@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 
 - Soap:
   . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
+  . Fixed bug GH-20011 (Array of SoapVar of unknown type causes crash).
+    (nielsdos)
 
 - Standard:
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
