@@ -251,14 +251,13 @@ ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_
 
 void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
-	int set_size;
+	uint32_t set_size = dfg->size;
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
 	int k;
 	int j;
 
-	set_size = dfg->size;
 	tmp = dfg->tmp;
 	def = dfg->def;
 	use = dfg->use;
