@@ -79,7 +79,7 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(
 		const zend_accel_hash        *accel_hash,
 		zend_string            *key);
 
-int zend_accel_hash_unlink(
+zend_result zend_accel_hash_unlink(
 		zend_accel_hash        *accel_hash,
 		zend_string            *key);
 

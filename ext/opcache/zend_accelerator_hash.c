@@ -189,7 +189,7 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(const zend_accel_hash *accel_h
 	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(accel_hash, key, false);
 }
 
-int zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
+zend_result zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
 {
 	zend_ulong hash_value;
 	zend_ulong index;
