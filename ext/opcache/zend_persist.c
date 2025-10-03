@@ -1421,7 +1421,7 @@ static zend_early_binding *zend_persist_early_bindings(
 	return early_bindings;
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, bool for_shm)
 {
 	Bucket *p;
 

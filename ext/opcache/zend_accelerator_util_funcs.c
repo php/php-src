@@ -47,7 +47,7 @@ zend_persistent_script* create_persistent_script(void)
 	return persistent_script;
 }
 
-void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
+void free_persistent_script(zend_persistent_script *persistent_script, bool destroy_elements)
 {
 	if (!destroy_elements) {
 		/* Both the keys and values have been transferred into the global tables.
@@ -358,7 +358,7 @@ static void zend_accel_do_delayed_early_binding(
 	CG(in_compilation) = orig_in_compilation;
 }
 
-zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
+zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, bool from_shared_memory)
 {
 	zend_op_array *op_array;
 
