@@ -204,7 +204,7 @@ struct _zend_executor_globals {
 
 	zend_execute_data *current_observed_frame;
 
-	int ticks_count;
+	uint32_t ticks_count;
 
 	zend_long precision;
 
