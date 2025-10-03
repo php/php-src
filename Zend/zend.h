@@ -152,7 +152,7 @@ struct _zend_class_entry {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
-	int refcount;
+	uint32_t refcount;
 	uint32_t ce_flags;
 	uint32_t ce_flags2;
 
