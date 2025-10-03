@@ -266,7 +266,7 @@ typedef struct _zend_scc_iterator {
 	};
 } zend_scc_iterator;
 
-static int zend_scc_next(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_scc_iterator *iterator) /* {{{ */
+static int zend_scc_next(const zend_op_array *op_array, const zend_ssa *ssa, int var, zend_scc_iterator *iterator) /* {{{ */
 {
 	zend_ssa_phi *phi;
 	int use, var2;
@@ -487,14 +487,14 @@ ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /
 
 #endif
 
-ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, const zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
-	zend_ssa_op *ssa_ops = ssa->ops;
+	const zend_ssa_op *ssa_ops = ssa->ops;
 	int ssa_vars_count = ssa->vars_count;
 	zend_bitset worklist;
 	int i, j, use;
-	zend_ssa_phi *p;
+	const zend_ssa_phi *p;
 	ALLOCA_FLAG(use_heap);
 
 	if (!op_array->function_name || !ssa->vars || !ssa->ops) {
@@ -1597,7 +1597,7 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 	return 0;
 }
 
-static void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
+static void zend_inference_init_range(const zend_op_array *op_array, const zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
 {
 	if (underflow) {
 		min = ZEND_LONG_MIN;
@@ -1645,7 +1645,7 @@ static bool zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_r
 	return 1;
 }
 
-static bool zend_ssa_range_widening(const zend_op_array *op_array, zend_ssa *ssa, int var, int scc)
+static bool zend_ssa_range_widening(const zend_op_array *op_array, const zend_ssa *ssa, int var, int scc)
 {
 	zend_ssa_range tmp;
 
@@ -1690,7 +1690,7 @@ static bool zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_
 	return 1;
 }
 
-static bool zend_ssa_range_narrowing(const zend_op_array *op_array, zend_ssa *ssa, int var, int scc)
+static bool zend_ssa_range_narrowing(const zend_op_array *op_array, const zend_ssa *ssa, int var, int scc)
 {
 	zend_ssa_range tmp;
 
@@ -2029,10 +2029,10 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 	} \
 } while (0)
 
-static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset worklist, int var)
+static void add_usages(const zend_op_array *op_array, const zend_ssa *ssa, zend_bitset worklist, int var)
 {
 	if (ssa->vars[var].phi_use_chain) {
-		zend_ssa_phi *p = ssa->vars[var].phi_use_chain;
+		const zend_ssa_phi *p = ssa->vars[var].phi_use_chain;
 		do {
 			zend_bitset_incl(worklist, p->ssa_var);
 			p = zend_ssa_next_use_phi(ssa, var, p);
@@ -2040,7 +2040,7 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 	if (ssa->vars[var].use_chain >= 0) {
 		int use = ssa->vars[var].use_chain;
-		zend_ssa_op *op;
+		const zend_ssa_op *op;
 
 		do {
 			op = ssa->ops + use;
@@ -2082,7 +2082,7 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 }
 
-static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa *ssa, int var)
+static void emit_type_narrowing_warning(const zend_op_array *op_array, const zend_ssa *ssa, int var)
 {
 	int def_op_num = ssa->vars[var].definition;
 	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
@@ -2258,7 +2258,7 @@ static uint32_t assign_dim_result_type(
 
 /* For binary ops that have compound assignment operators */
 static uint32_t binary_op_result_type(
-		zend_ssa *ssa, uint8_t opcode, uint32_t t1, uint32_t t2, int result_var,
+		const zend_ssa *ssa, uint8_t opcode, uint32_t t1, uint32_t t2, int result_var,
 		zend_long optimization_level) {
 	uint32_t tmp = 0;
 	uint32_t t1_type = (t1 & MAY_BE_ANY) | (t1 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
@@ -2435,7 +2435,7 @@ static const zend_property_info *lookup_prop_info(const zend_class_entry *ce, ze
 	return NULL;
 }
 
-static const zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op)
+static const zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op)
 {
 	const zend_property_info *prop_info = NULL;
 	if (opline->op2_type == IS_CONST) {
@@ -2462,7 +2462,7 @@ static const zend_property_info *zend_fetch_static_prop_info(const zend_script *
 {
 	const zend_property_info *prop_info = NULL;
 	if (opline->op1_type == IS_CONST) {
-		zend_class_entry *ce = NULL;
+		const zend_class_entry *ce = NULL;
 		if (opline->op2_type == IS_UNUSED) {
 			uint32_t fetch_type = opline->op2.num & ZEND_FETCH_CLASS_MASK;
 			switch (fetch_type) {
@@ -2479,12 +2479,12 @@ static const zend_property_info *zend_fetch_static_prop_info(const zend_script *
 					break;
 			}
 		} else if (opline->op2_type == IS_CONST) {
-			zval *zv = CRT_CONSTANT(opline->op2);
+			const zval *zv = CRT_CONSTANT(opline->op2);
 			ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(zv + 1));
 		}
 
 		if (ce) {
-			zval *zv = CRT_CONSTANT(opline->op1);
+			const zval *zv = CRT_CONSTANT(opline->op1);
 			prop_info = lookup_prop_info(ce, Z_STR_P(zv), op_array->scope);
 			if (prop_info && !(prop_info->flags & ZEND_ACC_STATIC)) {
 				prop_info = NULL;
@@ -2506,13 +2506,13 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, const zend_prope
 	return zend_convert_type(script, prop_info->type, pce);
 }
 
-static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
+static bool result_may_be_separated(const zend_ssa *ssa, const zend_ssa_op *ssa_op)
 {
 	int tmp_var = ssa_op->result_def;
 
 	if (ssa->vars[tmp_var].use_chain >= 0
 	 && !ssa->vars[tmp_var].phi_use_chain) {
-		zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
+		const zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
 
 		/* TODO: analyze instructions between ssa_op and use_op */
 		if (use_op == ssa_op + 1) {
@@ -3028,7 +3028,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			break;
 		case ZEND_ASSIGN_OBJ:
 			if (opline->op1_type == IS_CV) {
-				zend_class_entry *ce = ssa_var_info[ssa_op->op1_use].ce;
+				const zend_class_entry *ce = ssa_var_info[ssa_op->op1_use].ce;
 				bool add_rc = (t1 & (MAY_BE_OBJECT|MAY_BE_REF)) && (!ce
 					|| ce->__set
 					/* Non-default write_property may be set within create_object. */
@@ -4120,7 +4120,7 @@ ZEND_API zend_result zend_update_type_info(
 			const zend_op_array *op_array,
 			zend_ssa            *ssa,
 			const zend_script   *script,
-			zend_op             *opline,
+			const zend_op       *opline,
 			zend_ssa_op         *ssa_op,
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level)
@@ -4129,7 +4129,7 @@ ZEND_API zend_result zend_update_type_info(
 				      false);
 }
 
-static uint32_t get_class_entry_rank(zend_class_entry *ce) {
+static uint32_t get_class_entry_rank(const zend_class_entry *ce) {
 	uint32_t rank = 0;
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
 		while (ce->parent) {
@@ -4175,7 +4175,7 @@ static zend_class_entry *join_class_entries(
 	return ce1;
 }
 
-static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+static bool safe_instanceof(const zend_class_entry *ce1, const zend_class_entry *ce2) {
 	if (ce1 == ce2) {
 		return 1;
 	}
@@ -4188,7 +4188,7 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 
 static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
 {
-	zend_basic_block *blocks = ssa->cfg.blocks;
+	const zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_var *ssa_vars = ssa->vars;
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
@@ -4208,7 +4208,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 				tmp = get_ssa_var_info(ssa, p->sources[0]);
 
 				if (!p->has_range_constraint) {
-					zend_ssa_type_constraint *constraint = &p->constraint.type;
+					const zend_ssa_type_constraint *constraint = &p->constraint.type;
 					tmp &= constraint->type_mask;
 					if (!(tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 						tmp &= ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -4270,18 +4270,18 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 	return SUCCESS;
 }
 
-static bool is_narrowable_instr(zend_op *opline)  {
+static bool is_narrowable_instr(const zend_op *opline)  {
 	return opline->opcode == ZEND_ADD || opline->opcode == ZEND_SUB
 		|| opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV;
 }
 
-static bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
+static bool is_effective_op1_double_cast(const zend_op *opline, const zval *op2) {
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_SUB && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_MUL && Z_LVAL_P(op2) == 1)
 		|| (opline->opcode == ZEND_DIV && Z_LVAL_P(op2) == 1);
 }
-static bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
+static bool is_effective_op2_double_cast(const zend_op *opline, const zval *op1) {
 	/* In PHP it holds that (double)(0-$int) is bitwise identical to 0.0-(double)$int,
 	 * so allowing SUB here is fine. */
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op1) == 0)
@@ -4493,19 +4493,18 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 	return SUCCESS;
 }
 
-static bool is_recursive_tail_call(const zend_op_array *op_array,
-                                  zend_op             *opline)
+static bool is_recursive_tail_call(const zend_op_array *op_array, const zend_op *opline)
 {
-	zend_func_info *info = ZEND_FUNC_INFO(op_array);
+	const zend_func_info *info = ZEND_FUNC_INFO(op_array);
 
 	if (info->ssa.ops && info->ssa.vars && info->call_map &&
 	    info->ssa.ops[opline - op_array->opcodes].op1_use >= 0 &&
 	    info->ssa.vars[info->ssa.ops[opline - op_array->opcodes].op1_use].definition >= 0) {
 
-		zend_op *op = op_array->opcodes + info->ssa.vars[info->ssa.ops[opline - op_array->opcodes].op1_use].definition;
+		const zend_op *op = op_array->opcodes + info->ssa.vars[info->ssa.ops[opline - op_array->opcodes].op1_use].definition;
 
 		if (op->opcode == ZEND_DO_UCALL) {
-			zend_call_info *call_info = info->call_map[op - op_array->opcodes];
+			const zend_call_info *call_info = info->call_map[op - op_array->opcodes];
 			if (call_info && op_array == &call_info->callee_func->op_array) {
 				return 1;
 			}
@@ -4521,7 +4520,7 @@ uint32_t zend_get_return_info_from_signature_only(
 	if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE &&
 		(use_tentative_return_info || !ZEND_ARG_TYPE_IS_TENTATIVE(func->common.arg_info - 1))
 	) {
-		zend_arg_info *ret_info = func->common.arg_info - 1;
+		const zend_arg_info *ret_info = func->common.arg_info - 1;
 		type = zend_fetch_arg_info_type(script, ret_info, ce);
 		*ce_is_instanceof = ce != NULL;
 	} else {
@@ -4561,10 +4560,10 @@ static void zend_func_return_info(const zend_op_array   *op_array,
                                   bool                   widening,
                                   zend_ssa_var_info     *ret)
 {
-	zend_func_info *info = ZEND_FUNC_INFO(op_array);
-	zend_ssa *ssa = &info->ssa;
+	const zend_func_info *info = ZEND_FUNC_INFO(op_array);
+	const zend_ssa *ssa = &info->ssa;
 	int blocks_count = info->ssa.cfg.blocks_count;
-	zend_basic_block *blocks = info->ssa.cfg.blocks;
+	const zend_basic_block *blocks = info->ssa.cfg.blocks;
 	int j;
 	uint32_t t1;
 	uint32_t tmp = 0;
@@ -4595,7 +4594,7 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 			zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
 
 			if (opline->opcode == ZEND_RETURN || opline->opcode == ZEND_RETURN_BY_REF) {
-				zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
+				const zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
 				if (!recursive && ssa_op && info->ssa.var_info &&
 				    ssa_op->op1_use >= 0 &&
 				    info->ssa.var_info[ssa_op->op1_use].recursive) {
@@ -4642,7 +4641,7 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 				}
 
 				if (opline->op1_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT(opline->op1);
+					const zval *zv = CRT_CONSTANT(opline->op1);
 
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						if (tmp_has_range < 0) {
@@ -4745,7 +4744,7 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 	return SUCCESS;
 }
 
-static void zend_mark_cv_references(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
+static void zend_mark_cv_references(const zend_op_array *op_array, const zend_script *script, const zend_ssa *ssa)
 {
 	int var, def;
 	const zend_op *opline;
