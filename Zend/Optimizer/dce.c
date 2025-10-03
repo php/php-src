@@ -72,7 +72,7 @@ static inline bool is_bad_mod(const zend_ssa *ssa, int use, int def) {
 }
 
 static inline bool may_have_side_effects(
-		zend_op_array *op_array, zend_ssa *ssa,
+		const zend_op_array *op_array, const zend_ssa *ssa,
 		const zend_op *opline, const zend_ssa_op *ssa_op,
 		bool reorder_dtor_effects) {
 	switch (opline->opcode) {
@@ -271,8 +271,8 @@ static inline bool may_have_side_effects(
 	}
 }
 
-static zend_always_inline void add_to_worklists(context *ctx, int var_num, int check) {
-	zend_ssa_var *var = &ctx->ssa->vars[var_num];
+static zend_always_inline void add_to_worklists(const context *ctx, int var_num, int check) {
+	const zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition >= 0) {
 		if (!check || zend_bitset_in(ctx->instr_dead, var->definition)) {
 			zend_bitset_incl(ctx->instr_worklist, var->definition);
@@ -284,14 +284,14 @@ static zend_always_inline void add_to_worklists(context *ctx, int var_num, int c
 	}
 }
 
-static inline void add_to_phi_worklist_no_val(context *ctx, int var_num) {
-	zend_ssa_var *var = &ctx->ssa->vars[var_num];
+static inline void add_to_phi_worklist_no_val(const context *ctx, int var_num) {
+	const zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition_phi && zend_bitset_in(ctx->phi_dead, var_num)) {
 		zend_bitset_incl(ctx->phi_worklist_no_val, var_num);
 	}
 }
 
-static zend_always_inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend_ssa_op *ssa_op, zend_ssa *ssa, int check) {
+static zend_always_inline void add_operands_to_worklists(const context *ctx, const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, int check) {
 	if (ssa_op->result_use >= 0) {
 		add_to_worklists(ctx, ssa_op->result_use, check);
 	}
@@ -315,16 +315,16 @@ static zend_always_inline void add_operands_to_worklists(context *ctx, zend_op *
 	}
 }
 
-static zend_always_inline void add_phi_sources_to_worklists(context *ctx, zend_ssa_phi *phi, int check) {
-	zend_ssa *ssa = ctx->ssa;
+static zend_always_inline void add_phi_sources_to_worklists(const context *ctx, zend_ssa_phi *phi, int check) {
+	const zend_ssa *ssa = ctx->ssa;
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
 		add_to_worklists(ctx, source, check);
 	} FOREACH_PHI_SOURCE_END();
 }
 
-static inline bool is_var_dead(context *ctx, int var_num) {
-	zend_ssa_var *var = &ctx->ssa->vars[var_num];
+static inline bool is_var_dead(const context *ctx, int var_num) {
+	const zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition_phi) {
 		return zend_bitset_in(ctx->phi_dead, var_num);
 	} else if (var->definition >= 0) {
@@ -338,7 +338,7 @@ static inline bool is_var_dead(context *ctx, int var_num) {
 }
 
 // Sometimes we can mark the var as EXT_UNUSED
-static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_op *opline) {
+static bool try_remove_var_def(const context *ctx, int free_var, int use_chain, const zend_op *opline) {
 	if (use_chain >= 0) {
 		return false;
 	}
@@ -394,7 +394,7 @@ static zend_always_inline bool may_be_refcounted(uint32_t type) {
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
-static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static inline bool is_free_of_live_var(const context *ctx, const zend_op *opline, const zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_FREE:
 			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
@@ -411,8 +411,8 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 }
 
 /* Returns whether the instruction has been DCEd */
-static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
-	zend_ssa *ssa = ctx->ssa;
+static bool dce_instr(const context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+	const zend_ssa *ssa = ctx->ssa;
 	int free_var = -1;
 	uint8_t free_var_type;
 
@@ -464,7 +464,7 @@ static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	return true;
 }
 
-static inline int get_common_phi_source(zend_ssa *ssa, zend_ssa_phi *phi) {
+static inline int get_common_phi_source(const zend_ssa *ssa, zend_ssa_phi *phi) {
 	int common_source = -1;
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
@@ -484,7 +484,7 @@ static inline int get_common_phi_source(zend_ssa *ssa, zend_ssa_phi *phi) {
 	return common_source;
 }
 
-static void try_remove_trivial_phi(context *ctx, zend_ssa_phi *phi) {
+static void try_remove_trivial_phi(const context *ctx, zend_ssa_phi *phi) {
 	zend_ssa *ssa = ctx->ssa;
 	if (phi->pi < 0) {
 		/* Phi assignment with identical source operands */
@@ -567,7 +567,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer
 		int	op_data = -1;
 
 		b--;
-		zend_basic_block *block = &ssa->cfg.blocks[b];
+		const zend_basic_block *block = &ssa->cfg.blocks[b];
 		if (!(block->flags & ZEND_BB_REACHABLE)) {
 			continue;
 		}
