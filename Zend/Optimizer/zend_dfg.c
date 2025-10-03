@@ -19,7 +19,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+static zend_always_inline void zend_dfg_add_use_def_op_impl(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
 	uint32_t var_num;
 	const zend_op *next;
@@ -245,7 +245,7 @@ add_op1_def:
 
 ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
-	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
+	zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, use, def);
 }
 /* }}} */
 
@@ -279,7 +279,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const ze
 		b_def = DFG_BITSET(def, set_size, j);
 		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
-				_zend_dfg_add_use_def_op(op_array, opline, build_flags, b_use, b_def);
+				zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, b_use, b_def);
 			}
 		}
 	}
