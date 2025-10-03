@@ -106,7 +106,7 @@ static void strip_nops(const zend_op_array *op_array, zend_basic_block *b)
 	}
 }
 
-static int get_const_switch_target(const zend_cfg *cfg, const zend_op_array *op_array, const zend_basic_block *block, zend_op *opline, const zval *val) {
+static uint32_t get_const_switch_target(const zend_cfg *cfg, const zend_op_array *op_array, const zend_basic_block *block, zend_op *opline, const zval *val) {
 	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 	zval *zv;
 	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
@@ -409,7 +409,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					break;
 				}
 				if (opline->op1_type == IS_CONST) {
-					int target = get_const_switch_target(cfg, op_array, block, opline, &ZEND_OP1_LITERAL(opline));
+					uint32_t target = get_const_switch_target(cfg, op_array, block, opline, &ZEND_OP1_LITERAL(opline));
 					literal_dtor(&ZEND_OP1_LITERAL(opline));
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					opline->opcode = ZEND_JMP;
