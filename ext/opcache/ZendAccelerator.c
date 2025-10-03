@@ -4877,10 +4877,24 @@ static zend_result accel_finish_startup(void)
 		exit(ret == SUCCESS ? 0 : 1);
 	} else { /* parent */
 		int status;
+		pid_t chld_pid;
 
-		if (waitpid(pid, &status, 0) < 0) {
+		/* Handle EINTR from reload signal storms during preload.
+		 *
+		 * Problem: Legacy deployment workflows or monitoring systems may send
+		 * multiple SIGUSR1/SIGUSR2 signals before the previous reload finishes.
+		 * Because some SAPIs register these handlers without SA_RESTART, system calls
+		 * are interrupted (EINTR) rather than automatically restarted.
+		 *
+		 * Without this retry loop, repeated signals can cause waitpid() to fail
+		 * non-deterministically, leading to premature master process exit. */
+		do {
+			chld_pid = waitpid(pid, &status, 0);
+		} while (chld_pid < 0 && errno == EINTR);
+
+		if (chld_pid < 0) {
 			zend_shared_alloc_unlock();
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d) with errno=%s", pid, strerror(errno));
 		}
 
 		if (ZCSG(preload_script)) {
