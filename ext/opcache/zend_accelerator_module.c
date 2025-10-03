@@ -946,11 +946,7 @@ ZEND_FUNCTION(opcache_invalidate)
 		RETURN_FALSE;
 	}
 
-	if (zend_accel_invalidate(script_name, force) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_accel_invalidate(script_name, force) == SUCCESS);
 }
 
 /* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */
