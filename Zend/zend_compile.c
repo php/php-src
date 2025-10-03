@@ -3960,7 +3960,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 		uint8_t opcode = opline->opcode;
 
 		if (opcode == ZEND_NEW) {
-		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
 		if (opcode == ZEND_INIT_FCALL) {
