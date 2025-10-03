@@ -80,7 +80,7 @@ static inline bool zend_optimizer_is_loop_var_free(const zend_op *opline) {
 
 void zend_optimizer_convert_to_free_op1(const zend_op_array *op_array, zend_op *opline);
 uint32_t zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv);
-bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
+bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, bool copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, const zval *name, zval* value);
 bool zend_optimizer_get_collected_constant(const HashTable *constants, const zval *name, zval* value);
 zend_result zend_optimizer_eval_binary_op(zval *result, uint8_t opcode, zval *op1, zval *op2);

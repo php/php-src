@@ -149,7 +149,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
-				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &result, 1)) {
+				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &result, true)) {
 					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &result)) {
 						break;
 					}
@@ -171,7 +171,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 				zend_ast *ast = Z_ASTVAL_P(c);
 				if (ast->kind != ZEND_AST_CONSTANT
-				 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
+				 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, true)
 				 || Z_TYPE(result) == IS_CONSTANT_AST) {
 					break;
 				}
@@ -271,7 +271,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 		case ZEND_DEFINED:
-			if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &result, 0)) {
+			if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &result, false)) {
 				break;
 			}
 			ZVAL_TRUE(&result);
