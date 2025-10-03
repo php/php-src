@@ -243,7 +243,6 @@ static void php_converter_to_u_callback(const void *context,
 		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
-	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
 	zval_ptr_dtor(&zargs[2]);
 	zval_ptr_dtor(&zargs[3]);
@@ -320,7 +319,6 @@ static void php_converter_from_u_callback(const void *context,
 		*pErrorCode = Z_LVAL_P(Z_REFVAL(zargs[3]));
 	}
 
-	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
 	zval_ptr_dtor(&zargs[2]);
 	zval_ptr_dtor(&zargs[3]);
