@@ -301,9 +301,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
-			/* User reported filter creation error "return false;" */
-			zval_ptr_dtor(&retval);
-
 			/* Kill the filter (safely) */
 			ZVAL_UNDEF(&filter->abstract);
 			php_stream_filter_free(filter);
