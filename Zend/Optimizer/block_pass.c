@@ -1042,8 +1042,8 @@ static void assemble_code_blocks(const zend_cfg *cfg, zend_op_array *op_array, z
 		} else {
 			/* this block will not be used, delete all constants there */
 			const zend_op *op = op_array->opcodes + b->start;
-			const zend_op *end = op + b->len;
-			for (; op < end; op++) {
+			const zend_op *last_op = op + b->len;
+			for (; op < last_op; op++) {
 				if (op->op1_type == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(op));
 				}
@@ -1159,15 +1159,15 @@ static void assemble_code_blocks(const zend_cfg *cfg, zend_op_array *op_array, z
 			}
 
 			if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
-				zend_op *opline = new_opcodes;
-				const zend_op *end = opline + len;
-				while (opline < end) {
-					if (opline->opcode == ZEND_FAST_RET &&
-					    opline->op2.num != (uint32_t)-1 &&
-					    opline->op2.num < j) {
-						opline->op2.num = map[opline->op2.num];
+				zend_op *finally_opline = new_opcodes;
+				const zend_op *last_finally_op = finally_opline + len;
+				while (finally_opline < last_finally_op) {
+					if (finally_opline->opcode == ZEND_FAST_RET &&
+					    finally_opline->op2.num != (uint32_t)-1 &&
+					    finally_opline->op2.num < j) {
+						finally_opline->op2.num = map[finally_opline->op2.num];
 					}
-					opline++;
+					finally_opline++;
 				}
 			}
 		}
