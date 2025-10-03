@@ -34,7 +34,6 @@
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_filestat.h"
 #include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
