@@ -145,7 +145,7 @@ zend_result zend_optimizer_eval_special_func_call(
 		return FAILURE;
 	}
 	if (zend_string_equals_literal(name, "constant")) {
-		return zend_optimizer_get_persistent_constant(arg, result, 1) ? SUCCESS : FAILURE;
+		return zend_optimizer_get_persistent_constant(arg, result, true) ? SUCCESS : FAILURE;
 	}
 	if (zend_string_equals_literal(name, "dirname")) {
 		if (!IS_ABSOLUTE_PATH(ZSTR_VAL(arg), ZSTR_LEN(arg))) {
