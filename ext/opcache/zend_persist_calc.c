@@ -629,7 +629,7 @@ static void zend_persist_early_bindings_calc(
 	}
 }
 
-uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, bool for_shm)
 {
 	Bucket *p;
 
