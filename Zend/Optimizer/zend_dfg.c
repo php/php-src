@@ -249,7 +249,7 @@ ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_
 }
 /* }}} */
 
-void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
+void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
@@ -267,7 +267,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
-		zend_op *opline, *end;
+		const zend_op *opline, *end;
 		zend_bitset b_use, b_def;
 
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
@@ -318,7 +318,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 				/* Add predecessors of changed block to worklist */
 				{
-					int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
+					const int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
 					for (k = 0; k < blocks[j].predecessors_count; k++) {
 						zend_bitset_incl(worklist, predecessors[k]);
 					}
