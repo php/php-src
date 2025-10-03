@@ -3956,19 +3956,21 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value = 0;
+		/* opcode array may be reallocated, so don't access opcode field after zend_emit_op_tmp(). */
+		uint8_t opcode = opline->opcode;
 
-		if (opline->opcode == ZEND_NEW) {
+		if (opcode == ZEND_NEW) {
 		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
-		if (opline->opcode == ZEND_INIT_FCALL) {
+		if (opcode == ZEND_INIT_FCALL) {
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
 		zend_op *callable_convert_op = zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
-		if (opline->opcode == ZEND_INIT_FCALL
-		 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
-		 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+		if (opcode == ZEND_INIT_FCALL
+		 || opcode == ZEND_INIT_FCALL_BY_NAME
+		 || opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 			callable_convert_op->extended_value = zend_alloc_cache_slot();
 		} else {
 			callable_convert_op->extended_value = (uint32_t)-1;
