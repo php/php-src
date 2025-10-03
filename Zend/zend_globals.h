@@ -343,7 +343,7 @@ struct _zend_ini_scanner_globals {
 	zend_stack state_stack;
 
 	zend_string *filename;
-	int lineno;
+	uint32_t lineno;
 
 	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;
