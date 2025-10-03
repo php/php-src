@@ -602,8 +602,6 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 		didwrite = count;
 	}
 
-	zval_ptr_dtor(&retval);
-
 	return didwrite;
 }
 
