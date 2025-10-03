@@ -32,7 +32,7 @@
 /* Checks if a constant (like "true") may be replaced by its value */
 bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, bool copy)
 {
-	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
+	const zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 		 && !(ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)
@@ -62,9 +62,9 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, boo
 #define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
 #define SET_VAR_SOURCE(opline) Tsource[VAR_NUM(opline->result.var)] = opline
 
-static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
+static void strip_leading_nops(const zend_op_array *op_array, zend_basic_block *b)
 {
-	zend_op *opcodes = op_array->opcodes;
+	const zend_op *opcodes = op_array->opcodes;
 
 	do {
 		b->start++;
@@ -72,7 +72,7 @@ static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 	} while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP);
 }
 
-static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
+static void strip_nops(const zend_op_array *op_array, zend_basic_block *b)
 {
 	uint32_t i, j;
 
@@ -106,7 +106,7 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 	}
 }
 
-static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_basic_block *block, zend_op *opline, zval *val) {
+static int get_const_switch_target(const zend_cfg *cfg, const zend_op_array *op_array, const zend_basic_block *block, zend_op *opline, const zval *val) {
 	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 	zval *zv;
 	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
@@ -1009,10 +1009,10 @@ optimize_const_unary_op:
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
-static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
+static void assemble_code_blocks(const zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = cfg->blocks;
-	zend_basic_block *end = blocks + cfg->blocks_count;
+	const zend_basic_block *end = blocks + cfg->blocks_count;
 	zend_basic_block *b;
 	zend_op *new_opcodes;
 	zend_op *opline;
@@ -1025,7 +1025,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
-				zend_basic_block *next = b + 1;
+				const zend_basic_block *next = b + 1;
 
 				while (next < end && !(next->flags & ZEND_BB_REACHABLE)) {
 					next++;
@@ -1042,8 +1042,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			len += b->len;
 		} else {
 			/* this block will not be used, delete all constants there */
-			zend_op *op = op_array->opcodes + b->start;
-			zend_op *end = op + b->len;
+			const zend_op *op = op_array->opcodes + b->start;
+			const zend_op *end = op + b->len;
 			for (; op < end; op++) {
 				if (op->op1_type == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(op));
@@ -1109,7 +1109,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			case ZEND_SWITCH_STRING:
 			case ZEND_MATCH:
 			{
-				HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+				const HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 				zval *zv;
 				uint32_t s = 0;
 				ZEND_ASSERT(b->successors_count == (opline->opcode == ZEND_MATCH ? 1 : 2) + zend_hash_num_elements(jumptable));
@@ -1161,7 +1161,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 
 			if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 				zend_op *opline = new_opcodes;
-				zend_op *end = opline + len;
+				const zend_op *end = opline + len;
 				while (opline < end) {
 					if (opline->opcode == ZEND_FAST_RET &&
 					    opline->op2.num != (uint32_t)-1 &&
@@ -1184,7 +1184,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	}
 }
 
-static zend_always_inline zend_basic_block *get_target_block(const zend_cfg *cfg, zend_basic_block *block, int n, uint32_t *opt_count)
+static zend_always_inline zend_basic_block *get_target_block(const zend_cfg *cfg, const zend_basic_block *block, int n, uint32_t *opt_count)
 {
 	int b;
 	zend_basic_block *target_block = cfg->blocks + block->successors[n];
@@ -1200,7 +1200,7 @@ static zend_always_inline zend_basic_block *get_target_block(const zend_cfg *cfg
 	return target_block;
 }
 
-static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg, zend_basic_block *block, int n, uint32_t *opt_count)
+static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg, const zend_basic_block *block, int n, uint32_t *opt_count)
 {
 	int b;
 	zend_basic_block *target_block = cfg->blocks + block->successors[n];
@@ -1219,7 +1219,7 @@ static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg
 static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, zend_basic_block *block)
 {
 	zend_basic_block *next_block = block + 1;
-	zend_basic_block *end = cfg->blocks + cfg->blocks_count;
+	const zend_basic_block *end = cfg->blocks + cfg->blocks_count;
 
 	while (1) {
 		if (next_block == end) {
@@ -1237,7 +1237,7 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline bool in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(int target, const int *jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
@@ -1483,7 +1483,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 /* Find a set of variables which are used outside of the block where they are
  * defined. We won't apply some optimization patterns for such variables. */
-static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
+static void zend_t_usage(const zend_cfg *cfg, const zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
 {
 	int n;
 	zend_basic_block *block, *next_block;
@@ -1687,7 +1687,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	zend_arena_release(&ctx->arena, checkpoint);
 }
 
-static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg, uint32_t *opt_count)
+static void zend_merge_blocks(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t *opt_count)
 {
 	int i;
 	zend_basic_block *b, *bb;
@@ -1707,7 +1707,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg, uint32_t *
 
 				for (bb = prev + 1; bb != b; bb++) {
 					zend_op *op = op_array->opcodes + bb->start;
-					zend_op *end = op + bb->len;
+					const zend_op *end = op + bb->len;
 					while (op < end) {
 						if (op->op1_type == IS_CONST) {
 							literal_dtor(&ZEND_OP1_LITERAL(op));
