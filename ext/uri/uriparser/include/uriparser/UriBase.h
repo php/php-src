@@ -187,7 +187,7 @@ typedef struct UriIp6Struct {
 } UriIp6; /**< @copydoc UriIp6Struct */
 
 
-struct UriMemoryManagerStruct;  /* foward declaration to break loop */
+struct UriMemoryManagerStruct;  /* forward declaration to break loop */
 
 
 /**
@@ -287,28 +287,34 @@ typedef enum UriResolutionOptionsEnum {
 
 
 /**
- * Wraps a memory manager backend that only provides malloc and free
- * to make a complete memory manager ready to be used.
+ * Wraps a memory manager backend that only provides <c>malloc(3)</c> and
+ * <c>free(3)</c> to make a complete memory manager ready to be used.
  *
  * The core feature of this wrapper is that you don't need to implement
- * realloc if you don't want to.  The wrapped memory manager uses
- * backend->malloc, memcpy, and backend->free and soieof(size_t) extra
- * bytes per allocation to emulate fallback realloc for you.
+ * <c>realloc(3)</c> if you don't want to.  The wrapped memory manager uses
+ * <c>backend-&gt;malloc</c>, <c>memcpy(3)</c>, and <c>backend-&gt;free</c> and
+ * (at least) <c>sizeof(size_t)</c> extra bytes per allocation to emulate
+ * fallback <c>realloc(3)</c> for you.
  *
- * memory->calloc is uriEmulateCalloc.
- * memory->free uses backend->free and handles the size header.
- * memory->malloc uses backend->malloc and adds a size header.
- * memory->realloc uses memory->malloc, memcpy, and memory->free and reads
- *                 the size header.
- * memory->reallocarray is uriEmulateReallocarray.
+ * <ul>
+ * <li><c>memory-&gt;calloc</c> is <c>uriEmulateCalloc</c>.</li>
+ * <li><c>memory-&gt;free</c> uses <c>backend-&gt;free</c>,
+ *     and handles the size header.</li>
+ * <li><c>memory-&gt;malloc</c> uses <c>backend-&gt;malloc</c>,
+ *     and adds a size header.</li>
+ * <li><c>memory-&gt;realloc</c> uses <c>memory-&gt;malloc</c>,
+ *     <c>memcpy(3)</c> and <c>memory-&gt;free</c>,
+ *     and reads the size header.</li>
+ * <li><c>memory-&gt;reallocarray</c> is <c>uriEmulateReallocarray</c>.</li>
+ * </ul>
  *
- * The internal workings behind memory->free, memory->malloc, and
- * memory->realloc may change so the functions exposed by these function
- * pointer sshould be consided internal and not public API.
+ * The internal workings behind <c>memory-&gt;free</c>, <c>memory-&gt;malloc</c>,
+ * and <c>memory-&gt;realloc</c> may change, and the functions exposed by these
+ * function pointers should be considered internal and not public API.
  *
  * @param memory   <b>OUT</b>: Where to write the wrapped memory manager to
  * @param backend  <b>IN</b>: Memory manager to use as a backend
- * @return          Error code or 0 on success
+ * @return         Error code or 0 on success
  *
  * @see uriEmulateCalloc
  * @see uriEmulateReallocarray
@@ -321,7 +327,7 @@ URI_PUBLIC int uriCompleteMemoryManager(UriMemoryManager * memory,
 
 
 /**
- * Offers emulation of calloc(3) based on memory->malloc and memset.
+ * Offers emulation of calloc(3) based on memory-&gt;malloc and memset.
  * See "man 3 calloc" as well.
  *
  * @param memory  <b>IN</b>: Memory manager to use, should not be NULL
@@ -340,11 +346,11 @@ URI_PUBLIC void * uriEmulateCalloc(UriMemoryManager * memory,
 
 
 /**
- * Offers emulation of reallocarray(3) based on memory->realloc.
+ * Offers emulation of reallocarray(3) based on memory-&gt;realloc.
  * See "man 3 reallocarray" as well.
  *
  * @param memory  <b>IN</b>: Memory manager to use, should not be NULL
- * @param ptr     <b>IN</b>: Pointer allocated using memory->malloc/... or NULL
+ * @param ptr     <b>IN</b>: Pointer allocated using memory-&gt;malloc/... or NULL
  * @param nmemb   <b>IN</b>: Number of elements to allocate
  * @param size    <b>IN</b>: Size in bytes per element
  * @return        Pointer to allocated memory or NULL
@@ -369,7 +375,11 @@ URI_PUBLIC void * uriEmulateReallocarray(UriMemoryManager * memory,
  * 5. and frees that memory.
  *
  * It is recommended to compile with AddressSanitizer enabled
- * to take full advantage of uriTestMemoryManager.
+ * to take full advantage of <c>uriTestMemoryManager</c>.
+ *
+ * For backwards-compatibility, <c>uriTestMemoryManager</c>
+ * does not challenge pointer alignment; please see
+ * <c>uriTestMemoryManagerEx</c> for that feature.
  *
  * @param memory  <b>IN</b>: Memory manager to use, should not be NULL
  * @return        Error code or 0 on success
@@ -377,9 +387,39 @@ URI_PUBLIC void * uriEmulateReallocarray(UriMemoryManager * memory,
  * @see uriEmulateCalloc
  * @see uriEmulateReallocarray
  * @see UriMemoryManager
+ * @see uriTestMemoryManagerEx
  * @since 0.9.0
  */
 URI_PUBLIC int uriTestMemoryManager(UriMemoryManager * memory);
+
+
+
+/**
+ * Run multiple tests against a given memory manager.
+ * For example, one test
+ * 1. allocates a small amount of memory,
+ * 2. writes some magic bytes to it,
+ * 3. reallocates it,
+ * 4. checks that previous values are still present,
+ * 5. and frees that memory.
+ *
+ * It is recommended to compile with both AddressSanitizer and
+ * UndefinedBehaviorSanitizer enabled to take full advantage of
+ * <c>uriTestMemoryManagerEx</c>. Note that environment variable
+ * <c>UBSAN_OPTIONS</c> may need adjustment to make UndefinedBehaviorSanitizer
+ * fatal (which by default it is not).
+ *
+ * @param memory              <b>IN</b>: Memory manager to use, should not be NULL
+ * @param challengeAlignment  <b>IN</b>: Whether to challenge pointer alignment
+ * @return                    Error code or 0 on success
+ *
+ * @see uriEmulateCalloc
+ * @see uriEmulateReallocarray
+ * @see UriMemoryManager
+ * @see uriTestMemoryManager
+ * @since 0.9.10
+ */
+URI_PUBLIC int uriTestMemoryManagerEx(UriMemoryManager * memory, UriBool challengeAlignment);
 
 
 
