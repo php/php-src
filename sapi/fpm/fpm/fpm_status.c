@@ -69,7 +69,7 @@ int fpm_status_export_to_zval(zval *status)
 	for(i=0; i<scoreboard.nprocs; i++) {
 		proc_p = fpm_scoreboard_proc_acquire(scoreboard_p, i, 1);
 		if (!proc_p){
-			procs[i].used=-1;
+			procs[i].used=0;
 			continue;
 		}
 		procs[i] = *proc_p;
