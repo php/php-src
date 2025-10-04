@@ -10,10 +10,14 @@ $uri2 = $uri1->withHost("t%65st.com"); // test.com
 
 var_dump($uri1->getRawHost());
 var_dump($uri2->getRawHost());
+var_dump($uri2->toRawString());
 var_dump($uri2->getHost());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--
 string(11) "example.com"
 string(10) "t%65st.com"
+string(18) "https://t%65st.com"
 string(8) "test.com"
+string(16) "https://test.com"

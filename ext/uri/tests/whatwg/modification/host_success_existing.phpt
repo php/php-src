@@ -10,8 +10,10 @@ $url2 = $url1->withHost("test.com");
 
 var_dump($url1->getAsciiHost());
 var_dump($url2->getAsciiHost());
+var_dump($url2->toAsciiString());
 
 ?>
 --EXPECT--
 string(11) "example.com"
 string(8) "test.com"
+string(17) "https://test.com/"

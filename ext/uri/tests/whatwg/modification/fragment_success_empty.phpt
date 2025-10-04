@@ -5,13 +5,15 @@ uri
 --FILE--
 <?php
 
-$uri1 = Uri\WhatWg\Url::parse("https://example.com");
-$uri2 = $uri1->withFragment("");
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url2 = $url1->withFragment("");
 
-var_dump($uri1->getFragment());
-var_dump($uri2->getFragment());
+var_dump($url1->getFragment());
+var_dump($url2->getFragment());
+var_dump($url2->toAsciiString());
 
 ?>
 --EXPECT--
 NULL
 NULL
+string(20) "https://example.com/"

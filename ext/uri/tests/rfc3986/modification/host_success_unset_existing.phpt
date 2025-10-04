@@ -10,10 +10,14 @@ $uri2 = $uri1->withHost(null);
 
 var_dump($uri1->getRawHost());
 var_dump($uri2->getRawHost());
+var_dump($uri2->toRawString());
 var_dump($uri2->getHost());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--
 string(11) "example.com"
 NULL
+string(7) "https:/"
 NULL
+string(7) "https:/"
