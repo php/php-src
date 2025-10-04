@@ -1,7 +1,7 @@
 /* Declare a few additional TLS variables to fill any surplus space,
  * so _tsrm_ls_cache is allocated in the dynamic section. */
 
-#define DEF_VAR(prefix, num) __thread void* prefix##num
+#define DEF_VAR(prefix, num) thread_local void* prefix##num
 #define DEF_VARS(prefix) \
 	DEF_VAR(prefix, 0000); \
 	DEF_VAR(prefix, 0001); \

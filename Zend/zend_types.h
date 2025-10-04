@@ -77,8 +77,8 @@ typedef ZEND_RESULT_CODE zend_result;
 #endif
 
 #ifdef ZTS
-#define ZEND_TLS static TSRM_TLS
-#define ZEND_EXT_TLS TSRM_TLS
+#define ZEND_TLS static thread_local
+#define ZEND_EXT_TLS thread_local
 #else
 #define ZEND_TLS static
 #define ZEND_EXT_TLS
