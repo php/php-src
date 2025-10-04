@@ -316,7 +316,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					has_property = zval_is_true(value);
+					has_property = zend_is_true(value);
 					zval_ptr_dtor(value);
 				}
 				break;

@@ -276,7 +276,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	if (!strncasecmp(last_header_line, "Location:", sizeof("Location:")-1)) {
 		/* Check if the location should be followed. */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
-			header_info->follow_location = zval_is_true(tmpzval);
+			header_info->follow_location = zend_is_true(tmpzval);
 		} else if (!((response_code >= 300 && response_code < 304)
 				|| 307 == response_code || 308 == response_code)) {
 			/* The redirection should not be automatic if follow_location is not set and

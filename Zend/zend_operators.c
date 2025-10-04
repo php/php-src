@@ -1593,7 +1593,7 @@ ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1,
 				}
 			}
 			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BOOL_XOR);
-			op1_val = zval_is_true(op1);
+			op1_val = zend_is_true(op1);
 		}
 	} while (0);
 	do {
@@ -1613,7 +1613,7 @@ ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1,
 				}
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BOOL_XOR);
-			op2_val = zval_is_true(op2);
+			op2_val = zend_is_true(op2);
 		}
 	} while (0);
 
@@ -1641,7 +1641,7 @@ ZEND_API zend_result ZEND_FASTCALL boolean_not_function(zval *result, zval *op1)
 		}
 		ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BOOL_NOT);
 
-		ZVAL_BOOL(result, !zval_is_true(op1));
+		ZVAL_BOOL(result, !zend_is_true(op1));
 	}
 	return SUCCESS;
 }
@@ -2433,13 +2433,13 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 							converted = true;
 						}
 					} else if (Z_TYPE_P(op1) < IS_TRUE) {
-						return zval_is_true(op2) ? -1 : 0;
+						return zend_is_true(op2) ? -1 : 0;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
-						return zval_is_true(op2) ? 0 : 1;
+						return zend_is_true(op2) ? 0 : 1;
 					} else if (Z_TYPE_P(op2) < IS_TRUE) {
-						return zval_is_true(op1) ? 1 : 0;
+						return zend_is_true(op1) ? 1 : 0;
 					} else if (Z_TYPE_P(op2) == IS_TRUE) {
-						return zval_is_true(op1) ? 0 : -1;
+						return zend_is_true(op1) ? 0 : -1;
 					} else {
 						op1 = _zendi_convert_scalar_to_number_silent(op1, &op1_copy);
 						op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);

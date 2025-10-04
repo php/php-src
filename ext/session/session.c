@@ -1858,15 +1858,15 @@ PHP_FUNCTION(session_set_cookie_params)
 					domain = zval_get_string(value);
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "secure")) {
-					secure = zval_is_true(value);
+					secure = zend_is_true(value);
 					secure_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "partitioned")) {
-					partitioned = zval_is_true(value);
+					partitioned = zend_is_true(value);
 					partitioned_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "httponly")) {
-					httponly = zval_is_true(value);
+					httponly = zend_is_true(value);
 					httponly_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "samesite")) {
