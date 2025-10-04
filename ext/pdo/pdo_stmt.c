@@ -148,7 +148,7 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 					stmt->columns[col].name = zend_string_toupper(orig_name);
 					zend_string_release(orig_name);
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
+				default: ZEND_UNREACHABLE();
 			}
 		}
 
@@ -822,7 +822,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			 * However, if we fetch a group key we will have over allocated. */
 			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (group_key) {
@@ -917,7 +917,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			case PDO_FETCH_FUNC:
 				ZVAL_COPY_VALUE(&fetch_function_params[fetch_function_param_num++], &val);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

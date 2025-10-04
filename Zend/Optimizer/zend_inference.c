@@ -1063,7 +1063,7 @@ static bool zend_inference_calc_binary_op_range(
 		case ZEND_BW_XOR:
 			// TODO
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	return 0;
 }
@@ -2351,7 +2351,7 @@ static uint32_t binary_op_result_type(
 			/* TODO: +MAY_BE_OBJECT ??? */
 			tmp = MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	return tmp;
 }
@@ -3709,7 +3709,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 							case ZEND_FREE:
 								/* This may happen if the using opcode is DCEd.  */
 								break;
-							EMPTY_SWITCH_DEFAULT_CASE()
+							default: ZEND_UNREACHABLE();
 						}
 						j = zend_ssa_next_use(ssa->ops, ssa_op->result_def, j);
 						if (j >= 0) {
@@ -5296,10 +5296,10 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 					return (t1 & MAY_BE_OBJECT);
 				case IS_OBJECT:
 					return 0;
-				EMPTY_SWITCH_DEFAULT_CASE()
+				default: ZEND_UNREACHABLE();
 			}
 			/* GCC is getting confused here for the Wimplicit-fallthrough warning with
-			 * EMPTY_SWITCH_DEFAULT_CASE() macro */
+			 * default: ZEND_UNREACHABLE(); macro */
 			return 0;
 		case ZEND_ARRAY_KEY_EXISTS:
 			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {

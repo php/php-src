@@ -195,7 +195,7 @@ static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
 				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -573,7 +573,7 @@ PHP_FUNCTION(bcpowmod)
 		case OK:
 			RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	cleanup: {
@@ -1311,7 +1311,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (Z_TYPE_P(op1) != IS_OBJECT) {
@@ -1497,7 +1497,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (num_obj == NULL) {
@@ -1657,7 +1657,7 @@ PHP_METHOD(BcMath_Number, powmod)
 			goto cleanup;
 		case OK:
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	bc_rm_trailing_zeros(ret);

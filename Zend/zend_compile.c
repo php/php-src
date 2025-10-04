@@ -872,7 +872,7 @@ static const char *zend_modifier_token_to_string(uint32_t token)
 			return "protected(set)";
 		case T_PRIVATE_SET:
 			return "private(set)";
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -1818,7 +1818,7 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 		case ZEND_FETCH_CLASS_DEFAULT:
 			ZVAL_STR(zv, zend_resolve_class_name_ast(class_ast));
 			return 1;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -2262,7 +2262,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t 
 		case BP_VAR_UNSET:
 			opline->opcode += 5 * factor;
 			return;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -2425,7 +2425,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 		case ZEND_JMP_FRAMELESS:
 			opline->op2.opline_num = opnum_target;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -3539,7 +3539,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr);
 			return;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -3683,7 +3683,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			opline = zend_emit_op_data(&expr_node);
 			opline->extended_value = cache_slot;
 			return;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -4925,7 +4925,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 				case 'd':
 					zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_LONG;
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE();
+				default: ZEND_UNREACHABLE();
 			}
 
 			if (rope_elements == 0) {
@@ -5077,7 +5077,7 @@ static const char *zend_get_cstring_from_property_hook_kind(zend_property_hook_k
 			return "get";
 		case ZEND_PROPERTY_HOOK_SET:
 			return "set";
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -5597,7 +5597,7 @@ static void zend_compile_unset(zend_ast *ast) /* {{{ */
 			opline = zend_compile_static_prop(NULL, var_ast, BP_VAR_UNSET, false, false);
 			opline->opcode = ZEND_UNSET_STATIC_PROP;
 			return;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -9168,7 +9168,7 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 			case ZEND_AST_TRAIT_ALIAS:
 				zend_compile_trait_alias(adaptation_ast);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 }
@@ -9543,7 +9543,7 @@ static HashTable *zend_get_import_ht(uint32_t type) /* {{{ */
 				zend_hash_init(FC(imports_const), 8, NULL, str_dtor, 0);
 			}
 			return FC(imports_const);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return NULL;
@@ -9559,7 +9559,7 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 			return " function";
 		case ZEND_SYMBOL_CONST:
 			return " const";
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return " unknown";
@@ -9926,7 +9926,7 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 				ZVAL_EMPTY_STRING(zv);
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 1;
@@ -10670,7 +10670,7 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&default_node);
 			assign_node = var_node_w;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &assign_node, NULL);
@@ -10890,7 +10890,7 @@ static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			opline = zend_compile_static_prop(result, var_ast, BP_VAR_IS, false, false);
 			opline->opcode = ZEND_ISSET_ISEMPTY_STATIC_PROP;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	result->op_type = opline->result_type = IS_TMP_VAR;
@@ -11407,7 +11407,7 @@ static void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"static::class cannot be used for compile-time class name resolution");
 			return;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -11510,7 +11510,7 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 		case ZEND_AST_STATIC_CALL:
 			args_ast = &(*ast_ptr)->child[2];
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	if ((*args_ast)->kind != ZEND_AST_CALLABLE_CONVERT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
@@ -11548,7 +11548,7 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 			}
 			break;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

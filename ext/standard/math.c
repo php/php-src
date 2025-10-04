@@ -152,7 +152,7 @@ static inline double php_round_helper(double integral, double value, double expo
 
 			return integral;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
 	ZEND_UNREACHABLE();
@@ -261,7 +261,7 @@ PHP_FUNCTION(abs)
 			}
 		case IS_DOUBLE:
 			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -280,7 +280,7 @@ PHP_FUNCTION(ceil)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -299,7 +299,7 @@ PHP_FUNCTION(floor)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -326,7 +326,7 @@ PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
 			return PHP_ROUND_FLOOR;
 		case 'P' + 't':
 			return PHP_ROUND_CEILING;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -384,7 +384,7 @@ PHP_FUNCTION(round)
 		case IS_DOUBLE:
 			RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int)places, (int)mode));
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -1386,7 +1386,7 @@ PHP_FUNCTION(number_format)
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

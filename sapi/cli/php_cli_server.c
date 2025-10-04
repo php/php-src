@@ -2659,7 +2659,7 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 		case 0:
 			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
 			return SUCCESS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	/* Under ASAN the compiler somehow doesn't realise that the switch block always returns */
 	return FAILURE;

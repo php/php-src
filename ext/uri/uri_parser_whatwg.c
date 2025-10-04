@@ -195,7 +195,7 @@ static const char *fill_errors(zval *errors)
 				error_str = "FileInvalidWindowsDriveLetterHost";
 				ZVAL_FALSE(&failure);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		zval error_type;
@@ -367,7 +367,7 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 			case PHP_URI_COMPONENT_READ_MODE_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -608,7 +608,7 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 		case PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII:
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return smart_str_extract(&uri_str);

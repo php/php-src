@@ -79,7 +79,7 @@ try_again:
 			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
 			goto try_again;
 		/* All possible types are either handled here or previously */
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

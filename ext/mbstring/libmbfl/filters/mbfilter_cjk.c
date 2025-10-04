@@ -279,7 +279,7 @@ retry:
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -1836,7 +1836,7 @@ static int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -2528,7 +2528,7 @@ retry:
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -4115,7 +4115,7 @@ static int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -5086,7 +5086,7 @@ static int mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -5453,7 +5453,7 @@ static int mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -7420,7 +7420,7 @@ static int mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -8247,7 +8247,7 @@ static int mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -8566,7 +8566,7 @@ static int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -8953,7 +8953,7 @@ static int mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -9455,7 +9455,7 @@ static int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -9740,7 +9740,7 @@ static int mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -9970,7 +9970,7 @@ static int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -10165,7 +10165,7 @@ static int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(w, filter->data));
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -10796,7 +10796,7 @@ static int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -11280,7 +11280,7 @@ static int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -12126,7 +12126,7 @@ static int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -12682,7 +12682,7 @@ static int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
