@@ -8161,6 +8161,7 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 	uint32_t i;
 
 	zend_hash_init(&info->uses, param_list->children, NULL, NULL, 0);
+	info->varvars_used = false;
 
 	find_implicit_binds_recursively(info, stmt_ast);
 
@@ -8470,7 +8471,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 	closure_info info;
-	memset(&info, 0, sizeof(closure_info));
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
