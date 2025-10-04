@@ -20,6 +20,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
     added, given the primary flags were running out of bits.
+  . The zval_is_true() alias of zend_is_true() has been removed. Call
+    zend_is_true() directly instead.
 
 ========================
 2. Build system changes
