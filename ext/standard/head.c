@@ -213,13 +213,13 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
-			*secure = zval_is_true(value);
+			*secure = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
-			*httponly = zval_is_true(value);
+			*httponly = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
 			*samesite = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
-			*partitioned = zval_is_true(value);
+			*partitioned = zend_is_true(value);
 		} else {
 			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
 			return FAILURE;
