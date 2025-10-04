@@ -32,6 +32,52 @@ env:
   CC: ccache gcc
   CXX: ccache g++
 jobs:
+  ALPINE:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
+    runs-on: ubuntu-22.04
+    container:
+      image: 'alpine:3.20.1'
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: LLVM 17 (ASAN-only)
+        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
+        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
+        run: |
+          apk add clang17 compiler-rt
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-17
+            CXX=clang++-17
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-alpine
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            --asan -x
+            -d opcache.enable_cli=1
   LINUX_X64:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
