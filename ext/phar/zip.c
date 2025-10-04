@@ -1192,7 +1192,9 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		entry.fp_type = PHAR_MOD;
 		entry.is_modified = 1;
 		if (entry.fp == NULL) {
+			efree(signature);
 			spprintf(pass->error, 0, "phar error: unable to create temporary file for signature");
+			php_stream_close(newfile);
 			return FAILURE;
 		}
 
@@ -1456,11 +1458,12 @@ fperror:
 
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
 	if (temperr) {
+temperror:
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
 		}
 		efree(temperr);
-temperror:
+notemperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
 		php_stream_close(pass.filefp);
@@ -1488,7 +1491,7 @@ nocentralerror:
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 			}
-			goto temperror;
+			goto notemperror;
 		}
 	}
 
