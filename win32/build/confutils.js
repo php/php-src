@@ -3255,7 +3255,7 @@ function toolset_setup_common_cflags()
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 
 	// General CFLAGS for building objects
-	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
+	DEFINE("CFLAGS", "/nologo /std:clatest $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS \
 		/D _USE_MATH_DEFINES");
 
