@@ -20,8 +20,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
     added, given the primary flags were running out of bits.
-  . The WRONG_PARAM_COUNT macro has been removed. Use
-    ZEND_WRONG_PARAM_COUNT() directly instead.
+  . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
+    removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
+    instead.
 
 ========================
 2. Build system changes

@@ -1580,7 +1580,8 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				ZEND_WRONG_PARAM_COUNT();
+				zend_wrong_param_count();
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -1607,7 +1608,8 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				ZEND_WRONG_PARAM_COUNT();
+				zend_wrong_param_count();
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
