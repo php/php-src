@@ -11,10 +11,14 @@ $uri2 = $uri2->withHost(null);
 
 var_dump($uri1->getRawPath());
 var_dump($uri2->getRawPath());
+var_dump($uri2->toRawString());
 var_dump($uri2->getPath());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--
 string(5) "path1"
+string(6) "/path1"
+string(6) "/path1"
 string(6) "/path1"
 string(6) "/path1"

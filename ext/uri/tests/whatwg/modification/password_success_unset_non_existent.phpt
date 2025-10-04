@@ -10,8 +10,10 @@ $url2 = $url1->withPassword(null);
 
 var_dump($url1->getPassword());
 var_dump($url2->getPassword());
+var_dump($url2->toAsciiString());
 
 ?>
 --EXPECT--
 NULL
 NULL
+string(20) "https://example.com/"

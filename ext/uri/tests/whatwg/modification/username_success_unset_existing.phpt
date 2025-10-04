@@ -10,8 +10,10 @@ $url2 = $url1->withUsername(null);
 
 var_dump($url1->getUsername());
 var_dump($url2->getUsername());
+var_dump($url2->toAsciiString());
 
 ?>
 --EXPECT--
 string(8) "username"
 NULL
+string(30) "https://:password@example.com/"

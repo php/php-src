@@ -10,8 +10,10 @@ $url2 = $url1->withPort(null);
 
 var_dump($url2->getPort());
 var_dump($url2->getPort());
+var_dump($url2->toAsciiString());
 
 ?>
 --EXPECT--
 NULL
 NULL
+string(18) "ftp://example.com/"

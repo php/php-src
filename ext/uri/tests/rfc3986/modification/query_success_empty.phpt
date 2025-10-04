@@ -10,10 +10,14 @@ $uri2 = $uri1->withQuery("");
 
 var_dump($uri1->getRawQuery());
 var_dump($uri2->getRawQuery());
+var_dump($uri2->toRawString());
 var_dump($uri2->getQuery());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--
 NULL
 string(0) ""
+string(20) "https://example.com?"
 string(0) ""
+string(20) "https://example.com?"

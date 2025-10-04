@@ -10,10 +10,14 @@ $uri2 = $uri1->withFragment(null);
 
 var_dump($uri1->getRawFragment());
 var_dump($uri2->getRawFragment());
+var_dump($uri2->toRawString());
 var_dump($uri2->getFragment());
+var_dump($uri2->toString());
 
 ?>
 --EXPECT--
 NULL
 NULL
+string(19) "https://example.com"
 NULL
+string(19) "https://example.com"

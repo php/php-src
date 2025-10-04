@@ -10,8 +10,10 @@ $uri2 = $uri1->withPort(null);
 
 var_dump($uri2->getPort());
 var_dump($uri2->getPort());
+var_dump($uri2->toRawString());
 
 ?>
 --EXPECT--
 NULL
 NULL
+string(17) "ftp://example.com"
