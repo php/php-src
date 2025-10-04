@@ -2,6 +2,7 @@
 CGI with auto_globals_jit=0
 --INI--
 auto_globals_jit=0
+variables_order=ES
 --CGI--
 --ENV--
 FOO=BAR

@@ -3,6 +3,7 @@ GH-19188: new INI mail.cr_lf_mode
 --INI--
 sendmail_path={MAIL:gh19188_cr_lf_mode.out}
 mail.cr_lf_mode=crlf
+mail.add_x_header=off
 --FILE--
 <?php
 
