@@ -2255,7 +2255,7 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 #endif
 	size_t ext_len;
 
-	if (CHECK_NULL_PATH(filename, filename_len)) {
+	if (zend_char_has_nul_byte(filename, filename_len)) {
 		return FAILURE;
 	}
 

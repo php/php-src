@@ -303,7 +303,7 @@ bool php_openssl_check_path_ex(
 		fs_file_path_len = file_path_len;
 	}
 
-	if (CHECK_NULL_PATH(fs_file_path, fs_file_path_len)) {
+	if (zend_char_has_nul_byte(fs_file_path, fs_file_path_len)) {
 		error_msg = "must not contain any null bytes";
 		error_type = E_ERROR;
 	} else if (expand_filepath(fs_file_path, real_path) == NULL) {
