@@ -30,7 +30,7 @@ typedef struct _zend_file_handle zend_file_handle;
 #define ZEND_INI_SCANNER_TYPED  2 /* Typed mode. */
 
 BEGIN_EXTERN_C()
-ZEND_COLD int zend_ini_scanner_get_lineno(void);
+ZEND_COLD uint32_t zend_ini_scanner_get_lineno(void);
 ZEND_COLD const char *zend_ini_scanner_get_filename(void);
 zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode);
 zend_result zend_ini_prepare_string_for_scanning(const char *str, int scanner_mode);

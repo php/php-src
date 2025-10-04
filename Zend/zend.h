@@ -152,12 +152,12 @@ struct _zend_class_entry {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
-	int refcount;
+	uint32_t refcount;
 	uint32_t ce_flags;
 	uint32_t ce_flags2;
 
 	int default_properties_count;
-	int default_static_members_count;
+	uint32_t default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);

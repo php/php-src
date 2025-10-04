@@ -518,7 +518,7 @@ ZEND_API zend_string *zend_get_compiled_filename(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_get_compiled_lineno(void) /* {{{ */
+ZEND_API uint32_t zend_get_compiled_lineno(void) /* {{{ */
 {
 	return CG(zend_lineno);
 }
@@ -4696,7 +4696,7 @@ static const zend_frameless_function_info *find_frameless_function_info(zend_ast
 
 static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *args, zend_function *fbc, const zend_frameless_function_info *frameless_function_info, uint32_t type)
 {
-	int lineno = CG(zend_lineno);
+	uint32_t lineno = CG(zend_lineno);
 	uint32_t num_args = frameless_function_info->num_args;
 	uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
 	znode arg_zvs[3];
