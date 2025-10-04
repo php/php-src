@@ -9719,7 +9719,9 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
-			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
+			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
+			key = (key >> 3) | (key << ((sizeof(key) * 8) - 3));
+			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {
 				zend_closure_from_frame(closure_zv, call);
 			}
