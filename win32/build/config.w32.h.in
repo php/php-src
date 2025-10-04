@@ -48,6 +48,7 @@
 #undef HAVE_SETITIMER
 #undef HAVE_IODBC
 #define HAVE_LIBDL 1
+#define HAVE_TIMESPEC_GET 1
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_PUTENV 1
 #define HAVE_TZSET 1
