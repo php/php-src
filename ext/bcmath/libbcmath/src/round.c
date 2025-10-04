@@ -63,7 +63,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			case PHP_ROUND_AWAY_FROM_ZERO:
 				break;
 
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (bc_is_zero(num)) {
@@ -164,7 +164,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	/* Loop through the remaining digits. */
@@ -198,7 +198,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 up:

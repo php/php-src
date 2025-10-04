@@ -2942,7 +2942,7 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			*dval = 0.0;
 			return IS_STRING;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

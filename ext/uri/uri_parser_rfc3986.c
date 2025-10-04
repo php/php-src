@@ -95,7 +95,7 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc398
 			ZEND_FALLTHROUGH;
 		case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE:
 			return get_normalized_uri(uriparser_uris);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

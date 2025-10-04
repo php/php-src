@@ -1790,10 +1790,10 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 				case ZEND_FETCH_DIM_INCDEC:
 					msg = "Cannot increment/decrement string offsets";
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE();
+				default: ZEND_UNREACHABLE();
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_ASSERT(msg != NULL);
 	zend_throw_error(NULL, "%s", msg);
@@ -3502,7 +3502,7 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	return 1;
 }
@@ -4214,7 +4214,7 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 			ZVAL_UNDEF(result);
 			zend_throw_error(NULL, "Cannot unset $this");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -5355,7 +5355,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 				efree(eval_desc);
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	zend_tmp_string_release(tmp_inc_filename);

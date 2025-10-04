@@ -537,7 +537,7 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
 		case 1: hash = ((hash << 5) + hash) + *str++; break;
 		case 0: break;
-EMPTY_SWITCH_DEFAULT_CASE()
+default: ZEND_UNREACHABLE();
 	}
 #endif
 

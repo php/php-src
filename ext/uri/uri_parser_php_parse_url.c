@@ -34,7 +34,7 @@ static zend_string *decode_component(zend_string *in, php_uri_component_read_mod
 
 		return out;
 	}
-	EMPTY_SWITCH_DEFAULT_CASE();
+	default: ZEND_UNREACHABLE();
 	}
 }
 

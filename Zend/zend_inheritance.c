@@ -537,7 +537,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 						return INHERITANCE_SUCCESS;
 					}
 					continue;
-				EMPTY_SWITCH_DEFAULT_CASE();
+				default: ZEND_UNREACHABLE();
 			}
 		}
 

@@ -1449,7 +1449,7 @@ lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
 		case LXB_CSS_SELECTOR_TYPE_PSEUDO_ELEMENT_FUNCTION:
 			return false;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return false;
@@ -1631,7 +1631,7 @@ lxb_selectors_match_attribute_value(const lxb_css_selector_attribute_t *attr, bo
 
 			return lexbor_str_data_ncmp_contain(trg->data, trg->length,
 												src->data, src->length);
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return false;

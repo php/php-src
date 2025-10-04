@@ -398,7 +398,7 @@ retry:
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -674,7 +674,7 @@ retry:
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
