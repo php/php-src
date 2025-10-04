@@ -1013,7 +1013,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			break;
 		}
 #endif
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	if (result) {
 		RETURN_STRING(result);
@@ -1578,7 +1578,7 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 		case PHP_PG_CMD_TUPLES:
 			RETVAL_LONG(atoi(PQcmdTuples(pgsql_result)));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -1817,7 +1817,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 
 			oid = PQftype(pgsql_result, (int)field);
 			PGSQL_RETURN_OID(oid);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -2348,7 +2348,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 		case PHP_PG_DATA_ISNULL:
 			RETVAL_LONG(PQgetisnull(pgsql_result, pgsql_row, field_offset));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -3921,7 +3921,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			PQfreeCancel(c);
 			break;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");

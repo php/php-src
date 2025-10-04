@@ -194,7 +194,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_enum_RoundingMode mode, bc
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 up:

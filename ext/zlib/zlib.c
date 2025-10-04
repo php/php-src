@@ -925,7 +925,7 @@ PHP_FUNCTION(inflate_init)
 				efree(ctx->inflateDict);
 				ctx->inflateDict = NULL;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 }
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(inflate_add)
 							zend_string_release_ex(out, 0);
 							php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 							RETURN_FALSE;
-						EMPTY_SWITCH_DEFAULT_CASE()
+						default: ZEND_UNREACHABLE();
 					}
 					break;
 				} else {

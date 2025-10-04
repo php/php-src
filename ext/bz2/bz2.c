@@ -402,7 +402,7 @@ unsupported_mode:
 					RETURN_FALSE;
 				}
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {

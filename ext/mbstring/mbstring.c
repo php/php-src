@@ -5260,7 +5260,7 @@ finish_up_remaining_bytes:
 			}
 			break;
 
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

@@ -2049,7 +2049,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? 1 : 0;
 		case TIMELIB_ZONETYPE_ID:
 			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? 1 : 0;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 } /* }}} */
 
@@ -2744,7 +2744,7 @@ PHP_METHOD(DateTime, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -2825,7 +2825,7 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -5969,7 +5969,7 @@ static int date_period_has_property(zend_object *object, zend_string *name, int 
 				return 0;
 			case ZEND_PROPERTY_EXISTS:
 				return 1;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

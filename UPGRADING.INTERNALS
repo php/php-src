@@ -86,6 +86,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The unused ZEND_AST_PARENT_PROPERTY_HOOK_CALL has been removed.
   . ZEND_AST_METHOD_REFERENCE has been renamed to
     ZEND_AST_TRAIT_METHOD_REFERENCE.
+  . The EMPTY_SWITCH_DEFAULT_CASE() macro has been removed. Use
+    default: ZEND_UNREACHABLE(); instead.
 
 ========================
 2. Build system changes

@@ -74,7 +74,7 @@ U_CFUNC void resourcebundle_extract_value( zval *return_value, ResourceBundle_ob
 			source->child = NULL;
 			intl_errors_reset(INTL_DATA_ERROR_P(source));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

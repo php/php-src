@@ -430,7 +430,7 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 			return ZEND_ACC_PROTECTED_SET;
 		case ZEND_ACC_PRIVATE:
 			return ZEND_ACC_PRIVATE_SET;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

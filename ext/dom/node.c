@@ -138,7 +138,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			ZVAL_STRING(retval, "#text");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
