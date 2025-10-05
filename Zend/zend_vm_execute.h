@@ -39092,8 +39092,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
+			/* Rotate the key for better hash distribution. */
+			const int shift = sizeof(size_t) == 4 ? 6 : 7;
 			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
-			key = (key >> 3) | (key << ((sizeof(key) * 8) - 3));
+			key = (key >> shift) | (key << ((sizeof(key) * 8) - shift));
 			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {
 				zend_closure_from_frame(closure_zv, call);
@@ -94331,8 +94333,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_S
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
+			/* Rotate the key for better hash distribution. */
+			const int shift = sizeof(size_t) == 4 ? 6 : 7;
 			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
-			key = (key >> 3) | (key << ((sizeof(key) * 8) - 3));
+			key = (key >> shift) | (key << ((sizeof(key) * 8) - shift));
 			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {
 				zend_closure_from_frame(closure_zv, call);
