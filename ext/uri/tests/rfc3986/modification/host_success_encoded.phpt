@@ -6,7 +6,7 @@ uri
 <?php
 
 $uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
-$uri2 = $uri1->withHost("t%65st.com"); // test.com
+$uri2 = $uri1->withHost("%65xample.net"); // example.net
 
 var_dump($uri1->getRawHost());
 var_dump($uri2->getRawHost());
@@ -17,7 +17,7 @@ var_dump($uri2->toString());
 ?>
 --EXPECT--
 string(11) "example.com"
-string(10) "t%65st.com"
-string(18) "https://t%65st.com"
-string(8) "test.com"
-string(16) "https://test.com"
+string(13) "%65xample.net"
+string(21) "https://%65xample.net"
+string(11) "example.net"
+string(19) "https://example.net"

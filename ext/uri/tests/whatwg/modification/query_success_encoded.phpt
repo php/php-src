@@ -6,7 +6,7 @@ uri
 <?php
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
-$url2 = $url1->withQuery("foo%3dbar"); // foo=bar
+$url2 = $url1->withQuery("foo%3db%61r"); // foo=bar
 
 var_dump($url1->getQuery());
 var_dump($url2->getQuery());
@@ -15,5 +15,5 @@ var_dump($url2->toAsciiString());
 ?>
 --EXPECT--
 NULL
-string(9) "foo%3dbar"
-string(30) "https://example.com/?foo%3dbar"
+string(11) "foo%3db%61r"
+string(32) "https://example.com/?foo%3db%61r"
