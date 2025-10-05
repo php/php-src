@@ -6,7 +6,7 @@ uri
 <?php
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
-$url2 = $url1->withScheme("http");
+$url2 = $url1->withScheme("HTTP");
 
 var_dump($url1->getScheme());
 var_dump($url2->getScheme());

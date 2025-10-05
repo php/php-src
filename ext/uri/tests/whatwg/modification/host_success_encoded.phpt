@@ -6,7 +6,7 @@ uri
 <?php
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
-$url2 = $url1->withHost("t%65st.com"); // test.com
+$url2 = $url1->withHost("%65xample.net"); // example.net
 
 var_dump($url1->getAsciiHost());
 var_dump($url2->getAsciiHost());
@@ -15,5 +15,5 @@ var_dump($url2->toAsciiString());
 ?>
 --EXPECT--
 string(11) "example.com"
-string(8) "test.com"
-string(17) "https://test.com/"
+string(11) "example.net"
+string(20) "https://example.net/"
