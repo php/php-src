@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fix memory leak and invalid continuation after tar header writing fails.
     (nielsdos)
+  . Fix memory leaks when creating temp file fails when applying zip signature.
+    (nielsdos)
 
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
