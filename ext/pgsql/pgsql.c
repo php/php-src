@@ -1978,39 +1978,12 @@ PHP_FUNCTION(pg_fetch_result)
 /* }}} */
 
 /* {{{ void php_pgsql_fetch_hash */
-static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_type, int into_object)
+static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_long row, bool row_is_null, zend_long result_type)
 {
-	zval                *result;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row;
-	zend_long            row;
-	bool row_is_null = true;
 	char            *field_name;
-	HashTable		*ctor_params = NULL;
-	zend_class_entry *ce = NULL;
-
-	if (into_object) {
-		ZEND_PARSE_PARAMETERS_START(1, 4)
-			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_LONG_OR_NULL(row, row_is_null)
-			Z_PARAM_CLASS(ce)
-			Z_PARAM_ARRAY_HT(ctor_params)
-		ZEND_PARSE_PARAMETERS_END();
-
-		if (!ce) {
-			ce = zend_standard_class_def;
-		}
-		result_type = PGSQL_ASSOC;
-	} else {
-		ZEND_PARSE_PARAMETERS_START(1, 3)
-			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_LONG_OR_NULL(row, row_is_null)
-			Z_PARAM_LONG(result_type)
-		ZEND_PARSE_PARAMETERS_END();
-	}
 
 	if (!row_is_null && row < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
@@ -2054,7 +2027,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				add_assoc_null(return_value, field_name);
 			}
 		} else {
-			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
+			const char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
 				const size_t element_len = strlen(element);
 
@@ -2069,67 +2042,116 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			}
 		}
 	}
-
-	if (into_object) {
-		zval dataset;
-
-		ZVAL_COPY_VALUE(&dataset, return_value);
-		zend_result obj_initialized = object_init_ex(return_value, ce);
-		if (UNEXPECTED(obj_initialized == FAILURE)) {
-			zval_ptr_dtor(&dataset);
-			RETURN_THROWS();
-		}
-		if (!ce->default_properties_count && !ce->__set) {
-			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
-		} else {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
-		}
-
-		if (ce->constructor) {
-			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
-				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
-		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
-			zend_argument_value_error(3,
-				"must be empty when the specified class (%s) does not have a constructor",
-				ZSTR_VAL(ce->name)
-			);
-		}
-	}
 }
 /* }}} */
 
 /* {{{ Get a row as an enumerated array */
 PHP_FUNCTION(pg_fetch_row)
 {
-	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM, 0);
+	zval *result;
+	zend_long row = 0;
+	bool row_is_null = true;
+	zend_long result_type = PGSQL_NUM;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(row, row_is_null)
+		Z_PARAM_LONG(result_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type);
 }
 /* }}} */
 
 /* {{{ Fetch a row as an assoc array */
 PHP_FUNCTION(pg_fetch_assoc)
 {
-	/* pg_fetch_assoc() is added from PHP 4.3.0. It should raise error, when
-	   there is 3rd parameter */
-	if (ZEND_NUM_ARGS() > 2)
-		WRONG_PARAM_COUNT;
-	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC, 0);
+	zval *result;
+	zend_long row = 0;
+	bool row_is_null = true;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(row, row_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_pgsql_fetch_hash(return_value, result, row, row_is_null, PGSQL_ASSOC);
 }
 /* }}} */
 
 /* {{{ Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
-	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_BOTH, 0);
+	zval *result;
+	zend_long row = 0;
+	bool row_is_null = true;
+	zend_long result_type = PGSQL_BOTH;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(row, row_is_null)
+		Z_PARAM_LONG(result_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type);
 }
 /* }}} */
 
 /* {{{ Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
+	zval *result;
+	zend_long row = 0;
+	bool row_is_null = true;
+	zend_class_entry *ce = NULL;
+	HashTable *ctor_params = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(row, row_is_null)
+		Z_PARAM_CLASS(ce)
+		Z_PARAM_ARRAY_HT(ctor_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!ce) {
+		ce = zend_standard_class_def;
+	}
+
+	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+		zend_argument_value_error(3,
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
+		RETURN_THROWS();
+	}
+
 	/* pg_fetch_object() allowed result_type used to be. 3rd parameter
 	   must be allowed for compatibility */
-	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC, 1);
+	zval dataset;
+	php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC);
+
+	// TODO: Check CE is an instantiable class earlier?
+	zend_result obj_initialized = object_init_ex(return_value, ce);
+	if (UNEXPECTED(obj_initialized == FAILURE)) {
+		zval_ptr_dtor(&dataset);
+		RETURN_THROWS();
+	}
+	if (!ce->default_properties_count && !ce->__set) {
+		Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
+	} else {
+		zend_merge_properties(return_value, Z_ARRVAL(dataset));
+		zval_ptr_dtor(&dataset);
+	}
+
+	// TODO: Need to grab constructor via object handler as this allows instantiating internal objects with overridden get_constructor
+	if (ce->constructor) {
+		zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+			/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+	}
 }
 /* }}} */
 
@@ -2863,18 +2885,17 @@ PHP_FUNCTION(pg_lo_import)
 	Oid returned_oid;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-								 "OP|z", &pgsql_link, pgsql_link_ce, &file_in, &oid) == SUCCESS) {
+	/* Deprecated signature with implicit connection */
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "P|z", &file_in, &oid) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|z", &pgsql_link, pgsql_link_ce, &file_in, &oid) == FAILURE) {
+			RETURN_THROWS();
+		}
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
-	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-									  "P|z", &file_in, &oid) == SUCCESS) {
+	} else {
+		/* Load implicit connection */
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	}
-	else {
-		WRONG_PARAM_COUNT;
 	}
 
 	if (php_check_open_basedir(ZSTR_VAL(file_in))) {
