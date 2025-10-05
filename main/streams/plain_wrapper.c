@@ -261,10 +261,20 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
 #ifdef __linux__
 		if (S_ISCHR(self->sb.st_mode)) {
-			/* /dev/null & /dev/zero are exceptions, check their major/minor ID
+			/* Some character devices are exceptions, check their major/minor ID
 			 * https://www.kernel.org/doc/Documentation/admin-guide/devices.txt */
-			self->is_seekable = major(self->sb.st_rdev) == 1
-							&& (minor(self->sb.st_rdev) == 3 || minor(self->sb.st_rdev) == 5);
+			if (major(self->sb.st_rdev) == 1) {
+				unsigned m = minor(self->sb.st_rdev);
+				self->is_seekable =
+					m == 1 ||   /* /dev/mem   */
+					m == 2 ||   /* /dev/kmem  */
+					m == 3 ||   /* /dev/null  */
+					m == 4 ||   /* /dev/port  (seekable, offset = I/O port) */
+					m == 5 ||   /* /dev/zero  */
+					m == 7;     /* /dev/full  */
+			} else {
+				self->is_seekable = false;
+			}
 		} else {
 			self->is_seekable = !S_ISFIFO(self->sb.st_mode);
 		}
