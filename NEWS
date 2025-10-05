@@ -60,6 +60,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19701 (Serialize/deserialize loses some data). (nielsdos)
   . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
     (alexandre-daubois)
+  . Fixed bug GH-20043 (array_unique assertion failure with RC1 array
+    causing an exception on sort). (nielsdos)
 
 - Streams:
   . Fixed bug GH-19248 (Use strerror_r instead of strerror in main).
