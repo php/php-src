@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-ArgumentCountError: Wrong parameter count for socket_recvfrom()
+ArgumentCountError: socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6

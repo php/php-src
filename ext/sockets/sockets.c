@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
  */
 
+#include "zend_exceptions.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -1580,7 +1581,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -1607,7 +1612,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
