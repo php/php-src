@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed GH-19955 (imagefttext() memory leak). (David Carlier)
+  . Fixed GH-20070 (ext/gd: Return type violation in imagefilter when an
+    invalid filter is provided). (Girgias)
 
 - MySQLnd:
   . Fixed bug #67563 (mysqli compiled with mysqlnd does not take ipv6 adress
