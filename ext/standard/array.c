@@ -5044,6 +5044,11 @@ PHP_FUNCTION(array_unique)
 	ZVAL_UNDEF(&arTmp[i].b.val);
 	zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
 			(compare_func_t) cmp, (swap_func_t) array_bucketindex_swap);
+
+	if (UNEXPECTED(EG(exception))) {
+		goto out;
+	}
+
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
@@ -5063,6 +5068,8 @@ PHP_FUNCTION(array_unique)
 			}
 		}
 	}
+
+out:
 	pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
 
 	if (in_place) {
