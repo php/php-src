@@ -8000,6 +8000,16 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				if (override_attribute) {
 					prop->flags |= ZEND_ACC_OVERRIDE;
 				}
+
+				zend_attribute *no_serialize_attribute = zend_get_attribute_str(prop->attributes, "noserialize", sizeof("noserialize")-1);
+				if (no_serialize_attribute) {
+					if (prop->flags & ZEND_ACC_VIRTUAL) {
+						zend_error(E_COMPILE_WARNING,
+						"Virtual property %s::$%s is not serializable",
+						ZSTR_VAL(scope->name), ZSTR_VAL(name));
+					}
+					prop->flags |= ZEND_ACC_NO_SERIALIZE;
+				}
 			}
 		}
 	}
@@ -8992,6 +9002,16 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 
 			zend_attribute *no_serialize_attribute = zend_get_attribute_str(info->attributes, "noserialize", sizeof("noserialize")-1);
 			if (no_serialize_attribute) {
+				if (info->flags & ZEND_ACC_STATIC) {
+					zend_error(E_COMPILE_WARNING,
+					"Static property %s::$%s is not serializable",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
+				if (info->flags & ZEND_ACC_VIRTUAL) {
+					zend_error(E_COMPILE_WARNING,
+					"Virtual property %s::$%s is not serializable",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
 				info->flags |= ZEND_ACC_NO_SERIALIZE;
 			}
 		}
