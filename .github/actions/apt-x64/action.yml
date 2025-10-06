@@ -15,6 +15,7 @@ runs:
           locales \
           ldap-utils \
           openssl \
+          lsof \
           slapd \
           language-pack-de \
           libgmp-dev \
