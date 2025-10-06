@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     configured). (nielsdos)
   . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
 
+- CLI:
+  . Fix useless "Failed to poll event" error logs due to EAGAIN in CLI server
+    with PHP_CLI_SERVER_WORKERS. (leotaku)
+
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)

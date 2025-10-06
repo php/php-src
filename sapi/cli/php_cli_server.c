@@ -2711,14 +2711,16 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
-			int err = php_socket_errno();
-			if (err != SOCK_EAGAIN && php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
+			pefree(sa, 1);
+			if (php_socket_errno() == SOCK_EAGAIN) {
+				return SUCCESS;
+			}
+			if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 				char *errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR,
 					"Failed to accept a client (reason: %s)", errstr);
 				efree(errstr);
 			}
-			pefree(sa, 1);
 			return FAILURE;
 		}
 		if (SUCCESS != php_set_sock_blocking(client_sock, 0)) {
