@@ -401,10 +401,11 @@ PHP 8.5 UPGRADE NOTES
     $_GET or $_SERVER['QUERY_STRING'] to access the information, after verifying
     that the usage is safe.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_register_argc_argv_ini_directive
-  . The __sleep() and __wakeup() magic methods have been deprecated. The
+  . The __sleep() and __wakeup() magic methods have been soft-deprecated. The
     __serialize() and __unserialize() magic methods should be used instead,
     or at the same time if compatibility with PHP 7 is required.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_sleep_and_wakeup_magic_methods
+    RFC: https://wiki.php.net/rfc/soft-deprecate-sleep-wakeup
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
@@ -579,7 +580,7 @@ PHP 8.5 UPGRADE NOTES
   . Passing a string which is not a single byte to ord() is now deprecated,
     this is indicative of a bug.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_string_which_are_not_one_byte_long_to_ord
-  . Relying locally predefined variable $http_response_header is deprecated.
+  . The locally predefined variable $http_response_header is deprecated.
     Instead one should call the http_get_last_response_headers() function.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_http_response_header_predefined_variable
 
@@ -610,16 +611,16 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/grapheme_add_locale_for_case_insensitive
 
 - LDAP:
-  . ldap_get_option() now accepts a NULL connection, as ldap_set_option(),
+  . ldap_get_option() now accepts a NULL connection, like ldap_set_option(),
     to allow retrieval of global options.
 
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.
 
 - OpenSSL:
-  . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
-    $digest_algo that allows specifying hash digest algorithm for OEAP padding.
-  . openssl_sign() and openssl_verify() have new parameter $padding to allow
+  . openssl_public_encrypt() and openssl_private_decrypt() have a new parameter
+    $digest_algo that allows specifying the hash digest algorithm for OAEP padding.
+  . openssl_sign() and openssl_verify() have a new parameter $padding to allow
     using more secure RSA PSS padding.
   . openssl_cms_encrypt() $cipher_algo parameter can be a string with the
     cipher name. That allows to use more algorithms including AES GCM cipher
@@ -631,9 +632,9 @@ PHP 8.5 UPGRADE NOTES
     gather various platform specific metrics about the child process.
 
 - PDO_PGSQL:
-  . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
-  . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
-    PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
+  . PDO::pgsqlCopyFromArray now supports Iterable inputs.
+  . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare support setting
+    PDO::ATTR_PREFETCH to 0 which enters lazy fetch mode.
     In this mode, statements cannot be run in parallel.
 
 - PDO_SQLITE:
@@ -644,7 +645,7 @@ PHP 8.5 UPGRADE NOTES
     in line with Pdo_Sqlite::createCollation behavior.
 
 - PGSQL:
-  . pg_copy_from also supports inputs as Iterable.
+  . pg_copy_from now supports Iterable inputs.
   . pg_connect checks if the connection_string argument contains
     any null byte.
   . pg_close_stmt checks if the statement_name argument contains
@@ -658,12 +659,12 @@ PHP 8.5 UPGRADE NOTES
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
   . posix_kill throws a ValueError when the process_id argument is lower
-    or greater than what supports the platform (signed integer or long
+    or greater than what the platform supports (signed integer or long
     range), posix_setpgid throws a ValueError when the process_id or
     the process_group_id is lower than zero or greater than
-    what supports the platform.
-  . posix_setrlimit throws a ValueError when the hard_limit of soft_limit
-    argument are lower than -1 or if soft_limit is greater than hard_limit.
+    what the platform supports.
+  . posix_setrlimit throws a ValueError when the hard_limit or soft_limit
+    arguments are lower than -1 or if soft_limit is greater than hard_limit.
 
 - Reflection:
   . The output of ReflectionClass::__toString() for enums has changed to
@@ -676,14 +677,14 @@ PHP 8.5 UPGRADE NOTES
     properties.
   . ReflectionAttribute::newInstance() can now throw errors for internal
     attributes if the attribute was applied on an invalid target and the
-    error was delayed from compile-time to runtime via the
+    error was delayed from compile time to runtime via the
     #[\DelayedTargetValidation] attribute.
     RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Session:
-  . session_start is stricter in regard to the option argument.
-    It throws a ValueError if the whole is not a hashmap or
-    a TypeError if read_and_close value is not a valid type
+  . session_start is stricter in regard to the options argument.
+    It throws a ValueError if the array is not a hashmap, or
+    a TypeError if the read_and_close value is not a valid type
     compatible with int.
 
 - SNMP:
@@ -710,14 +711,13 @@ PHP 8.5 UPGRADE NOTES
     when the created socket is not of AF_INET/AF_INET6 family.
 
 - Tidy:
-  . tidy::__construct/parseFile/parseString now throws a ValueError
-    if the configuration contains an invalid or set a read-only
-    internal entry, a TypeError contains, at least, one element
-    when the key is not a string.
+  . tidy::__construct/parseFile/parseString now throws a ValueError if the
+    configuration contains an invalid value or attempts to set a read-only
+    internal entry, and a TypeError if a configuration key is not a string.
 
 - Zlib:
   . The "use_include_path" argument for the
-    gzfile, gzopen and readgzfile functions had been changed
+    gzfile, gzopen and readgzfile functions has been changed
     from int to boolean.
   . gzfile, gzopen and readgzfile functions now respect the default
     stream context.
@@ -739,7 +739,7 @@ PHP 8.5 UPGRADE NOTES
   . Added Closure::getCurrent() to receive currently executing closure.
 
 - Curl:
-  . curl_multi_get_handles() allows retrieving all CurlHandles current
+  . curl_multi_get_handles() allows retrieving all CurlHandles currently
     attached to a CurlMultiHandle. This includes both handles added using
     curl_multi_add_handle() and handles accepted by CURLMOPT_PUSHFUNCTION.
   . curl_share_init_persistent() allows creating a share handle that is
@@ -967,7 +967,7 @@ PHP 8.5 UPGRADE NOTES
   PHP_RELEASE_VERSION are now always numbers.  Previously, they have been
   strings for buildconf builds.
 
-* phpize builds now reflect the source tree in the build dir (like that already
+* phpize builds now reflect the source tree in the build dir (as it already
   worked for in-tree builds); some extension builds (especially when using
   Makefile.frag.w32) may need adjustments.
 
@@ -1063,4 +1063,4 @@ PHP 8.5 UPGRADE NOTES
   . Improved property access performance.
 
 - XMLWriter:
-  . Improved performance and reduce memory consumption.
+  . Improved performance and reduced memory consumption.

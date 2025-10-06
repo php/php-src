@@ -65,16 +65,6 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 		zend_string_release_ex(persistent_script->script.filename, 0);
 	}
 
-	if (persistent_script->warnings) {
-		for (uint32_t i = 0; i < persistent_script->num_warnings; i++) {
-			zend_error_info *info = persistent_script->warnings[i];
-			zend_string_release(info->filename);
-			zend_string_release(info->message);
-			efree(info);
-		}
-		efree(persistent_script->warnings);
-	}
-
 	zend_accel_free_delayed_early_binding_list(persistent_script);
 
 	efree(persistent_script);

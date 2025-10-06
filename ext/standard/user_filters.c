@@ -404,16 +404,18 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
 	}
 
+	/* If the bucket is already on a brigade we have to unlink it first to keep the
+	 * linked list consistent. Furthermore, we can transfer the refcount in that case. */
+	if (bucket->brigade) {
+		php_stream_bucket_unlink(bucket);
+	} else {
+		bucket->refcount++;
+	}
+
 	if (append) {
 		php_stream_bucket_append(brigade, bucket);
 	} else {
 		php_stream_bucket_prepend(brigade, bucket);
-	}
-	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
- 	 * multiple times. See bug35916.phpt for reference.
-	 */
-	if (bucket->refcount == 1) {
-		bucket->refcount++;
 	}
 }
 /* }}} */

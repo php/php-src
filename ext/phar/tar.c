@@ -1170,7 +1170,16 @@ nostub:
 	}
 
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
-	/* TODO: memory leak and incorrect continuation if phar_tar_writeheaders fails? */
+
+	if (error && *error) {
+		if (must_close_old_file) {
+			php_stream_close(oldfile);
+		}
+
+		/* on error in the hash iterator above, error is set */
+		php_stream_close(newfile);
+		return;
+	}
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {

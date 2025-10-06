@@ -2,15 +2,39 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC2
 
-- Opcache
-  . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
+- Core:
+  . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
+  . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
+  . Fixed bug GH-19352 (Cross-compilation with musl C library).
+    (henderkes, Peter Kokot)
+  . Revert deprecation of __sleep() and __wakeup().
+    They're now soft-deprecated. (Nicolas Grekas)
 
-- URI:
-  . Fixed Uri\WhatWg\Url::withPort() when an invalid value is passed. (timwolla)
+- CLI:
+  . Fix useless "Failed to poll event" error logs due to EAGAIN in CLI server
+    with PHP_CLI_SERVER_WORKERS. (leotaku)
+
+- BcMath:
+  . Fixed bug GH-20006 (Power of 0 of BcMath number causes UB). (nielsdos)
+
+- Opcache:
+  . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
+  . Fixed bug GH-19984 (Double-free of EG(errors)/persistent_script->warnings on
+    persist of already persisted file). (ilutov, Arnaud)
 
 - SOAP:
   . Fixed bug GH-19773 (SIGSEGV due to uninitialized soap_globals->lang_en).
     (nielsdos, KaseyJenkins)
+
+- Standard:
+  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
+    while COW violation flag is still set). (alexandre-daubois)
+
+- URI:
+  . Fixed Uri\WhatWg\Url::withPort() when an invalid value is passed.
+    (timwolla)
+  . Fixed Uri\WhatWg\Url::parse() when resolving a relative URL
+    against a base URL with query or fragment. (timwolla)
 
 25 Sep 2025, PHP 8.5.0RC1
 

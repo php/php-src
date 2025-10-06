@@ -18,7 +18,5 @@ $data = serialize($foo);
 var_dump(str_replace("\0", '\0', $data));
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Warning: serialize(): "no_such" returned as member variable from __sleep() but does not exist in %s on line %d
 string(114) "O:3:"foo":3:{s:12:"\0foo\0private";s:7:"private";s:12:"\0*\0protected";s:9:"protected";s:6:"public";s:6:"public";}"

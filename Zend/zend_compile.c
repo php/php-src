@@ -9355,15 +9355,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	if (ce->__serialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
-		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
-			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
-	if (ce->__unserialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP))) {
-		zend_error(E_DEPRECATED, "The __wakeup() serialization magic method has been deprecated."
-			" Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
-
 	/* We currently don't early-bind classes that implement interfaces or use traits */
 	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
 #ifdef ZEND_OPCACHE_SHM_REATTACHMENT
@@ -9998,7 +9989,9 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
 	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
 			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR) {
-		return !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2);
+		if (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2)) {
+			return 1;
+		}
 	}
 
 	if (opcode == ZEND_DIV && zval_get_double(op2) == 0.0) {
@@ -10009,7 +10002,9 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	/* Mod is an operation that will cast float/float-strings to integers which might
 	   produce float to int incompatible errors, and also cannot be divided by 0 */
 	if (opcode == ZEND_MOD) {
-		return  !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2) || zval_get_long(op2) == 0;
+		if (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2) || zval_get_long(op2) == 0) {
+			return 1;
+		}
 	}
 
 	if ((opcode == ZEND_POW) && zval_get_double(op1) == 0 && zval_get_double(op2) < 0) {
