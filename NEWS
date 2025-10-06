@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-19934 (CGI with auto_globals_jit=0 causes uouv). (ilutov)
+  . Fixed bug GH-20073 (Assertion failure in WeakMap offset operations on
+    reference). (nielsdos)
 
 23 Oct 2025, PHP 8.3.27
 
