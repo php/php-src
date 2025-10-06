@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     (timwolla)
   . Fixed Uri\WhatWg\Url::parse() when resolving a relative URL
     against a base URL with query or fragment. (timwolla)
+  . Fixed normalization of paths starting with two slashes for
+    Uri\Rfc3986\Uri. (timwolla)
 
 25 Sep 2025, PHP 8.5.0RC1
 
