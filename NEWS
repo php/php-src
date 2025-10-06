@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Revert deprecation of __sleep() and __wakeup().
     They're now soft-deprecated. (Nicolas Grekas)
 
+- CLI:
+  . Fix useless "Failed to poll event" error logs due to EAGAIN in CLI server
+    with PHP_CLI_SERVER_WORKERS. (leotaku)
+
 - BcMath:
   . Fixed bug GH-20006 (Power of 0 of BcMath number causes UB). (nielsdos)
 
