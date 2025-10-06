@@ -103,6 +103,8 @@ PHP                                                                        NEWS
     (alexandre-daubois)
   . Fixed GH-14402 (SplPriorityQueue, SplMinHeap, and SplMaxHeap lost their
     data on serialize()). (alexandre-daubois)
+  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
+    while COW violation flag is still set). (alexandre-daubois)
 
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).

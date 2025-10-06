@@ -3489,6 +3489,12 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
 
+	/* Set internal pointer to 0 directly instead of calling zend_hash_internal_pointer_reset().
+	 * This avoids the COW violation assertion and delays advancing to the first valid position
+	 * until after we've switched to the new array structure (out_hash). The iterator will be
+	 * advanced when actually accessed, at which point it will find valid indexes in the new array. */
+	in_hash->nInternalPointer = 0;
+
 	if (UNEXPECTED(GC_DELREF(in_hash) == 0)) {
 		/* Array was completely deallocated during the operation */
 		zend_array_destroy(in_hash);
@@ -3507,8 +3513,6 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	in_hash->nNextFreeElement  = out_hash.nNextFreeElement;
 	in_hash->arData            = out_hash.arData;
 	in_hash->pDestructor       = out_hash.pDestructor;
-
-	zend_hash_internal_pointer_reset(in_hash);
 }
 /* }}} */
 
