@@ -11,4 +11,8 @@ PHP                                                                        NEWS
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
 
+- Standard:
+  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
+    while COW violation flag is still set). (alexandre-daubois)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
