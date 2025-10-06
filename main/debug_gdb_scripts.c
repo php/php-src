@@ -55,7 +55,7 @@ asm(
     ".ascii \"\\n\"\n"
     ".ascii \"	printf \\\"Compiled variables count: %d\\\\\\\\n\\\\\\\\n\\\", $cv_count\\n\"\n"
     ".ascii \"	while $cv_idx < $cv_count\\n\"\n"
-    ".ascii \"		printf \\\"[%d] \\\\'%s\\\\'\\\\\\\\n\\\", $cv_idx, $cv[$cv_idx].val\\n\"\n"
+    ".ascii \"		printf \\\"[%d] \\\\'$%s\\\\'\\\\\\\\n\\\", $cv_idx, $cv[$cv_idx].val@$cv[$cv_idx].len\\n\"\n"
     ".ascii \"		set $zvalue = ((zval *) $cv_ex_ptr) + $callFrameSize + $cv_idx\\n\"\n"
     ".ascii \"		printzv $zvalue\\n\"\n"
     ".ascii \"		set $cv_idx = $cv_idx + 1\\n\"\n"
