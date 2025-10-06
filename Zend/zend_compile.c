@@ -8989,6 +8989,11 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			if (override_attribute) {
 				info->flags |= ZEND_ACC_OVERRIDE;
 			}
+
+			zend_attribute *no_serialize_attribute = zend_get_attribute_str(info->attributes, "noserialize", sizeof("noserialize")-1);
+			if (no_serialize_attribute) {
+				info->flags |= ZEND_ACC_NO_SERIALIZE;
+			}
 		}
 
 		CG(context).active_property_info_name = old_active_property_info_name;
