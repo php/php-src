@@ -25,8 +25,7 @@ for($i = 0; $i < 5; $i++) {
 
 var_dump($data);
 ?>
---EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 array(2) {
   [0]=>
   object(evilClass)#1 (0) {
