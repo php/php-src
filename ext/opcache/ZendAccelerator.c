@@ -5094,12 +5094,44 @@ static zend_result accel_finish_startup(void)
 
 		exit(ret == SUCCESS ? 0 : 1);
 	} else { /* parent */
-		int status;
+# ifdef HAVE_SIGPROCMASK
+		/* Interrupting the waitpid() call below with a signal would cause the
+		 * process to exit. This is fine when the signal disposition is set to
+		 * terminate the process, but not otherwise.
+		 * When running the apache2handler, preloading is performed in the
+		 * control process. SIGUSR1 and SIGHUP are used to tell the control
+		 * process to restart children. Exiting when these signals are received
+		 * would unexpectedly shutdown the server instead of restarting it.
+		 * Block the USR1 and HUP signals from being delivered during the
+		 * syscall when running the apache2handler SAPI, as these are not
+		 * supposed to terminate the process. See GH-20051. */
+		bool is_apache2handler = strcmp(sapi_module.name, "apache2handler") == 0;
+		sigset_t set, oldset;
+		if (is_apache2handler) {
+			if (sigemptyset(&set)
+					|| sigaddset(&set, SIGUSR1)
+					|| sigaddset(&set, SIGHUP)) {
+				ZEND_UNREACHABLE();
+			}
+			if (sigprocmask(SIG_BLOCK, &set, &oldset)) {
+				ZEND_UNREACHABLE();
+			}
+		}
+# endif
 
+		int status;
 		if (waitpid(pid, &status, 0) < 0) {
 			zend_shared_alloc_unlock();
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
 		}
+
+# ifdef HAVE_SIGPROCMASK
+		if (is_apache2handler) {
+			if (sigprocmask(SIG_SETMASK, &oldset, NULL)) {
+				ZEND_UNREACHABLE();
+			}
+		}
+# endif
 
 		if (ZCSG(preload_script)) {
 			preload_load(zend_map_ptr_static_last);
