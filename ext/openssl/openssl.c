@@ -1014,6 +1014,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *str_serial;
 	char *hex_serial;
 	char buf[256];
+	zval *altname = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
@@ -1033,7 +1034,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_string(return_value, "name", cert_name);
 	OPENSSL_free(cert_name);
 
-	php_openssl_add_assoc_name_entry(return_value, "subject", subject_name, useshortnames);
+	php_openssl_add_assoc_name_entry(return_value, "subject", subject_name, useshortnames ?
+					 PHP_OPENSSL_SHORT_NAME : PHP_OPENSSL_LONG_NAME);
 	/* hash as used in CA directories to lookup cert by subject name */
 	{
 		char buf[32];
@@ -1041,7 +1043,8 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_assoc_string(return_value, "hash", buf);
 	}
 
-	php_openssl_add_assoc_name_entry(return_value, "issuer", X509_get_issuer_name(cert), useshortnames);
+	php_openssl_add_assoc_name_entry(return_value, "issuer", X509_get_issuer_name(cert), useshortnames ?
+					 PHP_OPENSSL_SHORT_NAME : PHP_OPENSSL_LONG_NAME);
 	add_assoc_long(return_value, "version", X509_get_version(cert));
 
 	asn1_serial = X509_get_serialNumber(cert);
@@ -1133,7 +1136,7 @@ PHP_FUNCTION(openssl_x509_parse)
 			goto err_subitem;
 		}
 		if (nid == NID_subject_alt_name) {
-			if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
+			if (openssl_x509v3_subjectAltName(bio_out, extension, &altname) == 0) {
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
@@ -1150,6 +1153,9 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
+	if (altname != NULL) {
+	    add_assoc_zval(return_value, "subjectAlternativeName", altname);
+	}
 	if (cert_str) {
 		X509_free(cert);
 	}
@@ -1953,7 +1959,8 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	subject = X509_REQ_get_subject_name(csr);
 
 	array_init(return_value);
-	php_openssl_add_assoc_name_entry(return_value, NULL, subject, use_shortnames);
+	php_openssl_add_assoc_name_entry(return_value, NULL, subject, use_shortnames ?
+					 PHP_OPENSSL_SHORT_NAME : PHP_OPENSSL_LONG_NAME);
 
 	if (csr_str) {
 		X509_REQ_free(csr);
