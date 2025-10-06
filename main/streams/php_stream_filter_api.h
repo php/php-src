@@ -34,6 +34,11 @@
 #define PHP_STREAM_FILTER_WRITE	0x0002
 #define PHP_STREAM_FILTER_ALL	(PHP_STREAM_FILTER_READ | PHP_STREAM_FILTER_WRITE)
 
+#define PHP_STREAM_FILTER_SEEKABLE_NEVER  0
+#define PHP_STREAM_FILTER_SEEKABLE_START  1
+#define PHP_STREAM_FILTER_SEEKABLE_ALWAYS 2
+#define PHP_STREAM_FILTER_SEEKABLE_MASK   3
+
 typedef struct _php_stream_bucket			php_stream_bucket;
 typedef struct _php_stream_bucket_brigade	php_stream_bucket_brigade;
 
@@ -94,6 +99,26 @@ typedef struct _php_stream_filter_ops {
 
 } php_stream_filter_ops;
 
+typedef struct _php_stream_filter_extra_ops {
+	/* it should indicate whether seeking is supported and possibly modify internal state */
+	zend_result (*seek)(
+			php_stream *stream,
+			php_stream_filter *thisfilter,
+			zend_off_t offset,
+			int whence
+	);
+
+	/* this is a generic interface for possible further extensions */
+	zend_result (*set_option)(
+			php_stream *stream,
+			php_stream_filter *thisfilter,
+			int option,
+			void *value,
+			size_t size
+	);
+
+} php_stream_filter_extra_ops;
+
 typedef struct _php_stream_filter_chain {
 	php_stream_filter *head, *tail;
 
@@ -103,10 +128,12 @@ typedef struct _php_stream_filter_chain {
 
 struct _php_stream_filter {
 	const php_stream_filter_ops *fops;
+	const php_stream_filter_extra_ops *feops;
 	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
-	int is_persistent;
+	bool is_persistent;
+	uint8_t seekable;
 
 	/* link into stream and chain */
 	php_stream_filter_chain *chain;
@@ -128,8 +155,12 @@ PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool fini
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
+PHPAPI php_stream_filter *_php_stream_filter_alloc_ex(const php_stream_filter_ops *fops,
+		const php_stream_filter_extra_ops *feops, void *abstract, uint8_t persistent, uint16_t flags STREAMS_DC);
 END_EXTERN_C()
 #define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC)
+#define php_stream_filter_alloc_ex(fops, feops, thisptr, persistent) \
+	_php_stream_filter_alloc_ex((fops), (feops), (thisptr), (persistent) STREAMS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC)
 #define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter))
 #define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter))
