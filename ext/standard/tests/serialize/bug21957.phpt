@@ -28,8 +28,7 @@ echo $s . "\n";
 
 var_dump(unserialize($s));
 ?>
---EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 array(2) {
   ["one"]=>
   string(3) "ABC"
