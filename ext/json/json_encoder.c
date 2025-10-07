@@ -109,7 +109,6 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	bool encode_as_object = options & PHP_JSON_FORCE_OBJECT;
-	bool need_comma = false;
 	HashTable *myht, *prop_ht;
 	zend_refcounted *recursion_rc;
 
@@ -161,12 +160,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				continue;
 			}
 
-			if (need_comma) {
-				smart_str_appendc(buf, ',');
-			} else {
-				need_comma = true;
-			}
-
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 
@@ -186,6 +179,14 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 				return FAILURE;
 			}
+
+			smart_str_appendc(buf, ',');
+		}
+
+		bool empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		if (!empty) {
+			/* Drop the trailing comma. */
+			ZSTR_LEN(buf->s)--;
 		}
 
 		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
@@ -197,7 +198,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		}
 		--encoder->depth;
 
-		if (need_comma) {
+		if (!empty) {
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 		}
@@ -235,6 +236,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 	uint32_t i = myht ? zend_hash_num_elements(myht) : 0;
 
+	bool empty = true;
 	if (i > 0) {
 		zend_string *key;
 		zval *data;
@@ -246,12 +248,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 			if (!encode_as_object) {
 				ZEND_ASSERT(Z_TYPE_P(data) != IS_PTR);
-
-				if (need_comma) {
-					smart_str_appendc(buf, ',');
-				} else {
-					need_comma = true;
-				}
 
 				php_json_pretty_print_char(buf, options, '\n');
 				php_json_pretty_print_indent(buf, options, encoder);
@@ -276,11 +272,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						}
 					}
 
-					if (need_comma) {
-						smart_str_appendc(buf, ',');
-					} else {
-						need_comma = true;
-					}
 
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options, encoder);
@@ -293,12 +284,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						smart_str_appendl(buf, "\"\"", 2);
 					}
 				} else {
-					if (need_comma) {
-						smart_str_appendc(buf, ',');
-					} else {
-						need_comma = true;
-					}
-
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options, encoder);
 
@@ -319,7 +304,15 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				return FAILURE;
 			}
 			zval_ptr_dtor(&tmp);
+
+			smart_str_appendc(buf, ',');
 		} ZEND_HASH_FOREACH_END();
+
+		empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		if (!empty) {
+			/* Drop the trailing comma. */
+			ZSTR_LEN(buf->s)--;
+		}
 	}
 
 	PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
@@ -334,7 +327,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 	--encoder->depth;
 
 	/* Only keep closing bracket on same line for empty arrays/objects */
-	if (need_comma) {
+	if (!empty) {
 		php_json_pretty_print_char(buf, options, '\n');
 		php_json_pretty_print_indent(buf, options, encoder);
 	}
