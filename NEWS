@@ -208,6 +208,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19397 (mb_list_encodings() can cause crashes on shutdown).
     (nielsdos)
 
+- Curl:
+  . Fix curl build and test failures with version 8.16.
+    (nielsdos, ilutov, Jakub Zelenka)
+
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
     (Florian Engelhardt)
