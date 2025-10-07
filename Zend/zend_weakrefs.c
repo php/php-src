@@ -722,7 +722,7 @@ ZEND_METHOD(WeakMap, offsetGet)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY(return_value, zv);
+	RETURN_COPY_DEREF(zv);
 }
 
 ZEND_METHOD(WeakMap, offsetSet)
