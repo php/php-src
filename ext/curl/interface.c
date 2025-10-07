@@ -716,11 +716,11 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 
 #if LIBCURL_VERSION_NUM >= 0x072000
 /* {{{ curl_xferinfo */
-static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
 	php_curl_callback *t = ch->handlers.xferinfo;
-	size_t rval = 0;
+	int rval = 0;
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_xferinfo() called\n");
