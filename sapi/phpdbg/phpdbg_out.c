@@ -109,7 +109,7 @@ int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 				}
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (msgoutlen != FAILURE) {

@@ -57,7 +57,7 @@ static int get_int_val(zval *op) {
 			zend_string_free(Z_STR_P(op));
 			return val;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

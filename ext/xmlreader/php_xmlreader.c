@@ -102,7 +102,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;

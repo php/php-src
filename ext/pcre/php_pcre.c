@@ -2473,7 +2473,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 			case IS_NULL:
 				RETVAL_NULL();
 				goto error;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (EG(exception)) {

@@ -38,7 +38,7 @@ static zend_string *get_known_string_by_property_name(php_uri_property_name prop
 			return ZSTR_KNOWN(ZEND_STR_QUERY);
 		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return ZSTR_KNOWN(ZEND_STR_FRAGMENT);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

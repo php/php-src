@@ -180,7 +180,7 @@ static inline const php_uri_property_handler *php_uri_parser_property_handler_by
 			return &parser->property_handler.query;
 		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return &parser->property_handler.fragment;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

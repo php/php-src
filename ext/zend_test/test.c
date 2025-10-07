@@ -344,7 +344,7 @@ static ZEND_FUNCTION(zend_number_or_string)
 			RETURN_DOUBLE(Z_DVAL_P(input));
 		case IS_STRING:
 			RETURN_STR_COPY(Z_STR_P(input));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -368,7 +368,7 @@ static ZEND_FUNCTION(zend_number_or_string_or_null)
 			RETURN_DOUBLE(Z_DVAL_P(input));
 		case IS_STRING:
 			RETURN_STR_COPY(Z_STR_P(input));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

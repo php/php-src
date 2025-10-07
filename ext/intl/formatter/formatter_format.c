@@ -53,7 +53,7 @@ PHP_FUNCTION( numfmt_format )
 			case IS_DOUBLE:
 				type = FORMAT_TYPE_DOUBLE;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

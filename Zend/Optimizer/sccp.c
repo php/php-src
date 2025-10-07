@@ -1592,7 +1592,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				case ZEND_SHORT_CIRCUITING_CHAIN_EMPTY:
 					ZVAL_TRUE(&zv);
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
+				default: ZEND_UNREACHABLE();
 			}
 			SET_RESULT(result, &zv);
 			break;

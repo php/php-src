@@ -704,7 +704,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			node = tidyGetBody(obj->ptdoc->doc);
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (!node) {

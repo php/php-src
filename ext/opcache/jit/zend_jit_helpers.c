@@ -2285,7 +2285,7 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 				}
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	return 1;
 }

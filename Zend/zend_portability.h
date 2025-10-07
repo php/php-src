@@ -134,10 +134,6 @@
 # define ZEND_FALLTHROUGH ((void)0)
 #endif
 
-/* Only use this macro if you know for sure that all of the switches values
-   are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
-
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
 #else

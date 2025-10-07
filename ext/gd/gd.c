@@ -1750,7 +1750,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				RETURN_THROWS();
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	/* quality must fit in an int */
@@ -1780,7 +1780,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				}
 				gdImageGd2(im, fp, quality, type);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 		fflush(fp);
 		fclose(fp);
@@ -1806,7 +1806,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				}
 				gdImageGd2(im, tmp, quality, type);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		fseek(tmp, 0, SEEK_SET);
