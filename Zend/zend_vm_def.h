@@ -7275,7 +7275,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
-					ZEND_VM_C_GOTO(fe_fetch_w_exit);
+					ZEND_VM_C_GOTO(fe_fetch_w_exit_exc);
 				}
 				pos++;
 				value = &p->val;
@@ -7371,6 +7371,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 		}
 	} else {
 		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_value_name(array));
+ZEND_VM_C_LABEL(fe_fetch_w_exit_exc):
 		if (UNEXPECTED(EG(exception))) {
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
