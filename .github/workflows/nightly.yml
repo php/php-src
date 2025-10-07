@@ -95,7 +95,7 @@ jobs:
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
     runs-on: ubuntu-24.04
     container:
-      image: 'alpine:3.22.1'
+      image: 'alpine:3.22'
     steps:
       - name: git checkout
         uses: actions/checkout@v5
