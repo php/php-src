@@ -43,19 +43,14 @@ jobs:
   ALPINE:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container:
-      image: 'alpine:3.20.1'
+      image: 'alpine:3.22'
     steps:
       - name: git checkout
         uses: actions/checkout@v5
       - name: apk
         uses: ./.github/actions/apk
-      - name: LLVM 17 (ASAN-only)
-        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
-        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
-        run: |
-          apk add clang17 compiler-rt
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -70,8 +65,8 @@ jobs:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-17
-            CXX=clang++-17
+            CC=clang-20
+            CXX=clang++-20
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
