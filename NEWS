@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0RC2
+?? ??? ????, PHP 8.5.0RC3
+
+
+09 Oct 2025, PHP 8.5.0RC2
 
 - Core:
   . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
