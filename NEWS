@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.30
 
+- Curl:
+  . Fix curl build and test failures with version 8.16.
+    (nielsdos, ilutov, Jakub Zelenka)
+
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
     (Florian Engelhardt)
