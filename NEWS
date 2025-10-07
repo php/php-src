@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
   . Fixed bug GH-19984 (Double-free of EG(errors)/persistent_script->warnings on
     persist of already persisted file). (ilutov, Arnaud)
+  . Fixed bug GH-19889 (race condition in zend_runtime_jit(),
+    zend_jit_hot_func()). (Arnaud)
 
 - SOAP:
   . Fixed bug GH-19773 (SIGSEGV due to uninitialized soap_globals->lang_en).
