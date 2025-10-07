@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.14
+?? ??? ????, PHP 8.4.15
+
+
+09 Oct 2025, PHP 8.4.14
 
 - Core:
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
