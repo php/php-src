@@ -7,6 +7,9 @@ runs:
         set -x
 
         OPCACHE_TLS_TESTS_DEPS="clang gcc binutils-gold lld"
+        # compiler-rt provides libclang_rt.asan-x86_64.a for clang20
+        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.22
+        ASAN_DEPS="clang20 compiler-rt"
 
         apk update -q
         apk add \
@@ -52,8 +55,9 @@ runs:
             net-snmp-dev \
             openldap-dev \
             unixodbc-dev \
-            postgresql14-dev \
+            postgresql-dev \
             tzdata \
             musl-locales \
             musl-locales-lang \
-            $OPCACHE_TLS_TESTS_DEPS
+            $OPCACHE_TLS_TESTS_DEPS \
+            $ASAN_DEPS
