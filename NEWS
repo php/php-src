@@ -23,7 +23,8 @@ PHP                                                                        NEWS
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
-  . Fix curl build failure on macOS+curl 8.16. (nielsdos)
+  . Fix curl build and test failures with version 8.16.
+    (nielsdos, ilutov, Jakub Zelenka)
 
 - Date:
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
@@ -207,10 +208,6 @@ PHP                                                                        NEWS
 - MbString:
   . Fixed bug GH-19397 (mb_list_encodings() can cause crashes on shutdown).
     (nielsdos)
-
-- Curl:
-  . Fix curl build and test failures with version 8.16.
-    (nielsdos, ilutov, Jakub Zelenka)
 
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
