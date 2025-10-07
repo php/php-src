@@ -370,18 +370,25 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_addr = Z_OBJ_P(offset);
 	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
-	if (zv == NULL) {
-		if (type != BP_VAR_IS) {
-			zend_throw_error(NULL,
-				"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
+	if (type == BP_VAR_W || type == BP_VAR_RW) {
+		if (zv == NULL) {
+			zval value;
+			zend_weakref_register(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
+			ZVAL_NULL(&value);
+			zv = zend_hash_index_add_new(&wm->ht, zend_object_to_weakref_key(obj_addr), &value);
+		}
+		ZVAL_MAKE_REF(zv);
+	} else {
+		if (zv == NULL) {
+			if (type != BP_VAR_IS) {
+				zend_throw_error(NULL,
+					"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
+				return NULL;
+			}
 			return NULL;
 		}
-		return NULL;
 	}
 
-	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		ZVAL_MAKE_REF(zv);
-	}
 	return zv;
 }
 
