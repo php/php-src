@@ -61,6 +61,7 @@ PHP                                                                        NEWS
   . Casting floats that are not representable as ints now emits a warning.
     (Girgias)
   . Casting NAN to other types now emits a warning. (Girgias)
+  . Fixed bug GH-19934 (CGI with auto_globals_jit=0 causes uouv). (ilutov)
 
 - Bz2:
   . Fixed bug GH-19810 (Broken bzopen() stream mode validation). (ilutov)
