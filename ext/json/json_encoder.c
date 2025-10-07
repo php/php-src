@@ -243,6 +243,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		zend_ulong index;
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
+			bool need_dtor = false;
 			zval tmp;
 			ZVAL_UNDEF(&tmp);
 
@@ -264,6 +265,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
 							continue;
 						}
+						need_dtor = true;
 						data = zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
 						if (EG(exception)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
@@ -303,7 +305,9 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				zval_ptr_dtor(&tmp);
 				return FAILURE;
 			}
-			zval_ptr_dtor(&tmp);
+			if (UNEXPECTED(need_dtor)) {
+				zval_ptr_dtor(&tmp);
+			}
 
 			smart_str_appendc(buf, ',');
 		} ZEND_HASH_FOREACH_END();
