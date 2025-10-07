@@ -18,9 +18,13 @@ if ($curl_version['version_number'] < 0x074700) {
 --FILE--
 <?php
 
-function check_error(CurlHandle $ch) {
+function check_error(CurlHandle $ch, $expected = null) {
     if (curl_errno($ch) !== 0) {
-        echo "CURL ERROR: " . curl_errno($ch) . "\n";
+        $errno = curl_errno($ch);
+        if (!is_null($expected)) {
+            $errno = $errno == $expected ? 'EXPECTED' : "UNEXPECTED(A:$errno,E:$expected)";
+        }
+        echo "CURL ERROR: " . $errno . "\n";
     }
 }
 
@@ -109,7 +113,7 @@ try {
 
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
-    check_error($ch);
+    check_error($ch, curl_version()['version_number'] < 0x081000 ? 58 : 43);
     $ch = null;
 
     echo "\n";
@@ -203,7 +207,7 @@ bool(true)
 bool(true)
 bool(true)
 client cert subject not in response
-CURL ERROR: 58
+CURL ERROR: EXPECTED
 
 case 4: client cert and key from file
 bool(true)
