@@ -32,8 +32,14 @@
   do { \
     size_t _sz = (sz), _need = (need); \
     if (_sz < _need) { \
+      size_t _limit = sizeof(t) * DASM_SEC2POS(1); \
+      if (_need > _limit) { \
+        Dst_REF->status = DASM_S_NOMEM; \
+        return; \
+      } \
       if (_sz < 16) _sz = 16; \
       while (_sz < _need) _sz += _sz; \
+      if (_sz > _limit) _sz = _limit; \
       (p) = (t *)ir_mem_realloc((p), _sz); \
       (sz) = _sz; \
     } \

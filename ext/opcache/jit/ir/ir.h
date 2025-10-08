@@ -1032,6 +1032,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 #define IR_ERROR_UNSUPPORTED_CODE_RULE           3
 #define IR_ERROR_LINK                            4
 #define IR_ERROR_ENCODE                          5
+#define IR_ERROR_TOO_LARGE                       6
 
 /* IR Memmory Allocation */
 #ifndef ir_mem_malloc
