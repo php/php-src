@@ -74,9 +74,9 @@ array(2) {
   [0]=>
   array(2) {
     ["flags"]=>
-    UNKNOWN:0
+    string(13) "user_property"
     ["heap_elements"]=>
-    UNKNOWN:0
+    string(13) "user_property"
   }
   [1]=>
   array(2) {
