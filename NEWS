@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
+  . It is now possible to use reference assign on WeakMap without the key
+    needing to be present beforehand. (nielsdos)
 
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
