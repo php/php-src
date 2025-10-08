@@ -1167,7 +1167,7 @@ static zend_result spl_heap_unserialize_internal_state(HashTable *state_ht, spl_
 	return SUCCESS;
 }
 
-PHP_METHOD(SplPriorityQueue, __serialize)
+static void spl_heap_serialize_internal(INTERNAL_FUNCTION_PARAMETERS, bool is_pqueue)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 	zval props, state;
@@ -1185,12 +1185,16 @@ PHP_METHOD(SplPriorityQueue, __serialize)
 
 	array_init(return_value);
 
-	ZVAL_ARR(&props, zend_std_get_properties(&intern->std));
-	Z_TRY_ADDREF(props);
+	ZVAL_ARR(&props, zend_array_dup(zend_std_get_properties(&intern->std)));
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &props);
 
-	spl_heap_serialize_internal_state(&state, intern, true);
+	spl_heap_serialize_internal_state(&state, intern, is_pqueue);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &state);
+}
+
+PHP_METHOD(SplPriorityQueue, __serialize)
+{
+	spl_heap_serialize_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
 PHP_METHOD(SplPriorityQueue, __unserialize)
@@ -1241,28 +1245,7 @@ PHP_METHOD(SplPriorityQueue, __unserialize)
 
 PHP_METHOD(SplHeap, __serialize)
 {
-	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
-	zval props, state;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
-		RETURN_THROWS();
-	}
-
-	if (intern->heap->flags & SPL_HEAP_WRITE_LOCKED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Cannot serialize heap while it is being modified.", 0);
-		RETURN_THROWS();
-	}
-
-	array_init(return_value);
-
-	ZVAL_ARR(&props, zend_std_get_properties(&intern->std));
-	Z_TRY_ADDREF(props);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &props);
-
-	spl_heap_serialize_internal_state(&state, intern, false);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &state);
+	spl_heap_serialize_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
 PHP_METHOD(SplHeap, __unserialize)
