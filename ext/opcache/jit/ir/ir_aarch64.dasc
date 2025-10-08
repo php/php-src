@@ -658,16 +658,35 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 			flags = IR_OP2_MUST_BE_IN_REG;
 			constraints->tmp_regs[0] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 			n = 1;
+			insn = &ctx->ir_base[ref];
+			if (IR_IS_CONST_REF(insn->op2)) {
+				constraints->tmp_regs[1] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n = 2;
+			}
 			break;
 		case IR_VA_ARG:
 			flags = IR_USE_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG;
 			constraints->tmp_regs[0] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_SAVE_SUB_REF);
 			n = 1;
+			insn = &ctx->ir_base[ref];
+			if (IR_IS_CONST_REF(insn->op2)) {
+				constraints->tmp_regs[1] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n = 2;
+			}
 			break;
 		case IR_VA_COPY:
 			flags = IR_OP2_MUST_BE_IN_REG | IR_OP3_MUST_BE_IN_REG;
 			constraints->tmp_regs[0] = IR_TMP_REG(1, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 			n = 1;
+			insn = &ctx->ir_base[ref];
+			if (IR_IS_CONST_REF(insn->op2)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+			if (IR_IS_CONST_REF(insn->op3)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
 			break;
 	}
 	constraints->tmps_count = n;
@@ -6143,6 +6162,14 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	dasm_setup(&data.dasm_state, dasm_actions);
 	/* labels for each block + for each constant + rodata label + jmp_table label + for each entry + exit_table label */
 	dasm_growpc(&data.dasm_state, ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count + 1);
+	if (data.dasm_state->status != DASM_S_OK) {
+		IR_ASSERT(data.dasm_state->status == DASM_S_NOMEM);
+		dasm_free(&data.dasm_state);
+		ctx->data = NULL;
+		ctx->status = IR_ERROR_TOO_LARGE;
+		return NULL;
+	}
+
 	data.emit_constants = ir_bitset_malloc(ctx->consts_count);
 
 	if (!(ctx->flags & IR_SKIP_PROLOGUE)) {
@@ -6509,12 +6536,20 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 		return NULL;
 	}
 
-	ret = dasm_link(&data.dasm_state, size_ptr);
-	if (ret != DASM_S_OK) {
-		IR_ASSERT(0);
+	if (data.dasm_state->status != DASM_S_OK) {
+		IR_ASSERT(data.dasm_state->status == DASM_S_NOMEM);
 		dasm_free(&data.dasm_state);
 		ctx->data = NULL;
-		ctx->status = IR_ERROR_LINK;
+		ctx->status = IR_ERROR_TOO_LARGE;
+		return NULL;
+	}
+
+	ret = dasm_link(&data.dasm_state, size_ptr);
+	if (ret != DASM_S_OK) {
+		IR_ASSERT(ret == DASM_S_NOMEM);
+		dasm_free(&data.dasm_state);
+		ctx->data = NULL;
+		ctx->status = (ret == DASM_S_NOMEM) ? IR_ERROR_TOO_LARGE : IR_ERROR_LINK;
 		return NULL;
 	}
 	size = *size_ptr;

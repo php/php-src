@@ -238,6 +238,7 @@ IR_ALWAYS_INLINE ir_arena* ir_arena_create(size_t size)
 
 	IR_ASSERT(size >= IR_ALIGNED_SIZE(sizeof(ir_arena), 8));
 	arena = (ir_arena*)ir_mem_malloc(size);
+	if (UNEXPECTED(!arena))return NULL;
 	arena->ptr = (char*) arena + IR_ALIGNED_SIZE(sizeof(ir_arena), 8);
 	arena->end = (char*) arena + size;
 	arena->prev = NULL;
@@ -267,6 +268,7 @@ IR_ALWAYS_INLINE void* ir_arena_alloc(ir_arena **arena_ptr, size_t size)
 				(size_t)(arena->end - (char*) arena);
 		ir_arena *new_arena = (ir_arena*)ir_mem_malloc(arena_size);
 
+		if (UNEXPECTED(!new_arena)) return NULL;
 		ptr = (char*) new_arena + IR_ALIGNED_SIZE(sizeof(ir_arena), 8);
 		new_arena->ptr = (char*) new_arena + IR_ALIGNED_SIZE(sizeof(ir_arena), 8) + size;
 		new_arena->end = (char*) new_arena + arena_size;
