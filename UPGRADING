@@ -60,6 +60,9 @@ PHP 8.6 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Hash:
+  . The bundled version of xxHash was upgraded to 0.8.2.
+
 ========================================
 10. New Global Constants
 ========================================
