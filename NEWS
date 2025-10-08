@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC3
 
+- SPL:
+  . Fixed bug GH-20101 (SplHeap/SplPriorityQueue serialization
+    exposes INDIRECTs). (nielsdos)
 
 09 Oct 2025, PHP 8.5.0RC2
 
