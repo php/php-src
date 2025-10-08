@@ -2,8 +2,8 @@
 Multiple calls to DatePeriod iterator current() leak objects
 --FILE--
 <?php
-$start = new DateTime('2018-12-31 00:00:00');
-$end   = new DateTime('2019-12-31 00:00:00');
+$start = new DateTime('2018-12-31 00:00:00 UTC');
+$end   = new DateTime('2019-12-31 00:00:00 UTC');
 
 $interval = new DateInterval('P1M');
 $period = new DatePeriod($start, $interval, 1);
