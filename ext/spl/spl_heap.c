@@ -1257,6 +1257,10 @@ PHP_METHOD(SplHeap, __unserialize)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
 	if (zend_hash_num_elements(data) != 2) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
 		RETURN_THROWS();
@@ -1282,10 +1286,6 @@ PHP_METHOD(SplHeap, __unserialize)
 
 	if (spl_heap_unserialize_internal_state(Z_ARRVAL_P(state), intern, ZEND_THIS, false) != SUCCESS) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
-		RETURN_THROWS();
-	}
-
-	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
