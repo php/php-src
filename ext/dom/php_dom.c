@@ -1369,9 +1369,7 @@ PHP_MINFO_FUNCTION(dom)
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOM_API_VERSION);
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
-#ifdef LIBXML_HTML_ENABLED
 	php_info_print_table_row(2, "HTML Support", "enabled");
-#endif
 #ifdef LIBXML_XPATH_ENABLED
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
@@ -2709,20 +2707,10 @@ xmlChar *php_dom_libxml_fix_file_path(xmlChar *path)
 
 xmlDocPtr php_dom_create_html_doc(void)
 {
-#ifdef LIBXML_HTML_ENABLED
 	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
 	if (EXPECTED(lxml_doc)) {
 		lxml_doc->dict = xmlDictCreate();
 	}
-#else
-	/* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
-	 * This code mimics the behaviour. */
-	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-	if (EXPECTED(lxml_doc)) {
-		lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-		lxml_doc->dict = xmlDictCreate();
-	}
-#endif
 	return lxml_doc;
 }
 

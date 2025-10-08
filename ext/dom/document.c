@@ -2040,8 +2040,6 @@ PHP_METHOD(DOMDocument, relaxNGValidateSource)
 
 #endif
 
-#ifdef LIBXML_HTML_ENABLED
-
 static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *source;
@@ -2233,8 +2231,6 @@ PHP_METHOD(DOMDocument, saveHTML)
 
 }
 /* }}} end dom_document_save_html */
-
-#endif  /* defined(LIBXML_HTML_ENABLED) */
 
 /* {{{ Register extended class used to create base node type */
 static void dom_document_register_node_class(INTERNAL_FUNCTION_PARAMETERS, bool modern)
