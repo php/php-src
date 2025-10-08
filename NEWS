@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20085 (Assertion failure when combining lazy object
     get_properties exception with foreach loop). (nielsdos)
 
+- Random:
+  . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
+
 09 Oct 2025, PHP 8.4.14
 
 - Core:
