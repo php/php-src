@@ -32,6 +32,47 @@ env:
   CC: ccache gcc
   CXX: ccache g++
 jobs:
+  ALPINE:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
+    runs-on: ubuntu-24.04
+    container:
+      image: 'alpine:3.22'
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-20
+            CXX=clang++-20
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-alpine
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            --asan -x
+            -d opcache.enable_cli=1
   LINUX_X64:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:

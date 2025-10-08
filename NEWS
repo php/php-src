@@ -5,10 +5,16 @@ PHP                                                                        NEWS
 - Core:
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
+  . It is now possible to use reference assign on WeakMap without the key
+    needing to be present beforehand. (nielsdos)
 
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
+
+- Standard:
+  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
+    while COW violation flag is still set). (alexandre-daubois)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

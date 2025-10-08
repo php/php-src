@@ -9375,15 +9375,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	if (ce->__serialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
-		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
-			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
-	if (ce->__unserialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP))) {
-		zend_error(E_DEPRECATED, "The __wakeup() serialization magic method has been deprecated."
-			" Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
-
 	/* We currently don't early-bind classes that implement interfaces or use traits */
 	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
 #ifdef ZEND_OPCACHE_SHM_REATTACHMENT
@@ -12071,7 +12062,7 @@ bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 	}
 	switch (type) {
 		case _IS_BOOL:
-			ZVAL_BOOL(result, zval_is_true(op1));
+			ZVAL_BOOL(result, zend_is_true(op1));
 			return true;
 		case IS_LONG:
 			if (Z_TYPE_P(op1) == IS_DOUBLE && !ZEND_DOUBLE_FITS_LONG(Z_DVAL_P((op1)))) {
