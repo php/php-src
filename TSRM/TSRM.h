@@ -43,7 +43,9 @@ typedef uintptr_t tsrm_uintptr_t;
 
 #ifdef TSRM_WIN32
 # ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
-#  define WIN32_LEAN_AND_MEAN
+#  ifndef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN
+#  endif
 # endif
 #else
 # include <pthread.h>
