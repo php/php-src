@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20073 (Assertion failure in WeakMap offset operations on
     reference). (nielsdos)
 
+- Random:
+  . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
+
 23 Oct 2025, PHP 8.3.27
 
 - Core:
