@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (nielsdos)
 
+- Hash:
+  . Upgrade xxHash to 0.8.2. (timwolla)
+
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
