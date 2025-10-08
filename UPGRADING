@@ -84,3 +84,6 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- JSON:
+  . Improve performance of encoding arrays and objects.
