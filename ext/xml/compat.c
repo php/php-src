@@ -465,7 +465,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		/* Note: sax2 flag will be set due to the magic number in `initialized` in php_xml_compat_handlers */
 		ZEND_ASSERT(parser->parser->sax->initialized == XML_SAX2_MAGIC);
 		parser->use_namespace = 1;
-		parser->_ns_separator = xmlStrdup(sep);
+		parser->_ns_separator = BAD_CAST estrdup((const char *) sep);
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt
 		so must be set in the handlers */
@@ -718,7 +718,7 @@ XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
 		if (parser->_ns_separator) {
-			xmlFree(parser->_ns_separator);
+			efree(parser->_ns_separator);
 		}
 	}
 	if (parser->parser->myDoc) {
