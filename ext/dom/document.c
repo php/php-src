@@ -1448,8 +1448,12 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		options |= XML_PARSE_RECOVER;
 	}
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(ctxt, options);
+#else
 	php_libxml_sanitize_parse_ctxt_options(ctxt);
 	xmlCtxtUseOptions(ctxt, options);
+#endif
 
 	if (recover) {
 		old_error_reporting = EG(error_reporting);
@@ -2086,10 +2090,16 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ctxt->sax->error = php_libxml_ctx_error;
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
+#if LIBXML_VERSION >= 21400
+	if (options) {
+		htmlCtxtSetOptions(ctxt, (int)options);
+	}
+#else
 	php_libxml_sanitize_parse_ctxt_options(ctxt);
 	if (options) {
 		htmlCtxtUseOptions(ctxt, (int)options);
 	}
+#endif
 	htmlParseDocument(ctxt);
 	xmlDocPtr newdoc = ctxt->myDoc;
 	htmlFreeParserCtxt(ctxt);
