@@ -22,16 +22,18 @@
 
 #ifdef LIBXML_EXPAT_COMPAT
 
-static void
-qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
+static xmlChar *
+qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI)
 {
 	if (URI) {
-			/* Use libxml functions otherwise its memory deallocation is screwed up */
-			*qualified = xmlStrdup(URI);
-			*qualified = xmlStrncat(*qualified, parser->_ns_separator, 1);
-			*qualified = xmlStrncat(*qualified, name, xmlStrlen(name));
+		smart_string str = {0};
+		smart_string_appends(&str, (const char *) URI);
+		smart_string_appends(&str, (const char *) parser->_ns_separator);
+		smart_string_appends(&str, (const char *) name);
+		smart_string_0(&str);
+		return BAD_CAST str.c;
 	} else {
-		*qualified = xmlStrdup(name);
+		return BAD_CAST estrdup((const char *) name);
 	}
 }
 
@@ -151,7 +153,7 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 		}
 		return;
 	}
-	qualify_namespace(parser, name, URI, &qualified_name);
+	qualified_name = qualify_namespace(parser, name, URI);
 
 	if (attributes != NULL) {
 		xmlChar    *qualified_name_attr = NULL;
@@ -160,12 +162,12 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 		for (i = 0; i < nb_attributes; i += 1) {
 
 			if (attributes[y+1] != NULL) {
-				qualify_namespace(parser, attributes[y] , attributes[y + 2], &qualified_name_attr);
+				qualified_name_attr = qualify_namespace(parser, attributes[y] , attributes[y + 2]);
 			} else {
-				qualified_name_attr = xmlStrdup(attributes[y]);
+				qualified_name_attr = BAD_CAST estrdup((const char *) attributes[y]);
 			}
 			attrs[z] = qualified_name_attr;
-			attrs[z + 1] = xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3]));
+			attrs[z + 1] = BAD_CAST estrndup((const char *) attributes[y + 3], attributes[y + 4] - attributes[y + 3]);
 			z += 2;
 			y += 5;
 		}
@@ -175,11 +177,11 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attrs);
 	if (attrs) {
 		for (i = 0; i < z; i++) {
-			xmlFree(attrs[i]);
+			efree(attrs[i]);
 		}
 		efree(attrs);
 	}
-	xmlFree(qualified_name);
+	efree(qualified_name);
 }
 
 static void
@@ -223,11 +225,11 @@ end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, 
 		return;
 	}
 
-	qualify_namespace(parser, name, URI,  &qualified_name);
+	qualified_name = qualify_namespace(parser, name, URI);
 
 	parser->h_end_element(parser->user, (const XML_Char *) qualified_name);
 
-	xmlFree(qualified_name);
+	efree(qualified_name);
 }
 
 static void
