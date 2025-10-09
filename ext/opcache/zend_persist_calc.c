@@ -479,10 +479,8 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			}
 		}
 		if (ce->default_static_members_table) {
-		    int i;
-
 			ADD_SIZE(sizeof(zval) * ce->default_static_members_count);
-			for (i = 0; i < ce->default_static_members_count; i++) {
+			for (uint32_t i = 0; i < ce->default_static_members_count; i++) {
 				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
 					zend_persist_zval_calc(&ce->default_static_members_table[i]);
 				}
