@@ -1432,16 +1432,16 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
 
-	if (validate && ! (options & XML_PARSE_DTDVALID)) {
+	if (validate) {
 		options |= XML_PARSE_DTDVALID;
 	}
-	if (resolve_externals && ! (options & XML_PARSE_DTDATTR)) {
+	if (resolve_externals) {
 		options |= XML_PARSE_DTDATTR;
 	}
-	if (substitute_ent && ! (options & XML_PARSE_NOENT)) {
+	if (substitute_ent) {
 		options |= XML_PARSE_NOENT;
 	}
-	if (keep_blanks == 0 && ! (options & XML_PARSE_NOBLANKS)) {
+	if (keep_blanks == 0) {
 		options |= XML_PARSE_NOBLANKS;
 	}
 	if (recover) {
