@@ -93,63 +93,57 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 
 	if (parser->h_start_element == NULL) {
 	 	if (parser->h_default) {
-
+			smart_string qualified_name = {0};
+			smart_string_appendc(&qualified_name, '<');
 			if (prefix) {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", prefix, xmlStrlen(prefix));
-				qualified_name = xmlStrncat(qualified_name, (xmlChar *)":", 1);
-				qualified_name = xmlStrncat(qualified_name, name, xmlStrlen(name));
-			} else {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
+				smart_string_appends(&qualified_name, (const char *) prefix);
+				smart_string_appendc(&qualified_name, ':');
 			}
+			smart_string_appends(&qualified_name, (const char *) name);
 
 			if (namespaces) {
 				int i, j;
 				for (i = 0,j = 0;j < nb_namespaces;j++) {
-					int ns_len;
-					char *ns_string, *ns_prefix, *ns_url;
-
-					ns_prefix = (char *) namespaces[i++];
-					ns_url = (char *) namespaces[i++];
+					const char *ns_prefix = (const char *) namespaces[i++];
+					const char *ns_url = (const char *) namespaces[i++];
 
 					if (ns_prefix) {
-						ns_len = spprintf(&ns_string, 0, " xmlns:%s=\"%s\"", ns_prefix, ns_url);
+						smart_string_appends(&qualified_name, " xmlns:");
+						smart_string_appends(&qualified_name, ns_prefix);
+						smart_string_appends(&qualified_name, "=\"");
 					} else {
-						ns_len = spprintf(&ns_string, 0, " xmlns=\"%s\"", ns_url);
+						smart_string_appends(&qualified_name, " xmlns=\"");
 					}
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)ns_string, ns_len);
 
-					efree(ns_string);
+					smart_string_appends(&qualified_name, ns_url);
+					smart_string_appendc(&qualified_name, '"');
 				}
 			}
 
 			if (attributes) {
 				for (i = 0; i < nb_attributes; i += 1) {
-					int att_len;
-					char *att_string, *att_name, *att_value, *att_prefix, *att_valueend;
-
-					att_name = (char *) attributes[y++];
-					att_prefix = (char *)attributes[y++];
+					const char *att_name = (const char *) attributes[y++];
+					const char *att_prefix = (const char *)attributes[y++];
 					y++;
-					att_value = (char *)attributes[y++];
-					att_valueend = (char *)attributes[y++];
+					const char *att_value = (const char *)attributes[y++];
+					const char *att_valueend = (const char *)attributes[y++];
 
+					smart_string_appendc(&qualified_name, ' ');
 					if (att_prefix) {
-						att_len = spprintf(&att_string, 0, " %s:%s=\"", att_prefix, att_name);
-					} else {
-						att_len = spprintf(&att_string, 0, " %s=\"", att_name);
+						smart_string_appends(&qualified_name, att_prefix);
+						smart_string_appendc(&qualified_name, ':');
 					}
+					smart_string_appends(&qualified_name, att_name);
+					smart_string_appends(&qualified_name, "=\"");
 
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_value, att_valueend - att_value);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"\"", 1);
-
-					efree(att_string);
+					smart_string_appendl(&qualified_name, att_value, att_valueend - att_value);
+					smart_string_appendc(&qualified_name, '"');
 				}
 
 			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
+			smart_string_appendc(&qualified_name, '>');
+			parser->h_default(parser->user, (const XML_Char *) qualified_name.c, qualified_name.len);
+			smart_string_free(&qualified_name);
 		}
 		return;
 	}
