@@ -11488,6 +11488,11 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 {
 	zend_ast *class_ast = (*ast_ptr)->child[0];
 	zend_compile_const_expr_class_reference(class_ast);
+
+	zend_ast *args_ast = (*ast_ptr)->child[1];
+	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+	}
 }
 
 static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
