@@ -18,6 +18,7 @@
 #if defined(HAVE_LIBXML) && (defined(HAVE_XML) || defined(HAVE_XMLRPC)) && !defined(HAVE_LIBEXPAT)
 #include "expat_compat.h"
 #include "ext/libxml/php_libxml.h"
+#include "Zend/zend_smart_string.h"
 
 #ifdef LIBXML_EXPAT_COMPAT
 
@@ -38,31 +39,31 @@ static void
 start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
 {
 	XML_Parser  parser = (XML_Parser) user;
-	xmlChar    *qualified_name = NULL;
 
 	if (parser->h_start_element == NULL) {
 		if (parser->h_default) {
 			int attno = 0;
+			smart_string qualified_name = {0};
 
-			qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
+			smart_string_appendc(&qualified_name, '<');
+			smart_string_appends(&qualified_name, (const char *) name);
+
 			if (attributes) {
 				while (attributes[attno] != NULL) {
-					int att_len;
-					char *att_string, *att_name, *att_value;
+					const char *att_name = (const char *) attributes[attno++];
+					const char *att_value = (const char *) attributes[attno++];
 
-					att_name = (char *)attributes[attno++];
-					att_value = (char *)attributes[attno++];
-
-					att_len = spprintf(&att_string, 0, " %s=\"%s\"", att_name, att_value);
-
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					efree(att_string);
+					smart_string_appendc(&qualified_name, ' ');
+					smart_string_appends(&qualified_name, att_name);
+					smart_string_appends(&qualified_name, "=\"");
+					smart_string_appends(&qualified_name, att_value);
+					smart_string_appendc(&qualified_name, '"');
 				}
-
 			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
+			smart_string_appendc(&qualified_name, '>');
+			smart_string_0(&qualified_name);
+			parser->h_default(parser->user, (const XML_Char *) qualified_name.c, qualified_name.len);
+			smart_string_free(&qualified_name);
 		}
 		return;
 	}
