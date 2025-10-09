@@ -2,10 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC3
 
+- Core:
+  . Fixed bug GH-20113 (Missing new Foo(...) error in constant expressions).
+    (ilutov)
+
 - FPM:
   . Fixed bug GH-19817 (Decode SCRIPT_FILENAME issue in php 8.5).
     (Jakub Zelenka)
-
 
 - SPL:
   . Fixed bug GH-20101 (SplHeap/SplPriorityQueue serialization
