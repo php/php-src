@@ -37,15 +37,29 @@
 
 #define MYSQLI_GET_MYSQL(statusval) \
 MYSQL *p; \
-if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
-	if (!quiet) { \
-		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
+{ \
+	MYSQLI_RESOURCE *my_res = obj->ptr; \
+	MY_MYSQL *my_mysql; \
+	if (!my_res || !(my_mysql = (MY_MYSQL *)my_res->ptr)) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
 	} \
-	return FAILURE; \
-} else { \
-	CHECK_STATUS(statusval, quiet);\
-	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
-}
+	if (my_res->status < statusval ) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "Property access is not allowed yet"); \
+		} \
+		return FAILURE; \
+	} \
+	p = (MYSQL *)my_mysql->mysql;\
+	if (!p) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
+	} \
+} \
 
 #define MYSQLI_GET_RESULT(statusval) \
 MYSQL_RES *p; \
