@@ -159,7 +159,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
@@ -174,7 +174,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	}\
 }
 
-#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
@@ -190,7 +190,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), (__check)); \
 	if (!(__ptr)->mysql) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(Z_OBJCE_P(__id)->name)); \
 		RETURN_THROWS(); \
@@ -199,7 +199,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), (__check)); \
 	ZEND_ASSERT((__ptr)->stmt && "Missing statement?"); \
 }
 

@@ -391,7 +391,7 @@ PHP_FUNCTION(mysqli_fetch_column)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &col_no) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES*, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES*, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (col_no < 0) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
@@ -423,7 +423,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &mode) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (!mode || (mode & ~MYSQLI_BOTH)) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");
