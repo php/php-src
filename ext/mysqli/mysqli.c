@@ -136,10 +136,6 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
 	}
-	if (!Z_ISUNDEF(mysql->li_read)) {
-		zval_ptr_dtor(&(mysql->li_read));
-		ZVAL_UNDEF(&mysql->li_read);
-	}
 }
 /* }}} */
 

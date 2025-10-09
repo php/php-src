@@ -39,31 +39,13 @@ enum mysqli_status {
 };
 
 typedef struct {
-	char		*val;
-	zend_ulong		buflen;
-	zend_ulong		output_len;
-	zend_ulong		type;
-} VAR_BUFFER;
-
-typedef struct {
-	unsigned int	var_cnt;
-	VAR_BUFFER		*buf;
-	zval			*vars;
-	my_bool			*is_null;
-} BIND_BUFFER;
-
-typedef struct {
 	MYSQL_STMT	*stmt;
-	BIND_BUFFER	param;
-	BIND_BUFFER	result;
 	char		*query;
 } MY_STMT;
 
 typedef struct {
 	MYSQL			*mysql;
 	zend_string		*hash_key;
-	zval			li_read;
-	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	bool		persistent;
 	int				async_result_fetch_type;
