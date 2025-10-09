@@ -290,17 +290,19 @@ notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_id
 	parser->h_notation_decl(parser->user, notation, NULL, sys_id, pub_id);
 }
 
-static void
-build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *comment_len)
+static xmlChar *
+build_comment(const xmlChar *data, size_t data_len, size_t *comment_len)
 {
 	*comment_len = data_len + 7;
 
-	*comment = xmlMalloc(*comment_len + 1);
-	memcpy(*comment, "<!--", 4);
-	memcpy(*comment + 4, data, data_len);
-	memcpy(*comment + 4 + data_len, "-->", 3);
+	xmlChar *comment = emalloc(*comment_len + 1);
+	memcpy(comment, "<!--", 4);
+	memcpy(comment + 4, data, data_len);
+	memcpy(comment + 4 + data_len, "-->", 3);
 
-	(*comment)[*comment_len] = '\0';
+	comment[*comment_len] = '\0';
+
+	return comment;
 }
 
 static void
@@ -309,12 +311,11 @@ comment_handler(void *user, const xmlChar *comment)
 	XML_Parser parser = (XML_Parser) user;
 
 	if (parser->h_default) {
-		xmlChar *d_comment;
 		size_t   d_comment_len;
 
-		build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
+		xmlChar *d_comment = build_comment(comment, (size_t) xmlStrlen(comment), &d_comment_len);
 		parser->h_default(parser->user, d_comment, d_comment_len);
-		xmlFree(d_comment);
+		efree(d_comment);
 	}
 }
 
