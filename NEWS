@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20085 (Assertion failure when combining lazy object
     get_properties exception with foreach loop). (nielsdos)
 
+- FPM:
+  . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
+    execution). (Jakub Zelenka, txuna)
+
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
