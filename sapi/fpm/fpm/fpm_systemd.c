@@ -4,7 +4,6 @@
 #include <systemd/sd-daemon.h>
 
 #include "fpm.h"
-#include "fpm_clock.h"
 #include "fpm_worker_pool.h"
 #include "fpm_scoreboard.h"
 #include "zlog.h"
