@@ -319,15 +319,16 @@ comment_handler(void *user, const xmlChar *comment)
 	}
 }
 
-static void
-build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_len)
+static xmlChar *
+build_entity(const xmlChar *name, size_t len, size_t *entity_len)
 {
 	*entity_len = len + 2;
-	*entity = xmlMalloc(*entity_len + 1);
-	(*entity)[0] = '&';
-	memcpy(*entity+1, name, len);
-	(*entity)[len+1] = ';';
-	(*entity)[*entity_len] = '\0';
+	xmlChar *entity = emalloc(*entity_len + 1);
+	entity[0] = '&';
+	memcpy(entity + 1, name, len);
+	entity[len + 1] = ';';
+	entity[*entity_len] = '\0';
+	return entity;
 }
 
 static void
@@ -362,12 +363,11 @@ get_entity(void *user, const xmlChar *name)
 			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
 				/* Predefined entities will expand unless no cdata handler is present */
 				if (parser->h_default && ! (ret && ret->etype == XML_INTERNAL_PREDEFINED_ENTITY && parser->h_cdata)) {
-					xmlChar *entity;
 					size_t   len;
 
-					build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
+					xmlChar *entity = build_entity(name, (size_t) xmlStrlen(name), &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
-					xmlFree(entity);
+					efree(entity);
 				} else {
 					/* expat will not expand internal entities if default handler is present otherwise
 					it will expand and pass them to cdata handler */
