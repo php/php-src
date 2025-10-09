@@ -47,93 +47,76 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 int fpm_status_export_to_zval(zval *status)
 {
-	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
+	struct fpm_scoreboard_s *scoreboard_p;
+	struct fpm_scoreboard_proc_s *proc_p;
 	zval fpm_proc_stats, fpm_proc_stat;
 	time_t now_epoch;
 	struct timeval duration, now;
 	double cpu;
 	int i;
 
-	scoreboard_p = fpm_scoreboard_acquire(NULL, 1);
-	if (!scoreboard_p) {
-		zlog(ZLOG_NOTICE, "[pool (unknown)] status: scoreboard already in use.");
-		return -1;
-	}
-
-	/* copy the scoreboard not to bother other processes */
-	scoreboard = *scoreboard_p;
-	struct fpm_scoreboard_proc_s *procs = safe_emalloc(
-			sizeof(struct fpm_scoreboard_proc_s), scoreboard.nprocs, 0);
-
-	struct fpm_scoreboard_proc_s *proc_p;
-	for(i=0; i<scoreboard.nprocs; i++) {
-		proc_p = fpm_scoreboard_proc_acquire(scoreboard_p, i, 1);
-		if (!proc_p){
-			procs[i].used=-1;
-			continue;
-		}
-		procs[i] = *proc_p;
-		fpm_scoreboard_proc_release(proc_p);
-	}
-	fpm_scoreboard_release(scoreboard_p);
+	scoreboard_p = fpm_scoreboard_copy(NULL, 1);
 
 	now_epoch = time(NULL);
 	fpm_clock_get(&now);
 
 	array_init(status);
-	add_assoc_string(status, "pool", scoreboard.pool);
-	add_assoc_string(status, "process-manager", PM2STR(scoreboard.pm));
-	add_assoc_long(status, "start-time", scoreboard.start_epoch);
-	add_assoc_long(status, "start-since", now_epoch - scoreboard.start_epoch);
-	add_assoc_long(status, "accepted-conn", scoreboard.requests);
-	add_assoc_long(status, "listen-queue", scoreboard.lq);
-	add_assoc_long(status, "max-listen-queue", scoreboard.lq_max);
-	add_assoc_long(status, "listen-queue-len", scoreboard.lq_len);
-	add_assoc_long(status, "idle-processes", scoreboard.idle);
-	add_assoc_long(status, "active-processes", scoreboard.active);
-	add_assoc_long(status, "total-processes", scoreboard.idle + scoreboard.active);
-	add_assoc_long(status, "max-active-processes", scoreboard.active_max);
-	add_assoc_long(status, "max-children-reached", scoreboard.max_children_reached);
-	add_assoc_long(status, "slow-requests", scoreboard.slow_rq);
-	add_assoc_long(status, "memory-peak", scoreboard.memory_peak);
+	add_assoc_string(status, "pool",  scoreboard_p->pool);
+	add_assoc_string(status, "process-manager", PM2STR( scoreboard_p->pm));
+	add_assoc_long(status, "start-time",  scoreboard_p->start_epoch);
+	add_assoc_long(status, "start-since", now_epoch -  scoreboard_p->start_epoch);
+	add_assoc_long(status, "accepted-conn",  scoreboard_p->requests);
+	add_assoc_long(status, "listen-queue",  scoreboard_p->lq);
+	add_assoc_long(status, "max-listen-queue",  scoreboard_p->lq_max);
+	add_assoc_long(status, "listen-queue-len",  scoreboard_p->lq_len);
+	add_assoc_long(status, "idle-processes",  scoreboard_p->idle);
+	add_assoc_long(status, "active-processes",  scoreboard_p->active);
+	add_assoc_long(status, "total-processes",  scoreboard_p->idle +  scoreboard_p->active);
+	add_assoc_long(status, "max-active-processes",  scoreboard_p->active_max);
+	add_assoc_long(status, "max-children-reached",  scoreboard_p->max_children_reached);
+	add_assoc_long(status, "slow-requests",  scoreboard_p->slow_rq);
+	add_assoc_long(status, "memory-peak",  scoreboard_p->memory_peak);
 
 	array_init(&fpm_proc_stats);
-	for(i=0; i<scoreboard.nprocs; i++) {
-		if (!procs[i].used) {
+	for(i = 0; i < scoreboard_p->nprocs; i++) {
+		proc_p = &scoreboard_p->procs[i];
+		if (!proc_p->used) {
 			continue;
 		}
-		proc_p = &procs[i];
 		/* prevent NaN */
-		if (procs[i].cpu_duration.tv_sec == 0 && procs[i].cpu_duration.tv_usec == 0) {
+		if (proc_p->cpu_duration.tv_sec == 0 && proc_p->cpu_duration.tv_usec == 0) {
 			cpu = 0.;
 		} else {
-			cpu = (procs[i].last_request_cpu.tms_utime + procs[i].last_request_cpu.tms_stime + procs[i].last_request_cpu.tms_cutime + procs[i].last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (procs[i].cpu_duration.tv_sec + procs[i].cpu_duration.tv_usec / 1000000.) * 100.;
+			cpu = (proc_p->last_request_cpu.tms_utime + proc_p->last_request_cpu.tms_stime + proc_p->last_request_cpu.tms_cutime +
+					proc_p->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() /
+					(proc_p->cpu_duration.tv_sec + proc_p->cpu_duration.tv_usec / 1000000.) * 100.;
 		}
 
 		array_init(&fpm_proc_stat);
-		add_assoc_long(&fpm_proc_stat, "pid", procs[i].pid);
-		add_assoc_string(&fpm_proc_stat, "state", fpm_request_get_stage_name(procs[i].request_stage));
-		add_assoc_long(&fpm_proc_stat, "start-time", procs[i].start_epoch);
-		add_assoc_long(&fpm_proc_stat, "start-since", now_epoch - procs[i].start_epoch);
-		add_assoc_long(&fpm_proc_stat, "requests", procs[i].requests);
-		if (procs[i].request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = procs[i].duration;
+		add_assoc_long(&fpm_proc_stat, "pid", proc_p->pid);
+		add_assoc_string(&fpm_proc_stat, "state", fpm_request_get_stage_name(proc_p->request_stage));
+		add_assoc_long(&fpm_proc_stat, "start-time", proc_p->start_epoch);
+		add_assoc_long(&fpm_proc_stat, "start-since", now_epoch - proc_p->start_epoch);
+		add_assoc_long(&fpm_proc_stat, "requests", proc_p->requests);
+		if (proc_p->request_stage == FPM_REQUEST_ACCEPTING) {
+			duration = proc_p->duration;
 		} else {
-			timersub(&now, &procs[i].accepted, &duration);
+			timersub(&now, &proc_p->accepted, &duration);
 		}
 		add_assoc_long(&fpm_proc_stat, "request-duration", duration.tv_sec * 1000000UL + duration.tv_usec);
-		add_assoc_string(&fpm_proc_stat, "request-method", procs[i].request_method[0] != '\0' ? procs[i].request_method : "-");
-		add_assoc_string(&fpm_proc_stat, "request-uri", procs[i].request_uri);
-		add_assoc_string(&fpm_proc_stat, "query-string", procs[i].query_string);
-		add_assoc_long(&fpm_proc_stat, "request-length", procs[i].content_length);
-		add_assoc_string(&fpm_proc_stat, "user", procs[i].auth_user[0] != '\0' ? procs[i].auth_user : "-");
-		add_assoc_string(&fpm_proc_stat, "script", procs[i].script_filename[0] != '\0' ? procs[i].script_filename : "-");
-		add_assoc_double(&fpm_proc_stat, "last-request-cpu", procs[i].request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.);
-		add_assoc_long(&fpm_proc_stat, "last-request-memory", procs[i].request_stage == FPM_REQUEST_ACCEPTING ? procs[i].memory : 0);
+		add_assoc_string(&fpm_proc_stat, "request-method", proc_p->request_method[0] != '\0' ? proc_p->request_method : "-");
+		add_assoc_string(&fpm_proc_stat, "request-uri", proc_p->request_uri);
+		add_assoc_string(&fpm_proc_stat, "query-string", proc_p->query_string);
+		add_assoc_long(&fpm_proc_stat, "request-length", proc_p->content_length);
+		add_assoc_string(&fpm_proc_stat, "user", proc_p->auth_user[0] != '\0' ? proc_p->auth_user : "-");
+		add_assoc_string(&fpm_proc_stat, "script", proc_p->script_filename[0] != '\0' ? proc_p->script_filename : "-");
+		add_assoc_double(&fpm_proc_stat, "last-request-cpu", proc_p->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.);
+		add_assoc_long(&fpm_proc_stat, "last-request-memory", proc_p->request_stage == FPM_REQUEST_ACCEPTING ? proc_p->memory : 0);
 		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
 	}
 	add_assoc_zval(status, "procs", &fpm_proc_stats);
-	efree(procs);
+
+	fpm_scoreboard_free_copy(scoreboard_p);
 
 	return 0;
 }
