@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
 
+- Opcache:
+  . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
+    preloading). (Arnaud, welcomycozyhom)
+
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
