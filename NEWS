@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
     to work). (nielsdos)
 
+- Standard:
+  . Fix shm corruption with coercion in options of unserialize(). (nielsdos)
+
 - XMLReader:
   . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
     (nielsdos)
