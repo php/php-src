@@ -452,8 +452,12 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		return NULL;
 	}
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_NOENT);
+#else
 	php_libxml_sanitize_parse_ctxt_options(parser->parser);
 	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_NOENT);
+#endif
 
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
