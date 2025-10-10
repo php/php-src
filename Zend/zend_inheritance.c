@@ -915,10 +915,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 {
 	smart_str str = {0};
 
-	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-		smart_str_appends(&str, "& ");
-	}
-
 	if (fptr->common.scope) {
 		if (fptr->common.scope->ce_flags & ZEND_ACC_ANON_CLASS) {
 			/* cut off on NULL byte ... class@anonymous */
@@ -927,6 +923,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			smart_str_appendl(&str, ZSTR_VAL(fptr->common.scope->name), ZSTR_LEN(fptr->common.scope->name));
 		}
 		smart_str_appends(&str, "::");
+	}
+
+	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		smart_str_appendc(&str, '&');
 	}
 
 	smart_str_append(&str, fptr->common.function_name);
