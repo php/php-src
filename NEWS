@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
     execution). (Jakub Zelenka, txuna)
 
+- Opcache:
+  . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
+    (Arnaud)
+
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
