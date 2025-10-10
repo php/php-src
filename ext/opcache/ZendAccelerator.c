@@ -4524,16 +4524,6 @@ static void preload_load(size_t orig_map_ptr_static_last)
 		}
 	}
 
-	if (EG(zend_constants)) {
-		EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
-	}
-	if (EG(function_table)) {
-		EG(persistent_functions_count) = EG(function_table)->nNumUsed;
-	}
-	if (EG(class_table)) {
-		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
-	}
-
 	size_t old_map_ptr_last = CG(map_ptr_last);
 	if (zend_map_ptr_static_last != ZCSG(map_ptr_static_last) || old_map_ptr_last != ZCSG(map_ptr_last)) {
 		CG(map_ptr_last) = ZCSG(map_ptr_last);
@@ -4802,6 +4792,12 @@ static zend_result accel_preload(const char *config, bool in_child)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		preload_load(orig_map_ptr_static_last);
+
+		/* Update persistent counts, as shutdown will discard anything past
+		 * that, and these tables are aliases to global ones at this point. */
+		EG(persistent_functions_count) = EG(function_table)->nNumUsed;
+		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+		EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
 
 		/* Store individual scripts with unlinked classes */
 		HANDLE_BLOCK_INTERRUPTIONS();
