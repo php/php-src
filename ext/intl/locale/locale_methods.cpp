@@ -341,7 +341,7 @@ U_CFUNC PHP_NAMED_FUNCTION(zif_locale_set_default)
 * common code shared by get_primary_language,get_script or get_region or get_variant
 * result = 0 if error, 1 if successful , -1 if no value
 */
-static zend_string* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
+static zend_string* get_icu_value_internal( const char* loc_name , const char* tag_name, int* result , int fromParseLocale)
 {
 	zend_string* tag_value	    = NULL;
 	int32_t      tag_value_len  = 512;
@@ -466,7 +466,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 * Gets the value from ICU , called when PHP userspace function is called
 * common code shared by get_primary_language,get_script or get_region or get_variant
 */
-static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
+static void get_icu_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 
 	char*          loc_name        	= NULL;
@@ -544,7 +544,7 @@ U_CFUNC PHP_FUNCTION(locale_get_primary_language )
 /* {{{
  * common code shared by display_xyz functions to  get the value from ICU
  }}} */
-static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
+static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*          loc_name        	= NULL;
 	size_t         loc_name_len    	= 0;
@@ -801,7 +801,7 @@ U_CFUNC PHP_FUNCTION(locale_canonicalize)
 * returns 1 if successful , -1 if not found ,
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char* key_name)
 {
 	zval *ele_value;
 
@@ -826,7 +826,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 /* {{{ append_prefix , appends the prefix needed
 * e.g. private adds 'x'
 */
-static void add_prefix(smart_str* loc_name, char* key_name)
+static void add_prefix(smart_str* loc_name, const char* key_name)
 {
 	if( strncmp(key_name , LOC_PRIVATE_TAG , 7) == 0 ){
 		smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
@@ -842,7 +842,7 @@ static void add_prefix(smart_str* loc_name, char* key_name)
 * returns 1 if successful , -1 if not found ,
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, const char* key_name)
 {
 	zval	*ele_value;
 	int 	isFirstSubtag 	= 0;
@@ -1053,7 +1053,7 @@ static zend_string* get_private_subtags(const char* loc_name)
 /* }}} */
 
 /* {{{ code used by locale_parse */
-static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
+static int add_array_entry(const char* loc_name, zval* hash_arr, const char* key_name)
 {
 	zend_string*   key_value 	= NULL;
 	char*   cur_key_name	= NULL;
@@ -1141,11 +1141,12 @@ U_CFUNC PHP_FUNCTION(locale_parse)
 	}
 	else{
 		/* Not grandfathered */
-		add_array_entry( loc_name , return_value , LOC_LANG_TAG);
-		add_array_entry( loc_name , return_value , LOC_SCRIPT_TAG);
-		add_array_entry( loc_name , return_value , LOC_REGION_TAG);
-		add_array_entry( loc_name , return_value , LOC_VARIANT_TAG);
-		add_array_entry( loc_name , return_value , LOC_PRIVATE_TAG);
+		const char *c_loc_name = const_cast<char *>(loc_name);
+		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_LANG_TAG));
+		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_SCRIPT_TAG));
+		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_REGION_TAG));
+		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_VARIANT_TAG));
+		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_PRIVATE_TAG));
 	}
 }
 /* }}} */
@@ -1182,7 +1183,7 @@ U_CFUNC PHP_FUNCTION(locale_get_all_variants)
 	}
 	else {
 	/* Call ICU variant */
-		variant = get_icu_value_internal( loc_name , LOC_VARIANT_TAG , &result ,0);
+		variant = get_icu_value_internal( const_cast<char *>(loc_name) , LOC_VARIANT_TAG , &result ,0);
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
 			token = php_strtok_r( variant->val , DELIMITER , &saved_ptr);
@@ -1278,14 +1279,14 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 	if( boolCanonical ){
 		/* canonicalize loc_range */
-		can_loc_range=get_icu_value_internal( loc_range , LOC_CANONICALIZE_TAG , &result , 0);
+		can_loc_range=get_icu_value_internal( const_cast<char *>(loc_range) , LOC_CANONICALIZE_TAG , &result , 0);
 		if( result <=0) {
 			intl_error_set(NULL, status, "unable to canonicalize loc_range");
 			RETURN_FALSE;
 		}
 
 		/* canonicalize lang_tag */
-		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
+		can_lang_tag = get_icu_value_internal( const_cast<char *>(lang_tag) , LOC_CANONICALIZE_TAG , &result ,  0);
 		if( result <=0) {
 			intl_error_set(NULL, status, "unable to canonicalize lang_tag");
 			RETURN_FALSE;
@@ -1447,7 +1448,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	/* Canonicalize array elements */
 	if(canonicalize) {
 		for(i=0; i<cur_arr_len; i++) {
-			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
+			lang_tag = get_icu_value_internal(const_cast<char *>(cur_arr[i*2]), LOC_CANONICALIZE_TAG, &result, 0);
 			if(result != 1 || lang_tag == NULL || !lang_tag->val[0]) {
 				if(lang_tag) {
 					zend_string_release_ex(lang_tag, 0);
@@ -1468,7 +1469,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	if(canonicalize) {
 		/* Canonicalize the loc_range */
-		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
+		can_loc_range = get_icu_value_internal(const_cast<char *>(loc_range), LOC_CANONICALIZE_TAG, &result , 0);
 		if( result != 1 || can_loc_range == NULL || !can_loc_range->val[0]) {
 			/* Error */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize loc_range");
