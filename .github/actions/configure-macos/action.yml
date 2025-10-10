@@ -29,7 +29,6 @@ runs:
           --with-pgsql="$BREW_OPT"/libpq \
           --with-pdo-pgsql="$BREW_OPT"/libpq \
           --with-pdo-sqlite \
-          --without-pear \
           --enable-gd \
           --with-jpeg \
           --with-webp \
