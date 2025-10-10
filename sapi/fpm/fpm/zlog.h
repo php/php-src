@@ -77,6 +77,7 @@ struct zlog_stream {
 	unsigned int decorate:1;
 	unsigned int is_stdout:1;
 	unsigned int over_limit:1;
+	unsigned int use_external_logger:1;
 	int fd;
 	int line;
 	int child_pid;
