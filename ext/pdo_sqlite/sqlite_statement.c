@@ -335,7 +335,6 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
-			/* TODO Check this is correct */
 			ZEND_FALLTHROUGH;
 		case SQLITE_TEXT:
 			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_STRING));
