@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
+- XMLReader:
+  . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
+    (nielsdos)
+
 23 Oct 2025, PHP 8.3.27
 
 - Core:
