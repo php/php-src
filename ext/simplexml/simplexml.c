@@ -1225,8 +1225,14 @@ static HashTable *sxe_get_properties(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+/* This custom handler exists because the var_dump adds a pseudo "@attributes" key. */
 static HashTable * sxe_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
+	/* As we have a custom implementation, we must manually check for overrides. */
+	if (object->ce->__debugInfo) {
+		return zend_std_get_debug_info(object, is_temp);
+	}
+
 	*is_temp = 1;
 	return sxe_get_prop_hash(object, 1);
 }
