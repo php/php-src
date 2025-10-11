@@ -27,17 +27,17 @@ extern "C" {
 /* {{{ Get formatter attribute value. */
 U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 {
-	zend_long zattribute, value;
+	zend_long lattribute, value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
-		&object, NumberFormatter_ce_ptr, &zattribute ) == FAILURE )
+		&object, NumberFormatter_ce_ptr, &lattribute ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
-	UNumberFormatAttribute attribute = static_cast<UNumberFormatAttribute>(zattribute);
+	UNumberFormatAttribute attribute = static_cast<UNumberFormatAttribute>(lattribute);
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
@@ -91,7 +91,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 /* {{{ Get formatter attribute value. */
 U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 {
-	zend_long   zattribute;
+	zend_long   lattribute;
 	UChar   value_buf[64];
 	int32_t value_buf_size = USIZE( value_buf );
 	UChar*  value  = value_buf;
@@ -100,7 +100,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
-		&object, NumberFormatter_ce_ptr, &zattribute ) == FAILURE )
+		&object, NumberFormatter_ce_ptr, &lattribute ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
@@ -108,7 +108,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	UNumberFormatTextAttribute attribute = static_cast<UNumberFormatTextAttribute>(zattribute);
+	UNumberFormatTextAttribute attribute = static_cast<UNumberFormatTextAttribute>(lattribute);
 
 	length = unum_getTextAttribute( FORMATTER_OBJECT(nfo), attribute, value, value_buf_size, &INTL_DATA_ERROR_CODE(nfo) );
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= value_buf_size) {
@@ -130,13 +130,13 @@ U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 /* {{{ Get formatter attribute value. */
 U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 {
-	zend_long zattribute;
+	zend_long lattribute;
 	zval *value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oln",
-		&object, NumberFormatter_ce_ptr, &zattribute, &value ) == FAILURE)
+		&object, NumberFormatter_ce_ptr, &lattribute, &value ) == FAILURE)
 	{
 		RETURN_THROWS();
 	}
@@ -144,7 +144,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	UNumberFormatAttribute attribute = static_cast<UNumberFormatAttribute>(zattribute);
+	UNumberFormatAttribute attribute = static_cast<UNumberFormatAttribute>(lattribute);
 
 	switch(attribute) {
 		case UNUM_PARSE_INT_ONLY:
@@ -220,7 +220,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
 /* {{{ Get formatter symbol value. */
 U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 {
-	zend_long zsymbol;
+	zend_long lsymbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
 	uint32_t length = USIZE(value_buf);
@@ -228,12 +228,12 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
-		&object, NumberFormatter_ce_ptr, &zsymbol ) == FAILURE )
+		&object, NumberFormatter_ce_ptr, &lsymbol ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
-	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(zsymbol);
+	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
 	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
@@ -263,7 +263,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 /* {{{ Set formatter symbol value. */
 U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 {
-	zend_long  zsymbol;
+	zend_long  lsymbol;
 	char*      value     = NULL;
 	size_t     value_len = 0;
 	UChar*     svalue  = 0;
@@ -272,12 +272,12 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ols",
-		&object, NumberFormatter_ce_ptr, &zsymbol, &value, &value_len ) == FAILURE )
+		&object, NumberFormatter_ce_ptr, &lsymbol, &value, &value_len ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
-	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(zsymbol);
+	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
 	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
@@ -380,7 +380,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
 U_CFUNC PHP_FUNCTION( numfmt_get_locale )
 {
 	zend_long type = ULOC_ACTUAL_LOCALE;
-	char* loc;
+	const char* loc;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -393,7 +393,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_locale )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	loc = const_cast<char *>(unum_getLocaleByType(FORMATTER_OBJECT(nfo), static_cast<ULocDataLocaleType>(type), &INTL_DATA_ERROR_CODE(nfo)));
+	loc = unum_getLocaleByType(FORMATTER_OBJECT(nfo), static_cast<ULocDataLocaleType>(type), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting locale" );
 	RETURN_STRING(loc);
 }

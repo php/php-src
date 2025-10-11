@@ -140,7 +140,7 @@ U_CFUNC PHP_FUNCTION( datefmt_set_pattern )
 /* {{{ Get formatter locale. */
 U_CFUNC PHP_FUNCTION( datefmt_get_locale )
 {
-	char *loc;
+	const char *loc;
 	zend_long  loc_type =ULOC_ACTUAL_LOCALE;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -156,7 +156,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_locale )
 	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	loc = const_cast<char *>(udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), static_cast<ULocDataLocaleType>(loc_type),&INTL_DATA_ERROR_CODE(dfo)));
+	loc = udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), static_cast<ULocDataLocaleType>(loc_type),&INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting locale");
 	RETURN_STRING(loc);
 }
