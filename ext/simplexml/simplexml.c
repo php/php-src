@@ -2028,7 +2028,7 @@ PHP_METHOD(SimpleXMLElement, key)
 	}
 
 	curnode = intern->node->node;
-	RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
+	RETURN_STRINGL_FAST((char*)curnode->name, xmlStrlen(curnode->name));
 }
 /* }}} */
 
