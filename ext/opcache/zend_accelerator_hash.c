@@ -138,7 +138,7 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 	return entry;
 }
 
-static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, zend_string *key, int data)
+static zend_always_inline void* zend_accel_hash_find_ex(const zend_accel_hash *accel_hash, zend_string *key, bool data)
 {
 	zend_ulong index;
 	zend_accel_hash_entry *entry;
@@ -176,20 +176,20 @@ static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_h
 /* Returns the data associated with key on success
  * Returns NULL if data doesn't exist
  */
-void* zend_accel_hash_find(zend_accel_hash *accel_hash, zend_string *key)
+void* zend_accel_hash_find(const zend_accel_hash *accel_hash, zend_string *key)
 {
-	return zend_accel_hash_find_ex(accel_hash, key, 1);
+	return zend_accel_hash_find_ex(accel_hash, key, true);
 }
 
 /* Returns the hash entry associated with key on success
  * Returns NULL if it doesn't exist
  */
-zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, zend_string *key)
+zend_accel_hash_entry* zend_accel_hash_find_entry(const zend_accel_hash *accel_hash, zend_string *key)
 {
-	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(accel_hash, key, 0);
+	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(accel_hash, key, false);
 }
 
-int zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
+zend_result zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
 {
 	zend_ulong hash_value;
 	zend_ulong index;

@@ -205,7 +205,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 		return;
 	}
 
-	zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
+	const zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
 	while (p<end) {
 		free(p->path);
 		p++;
@@ -336,10 +336,10 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
+bool zend_accel_blacklist_is_blacklisted(const zend_blacklist *blacklist, const char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
-	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
+	const zend_regexp_list *regexp_list_it = blacklist->regexp_list;
 	pcre2_match_context *mctx = php_pcre_mctx();
 
 	if (regexp_list_it == NULL) {
@@ -363,7 +363,7 @@ bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
+void zend_accel_blacklist_apply(const zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
 {
 	int i;
 
