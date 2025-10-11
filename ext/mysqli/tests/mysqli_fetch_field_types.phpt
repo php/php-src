@@ -94,6 +94,7 @@ require_once 'skipifconnectfailure.inc';
         MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
         MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',
         MYSQLI_TYPE_GEOMETRY => 'MYSQLI_TYPE_GEOMETRY - TODO add testing',
+        MYSQLI_TYPE_JSON => array('JSON', '[]'),
     );
 
     $datatypes[MYSQLI_TYPE_NEWDECIMAL] = array('DECIMAL', '1.1');
