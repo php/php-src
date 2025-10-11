@@ -4513,28 +4513,27 @@ PHP_METHOD(PharFileInfo, __construct)
 }
 /* }}} */
 
-#define PHAR_ENTRY_OBJECT() \
+#define PHAR_ENTRY_OBJECT_EX(throw) \
 	zval *zobj = ZEND_THIS; \
 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
 	if (!entry_obj->entry) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Cannot call method on an uninitialized PharFileInfo object"); \
-		RETURN_THROWS(); \
+		if (throw) { \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
+				"Cannot call method on an uninitialized PharFileInfo object"); \
+		} \
+		return; \
 	}
+
+#define PHAR_ENTRY_OBJECT() PHAR_ENTRY_OBJECT_EX(true)
 
 /* {{{ clean up directory-based entry objects */
 PHP_METHOD(PharFileInfo, __destruct)
 {
-	zval *zobj = ZEND_THIS;
-	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!entry_obj->entry) {
-		return;
-	}
+	PHAR_ENTRY_OBJECT_EX(false);
 
 	if (entry_obj->entry->is_temp_dir) {
 		if (entry_obj->entry->filename) {
