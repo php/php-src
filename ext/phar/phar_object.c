@@ -2770,6 +2770,7 @@ valid_alias:
 	phar_flush(phar_obj->archive, NULL, 0, 0, &error);
 
 	if (error) {
+		pefree(phar_obj->archive->alias, phar_obj->archive->is_persistent);
 		phar_obj->archive->alias = oldalias;
 		phar_obj->archive->alias_len = oldalias_len;
 		phar_obj->archive->is_temporary_alias = old_temp;
