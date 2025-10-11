@@ -703,11 +703,6 @@ PHP_METHOD(Phar, webPhar)
 			goto cleanup_fail;
 		}
 
-		if (Z_TYPE_P(rewrite_fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-			goto cleanup_fail;
-		}
-
 		switch (Z_TYPE(retval)) {
 			case IS_STRING:
 				efree(entry);
