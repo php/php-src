@@ -3174,12 +3174,14 @@ static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 	if (!PHAR_G(has_bz2)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 			*(int *) argument = 0;
+			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
 	if (!PHAR_G(has_zlib)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 			*(int *) argument = 0;
+			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
