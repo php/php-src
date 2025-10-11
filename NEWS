@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
     (Arnaud)
 
+- Phar:
+  . Fix memory leak of argument in webPhar. (nielsdos)
+
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
