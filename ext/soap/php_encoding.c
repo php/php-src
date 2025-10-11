@@ -1797,9 +1797,9 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
 				return model_array_element(tmp);
 			} ZEND_HASH_FOREACH_END();
+
+			break;
 		}
-		/* TODO Check this is correct */
-		ZEND_FALLTHROUGH;
 		case XSD_CONTENT_GROUP: {
 			return model_array_element(model->u.group->model);
 		}
