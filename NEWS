@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fix memory leak of argument in webPhar. (nielsdos)
   . Fix memory leak when setAlias() fails. (nielsdos)
+  . Fix memory leak in phar_parse_zipfile() error handling. (nielsdos)
 
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
