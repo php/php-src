@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06c88dc2fb5582a6d21c11aee6ac0a0538e70cbc */
+ * Stub hash: 3da8d1222740f381602c0ec738fe6aa9dca56c8e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -79,6 +79,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement___debugInfo, 0, 0, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -116,6 +119,7 @@ ZEND_METHOD(SimpleXMLElement, addChild);
 ZEND_METHOD(SimpleXMLElement, addAttribute);
 ZEND_METHOD(SimpleXMLElement, getName);
 ZEND_METHOD(SimpleXMLElement, __toString);
+ZEND_METHOD(SimpleXMLElement, __debugInfo);
 ZEND_METHOD(SimpleXMLElement, count);
 ZEND_METHOD(SimpleXMLElement, rewind);
 ZEND_METHOD(SimpleXMLElement, valid);
@@ -148,6 +152,7 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, addAttribute, arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, getName, arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, __toString, arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, __debugInfo, arginfo_class_SimpleXMLElement___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, count, arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, rewind, arginfo_class_SimpleXMLElement_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, valid, arginfo_class_SimpleXMLElement_valid, ZEND_ACC_PUBLIC)

@@ -1226,17 +1226,11 @@ static HashTable *sxe_get_properties(zend_object *object) /* {{{ */
 /* }}} */
 
 /* This custom handler exists because the var_dump adds a pseudo "@attributes" key. */
-static HashTable * sxe_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+PHP_METHOD(SimpleXMLElement, __debugInfo)
 {
-	/* As we have a custom implementation, we must manually check for overrides. */
-	if (object->ce->__debugInfo) {
-		return zend_std_get_debug_info(object, is_temp);
-	}
-
-	*is_temp = 1;
-	return sxe_get_prop_hash(object, 1);
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_ARR(sxe_get_prop_hash(Z_OBJ_P(ZEND_THIS), 1));
 }
-/* }}} */
 
 static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 {
@@ -2739,7 +2733,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.compare = sxe_objects_compare;
 	sxe_object_handlers.cast_object = sxe_object_cast;
 	sxe_object_handlers.count_elements = sxe_count_elements;
-	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
 
