@@ -111,7 +111,7 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
 
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "Websites and Infrastructure team");
-		/* www., wiki., windows., master., and others, I guess pecl. too? */
+		/* www., wiki., windows., master., and others */
 		CREDIT_LINE("PHP Websites Team", "Rasmus Lerdorf, Hannes Magnusson, Philip Olson, Lukas Kahwe Smith, Pierre-Alain Joye, Kalle Sommer Nielsen, Peter Cowburn, Adam Harvey, Ferenc Kovacs, Levi Morrison");
 		CREDIT_LINE("Event Maintainers", "Damien Seguy, Daniel P. Brown");
 		/* Mirroring */
