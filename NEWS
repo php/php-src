@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20073 (Assertion failure in WeakMap offset operations on
     reference). (nielsdos)
 
+- DOM:
+  . Partially fixed bug GH-16317 (DOM classes do not allow
+    __debugInfo() overrides to work). (nielsdos)
+
 - FPM:
   . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
     execution). (Jakub Zelenka, txuna)
