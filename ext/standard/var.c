@@ -1366,14 +1366,14 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		}
 		if(class_hash && Z_TYPE_P(classes) == IS_ARRAY) {
 			zval *entry;
-			zend_string *lcname, *tmp_str, *str;
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
-				str = zval_get_tmp_string(entry, &tmp_str);
-				lcname = zend_string_tolower(str);
+				/* Note: cannot use zval_get_tmp_string() here as we need to keep it in class_hash for longer than this loop. */
+				zend_string *str = zval_get_string(entry);
+				zend_string *lcname = zend_string_tolower(str);
 				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release_ex(lcname, 0);
-				zend_tmp_string_release(tmp_str);
+		        zend_string_release_ex(lcname, false);
+				zend_string_release_ex(str, false);
 			} ZEND_HASH_FOREACH_END();
 
 			/* Exception during string conversion. */
