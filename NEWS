@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
+- SimpleXML:
+  . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
+    to work). (nielsdos)
+
 - XMLReader:
   . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
     (nielsdos)
