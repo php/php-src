@@ -287,6 +287,12 @@ safe:
 							}
 
 							plc->quoted = stmt->dbh->methods->quoter(stmt->dbh, buf, param_type);
+							if (plc->quoted == NULL) {
+								/* bork */
+								ret = -1;
+								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								goto clean_up;
+							}
 						}
 					}
 
