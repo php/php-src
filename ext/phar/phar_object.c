@@ -897,7 +897,7 @@ PHP_METHOD(Phar, mungServer)
 	phar_request_initialize();
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
-
+		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			RETURN_THROWS();
@@ -911,8 +911,10 @@ PHP_METHOD(Phar, mungServer)
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_NAME;
 		} else if (zend_string_equals_literal(Z_STR_P(data), "SCRIPT_FILENAME")) {
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
+		} else {
+			zend_throw_exception_ex(phar_ce_PharException, 0, "Invalid value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			RETURN_THROWS();
 		}
-		// TODO Warning for invalid value?
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
