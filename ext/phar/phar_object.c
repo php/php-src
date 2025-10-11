@@ -2782,7 +2782,7 @@ valid_alias:
 	zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, phar_obj->archive);
 
 	if (oldalias) {
-		efree(oldalias);
+		pefree(oldalias, phar_obj->archive->is_persistent);
 	}
 
 	RETURN_TRUE;
