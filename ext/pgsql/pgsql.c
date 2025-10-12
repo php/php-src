@@ -2886,18 +2886,17 @@ PHP_FUNCTION(pg_lo_import)
 	pgsql_link_handle *link;
 
 	/* Deprecated signature with implicit connection */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "P|z", &file_in, &oid) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "P|z", &file_in, &oid) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|z", &pgsql_link, pgsql_link_ce, &file_in, &oid) == FAILURE) {
+			RETURN_THROWS();
+		}
+		link = Z_PGSQL_LINK_P(pgsql_link);
+		CHECK_PGSQL_LINK(link);
+	} else {
+		/* Load implicit connection */
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-		goto fn_body;
 	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|z", &pgsql_link, pgsql_link_ce, &file_in, &oid) == FAILURE) {
-		RETURN_THROWS();
-	}
-	link = Z_PGSQL_LINK_P(pgsql_link);
-	CHECK_PGSQL_LINK(link);
-
-fn_body:
 
 	if (php_check_open_basedir(ZSTR_VAL(file_in))) {
 		RETURN_FALSE;
