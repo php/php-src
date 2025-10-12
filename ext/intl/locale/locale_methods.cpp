@@ -1574,8 +1574,6 @@ U_CFUNC PHP_FUNCTION(locale_lookup)
 /* }}} */
 
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
-/* }}} */
-/* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
 U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 {
 	UEnumeration *available;
