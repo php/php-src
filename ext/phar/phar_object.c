@@ -697,11 +697,14 @@ PHP_METHOD(Phar, webPhar)
 		rewrite_fci.retval = &retval;
 
 		if (FAILURE == zend_call_function(&rewrite_fci, &rewrite_fcc)) {
+			zval_ptr_dtor_str(&params);
 			if (!EG(exception)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: failed to call rewrite callback");
 			}
 			goto cleanup_fail;
 		}
+
+		zval_ptr_dtor_str(&params);
 
 		if (Z_TYPE_P(rewrite_fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
@@ -728,7 +731,6 @@ PHP_METHOD(Phar, webPhar)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 
 cleanup_fail:
-				zval_ptr_dtor(&params);
 				if (free_pathinfo) {
 					efree(path_info);
 				}
