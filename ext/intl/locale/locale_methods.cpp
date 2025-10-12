@@ -1141,12 +1141,11 @@ U_CFUNC PHP_FUNCTION(locale_parse)
 	}
 	else{
 		/* Not grandfathered */
-		const char *c_loc_name = const_cast<char *>(loc_name);
-		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_LANG_TAG));
-		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_SCRIPT_TAG));
-		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_REGION_TAG));
-		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_VARIANT_TAG));
-		add_array_entry( c_loc_name , return_value , const_cast<char *>(LOC_PRIVATE_TAG));
+		add_array_entry( loc_name , return_value , LOC_LANG_TAG);
+		add_array_entry( loc_name , return_value , LOC_SCRIPT_TAG);
+		add_array_entry( loc_name , return_value , LOC_REGION_TAG);
+		add_array_entry( loc_name , return_value , LOC_VARIANT_TAG);
+		add_array_entry( loc_name , return_value , LOC_PRIVATE_TAG);
 	}
 }
 /* }}} */
@@ -1183,7 +1182,7 @@ U_CFUNC PHP_FUNCTION(locale_get_all_variants)
 	}
 	else {
 	/* Call ICU variant */
-		variant = get_icu_value_internal( const_cast<char *>(loc_name) , LOC_VARIANT_TAG , &result ,0);
+		variant = get_icu_value_internal( loc_name , LOC_VARIANT_TAG , &result ,0);
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
 			token = php_strtok_r( variant->val , DELIMITER , &saved_ptr);
@@ -1279,14 +1278,14 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 	if( boolCanonical ){
 		/* canonicalize loc_range */
-		can_loc_range=get_icu_value_internal( const_cast<char *>(loc_range) , LOC_CANONICALIZE_TAG , &result , 0);
+		can_loc_range=get_icu_value_internal( loc_range , LOC_CANONICALIZE_TAG , &result , 0);
 		if( result <=0) {
 			intl_error_set(NULL, status, "unable to canonicalize loc_range");
 			RETURN_FALSE;
 		}
 
 		/* canonicalize lang_tag */
-		can_lang_tag = get_icu_value_internal( const_cast<char *>(lang_tag) , LOC_CANONICALIZE_TAG , &result ,  0);
+		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
 		if( result <=0) {
 			intl_error_set(NULL, status, "unable to canonicalize lang_tag");
 			RETURN_FALSE;
@@ -1448,7 +1447,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	/* Canonicalize array elements */
 	if(canonicalize) {
 		for(i=0; i<cur_arr_len; i++) {
-			lang_tag = get_icu_value_internal(const_cast<char *>(cur_arr[i*2]), LOC_CANONICALIZE_TAG, &result, 0);
+			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
 			if(result != 1 || lang_tag == NULL || !lang_tag->val[0]) {
 				if(lang_tag) {
 					zend_string_release_ex(lang_tag, 0);
@@ -1469,7 +1468,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	if(canonicalize) {
 		/* Canonicalize the loc_range */
-		can_loc_range = get_icu_value_internal(const_cast<char *>(loc_range), LOC_CANONICALIZE_TAG, &result , 0);
+		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
 		if( result != 1 || can_loc_range == NULL || !can_loc_range->val[0]) {
 			/* Error */
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize loc_range");
