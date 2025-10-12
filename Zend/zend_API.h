@@ -951,10 +951,6 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 	return known_length != strlen(s);
 }
 
-/* Compatibility with PHP 8.1 and below */
-#define CHECK_ZVAL_NULL_PATH(p) zend_str_has_nul_byte(Z_STR_P(p))
-#define CHECK_NULL_PATH(p, l) zend_char_has_nul_byte(p, l)
-
 #define ZVAL_STRINGL(z, s, l) do {				\
 		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
 	} while (0)

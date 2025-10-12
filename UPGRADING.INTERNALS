@@ -22,6 +22,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     added, given the primary flags were running out of bits.
   . The zval_is_true() alias of zend_is_true() has been removed. Call
     zend_is_true() directly instead.
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
 
 ========================
 2. Build system changes
