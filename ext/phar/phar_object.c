@@ -34,6 +34,17 @@ static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 
+#define PHAR_FETCH_INTERNAL_EX(zv) (void *)((char *) Z_OBJ_P(zv) - Z_OBJ_P(zv)->handlers->offset);
+#define PHAR_FETCH_INTERNAL() PHAR_FETCH_INTERNAL_EX(ZEND_THIS)
+
+#define PHAR_ARCHIVE_OBJECT() \
+	phar_archive_object *phar_obj = PHAR_FETCH_INTERNAL(); \
+	if (!phar_obj->archive) { \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
+			"Cannot call method on an uninitialized Phar object"); \
+		RETURN_THROWS(); \
+	}
+
 static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{ */
 {
 	char *ext;
@@ -1119,11 +1130,11 @@ PHP_METHOD(Phar, __construct)
 	zend_long format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
-	zval *zobj = ZEND_THIS, arg1, arg2;
+	zval arg1, arg2;
 
-	phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	phar_obj = PHAR_FETCH_INTERNAL();
 
-	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data);
+	is_data = instanceof_function(Z_OBJCE_P(ZEND_THIS), phar_ce_data);
 
 	if (is_data) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
@@ -1223,7 +1234,7 @@ PHP_METHOD(Phar, __construct)
 	ZVAL_LONG(&arg2, flags);
 
 	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
-		Z_OBJ_P(zobj), NULL, &arg1, &arg2);
+		Z_OBJ_P(ZEND_THIS), NULL, &arg1, &arg2);
 
 	zval_ptr_dtor(&arg1);
 
@@ -1353,20 +1364,10 @@ PHP_METHOD(Phar, unlinkArchive)
 }
 /* }}} */
 
-#define PHAR_ARCHIVE_OBJECT() \
-	zval *zobj = ZEND_THIS; \
-	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
-	if (!phar_obj->archive) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Cannot call method on an uninitialized Phar object"); \
-		RETURN_THROWS(); \
-	}
-
 /* {{{ if persistent, remove from the cache */
 PHP_METHOD(Phar, __destruct)
 {
-	zval *zobj = ZEND_THIS;
-	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	phar_archive_object *phar_obj = PHAR_FETCH_INTERNAL();
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1458,7 +1459,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
 				char *test = NULL;
-				spl_filesystem_object *intern = (spl_filesystem_object*)((char*)Z_OBJ_P(value) - Z_OBJ_P(value)->handlers->offset);
+				spl_filesystem_object *intern = PHAR_FETCH_INTERNAL_EX(value);
 
 				if (!base_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %s returns an SplFileInfo object, so base directory must be specified", ZSTR_VAL(ce->name));
@@ -4460,13 +4461,13 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_object *entry_obj;
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;
-	zval *zobj = ZEND_THIS, arg1;
+	zval arg1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	entry_obj = PHAR_FETCH_INTERNAL();
 
 	if (entry_obj->entry) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
@@ -4512,15 +4513,14 @@ PHP_METHOD(PharFileInfo, __construct)
 	ZVAL_STRINGL(&arg1, fname, fname_len);
 
 	zend_call_known_instance_method_with_1_params(spl_ce_SplFileInfo->constructor,
-		Z_OBJ_P(zobj), NULL, &arg1);
+		Z_OBJ_P(ZEND_THIS), NULL, &arg1);
 
 	zval_ptr_dtor(&arg1);
 }
 /* }}} */
 
 #define PHAR_ENTRY_OBJECT_EX(throw) \
-	zval *zobj = ZEND_THIS; \
-	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
+	phar_entry_object *entry_obj = PHAR_FETCH_INTERNAL(); \
 	if (!entry_obj->entry) { \
 		if (throw) { \
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
