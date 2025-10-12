@@ -267,8 +267,8 @@ zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t fil
 zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
-	char *path, *arch, *entry, *test;
-	size_t arch_len, entry_len;
+	char *path, *arch, *test;
+	size_t arch_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -301,11 +301,9 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 		goto splitted;
 	}
 
-	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
+	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 1, 0)) {
 		return NULL;
 	}
-
-	efree(entry);
 
 	if (*ZSTR_VAL(filename) == '.') {
 		size_t try_len;
@@ -347,7 +345,7 @@ splitted:
 
 	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
 		/* found phar:// */
-		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
+		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, NULL, NULL, 1, 0)) {
 			return ret;
 		}
 
@@ -358,7 +356,6 @@ splitted:
 		}
 
 		efree(arch);
-		efree(entry);
 	}
 
 	return ret;

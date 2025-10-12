@@ -349,12 +349,12 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 {
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
-	char *error, *arch, *entry2;
-	size_t arch_len, entry_len;
+	char *error, *arch;
+	size_t arch_len;
 	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, NULL, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
 		return 0;
 	}
@@ -364,7 +364,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	}
 
 	efree(arch);
-	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
@@ -477,12 +476,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
-	char *error, *arch, *entry2;
-	size_t arch_len, entry_len;
+	char *error, *arch;
+	size_t arch_len;
 	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, NULL, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
 		return 0;
 	}
@@ -492,7 +491,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	}
 
 	efree(arch);
-	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
