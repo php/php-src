@@ -2748,13 +2748,15 @@ PHP_METHOD(Phar, setAlias)
 		readd = 1;
 	}
 
+	ZEND_ASSERT(!phar_obj->archive->is_persistent);
+
 	oldalias = phar_obj->archive->alias;
 	oldalias_len = phar_obj->archive->alias_len;
 	old_temp = phar_obj->archive->is_temporary_alias;
 
 	phar_obj->archive->alias_len = ZSTR_LEN(new_alias);
 	if (phar_obj->archive->alias_len) {
-		phar_obj->archive->alias = pestrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias), phar_obj->archive->is_persistent);
+		phar_obj->archive->alias = estrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias));
 	} else {
 		phar_obj->archive->alias = NULL;
 	}
@@ -2763,7 +2765,7 @@ PHP_METHOD(Phar, setAlias)
 	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
-		pefree(phar_obj->archive->alias, phar_obj->archive->is_persistent);
+		efree(phar_obj->archive->alias);
 		phar_obj->archive->alias = oldalias;
 		phar_obj->archive->alias_len = oldalias_len;
 		phar_obj->archive->is_temporary_alias = old_temp;
