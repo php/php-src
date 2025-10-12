@@ -1713,7 +1713,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 {
 	char *error;
 	bool apply_reg = false;
-	zval arg, arg2, iter, iteriter, regexiter;
+	zval iter, iteriter, regexiter;
 	struct _phar_t pass;
 	zend_string *dir, *regex = NULL;
 
@@ -1729,34 +1729,22 @@ PHP_METHOD(Phar, buildFromDirectory)
 		RETURN_THROWS();
 	}
 
-	if (SUCCESS != object_init_ex(&iter, spl_ce_RecursiveDirectoryIterator)) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
+	zval args[2];
+	ZVAL_STR(&args[0], dir);
+	ZVAL_LONG(&args[1], SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
+
+	if (SUCCESS != object_init_with_constructor(&iter, spl_ce_RecursiveDirectoryIterator, 2, args, NULL)) {
+		if (!EG(exception)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
+		}
 		RETURN_THROWS();
 	}
 
-	ZVAL_STR(&arg, dir);
-	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
-
-	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
-		Z_OBJ(iter), NULL, &arg, &arg2);
-
-	if (EG(exception)) {
+	if (SUCCESS != object_init_with_constructor(&iteriter, spl_ce_RecursiveIteratorIterator, 1, &iter, NULL)) {
 		zval_ptr_dtor(&iter);
-		RETURN_THROWS();
-	}
-
-	if (SUCCESS != object_init_ex(&iteriter, spl_ce_RecursiveIteratorIterator)) {
-		zval_ptr_dtor(&iter);
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
-		RETURN_THROWS();
-	}
-
-	zend_call_known_instance_method_with_1_params(spl_ce_RecursiveIteratorIterator->constructor,
-		Z_OBJ(iteriter), NULL, &iter);
-
-	if (EG(exception)) {
-		zval_ptr_dtor(&iter);
-		zval_ptr_dtor(&iteriter);
+		if (!EG(exception)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
+		}
 		RETURN_THROWS();
 	}
 
@@ -1765,15 +1753,16 @@ PHP_METHOD(Phar, buildFromDirectory)
 	if (regex && ZSTR_LEN(regex) > 0) {
 		apply_reg = true;
 
-		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
+		ZVAL_COPY_VALUE(&args[0], &iteriter);
+		ZVAL_STR(&args[1], regex);
+
+		if (SUCCESS != object_init_with_constructor(&regexiter, spl_ce_RegexIterator, 2, args, NULL)) {
 			zval_ptr_dtor(&iteriter);
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
+			if (!EG(exception)) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
+			}
 			RETURN_THROWS();
 		}
-
-		ZVAL_STR(&arg2, regex);
-		zend_call_known_instance_method_with_2_params(spl_ce_RegexIterator->constructor,
-			Z_OBJ(regexiter), NULL, &iteriter, &arg2);
 	}
 
 	array_init(return_value);
@@ -2197,15 +2186,13 @@ its_ok:
 		ce = phar_ce_archive;
 	}
 
-	if (SUCCESS != object_init_ex(&ret, ce)) {
+	ZVAL_STRINGL(&arg1, phar->fname, phar->fname_len);
+	zend_result result = object_init_with_constructor(&ret, ce, 1, &arg1, NULL);
+	zval_ptr_dtor_str(&arg1);
+	if (SUCCESS != result) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate phar object when converting archive \"%s\"", phar->fname);
 		return NULL;
 	}
-
-	ZVAL_STRINGL(&arg1, phar->fname, phar->fname_len);
-
-	zend_call_known_instance_method_with_1_params(ce->constructor, Z_OBJ(ret), NULL, &arg1);
-	zval_ptr_dtor(&arg1);
 	return Z_OBJ(ret);
 
 err_reused_oldpath:
