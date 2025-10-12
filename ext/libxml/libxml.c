@@ -39,6 +39,7 @@
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
+#include <libxml/xmlschemastypes.h>
 #endif
 
 #include "php_libxml.h"
@@ -933,7 +934,11 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 	if (!_php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
 		ZEND_IGNORE_LEAKS_BEGIN();
+
 		xmlInitParser();
+#ifdef LIBXML_SCHEMAS_ENABLED
+		xmlSchemaInitTypes();
+#endif
 		ZEND_IGNORE_LEAKS_END();
 
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
