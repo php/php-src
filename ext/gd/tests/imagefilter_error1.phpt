@@ -21,5 +21,5 @@ try {
 }
 ?>
 --EXPECT--
-Wrong parameter count for imagefilter()
+imagefilter() expects at least 2 arguments, 1 given
 imagefilter(): Argument #1 ($image) must be of type GdImage, int given
