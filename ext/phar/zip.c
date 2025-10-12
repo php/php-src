@@ -1417,6 +1417,7 @@ fperror:
 	pass.centralfp = php_stream_fopen_tmpfile();
 
 	if (!pass.centralfp) {
+		php_stream_close(pass.filefp);
 		goto fperror;
 	}
 
