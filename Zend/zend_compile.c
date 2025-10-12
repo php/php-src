@@ -3956,16 +3956,25 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value = 0;
+		/* opcode array may be reallocated, so don't access opcode field after zend_emit_op_tmp(). */
+		uint8_t opcode = opline->opcode;
 
-		if (opline->opcode == ZEND_NEW) {
-		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+		if (opcode == ZEND_NEW) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
-		if (opline->opcode == ZEND_INIT_FCALL) {
+		if (opcode == ZEND_INIT_FCALL) {
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
-		zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		zend_op *callable_convert_op = zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		if (opcode == ZEND_INIT_FCALL
+		 || opcode == ZEND_INIT_FCALL_BY_NAME
+		 || opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+			callable_convert_op->extended_value = zend_alloc_cache_slot();
+		} else {
+			callable_convert_op->extended_value = (uint32_t)-1;
+		}
 		return true;
 	}
 
@@ -8083,6 +8092,8 @@ typedef struct {
 	bool varvars_used;
 } closure_info;
 
+static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast);
+
 static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	if (!ast) {
 		return;
@@ -8127,7 +8138,15 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
 		/* For arrow functions recursively check the expression. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
-		find_implicit_binds_recursively(info, closure_ast->child[2]);
+		closure_info inner_info;
+		find_implicit_binds(&inner_info, closure_ast->child[0], closure_ast->child[2]);
+		if (inner_info.varvars_used) {
+			info->varvars_used = true;
+		}
+		if (zend_hash_num_elements(&inner_info.uses)) {
+			zend_hash_copy(&info->uses, &inner_info.uses, NULL);
+		}
+		zend_hash_destroy(&inner_info.uses);
 	} else if (!zend_ast_is_special(ast)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
@@ -8142,6 +8161,7 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 	uint32_t i;
 
 	zend_hash_init(&info->uses, param_list->children, NULL, NULL, 0);
+	info->varvars_used = false;
 
 	find_implicit_binds_recursively(info, stmt_ast);
 
@@ -8451,7 +8471,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 	closure_info info;
-	memset(&info, 0, sizeof(closure_info));
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
@@ -9354,15 +9373,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	if (toplevel) {
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
-	}
-
-	if (ce->__serialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
-		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
-			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
-	if (ce->__unserialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP))) {
-		zend_error(E_DEPRECATED, "The __wakeup() serialization magic method has been deprecated."
-			" Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)");
 	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */
@@ -11478,6 +11488,11 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 {
 	zend_ast *class_ast = (*ast_ptr)->child[0];
 	zend_compile_const_expr_class_reference(class_ast);
+
+	zend_ast *args_ast = (*ast_ptr)->child[1];
+	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+	}
 }
 
 static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
@@ -12052,7 +12067,7 @@ bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 	}
 	switch (type) {
 		case _IS_BOOL:
-			ZVAL_BOOL(result, zval_is_true(op1));
+			ZVAL_BOOL(result, zend_is_true(op1));
 			return true;
 		case IS_LONG:
 			if (Z_TYPE_P(op1) == IS_DOUBLE && !ZEND_DOUBLE_FITS_LONG(Z_DVAL_P((op1)))) {

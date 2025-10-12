@@ -1,6 +1,6 @@
 --TEST--
 NumberFormatter: currency formatting
-----DESCRIPTION--
+--DESCRIPTION--
 Tests NumberFormatter with various currenct-related formatters.
 --EXTENSIONS--
 intl

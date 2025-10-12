@@ -136,10 +136,6 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
 	}
-	if (!Z_ISUNDEF(mysql->li_read)) {
-		zval_ptr_dtor(&(mysql->li_read));
-		ZVAL_UNDEF(&mysql->li_read);
-	}
 }
 /* }}} */
 
@@ -316,7 +312,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					has_property = zval_is_true(value);
+					has_property = zend_is_true(value);
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -788,7 +784,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		}
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");

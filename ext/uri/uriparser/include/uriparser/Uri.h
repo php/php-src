@@ -137,7 +137,7 @@ typedef struct URI_TYPE(HostDataStruct) {
 	URI_TYPE(TextRange) ipFuture; /**< IPvFuture address
 		@note
 		With non-<c>NULL</c> members in UriUriStructA.hostData context,
-		this text range's pointers must be <em>idential</em> to those
+		this text range's pointers must be <em>identical</em> to those
 		of UriUriStructA.hostText at all times. */
 } URI_TYPE(HostData); /**< @copydoc UriHostDataStructA */
 
@@ -1420,7 +1420,7 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first, con
  *
  * @param first      <b>IN</b>: Pointer to first character
  * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
- * @param hasHost    <b>IN</b>: Wether the target %URI has a non-<c>NULL</c> host set or not
+ * @param hasHost    <b>IN</b>: Whether the target %URI has a non-<c>NULL</c> host set or not
  * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
  *
  * @see uriIsWellFormedFragmentA
@@ -2415,7 +2415,7 @@ URI_PUBLIC int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri,
  *       or even fully custom patches. As a result, the version string
  *       returned serves as nothing more than "based on that version",
  *       it does not guarantee equivalence to vanilla upstream releases
- *       or absence of additinal downstream patches.
+ *       or absence of additional downstream patches.
  *       It is nothing more than "a hint" and MUST NEVER be used to
  *       make decisions on in application code at runtime.
  *

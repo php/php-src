@@ -155,6 +155,7 @@ static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const
 {
 	char *tmp;
 	char *msg;
+	char errstr[256];
 	int free_msg = 0;
 
 	if (EG(exception)) {
@@ -204,7 +205,6 @@ static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const
 			free_msg = 1;
 		} else {
 			if (wrapper == &php_plain_files_wrapper) {
-				char errstr[256];
 				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
 			} else {
 				msg = "operation failed";
@@ -1296,7 +1296,7 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 {
 	int ret = 0;
 
-	if (stream->writefilters.head) {
+	if (stream->writefilters.head && stream->ops->write) {
 		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
 	}
 

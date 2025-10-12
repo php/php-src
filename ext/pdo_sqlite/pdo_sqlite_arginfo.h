@@ -69,120 +69,120 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 
 	zval const_DETERMINISTIC_value;
 	ZVAL_LONG(&const_DETERMINISTIC_value, SQLITE_DETERMINISTIC);
-	zend_string *const_DETERMINISTIC_name = zend_string_init_interned("DETERMINISTIC", sizeof("DETERMINISTIC") - 1, 1);
+	zend_string *const_DETERMINISTIC_name = zend_string_init_interned("DETERMINISTIC", sizeof("DETERMINISTIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DETERMINISTIC_name, &const_DETERMINISTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DETERMINISTIC_name);
+	zend_string_release_ex(const_DETERMINISTIC_name, true);
 #endif
 
 	zval const_OPEN_READONLY_value;
 	ZVAL_LONG(&const_OPEN_READONLY_value, SQLITE_OPEN_READONLY);
-	zend_string *const_OPEN_READONLY_name = zend_string_init_interned("OPEN_READONLY", sizeof("OPEN_READONLY") - 1, 1);
+	zend_string *const_OPEN_READONLY_name = zend_string_init_interned("OPEN_READONLY", sizeof("OPEN_READONLY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OPEN_READONLY_name, &const_OPEN_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_OPEN_READONLY_name);
+	zend_string_release_ex(const_OPEN_READONLY_name, true);
 
 	zval const_OPEN_READWRITE_value;
 	ZVAL_LONG(&const_OPEN_READWRITE_value, SQLITE_OPEN_READWRITE);
-	zend_string *const_OPEN_READWRITE_name = zend_string_init_interned("OPEN_READWRITE", sizeof("OPEN_READWRITE") - 1, 1);
+	zend_string *const_OPEN_READWRITE_name = zend_string_init_interned("OPEN_READWRITE", sizeof("OPEN_READWRITE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OPEN_READWRITE_name, &const_OPEN_READWRITE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_OPEN_READWRITE_name);
+	zend_string_release_ex(const_OPEN_READWRITE_name, true);
 
 	zval const_OPEN_CREATE_value;
 	ZVAL_LONG(&const_OPEN_CREATE_value, SQLITE_OPEN_CREATE);
-	zend_string *const_OPEN_CREATE_name = zend_string_init_interned("OPEN_CREATE", sizeof("OPEN_CREATE") - 1, 1);
+	zend_string *const_OPEN_CREATE_name = zend_string_init_interned("OPEN_CREATE", sizeof("OPEN_CREATE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OPEN_CREATE_name, &const_OPEN_CREATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_OPEN_CREATE_name);
+	zend_string_release_ex(const_OPEN_CREATE_name, true);
 
 	zval const_ATTR_OPEN_FLAGS_value;
 	ZVAL_LONG(&const_ATTR_OPEN_FLAGS_value, PDO_SQLITE_ATTR_OPEN_FLAGS);
-	zend_string *const_ATTR_OPEN_FLAGS_name = zend_string_init_interned("ATTR_OPEN_FLAGS", sizeof("ATTR_OPEN_FLAGS") - 1, 1);
+	zend_string *const_ATTR_OPEN_FLAGS_name = zend_string_init_interned("ATTR_OPEN_FLAGS", sizeof("ATTR_OPEN_FLAGS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_OPEN_FLAGS_name, &const_ATTR_OPEN_FLAGS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_OPEN_FLAGS_name);
+	zend_string_release_ex(const_ATTR_OPEN_FLAGS_name, true);
 
 	zval const_ATTR_READONLY_STATEMENT_value;
 	ZVAL_LONG(&const_ATTR_READONLY_STATEMENT_value, PDO_SQLITE_ATTR_READONLY_STATEMENT);
-	zend_string *const_ATTR_READONLY_STATEMENT_name = zend_string_init_interned("ATTR_READONLY_STATEMENT", sizeof("ATTR_READONLY_STATEMENT") - 1, 1);
+	zend_string *const_ATTR_READONLY_STATEMENT_name = zend_string_init_interned("ATTR_READONLY_STATEMENT", sizeof("ATTR_READONLY_STATEMENT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_READONLY_STATEMENT_name, &const_ATTR_READONLY_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_READONLY_STATEMENT_name);
+	zend_string_release_ex(const_ATTR_READONLY_STATEMENT_name, true);
 
 	zval const_ATTR_EXTENDED_RESULT_CODES_value;
 	ZVAL_LONG(&const_ATTR_EXTENDED_RESULT_CODES_value, PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
-	zend_string *const_ATTR_EXTENDED_RESULT_CODES_name = zend_string_init_interned("ATTR_EXTENDED_RESULT_CODES", sizeof("ATTR_EXTENDED_RESULT_CODES") - 1, 1);
+	zend_string *const_ATTR_EXTENDED_RESULT_CODES_name = zend_string_init_interned("ATTR_EXTENDED_RESULT_CODES", sizeof("ATTR_EXTENDED_RESULT_CODES") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXTENDED_RESULT_CODES_name, &const_ATTR_EXTENDED_RESULT_CODES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_EXTENDED_RESULT_CODES_name);
+	zend_string_release_ex(const_ATTR_EXTENDED_RESULT_CODES_name, true);
 
 	zval const_ATTR_BUSY_STATEMENT_value;
 	ZVAL_LONG(&const_ATTR_BUSY_STATEMENT_value, PDO_SQLITE_ATTR_BUSY_STATEMENT);
-	zend_string *const_ATTR_BUSY_STATEMENT_name = zend_string_init_interned("ATTR_BUSY_STATEMENT", sizeof("ATTR_BUSY_STATEMENT") - 1, 1);
+	zend_string *const_ATTR_BUSY_STATEMENT_name = zend_string_init_interned("ATTR_BUSY_STATEMENT", sizeof("ATTR_BUSY_STATEMENT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_BUSY_STATEMENT_name, &const_ATTR_BUSY_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_BUSY_STATEMENT_name);
+	zend_string_release_ex(const_ATTR_BUSY_STATEMENT_name, true);
 
 	zval const_ATTR_EXPLAIN_STATEMENT_value;
 	ZVAL_LONG(&const_ATTR_EXPLAIN_STATEMENT_value, PDO_SQLITE_ATTR_EXPLAIN_STATEMENT);
-	zend_string *const_ATTR_EXPLAIN_STATEMENT_name = zend_string_init_interned("ATTR_EXPLAIN_STATEMENT", sizeof("ATTR_EXPLAIN_STATEMENT") - 1, 1);
+	zend_string *const_ATTR_EXPLAIN_STATEMENT_name = zend_string_init_interned("ATTR_EXPLAIN_STATEMENT", sizeof("ATTR_EXPLAIN_STATEMENT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXPLAIN_STATEMENT_name, &const_ATTR_EXPLAIN_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_EXPLAIN_STATEMENT_name);
+	zend_string_release_ex(const_ATTR_EXPLAIN_STATEMENT_name, true);
 
 	zval const_ATTR_TRANSACTION_MODE_value;
 	ZVAL_LONG(&const_ATTR_TRANSACTION_MODE_value, PDO_SQLITE_ATTR_TRANSACTION_MODE);
-	zend_string *const_ATTR_TRANSACTION_MODE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE", sizeof("ATTR_TRANSACTION_MODE") - 1, 1);
+	zend_string *const_ATTR_TRANSACTION_MODE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE", sizeof("ATTR_TRANSACTION_MODE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_name, &const_ATTR_TRANSACTION_MODE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_TRANSACTION_MODE_name);
+	zend_string_release_ex(const_ATTR_TRANSACTION_MODE_name, true);
 
 	zval const_TRANSACTION_MODE_DEFERRED_value;
 	ZVAL_LONG(&const_TRANSACTION_MODE_DEFERRED_value, 0);
-	zend_string *const_TRANSACTION_MODE_DEFERRED_name = zend_string_init_interned("TRANSACTION_MODE_DEFERRED", sizeof("TRANSACTION_MODE_DEFERRED") - 1, 1);
+	zend_string *const_TRANSACTION_MODE_DEFERRED_name = zend_string_init_interned("TRANSACTION_MODE_DEFERRED", sizeof("TRANSACTION_MODE_DEFERRED") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_MODE_DEFERRED_name, &const_TRANSACTION_MODE_DEFERRED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TRANSACTION_MODE_DEFERRED_name);
+	zend_string_release_ex(const_TRANSACTION_MODE_DEFERRED_name, true);
 
 	zval const_TRANSACTION_MODE_IMMEDIATE_value;
 	ZVAL_LONG(&const_TRANSACTION_MODE_IMMEDIATE_value, 1);
-	zend_string *const_TRANSACTION_MODE_IMMEDIATE_name = zend_string_init_interned("TRANSACTION_MODE_IMMEDIATE", sizeof("TRANSACTION_MODE_IMMEDIATE") - 1, 1);
+	zend_string *const_TRANSACTION_MODE_IMMEDIATE_name = zend_string_init_interned("TRANSACTION_MODE_IMMEDIATE", sizeof("TRANSACTION_MODE_IMMEDIATE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_MODE_IMMEDIATE_name, &const_TRANSACTION_MODE_IMMEDIATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TRANSACTION_MODE_IMMEDIATE_name);
+	zend_string_release_ex(const_TRANSACTION_MODE_IMMEDIATE_name, true);
 
 	zval const_TRANSACTION_MODE_EXCLUSIVE_value;
 	ZVAL_LONG(&const_TRANSACTION_MODE_EXCLUSIVE_value, 2);
-	zend_string *const_TRANSACTION_MODE_EXCLUSIVE_name = zend_string_init_interned("TRANSACTION_MODE_EXCLUSIVE", sizeof("TRANSACTION_MODE_EXCLUSIVE") - 1, 1);
+	zend_string *const_TRANSACTION_MODE_EXCLUSIVE_name = zend_string_init_interned("TRANSACTION_MODE_EXCLUSIVE", sizeof("TRANSACTION_MODE_EXCLUSIVE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_MODE_EXCLUSIVE_name, &const_TRANSACTION_MODE_EXCLUSIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TRANSACTION_MODE_EXCLUSIVE_name);
+	zend_string_release_ex(const_TRANSACTION_MODE_EXCLUSIVE_name, true);
 #if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_PREPARED_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_PREPARED_value, 0);
-	zend_string *const_EXPLAIN_MODE_PREPARED_name = zend_string_init_interned("EXPLAIN_MODE_PREPARED", sizeof("EXPLAIN_MODE_PREPARED") - 1, 1);
+	zend_string *const_EXPLAIN_MODE_PREPARED_name = zend_string_init_interned("EXPLAIN_MODE_PREPARED", sizeof("EXPLAIN_MODE_PREPARED") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_PREPARED_name, &const_EXPLAIN_MODE_PREPARED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_EXPLAIN_MODE_PREPARED_name);
+	zend_string_release_ex(const_EXPLAIN_MODE_PREPARED_name, true);
 
 	zval const_EXPLAIN_MODE_EXPLAIN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_value, 1);
-	zend_string *const_EXPLAIN_MODE_EXPLAIN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN", sizeof("EXPLAIN_MODE_EXPLAIN") - 1, 1);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN", sizeof("EXPLAIN_MODE_EXPLAIN") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_name, &const_EXPLAIN_MODE_EXPLAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_name);
+	zend_string_release_ex(const_EXPLAIN_MODE_EXPLAIN_name, true);
 
 	zval const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, 2);
-	zend_string *const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN", sizeof("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN") - 1, 1);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN", sizeof("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name, &const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name);
+	zend_string_release_ex(const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name, true);
 #endif
 
 	zval const_OK_value;
 	ZVAL_LONG(&const_OK_value, SQLITE_OK);
-	zend_string *const_OK_name = zend_string_init_interned("OK", sizeof("OK") - 1, 1);
+	zend_string *const_OK_name = zend_string_init_interned("OK", sizeof("OK") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OK_name, &const_OK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_OK_name);
+	zend_string_release_ex(const_OK_name, true);
 
 	zval const_DENY_value;
 	ZVAL_LONG(&const_DENY_value, SQLITE_DENY);
-	zend_string *const_DENY_name = zend_string_init_interned("DENY", sizeof("DENY") - 1, 1);
+	zend_string *const_DENY_name = zend_string_init_interned("DENY", sizeof("DENY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DENY_name, &const_DENY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DENY_name);
+	zend_string_release_ex(const_DENY_name, true);
 
 	zval const_IGNORE_value;
 	ZVAL_LONG(&const_IGNORE_value, SQLITE_IGNORE);
-	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, 1);
+	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_IGNORE_name, &const_IGNORE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IGNORE_name);
+	zend_string_release_ex(const_IGNORE_name, true);
 
 	return class_entry;
 }

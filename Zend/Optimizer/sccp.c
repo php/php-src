@@ -1650,7 +1650,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		{
 			zend_call_info *call;
 			zval *name, *args[3] = {NULL};
-			int i;
 
 			if (!ctx->call_map) {
 				SET_RESULT_BOT(result);
@@ -1672,7 +1671,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			for (i = 0; i < call->num_args; i++) {
+			for (uint32_t i = 0; i < call->num_args; i++) {
 				zend_op *opline = call->arg_info[i].opline;
 				if (opline->opcode != ZEND_SEND_VAL && opline->opcode != ZEND_SEND_VAR) {
 					SET_RESULT_BOT(result);
@@ -2038,7 +2037,7 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 	}
 }
 
-static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
+static void sccp_visit_phi(scdf_ctx *scdf, const zend_ssa_phi *phi) {
 	sccp_ctx *ctx = (sccp_ctx *) scdf;
 	zend_ssa *ssa = scdf->ssa;
 	ZEND_ASSERT(phi->ssa_var >= 0);
@@ -2088,7 +2087,6 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_op_array *op_array = ctx->scdf.op_array;
 	zend_call_info *call;
-	int i;
 
 	ZEND_ASSERT(ctx->call_map);
 	call = ctx->call_map[opline - op_array->opcodes];
@@ -2098,7 +2096,7 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 	zend_ssa_remove_instr(ssa, call->caller_init_opline,
 		&ssa->ops[call->caller_init_opline - op_array->opcodes]);
 
-	for (i = 0; i < call->num_args; i++) {
+	for (uint32_t i = 0; i < call->num_args; i++) {
 		zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
 			&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
 	}
@@ -2122,11 +2120,11 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
  *    we need to collect.
  * d) The ordinary DCE pass cannot collect construction of dead non-escaping arrays and objects.
  */
-static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, zval *value)
+static uint32_t try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, zval *value)
 {
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_op_array *op_array = ctx->scdf.op_array;
-	int removed_ops = 0;
+	uint32_t removed_ops = 0;
 
 	if (var->definition >= 0) {
 		zend_op *opline = &op_array->opcodes[var->definition];
@@ -2370,12 +2368,12 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 /* This will try to replace uses of SSA variables we have determined to be constant. Not all uses
  * can be replaced, because some instructions don't accept constant operands or only accept them
  * if they have a certain type. */
-static int replace_constant_operands(sccp_ctx *ctx) {
+static uint32_t replace_constant_operands(sccp_ctx *ctx) {
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_op_array *op_array = ctx->scdf.op_array;
 	int i;
 	zval tmp;
-	int removed_ops = 0;
+	uint32_t removed_ops = 0;
 
 	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
 	 * and INIT_ARRAY. */
@@ -2468,10 +2466,10 @@ static void sccp_context_free(sccp_ctx *sccp) {
 	}
 }
 
-int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
+uint32_t sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map)
 {
 	sccp_ctx sccp;
-	int removed_ops = 0;
+	uint32_t removed_ops = 0;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	sccp_context_init(ctx, &sccp, ssa, op_array, call_map);

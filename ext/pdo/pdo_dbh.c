@@ -805,7 +805,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 			*bval = false;
 			return true;
 		case IS_LONG:
-			*bval = zval_is_true(value);
+			*bval = zend_is_true(value);
 			return true;
 		case IS_STRING: /* TODO Should string be allowed? */
 		default:

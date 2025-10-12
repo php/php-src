@@ -250,15 +250,10 @@ case $host_alias in
     ;;
 esac
 
-dnl Detect musl libc
-AC_MSG_CHECKING([whether we are using musl libc])
-if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1
-then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])
-else
-  AC_MSG_RESULT([no])
-fi
+dnl Detect C library.
+PHP_C_STANDARD_LIBRARY
+AS_VAR_IF([php_cv_c_standard_library], [musl],
+  [AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])])
 
 dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
 dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which

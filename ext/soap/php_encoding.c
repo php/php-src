@@ -1797,9 +1797,9 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
 				return model_array_element(tmp);
 			} ZEND_HASH_FOREACH_END();
+
+			break;
 		}
-		/* TODO Check this is correct */
-		ZEND_FALLTHROUGH;
 		case XSD_CONTENT_GROUP: {
 			return model_array_element(model->u.group->model);
 		}
@@ -3579,6 +3579,11 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_P(ztype);
+			if (cur_type == UNKNOWN_TYPE) {
+				/* Mimic guess_xml_convert() where we use the type of the data.
+				 * UNDEFs are handled transparently as it will error out upon encoding the data. */
+				cur_type = Z_TYPE_P(Z_VAR_ENC_VALUE_P(tmp));
+			}
 
 			zval *zstype = Z_VAR_ENC_STYPE_P(tmp);
 			if (Z_TYPE_P(zstype) == IS_STRING) {

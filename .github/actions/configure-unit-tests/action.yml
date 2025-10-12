@@ -1,0 +1,10 @@
+name: ./configure (unit tests)
+description: Configure PHP with minimal settings for unit testing
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        ./buildconf --force
+        ./configure --disable-all --enable-embed=static

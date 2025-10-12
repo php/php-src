@@ -23631,7 +23631,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_FETCH_RW_S
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
-					goto fe_fetch_w_exit;
+					goto fe_fetch_w_exit_exc;
 				}
 				pos++;
 				value = &p->val;
@@ -23727,6 +23727,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_FETCH_RW_S
 		}
 	} else {
 		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_value_name(array));
+fe_fetch_w_exit_exc:
 		if (UNEXPECTED(EG(exception))) {
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
@@ -39087,7 +39088,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 
-	zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+		} else {
+			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
+			if (Z_TYPE_P(closure_zv) == IS_NULL) {
+				zend_closure_from_frame(closure_zv, call);
+			}
+			ZEND_ASSERT(Z_TYPE_P(closure_zv) == IS_OBJECT);
+			closure = Z_OBJ_P(closure_zv);
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			CACHE_PTR(opline->extended_value, closure);
+		}
+	} else {
+		zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 		OBJ_RELEASE(Z_OBJ(call->This));
@@ -78852,7 +78869,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FETCH_RW_SPEC_V
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
-					goto fe_fetch_w_exit;
+					goto fe_fetch_w_exit_exc;
 				}
 				pos++;
 				value = &p->val;
@@ -78948,6 +78965,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FETCH_RW_SPEC_V
 		}
 	} else {
 		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_value_name(array));
+fe_fetch_w_exit_exc:
 		if (UNEXPECTED(EG(exception))) {
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
@@ -94308,7 +94326,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_S
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 
-	zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+		} else {
+			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
+			if (Z_TYPE_P(closure_zv) == IS_NULL) {
+				zend_closure_from_frame(closure_zv, call);
+			}
+			ZEND_ASSERT(Z_TYPE_P(closure_zv) == IS_OBJECT);
+			closure = Z_OBJ_P(closure_zv);
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			CACHE_PTR(opline->extended_value, closure);
+		}
+	} else {
+		zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 		OBJ_RELEASE(Z_OBJ(call->This));

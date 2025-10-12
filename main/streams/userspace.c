@@ -346,7 +346,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		zval_ptr_dtor(&args[3]);
 		goto end;
 	}
-	if (zval_is_true(&zretval)) {
+	if (zend_is_true(&zretval)) {
 		/* the stream is now open! */
 		stream = php_stream_alloc_rel(&php_stream_userspace_ops, us, 0, mode);
 
@@ -430,7 +430,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 		goto end;
 	}
 
-	if (zval_is_true(&zretval)) {
+	if (zend_is_true(&zretval)) {
 		/* the stream is now open! */
 		stream = php_stream_alloc_rel(&php_stream_userspace_dir_ops, us, 0, mode);
 
@@ -602,8 +602,6 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 		didwrite = count;
 	}
 
-	zval_ptr_dtor(&retval);
-
 	return didwrite;
 }
 
@@ -674,7 +672,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 		goto err;
 	}
 
-	if (zval_is_true(&retval)) {
+	if (zend_is_true(&retval)) {
 		stream->eof = 1;
 	}
 	zval_ptr_dtor(&retval);
@@ -722,7 +720,7 @@ static int php_userstreamop_flush(php_stream *stream)
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
-	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval) ? 0 : -1;
+	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
 
 	zval_ptr_dtor(&retval);
 
@@ -757,7 +755,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 		ret = -1;
 		goto out;
-	} else if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
+	} else if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval)) {
 		ret = 0;
 	} else {
 		ret = -1;
@@ -1092,7 +1090,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	} else if (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
 	}
-	// TODO: Warn on invalid return type, or use zval_is_true()?
+	// TODO: Warn on invalid return type, or use zend_is_true()?
 
 	zval_ptr_dtor(&zretval);
 
@@ -1130,7 +1128,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	} else if (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
 	}
-	// TODO: Warn on invalid return type, or use zval_is_true()?
+	// TODO: Warn on invalid return type, or use zend_is_true()?
 
 	zval_ptr_dtor(&zretval);
 
@@ -1168,7 +1166,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	} else if (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
 	}
-	// TODO: Warn on invalid return type, or use zval_is_true()?
+	// TODO: Warn on invalid return type, or use zend_is_true()?
 
 	zval_ptr_dtor(&zretval);
 
@@ -1205,7 +1203,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	} else if (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
 	}
-	// TODO: Warn on invalid return type, or use zval_is_true()?
+	// TODO: Warn on invalid return type, or use zend_is_true()?
 
 	zval_ptr_dtor(&zretval);
 
@@ -1267,7 +1265,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	} else if (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
 	}
-	// TODO: Warn on invalid return type, or use zval_is_true()?
+	// TODO: Warn on invalid return type, or use zend_is_true()?
 
 	zval_ptr_dtor(&zretval);
 

@@ -7307,7 +7307,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
-					ZEND_VM_C_GOTO(fe_fetch_w_exit);
+					ZEND_VM_C_GOTO(fe_fetch_w_exit_exc);
 				}
 				pos++;
 				value = &p->val;
@@ -7403,6 +7403,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 		}
 	} else {
 		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_value_name(array));
+ZEND_VM_C_LABEL(fe_fetch_w_exit_exc):
 		if (UNEXPECTED(EG(exception))) {
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
@@ -9709,12 +9710,28 @@ ZEND_VM_HANDLER(167, ZEND_COPY_TMP, TMPVAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED)
+ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 
-	zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+		} else {
+			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
+			if (Z_TYPE_P(closure_zv) == IS_NULL) {
+				zend_closure_from_frame(closure_zv, call);
+			}
+			ZEND_ASSERT(Z_TYPE_P(closure_zv) == IS_OBJECT);
+			closure = Z_OBJ_P(closure_zv);
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			CACHE_PTR(opline->extended_value, closure);
+		}
+	} else {
+		zend_closure_from_frame(EX_VAR(opline->result.var), call);
+	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 		OBJ_RELEASE(Z_OBJ(call->This));

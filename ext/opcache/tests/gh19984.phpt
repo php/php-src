@@ -14,6 +14,10 @@ if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');
 <?php
 $pid = pcntl_fork();
 require __DIR__ . '/warning_replay.inc';
+if ($pid) {
+    // Wait for child to output its error message.
+    pcntl_waitpid($pid, $status);
+}
 ?>
 --EXPECTF--
 Warning: Unsupported declare 'unknown' in %s on line %d

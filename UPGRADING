@@ -23,6 +23,10 @@ PHP 8.6 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . It is now possible to use reference assign on WeakMap without the key
+    needing to be present beforehand.
+
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
@@ -56,6 +60,9 @@ PHP 8.6 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Hash:
+  . The bundled version of xxHash was upgraded to 0.8.2.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -84,3 +91,6 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- JSON:
+  . Improve performance of encoding arrays and objects.

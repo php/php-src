@@ -15,16 +15,18 @@
 #include <config.h>
 #endif
 
+extern "C" {
 #include "../php_intl.h"
-#include "dateformat_class.h"
 #include "../intl_convert.h"
+}
+#include "dateformat_class.h"
 #include "dateformat_class.h"
 
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 
 /* {{{ Get formatter datetype. */
-PHP_FUNCTION( datefmt_get_datetype )
+U_CFUNC PHP_FUNCTION( datefmt_get_datetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -44,7 +46,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 /* }}} */
 
 /* {{{ Get formatter timetype. */
-PHP_FUNCTION( datefmt_get_timetype )
+U_CFUNC PHP_FUNCTION( datefmt_get_timetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -64,7 +66,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 /* }}} */
 
 /* {{{ Get formatter pattern. */
-PHP_FUNCTION( datefmt_get_pattern )
+U_CFUNC PHP_FUNCTION( datefmt_get_pattern )
 {
 	UChar  value_buf[64];
 	uint32_t    length = USIZE( value_buf );
@@ -100,12 +102,12 @@ PHP_FUNCTION( datefmt_get_pattern )
 /* }}} */
 
 /* {{{ Set formatter pattern. */
-PHP_FUNCTION( datefmt_set_pattern )
+U_CFUNC PHP_FUNCTION( datefmt_set_pattern )
 {
-	char*       value = NULL;
+	char*       value = nullptr;
 	size_t      value_len = 0;
 	int32_t     slength = 0;
-	UChar*	    svalue  = NULL;
+	UChar*	    svalue  = nullptr;
 	bool   is_pattern_localized = false;
 
 
@@ -136,9 +138,9 @@ PHP_FUNCTION( datefmt_set_pattern )
 /* }}} */
 
 /* {{{ Get formatter locale. */
-PHP_FUNCTION( datefmt_get_locale )
+U_CFUNC PHP_FUNCTION( datefmt_get_locale )
 {
-	char *loc;
+	const char *loc;
 	zend_long  loc_type =ULOC_ACTUAL_LOCALE;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -154,14 +156,14 @@ PHP_FUNCTION( datefmt_get_locale )
 	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	loc = (char *)udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), loc_type,&INTL_DATA_ERROR_CODE(dfo));
+	loc = udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), static_cast<ULocDataLocaleType>(loc_type),&INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting locale");
 	RETURN_STRING(loc);
 }
 /* }}} */
 
 /* {{{ Get formatter isLenient. */
-PHP_FUNCTION( datefmt_is_lenient )
+U_CFUNC PHP_FUNCTION( datefmt_is_lenient )
 {
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -182,7 +184,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 /* }}} */
 
 /* {{{ Set formatter lenient. */
-PHP_FUNCTION( datefmt_set_lenient )
+U_CFUNC PHP_FUNCTION( datefmt_set_lenient )
 {
 	bool isLenient = false;
 

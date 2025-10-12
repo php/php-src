@@ -34,10 +34,8 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xinclude.h>
 #include <libxml/hash.h>
 #include <libxml/c14n.h>
-#ifdef LIBXML_HTML_ENABLED
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
-#endif
 #ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>

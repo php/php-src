@@ -996,7 +996,7 @@ static zend_always_inline const char *zend_get_unmangled_property_name(const zen
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
-typedef bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *opline);
+typedef bool (*zend_needs_live_range_cb)(const zend_op_array *op_array, const zend_op *opline);
 ZEND_API void zend_recalc_live_ranges(
 	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
 

@@ -648,6 +648,12 @@ function main(): void
         $environment['SKIP_ONLINE_TESTS'] = $online ? '0' : '1';
     }
 
+    if (!defined('STDIN') || !stream_isatty(STDIN)
+     || !defined('STDOUT') || !stream_isatty(STDOUT)
+     || !defined('STDERR') || !stream_isatty(STDERR)) {
+        $environment['SKIP_IO_CAPTURE_TESTS'] = '1';
+    }
+
     if ($selected_tests && count($test_files) === 0) {
         echo "No tests found.\n";
         return;

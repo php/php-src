@@ -16,16 +16,18 @@
 #include <config.h>
 #endif
 
+extern "C" {
 #include "php_intl.h"
+#include "intl_convert.h"
+}
 
 #include <unicode/ustring.h>
 
 #include "formatter_class.h"
 #include "formatter_format.h"
-#include "intl_convert.h"
 
 /* {{{ Format a number. */
-PHP_FUNCTION( numfmt_format )
+U_CFUNC PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
 	zend_long type = FORMAT_TYPE_DEFAULT;
@@ -123,7 +125,7 @@ PHP_FUNCTION( numfmt_format )
 /* }}} */
 
 /* {{{ Format a number as currency. */
-PHP_FUNCTION( numfmt_format_currency )
+U_CFUNC PHP_FUNCTION( numfmt_format_currency )
 {
 	double     number;
 	UChar      format_buf[32];
