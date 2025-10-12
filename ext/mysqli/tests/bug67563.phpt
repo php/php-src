@@ -10,8 +10,8 @@ if (@stream_socket_client('udp://[::1]:8888') === false)
     die('skip no IPv6 support');
 
 if (!$link = @my_mysqli_connect('[::1]', $user, $passwd, $db, $port, $socket)) {
-    die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-        $host, $user, $db, $port, $socket));
+    die(sprintf("SKIP Cannot connect to the server using host=[::1], user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+        $user, $db, $port, $socket));
 }
 ?>
 --INI--
