@@ -2055,7 +2055,7 @@ static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_lo
 PHP_FUNCTION(pg_fetch_row)
 {
 	zval *result;
-	zend_long row;
+	zend_long row = 0;
 	bool row_is_null = true;
 	zend_long result_type = PGSQL_NUM;
 
@@ -2074,7 +2074,7 @@ PHP_FUNCTION(pg_fetch_row)
 PHP_FUNCTION(pg_fetch_assoc)
 {
 	zval *result;
-	zend_long row;
+	zend_long row = 0;
 	bool row_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -2091,7 +2091,7 @@ PHP_FUNCTION(pg_fetch_assoc)
 PHP_FUNCTION(pg_fetch_array)
 {
 	zval *result;
-	zend_long row;
+	zend_long row = 0;
 	bool row_is_null = true;
 	zend_long result_type = PGSQL_BOTH;
 
@@ -2110,7 +2110,7 @@ PHP_FUNCTION(pg_fetch_array)
 PHP_FUNCTION(pg_fetch_object)
 {
 	zval *result;
-	zend_long row;
+	zend_long row = 0;
 	bool row_is_null = true;
 	zend_class_entry *ce = NULL;
 	HashTable *ctor_params = NULL;
