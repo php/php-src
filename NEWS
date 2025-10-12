@@ -21,6 +21,10 @@ PHP                                                                        NEWS
     exposes INDIRECTs). (nielsdos)
   . Improve __unserialize() hardening for SplHeap/SplPriorityQueue. (nielsdos)
 
+- URI:
+  . Fixed bug GH-20088 (Heap-use-after-free in PHP URI WHATWG parser
+    during malformed URL processing). (lexborisov)
+
 09 Oct 2025, PHP 8.5.0RC2
 
 - Core:
