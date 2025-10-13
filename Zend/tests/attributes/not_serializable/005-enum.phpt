@@ -1,24 +1,22 @@
 --TEST--
-#[NotSerializable] inheritance behavior
+#[NotSerializable] enum behavior
 --FILE--
 <?php
 
 #[NotSerializable]
-class Foo {
-    public int $x = 42;
+enum Foo {
+    case BAR;
 }
 
-class Bar extends Foo {}
-
 try {
-    $s = serialize(new Bar());
+    $s = serialize(Foo::BAR);
     echo "Should not reach here\n";
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $data = 'O:3:"Bar":1:{s:1:"x";i:42;}';
+    $data = 'E:7:"Foo:BAR";';
     unserialize($data);
     echo "Should not reach here\n";
 } catch (Throwable $e) {
@@ -27,5 +25,5 @@ try {
 
 ?>
 --EXPECTF--
-Serialization of 'Bar' is not allowed
-Unserialization of 'Bar' is not allowed
+Serialization of 'Foo' is not allowed
+Unserialization of 'Foo' is not allowed
