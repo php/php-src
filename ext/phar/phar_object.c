@@ -1781,6 +1781,10 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
 	if (pass.fp == NULL) {
+		zval_ptr_dtor(&iteriter);
+		if (apply_reg) {
+			zval_ptr_dtor(&regexiter);
+		}
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" unable to create temporary file", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
