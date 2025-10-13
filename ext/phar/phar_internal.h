@@ -416,14 +416,14 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 
 /* utility functions */
 zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error);
-char *phar_decompress_filter(phar_entry_info * entry, int return_unknown);
-char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
+char *phar_decompress_filter(phar_entry_info * entry, bool return_unknown);
+char *phar_compress_filter(phar_entry_info * entry, bool return_unknown);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
 zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
 zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
-char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
+char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, bool persistent);
 bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, bool persistent);
@@ -434,10 +434,10 @@ void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
 void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, bool persistent);
 zend_result phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, bool persistent, HashTable *unserialize_options, const char* method_name);
 void destroy_phar_manifest_entry(zval *zv);
-int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
-php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
+int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, bool follow_links);
+php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links);
 zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error);
-zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links);
+zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links);
 phar_entry_info *phar_get_link_source(phar_entry_info *entry);
 zend_result phar_open_archive_fp(phar_archive_data *phar);
 zend_result phar_copy_on_write(phar_archive_data **pphar);
@@ -445,12 +445,12 @@ zend_result phar_copy_on_write(phar_archive_data **pphar);
 /* tar functions in tar.c */
 bool phar_is_tar(char *buf, char *fname);
 zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
-zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 void phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error);
 
 /* zip functions in zip.c */
 zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
-zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 void phar_zip_flush(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 
 #ifdef PHAR_MAIN
@@ -463,13 +463,13 @@ extern HashTable cached_alias;
 bool phar_archive_delref(phar_archive_data *phar);
 void phar_entry_delref(phar_entry_data *idata);
 
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security);
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security);
-phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
-zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security);
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, bool security);
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security);
+phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
+zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
 void phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 void phar_flush(phar_archive_data *archive, char **error);
-zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, int is_complete);
+zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, bool is_complete);
 zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create);
 
 typedef enum {
