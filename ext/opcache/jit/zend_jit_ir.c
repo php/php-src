@@ -19,6 +19,10 @@
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
 
+#if defined(__APPLE__) && defined(__x86_64__)
+# include <mach-o/dyld.h>
+#endif
+
 #if defined(IR_TARGET_X86)
 # define IR_REG_SP            4 /* IR_REG_RSP */
 # define IR_REG_FP            5 /* IR_REG_RBP */
@@ -3329,6 +3333,24 @@ static void zend_jit_setup_unwinder(void)
 }
 #endif
 
+#if defined(__APPLE__) && defined(__x86_64__)
+/* Thunk format used since dydl 1284 (approx. MacOS 15)
+ * https://github.com/apple-oss-distributions/dyld/blob/9307719dd8dc9b385daa412b03cfceb897b2b398/libdyld/ThreadLocalVariables.h#L146 */
+struct TLV_Thunkv2
+{
+       void*        func;
+       uint32_t     key;
+       uint32_t     offset;
+};
+
+/* Thunk format used in earlier versions */
+struct TLV_Thunkv1
+{
+       void*       func;
+       size_t      key;
+       size_t      offset;
+};
+#endif
 
 static void zend_jit_setup(bool reattached)
 {
@@ -3436,12 +3458,25 @@ static void zend_jit_setup(bool reattached)
 # elif defined(__APPLE__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-		size_t *ti;
+		struct TLV_Thunkv2 *thunk;
 		__asm__(
 			"leaq __tsrm_ls_cache(%%rip),%0"
-			: "=r" (ti));
-		tsrm_tls_offset = ti[2];
-		tsrm_tls_index = ti[1] * 8;
+			: "=r" (thunk));
+
+		/* Detect dyld 1284: With dyld 1284, thunk->func will be _tlv_get_addr.
+		 * Unfortunately this symbol is private, but we can find it
+		 * as _tlv_bootstrap+8: https://github.com/apple-oss-distributions/dyld/blob/9307719dd8dc9b385daa412b03cfceb897b2b398/libdyld/threadLocalHelpers.s#L54
+		 * In earlier versions, thunk->func will be tlv_get_addr, which is not
+		 * _tlv_bootstrap+8.
+		 */
+		if (thunk->func == (void*)((char*)_tlv_bootstrap + 8)) {
+			tsrm_tls_offset = thunk->offset;
+			tsrm_tls_index = (size_t)thunk->key * 8;
+		} else {
+			struct TLV_Thunkv1 *thunkv1 = (struct TLV_Thunkv1*) thunk;
+			tsrm_tls_offset = thunkv1->offset;
+			tsrm_tls_index = thunkv1->key * 8;
+		}
 	}
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();

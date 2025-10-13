@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
     (Arnaud)
+  . Fixed bug GH-20121 (JIT broken in ZTS builds on MacOS 15).
+    (Arnaud, Shivam Mathur)
 
 - Phar:
   . Fix memory leak of argument in webPhar. (nielsdos)
