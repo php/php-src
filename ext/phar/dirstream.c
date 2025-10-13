@@ -394,7 +394,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, 1))) {
+	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, true))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
 			zend_string_efree(e->filename);
@@ -412,7 +412,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if (phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 0, &error, 1)) {
+	if (phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 0, &error, true)) {
 		/* entry exists as a file */
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
 		php_url_free(resource);
@@ -523,7 +523,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	size_t path_len = ZSTR_LEN(resource->path) - 1;
 
-	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, 1))) {
+	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, true))) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 			efree(error);

@@ -127,7 +127,7 @@ bool phar_is_tar(char *buf, char *fname) /* {{{ */
 }
 /* }}} */
 
-zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
 	zend_result ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
@@ -210,7 +210,7 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 	tar_header *hdr;
 	uint32_t sum1, sum2, size, old;
 	phar_archive_data *myphar, *actual;
-	int last_was_longlink = 0;
+	bool last_was_longlink = false;
 	size_t linkname_len;
 
 	if (error) {
@@ -361,7 +361,7 @@ bail:
 		}
 
 		if (!last_was_longlink && hdr->typeflag == 'L') {
-			last_was_longlink = 1;
+			last_was_longlink = true;
 			/* support the ././@LongLink system for storing long filenames */
 
 			/* Check for overflow - bug 61065 */
@@ -465,7 +465,7 @@ bail:
 				GC_MAKE_PERSISTENT_LOCAL(entry.filename);
 			}
 		}
-		last_was_longlink = 0;
+		last_was_longlink = false;
 
 		phar_add_virtual_dirs(myphar, ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename));
 
@@ -819,18 +819,18 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 
 	/* write contents */
 	if (entry->uncompressed_filesize) {
-		if (FAILURE == phar_open_entry_fp(entry, fp->error, 0)) {
+		if (FAILURE == phar_open_entry_fp(entry, fp->error, false)) {
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written, seek failed", entry->phar->fname, ZSTR_VAL(entry->filename));
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp->new, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, false), fp->new, entry->uncompressed_filesize, NULL)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, ZSTR_VAL(entry->filename));
 			}

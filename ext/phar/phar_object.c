@@ -199,7 +199,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			}
 
 			/* prepare to output  */
-			fp = phar_get_efp(info, 1);
+			fp = phar_get_efp(info, true);
 
 			if (!fp) {
 				char *error;
@@ -210,10 +210,10 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					}
 					return -1;
 				}
-				fp = phar_get_efp(info, 1);
+				fp = phar_get_efp(info, true);
 			}
 			position = 0;
-			phar_seek_efp(info, 0, SEEK_SET, 0, 1);
+			phar_seek_efp(info, 0, SEEK_SET, 0, true);
 
 			do {
 				got = php_stream_read(fp, buf, MIN(8192, info->uncompressed_filesize - position));
@@ -331,7 +331,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 	phar_entry_info	*info;
 
 	if (phar && f404_len) {
-		info = phar_get_entry_info(phar, f404, f404_len, NULL, 1);
+		info = phar_get_entry_info(phar, f404, f404_len, NULL, true);
 
 		if (info) {
 			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, NULL, NULL, 0);
@@ -768,7 +768,7 @@ cleanup_fail:
 		}
 
 		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-			(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
+			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
 
 			if (free_pathinfo) {
@@ -814,7 +814,7 @@ cleanup_fail:
 	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
+		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
 		zend_bailout();
 	}
@@ -1067,15 +1067,13 @@ PHP_METHOD(Phar, isValidPharFilename)
 	const char *ext_str;
 	size_t fname_len;
 	size_t ext_len;
-	int is_executable;
-	bool executable = true;
+	bool is_executable = true;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &fname, &fname_len, &executable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &fname, &fname_len, &is_executable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	is_executable = executable;
-	RETVAL_BOOL(phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, is_executable, 2, 1) == SUCCESS);
+	RETURN_BOOL(phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, is_executable, 2, true) == SUCCESS);
 }
 /* }}} */
 
@@ -1193,8 +1191,8 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	if (is_data && phar_data->is_tar && phar_data->is_brandnew && format == PHAR_FORMAT_ZIP) {
-		phar_data->is_zip = 1;
-		phar_data->is_tar = 0;
+		phar_data->is_zip = true;
+		phar_data->is_tar = false;
 	}
 
 	if (fname == arch) {
@@ -1631,7 +1629,7 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, 1))) {
+	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, true))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 
@@ -1914,7 +1912,7 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 
 	ZEND_ASSERT(!entry->link);
 
-	if (FAILURE == phar_open_entry_fp(entry, &error, 1)) {
+	if (FAILURE == phar_open_entry_fp(entry, &error, true)) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents: %s", entry->phar->fname, ZSTR_VAL(entry->filename), error);
@@ -1927,9 +1925,9 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 	}
 
 	/* copy old contents in entirety */
-	phar_seek_efp(entry, 0, SEEK_SET, 0, 0);
+	phar_seek_efp(entry, 0, SEEK_SET, 0, false);
 	offset = php_stream_tell(fp);
-	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp, entry->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, false), fp, entry->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, ZSTR_VAL(entry->filename));
 		return FAILURE;
@@ -2120,7 +2118,7 @@ its_ok:
 		goto err_reused_oldpath;
 	}
 	if (!phar->is_data) {
-		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &ext_len, 1, 1, 1)) {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &ext_len, 1, 1, true)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "phar \"%s\" has invalid extension %s", phar->fname, ext);
 			goto err_reused_oldpath;
 		}
@@ -2143,7 +2141,7 @@ its_ok:
 
 	} else {
 
-		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &ext_len, 0, 1, 1)) {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &ext_len, 0, 1, true)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "data phar \"%s\" has invalid extension %s", phar->fname, ext);
 			goto err_reused_oldpath;
 		}
@@ -2161,7 +2159,7 @@ its_ok:
 		goto err_oldpath;
 	}
 
-	phar_flush_ex(phar, NULL, 1, &error);
+	phar_flush_ex(phar, NULL, true, &error);
 
 	if (error) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), newpath, phar->fname_len);
@@ -2222,13 +2220,13 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 
 	switch (convert) {
 		case PHAR_FORMAT_TAR:
-			phar->is_tar = 1;
+			phar->is_tar = true;
 			break;
 		case PHAR_FORMAT_ZIP:
-			phar->is_zip = 1;
+			phar->is_zip = true;
 			break;
 		default:
-			phar->is_data = 0;
+			phar->is_data = false;
 			break;
 	}
 
@@ -2327,7 +2325,6 @@ no_copy:
 PHP_METHOD(Phar, convertToExecutable)
 {
 	char *ext = NULL;
-	int is_data;
 	size_t ext_len = 0;
 	uint32_t flags;
 	zend_object *ret;
@@ -2418,8 +2415,8 @@ PHP_METHOD(Phar, convertToExecutable)
 		}
 	}
 
-	is_data = phar_obj->archive->is_data;
-	phar_obj->archive->is_data = 0;
+	bool is_data = phar_obj->archive->is_data;
+	phar_obj->archive->is_data = false;
 	ret = phar_convert_to_other(phar_obj->archive, format, ext, flags);
 	phar_obj->archive->is_data = is_data;
 
@@ -2438,7 +2435,6 @@ PHP_METHOD(Phar, convertToExecutable)
 PHP_METHOD(Phar, convertToData)
 {
 	char *ext = NULL;
-	int is_data;
 	size_t ext_len = 0;
 	uint32_t flags;
 	zend_object *ret;
@@ -2528,8 +2524,8 @@ PHP_METHOD(Phar, convertToData)
 		}
 	}
 
-	is_data = phar_obj->archive->is_data;
-	phar_obj->archive->is_data = 1;
+	bool is_data = phar_obj->archive->is_data;
+	phar_obj->archive->is_data = true;
 	ret = phar_convert_to_other(phar_obj->archive, (int)format, ext, flags);
 	phar_obj->archive->is_data = is_data;
 
@@ -2676,7 +2672,7 @@ PHP_METHOD(Phar, setAlias)
 	char *error, *oldalias;
 	phar_archive_data *fd_ptr;
 	size_t oldalias_len;
-	int old_temp, readd = 0;
+	bool old_temp, readd = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_alias) == FAILURE) {
 		RETURN_THROWS();
@@ -2724,7 +2720,7 @@ PHP_METHOD(Phar, setAlias)
 	}
 	if (phar_obj->archive->alias_len && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len))) {
 		zend_hash_str_del(&(PHAR_G(phar_alias_map)), phar_obj->archive->alias, phar_obj->archive->alias_len);
-		readd = 1;
+		readd = true;
 	}
 
 	ZEND_ASSERT(!phar_obj->archive->is_persistent);
@@ -2937,7 +2933,7 @@ PHP_METHOD(Phar, setDefaultStub)
 	char *index = NULL, *webindex = NULL, *error = NULL;
 	zend_string *stub = NULL;
 	size_t index_len = 0, webindex_len = 0;
-	int created_stub = 0;
+	bool created_stub = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		RETURN_THROWS();
@@ -3551,7 +3547,7 @@ PHP_METHOD(Phar, offsetGet)
 	PHAR_ARCHIVE_OBJECT();
 
 	/* security is 0 here so that we can get a better error message than "entry doesn't exist" */
-	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, ZSTR_VAL(file_name), ZSTR_LEN(file_name), 1, &error, 0))) {
+	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, ZSTR_VAL(file_name), ZSTR_LEN(file_name), 1, &error, false))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist%s%s", ZSTR_VAL(file_name), error?", ":"", error?error:"");
 	} else {
 		if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
@@ -3624,7 +3620,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, 1))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
 			efree(error);
@@ -3696,7 +3692,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, 1))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", ZSTR_VAL(dir_name), error);
 			efree(error);
@@ -3908,13 +3904,13 @@ PHP_METHOD(Phar, getStub)
 				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
 					char *filter_name;
 
-					if ((filter_name = phar_decompress_filter(stub, 0)) != NULL) {
+					if ((filter_name = phar_decompress_filter(stub, false)) != NULL) {
 						filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp));
 					} else {
 						filter = NULL;
 					}
 					if (!filter) {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", phar_obj->archive->fname, phar_decompress_filter(stub, 1));
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", phar_obj->archive->fname, phar_decompress_filter(stub, true));
 						RETURN_THROWS();
 					}
 					php_stream_filter_append(&fp->readfilters, filter);
@@ -4011,7 +4007,7 @@ PHP_METHOD(Phar, getMetadata)
 /* }}} */
 
 /* {{{ Modifies the phar metadata or throws */
-static zend_result serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
+static zend_result serialize_metadata_or_throw(phar_metadata_tracker *tracker, bool persistent, zval *metadata)
 {
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
@@ -4248,8 +4244,8 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 		return FAILURE;
 	}
 
-	if ((phar_get_fp_type(entry) == PHAR_FP && (entry->flags & PHAR_ENT_COMPRESSION_MASK)) || !phar_get_efp(entry, 0)) {
-		if (FAILURE == phar_open_entry_fp(entry, error, 1)) {
+	if ((phar_get_fp_type(entry) == PHAR_FP && (entry->flags & PHAR_ENT_COMPRESSION_MASK)) || !phar_get_efp(entry, false)) {
+		if (FAILURE == phar_open_entry_fp(entry, error, true)) {
 			if (error) {
 				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", ZSTR_VAL(entry->filename), fullpath, *error);
 			} else {
@@ -4261,14 +4257,14 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 		}
 	}
 
-	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to seek internal file pointer", ZSTR_VAL(entry->filename), fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
 		return FAILURE;
 	}
 
-	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp, entry->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, false), fp, entry->uncompressed_filesize, NULL)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", ZSTR_VAL(entry->filename), fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
@@ -4464,7 +4460,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS();
 	}
 
-	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error, 1)) == NULL) {
+	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error, true)) == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"Cannot access phar file entry '%s' in archive '%s'%s%s", entry, arch, error ? ", " : "", error ? error : "");
 		efree(arch);
@@ -4844,20 +4840,20 @@ PHP_METHOD(PharFileInfo, getContent)
 		link = entry_obj->entry;
 	}
 
-	if (SUCCESS != phar_open_entry_fp(link, &error, 0)) {
+	if (SUCCESS != phar_open_entry_fp(link, &error, false)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 			"phar error: Cannot retrieve contents, \"%s\" in phar \"%s\": %s", ZSTR_VAL(entry_obj->entry->filename), entry_obj->entry->phar->fname, error);
 		efree(error);
 		RETURN_THROWS();
 	}
 
-	if (!(fp = phar_get_efp(link, 0))) {
+	if (!(fp = phar_get_efp(link, false))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 			"phar error: Cannot retrieve contents of \"%s\" in phar \"%s\"", ZSTR_VAL(entry_obj->entry->filename), entry_obj->entry->phar->fname);
 		RETURN_THROWS();
 	}
 
-	phar_seek_efp(link, 0, SEEK_SET, 0, 0);
+	phar_seek_efp(link, 0, SEEK_SET, 0, false);
 	str = php_stream_copy_to_mem(fp, link->uncompressed_filesize, 0);
 	if (str) {
 		RETURN_STR(str);
@@ -4927,7 +4923,7 @@ PHP_METHOD(PharFileInfo, compress)
 				}
 
 				/* decompress this file indirectly */
-				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
+				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, true)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 						"phar error: Cannot decompress bzip2-compressed file \"%s\" in phar \"%s\" in order to compress with gzip: %s", ZSTR_VAL(entry_obj->entry->filename), entry_obj->entry->phar->fname, error);
 					efree(error);
@@ -4958,7 +4954,7 @@ PHP_METHOD(PharFileInfo, compress)
 				}
 
 				/* decompress this file indirectly */
-				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
+				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, true)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 						"phar error: Cannot decompress gzip-compressed file \"%s\" in phar \"%s\" in order to compress with bzip2: %s", ZSTR_VAL(entry_obj->entry->filename), entry_obj->entry->phar->fname, error);
 					efree(error);
@@ -5063,7 +5059,7 @@ PHP_METHOD(PharFileInfo, decompress)
 			RETURN_THROWS();
 	}
 	/* decompress this file indirectly */
-	if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
+	if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, true)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 			"Phar error: Cannot decompress %s-compressed file \"%s\" in phar \"%s\": %s", compression_type, ZSTR_VAL(entry_obj->entry->filename), entry_obj->entry->phar->fname, error);
 		efree(error);

@@ -798,7 +798,7 @@ foundit:
 /**
  * Create or open a zip-based phar for writing
  */
-zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
 	zend_result ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
@@ -849,7 +849,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	struct _phar_zip_pass *p;
 	uint32_t newcrc32;
 	zend_off_t offset;
-	int not_really_modified = 0;
+	bool not_really_modified = false;
 	p = (struct _phar_zip_pass*) arg;
 	uint16_t general_purpose_flags;
 
@@ -923,23 +923,23 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 			goto continue_dir;
 		}
 
-		if (FAILURE == phar_open_entry_fp(entry, p->error, 0)) {
+		if (FAILURE == phar_open_entry_fp(entry, p->error, false)) {
 			spprintf(p->error, 0, "unable to open file contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
 
 		/* we can be modified and already be compressed, such as when chmod() is executed */
 		if (entry->flags & PHAR_ENT_COMPRESSION_MASK && (entry->old_flags == entry->flags || !entry->old_flags)) {
-			not_really_modified = 1;
+			not_really_modified = true;
 			goto is_compressed;
 		}
 
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		efp = phar_get_efp(entry, 0);
+		efp = phar_get_efp(entry, false);
 		newcrc32 = php_crc32_bulk_init();
 
 		php_crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
@@ -956,7 +956,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 			goto not_compressed;
 		}
 
-		filter = php_stream_filter_create(phar_compress_filter(entry, 0), NULL, 0);
+		filter = php_stream_filter_create(phar_compress_filter(entry, false), NULL, 0);
 
 		if (!filter) {
 			if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -980,7 +980,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		php_stream_flush(efp);
 
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 			php_stream_filter_free(filter);
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
@@ -1093,13 +1093,13 @@ continue_dir:
 			php_stream_close(entry->cfp);
 			entry->cfp = NULL;
 		} else {
-			if (FAILURE == phar_open_entry_fp(entry, p->error, 0)) {
+			if (FAILURE == phar_open_entry_fp(entry, p->error, false)) {
 				return ZEND_HASH_APPLY_STOP;
 			}
 
-			phar_seek_efp(entry, 0, SEEK_SET, 0, 0);
+			phar_seek_efp(entry, 0, SEEK_SET, 0, false);
 
-			if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), p->filefp, entry->uncompressed_filesize, NULL)) {
+			if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, false), p->filefp, entry->uncompressed_filesize, NULL)) {
 				spprintf(p->error, 0, "unable to write contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
 				return ZEND_HASH_APPLY_STOP;
 			}
