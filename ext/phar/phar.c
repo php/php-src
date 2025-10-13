@@ -2544,7 +2544,8 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;
-	int restore_alias_len, global_flags = 0;
+	uint32_t restore_alias_len;
+	uint32_t global_flags = 0;
 	bool must_close_old_file = false;
 	bool has_dirs = false;
 	char manifest[18], entry_buffer[24];
