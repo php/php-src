@@ -205,7 +205,6 @@ typedef struct _phar_entry_info {
 	uint32_t                 old_flags;
 	phar_metadata_tracker metadata_tracker;
 	zend_string              *filename;
-	enum phar_fp_type        fp_type;
 	/* offset within original phar file of the file contents */
 	zend_long                     offset_abs;
 	/* offset within fp of the file contents */
@@ -214,6 +213,7 @@ typedef struct _phar_entry_info {
 	zend_long                     header_offset;
 	php_stream               *fp;
 	php_stream               *cfp;
+	enum phar_fp_type        fp_type;
 	int                      fp_refcount;
 	char                     *tmp;
 	phar_archive_data        *phar;
