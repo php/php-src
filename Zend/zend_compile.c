@@ -9346,11 +9346,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	if (decl->child[3]) {
 		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
-
-		zend_attribute *not_serializable = zend_get_attribute_str(ce->attributes, "notserializable", sizeof("notserializable")-1);
-		if (not_serializable) {
-			ce->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
-		}
 	}
 
 	if (implements_ast) {
