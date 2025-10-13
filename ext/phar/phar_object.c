@@ -1734,17 +1734,11 @@ PHP_METHOD(Phar, buildFromDirectory)
 	ZVAL_LONG(&args[1], SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
 	if (SUCCESS != object_init_with_constructor(&iter, spl_ce_RecursiveDirectoryIterator, 2, args, NULL)) {
-		if (!EG(exception)) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
-		}
 		RETURN_THROWS();
 	}
 
 	if (SUCCESS != object_init_with_constructor(&iteriter, spl_ce_RecursiveIteratorIterator, 1, &iter, NULL)) {
 		zval_ptr_dtor(&iter);
-		if (!EG(exception)) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
-		}
 		RETURN_THROWS();
 	}
 
@@ -1758,9 +1752,6 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 		if (SUCCESS != object_init_with_constructor(&regexiter, spl_ce_RegexIterator, 2, args, NULL)) {
 			zval_ptr_dtor(&iteriter);
-			if (!EG(exception)) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
-			}
 			RETURN_THROWS();
 		}
 	}
@@ -2190,7 +2181,6 @@ its_ok:
 	zend_result result = object_init_with_constructor(&ret, ce, 1, &arg1, NULL);
 	zval_ptr_dtor_str(&arg1);
 	if (SUCCESS != result) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate phar object when converting archive \"%s\"", phar->fname);
 		return NULL;
 	}
 	return Z_OBJ(ret);
