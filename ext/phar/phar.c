@@ -2298,16 +2298,18 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 	*arch_len = ext_str - filename + ext_len;
 	*arch = estrndup(filename, *arch_len);
 
-	if (ext_str[ext_len]) {
-		*entry_len = filename_len - *arch_len;
-		*entry = estrndup(ext_str+ext_len, *entry_len);
-#ifdef PHP_WIN32
-		phar_unixify_path_separators(*entry, *entry_len);
-#endif
-		*entry = phar_fix_filepath(*entry, entry_len, 0);
-	} else {
-		*entry_len = 1;
-		*entry = estrndup("/", 1);
+	if (entry) {
+		if (ext_str[ext_len]) {
+			*entry_len = filename_len - *arch_len;
+			*entry = estrndup(ext_str+ext_len, *entry_len);
+	#ifdef PHP_WIN32
+			phar_unixify_path_separators(*entry, *entry_len);
+	#endif
+			*entry = phar_fix_filepath(*entry, entry_len, 0);
+		} else {
+			*entry_len = 1;
+			*entry = estrndup("/", 1);
+		}
 	}
 
 #ifdef PHP_WIN32
