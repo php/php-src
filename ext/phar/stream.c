@@ -447,7 +447,7 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
-		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, ZSTR_VAL(data->internal_file->filename), data->phar->fname);
+		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %zu characters to \"%s\" in phar \"%s\"", count, ZSTR_VAL(data->internal_file->filename), data->phar->fname);
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp) - data->zero;
