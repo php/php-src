@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   . Fix a bunch of memory leaks in phar_parse_zipfile() error handling.
     (nielsdos)
   . Fix file descriptor/memory leak when opening central fp fails. (nielsdos)
+  . Fix memleak+UAF when opening temp stream in buildFromDirectory() fails.
+    (nielsdos)
 
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
