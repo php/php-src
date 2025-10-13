@@ -416,8 +416,8 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 
 /* utility functions */
 zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error);
-char *phar_decompress_filter(phar_entry_info * entry, bool return_unknown);
-char *phar_compress_filter(phar_entry_info * entry, bool return_unknown);
+const char *phar_decompress_filter(const phar_entry_info *entry, bool return_unknown);
+const char *phar_compress_filter(const phar_entry_info *entry, bool return_unknown);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);

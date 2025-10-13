@@ -832,7 +832,6 @@ zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow
 {
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
-	char *filtername;
 	zend_off_t loc;
 	php_stream *ufp;
 	phar_entry_data dummy;
@@ -896,8 +895,9 @@ zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow
 
 	ufp = phar_get_entrypufp(entry);
 
-	if ((filtername = phar_decompress_filter(entry, false)) != NULL) {
-		filter = php_stream_filter_create(filtername, NULL, 0);
+	const char *filter_name = phar_decompress_filter(entry, false);
+	if (filter_name != NULL) {
+		filter = php_stream_filter_create(filter_name, NULL, 0);
 	} else {
 		filter = NULL;
 	}
@@ -1191,7 +1191,7 @@ realpath_success:
 /**
  * Determine which stream compression filter (if any) we need to read this file
  */
-char * phar_compress_filter(phar_entry_info * entry, bool return_unknown) /* {{{ */
+const char * phar_compress_filter(const phar_entry_info *entry, bool return_unknown) /* {{{ */
 {
 	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 	case PHAR_ENT_COMPRESSED_GZ:
@@ -1207,7 +1207,7 @@ char * phar_compress_filter(phar_entry_info * entry, bool return_unknown) /* {{{
 /**
  * Determine which stream decompression filter (if any) we need to read this file
  */
-char * phar_decompress_filter(phar_entry_info * entry, bool return_unknown) /* {{{ */
+const char * phar_decompress_filter(const phar_entry_info *entry, bool return_unknown) /* {{{ */
 {
 	uint32_t flags;
 
