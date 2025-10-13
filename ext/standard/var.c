@@ -1414,19 +1414,20 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 						function_name, zend_zval_value_name(entry));
 					goto cleanup;
 				}
-				zend_string *name = zval_try_get_string(entry);
+				zend_string *tmp_str;
+				zend_string *name = zval_try_get_tmp_string(entry, &tmp_str);
 				if (UNEXPECTED(name == NULL)) {
 					goto cleanup;
 				}
 				if (UNEXPECTED(!zend_is_valid_class_name(name))) {
 					zend_value_error("%s(): Option \"allowed_classes\" must be an array of class names, \"%s\" given", function_name, ZSTR_VAL(name));
-					zend_string_release_ex(name, false);
+					zend_tmp_string_release(tmp_str);
 					goto cleanup;
 				}
 				zend_string *lcname = zend_string_tolower(name);
 				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release_ex(name, false);
 		        zend_string_release_ex(lcname, false);
+		        zend_tmp_string_release(tmp_str);
 			} ZEND_HASH_FOREACH_END();
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
