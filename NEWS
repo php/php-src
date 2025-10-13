@@ -20,6 +20,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
 
+- Phar:
+  . Support reference values in Phar::mungServer(). (nielsdos)
+  . Invalid values now throw in Phar::mungServer() instead of being silently
+    ignored. (nielsdos)
+
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
