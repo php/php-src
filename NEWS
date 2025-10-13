@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20085 (Assertion failure when combining lazy object
     get_properties exception with foreach loop). (nielsdos)
 
+- DOM:
+  . Partially fixed bug GH-16317 (DOM classes do not allow
+    __debugInfo() overrides to work). (nielsdos)
+
 - FPM:
   . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
     execution). (Jakub Zelenka, txuna)

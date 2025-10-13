@@ -492,6 +492,7 @@ static void dom_unset_property(zend_object *object, zend_string *member, void **
 	zend_std_unset_property(object, member, cache_slot);
 }
 
+/* This custom handler is necessary to avoid a recursive construction of the entire subtree. */
 static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
 	dom_object			*obj = php_dom_obj_from_obj(object);
@@ -501,6 +502,11 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	zend_string			*string_key;
 	dom_prop_handler	*entry;
 	zend_string         *object_str;
+
+	/* As we have a custom implementation, we must manually check for overrides. */
+	if (object->ce->__debugInfo) {
+		return zend_std_get_debug_info(object, is_temp);
+	}
 
 	*is_temp = 1;
 
