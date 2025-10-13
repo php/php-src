@@ -6522,6 +6522,229 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+#define COPY_ZVAL_WITH_REFCOUNT(result, expr, op1_type) do { \
+	ZVAL_COPY_VALUE(result, expr); \
+	if ((op1_type) == IS_CONST && UNEXPECTED(Z_OPT_REFCOUNTED_P(result))) { \
+		Z_ADDREF_P(result); \
+	} else if ((op1_type) != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(result)) { \
+		Z_ADDREF_P(result); \
+	} \
+} while (0)
+
+#define GET_TYPE_MASK_AND_TARGET(extended_value, type_mask_var, target_type_var) do { \
+	switch (extended_value) { \
+		case IS_LONG: type_mask_var = MAY_BE_LONG; target_type_var = IS_LONG; break; \
+		case IS_DOUBLE: type_mask_var = MAY_BE_DOUBLE; target_type_var = IS_DOUBLE; break; \
+		case IS_STRING: type_mask_var = MAY_BE_STRING; target_type_var = IS_STRING; break; \
+		case _IS_BOOL: type_mask_var = MAY_BE_BOOL; target_type_var = IS_TRUE; break; \
+		default: ZEND_UNREACHABLE(); \
+	} \
+} while (0)
+
+ZEND_VM_COLD_CONST_HANDLER(211, ZEND_NULLABLE_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
+{
+	USE_OPLINE
+	zval *expr;
+	zval *result = EX_VAR(opline->result.var);
+
+	SAVE_OPLINE();
+	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE & (IS_VAR|IS_CV)) {
+		ZVAL_DEREF(expr);
+	}
+
+	/* Check for null first - if null, return null unchanged */
+	if (Z_TYPE_P(expr) == IS_NULL) {
+		ZVAL_NULL(result);
+		FREE_OP1();
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+
+	/* For non-null values, perform weak mode validation and coercion */
+	switch (opline->extended_value) {
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case _IS_BOOL: {
+			uint32_t type_mask;
+			uint8_t target_type;
+			GET_TYPE_MASK_AND_TARGET(opline->extended_value, type_mask, target_type);
+
+			/* Copy value for validation */
+			COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+
+			/* Check if already correct type */
+			if (opline->extended_value == _IS_BOOL) {
+				if (Z_TYPE_P(result) == IS_TRUE || Z_TYPE_P(result) == IS_FALSE) {
+					break; /* Already a bool, no conversion needed */
+				}
+			} else if (Z_TYPE_P(result) == target_type) {
+				break; /* Already correct type, no conversion needed */
+			}
+
+			/* For int casts, reject floats with precision loss directly */
+			if (opline->extended_value == IS_LONG) {
+				if (zend_handle_float_to_int_cast_strict(result, expr)) {
+					FREE_OP1_IF_VAR();
+					if (Z_TYPE_P(result) == IS_UNDEF) {
+						HANDLE_EXCEPTION();
+					}
+					break;
+				}
+			}
+
+			/* Attempt weak mode type coercion */
+			if (!zend_verify_weak_scalar_type_hint(type_mask, result)) {
+				zval_ptr_dtor(result);
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to %s",
+					zend_zval_type_name(expr),
+					opline->extended_value == IS_LONG ? "int" :
+					opline->extended_value == IS_DOUBLE ? "float" :
+					opline->extended_value == IS_STRING ? "string" : "bool");
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		}
+		case IS_ARRAY:
+			if (Z_TYPE_P(expr) == IS_ARRAY) {
+				COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+			} else if (Z_TYPE_P(expr) == IS_OBJECT) {
+				zend_cast_zval_to_array(result, expr, OP1_TYPE);
+			} else {
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to array", zend_zval_type_name(expr));
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(expr) == IS_OBJECT) {
+				COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+			} else if (Z_TYPE_P(expr) == IS_ARRAY) {
+				zend_cast_zval_to_object(result, expr, OP1_TYPE);
+			} else {
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to object", zend_zval_type_name(expr));
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_COLD_CONST_HANDLER(212, ZEND_NONNULL_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
+{
+	USE_OPLINE
+	zval *expr;
+	zval *result = EX_VAR(opline->result.var);
+
+	SAVE_OPLINE();
+	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE & (IS_VAR|IS_CV)) {
+		ZVAL_DEREF(expr);
+	}
+
+	/* Check for null - if null, throw TypeError */
+	if (Z_TYPE_P(expr) == IS_NULL) {
+		FREE_OP1_IF_VAR();
+		zend_type_error("Cannot cast null to %s",
+			opline->extended_value == IS_LONG ? "int" :
+			opline->extended_value == IS_DOUBLE ? "float" :
+			opline->extended_value == IS_STRING ? "string" :
+			opline->extended_value == _IS_BOOL ? "bool" :
+			opline->extended_value == IS_ARRAY ? "array" : "object");
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
+	/* For non-null values, perform weak mode validation and coercion */
+	switch (opline->extended_value) {
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case _IS_BOOL: {
+			uint32_t type_mask;
+			uint8_t target_type;
+			GET_TYPE_MASK_AND_TARGET(opline->extended_value, type_mask, target_type);
+
+			/* Copy value for validation */
+			COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+
+			/* Check if already correct type */
+			if (opline->extended_value == _IS_BOOL) {
+				if (Z_TYPE_P(result) == IS_TRUE || Z_TYPE_P(result) == IS_FALSE) {
+					break; /* Already a bool, no conversion needed */
+				}
+			} else if (Z_TYPE_P(result) == target_type) {
+				break; /* Already correct type, no conversion needed */
+			}
+
+			/* For int casts, reject floats with precision loss directly */
+			if (opline->extended_value == IS_LONG) {
+				if (zend_handle_float_to_int_cast_strict(result, expr)) {
+					FREE_OP1_IF_VAR();
+					if (Z_TYPE_P(result) == IS_UNDEF) {
+						HANDLE_EXCEPTION();
+					}
+					break;
+				}
+			}
+
+			/* Attempt weak mode type coercion */
+			if (!zend_verify_weak_scalar_type_hint(type_mask, result)) {
+				zval_ptr_dtor(result);
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to %s",
+					zend_zval_type_name(expr),
+					opline->extended_value == IS_LONG ? "int" :
+					opline->extended_value == IS_DOUBLE ? "float" :
+					opline->extended_value == IS_STRING ? "string" : "bool");
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		}
+		case IS_ARRAY:
+			if (Z_TYPE_P(expr) == IS_ARRAY) {
+				COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+			} else if (Z_TYPE_P(expr) == IS_OBJECT) {
+				zend_cast_zval_to_array(result, expr, OP1_TYPE);
+			} else {
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to array", zend_zval_type_name(expr));
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		case IS_OBJECT:
+			if (Z_TYPE_P(expr) == IS_OBJECT) {
+				COPY_ZVAL_WITH_REFCOUNT(result, expr, OP1_TYPE);
+			} else if (Z_TYPE_P(expr) == IS_ARRAY) {
+				zend_cast_zval_to_object(result, expr, OP1_TYPE);
+			} else {
+				FREE_OP1_IF_VAR();
+				zend_type_error("Cannot cast %s to object", zend_zval_type_name(expr));
+				ZVAL_UNDEF(result);
+				HANDLE_EXCEPTION();
+			}
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL, SPEC(OBSERVER))
 {
 	USE_OPLINE
