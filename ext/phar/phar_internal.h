@@ -105,8 +105,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* for cached phars, this is a per-process store of fp/ufp */
 	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
-	int         phar_SERVER_mung_list;
 	char*       cache_list;
+	int         phar_SERVER_mung_list;
 	bool        readonly;
 	bool        manifest_cached;
 	bool        persist;
@@ -150,8 +150,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* phar_get_archive cache */
 	char*       last_phar_name;
 	uint32_t    last_phar_name_len;
-	char*       last_alias;
 	uint32_t    last_alias_len;
+	char*       last_alias;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
