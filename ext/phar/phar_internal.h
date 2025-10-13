@@ -224,21 +224,21 @@ typedef struct _phar_entry_info {
 	/* for stat */
 	unsigned short           inode;
 
-	uint32_t             is_crc_checked:1;
-	uint32_t             is_modified:1;
-	uint32_t             is_deleted:1;
-	uint32_t             is_dir:1;
+	bool             is_crc_checked:1;
+	bool             is_modified:1;
+	bool             is_deleted:1;
+	bool             is_dir:1;
 	/* this flag is used for mounted entries (external files mapped to location
 	   inside a phar */
-	uint32_t             is_mounted:1;
+	bool             is_mounted:1;
 	/* used when iterating */
-	uint32_t             is_temp_dir:1;
+	bool             is_temp_dir:1;
 	/* tar-based phar file stuff */
-	uint32_t             is_tar:1;
+	bool             is_tar:1;
 	/* zip-based phar file stuff */
-	uint32_t             is_zip:1;
+	bool             is_zip:1;
 	/* for cached phar entries */
-	uint32_t             is_persistent:1;
+	bool             is_persistent:1;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -270,20 +270,20 @@ struct _phar_archive_data {
 	phar_metadata_tracker metadata_tracker;
 	uint32_t                 phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
-	uint32_t             is_temporary_alias:1;
-	uint32_t             is_modified:1;
-	uint32_t             is_writeable:1;
-	uint32_t             is_brandnew:1;
+	bool             is_temporary_alias:1;
+	bool             is_modified:1;
+	bool             is_writeable:1;
+	bool             is_brandnew:1;
 	/* defer phar creation */
-	uint32_t             donotflush:1;
+	bool             donotflush:1;
 	/* zip-based phar variables */
-	uint32_t             is_zip:1;
+	bool             is_zip:1;
 	/* tar-based phar variables */
-	uint32_t             is_tar:1;
+	bool             is_tar:1;
 	/* PharData variables       */
-	uint32_t             is_data:1;
+	bool             is_data:1;
 	/* for cached phar manifests */
-	uint32_t             is_persistent:1;
+	bool             is_persistent:1;
 };
 
 typedef struct _phar_entry_fp_info {

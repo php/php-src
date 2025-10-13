@@ -1252,7 +1252,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 	phar_unixify_path_separators(path, path_len);
 #endif
 
-	is_dir = (path_len && (path[path_len - 1] == '/')) ? true : false;
+	is_dir = path_len && (path[path_len - 1] == '/');
 
 	if (error) {
 		*error = NULL;
