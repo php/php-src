@@ -510,7 +510,6 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, char *al
 		&& ((alias && fname_len == phar->fname_len
 		&& !strncmp(fname, phar->fname, fname_len)) || !alias)
 	) {
-		phar_entry_info *stub;
 #ifdef PHP_WIN32
 		if (fname != save_fname) {
 			free_alloca(fname, fname_use_heap);
@@ -526,7 +525,7 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, char *al
 		if (!is_data) {
 			/* prevent any ".phar" without a stub getting through */
 			if (!phar->halt_offset && !phar->is_brandnew && (phar->is_tar || phar->is_zip)) {
-				if (PHAR_G(readonly) && NULL == (stub = zend_hash_str_find_ptr(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1))) {
+				if (PHAR_G(readonly) && !zend_hash_str_exists(&(phar->manifest), ZEND_STRL(".phar/stub.php"))) {
 					if (error) {
 						spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 					}
@@ -1354,8 +1353,7 @@ check_file:
 		}
 
 		if (PHAR_G(readonly) && !(*test)->is_data && ((*test)->is_tar || (*test)->is_zip)) {
-			phar_entry_info *stub;
-			if (NULL == (stub = zend_hash_str_find_ptr(&((*test)->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1))) {
+			if (!zend_hash_str_exists(&((*test)->manifest), ZEND_STRL(".phar/stub.php"))) {
 				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 				return FAILURE;
 			}
