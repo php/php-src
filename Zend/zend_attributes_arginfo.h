@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b868cb33f41d9442f42d0cec84e33fcc09f5d88c */
+ * Stub hash: ef3a21a6e698ac7755676ec43f5ba0daac63bb76 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -288,6 +288,21 @@ static zend_class_entry *register_class_DelayedTargetValidation(void)
 	zend_attribute *attribute_Attribute_class_DelayedTargetValidation_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_DelayedTargetValidation_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_DelayedTargetValidation_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_DelayedTargetValidation_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_NotSerializable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NotSerializable", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_string *attribute_name_Attribute_class_NotSerializable_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
+	zend_attribute *attribute_Attribute_class_NotSerializable_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NotSerializable_0, 1);
+	zend_string_release_ex(attribute_name_Attribute_class_NotSerializable_0, true);
+	ZVAL_LONG(&attribute_Attribute_class_NotSerializable_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
 	return class_entry;
 }
