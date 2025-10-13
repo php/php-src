@@ -3902,9 +3902,9 @@ PHP_METHOD(Phar, getStub)
 					RETURN_THROWS();
 				}
 				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
-					char *filter_name;
+					const char *filter_name = phar_decompress_filter(stub, false);
 
-					if ((filter_name = phar_decompress_filter(stub, false)) != NULL) {
+					if (filter_name != NULL) {
 						filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp));
 					} else {
 						filter = NULL;
