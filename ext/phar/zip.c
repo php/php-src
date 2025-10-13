@@ -41,7 +41,7 @@ static inline void phar_write_16(char buffer[2], uint32_t value)
 # define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
 # define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
+static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
@@ -226,7 +226,7 @@ static char *phar_find_eocd(const char *s, size_t n)
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
@@ -798,10 +798,10 @@ foundit:
 /**
  * Create or open a zip-based phar for writing
  */
-int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
+	zend_result ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
@@ -1152,7 +1152,7 @@ static int phar_zip_changed_apply(zval *zv, void *arg) /* {{{ */
 }
 /* }}} */
 
-static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass) /* {{{ */
+static zend_result phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass) /* {{{ */
 {
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1442,7 +1442,7 @@ nocentralerror:
 
 	{
 		size_t clen;
-		int ret = php_stream_copy_to_stream_ex(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &clen);
+		zend_result ret = php_stream_copy_to_stream_ex(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &clen);
 		if (SUCCESS != ret || clen != cdir_size) {
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
