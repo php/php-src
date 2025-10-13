@@ -736,7 +736,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 	uint32_t len;
 	zend_long offset;
 	size_t sig_len;
-	bool register_alias = 0, temp_alias = 0;
+	bool register_alias = false, temp_alias = false;
 	char *signature = NULL;
 	zend_string *str;
 
