@@ -1590,7 +1590,7 @@ int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t a
 }
 /* }}}*/
 
-static inline char *phar_strnstr(const char *buf, int buf_len, const char *search, int search_len) /* {{{ */
+static inline char *phar_strnstr(const char *buf, size_t buf_len, const char *search, size_t search_len) /* {{{ */
 {
 	const char *c;
 	ptrdiff_t so_far = 0;
