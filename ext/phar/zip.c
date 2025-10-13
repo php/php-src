@@ -345,28 +345,6 @@ foundit:
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
 	entry.is_persistent = mydata->is_persistent;
-#define PHAR_ZIP_FAIL_FREE(errmsg, save) \
-			zend_hash_destroy(&mydata->manifest); \
-			HT_INVALIDATE(&mydata->manifest); \
-			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_INVALIDATE(&mydata->mounted_dirs); \
-			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_INVALIDATE(&mydata->virtual_dirs); \
-			php_stream_close(fp); \
-			phar_metadata_tracker_free(&mydata->metadata_tracker, mydata->is_persistent); \
-			if (mydata->signature) { \
-				efree(mydata->signature); \
-			} \
-			if (error) { \
-				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
-			} \
-			pefree(mydata->fname, mydata->is_persistent); \
-			if (mydata->alias) { \
-				pefree(mydata->alias, mydata->is_persistent); \
-			} \
-			pefree(mydata, mydata->is_persistent); \
-			efree(save); \
-			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
 			HT_INVALIDATE(&mydata->manifest); \
@@ -522,14 +500,13 @@ foundit:
 			mydata->sig_flags = PHAR_GET_32(sig);
 			if (FAILURE == phar_verify_signature(sigfile, php_stream_tell(sigfile), mydata->sig_flags, sig + 8, entry.uncompressed_filesize - 8, fname, &mydata->signature, &sig_len, error)) {
 				efree(sig);
+				php_stream_close(sigfile);
 				if (error) {
-					char *save;
-					php_stream_close(sigfile);
-					spprintf(&save, 4096, "signature cannot be verified: %s", *error);
+					char errmsg[128];
+					snprintf(errmsg, sizeof(errmsg), "signature cannot be verified: %s", *error);
 					efree(*error);
-					PHAR_ZIP_FAIL_FREE(save, save);
+					PHAR_ZIP_FAIL(errmsg);
 				} else {
-					php_stream_close(sigfile);
 					PHAR_ZIP_FAIL("signature cannot be verified");
 				}
 			}
@@ -641,13 +618,6 @@ foundit:
 
 			zend_off_t restore_pos = php_stream_tell(fp);
 			php_stream_seek(fp, entry.offset, SEEK_SET);
-			/* these next lines should be for php < 5.2.6 after 5.3 filters are fixed */
-			fp->writepos = 0;
-			fp->readpos = 0;
-			php_stream_seek(fp, entry.offset, SEEK_SET);
-			fp->writepos = 0;
-			fp->readpos = 0;
-			/* the above lines should be for php < 5.2.6 after 5.3 filters are fixed */
 
 			mydata->alias_len = entry.uncompressed_filesize;
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -674,7 +644,8 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
+					efree(actual_alias);
 					php_stream_filter_remove(filter, 1);
 					zend_string_release_ex(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
@@ -707,7 +678,8 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
+					efree(actual_alias);
 					php_stream_filter_remove(filter, 1);
 					zend_string_release_ex(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
@@ -730,7 +702,8 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
+					efree(actual_alias);
 					zend_string_release_ex(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -1222,7 +1195,9 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		entry.fp_type = PHAR_MOD;
 		entry.is_modified = 1;
 		if (entry.fp == NULL) {
+			efree(signature);
 			spprintf(pass->error, 0, "phar error: unable to create temporary file for signature");
+			php_stream_close(newfile);
 			return FAILURE;
 		}
 
@@ -1419,6 +1394,7 @@ fperror:
 	pass.centralfp = php_stream_fopen_tmpfile();
 
 	if (!pass.centralfp) {
+		php_stream_close(pass.filefp);
 		goto fperror;
 	}
 
@@ -1440,11 +1416,12 @@ fperror:
 
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
 	if (temperr) {
+temperror:
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
 		}
 		efree(temperr);
-temperror:
+notemperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
 		php_stream_close(pass.filefp);
@@ -1472,7 +1449,7 @@ nocentralerror:
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 			}
-			goto temperror;
+			goto notemperror;
 		}
 	}
 

@@ -466,7 +466,7 @@ static ssize_t zlog_stream_buf_flush(struct zlog_stream *stream) /* {{{ */
 	}
 #endif
 
-	if (external_logger != NULL) {
+	if (stream->use_external_logger) {
 		external_logger(stream->flags & ZLOG_LEVEL_MASK,
 				stream->buf.data + stream->prefix_len, stream->len - stream->prefix_len);
 	}
@@ -539,9 +539,11 @@ static inline void zlog_stream_init_internal(
 	stream->fd = fd > -1 ? fd : STDERR_FILENO;
 	stream->buf_init_size = capacity;
 	if (flags & ZLOG_ACCESS_LOG) {
+		stream->use_external_logger = 0;
 		stream->use_buffer = 1;
 		stream->use_stderr = fd < 0;
 	} else {
+		stream->use_external_logger = external_logger != NULL;
 		stream->use_buffer = zlog_buffering || external_logger != NULL || stream->use_syslog;
 		stream->use_stderr = fd < 0 ||
 				(

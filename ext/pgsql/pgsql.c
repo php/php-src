@@ -4971,7 +4971,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			break; /* break out for() */
 		}
 
-		if (zval_is_true(is_enum)) {
+		if (zend_is_true(is_enum)) {
 			/* enums need to be treated like strings */
 			data_type = PG_TEXT;
 		} else {

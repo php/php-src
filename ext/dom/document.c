@@ -1432,24 +1432,28 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
 
-	if (validate && ! (options & XML_PARSE_DTDVALID)) {
+	if (validate) {
 		options |= XML_PARSE_DTDVALID;
 	}
-	if (resolve_externals && ! (options & XML_PARSE_DTDATTR)) {
+	if (resolve_externals) {
 		options |= XML_PARSE_DTDATTR;
 	}
-	if (substitute_ent && ! (options & XML_PARSE_NOENT)) {
+	if (substitute_ent) {
 		options |= XML_PARSE_NOENT;
 	}
-	if (keep_blanks == 0 && ! (options & XML_PARSE_NOBLANKS)) {
+	if (keep_blanks == 0) {
 		options |= XML_PARSE_NOBLANKS;
 	}
 	if (recover) {
 		options |= XML_PARSE_RECOVER;
 	}
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(ctxt, options);
+#else
 	php_libxml_sanitize_parse_ctxt_options(ctxt);
 	xmlCtxtUseOptions(ctxt, options);
+#endif
 
 	if (recover) {
 		old_error_reporting = EG(error_reporting);
@@ -2040,8 +2044,6 @@ PHP_METHOD(DOMDocument, relaxNGValidateSource)
 
 #endif
 
-#ifdef LIBXML_HTML_ENABLED
-
 static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *source;
@@ -2088,10 +2090,16 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ctxt->sax->error = php_libxml_ctx_error;
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
+#if LIBXML_VERSION >= 21400
+	if (options) {
+		htmlCtxtSetOptions(ctxt, (int)options);
+	}
+#else
 	php_libxml_sanitize_parse_ctxt_options(ctxt);
 	if (options) {
 		htmlCtxtUseOptions(ctxt, (int)options);
 	}
+#endif
 	htmlParseDocument(ctxt);
 	xmlDocPtr newdoc = ctxt->myDoc;
 	htmlFreeParserCtxt(ctxt);
@@ -2233,8 +2241,6 @@ PHP_METHOD(DOMDocument, saveHTML)
 
 }
 /* }}} end dom_document_save_html */
-
-#endif  /* defined(LIBXML_HTML_ENABLED) */
 
 /* {{{ Register extended class used to create base node type */
 static void dom_document_register_node_class(INTERNAL_FUNCTION_PARAMETERS, bool modern)

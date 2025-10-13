@@ -291,8 +291,12 @@ static xmlNodePtr dom_xml_fragment_parsing_algorithm(dom_object *obj, const xmlN
 	}
 	parser->dict = context_node->doc->dict;
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(parser, XML_PARSE_IGNORE_ENC | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NO_XXE);
+#else
 	php_libxml_sanitize_parse_ctxt_options(parser);
 	xmlCtxtUseOptions(parser, XML_PARSE_IGNORE_ENC | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+#endif
 
 	xmlCharEncodingHandlerPtr encoding = xmlFindCharEncodingHandler("UTF-8");
 	(void) xmlSwitchToEncoding(parser, encoding);

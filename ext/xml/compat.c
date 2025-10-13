@@ -18,19 +18,22 @@
 #if defined(HAVE_LIBXML) && (defined(HAVE_XML) || defined(HAVE_XMLRPC)) && !defined(HAVE_LIBEXPAT)
 #include "expat_compat.h"
 #include "ext/libxml/php_libxml.h"
+#include "Zend/zend_smart_string.h"
 
 #ifdef LIBXML_EXPAT_COMPAT
 
-static void
-qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
+static xmlChar *
+qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI)
 {
 	if (URI) {
-			/* Use libxml functions otherwise its memory deallocation is screwed up */
-			*qualified = xmlStrdup(URI);
-			*qualified = xmlStrncat(*qualified, parser->_ns_separator, 1);
-			*qualified = xmlStrncat(*qualified, name, xmlStrlen(name));
+		smart_string str = {0};
+		smart_string_appends(&str, (const char *) URI);
+		smart_string_appends(&str, (const char *) parser->_ns_separator);
+		smart_string_appends(&str, (const char *) name);
+		smart_string_0(&str);
+		return BAD_CAST str.c;
 	} else {
-		*qualified = xmlStrdup(name);
+		return BAD_CAST estrdup((const char *) name);
 	}
 }
 
@@ -38,31 +41,31 @@ static void
 start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
 {
 	XML_Parser  parser = (XML_Parser) user;
-	xmlChar    *qualified_name = NULL;
 
 	if (parser->h_start_element == NULL) {
 		if (parser->h_default) {
 			int attno = 0;
+			smart_string qualified_name = {0};
 
-			qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
+			smart_string_appendc(&qualified_name, '<');
+			smart_string_appends(&qualified_name, (const char *) name);
+
 			if (attributes) {
 				while (attributes[attno] != NULL) {
-					int att_len;
-					char *att_string, *att_name, *att_value;
+					const char *att_name = (const char *) attributes[attno++];
+					const char *att_value = (const char *) attributes[attno++];
 
-					att_name = (char *)attributes[attno++];
-					att_value = (char *)attributes[attno++];
-
-					att_len = spprintf(&att_string, 0, " %s=\"%s\"", att_name, att_value);
-
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					efree(att_string);
+					smart_string_appendc(&qualified_name, ' ');
+					smart_string_appends(&qualified_name, att_name);
+					smart_string_appends(&qualified_name, "=\"");
+					smart_string_appends(&qualified_name, att_value);
+					smart_string_appendc(&qualified_name, '"');
 				}
-
 			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
+			smart_string_appendc(&qualified_name, '>');
+			smart_string_0(&qualified_name);
+			parser->h_default(parser->user, (const XML_Char *) qualified_name.c, qualified_name.len);
+			smart_string_free(&qualified_name);
 		}
 		return;
 	}
@@ -90,67 +93,61 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 
 	if (parser->h_start_element == NULL) {
 	 	if (parser->h_default) {
-
+			smart_string qualified_name = {0};
+			smart_string_appendc(&qualified_name, '<');
 			if (prefix) {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", prefix, xmlStrlen(prefix));
-				qualified_name = xmlStrncat(qualified_name, (xmlChar *)":", 1);
-				qualified_name = xmlStrncat(qualified_name, name, xmlStrlen(name));
-			} else {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
+				smart_string_appends(&qualified_name, (const char *) prefix);
+				smart_string_appendc(&qualified_name, ':');
 			}
+			smart_string_appends(&qualified_name, (const char *) name);
 
 			if (namespaces) {
 				int i, j;
 				for (i = 0,j = 0;j < nb_namespaces;j++) {
-					int ns_len;
-					char *ns_string, *ns_prefix, *ns_url;
-
-					ns_prefix = (char *) namespaces[i++];
-					ns_url = (char *) namespaces[i++];
+					const char *ns_prefix = (const char *) namespaces[i++];
+					const char *ns_url = (const char *) namespaces[i++];
 
 					if (ns_prefix) {
-						ns_len = spprintf(&ns_string, 0, " xmlns:%s=\"%s\"", ns_prefix, ns_url);
+						smart_string_appends(&qualified_name, " xmlns:");
+						smart_string_appends(&qualified_name, ns_prefix);
+						smart_string_appends(&qualified_name, "=\"");
 					} else {
-						ns_len = spprintf(&ns_string, 0, " xmlns=\"%s\"", ns_url);
+						smart_string_appends(&qualified_name, " xmlns=\"");
 					}
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)ns_string, ns_len);
 
-					efree(ns_string);
+					smart_string_appends(&qualified_name, ns_url);
+					smart_string_appendc(&qualified_name, '"');
 				}
 			}
 
 			if (attributes) {
 				for (i = 0; i < nb_attributes; i += 1) {
-					int att_len;
-					char *att_string, *att_name, *att_value, *att_prefix, *att_valueend;
-
-					att_name = (char *) attributes[y++];
-					att_prefix = (char *)attributes[y++];
+					const char *att_name = (const char *) attributes[y++];
+					const char *att_prefix = (const char *)attributes[y++];
 					y++;
-					att_value = (char *)attributes[y++];
-					att_valueend = (char *)attributes[y++];
+					const char *att_value = (const char *)attributes[y++];
+					const char *att_valueend = (const char *)attributes[y++];
 
+					smart_string_appendc(&qualified_name, ' ');
 					if (att_prefix) {
-						att_len = spprintf(&att_string, 0, " %s:%s=\"", att_prefix, att_name);
-					} else {
-						att_len = spprintf(&att_string, 0, " %s=\"", att_name);
+						smart_string_appends(&qualified_name, att_prefix);
+						smart_string_appendc(&qualified_name, ':');
 					}
+					smart_string_appends(&qualified_name, att_name);
+					smart_string_appends(&qualified_name, "=\"");
 
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_value, att_valueend - att_value);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"\"", 1);
-
-					efree(att_string);
+					smart_string_appendl(&qualified_name, att_value, att_valueend - att_value);
+					smart_string_appendc(&qualified_name, '"');
 				}
 
 			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
+			smart_string_appendc(&qualified_name, '>');
+			parser->h_default(parser->user, (const XML_Char *) qualified_name.c, qualified_name.len);
+			smart_string_free(&qualified_name);
 		}
 		return;
 	}
-	qualify_namespace(parser, name, URI, &qualified_name);
+	qualified_name = qualify_namespace(parser, name, URI);
 
 	if (attributes != NULL) {
 		xmlChar    *qualified_name_attr = NULL;
@@ -159,12 +156,12 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 		for (i = 0; i < nb_attributes; i += 1) {
 
 			if (attributes[y+1] != NULL) {
-				qualify_namespace(parser, attributes[y] , attributes[y + 2], &qualified_name_attr);
+				qualified_name_attr = qualify_namespace(parser, attributes[y] , attributes[y + 2]);
 			} else {
-				qualified_name_attr = xmlStrdup(attributes[y]);
+				qualified_name_attr = BAD_CAST estrdup((const char *) attributes[y]);
 			}
 			attrs[z] = qualified_name_attr;
-			attrs[z + 1] = xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3]));
+			attrs[z + 1] = BAD_CAST estrndup((const char *) attributes[y + 3], attributes[y + 4] - attributes[y + 3]);
 			z += 2;
 			y += 5;
 		}
@@ -174,11 +171,11 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attrs);
 	if (attrs) {
 		for (i = 0; i < z; i++) {
-			xmlFree(attrs[i]);
+			efree(attrs[i]);
 		}
 		efree(attrs);
 	}
-	xmlFree(qualified_name);
+	efree(qualified_name);
 }
 
 static void
@@ -222,11 +219,11 @@ end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, 
 		return;
 	}
 
-	qualify_namespace(parser, name, URI,  &qualified_name);
+	qualified_name = qualify_namespace(parser, name, URI);
 
 	parser->h_end_element(parser->user, (const XML_Char *) qualified_name);
 
-	xmlFree(qualified_name);
+	efree(qualified_name);
 }
 
 static void
@@ -290,17 +287,19 @@ notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_id
 	parser->h_notation_decl(parser->user, notation, NULL, sys_id, pub_id);
 }
 
-static void
-build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *comment_len)
+static xmlChar *
+build_comment(const xmlChar *data, size_t data_len, size_t *comment_len)
 {
 	*comment_len = data_len + 7;
 
-	*comment = xmlMalloc(*comment_len + 1);
-	memcpy(*comment, "<!--", 4);
-	memcpy(*comment + 4, data, data_len);
-	memcpy(*comment + 4 + data_len, "-->", 3);
+	xmlChar *comment = emalloc(*comment_len + 1);
+	memcpy(comment, "<!--", 4);
+	memcpy(comment + 4, data, data_len);
+	memcpy(comment + 4 + data_len, "-->", 3);
 
-	(*comment)[*comment_len] = '\0';
+	comment[*comment_len] = '\0';
+
+	return comment;
 }
 
 static void
@@ -309,24 +308,24 @@ comment_handler(void *user, const xmlChar *comment)
 	XML_Parser parser = (XML_Parser) user;
 
 	if (parser->h_default) {
-		xmlChar *d_comment;
 		size_t   d_comment_len;
 
-		build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
+		xmlChar *d_comment = build_comment(comment, (size_t) xmlStrlen(comment), &d_comment_len);
 		parser->h_default(parser->user, d_comment, d_comment_len);
-		xmlFree(d_comment);
+		efree(d_comment);
 	}
 }
 
-static void
-build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_len)
+static xmlChar *
+build_entity(const xmlChar *name, size_t len, size_t *entity_len)
 {
 	*entity_len = len + 2;
-	*entity = xmlMalloc(*entity_len + 1);
-	(*entity)[0] = '&';
-	memcpy(*entity+1, name, len);
-	(*entity)[len+1] = ';';
-	(*entity)[*entity_len] = '\0';
+	xmlChar *entity = emalloc(*entity_len + 1);
+	entity[0] = '&';
+	memcpy(entity + 1, name, len);
+	entity[len + 1] = ';';
+	entity[*entity_len] = '\0';
+	return entity;
 }
 
 static void
@@ -361,12 +360,11 @@ get_entity(void *user, const xmlChar *name)
 			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
 				/* Predefined entities will expand unless no cdata handler is present */
 				if (parser->h_default && ! (ret && ret->etype == XML_INTERNAL_PREDEFINED_ENTITY && parser->h_cdata)) {
-					xmlChar *entity;
 					size_t   len;
 
-					build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
+					xmlChar *entity = build_entity(name, (size_t) xmlStrlen(name), &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
-					xmlFree(entity);
+					efree(entity);
 				} else {
 					/* expat will not expand internal entities if default handler is present otherwise
 					it will expand and pass them to cdata handler */
@@ -452,15 +450,19 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		return NULL;
 	}
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_NOENT);
+#else
 	php_libxml_sanitize_parse_ctxt_options(parser->parser);
 	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_NOENT);
+#endif
 
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
 		/* Note: sax2 flag will be set due to the magic number in `initialized` in php_xml_compat_handlers */
 		ZEND_ASSERT(parser->parser->sax->initialized == XML_SAX2_MAGIC);
 		parser->use_namespace = 1;
-		parser->_ns_separator = xmlStrdup(sep);
+		parser->_ns_separator = BAD_CAST estrdup((const char *) sep);
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt
 		so must be set in the handlers */
@@ -713,7 +715,7 @@ XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
 		if (parser->_ns_separator) {
-			xmlFree(parser->_ns_separator);
+			efree(parser->_ns_separator);
 		}
 	}
 	if (parser->parser->myDoc) {

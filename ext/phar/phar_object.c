@@ -34,6 +34,17 @@ static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 
+#define PHAR_FETCH_INTERNAL_EX(zv) (void *)((char *) Z_OBJ_P(zv) - Z_OBJ_P(zv)->handlers->offset);
+#define PHAR_FETCH_INTERNAL() PHAR_FETCH_INTERNAL_EX(ZEND_THIS)
+
+#define PHAR_ARCHIVE_OBJECT() \
+	phar_archive_object *phar_obj = PHAR_FETCH_INTERNAL(); \
+	if (!phar_obj->archive) { \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
+			"Cannot call method on an uninitialized Phar object"); \
+		RETURN_THROWS(); \
+	}
+
 static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{ */
 {
 	char *ext;
@@ -697,16 +708,14 @@ PHP_METHOD(Phar, webPhar)
 		rewrite_fci.retval = &retval;
 
 		if (FAILURE == zend_call_function(&rewrite_fci, &rewrite_fcc)) {
+			zval_ptr_dtor_str(&params);
 			if (!EG(exception)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: failed to call rewrite callback");
 			}
 			goto cleanup_fail;
 		}
 
-		if (Z_TYPE_P(rewrite_fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-			goto cleanup_fail;
-		}
+		zval_ptr_dtor_str(&params);
 
 		switch (Z_TYPE(retval)) {
 			case IS_STRING:
@@ -728,7 +737,6 @@ PHP_METHOD(Phar, webPhar)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 
 cleanup_fail:
-				zval_ptr_dtor(&params);
 				if (free_pathinfo) {
 					efree(path_info);
 				}
@@ -1122,11 +1130,11 @@ PHP_METHOD(Phar, __construct)
 	zend_long format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
-	zval *zobj = ZEND_THIS, arg1, arg2;
+	zval arg1, arg2;
 
-	phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	phar_obj = PHAR_FETCH_INTERNAL();
 
-	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data);
+	is_data = instanceof_function(Z_OBJCE_P(ZEND_THIS), phar_ce_data);
 
 	if (is_data) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
@@ -1226,7 +1234,7 @@ PHP_METHOD(Phar, __construct)
 	ZVAL_LONG(&arg2, flags);
 
 	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
-		Z_OBJ_P(zobj), NULL, &arg1, &arg2);
+		Z_OBJ_P(ZEND_THIS), NULL, &arg1, &arg2);
 
 	zval_ptr_dtor(&arg1);
 
@@ -1356,20 +1364,10 @@ PHP_METHOD(Phar, unlinkArchive)
 }
 /* }}} */
 
-#define PHAR_ARCHIVE_OBJECT() \
-	zval *zobj = ZEND_THIS; \
-	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
-	if (!phar_obj->archive) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Cannot call method on an uninitialized Phar object"); \
-		RETURN_THROWS(); \
-	}
-
 /* {{{ if persistent, remove from the cache */
 PHP_METHOD(Phar, __destruct)
 {
-	zval *zobj = ZEND_THIS;
-	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	phar_archive_object *phar_obj = PHAR_FETCH_INTERNAL();
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1461,7 +1459,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
 				char *test = NULL;
-				spl_filesystem_object *intern = (spl_filesystem_object*)((char*)Z_OBJ_P(value) - Z_OBJ_P(value)->handlers->offset);
+				spl_filesystem_object *intern = PHAR_FETCH_INTERNAL_EX(value);
 
 				if (!base_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %s returns an SplFileInfo object, so base directory must be specified", ZSTR_VAL(ce->name));
@@ -1732,7 +1730,6 @@ PHP_METHOD(Phar, buildFromDirectory)
 	}
 
 	if (SUCCESS != object_init_ex(&iter, spl_ce_RecursiveDirectoryIterator)) {
-		zval_ptr_dtor(&iter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
@@ -1750,7 +1747,6 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	if (SUCCESS != object_init_ex(&iteriter, spl_ce_RecursiveIteratorIterator)) {
 		zval_ptr_dtor(&iter);
-		zval_ptr_dtor(&iteriter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
@@ -1771,7 +1767,6 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
 			zval_ptr_dtor(&iteriter);
-			zval_ptr_dtor(&regexiter);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate regex iterator for %s", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
@@ -2202,9 +2197,7 @@ its_ok:
 		ce = phar_ce_archive;
 	}
 
-	ZVAL_NULL(&ret);
 	if (SUCCESS != object_init_ex(&ret, ce)) {
-		zval_ptr_dtor(&ret);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate phar object when converting archive \"%s\"", phar->fname);
 		return NULL;
 	}
@@ -2737,21 +2730,15 @@ PHP_METHOD(Phar, setAlias)
 		RETURN_TRUE;
 	}
 	if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), new_alias))) {
-		spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", ZSTR_VAL(new_alias), fd_ptr->fname);
-		if (SUCCESS == phar_free_alias(fd_ptr, ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
-			efree(error);
-			goto valid_alias;
+		if (SUCCESS != phar_free_alias(fd_ptr, ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
+			zend_throw_exception_ex(phar_ce_PharException, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", ZSTR_VAL(new_alias), fd_ptr->fname);
+			RETURN_THROWS();
 		}
-		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
-		efree(error);
-		RETURN_THROWS();
-	}
-	if (!phar_validate_alias(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
+	} else if (!phar_validate_alias(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"Invalid alias \"%s\" specified for phar \"%s\"", ZSTR_VAL(new_alias), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-valid_alias:
 	if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
@@ -2761,13 +2748,15 @@ valid_alias:
 		readd = 1;
 	}
 
+	ZEND_ASSERT(!phar_obj->archive->is_persistent);
+
 	oldalias = phar_obj->archive->alias;
 	oldalias_len = phar_obj->archive->alias_len;
 	old_temp = phar_obj->archive->is_temporary_alias;
 
 	phar_obj->archive->alias_len = ZSTR_LEN(new_alias);
 	if (phar_obj->archive->alias_len) {
-		phar_obj->archive->alias = pestrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias), phar_obj->archive->is_persistent);
+		phar_obj->archive->alias = estrndup(ZSTR_VAL(new_alias), ZSTR_LEN(new_alias));
 	} else {
 		phar_obj->archive->alias = NULL;
 	}
@@ -2776,6 +2765,7 @@ valid_alias:
 	phar_flush(phar_obj->archive, &error);
 
 	if (error) {
+		efree(phar_obj->archive->alias);
 		phar_obj->archive->alias = oldalias;
 		phar_obj->archive->alias_len = oldalias_len;
 		phar_obj->archive->is_temporary_alias = old_temp;
@@ -3174,12 +3164,14 @@ static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 	if (!PHAR_G(has_bz2)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 			*(int *) argument = 0;
+			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
 	if (!PHAR_G(has_zlib)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 			*(int *) argument = 0;
+			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
@@ -4460,13 +4452,13 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_object *entry_obj;
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;
-	zval *zobj = ZEND_THIS, arg1;
+	zval arg1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
+	entry_obj = PHAR_FETCH_INTERNAL();
 
 	if (entry_obj->entry) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
@@ -4512,34 +4504,32 @@ PHP_METHOD(PharFileInfo, __construct)
 	ZVAL_STRINGL(&arg1, fname, fname_len);
 
 	zend_call_known_instance_method_with_1_params(spl_ce_SplFileInfo->constructor,
-		Z_OBJ_P(zobj), NULL, &arg1);
+		Z_OBJ_P(ZEND_THIS), NULL, &arg1);
 
 	zval_ptr_dtor(&arg1);
 }
 /* }}} */
 
-#define PHAR_ENTRY_OBJECT() \
-	zval *zobj = ZEND_THIS; \
-	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset); \
+#define PHAR_ENTRY_OBJECT_EX(throw) \
+	phar_entry_object *entry_obj = PHAR_FETCH_INTERNAL(); \
 	if (!entry_obj->entry) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Cannot call method on an uninitialized PharFileInfo object"); \
-		RETURN_THROWS(); \
+		if (throw) { \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
+				"Cannot call method on an uninitialized PharFileInfo object"); \
+		} \
+		return; \
 	}
+
+#define PHAR_ENTRY_OBJECT() PHAR_ENTRY_OBJECT_EX(true)
 
 /* {{{ clean up directory-based entry objects */
 PHP_METHOD(PharFileInfo, __destruct)
 {
-	zval *zobj = ZEND_THIS;
-	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!entry_obj->entry) {
-		return;
-	}
+	PHAR_ENTRY_OBJECT_EX(false);
 
 	if (entry_obj->entry->is_temp_dir) {
 		if (entry_obj->entry->filename) {

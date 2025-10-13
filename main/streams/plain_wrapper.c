@@ -43,6 +43,10 @@
 # include <limits.h>
 #endif
 
+#ifdef __linux__
+# include <sys/sysmacros.h>
+#endif
+
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
 #define php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_REL_CC)
 #define php_stream_fopen_from_file_int(file, mode)	_php_stream_fopen_from_file_int((file), (mode) STREAMS_CC)
@@ -255,7 +259,28 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC)
 static void detect_is_seekable(php_stdio_stream_data *self) {
 #if defined(S_ISFIFO) && defined(S_ISCHR)
 	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
+#ifdef __linux__
+		if (S_ISCHR(self->sb.st_mode)) {
+			/* Some character devices are exceptions, check their major/minor ID
+			 * https://www.kernel.org/doc/Documentation/admin-guide/devices.txt */
+			if (major(self->sb.st_rdev) == 1) {
+				unsigned m = minor(self->sb.st_rdev);
+				self->is_seekable =
+					m == 1 ||   /* /dev/mem   */
+					m == 2 ||   /* /dev/kmem  */
+					m == 3 ||   /* /dev/null  */
+					m == 4 ||   /* /dev/port  (seekable, offset = I/O port) */
+					m == 5 ||   /* /dev/zero  */
+					m == 7;     /* /dev/full  */
+			} else {
+				self->is_seekable = false;
+			}
+		} else {
+			self->is_seekable = !S_ISFIFO(self->sb.st_mode);
+		}
+#else
 		self->is_seekable = !(S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode));
+#endif
 		self->is_pipe = S_ISFIFO(self->sb.st_mode);
 	}
 #elif defined(PHP_WIN32)
