@@ -246,10 +246,10 @@ struct _phar_archive_data {
 	char                     *fname;
 	uint32_t                 fname_len;
 	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
-	char                     *ext;
 	uint32_t                 ext_len;
+	char                     *ext;
 	char                     *alias;
-	uint32_t                      alias_len;
+	uint32_t                 alias_len;
 	char                     version[12];
 	size_t                   halt_offset;
 	HashTable                manifest;
@@ -260,10 +260,10 @@ struct _phar_archive_data {
 	uint32_t                 flags;
 	uint32_t                 min_timestamp;
 	uint32_t                 max_timestamp;
+	int                      refcount;
 	php_stream               *fp;
 	/* decompressed file contents are stored here */
 	php_stream               *ufp;
-	int                      refcount;
 	uint32_t                 sig_flags;
 	uint32_t                 sig_len;
 	char                     *signature;
