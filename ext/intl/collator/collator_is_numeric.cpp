@@ -82,20 +82,20 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		}
 
 		*bufpos = '\0';
-		value = zend_strtod(numbuf, NULL);
+		value = zend_strtod(numbuf, nullptr);
 
 		if (numbuf != buf) {
 			free_alloca(numbuf, use_heap);
 		}
 
-		if (endptr != NULL) {
+		if (endptr != nullptr) {
 			*endptr = (UChar *)u;
 		}
 
 		return value;
 	}
 
-	if (endptr != NULL) {
+	if (endptr != nullptr) {
 		*endptr = (UChar *)nptr;
 	}
 
@@ -118,10 +118,10 @@ static zend_long collator_u_strtol(const UChar *nptr, UChar **endptr, int base)
 	zend_ulong cutoff;
 	int neg = 0, any, cutlim;
 
-	if (s == NULL) {
+	if (s == nullptr) {
 		errno = ERANGE;
-		if (endptr != NULL) {
-			*endptr = NULL;
+		if (endptr != nullptr) {
+			*endptr = nullptr;
 		}
 		return 0;
 	}
@@ -194,7 +194,7 @@ static zend_long collator_u_strtol(const UChar *nptr, UChar **endptr, int base)
 		errno = ERANGE;
 	} else if (neg)
 		acc = -acc;
-	if (endptr != NULL)
+	if (endptr != nullptr)
 		*endptr = (UChar *)(any ? s - 1 : nptr);
 	return (acc);
 }
@@ -235,12 +235,12 @@ uint8_t collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double
 			return 0;
 		}
 	} else {
-		end_ptr_long = NULL;
+		end_ptr_long = nullptr;
 	}
 
 	local_dval = collator_u_strtod(str, &end_ptr_double);
 	if (local_dval == 0 && end_ptr_double == str) {
-		end_ptr_double = NULL;
+		end_ptr_double = nullptr;
 	} else {
 		end_ptr_double = collator_skip_ws(end_ptr_double);
 		if (end_ptr_double == str+length) { /* floating point string */
