@@ -2771,7 +2771,7 @@ PHP_FUNCTION(ldap_modify_batch)
 			case LDAP_MODIFY_BATCH_REPLACE:
 				ldap_operation = LDAP_MOD_REPLACE;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 
 		/* fill in the basic info */

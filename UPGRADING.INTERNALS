@@ -22,6 +22,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     added, given the primary flags were running out of bits.
   . The zval_is_true() alias of zend_is_true() has been removed. Call
     zend_is_true() directly instead.
+  . The EMPTY_SWITCH_DEFAULT_CASE() macro has been removed. Use
+    `default: ZEND_UNREACHABLE();` instead.
 
 ========================
 2. Build system changes

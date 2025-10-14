@@ -466,7 +466,7 @@ PHP_METHOD(DOMElement, setAttribute)
 					break;
 				case XML_NAMESPACE_DECL:
 					RETURN_FALSE;
-				EMPTY_SWITCH_DEFAULT_CASE();
+				default: ZEND_UNREACHABLE();
 			}
 		}
 
@@ -593,7 +593,7 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 
 			break;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	return true;
 }
@@ -1792,7 +1792,7 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 			/* Set context to this. */
 			context = thisp;
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	/* 4. If context is not an Element or all of the following are true: (...) */
@@ -1831,7 +1831,7 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 		case sizeof("BeforeEnd") - 1 + 'f':
 			php_dom_node_append(this_intern->document, fragment, thisp);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 err:

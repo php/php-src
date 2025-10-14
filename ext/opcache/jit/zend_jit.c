@@ -1410,7 +1410,7 @@ static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t
 			return (op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG);
 		case ZEND_CONCAT:
 			return (op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

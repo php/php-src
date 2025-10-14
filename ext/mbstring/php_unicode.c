@@ -461,7 +461,7 @@ set_title_mode:
 			}
 			break;
 
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		converted_end = p;

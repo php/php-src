@@ -1537,7 +1537,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 		case NAMED_TYPE:
 			object_init_ex(object, reflection_named_type_ptr);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	intern = Z_REFLECTION_P(object);

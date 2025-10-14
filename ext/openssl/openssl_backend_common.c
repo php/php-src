@@ -1505,7 +1505,7 @@ EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 		case EVP_PKEY_ED448:
 			break;
 #endif
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 		}
 
 		if (EVP_PKEY_paramgen(ctx, &params) <= 0) {

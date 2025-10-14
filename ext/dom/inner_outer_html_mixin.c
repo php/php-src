@@ -181,7 +181,7 @@ static lxb_dom_document_cmode_t dom_translate_quirks_mode(php_libxml_quirks_mode
 		case PHP_LIBXML_NO_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS;
 		case PHP_LIBXML_LIMITED_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_LIMITED_QUIRKS;
 		case PHP_LIBXML_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_QUIRKS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

@@ -326,7 +326,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				}
 				break;
 			}
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		has_property = zend_std_has_property(object, name, has_set_exists, cache_slot);
