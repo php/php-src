@@ -390,14 +390,6 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 	return _try_convert_to_string(op);
 }
 
-/* Compatibility macros for 7.2 and below */
-#define _zval_get_long(op) zval_get_long(op)
-#define _zval_get_double(op) zval_get_double(op)
-#define _zval_get_string(op) zval_get_string(op)
-#define _zval_get_long_func(op) zval_get_long_func(op)
-#define _zval_get_double_func(op) zval_get_double_func(op)
-#define _zval_get_string_func(op) zval_get_string_func(op)
-
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 

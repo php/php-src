@@ -412,8 +412,8 @@ static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry,
 PHP_METHOD(Phar, running)
 {
 	zend_string *fname;
-	char *arch, *entry;
-	size_t arch_len, entry_len;
+	char *arch;
+	size_t arch_len;
 	bool retphar = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &retphar) == FAILURE) {
@@ -427,9 +427,8 @@ PHP_METHOD(Phar, running)
 
 	if (
 		zend_string_starts_with_literal_ci(fname, "phar://")
-		&& SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)
+		&& SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)
 	) {
-		efree(entry);
 		if (retphar) {
 			RETVAL_STRINGL(ZSTR_VAL(fname), arch_len + 7);
 			efree(arch);
@@ -485,8 +484,7 @@ PHP_METHOD(Phar, mount)
 	}
 #endif
 
-	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
-		efree(entry);
+	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, NULL, NULL, 2, 0)) {
 		entry = NULL;
 
 		if (path_len > 7 && !memcmp(path, "phar://", 7)) {
@@ -905,7 +903,7 @@ PHP_METHOD(Phar, mungServer)
 	phar_request_initialize();
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
-
+		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			RETURN_THROWS();
@@ -919,8 +917,10 @@ PHP_METHOD(Phar, mungServer)
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_NAME;
 		} else if (zend_string_equals_literal(Z_STR_P(data), "SCRIPT_FILENAME")) {
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
+		} else {
+			zend_throw_exception_ex(phar_ce_PharException, 0, "Invalid value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			RETURN_THROWS();
 		}
-		// TODO Warning for invalid value?
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -1300,9 +1300,9 @@ PHP_METHOD(Phar, getSupportedCompression)
 /* {{{ Completely remove a phar archive from memory and disk */
 PHP_METHOD(Phar, unlinkArchive)
 {
-	char *fname, *error, *arch, *entry;
+	char *fname, *error, *arch;
 	size_t fname_len;
-	size_t arch_len, entry_len;
+	size_t arch_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
@@ -1329,16 +1329,14 @@ PHP_METHOD(Phar, unlinkArchive)
 	if (
 		zend_file_name
 		&& zend_string_starts_with_literal_ci(zend_file_name, "phar://")
-		&& SUCCESS == phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), &arch, &arch_len, &entry, &entry_len, 2, 0)
+		&& SUCCESS == phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), &arch, &arch_len, NULL, NULL, 2, 0)
 	) {
 		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar archive \"%s\" cannot be unlinked from within itself", fname);
 			efree(arch);
-			efree(entry);
 			RETURN_THROWS();
 		}
 		efree(arch);
-		efree(entry);
 	}
 
 	if (phar->is_persistent) {
@@ -1785,6 +1783,10 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
 	if (pass.fp == NULL) {
+		zval_ptr_dtor(&iteriter);
+		if (apply_reg) {
+			zval_ptr_dtor(&regexiter);
+		}
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" unable to create temporary file", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
