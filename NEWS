@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20070 (Return type violation in imagefilter when an invalid
     filter is provided). (Girgias)
 
+- LibXML:
+  . Fix not thread safe schema/relaxng calls. (SpencerMalone, nielsdos)
+
 - Opcache:
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
     (Arnaud)
