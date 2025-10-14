@@ -711,7 +711,7 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	}
 
 	/* This loads from a file, a stack of x509/crl/pkey sets */
-	if (!(sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
+	if (!(sk = php_openssl_pem_read_bio_x509_info(in))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error reading the file, %s", cert_path);
 		sk_X509_free(stack);
