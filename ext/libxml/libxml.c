@@ -939,6 +939,9 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 #ifdef LIBXML_SCHEMAS_ENABLED
 		xmlSchemaInitTypes();
 #endif
+#ifdef LIBXML_RELAXNG_ENABLED
+		xmlRelaxNGInitTypes();
+#endif
 		ZEND_IGNORE_LEAKS_END();
 
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();

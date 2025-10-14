@@ -20,7 +20,7 @@ PHP                                                                        NEWS
     filter is provided). (Girgias)
 
 - LibXML:
-  . Fix not thread safe xmlSchemaParse calls. (SpencerMalone)
+  . Fix not thread safe schema/relaxng calls. (SpencerMalone, nielsdos)
 
 - Opcache:
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
