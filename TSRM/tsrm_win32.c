@@ -694,8 +694,13 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	}
 	shm->segment = shm_handle;
 	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	if (shm->descriptor == NULL) {
+		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		CloseHandle(shm->segment);
+		return -1;
+	}
 
-	if (NULL != shm->descriptor && created) {
+	if (created) {
 		shm->descriptor->shm_perm.key	= key;
 		shm->descriptor->shm_segsz		= size;
 		shm->descriptor->shm_ctime		= time(NULL);
@@ -709,7 +714,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		shm->descriptor->shm_perm.mode	= shm->descriptor->shm_perm.seq	= 0;
 	}
 
-	if (NULL != shm->descriptor && (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz)) {
+	if (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz) {
 		if (NULL != shm->segment) {
 			CloseHandle(shm->segment);
 			shm->segment = INVALID_HANDLE_VALUE;
