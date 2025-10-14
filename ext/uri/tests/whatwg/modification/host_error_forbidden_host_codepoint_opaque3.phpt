@@ -5,14 +5,13 @@ uri
 --FILE--
 <?php
 
-$url = Uri\WhatWg\Url::parse("foo://example.com");
+$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url2 = $url1->withHost("ex#mple.com");
 
-try {
-    $url = $url->withHost("ex:mple.com");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
-}
+var_dump($url1->getAsciiHost());
+var_dump($url2->getAsciiHost());
 
 ?>
 --EXPECT--
-The specified host is malformed
+string(11) "example.com"
+string(2) "ex"
