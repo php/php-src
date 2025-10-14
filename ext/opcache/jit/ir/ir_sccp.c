@@ -12,6 +12,8 @@
 #include "ir.h"
 #include "ir_private.h"
 
+#include <math.h>
+
 #define IR_COMBO_COPY_PROPAGATION 1
 
 #define IR_TOP                  IR_UNUSED
@@ -420,11 +422,12 @@ static bool ir_is_dead_load_ex(ir_ctx *ctx, ir_ref ref, uint32_t flags, ir_insn 
 static bool ir_is_dead_load(ir_ctx *ctx, ir_ref ref)
 {
 	if (ctx->use_lists[ref].count == 1) {
-		uint32_t flags = ir_op_flags[ctx->ir_base[ref].op];
+		ir_insn *insn = &ctx->ir_base[ref];
+		uint32_t flags = ir_op_flags[insn->op];
 
 		if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
 			return 1;
-		} else if (ctx->ir_base[ref].op == IR_ALLOCA) {
+		} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
 			return 1;
 		}
 	}
@@ -2808,6 +2811,10 @@ static bool ir_cmp_is_true(ir_op op, ir_insn *op1, ir_insn *op2)
 			return !(op1->val.d > op2->val.d);
 		} else if (op == IR_UGT) {
 			return !(op1->val.d <= op2->val.d);
+		} else if (op == IR_ORDERED) {
+			return !isnan(op1->val.d) && !isnan(op2->val.d);
+		} else if (op == IR_UNORDERED) {
+			return isnan(op1->val.d) || isnan(op2->val.d);
 		} else {
 			IR_ASSERT(0);
 			return 0;
@@ -2834,6 +2841,10 @@ static bool ir_cmp_is_true(ir_op op, ir_insn *op1, ir_insn *op2)
 			return !(op1->val.f > op2->val.f);
 		} else if (op == IR_UGT) {
 			return !(op1->val.f <= op2->val.f);
+		} else if (op == IR_ORDERED) {
+			return !isnan(op1->val.f) && !isnan(op2->val.f);
+		} else if (op == IR_UNORDERED) {
+			return isnan(op1->val.f) || isnan(op2->val.f);
 		} else {
 			IR_ASSERT(0);
 			return 0;
@@ -3465,9 +3476,18 @@ static void ir_iter_optimize_guard(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bi
 remove_guard:
 				prev = insn->op1;
 				next = ir_next_control(ctx, ref);
+				if (ctx->ir_base[prev].op == IR_SNAPSHOT) {
+					ir_ref snapshot = prev;
+					prev = ctx->ir_base[prev].op1;
+					ir_use_list_remove_one(ctx, snapshot, ref);
+					ir_use_list_remove_one(ctx, ref, next);
+					ir_use_list_replace_one(ctx, prev, snapshot, next);
+					ir_iter_remove_insn(ctx, snapshot, worklist);
+				} else {
+					ir_use_list_remove_one(ctx, ref, next);
+					ir_use_list_replace_one(ctx, prev, ref, next);
+				}
 				ctx->ir_base[next].op1 = prev;
-				ir_use_list_remove_one(ctx, ref, next);
-				ir_use_list_replace_one(ctx, prev, ref, next);
 				insn->op1 = IR_UNUSED;
 
 				if (!IR_IS_CONST_REF(insn->op2)) {
@@ -3478,9 +3498,12 @@ remove_guard:
 					}
 				}
 
-				if (insn->op3) {
-					/* SNAPSHOT */
-					ir_iter_remove_insn(ctx, insn->op3, worklist);
+				if (!IR_IS_CONST_REF(insn->op3)) {
+					ir_use_list_remove_one(ctx, insn->op3, ref);
+					if (ir_is_dead(ctx, insn->op3)) {
+						/* schedule DCE */
+						ir_bitqueue_add(worklist, insn->op3);
+					}
 				}
 
 				MAKE_NOP(insn);

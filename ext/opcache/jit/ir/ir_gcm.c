@@ -1379,6 +1379,8 @@ restart:
 					switch (new_insn->op) {
 						case IR_EQ:
 						case IR_NE:
+						case IR_ORDERED:
+						case IR_UNORDERED:
 						case IR_ADD:
 						case IR_MUL:
 						case IR_ADD_OV:
