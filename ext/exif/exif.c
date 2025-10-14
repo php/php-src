@@ -3253,6 +3253,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 #define REQUIRE_NON_EMPTY() do { \
 	if (byte_count == 0) { \
+		EFREE_IF(outside); \
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname_debug(tag, tag_table)); \
 		return false; \
 	} \
