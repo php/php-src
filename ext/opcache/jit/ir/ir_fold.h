@@ -274,6 +274,106 @@ IR_FOLD(UGT(C_FLOAT, C_FLOAT))
 	IR_FOLD_BOOL(!(op1_insn->val.f <= op2_insn->val.f));
 }
 
+IR_FOLD(ORDERED(C_FLOAT, C_FLOAT))
+{
+	IR_FOLD_BOOL(!isnan(op1_insn->val.f) && !isnan(op2_insn->val.f));
+}
+
+IR_FOLD(ORDERED(C_DOUBLE, C_DOUBLE))
+{
+	IR_FOLD_BOOL(!isnan(op1_insn->val.d) && !isnan(op2_insn->val.d));
+}
+
+IR_FOLD(UNORDERED(C_FLOAT, C_FLOAT))
+{
+	IR_FOLD_BOOL(isnan(op1_insn->val.f) || isnan(op2_insn->val.f));
+}
+
+IR_FOLD(UNORDERED(C_DOUBLE, C_DOUBLE))
+{
+	IR_FOLD_BOOL(isnan(op1_insn->val.d) || isnan(op2_insn->val.d));
+}
+
+IR_FOLD(EQ(_, C_FLOAT))
+IR_FOLD(LT(_, C_FLOAT))
+IR_FOLD(GE(_, C_FLOAT))
+IR_FOLD(LE(_, C_FLOAT))
+IR_FOLD(GT(_, C_FLOAT))
+{
+	if (isnan(op2_insn->val.f)) {
+		IR_FOLD_COPY(IR_FALSE);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(NE(_, C_FLOAT))
+{
+	if (isnan(op2_insn->val.f)) {
+		IR_FOLD_COPY(IR_TRUE);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(ORDERED(_, C_FLOAT))
+{
+	if (isnan(op2_insn->val.f)) {
+		IR_FOLD_COPY(IR_FALSE);
+	} else {
+		op2 = op1;
+		IR_FOLD_RESTART;
+	}
+}
+
+IR_FOLD(UNORDERED(_, C_FLOAT))
+{
+	if (isnan(op2_insn->val.f)) {
+		IR_FOLD_COPY(IR_TRUE);
+	} else {
+		op2 = op1;
+		IR_FOLD_RESTART;
+	}
+}
+
+IR_FOLD(EQ(_, C_DOUBLE))
+IR_FOLD(LT(_, C_DOUBLE))
+IR_FOLD(GE(_, C_DOUBLE))
+IR_FOLD(LE(_, C_DOUBLE))
+IR_FOLD(GT(_, C_DOUBLE))
+{
+	if (isnan(op2_insn->val.d)) {
+		IR_FOLD_COPY(IR_FALSE);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(NE(_, C_DOUBLE))
+{
+	if (isnan(op2_insn->val.d)) {
+		IR_FOLD_COPY(IR_TRUE);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(ORDERED(_, C_DOUBLE))
+{
+	if (isnan(op2_insn->val.d)) {
+		IR_FOLD_COPY(IR_FALSE);
+	} else {
+		op2 = op1;
+		IR_FOLD_RESTART;
+	}
+}
+
+IR_FOLD(UNORDERED(_, C_DOUBLE))
+{
+	if (isnan(op2_insn->val.d)) {
+		IR_FOLD_COPY(IR_TRUE);
+	} else {
+		op2 = op1;
+		IR_FOLD_RESTART;
+	}
+}
+
 IR_FOLD(ADD(C_U8, C_U8))
 {
 	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
@@ -1645,6 +1745,8 @@ IR_FOLD(NOT(ULT))
 IR_FOLD(NOT(UGE))
 IR_FOLD(NOT(ULE))
 IR_FOLD(NOT(UGT))
+IR_FOLD(NOT(ORDERED))
+IR_FOLD(NOT(UNORDERED))
 {
 	if (IR_IS_TYPE_INT(ctx->ir_base[op1_insn->op1].type)) {
 		opt = op1_insn->opt ^ 1;
@@ -3182,6 +3284,8 @@ IR_FOLD(ADD(SHR, SHL))
 
 /* Swap operands (move lower ref to op2) for better CSE */
 IR_FOLD(MUL(_, _))
+IR_FOLD(ORDERED(_, _))
+IR_FOLD(UNORDERED(_, _))
 IR_FOLD_NAMED(swap_ops)
 {
 	if (op1 < op2) {  /* move lower ref to op2 */

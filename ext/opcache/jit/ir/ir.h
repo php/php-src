@@ -257,6 +257,8 @@ typedef enum _ir_type {
 	_(UGE,          d2,   def, def, ___) /* unsigned greater or equal   */ \
 	_(ULE,          d2,   def, def, ___) /* unsigned less or equal      */ \
 	_(UGT,          d2,   def, def, ___) /* unsigned greater            */ \
+	_(ORDERED,      d2,   def, def, ___) /* both operands are not NAN   */ \
+	_(UNORDERED,    d2,   def, def, ___) /* one of operands is NAN      */ \
 	\
 	/* arithmetic ops                                                   */ \
 	_(ADD,          d2C,  def, def, ___) /* addition                    */ \
