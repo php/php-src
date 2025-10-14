@@ -22,8 +22,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     added, given the primary flags were running out of bits.
   . The zval_is_true() alias of zend_is_true() has been removed. Call
     zend_is_true() directly instead.
-  . The `_zval_get_*()` compatibility macros for PHP 7.2 have been removed
+  . The _zval_get_*() compatibility macros for PHP 7.2 have been removed
     call the variant without the leading underscore instead.
+    Affected: _zval_get_long, _zval_get_double, _zval_get_string,
+    _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
 
 ========================
 2. Build system changes
