@@ -278,7 +278,7 @@ static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_compon
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->username.length) {
+	if (lexbor_uri->username.length > 0) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
 	} else {
 		ZVAL_NULL(retval);
@@ -454,7 +454,7 @@ static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->query.length) {
+	if (lexbor_uri->query.data != NULL) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->query.data, lexbor_uri->query.length);
 	} else {
 		ZVAL_NULL(retval);
@@ -483,7 +483,7 @@ static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_compon
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->fragment.length) {
+	if (lexbor_uri->fragment.data != NULL) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->fragment.data, lexbor_uri->fragment.length);
 	} else {
 		ZVAL_NULL(retval);

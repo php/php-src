@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - port - negative number
+Test Uri\WhatWg\Url component modification - host - forbidden domain code point
 --EXTENSIONS--
 uri
 --FILE--
@@ -8,11 +8,11 @@ uri
 $url = Uri\WhatWg\Url::parse("https://example.com");
 
 try {
-    $url->withPort(-1);
+    $url = $url->withHost("ex:mple.com");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECT--
-The specified port is malformed
+The specified host is malformed
