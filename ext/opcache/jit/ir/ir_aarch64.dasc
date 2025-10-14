@@ -747,6 +747,9 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 				return IR_CMP_FP;
 			}
 			break;
+		case IR_ORDERED:
+		case IR_UNORDERED:
+			return IR_CMP_FP;
 		case IR_ADD:
 		case IR_SUB:
 			if (IR_IS_TYPE_INT(insn->type)) {
@@ -1043,7 +1046,7 @@ binop_fp:
 		case IR_IF:
 			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
 				op2_insn = &ctx->ir_base[insn->op2];
-				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UGT) {
+				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED) {
 					if (IR_IS_TYPE_INT(ctx->ir_base[op2_insn->op1].type)) {
 						ctx->rules[insn->op2] = IR_FUSED | IR_CMP_INT;
 						return IR_CMP_AND_BRANCH_INT;
@@ -1066,7 +1069,7 @@ binop_fp:
 		case IR_GUARD_NOT:
 			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
 				op2_insn = &ctx->ir_base[insn->op2];
-				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UGT
+				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED
 					// TODO: register allocator may clobber operands of CMP before they are used in the GUARD_CMP
 				 && (insn->op2 == ref - 1 ||
 				     (insn->op2 == ctx->prev_ref[ref] - 1
@@ -1110,6 +1113,9 @@ binop_fp:
 						ctx->flags2 |= IR_HAS_VA_ARG_GP|IR_HAS_VA_ARG_FP;
 					}
 				}
+			} else {
+				/* va_list may escape */
+				ctx->flags2 |= IR_HAS_VA_ARG_GP|IR_HAS_VA_ARG_FP;
 			}
 			return IR_VA_START;
 		case IR_VA_END:
@@ -2991,6 +2997,12 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		case IR_UGT:
 			|	cset Rw(def_reg), hi
 			break;
+		case IR_ORDERED:
+			|	cset Rw(def_reg), vc
+			break;
+		case IR_UNORDERED:
+			|	cset Rw(def_reg), vs
+			break;
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, insn->type, def, def_reg);
@@ -3065,7 +3077,7 @@ static void ir_emit_jcc(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint
 	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (true_block == next_block) {
 		/* swap to avoid unconditional JMP */
-		if (int_cmp || op == IR_EQ || op == IR_NE) {
+		if (int_cmp || op == IR_EQ || op == IR_NE || op == IR_ORDERED || op == IR_UNORDERED) {
 			op ^= 1; // reverse
 		} else {
 			op ^= 5; // reverse
@@ -3145,6 +3157,11 @@ static void ir_emit_jcc(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint
 			case IR_UGT:
 				|	bhi =>true_block
 				break;
+			case IR_ORDERED:
+				|	bvc =>true_block
+				break;
+			case IR_UNORDERED:
+				|	bvs =>true_block
 //			case IR_ULT: fprintf(stderr, "\tjb .LL%d\n", true_block); break;
 //			case IR_UGE: fprintf(stderr, "\tjae .LL%d\n", true_block); break;
 //			case IR_ULE: fprintf(stderr, "\tjbe .LL%d\n", true_block); break;
@@ -4462,11 +4479,7 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
-	if (ctx->use_lists[def].count == 1) {
-		/* dead load */
-		return;
-	}
-	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
+	IR_ASSERT((def_reg != IR_REG_NONE || ctx->use_lists[def].count == 1) && tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
 			op2_reg = IR_REG_NUM(op2_reg);
@@ -4479,10 +4492,12 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		offset = ir_local_offset(ctx, &ctx->ir_base[insn->op2]);
 	}
 	|	ldr Rx(tmp_reg), [Rx(op2_reg), #offset]
-	ir_emit_load_mem(ctx, type, def_reg, IR_MEM_BO(tmp_reg, 0));
+	if (def_reg  != IR_REG_NONE) {
+		ir_emit_load_mem(ctx, type, def_reg, IR_MEM_BO(tmp_reg, 0));
+	}
 	|	add Rx(tmp_reg), Rx(tmp_reg), #IR_MAX(ir_type_size[type], sizeof(void*))
 	|	str Rx(tmp_reg), [Rx(op2_reg), #offset]
-	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+	if (def_reg != IR_REG_NONE && IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, type, def, def_reg);
 	}
 #else
@@ -4494,11 +4509,7 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
-	if (ctx->use_lists[def].count == 1) {
-		/* dead load */
-		return;
-	}
-	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
+	IR_ASSERT((def_reg != IR_REG_NONE || ctx->use_lists[def].count == 1) && tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
 			op2_reg = IR_REG_NUM(op2_reg);
@@ -4517,13 +4528,17 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		|	ldr Rx(IR_REG_INT_TMP), [Rx(op2_reg), #(offset+offsetof(ir_va_list, gr_top))]
 		|	sxtw Rx(tmp_reg), Rw(tmp_reg)
 		|	add Rx(IR_REG_INT_TMP), Rx(tmp_reg), Rx(IR_REG_INT_TMP)
-		|	ldr Rx(def_reg), [Rx(IR_REG_INT_TMP)]
+		if (def_reg  != IR_REG_NONE) {
+			|	ldr Rx(def_reg), [Rx(IR_REG_INT_TMP)]
+		}
 		|	add Rw(tmp_reg), Rw(tmp_reg), #sizeof(void*)
 		|	str Rw(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, gr_offset))]
 		|	b >2
 		|1:
 		|	ldr Rx(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, stack))]
-		|	ldr Rx(def_reg), [Rx(tmp_reg)]
+		if (def_reg  != IR_REG_NONE) {
+			|	ldr Rx(def_reg), [Rx(tmp_reg)]
+		}
 		|	add Rx(tmp_reg), Rx(tmp_reg), #sizeof(void*)
 		|	str Rx(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, stack))]
 		|2:
@@ -4534,18 +4549,22 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		|	ldr Rx(IR_REG_INT_TMP), [Rx(op2_reg), #(offset+offsetof(ir_va_list, vr_top))]
 		|	sxtw Rx(tmp_reg), Rw(tmp_reg)
 		|	add Rx(IR_REG_INT_TMP), Rx(tmp_reg), Rx(IR_REG_INT_TMP)
-		|	ldr Rd(def_reg-IR_REG_FP_FIRST), [Rx(IR_REG_INT_TMP)]
+		if (def_reg  != IR_REG_NONE) {
+			|	ldr Rd(def_reg-IR_REG_FP_FIRST), [Rx(IR_REG_INT_TMP)]
+		}
 		|	add Rw(tmp_reg), Rw(tmp_reg), #16
 		|	str Rw(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, vr_offset))]
 		|	b >2
 		|1:
 		|	ldr Rx(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, stack))]
-		|	ldr Rd(def_reg-IR_REG_FP_FIRST), [Rx(tmp_reg)]
+		if (def_reg  != IR_REG_NONE) {
+			|	ldr Rd(def_reg-IR_REG_FP_FIRST), [Rx(tmp_reg)]
+		}
 		|	add Rx(tmp_reg), Rx(tmp_reg), #sizeof(void*)
 		|	str Rx(tmp_reg), [Rx(op2_reg), #(offset+offsetof(ir_va_list, stack))]
 		|2:
 	}
-	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+	if (def_reg != IR_REG_NONE && IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, type, def, def_reg);
 	}
 #endif
@@ -5378,6 +5397,11 @@ static void ir_emit_guard_jcc(ir_ctx *ctx, uint8_t op, void *addr, bool int_cmp)
 			case IR_GT:
 				|	bgt &addr
 				break;
+			case IR_ORDERED:
+				|	bvc &addr
+				break;
+			case IR_UNORDERED:
+				|	bvs &addr
 //			case IR_ULT: fprintf(stderr, "\tjb .LL%d\n", true_block); break;
 //			case IR_UGE: fprintf(stderr, "\tjae .LL%d\n", true_block); break;
 //			case IR_ULE: fprintf(stderr, "\tjbe .LL%d\n", true_block); break;
