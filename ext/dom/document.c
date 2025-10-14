@@ -1380,8 +1380,6 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	substitute_ent = doc_props->substituteentities;
 	recover = doc_props->recover || (options & XML_PARSE_RECOVER) == XML_PARSE_RECOVER;
 
-	xmlInitParser();
-
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
