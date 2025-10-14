@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     reference). (nielsdos)
   . Fixed bug GH-20085 (Assertion failure when combining lazy object
     get_properties exception with foreach loop). (nielsdos)
+  . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
 
 - DOM:
   . Partially fixed bug GH-16317 (DOM classes do not allow
