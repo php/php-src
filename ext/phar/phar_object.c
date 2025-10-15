@@ -45,7 +45,7 @@ static zend_class_entry *phar_ce_entry;
 		RETURN_THROWS(); \
 	}
 
-static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{ */
+static int phar_file_type(const HashTable *mimes, const char *file, char **mime_type) /* {{{ */
 {
 	char *ext;
 	phar_mime_type *mime;
@@ -65,7 +65,7 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, char *basename, size_t request_uri_len) /* {{{ */
+static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, const char *basename, size_t request_uri_len) /* {{{ */
 {
 	HashTable *_SERVER;
 	zval *stuff;
@@ -151,7 +151,7 @@ static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, ch
 }
 /* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, char *basename, char *ru, size_t ru_len) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, const char *basename, char *ru, size_t ru_len) /* {{{ */
 {
 	char *name = NULL, buf[8192];
 	const char *cwd;
@@ -349,7 +349,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(const char *fname, size_t fname_len, char **entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
 	char *e = *entry + 1, *u = NULL, *u1 = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
@@ -627,7 +627,7 @@ PHP_METHOD(Phar, webPhar)
 		|| (sapi_mod_name_len == sizeof("litespeed") - 1 && !strncmp(sapi_module.name, "litespeed", sizeof("litespeed") - 1))) {
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF) {
-			HashTable *_server = Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]);
+			const HashTable *_server = Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]);
 			zval *z_script_name, *z_path_info;
 
 			if (NULL == (z_script_name = zend_hash_str_find(_server, "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) ||
@@ -3114,7 +3114,7 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 
 static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 {
-	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
+	const phar_entry_info *entry = Z_PTR_P(zv);
 
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_KEEP;
