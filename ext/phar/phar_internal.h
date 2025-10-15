@@ -415,7 +415,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 
 /* utility functions */
-zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error);
+zend_string *phar_create_default_stub(const zend_string *php_index_str, const zend_string *web_index_str, char **error);
 const char *phar_decompress_filter(const phar_entry_info *entry, bool return_unknown);
 const char *phar_compress_filter(const phar_entry_info *entry, bool return_unknown);
 

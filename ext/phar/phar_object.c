@@ -946,11 +946,11 @@ PHP_METHOD(Phar, interceptFileFuncs)
  */
 PHP_METHOD(Phar, createDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error;
+	zend_string *index = NULL, *webindex = NULL;
+	char *error;
 	zend_string *stub;
-	size_t index_len = 0, webindex_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!p!", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!P!", &index, &webindex) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2914,12 +2914,11 @@ PHP_METHOD(Phar, setStub)
  */
 PHP_METHOD(Phar, setDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error = NULL;
+	zend_string *index = NULL, *webindex = NULL;
 	zend_string *stub = NULL;
-	size_t index_len = 0, webindex_len = 0;
 	bool created_stub = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!P!", &index, &webindex) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2947,6 +2946,7 @@ PHP_METHOD(Phar, setDefaultStub)
 		RETURN_THROWS();
 	}
 
+	char *error = NULL;
 	if (!phar_obj->archive->is_tar && !phar_obj->archive->is_zip) {
 		stub = phar_create_default_stub(index, webindex, &error);
 
