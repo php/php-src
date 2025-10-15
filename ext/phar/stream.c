@@ -665,7 +665,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 {
 	php_url *resource;
 	char *internal_file, *error;
-	int internal_file_len;
+	size_t internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
 
