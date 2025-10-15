@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Partially fixed bug GH-16317 (DOM classes do not allow
     __debugInfo() overrides to work). (nielsdos)
 
+- Exif:
+  . Fix possible memory leak when tag is empty. (nielsdos)
+
 - FPM:
   . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
     execution). (Jakub Zelenka, txuna)
