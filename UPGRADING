@@ -19,6 +19,10 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Phar:
+  . Invalid values now throw in Phar::mungServer() instead of being silently
+    ignored.
+
 ========================================
 2. New Features
 ========================================
@@ -43,6 +47,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- Phar:
+  . Phar::mungServer() now supports reference values.
 
 ========================================
 6. New Functions

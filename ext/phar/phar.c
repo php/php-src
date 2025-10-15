@@ -595,13 +595,9 @@ zend_result phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker *tra
 	const bool has_unserialize_options = unserialize_options != NULL && zend_hash_num_elements(unserialize_options) > 0;
 	/* It should be impossible to create a zval in a persistent phar/entry. */
 	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
+	ZEND_ASSERT(!EG(exception));
 
 	if (Z_ISUNDEF(tracker->val) || has_unserialize_options) {
-		if (EG(exception)) {
-			/* Because other parts of the phar code haven't been updated to check for exceptions after doing something that may throw,
-			 * check for exceptions before potentially serializing/unserializing instead. */
-			return FAILURE;
-		}
 		/* Persistent phars should always be unserialized. */
 		const char *start;
 		/* Assert it should not be possible to create raw data in a persistent phar (i.e. from cache_list) */
@@ -2298,16 +2294,18 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 	*arch_len = ext_str - filename + ext_len;
 	*arch = estrndup(filename, *arch_len);
 
-	if (ext_str[ext_len]) {
-		*entry_len = filename_len - *arch_len;
-		*entry = estrndup(ext_str+ext_len, *entry_len);
-#ifdef PHP_WIN32
-		phar_unixify_path_separators(*entry, *entry_len);
-#endif
-		*entry = phar_fix_filepath(*entry, entry_len, 0);
-	} else {
-		*entry_len = 1;
-		*entry = estrndup("/", 1);
+	if (entry) {
+		if (ext_str[ext_len]) {
+			*entry_len = filename_len - *arch_len;
+			*entry = estrndup(ext_str+ext_len, *entry_len);
+	#ifdef PHP_WIN32
+			phar_unixify_path_separators(*entry, *entry_len);
+	#endif
+			*entry = phar_fix_filepath(*entry, entry_len, 0);
+		} else {
+			*entry_len = 1;
+			*entry = estrndup("/", 1);
+		}
 	}
 
 #ifdef PHP_WIN32

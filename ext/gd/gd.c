@@ -3605,7 +3605,7 @@ PHP_FUNCTION(imagefilter)
 	zval *tmp;
 
 	typedef void (*image_filter)(INTERNAL_FUNCTION_PARAMETERS);
-	zend_long filtertype;
+	zend_long filtertype = 0;
 	image_filter filters[] =
 	{
 		php_image_filter_negate ,
@@ -3623,15 +3623,17 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_scatter
 	};
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {
-		WRONG_PARAM_COUNT;
-	} else if (zend_parse_parameters(2, "Ol", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+	/* We need to do some initial ZPP parsing to be able to extract the filter value */
+	if (zend_parse_parameters(MIN(2, ZEND_NUM_ARGS()), "Ol*", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+
 		RETURN_THROWS();
 	}
 
-	if (filtertype >= 0 && filtertype <= IMAGE_FILTER_MAX) {
-		filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (UNEXPECTED(filtertype < 0 || filtertype > IMAGE_FILTER_MAX)) {
+		zend_argument_value_error(2, "must be one of the IMG_FILTER_* filter constants");
+		RETURN_THROWS();
 	}
+	filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

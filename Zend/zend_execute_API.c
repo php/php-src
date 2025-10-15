@@ -273,9 +273,7 @@ void shutdown_destructors(void) /* {{{ */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
-	zend_try {
-		zend_close_rsrc_list(&EG(regular_list));
-	} zend_end_try();
+	zend_close_rsrc_list(&EG(regular_list));
 
 	/* No PHP callback functions should be called after this point. */
 	EG(active) = 0;
