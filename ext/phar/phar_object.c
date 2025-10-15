@@ -325,16 +325,16 @@ static void phar_do_403(void) /* {{{ */
 }
 /* }}} */
 
-static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, char *f404, size_t f404_len) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, zend_string *f404) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 	phar_entry_info	*info;
 
-	if (phar && f404_len) {
-		info = phar_get_entry_info(phar, f404, f404_len, NULL, true);
+	if (phar && f404 && ZSTR_LEN(f404)) {
+		info = phar_get_entry_info(phar, ZSTR_VAL(f404), ZSTR_LEN(f404), NULL, true);
 
 		if (info) {
-			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, NULL, NULL, 0);
+			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, ZSTR_VAL(f404), ZSTR_LEN(f404), fname, NULL, NULL, 0);
 			return;
 		}
 	}
@@ -559,8 +559,9 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL;
 	zend_fcall_info rewrite_fci = {0};
 	zend_fcall_info_cache rewrite_fcc;
-	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
-	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0;
+	char *alias = NULL, *error, *index_php = NULL, *ru = NULL;
+	size_t alias_len = 0, free_pathinfo = 0;
+	zend_string *f404 = NULL;
 	size_t ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
@@ -571,7 +572,7 @@ PHP_METHOD(Phar, webPhar)
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!s!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -769,7 +770,7 @@ cleanup_fail:
 
 		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
-			phar_do_404(phar, fname, fname_len, f404, f404_len);
+			phar_do_404(phar, fname, fname_len, f404);
 
 			if (free_pathinfo) {
 				efree(path_info);
@@ -815,7 +816,7 @@ cleanup_fail:
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
-		phar_do_404(phar, fname, fname_len, f404, f404_len);
+		phar_do_404(phar, fname, fname_len, f404);
 		zend_bailout();
 	}
 
