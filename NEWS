@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 - LibXML:
   . Fix not thread safe schema/relaxng calls. (SpencerMalone, nielsdos)
 
+- MySQLnd:
+  . Fixed bug GH-8978 (SSL certificate verification fails (port doubled)).
+    (nielsdos)
+
 - Opcache:
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
     (Arnaud)
