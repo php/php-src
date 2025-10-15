@@ -325,7 +325,7 @@ static void phar_do_403(void) /* {{{ */
 }
 /* }}} */
 
-static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, char *f404, size_t f404_len, char *entry, size_t entry_len) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, char *f404, size_t f404_len) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 	phar_entry_info	*info;
@@ -769,7 +769,7 @@ cleanup_fail:
 
 		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
-			phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
+			phar_do_404(phar, fname, fname_len, f404, f404_len);
 
 			if (free_pathinfo) {
 				efree(path_info);
@@ -815,7 +815,7 @@ cleanup_fail:
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
-		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
+		phar_do_404(phar, fname, fname_len, f404, f404_len);
 		zend_bailout();
 	}
 
