@@ -4378,7 +4378,7 @@ static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num) {
 			}
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
-			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
+			if (zend_str_has_nul_byte(Z_STR_P(to_zval))) {
 				zend_argument_type_error(arg_num, "must not contain null bytes");
 				return NULL;
 			}

@@ -26,6 +26,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     call the variant without the leading underscore instead.
     Affected: _zval_get_long, _zval_get_double, _zval_get_string,
     _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
 
 ========================
 2. Build system changes

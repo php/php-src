@@ -1381,7 +1381,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	recover = doc_props->recover || (options & XML_PARSE_RECOVER) == XML_PARSE_RECOVER;
 
 	if (mode == DOM_LOAD_FILE) {
-		if (CHECK_NULL_PATH(source, source_len)) {
+		if (zend_char_has_nul_byte(source, source_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			return NULL;
 		}
@@ -1864,7 +1864,7 @@ static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	switch (type) {
 	case DOM_LOAD_FILE:
-		if (CHECK_NULL_PATH(source, source_len)) {
+		if (zend_char_has_nul_byte(source, source_len)) {
 			PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
@@ -1971,7 +1971,7 @@ static void dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 
 	switch (type) {
 	case DOM_LOAD_FILE:
-		if (CHECK_NULL_PATH(source, source_len)) {
+		if (zend_char_has_nul_byte(source, source_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -2064,7 +2064,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (mode == DOM_LOAD_FILE) {
-		if (CHECK_NULL_PATH(source, source_len)) {
+		if (zend_char_has_nul_byte(source, source_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
