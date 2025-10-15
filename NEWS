@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fix file descriptor/memory leak when opening central fp fails. (nielsdos)
   . Fix memleak+UAF when opening temp stream in buildFromDirectory() fails.
     (nielsdos)
+  . Fix potential buffer length truncation due to usage of type int instead
+    of type size_t. (Girgias)
 
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
