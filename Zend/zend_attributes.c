@@ -608,7 +608,7 @@ void zend_register_attribute_ce(void)
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
 
-    zend_ce_no_serialize = register_class_NoSerialize();
+	zend_ce_no_serialize = register_class_NoSerialize();
 	zend_mark_internal_attribute(zend_ce_no_serialize);
 }
 
