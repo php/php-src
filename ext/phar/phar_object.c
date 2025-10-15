@@ -168,7 +168,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 
 	switch (code) {
 		case PHAR_MIME_PHPS:
-			efree(basename);
 			/* highlight source */
 			if (entry[0] == '/') {
 				spprintf(&name, 4096, "phar://%s%s", arch, entry);
@@ -186,7 +185,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			zend_bailout();
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
-			efree(basename);
 			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			efree((void *) ctr.line);
@@ -230,7 +228,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, ru_len);
-				efree(basename);
 			}
 
 			if (entry[0] == '/') {
@@ -870,6 +867,7 @@ cleanup_fail:
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type);
 	}
 	phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len);
+	efree(pt);
 
 finish: ;
 #ifdef PHP_WIN32
