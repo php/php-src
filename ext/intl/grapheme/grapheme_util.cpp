@@ -22,10 +22,12 @@
 #include <unicode/unistr.h>
 #endif
 
+extern "C" {
 #include <php.h>
 #include "grapheme.h"
 #include "grapheme_util.h"
 #include "intl_common.h"
+}
 
 #include <unicode/utypes.h>
 #include <unicode/ucol.h>
