@@ -1874,6 +1874,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_init_ex(return_value, ce);
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&dataset);
+			zval_ptr_dtor(return_value);
+			RETURN_THROWS();
+		}
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 		} else {
