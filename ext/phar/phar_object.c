@@ -1030,23 +1030,11 @@ PHP_METHOD(Phar, canCompress)
 	phar_request_initialize();
 	switch (method) {
 	case PHAR_ENT_COMPRESSED_GZ:
-		if (PHAR_G(has_zlib)) {
-			RETURN_TRUE;
-		} else {
-			RETURN_FALSE;
-		}
+		RETURN_BOOL(PHAR_G(has_zlib));
 	case PHAR_ENT_COMPRESSED_BZ2:
-		if (PHAR_G(has_bz2)) {
-			RETURN_TRUE;
-		} else {
-			RETURN_FALSE;
-		}
+		RETURN_BOOL(PHAR_G(has_bz2));
 	default:
-		if (PHAR_G(has_zlib) || PHAR_G(has_bz2)) {
-			RETURN_TRUE;
-		} else {
-			RETURN_FALSE;
-		}
+		RETURN_BOOL(PHAR_G(has_zlib) || PHAR_G(has_bz2));
 	}
 }
 /* }}} */
@@ -2577,11 +2565,8 @@ PHP_METHOD(Phar, isWritable)
 	}
 
 	if (SUCCESS != php_stream_stat_path(phar_obj->archive->fname, &ssb)) {
-		if (phar_obj->archive->is_brandnew) {
-			/* assume it works if the file doesn't exist yet */
-			RETURN_TRUE;
-		}
-		RETURN_FALSE;
+		/* assume it works if the file doesn't exist yet */
+		RETURN_BOOL(phar_obj->archive->is_brandnew);
 	}
 
 	RETURN_BOOL((ssb.sb.st_mode & (S_IWOTH | S_IWGRP | S_IWUSR)) != 0);
@@ -3503,7 +3488,6 @@ PHP_METHOD(Phar, copy)
 PHP_METHOD(Phar, offsetExists)
 {
 	zend_string *file_name;
-	phar_entry_info *entry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file_name) == FAILURE) {
 		RETURN_THROWS();
@@ -3511,19 +3495,15 @@ PHP_METHOD(Phar, offsetExists)
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_hash_exists(&phar_obj->archive->manifest, file_name)) {
-		if (NULL != (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name))) {
-			if (entry->is_deleted) {
-				/* entry is deleted, but has not been flushed to disk yet */
-				RETURN_FALSE;
-			}
-		}
-
-		if (zend_string_starts_with_literal(file_name, ".phar")) {
-			/* none of these are real files, so they don't exist */
+	const phar_entry_info *entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
+	if (entry != NULL) {
+		if (entry->is_deleted) {
+			/* entry is deleted, but has not been flushed to disk yet */
 			RETURN_FALSE;
 		}
-		RETURN_TRUE;
+
+		/* none of these are real files, so they don't exist */
+		RETURN_BOOL(!zend_string_starts_with_literal(file_name, ".phar"));
 	} else {
 		/* If the info class is not based on PharFileInfo, directories are not directly instantiable */
 		if (UNEXPECTED(!instanceof_function(phar_obj->spl.info_class, phar_ce_entry))) {
