@@ -103,7 +103,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	if (req_size > ZSTR_LEN(*buffer)) {
 		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
-			if (size > ZEND_SIZE_MAX/2) {
+			if (size > SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
 			}
 			size <<= 1;
