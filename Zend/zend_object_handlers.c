@@ -528,6 +528,13 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 				return FAILURE;
 			}
 		} else {
+			/* The property we found may be private if we have a private parent
+			 * property and a protected child property, and we're accessing the
+			 * property from the parent's scope. In that case we want to access
+			 * the parent property, not child property. */
+			if (property_info->flags & ZEND_ACC_PRIVATE) {
+				return FAILURE;
+			}
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		}
 		return SUCCESS;
