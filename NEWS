@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19994 (openssl_get_cipher_methods inconsistent with fetching).
     (Jakub Zelenka)
 
+- Phar:
+  . Fix potential buffer length truncation due to usage of type int instead
+    of type size_t. (Girgias)
+
 - SPL:
   . Fixed bug GH-20101 (SplHeap/SplPriorityQueue serialization
     exposes INDIRECTs). (nielsdos)
