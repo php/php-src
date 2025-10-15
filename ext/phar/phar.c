@@ -2453,42 +2453,48 @@ static int phar_flush_clean_deleted_apply(zval *zv) /* {{{ */
 
 #include "stub.h" /* Generated phar_get_stub() function from makestub.php script */
 
-zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error) /* {{{ */
+zend_string *phar_create_default_stub(const zend_string *php_index_str, const zend_string *web_index_str, char **error) /* {{{ */
 {
-	size_t index_len, web_len;
+	const char *php_index;
+	const char *web_index;
+	size_t php_len, web_len;
 
 	if (error) {
 		*error = NULL;
 	}
 
-	if (!index_php) {
-		index_php = "index.php";
+	if (!php_index_str) {
+		php_index = "index.php";
+		php_len = strlen("index.php");
+	} else {
+		php_index = ZSTR_VAL(php_index_str);
+		php_len = ZSTR_LEN(php_index_str);
+		if (php_len > 400) {
+			/* ridiculous size not allowed for index.php startup filename */
+			if (error) {
+				spprintf(error, 0, "Illegal filename passed in for stub creation, was %zd characters long, and only 400 or less is allowed", php_len);
+			}
+			return NULL;
+		}
 	}
 
-	if (!web_index) {
+	if (!web_index_str) {
 		web_index = "index.php";
-	}
+		web_len = strlen("index.php");
+	} else {
+		web_index = ZSTR_VAL(web_index_str);
+		web_len = ZSTR_LEN(web_index_str);
 
-	index_len = strlen(index_php);
-	web_len = strlen(web_index);
-
-	if (index_len > 400) {
-		/* ridiculous size not allowed for index.php startup filename */
-		if (error) {
-			spprintf(error, 0, "Illegal filename passed in for stub creation, was %zd characters long, and only 400 or less is allowed", index_len);
+		if (web_len > 400) {
+			/* ridiculous size not allowed for index.php startup filename */
+			if (error) {
+				spprintf(error, 0, "Illegal web filename passed in for stub creation, was %zd characters long, and only 400 or less is allowed", web_len);
+			}
 			return NULL;
 		}
 	}
 
-	if (web_len > 400) {
-		/* ridiculous size not allowed for index.php startup filename */
-		if (error) {
-			spprintf(error, 0, "Illegal web filename passed in for stub creation, was %zd characters long, and only 400 or less is allowed", web_len);
-			return NULL;
-		}
-	}
-
-	return phar_get_stub(index_php, web_index, index_len+1, web_len+1);
+	return phar_get_stub(php_index, web_index, php_len+1, web_len+1);
 }
 /* }}} */
 
