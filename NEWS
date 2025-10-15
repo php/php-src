@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
   . Fixed bug GH-20177 (Accessing overridden private property in
     get_object_vars() triggers assertion error). (ilutov)
+  . Fixed bug GH-20183 (Stale EG(opline_before_exception) pointer through eval).
+    (ilutov)
 
 - DOM:
   . Partially fixed bug GH-16317 (DOM classes do not allow
