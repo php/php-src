@@ -2113,8 +2113,11 @@ PHP_FUNCTION(pg_fetch_assoc)
 {
 	/* pg_fetch_assoc() is added from PHP 4.3.0. It should raise error, when
 	   there is 3rd parameter */
-	if (ZEND_NUM_ARGS() > 2)
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() > 2) {
+		zend_wrong_param_count();
+		RETURN_THROWS();
+	}
+
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC, 0);
 }
 /* }}} */
@@ -2876,7 +2879,8 @@ PHP_FUNCTION(pg_lo_import)
 		CHECK_DEFAULT_LINK(link);
 	}
 	else {
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 
 	if (php_check_open_basedir(ZSTR_VAL(file_in))) {
