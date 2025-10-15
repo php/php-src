@@ -6333,6 +6333,11 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 		zend_ast *cond_ast = case_ast->child[0];
 		znode cond_node;
 
+		if (case_ast->attr == ZEND_ALT_CASE_SYNTAX) {
+			CG(zend_lineno) = case_ast->lineno;
+			zend_error(E_DEPRECATED, "Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead");
+		}
+
 		if (!cond_ast) {
 			if (has_default_case) {
 				CG(zend_lineno) = case_ast->lineno;
@@ -6341,11 +6346,6 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 			}
 			has_default_case = 1;
 			continue;
-		}
-
-		if (case_ast->attr == ZEND_ALT_CASE_SYNTAX) {
-			CG(zend_lineno) = case_ast->lineno;
-			zend_error(E_DEPRECATED, "Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead");
 		}
 
 		zend_compile_expr(&cond_node, cond_ast);
