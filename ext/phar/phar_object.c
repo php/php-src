@@ -311,7 +311,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 }
 /* }}} */
 
-static void phar_do_403(char *entry, size_t entry_len) /* {{{ */
+static void phar_do_403(void) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 
@@ -723,7 +723,7 @@ PHP_METHOD(Phar, webPhar)
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
-				phar_do_403(entry, entry_len);
+				phar_do_403();
 
 				if (free_pathinfo) {
 					efree(path_info);
