@@ -156,8 +156,6 @@ typedef enum {
 	PHAR_ACT_GRACEFULLY_RETURN,
 } phar_action_status;
 
-/* Returns SUCCESS when the action has been completed (with or without exception).
- * Returns FAILURE when the code needs to exit. */
 static phar_action_status phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, const char *basename, char *ru, size_t ru_len) /* {{{ */
 {
 	char *name = NULL, buf[8192];
