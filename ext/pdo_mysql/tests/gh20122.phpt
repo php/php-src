@@ -8,11 +8,10 @@ pdo_mysql
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
---XFAIL--
 --FILE--
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
-$pdo = MySQLPDOTest::factory();
+$db = MySQLPDOTest::factory();
 
 $db->exec('CREATE TABLE test (bar JSON)');
 $db->exec('INSERT INTO test VALUES("[]")');
