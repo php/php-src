@@ -609,10 +609,8 @@ PHP_METHOD(Phar, webPhar)
 	fname_len = ZSTR_LEN(zend_file_name);
 
 #ifdef PHP_WIN32
-	if (memchr(fname, '\\', fname_len)) {
-		fname = estrndup(fname, fname_len);
-		phar_unixify_path_separators(fname, fname_len);
-	}
+	fname = estrndup(fname, fname_len);
+	phar_unixify_path_separators(fname, fname_len);
 #endif
 	basename = zend_memrchr(fname, '/', fname_len);
 
