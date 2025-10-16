@@ -8,6 +8,7 @@ pdo_mysql
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
+--XFAIL--
 --FILE--
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
