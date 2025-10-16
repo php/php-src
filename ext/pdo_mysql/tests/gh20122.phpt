@@ -5,15 +5,13 @@ pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$pdo = MySQLPDOTest::factory();
 
 $db->exec('CREATE TABLE test (bar JSON)');
 $db->exec('INSERT INTO test VALUES("[]")');
