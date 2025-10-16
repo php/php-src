@@ -362,8 +362,10 @@ splitted:
 }
 /* }}} */
 
-static zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
+static ZEND_ATTRIBUTE_NONNULL zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
 {
+	*error = NULL;
+
 	if (entry->fp_type == PHAR_MOD) {
 		/* already newly created, truncate */
 		php_stream_truncate_set_size(entry->fp, 0);
@@ -381,10 +383,6 @@ static zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_ent
 		return SUCCESS;
 	}
 
-	if (error) {
-		*error = NULL;
-	}
-
 	/* open a new temp file for writing */
 	if (entry->link) {
 		efree(entry->link);
@@ -395,9 +393,7 @@ static zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_ent
 	entry->fp = php_stream_fopen_tmpfile();
 
 	if (!entry->fp) {
-		if (error) {
-			spprintf(error, 0, "phar error: unable to create temporary file");
-		}
+		*error = estrdup("phar error: unable to create temporary file");
 		return FAILURE;
 	}
 
@@ -415,7 +411,7 @@ static zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_ent
 }
 /* }}} */
 
-static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) /* {{{ */
 {
 	php_stream *fp;
 	phar_entry_info *link;
@@ -430,7 +426,7 @@ static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) 
 
 	fp = php_stream_fopen_tmpfile();
 	if (fp == NULL) {
-		spprintf(error, 0, "phar error: unable to create temporary file");
+		*error = estrdup("phar error: unable to create temporary file");
 		return FAILURE;
 	}
 	phar_seek_efp(entry, 0, SEEK_SET, 0, true);
@@ -441,9 +437,7 @@ static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) 
 	}
 
 	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, false), fp, link->uncompressed_filesize, NULL)) {
-		if (error) {
-			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", ZSTR_VAL(entry->filename), entry->phar->fname);
-		}
+		spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", ZSTR_VAL(entry->filename), entry->phar->fname);
 		return FAILURE;
 	}
 
@@ -469,7 +463,7 @@ static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) 
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -478,31 +472,20 @@ zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname
 	bool for_create = mode[0] != 'r';
 	bool for_trunc  = mode[0] == 'w';
 
-	if (!ret) {
-		return FAILURE;
-	}
-
 	*ret = NULL;
-
-	if (error) {
-		*error = NULL;
-	}
+	*error = NULL;
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
 		return FAILURE;
 	}
 
 	if (for_write && PHAR_G(readonly) && !phar->is_data) {
-		if (error) {
-			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, disabled by ini setting", path, fname);
-		}
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, disabled by ini setting", path, fname);
 		return FAILURE;
 	}
 
 	if (!path_len) {
-		if (error) {
-			spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" must not be empty", fname);
-		}
+		spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" must not be empty", fname);
 		return FAILURE;
 	}
 really_get_entry:
@@ -524,9 +507,7 @@ really_get_entry:
 
 	if (for_write && phar->is_persistent) {
 		if (FAILURE == phar_copy_on_write(&phar)) {
-			if (error) {
-				spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, could not make cached phar writeable", path, fname);
-			}
+			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, could not make cached phar writeable", path, fname);
 			return FAILURE;
 		} else {
 			goto really_get_entry;
@@ -534,16 +515,12 @@ really_get_entry:
 	}
 
 	if (entry->is_modified && !for_write) {
-		if (error) {
-			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for reading, writable file pointers are open", path, fname);
-		}
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for reading, writable file pointers are open", path, fname);
 		return FAILURE;
 	}
 
 	if (entry->fp_refcount && for_write) {
-		if (error) {
-			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, readable file pointers are open", path, fname);
-		}
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, readable file pointers are open", path, fname);
 		return FAILURE;
 	}
 
@@ -629,7 +606,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -654,16 +631,12 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 	}
 
 	if (phar_path_check(&path, &path_len, &pcr_error) > pcr_is_ok) {
-		if (error) {
-			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
-		}
+		spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
 		return NULL;
 	}
 
 	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar)) {
-		if (error) {
-			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be created, could not make cached phar writeable", path, fname);
-		}
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be created, could not make cached phar writeable", path, fname);
 		return NULL;
 	}
 
@@ -676,9 +649,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 	etemp.fp = php_stream_fopen_tmpfile();
 
 	if (!etemp.fp) {
-		if (error) {
-			spprintf(error, 0, "phar error: unable to create temporary file");
-		}
+		*error = estrdup("phar error: unable to create temporary file");
 		efree(ret);
 		return NULL;
 	}
@@ -710,9 +681,8 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 
 	if (NULL == (entry = zend_hash_add_mem(&phar->manifest, etemp.filename, &etemp, sizeof(phar_entry_info)))) {
 		php_stream_close(etemp.fp);
-		if (error) {
-			spprintf(error, 0, "phar error: unable to add new entry \"%s\" to phar \"%s\"", ZSTR_VAL(etemp.filename), phar->fname);
-		}
+		spprintf(error, 0, "phar error: unable to add new entry \"%s\" to phar \"%s\"",
+			ZSTR_VAL(etemp.filename), phar->fname);
 		efree(ret);
 		zend_string_efree(etemp.filename);
 		return NULL;
@@ -760,7 +730,7 @@ zend_result phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 /* }}} */
 
 /* copy file data from an existing to a new phar_entry_info that is not in the manifest */
-zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error) /* {{{ */
 {
 	phar_entry_info *link;
 
@@ -779,7 +749,7 @@ zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, c
 	dest->is_modified = 1;
 	dest->fp = php_stream_fopen_tmpfile();
 	if (dest->fp == NULL) {
-		spprintf(error, 0, "phar error: unable to create temporary file");
+		*error = estrdup("phar error: unable to create temporary file");
 		return EOF;
 	}
 	phar_seek_efp(source, 0, SEEK_SET, 0, true);
@@ -792,9 +762,8 @@ zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, c
 	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, false), dest->fp, link->uncompressed_filesize, NULL)) {
 		php_stream_close(dest->fp);
 		dest->fp_type = PHAR_FP;
-		if (error) {
-			spprintf(error, 4096, "phar error: unable to copy contents of file \"%s\" to \"%s\" in phar archive \"%s\"", ZSTR_VAL(source->filename), ZSTR_VAL(dest->filename), source->phar->fname);
-		}
+		spprintf(error, 4096, "phar error: unable to copy contents of file \"%s\" to \"%s\" in phar archive \"%s\"",
+			ZSTR_VAL(source->filename), ZSTR_VAL(dest->filename), source->phar->fname);
 		return FAILURE;
 	}
 
@@ -828,7 +797,7 @@ static void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zen
 
 /* open and decompress a compressed phar entry
  */
-zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links) /* {{{ */
 {
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
@@ -947,11 +916,9 @@ zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow
 /**
  * helper function to open an internal file's fp just-in-time
  */
-phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL phar_entry_info * phar_open_jit(const phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
 {
-	if (error) {
-		*error = NULL;
-	}
+	*error = NULL;
 	/* seek to start of internal file and read it */
 	if (FAILURE == phar_open_entry_fp(entry, error, true)) {
 		return NULL;
@@ -1540,7 +1507,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 #ifndef PHAR_HAVE_OPENSSL
 			if (!zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
 				if (error) {
-					spprintf(error, 0, "openssl not loaded");
+					*error = estrdup("openssl not loaded");
 				}
 				return FAILURE;
 			}
@@ -1555,7 +1522,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 					php_stream_close(pfp);
 				}
 				if (error) {
-					spprintf(error, 0, "openssl public key could not be read");
+					*error = estrdup("openssl public key could not be read");
 				}
 				return FAILURE;
 			}
@@ -1568,7 +1535,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 				zend_string_release_ex(pubkey, 0);
 
 				if (error) {
-					spprintf(error, 0, "openssl signature could not be verified");
+					*error = estrdup("openssl signature could not be verified");
 				}
 
 				return FAILURE;
@@ -1583,7 +1550,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			if (NULL == in) {
 				zend_string_release_ex(pubkey, 0);
 				if (error) {
-					spprintf(error, 0, "openssl signature could not be processed");
+					*error = estrdup("openssl signature could not be processed");
 				}
 				return FAILURE;
 			}
@@ -1594,7 +1561,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (NULL == key) {
 				if (error) {
-					spprintf(error, 0, "openssl signature could not be processed");
+					*error = estrdup("openssl signature could not be processed");
 				}
 				return FAILURE;
 			}
@@ -1605,7 +1572,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 					EVP_MD_CTX_destroy(md_ctx);
 				}
 				if (error) {
-					spprintf(error, 0, "openssl signature could not be verified");
+					*error = estrdup("openssl signature could not be verified");
 				}
 				return FAILURE;
 			}
@@ -1637,7 +1604,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 				EVP_MD_CTX_destroy(md_ctx);
 
 				if (error) {
-					spprintf(error, 0, "broken openssl signature");
+					*error = estrdup("broken openssl signature");
 				}
 
 				return FAILURE;
@@ -1656,7 +1623,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (sig_len < sizeof(digest)) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken openssl signature");
 				}
 				return FAILURE;
 			}
@@ -1682,7 +1649,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (memcmp(digest, sig, sizeof(digest))) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken openssl signature");
 				}
 				return FAILURE;
 			}
@@ -1696,7 +1663,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (sig_len < sizeof(digest)) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken openssl signature");
 				}
 				return FAILURE;
 			}
@@ -1722,7 +1689,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (memcmp(digest, sig, sizeof(digest))) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken signature");
 				}
 				return FAILURE;
 			}
@@ -1736,7 +1703,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (sig_len < sizeof(digest)) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken signature");
 				}
 				return FAILURE;
 			}
@@ -1762,7 +1729,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (memcmp(digest, sig, sizeof(digest))) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken signature");
 				}
 				return FAILURE;
 			}
@@ -1776,7 +1743,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (sig_len < sizeof(digest)) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken signature");
 				}
 				return FAILURE;
 			}
@@ -1802,7 +1769,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 			if (memcmp(digest, sig, sizeof(digest))) {
 				if (error) {
-					spprintf(error, 0, "broken signature");
+					*error = estrdup("broken signature");
 				}
 				return FAILURE;
 			}
@@ -1812,7 +1779,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 		}
 		default:
 			if (error) {
-				spprintf(error, 0, "broken or unsupported signature");
+				*error = estrdup("broken or unsupported signature");
 			}
 			return FAILURE;
 	}
@@ -1820,7 +1787,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 }
 /* }}} */
 
-zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error) /* {{{ */
 {
 	unsigned char buf[1024];
 	size_t sig_len;
@@ -1888,9 +1855,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
 
 			if (in == NULL) {
-				if (error) {
-					spprintf(error, 0, "unable to write to phar \"%s\" with requested openssl signature", phar->fname);
-				}
+				spprintf(error, 0, "unable to write to phar \"%s\" with requested openssl signature", phar->fname);
 				return FAILURE;
 			}
 
@@ -1898,18 +1863,14 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 			BIO_free(in);
 
 			if (!key) {
-				if (error) {
-					spprintf(error, 0, "unable to process private key");
-				}
+				*error = estrdup("unable to process private key");
 				return FAILURE;
 			}
 
 			md_ctx = EVP_MD_CTX_create();
 			if (md_ctx == NULL) {
 				EVP_PKEY_free(key);
-				if (error) {
-					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
-				}
+				spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
 				return FAILURE;
 			}
 
@@ -1920,9 +1881,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 				EVP_PKEY_free(key);
 				EVP_MD_CTX_free(md_ctx);
 				efree(sigbuf);
-				if (error) {
-					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
-				}
+				spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
 				return FAILURE;
 			}
 
@@ -1931,9 +1890,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 					EVP_PKEY_free(key);
 					EVP_MD_CTX_free(md_ctx);
 					efree(sigbuf);
-					if (error) {
-						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
-					}
+					spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
 					return FAILURE;
 				}
 			}
@@ -1942,9 +1899,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 				EVP_PKEY_free(key);
 				EVP_MD_CTX_free(md_ctx);
 				efree(sigbuf);
-				if (error) {
-					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
-				}
+				spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
 				return FAILURE;
 			}
 
@@ -1958,9 +1913,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 			php_stream_seek(fp, 0, SEEK_END);
 
 			if (FAILURE == phar_call_openssl_signverify(true, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
-				if (error) {
-					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
-				}
+				spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
 				return FAILURE;
 			}
 #endif

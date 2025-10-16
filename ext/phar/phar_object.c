@@ -4108,7 +4108,7 @@ PHP_METHOD(Phar, delMetadata)
 }
 /* }}} */
 
-static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, const zend_string *path, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, const zend_string *path, char **error) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4245,9 +4245,10 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, con
 	}
 
 	if ((phar_get_fp_type(entry) == PHAR_FP && (entry->flags & PHAR_ENT_COMPRESSION_MASK)) || !phar_get_efp(entry, false)) {
-		if (FAILURE == phar_open_entry_fp(entry, error, true)) {
-			if (error) {
-				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", ZSTR_VAL(entry->filename), fullpath, *error);
+		char *open_entry_error = NULL;
+		if (FAILURE == phar_open_entry_fp(entry, &open_entry_error, true)) {
+			if (open_entry_error) {
+				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", ZSTR_VAL(entry->filename), fullpath, open_entry_error);
 			} else {
 				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer", ZSTR_VAL(entry->filename), fullpath);
 			}
@@ -4285,7 +4286,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, con
 }
 /* }}} */
 
-static int extract_helper(const phar_archive_data *archive, zend_string *search, const zend_string *path_to, bool overwrite, char **error) { /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 3, 5) static int extract_helper(const phar_archive_data *archive, zend_string *search, const zend_string *path_to, bool overwrite, char **error) { /* {{{ */
 	int extracted = 0;
 	phar_entry_info *entry;
 
