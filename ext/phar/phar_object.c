@@ -349,9 +349,10 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(const char *fname, size_t fname_len, char **entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(const char *fname, size_t fname_len, const char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
-	char *e = *entry + 1, *u = NULL, *u1 = NULL, *saveu = NULL;
+	const char *e = entry + 1;
+	char *u = NULL, *u1 = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
 	phar_archive_data *pphar;
 
@@ -746,7 +747,7 @@ cleanup_fail:
 	}
 
 	if (entry_len) {
-		phar_postprocess_ru_web(fname, fname_len, &entry, &entry_len, &ru, &ru_len);
+		phar_postprocess_ru_web(fname, fname_len, entry, &entry_len, &ru, &ru_len);
 	}
 
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
