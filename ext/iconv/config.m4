@@ -158,22 +158,10 @@ int main(void) {
     LDFLAGS="$save_LDFLAGS"
     CFLAGS="$save_CFLAGS"
 
-<<<<<<< HEAD
-    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DICONV_CONST=$php_cv_iconv_const])
     PHP_SUBST(ICONV_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/iconv/])
   else
     AC_MSG_ERROR(Please reinstall the iconv library.)
   fi
-=======
-  AC_DEFINE([HAVE_ICONV], [1],
-    [Define to 1 if the PHP extension 'iconv' is available.])
-
-  PHP_NEW_EXTENSION([iconv],
-    [iconv.c],
-    [$ext_shared],,
-    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DICONV_CONST=$php_cv_iconv_const])
-  PHP_SUBST([ICONV_SHARED_LIBADD])
-  PHP_INSTALL_HEADERS([ext/iconv], [php_iconv.h])
->>>>>>> db8c5c88d1e (Put iconv constiness into CFLAGS)
 fi

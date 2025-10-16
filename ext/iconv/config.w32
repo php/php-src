@@ -14,7 +14,6 @@ if (PHP_ICONV != "no") {
 		AC_DEFINE("ICONV_ALIASED_LIBICONV", 1, "The iconv function is called iconv() in libiconv");
 		AC_DEFINE("PHP_ICONV_IMPL", "\"libiconv\"", "Which iconv implementation to use");
 		ADD_FLAG("CFLAGS_ICONV", "/D PHP_ICONV_EXPORTS ");
-		ADD_FLAG("CFLAGS_ICONV", "/D PHP_ICONV_EXPORTS /D ICONV_CONST ");
 		if (!PHP_ICONV_SHARED) {
 			ADD_DEF_FILE("ext\\iconv\\php_iconv.def");
 		}
