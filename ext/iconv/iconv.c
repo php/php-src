@@ -43,6 +43,14 @@
 #undef iconv
 #endif
 
+/* iconv can have different constiness for src on some platforms;
+ * this is explained in config.m4. On Windows, it's always non-const,
+ * but it can be awkward to set that on the command line. Do it here.
+ */
+#ifndef ICONV_CONST
+#define ICONV_CONST
+#endif
+
 #include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
