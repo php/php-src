@@ -151,7 +151,14 @@ static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, co
 }
 /* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, const char *basename, char *ru, size_t ru_len) /* {{{ */
+typedef enum {
+	PHAR_ACT_DO_EXIT,
+	PHAR_ACT_GRACEFULLY_RETURN,
+} phar_action_status;
+
+/* Returns SUCCESS when the action has been completed (with or without exception).
+ * Returns FAILURE when the code needs to exit. */
+static phar_action_status phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, const char *basename, char *ru, size_t ru_len) /* {{{ */
 {
 	char *name = NULL, buf[8192];
 	const char *cwd;
@@ -182,7 +189,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 #ifdef PHP_WIN32
 			efree(arch);
 #endif
-			zend_bailout();
+			return PHAR_ACT_DO_EXIT;
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
 			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-type: %s", mime_type);
@@ -193,7 +200,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			efree((void *) ctr.line);
 
 			if (FAILURE == sapi_send_headers()) {
-				zend_bailout();
+				return PHAR_ACT_DO_EXIT;
 			}
 
 			/* prepare to output  */
@@ -206,7 +213,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 						zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 						efree(error);
 					}
-					return -1;
+					return PHAR_ACT_GRACEFULLY_RETURN;
 				}
 				fp = phar_get_efp(info, true);
 			}
@@ -224,7 +231,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				}
 			} while (1);
 
-			zend_bailout();
+			return PHAR_ACT_DO_EXIT;
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, ru_len);
@@ -299,12 +306,11 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					efree(name);
 				} zend_end_try();
 
-				zend_bailout();
+				return PHAR_ACT_DO_EXIT;
 			}
-
-			return PHAR_MIME_PHP;
 	}
-	return -1;
+
+	return PHAR_ACT_GRACEFULLY_RETURN;
 }
 /* }}} */
 
@@ -331,6 +337,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 		info = phar_get_entry_info(phar, ZSTR_VAL(f404), ZSTR_LEN(f404), NULL, true);
 
 		if (info) {
+			/* Status doesn't matter, we're exiting anyway. */
 			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, ZSTR_VAL(f404), ZSTR_LEN(f404), fname, NULL, NULL, 0);
 			return;
 		}
@@ -569,6 +576,7 @@ PHP_METHOD(Phar, webPhar)
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
+	phar_action_status status = PHAR_ACT_DO_EXIT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
@@ -654,9 +662,7 @@ PHP_METHOD(Phar, webPhar)
 			pt = estrndup(Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name));
 
 		} else {
-			char *testit;
-
-			testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
+			char *testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
 			if (!(pt = strstr(testit, basename))) {
 				efree(testit);
 				goto finish;
@@ -677,6 +683,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 
 			pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
+			efree(testit);
 		}
 		not_cgi = 0;
 	} else {
@@ -710,7 +717,7 @@ PHP_METHOD(Phar, webPhar)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: failed to call rewrite callback");
 			}
-			goto cleanup_fail;
+			goto cleanup_skip_entry;
 		}
 
 		zval_ptr_dtor_str(&params);
@@ -725,27 +732,11 @@ PHP_METHOD(Phar, webPhar)
 			case IS_TRUE:
 			case IS_FALSE:
 				phar_do_403();
-
-				if (free_pathinfo) {
-					efree(path_info);
-				}
-				efree(pt);
-
-				zend_throw_unwind_exit();
-				return;
+				goto cleanup_skip_entry;
 			default:
 				zval_ptr_dtor(&retval);
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-
-cleanup_fail:
-				if (free_pathinfo) {
-					efree(path_info);
-				}
-				efree(pt);
-#ifdef PHP_WIN32
-				efree(fname);
-#endif
-				RETURN_THROWS();
+				goto cleanup_skip_entry;
 		}
 	}
 
@@ -755,7 +746,6 @@ cleanup_fail:
 
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
 		efree(entry);
-		efree(pt);
 
 		bool is_entry_allocated = false;
 
@@ -811,24 +801,14 @@ cleanup_fail:
 		if (is_entry_allocated) {
 			efree(entry);
 		}
-		if (free_pathinfo) {
-			efree(path_info);
-		}
 
-		zend_throw_unwind_exit();
-		return;
+		goto cleanup_skip_entry;
 	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
-		efree(entry);
-		efree(pt);
-		if (free_pathinfo) {
-			efree(path_info);
-		}
 		phar_do_404(phar, fname, fname_len, f404);
-		zend_throw_unwind_exit();
-		return;
+		goto cleanup;
 	}
 
 	if (mimeoverride && zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
@@ -846,15 +826,7 @@ cleanup_fail:
 							code = Z_LVAL_P(val);
 						} else {
 							zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
-							if (free_pathinfo) {
-								efree(path_info);
-							}
-							efree(pt);
-							efree(entry);
-#ifdef PHP_WIN32
-							efree(fname);
-#endif
-							RETURN_THROWS();
+							goto cleanup;
 						}
 						break;
 					case IS_STRING:
@@ -863,15 +835,7 @@ cleanup_fail:
 						break;
 					default:
 						zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
-						if (free_pathinfo) {
-							efree(path_info);
-						}
-						efree(pt);
-						efree(entry);
-#ifdef PHP_WIN32
-						efree(fname);
-#endif
-						RETURN_THROWS();
+						goto cleanup;
 				}
 			}
 		}
@@ -880,8 +844,22 @@ cleanup_fail:
 	if (!mime_type) {
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type);
 	}
-	phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len);
+	status = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len);
+
+cleanup:
+	efree(entry);
+cleanup_skip_entry:
+	if (free_pathinfo) {
+		efree(path_info);
+	}
 	efree(pt);
+	efree(ru);
+
+	if (status == PHAR_ACT_DO_EXIT) {
+		if (!EG(exception)) {
+			zend_throw_unwind_exit();
+		}
+	}
 
 finish: ;
 #ifdef PHP_WIN32
