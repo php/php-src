@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-8978 (SSL certificate verification fails (port doubled)).
     (nielsdos)
+  . Fixed bug GH-20122 (getColumnMeta() for JSON-column in MySQL). (nielsdos)
 
 - Opcache:
   . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
