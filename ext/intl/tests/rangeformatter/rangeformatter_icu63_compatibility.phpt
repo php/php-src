@@ -23,4 +23,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlNumberRangeFormatter is not available in ICU 62 and earlier
+Class "IntlNumberRangeFormatter" not found
