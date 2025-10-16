@@ -699,6 +699,7 @@ PHP_METHOD(Phar, webPhar)
 		zval params, retval;
 
 		ZVAL_STRINGL(&params, entry, entry_len);
+		efree(entry);
 
 		rewrite_fci.param_count = 1;
 		rewrite_fci.params = &params;
@@ -716,9 +717,10 @@ PHP_METHOD(Phar, webPhar)
 
 		switch (Z_TYPE(retval)) {
 			case IS_STRING:
-				efree(entry);
+				/* TODO: avoid relocation??? */
 				entry = estrndup(Z_STRVAL_P(rewrite_fci.retval), Z_STRLEN_P(rewrite_fci.retval));
 				entry_len = Z_STRLEN_P(rewrite_fci.retval);
+				zval_ptr_dtor_str(&retval);
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
@@ -729,15 +731,16 @@ PHP_METHOD(Phar, webPhar)
 				}
 				efree(pt);
 
-				zend_bailout();
+				zend_throw_unwind_exit();
+				return;
 			default:
+				zval_ptr_dtor(&retval);
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 
 cleanup_fail:
 				if (free_pathinfo) {
 					efree(path_info);
 				}
-				efree(entry);
 				efree(pt);
 #ifdef PHP_WIN32
 				efree(fname);
@@ -752,6 +755,10 @@ cleanup_fail:
 
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
 		efree(entry);
+		efree(pt);
+
+		bool is_entry_allocated = false;
+
 		/* direct request */
 		if (index_php_len) {
 			entry = index_php;
@@ -759,22 +766,17 @@ cleanup_fail:
 			if (entry[0] != '/') {
 				spprintf(&entry, 0, "/%s", index_php);
 				++entry_len;
+				is_entry_allocated = true;
 			}
 		} else {
 			/* assume "index.php" is starting point */
-			entry = estrndup("/index.php", sizeof("/index.php"));
+			entry = "/index.php";
 			entry_len = sizeof("/index.php")-1;
 		}
 
 		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404);
-
-			if (free_pathinfo) {
-				efree(path_info);
-			}
-
-			zend_bailout();
 		} else {
 			char *tmp = NULL, sa = '\0';
 			sapi_header_line ctr = {0};
@@ -801,21 +803,32 @@ cleanup_fail:
 				*tmp = sa;
 			}
 
-			if (free_pathinfo) {
-				efree(path_info);
-			}
-
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			sapi_send_headers();
 			efree((void *) ctr.line);
-			zend_bailout();
 		}
+
+		if (is_entry_allocated) {
+			efree(entry);
+		}
+		if (free_pathinfo) {
+			efree(path_info);
+		}
+
+		zend_throw_unwind_exit();
+		return;
 	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
+		efree(entry);
+		efree(pt);
+		if (free_pathinfo) {
+			efree(path_info);
+		}
 		phar_do_404(phar, fname, fname_len, f404);
-		zend_bailout();
+		zend_throw_unwind_exit();
+		return;
 	}
 
 	if (mimeoverride && zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
