@@ -5217,12 +5217,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CATCH_SPEC_CO
 	exception = EG(exception);
 	EG(exception) = NULL;
 	if (RETURN_VALUE_USED(opline)) {
-		/* Always perform a strict assignment. There is a reasonable expectation that if you
-		 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
-		 * we should not permit coercion to string here. */
-		zval tmp;
-		ZVAL_OBJ(&tmp, exception);
-		zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		if (opline->result_type == IS_CV) {
+			/* Always perform a strict assignment. There is a reasonable expectation that if you
+			 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
+			 * we should not permit coercion to string here. */
+			zval tmp;
+			ZVAL_OBJ(&tmp, exception);
+			zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		} else {
+			ZEND_ASSERT(opline->result_type == IS_TMP_VAR);
+			ZVAL_OBJ(EX_VAR(opline->result.var), exception);
+		}
 	} else {
 		OBJ_RELEASE(exception);
 	}
@@ -12133,6 +12138,37 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_PARENT_P
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USING_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = RT_CONSTANT(opline, opline->op1);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+
+	HANDLE_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DIV_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -22225,6 +22261,37 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GET_TYPE_SPEC
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USING_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DIV_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -30517,6 +30584,47 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MAKE_REF_SPEC
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USING_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_RESTORE_CV_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE;
+
+	zval *var = EX_VAR(opline->result.var);
+	zval *value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+	ZVAL_COPY_VALUE(var, value);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -50265,6 +50373,47 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GET_TYPE_SPEC
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USING_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_BACKUP_CV_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE;
+
+	zval *var = EX_VAR(opline->result.var);
+	zval *value = _get_zval_ptr_cv_BP_VAR_IS(opline->op1.var EXECUTE_DATA_CC);
+	ZVAL_COPY(var, value);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -58102,12 +58251,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CATCH_SPEC_CONST_T
 	exception = EG(exception);
 	EG(exception) = NULL;
 	if (RETURN_VALUE_USED(opline)) {
-		/* Always perform a strict assignment. There is a reasonable expectation that if you
-		 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
-		 * we should not permit coercion to string here. */
-		zval tmp;
-		ZVAL_OBJ(&tmp, exception);
-		zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		if (opline->result_type == IS_CV) {
+			/* Always perform a strict assignment. There is a reasonable expectation that if you
+			 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
+			 * we should not permit coercion to string here. */
+			zval tmp;
+			ZVAL_OBJ(&tmp, exception);
+			zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		} else {
+			ZEND_ASSERT(opline->result_type == IS_TMP_VAR);
+			ZVAL_OBJ(EX_VAR(opline->result.var), exception);
+		}
 	} else {
 		OBJ_RELEASE(exception);
 	}
@@ -64916,6 +65070,37 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_PARENT_PROPER
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USING_SPEC_CONST_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = RT_CONSTANT(opline, opline->op1);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+
+	HANDLE_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DIV_SPEC_CONST_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -74908,6 +75093,37 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GET_TYPE_SPEC_TMP_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USING_SPEC_TMP_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DIV_SPEC_TMP_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -83200,6 +83416,47 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MAKE_REF_SPEC_VAR_
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USING_SPEC_VAR_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RESTORE_CV_SPEC_VAR_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE;
+
+	zval *var = EX_VAR(opline->result.var);
+	zval *value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+	ZVAL_COPY_VALUE(var, value);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -102846,6 +103103,47 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GET_TYPE_SPEC_CV_U
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USING_SPEC_CV_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval obj;
+	zval *op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
+		if (UNEXPECTED(!instanceof_function_slow(Z_OBJCE_P(op1), zend_ce_context_manager))) {
+			goto type_error;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_RESOURCE)) {
+		object_init_ex(&obj, zend_ce_resource_context);
+		zend_resource_context_init(Z_OBJ(obj), Z_RES_P(op1));
+		op1 = &obj;
+	} else {
+		goto type_error;
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	ZEND_VM_NEXT_OPCODE();
+
+type_error:
+	SAVE_OPLINE();
+
+	zend_throw_invalid_context_manager_error(op1 OPLINE_CC EXECUTE_DATA_CC);
+
+
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_BACKUP_CV_SPEC_CV_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE;
+
+	zval *var = EX_VAR(opline->result.var);
+	zval *value = _get_zval_ptr_cv_BP_VAR_IS(opline->op1.var EXECUTE_DATA_CC);
+	ZVAL_COPY(var, value);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -109674,6 +109972,13 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_INIT_USING_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_INIT_USING_SPEC_TMP_UNUSED_LABEL,
+			(void*)&&ZEND_INIT_USING_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_INIT_USING_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_BACKUP_CV_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_RESTORE_CV_SPEC_VAR_UNUSED_LABEL,
 			(void*)&&ZEND_INIT_FCALL_OFFSET_SPEC_CONST_LABEL,
 			(void*)&&ZEND_RECV_NOTYPE_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -112062,6 +112367,11 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_INIT_USING_SPEC_CONST_UNUSED):
+				VM_TRACE(ZEND_INIT_USING_SPEC_CONST_UNUSED)
+				ZEND_INIT_USING_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_INIT_USING_SPEC_CONST_UNUSED)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_DIV_SPEC_CONST_CV):
 				VM_TRACE(ZEND_DIV_SPEC_CONST_CV)
 				ZEND_DIV_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -113431,6 +113741,11 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_GET_TYPE_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_GET_TYPE_SPEC_TMP_UNUSED)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_INIT_USING_SPEC_TMP_UNUSED):
+				VM_TRACE(ZEND_INIT_USING_SPEC_TMP_UNUSED)
+				ZEND_INIT_USING_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_INIT_USING_SPEC_TMP_UNUSED)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_DIV_SPEC_TMP_CV):
 				VM_TRACE(ZEND_DIV_SPEC_TMP_CV)
 				ZEND_DIV_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -114045,6 +114360,16 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_MAKE_REF_SPEC_VAR_UNUSED)
 				ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_MAKE_REF_SPEC_VAR_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_INIT_USING_SPEC_VAR_UNUSED):
+				VM_TRACE(ZEND_INIT_USING_SPEC_VAR_UNUSED)
+				ZEND_INIT_USING_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_INIT_USING_SPEC_VAR_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_RESTORE_CV_SPEC_VAR_UNUSED):
+				VM_TRACE(ZEND_RESTORE_CV_SPEC_VAR_UNUSED)
+				ZEND_RESTORE_CV_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_RESTORE_CV_SPEC_VAR_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_SEND_VAR_EX_SIMPLE_SPEC_VAR_UNUSED)
@@ -115724,6 +116049,16 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_GET_TYPE_SPEC_CV_UNUSED)
 				ZEND_GET_TYPE_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_GET_TYPE_SPEC_CV_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_INIT_USING_SPEC_CV_UNUSED):
+				VM_TRACE(ZEND_INIT_USING_SPEC_CV_UNUSED)
+				ZEND_INIT_USING_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_INIT_USING_SPEC_CV_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_BACKUP_CV_SPEC_CV_UNUSED):
+				VM_TRACE(ZEND_BACKUP_CV_SPEC_CV_UNUSED)
+				ZEND_BACKUP_CV_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_BACKUP_CV_SPEC_CV_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_UNUSED):
 				VM_TRACE(ZEND_SEND_VAR_EX_SIMPLE_SPEC_CV_UNUSED)
@@ -118642,6 +118977,13 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_INIT_USING_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_INIT_USING_SPEC_TMP_UNUSED_HANDLER,
+		ZEND_INIT_USING_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_INIT_USING_SPEC_CV_UNUSED_HANDLER,
+		ZEND_BACKUP_CV_SPEC_CV_UNUSED_HANDLER,
+		ZEND_RESTORE_CV_SPEC_VAR_UNUSED_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -122130,6 +122472,13 @@ void zend_vm_init(void)
 		ZEND_NULL_TAILCALL_HANDLER,
 		ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_UNUSED_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
+		ZEND_INIT_USING_SPEC_CONST_UNUSED_TAILCALL_HANDLER,
+		ZEND_INIT_USING_SPEC_TMP_UNUSED_TAILCALL_HANDLER,
+		ZEND_INIT_USING_SPEC_VAR_UNUSED_TAILCALL_HANDLER,
+		ZEND_NULL_TAILCALL_HANDLER,
+		ZEND_INIT_USING_SPEC_CV_UNUSED_TAILCALL_HANDLER,
+		ZEND_BACKUP_CV_SPEC_CV_UNUSED_TAILCALL_HANDLER,
+		ZEND_RESTORE_CV_SPEC_VAR_UNUSED_TAILCALL_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_TAILCALL_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
@@ -123098,7 +123447,7 @@ void zend_vm_init(void)
 		1255,
 		1256 | SPEC_RULE_OP1,
 		1261 | SPEC_RULE_OP1,
-		3484,
+		3491,
 		1266 | SPEC_RULE_OP1,
 		1271 | SPEC_RULE_OP1,
 		1276 | SPEC_RULE_OP2,
@@ -123132,7 +123481,7 @@ void zend_vm_init(void)
 		1559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1584 | SPEC_RULE_OP1,
 		1589,
-		3484,
+		3491,
 		1590 | SPEC_RULE_OP1,
 		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -123267,48 +123616,48 @@ void zend_vm_init(void)
 		2558,
 		2559 | SPEC_RULE_OP2,
 		2564 | SPEC_RULE_OP2,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
+		2569 | SPEC_RULE_OP1,
+		2574,
+		2575,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
+		3491,
 	};
 #if 0
 #elif (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -123501,7 +123850,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2577 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2584 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123509,7 +123858,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2602 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2609 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123517,7 +123866,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2627 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2634 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123528,17 +123877,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2652 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2659 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2677 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2684 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2702 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2709 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -123549,17 +123898,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2727 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2734 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2752 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2759 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2777 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2784 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -123570,19 +123919,19 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2802 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2809 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2877 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2884 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3102 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3109 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !((op1_info & op2_info) & MAY_BE_ARRAY_OF_ARRAY)) {
-				spec = 3108 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3115 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -123593,19 +123942,19 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2952 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2959 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3027 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3034 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3105 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3112 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !((op1_info & op2_info) & MAY_BE_ARRAY_OF_ARRAY)) {
-				spec = 3113 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3120 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -123616,12 +123965,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2802 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2809 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2877 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2884 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -123632,12 +123981,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2952 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2959 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3027 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3034 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -123645,12 +123994,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3118 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3125 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3193 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3200 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -123658,79 +124007,79 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3268 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3275 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3343 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3350 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3430 | SPEC_RULE_OP1;
+				spec = 3437 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3435 | SPEC_RULE_OP1;
+				spec = 3442 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3440 | SPEC_RULE_OP1;
+				spec = 3447 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3418 | SPEC_RULE_RETVAL;
+				spec = 3425 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3420 | SPEC_RULE_RETVAL;
+				spec = 3427 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3422 | SPEC_RULE_RETVAL;
+				spec = 3429 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3424 | SPEC_RULE_RETVAL;
+				spec = 3431 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3426;
+				spec = 3433;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3427;
+				spec = 3434;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3428;
+				spec = 3435;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3429;
+				spec = 3436;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2576;
+				spec = 2583;
 			}
 			break;
 		case ZEND_INIT_FCALL:
 			if (Z_EXTRA_P(RT_CONSTANT(op, op->op2)) != 0) {
-				spec = 2569;
+				spec = 2576;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2570;
+				spec = 2577;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3480;
+				spec = 3487;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3475 | SPEC_RULE_OP1;
+				spec = 3482 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3482 | SPEC_RULE_RETVAL;
+				spec = 3489 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -123738,22 +124087,22 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3445 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3452 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3481;
+				spec = 3488;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3470 | SPEC_RULE_OP1;
+				spec = 3477 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_COUNT:
 			if (op->op1_type != IS_CONST && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2571 | SPEC_RULE_OP1;
+				spec = 2578 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

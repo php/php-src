@@ -54,6 +54,12 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(const znode *node) {
 	return (zend_ast *) ast;
 }
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_copy_znode(const znode *node) {
+	zend_ast *ast = zend_ast_create_znode(node);
+	ast->attr = 1;
+	return ast;
+}
+
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args) {
 	zend_ast_fcc *ast;
 

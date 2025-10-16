@@ -818,6 +818,15 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_ASSERT,                 "assert") \
 	_(ZEND_STR_CALL_USER_FUNC,         "call_user_func") \
 	_(ZEND_STR_ARRAY_SLICE,            "array_slice") \
+	_(ZEND_STR_GENERATOR,              "Generator") \
+	_(ZEND_STR_TYPE_ERROR,             "TypeError") \
+	_(ZEND_STR_ERROR,                  "Error") \
+	_(ZEND_STR_THROWABLE,              "Throwable") \
+	_(ZEND_STR_CURRENT,                "current") \
+	_(ZEND_STR_VALID,                  "valid") \
+	_(ZEND_STR_NEXT,                   "next") \
+	_(ZEND_STR_THROW,                  "throw") \
+	_(ZEND_STR_GET_RETURN,             "getReturn") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \

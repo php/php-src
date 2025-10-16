@@ -57,7 +57,7 @@ ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res)
 	zend_hash_index_del(&EG(regular_list), res->handle);
 }
 
-static void zend_resource_dtor(zend_resource *res)
+static void ZEND_FASTCALL zend_resource_dtor(zend_resource *res)
 {
 	zend_rsrc_list_dtors_entry *ld;
 	zend_resource r = *res;

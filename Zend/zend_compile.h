@@ -97,6 +97,7 @@ typedef struct _zend_ast_znode {
 } zend_ast_znode;
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(const znode *node);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_copy_znode(const znode *node);
 
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
@@ -154,7 +155,6 @@ struct _zend_op {
 	uint32_t result_def_type;
 #endif
 };
-
 
 typedef struct _zend_brk_cont_element {
 	int start;

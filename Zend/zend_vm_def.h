@@ -4889,12 +4889,17 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	exception = EG(exception);
 	EG(exception) = NULL;
 	if (RETURN_VALUE_USED(opline)) {
-		/* Always perform a strict assignment. There is a reasonable expectation that if you
-		 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
-		 * we should not permit coercion to string here. */
-		zval tmp;
-		ZVAL_OBJ(&tmp, exception);
-		zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		if (opline->result_type == IS_CV) {
+			/* Always perform a strict assignment. There is a reasonable expectation that if you
+			 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
+			 * we should not permit coercion to string here. */
+			zval tmp;
+			ZVAL_OBJ(&tmp, exception);
+			zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+		} else {
+			ZEND_ASSERT(opline->result_type == IS_TMP_VAR);
+			ZVAL_OBJ(EX_VAR(opline->result.var), exception);
+		}
 	} else {
 		OBJ_RELEASE(exception);
 	}

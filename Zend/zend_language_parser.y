@@ -182,6 +182,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_FUNC_C          "'__FUNCTION__'"
 %token <ident> T_PROPERTY_C      "'__PROPERTY__'"
 %token <ident> T_NS_C            "'__NAMESPACE__'"
+%token <ident> T_USING           "'using'"
 
 %token END 0 "end of file"
 %token T_ATTRIBUTE    "'#['"
@@ -270,7 +271,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_cond_exprs for_exprs switch_case_list global_var_list static_var_list
-%type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
+%type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable optional_using_var using using_list parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
@@ -309,7 +310,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM | T_USING
 	| T_PROPERTY_C
 ;
 
@@ -1389,8 +1390,22 @@ expr:
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	match { $$ = $1; }
+	|	using { $$ = $1; }
 ;
 
+using:
+	T_USING '(' using_list ')' statement { $$ = zend_ast_create(ZEND_AST_USING, $3, $5); }
+
+optional_using_var:
+		%empty                    { $$ = NULL; }
+	|   T_DOUBLE_ARROW T_VARIABLE { $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+;
+
+using_list:
+	expr optional_using_var
+		{ $$ = zend_ast_create_list(1, ZEND_AST_USING_LIST, zend_ast_create(ZEND_AST_USING_ELEM, $1, $2)); }
+	| using_list ',' expr optional_using_var
+		{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_USING_ELEM, $3, $4)); }
 
 inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type

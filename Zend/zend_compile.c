@@ -104,6 +104,7 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type);
+static void zend_compile_try(const zend_ast *ast);
 
 static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg);
 
@@ -3678,6 +3679,12 @@ static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_
 				result->op_type = IS_UNUSED;
 			}
 			return;
+		case ZEND_AST_ZNODE:
+			var_node = *zend_ast_get_znode(var_ast);
+			zend_compile_expr(&expr_node, expr_ast);
+			opline = zend_emit_op(NULL, ZEND_QM_ASSIGN, &expr_node, NULL);
+			SET_NODE(opline->result, &var_node);
+			break;
 		default: ZEND_UNREACHABLE();
 	}
 }
@@ -6397,6 +6404,263 @@ static void zend_compile_void_cast(znode *result, const zend_ast *ast)
 	}
 }
 
+static void zend_emit_copy_tmp(znode *result, znode *expr)
+{
+	if (expr->op_type == IS_VAR) {
+		zend_emit_op(result, ZEND_COPY_TMP, expr, NULL);
+	} else if (expr->op_type == IS_TMP_VAR) {
+		zend_emit_op_tmp(result, ZEND_COPY_TMP, expr, NULL);
+	} else {
+		if (expr->op_type == IS_CONST) {
+			Z_TRY_ADDREF(expr->u.constant);
+		}
+		*result = *expr;
+	}
+}
+
+static void zend_compile_using(znode *result, zend_ast *ast)
+{
+	zend_ast_list *list_ast = zend_ast_get_list(ast->child[0]);
+	ZEND_ASSERT(list_ast->children > 0);
+
+	zend_ast *expr_ast = list_ast->child[0]->child[0];
+	zend_ast *var_ast = list_ast->child[0]->child[1];
+
+	zend_ast *stmts_ast = ast->child[1];
+	bool is_last = true;
+
+	result->op_type = IS_TMP_VAR;
+	result->u.op.var = get_temporary_variable();
+
+	znode null_node;
+	null_node.op_type = IS_CONST;
+	ZVAL_NULL(&null_node.u.constant);
+	zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &null_node, NULL);
+
+	/* For a using() with multiple context managers, set stmts_ast to the same
+	 * USING_AST minus the first element. */
+	if (list_ast->children > 1) {
+
+		zend_ast *copy = zend_ast_dup(ast);
+		zend_ast_list *list_ast = zend_ast_get_list(copy->child[0]);
+		zend_ast_destroy(list_ast->child[0]);
+		memmove(list_ast->child, list_ast->child + 1, sizeof(*list_ast->child) * list_ast->children - 1);
+		list_ast->children--;
+
+		stmts_ast = zend_ast_create_list(1, ZEND_AST_STMT_LIST,
+			zend_ast_create(ZEND_AST_ASSIGN, zend_ast_create_znode(result), copy));
+
+		is_last = false;
+	}
+
+	/* manager = (expr); */
+	znode manager;
+	zend_compile_expr(&manager, expr_ast);
+	if (manager.op_type != IS_TMP_VAR) {
+		zend_emit_op_tmp(&manager, ZEND_QM_ASSIGN, &manager, NULL);
+	}
+
+	/* if (!(manager instanceof Generator)) { throw } */
+	{
+		zend_ast *generator_class_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_GENERATOR));
+		generator_class_ast->attr = ZEND_NAME_FQ;
+
+		zend_ast *type_error_class_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_TYPE_ERROR));
+		type_error_class_ast->attr = ZEND_NAME_FQ;
+
+		zend_ast *invalid_type_fmt_ast = zend_ast_create_zval_from_str(ZSTR_INIT_LITERAL("Context Manager must be an instance of Generator (TODO: proper error message)", false));
+
+		zend_ast *check_type_ast = zend_ast_create_list(1, ZEND_AST_IF,
+			zend_ast_create(ZEND_AST_IF_ELEM,
+				/* !(manager instanceof Generator) */
+				zend_ast_create_ex(ZEND_AST_UNARY_OP,
+					ZEND_BOOL_NOT,
+					zend_ast_create(ZEND_AST_INSTANCEOF,
+						zend_ast_create_copy_znode(&manager),
+						generator_class_ast)),
+				/* throw */
+				zend_ast_create(ZEND_AST_THROW,
+					zend_ast_create(ZEND_AST_NEW,
+						type_error_class_ast,
+							zend_ast_create_arg_list(1,
+								ZEND_AST_ARG_LIST,
+								invalid_type_fmt_ast)))));
+		zend_compile_stmt(check_type_ast);
+		zend_ast_destroy(check_type_ast);
+	}
+
+	/**
+	 * [$var] = manager->current();
+	 * if ($var === null && !manager->valid()) { throw }
+	 */
+	{
+		zend_ast *current_method_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CURRENT));
+
+		zend_ast *valid_method_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VALID));
+
+		zend_ast *error_class_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_ERROR));
+		error_class_ast->attr = ZEND_NAME_FQ;
+
+		zend_ast *did_not_yield_fmt_ast = zend_ast_create_zval_from_str(ZSTR_INIT_LITERAL("Context Manager must yield once, but it returned without yielding", false));
+
+		zval zv;
+		ZVAL_NULL(&zv);
+		zend_ast *null_ast = zend_ast_create_zval(&zv);
+
+		zend_ast *current_ast = zend_ast_create(ZEND_AST_METHOD_CALL,
+				zend_ast_create_copy_znode(&manager),
+				current_method_ast,
+				zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST));
+
+		znode result;
+		zend_compile_expr(&result, current_ast);
+		zend_ast_destroy(current_ast);
+
+		zend_ast *stmt = zend_ast_create_list(1, ZEND_AST_IF,
+			zend_ast_create(ZEND_AST_IF_ELEM,
+				/* $var === null && !manager->valid() */
+				zend_ast_create(ZEND_AST_AND,
+					/* $var === null */
+					zend_ast_create_ex(ZEND_AST_BINARY_OP,
+						ZEND_IS_IDENTICAL,
+						zend_ast_create_copy_znode(&result),
+						null_ast),
+					/* && !manager->valid() */
+					zend_ast_create_ex(ZEND_AST_UNARY_OP,
+						ZEND_BOOL_NOT,
+						zend_ast_create(ZEND_AST_METHOD_CALL,
+							zend_ast_create_copy_znode(&manager),
+							valid_method_ast,
+							zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST)))),
+				/* throw */
+				zend_ast_create(ZEND_AST_THROW,
+					zend_ast_create(ZEND_AST_NEW,
+						error_class_ast,
+							zend_ast_create_arg_list(1,
+								ZEND_AST_ARG_LIST,
+								did_not_yield_fmt_ast)))));
+		zend_compile_stmt(stmt);
+		zend_ast_destroy(stmt);
+
+		if (var_ast) {
+			zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN,
+					zend_ast_dup(var_ast),
+					zend_ast_create_znode(&result));
+			zend_compile_stmt(assign_ast);
+			zend_ast_destroy(assign_ast);
+		} else {
+			zend_do_free(&result);
+		}
+	}
+
+	/**
+	 * try {
+	 *     // stmts
+	 * } catch (Throwable $e) {
+	 *     manager->throw($e);
+	 * } finally {
+	 *     [unset($var);]
+	 *     manager->next();
+	 *     if (manager->valid()) { throw }
+	 *     try { result = manager->getReturn() } catch (Throwable $e) {}
+	 * }
+	 */
+	{
+		zend_ast *throwable_class_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THROWABLE));
+		throwable_class_ast->attr = ZEND_NAME_FQ;
+
+		znode exception;
+		exception.op_type = IS_TMP_VAR;
+		exception.u.op.var = get_temporary_variable();
+
+		/* } catch (Throwable exception) { manager->throw(exception); } */
+		zend_ast *catch_list_ast = zend_ast_create_list(1, ZEND_AST_CATCH_LIST,
+			zend_ast_create(ZEND_AST_CATCH,
+				zend_ast_create_list(1, ZEND_AST_NAME_LIST, throwable_class_ast),
+				zend_ast_create_znode(&exception),
+				zend_ast_create_list(1, ZEND_AST_STMT_LIST,
+					/* Resumes the manager with the exception. The manager may
+					 * swallow it, or let it propagate. */
+					zend_ast_create(ZEND_AST_METHOD_CALL,
+						zend_ast_create_copy_znode(&manager),
+						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THROW)),
+						zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST,
+							zend_ast_create_znode(&exception))))));
+
+		zend_ast *finally_ast = zend_ast_create_list(0, ZEND_AST_STMT_LIST);
+
+		if (var_ast) {
+			/* unset($var); */
+			finally_ast = zend_ast_list_add(finally_ast,
+				zend_ast_create(ZEND_AST_UNSET, zend_ast_dup(var_ast)));
+		}
+
+		/* manager->next(); */
+		finally_ast = zend_ast_list_add(finally_ast,
+			zend_ast_create(ZEND_AST_METHOD_CALL,
+				zend_ast_create_copy_znode(&manager),
+				zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_NEXT)),
+				zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST)));
+
+		/* if (manager->valid()) { throw } */
+		{
+			zend_ast *valid_method_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VALID));
+
+			zend_ast *error_class_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_ERROR));
+			error_class_ast->attr = ZEND_NAME_FQ;
+
+			zend_ast *yielded_twice_fmt_ast = zend_ast_create_zval_from_str(ZSTR_INIT_LITERAL("Context Manager must yield only once, but it yielded a second time when fetching the return value", false));
+
+			finally_ast = zend_ast_list_add(finally_ast,
+				zend_ast_create_list(1, ZEND_AST_IF,
+					zend_ast_create(ZEND_AST_IF_ELEM,
+						/* manager->valid() */
+						zend_ast_create(ZEND_AST_METHOD_CALL,
+							zend_ast_create_copy_znode(&manager),
+							valid_method_ast,
+							zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST)),
+						/* throw */
+						zend_ast_create(ZEND_AST_THROW,
+							zend_ast_create(ZEND_AST_NEW,
+								error_class_ast,
+								zend_ast_create_arg_list(1,
+									ZEND_AST_ARG_LIST,
+									yielded_twice_fmt_ast))))));
+		}
+
+		/* try { manager->getReturn(); } catch (Throwable) {} */
+		if (is_last) {
+			zend_ast *throwable_class_ast2 = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THROWABLE));
+			throwable_class_ast2->attr = ZEND_NAME_FQ;
+
+			finally_ast = zend_ast_list_add(finally_ast,
+				zend_ast_create(ZEND_AST_TRY,
+					zend_ast_create_list(1, ZEND_AST_STMT_LIST,
+						zend_ast_create(ZEND_AST_ASSIGN,
+							zend_ast_create_znode(result),
+							zend_ast_create(ZEND_AST_METHOD_CALL,
+								zend_ast_create_copy_znode(&manager),
+								zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_GET_RETURN)),
+								zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST)))),
+					zend_ast_create_list(1, ZEND_AST_CATCH_LIST,
+						zend_ast_create(ZEND_AST_CATCH,
+							zend_ast_create_list(1, ZEND_AST_NAME_LIST, throwable_class_ast2),
+							NULL,
+							zend_ast_create_list(0, ZEND_AST_STMT_LIST))),
+					NULL));
+		}
+
+		zend_compile_try(zend_ast_create(ZEND_AST_TRY, stmts_ast, catch_list_ast, finally_ast));
+		if (!is_last) {
+			zend_ast_destroy(stmts_ast);
+		}
+		zend_ast_destroy(catch_list_ast);
+		zend_ast_destroy(finally_ast);
+	}
+
+	zend_do_free(&manager);
+}
+
 static void zend_compile_echo(const zend_ast *ast) /* {{{ */
 {
 	zend_op *opline;
@@ -7490,7 +7754,7 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 		const zend_ast_list *classes = zend_ast_get_list(catch_ast->child[0]);
 		zend_ast *var_ast = catch_ast->child[1];
 		zend_ast *stmt_ast = catch_ast->child[2];
-		zend_string *var_name = var_ast ? zval_make_interned_string(zend_ast_get_zval(var_ast)) : NULL;
+		zend_string *var_name = var_ast && var_ast->kind == ZEND_AST_ZVAL ? zval_make_interned_string(zend_ast_get_zval(var_ast)) : NULL;
 		bool is_last_catch = (i + 1 == catches->children);
 
 		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
@@ -7522,8 +7786,18 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
 
-			opline->result_type = var_name ? IS_CV : IS_UNUSED;
-			opline->result.var = var_name ? lookup_cv(var_name) : -1;
+			if (var_name) {
+				opline->result_type = var_name ? IS_CV : IS_UNUSED;
+				opline->result.var = var_name ? lookup_cv(var_name) : -1;
+			} else if (var_ast && var_ast->kind == ZEND_AST_ZNODE) {
+				znode *node = zend_ast_get_znode(var_ast);
+				ZEND_ASSERT(node->op_type == IS_TMP_VAR);
+				opline->result_type = IS_TMP_VAR;
+				opline->result = node->u.op;
+			} else {
+				opline->result_type = IS_UNUSED;
+				opline->result.var = -1;
+			}
 
 			if (is_last_catch && is_last_class) {
 				opline->extended_value |= ZEND_LAST_CATCH;
@@ -12661,6 +12935,9 @@ static zend_never_inline void zend_compile_expr_inner(znode *result, zend_ast *a
 			return;
 		case ZEND_AST_ZNODE:
 			*result = *zend_ast_get_znode(ast);
+			if (ast->attr) {
+				zend_emit_copy_tmp(result, result);
+			}
 			return;
 		case ZEND_AST_VAR:
 		case ZEND_AST_DIM:
@@ -12780,6 +13057,9 @@ static zend_never_inline void zend_compile_expr_inner(znode *result, zend_ast *a
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
 			return;
+		case ZEND_AST_USING:
+			zend_compile_using(result, ast);
+			break;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}

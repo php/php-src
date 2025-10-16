@@ -479,6 +479,11 @@ const T_PROPERTY_C = UNKNOWN;
 const T_NS_C = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_USING
+ */
+const T_USING = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_ATTRIBUTE
  */
 const T_ATTRIBUTE = UNKNOWN;
