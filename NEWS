@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19994 (openssl_get_cipher_methods inconsistent with fetching).
     (Jakub Zelenka)
 
+- PDO:
+  . Fixed bug GH-20095 (Incorrect class name in deprecation message for PDO
+    mixins). (timwolla)
+
 - Phar:
   . Fix potential buffer length truncation due to usage of type int instead
     of type size_t. (Girgias)
