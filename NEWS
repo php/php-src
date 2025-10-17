@@ -48,6 +48,9 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-17112 (Macro redefinitions). (nielsdos, cmb)
 
+- mysqli:
+  . Make mysqli_begin_transaction() report errors properly. (Kamil Tekiela)
+
 - Opcache:
   . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
 

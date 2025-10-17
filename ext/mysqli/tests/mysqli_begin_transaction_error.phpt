@@ -38,6 +38,5 @@ echo "done!\n";
     require_once 'clean_table.inc';
 ?>
 --EXPECT--
-NULL
 Expecting an exception.
 done!
