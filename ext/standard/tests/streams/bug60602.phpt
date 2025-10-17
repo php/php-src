@@ -9,7 +9,7 @@ $descs = array(
     2 => array('pipe', 'w'), // strerr
 );
 
-$environment = array('test' => array(1, 2, 3));
+$environment = array('test' => array(1, 2, 3), 'PATH' => getenv('PATH'));
 
 $cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
 $p = proc_open($cmd, $descs, $pipes, '.', $environment);
