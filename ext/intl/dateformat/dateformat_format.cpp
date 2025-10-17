@@ -16,13 +16,13 @@
 #include <config.h>
 #endif
 
+#include <unicode/ustring.h>
+#include <unicode/ucal.h>
+
 extern "C" {
 #include "../php_intl.h"
 #include "../intl_convert.h"
 }
-
-#include <unicode/ustring.h>
-#include <unicode/ucal.h>
 
 #include "../common/common_date.h"
 #include "dateformat.h"
