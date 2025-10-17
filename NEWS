@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Use the "includes credentials" rule of the WHATWG URL Standard to
     decide whether Uri\WhatWg\Url::getUsername() and ::getPassword()
     getters should return null or an empty string. (timwolla)
+  . Fixed the distinction between an empty and a missing query/fragment
+    when using Uri\WhatWg\Url::getQuery() and Uri\WhatWg\Url::getFragment().
+    (kocsismate)
 
 - Zip:
   . Fixed missing zend_release_fcall_info_cache on the following methods
