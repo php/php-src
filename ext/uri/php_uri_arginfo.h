@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f3c524798d1933a400cc9377cfbfdcbaf77b87f0 */
+ * Stub hash: f188c5ab4e2f94c934917868537c839b188b0c67 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -239,28 +239,28 @@ static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, __construct, arginfo_class_Uri_Rfc3986_Uri___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getScheme, arginfo_class_Uri_Rfc3986_Uri_getScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawScheme, arginfo_class_Uri_Rfc3986_Uri_getRawScheme, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withScheme, arginfo_class_Uri_Rfc3986_Uri_withScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withScheme, arginfo_class_Uri_Rfc3986_Uri_withScheme, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getUserInfo, arginfo_class_Uri_Rfc3986_Uri_getUserInfo, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawUserInfo, arginfo_class_Uri_Rfc3986_Uri_getRawUserInfo, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withUserInfo, arginfo_class_Uri_Rfc3986_Uri_withUserInfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withUserInfo, arginfo_class_Uri_Rfc3986_Uri_withUserInfo, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getUsername, arginfo_class_Uri_Rfc3986_Uri_getUsername, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawUsername, arginfo_class_Uri_Rfc3986_Uri_getRawUsername, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getPassword, arginfo_class_Uri_Rfc3986_Uri_getPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawPassword, arginfo_class_Uri_Rfc3986_Uri_getRawPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getHost, arginfo_class_Uri_Rfc3986_Uri_getHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawHost, arginfo_class_Uri_Rfc3986_Uri_getRawHost, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withHost, arginfo_class_Uri_Rfc3986_Uri_withHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withHost, arginfo_class_Uri_Rfc3986_Uri_withHost, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getPort, arginfo_class_Uri_Rfc3986_Uri_getPort, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withPort, arginfo_class_Uri_Rfc3986_Uri_withPort, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withPort, arginfo_class_Uri_Rfc3986_Uri_withPort, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getPath, arginfo_class_Uri_Rfc3986_Uri_getPath, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawPath, arginfo_class_Uri_Rfc3986_Uri_getRawPath, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withPath, arginfo_class_Uri_Rfc3986_Uri_withPath, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withPath, arginfo_class_Uri_Rfc3986_Uri_withPath, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getQuery, arginfo_class_Uri_Rfc3986_Uri_getQuery, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawQuery, arginfo_class_Uri_Rfc3986_Uri_getRawQuery, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withQuery, arginfo_class_Uri_Rfc3986_Uri_withQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withQuery, arginfo_class_Uri_Rfc3986_Uri_withQuery, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, getFragment, arginfo_class_Uri_Rfc3986_Uri_getFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawFragment, arginfo_class_Uri_Rfc3986_Uri_getRawFragment, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_Rfc3986_Uri, withFragment, arginfo_class_Uri_Rfc3986_Uri_withFragment, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withFragment, arginfo_class_Uri_Rfc3986_Uri_withFragment, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_Rfc3986_Uri, equals, arginfo_class_Uri_Rfc3986_Uri_equals, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, toString, arginfo_class_Uri_Rfc3986_Uri_toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, toRawString, arginfo_class_Uri_Rfc3986_Uri_toRawString, ZEND_ACC_PUBLIC)
@@ -285,22 +285,42 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, parse, arginfo_class_Uri_WhatWg_Url_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_WhatWg_Url, __construct, arginfo_class_Uri_WhatWg_Url___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getScheme, arginfo_class_Uri_WhatWg_Url_getScheme, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_WhatWg_Url, withScheme, arginfo_class_Uri_WhatWg_Url_withScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_Url, withScheme, arginfo_class_Uri_WhatWg_Url_withScheme, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_RAW_FENTRY("getUsername", zim_Uri_Rfc3986_Uri_getUsername, arginfo_class_Uri_WhatWg_Url_getUsername, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(Uri_WhatWg_Url, withUsername, arginfo_class_Uri_WhatWg_Url_withUsername, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_Url, withUsername, arginfo_class_Uri_WhatWg_Url_withUsername, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_RAW_FENTRY("getPassword", zim_Uri_Rfc3986_Uri_getPassword, arginfo_class_Uri_WhatWg_Url_getPassword, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(Uri_WhatWg_Url, withPassword, arginfo_class_Uri_WhatWg_Url_withPassword, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_Url, withPassword, arginfo_class_Uri_WhatWg_Url_withPassword, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Uri_WhatWg_Url, getAsciiHost, arginfo_class_Uri_WhatWg_Url_getAsciiHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getUnicodeHost, arginfo_class_Uri_WhatWg_Url_getUnicodeHost, ZEND_ACC_PUBLIC)
+#if (PHP_VERSION_ID >= 80500)
+	ZEND_RAW_FENTRY("withHost", zim_Uri_Rfc3986_Uri_withHost, arginfo_class_Uri_WhatWg_Url_withHost, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("withHost", zim_Uri_Rfc3986_Uri_withHost, arginfo_class_Uri_WhatWg_Url_withHost, ZEND_ACC_PUBLIC, NULL, NULL)
+#endif
 	ZEND_RAW_FENTRY("getPort", zim_Uri_Rfc3986_Uri_getPort, arginfo_class_Uri_WhatWg_Url_getPort, ZEND_ACC_PUBLIC, NULL, NULL)
+#if (PHP_VERSION_ID >= 80500)
+	ZEND_RAW_FENTRY("withPort", zim_Uri_Rfc3986_Uri_withPort, arginfo_class_Uri_WhatWg_Url_withPort, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("withPort", zim_Uri_Rfc3986_Uri_withPort, arginfo_class_Uri_WhatWg_Url_withPort, ZEND_ACC_PUBLIC, NULL, NULL)
+#endif
 	ZEND_RAW_FENTRY("getPath", zim_Uri_Rfc3986_Uri_getPath, arginfo_class_Uri_WhatWg_Url_getPath, ZEND_ACC_PUBLIC, NULL, NULL)
+#if (PHP_VERSION_ID >= 80500)
+	ZEND_RAW_FENTRY("withPath", zim_Uri_Rfc3986_Uri_withPath, arginfo_class_Uri_WhatWg_Url_withPath, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("withPath", zim_Uri_Rfc3986_Uri_withPath, arginfo_class_Uri_WhatWg_Url_withPath, ZEND_ACC_PUBLIC, NULL, NULL)
+#endif
 	ZEND_RAW_FENTRY("getQuery", zim_Uri_Rfc3986_Uri_getQuery, arginfo_class_Uri_WhatWg_Url_getQuery, ZEND_ACC_PUBLIC, NULL, NULL)
+#if (PHP_VERSION_ID >= 80500)
+	ZEND_RAW_FENTRY("withQuery", zim_Uri_Rfc3986_Uri_withQuery, arginfo_class_Uri_WhatWg_Url_withQuery, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("withQuery", zim_Uri_Rfc3986_Uri_withQuery, arginfo_class_Uri_WhatWg_Url_withQuery, ZEND_ACC_PUBLIC, NULL, NULL)
+#endif
 	ZEND_RAW_FENTRY("getFragment", zim_Uri_Rfc3986_Uri_getFragment, arginfo_class_Uri_WhatWg_Url_getFragment, ZEND_ACC_PUBLIC, NULL, NULL)
+#if (PHP_VERSION_ID >= 80500)
+	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986_Uri_withFragment, arginfo_class_Uri_WhatWg_Url_withFragment, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986_Uri_withFragment, arginfo_class_Uri_WhatWg_Url_withFragment, ZEND_ACC_PUBLIC, NULL, NULL)
+#endif
 	ZEND_ME(Uri_WhatWg_Url, equals, arginfo_class_Uri_WhatWg_Url_equals, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, toAsciiString, arginfo_class_Uri_WhatWg_Url_toAsciiString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, toUnicodeString, arginfo_class_Uri_WhatWg_Url_toUnicodeString, ZEND_ACC_PUBLIC)
@@ -360,7 +380,56 @@ static zend_class_entry *register_class_Uri_Rfc3986_Uri(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 
+	zend_string *attribute_name_NoDiscard_func_withscheme_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withscheme_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withscheme", sizeof("withscheme") - 1), attribute_name_NoDiscard_func_withscheme_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withscheme_0);
+	zend_string *attribute_NoDiscard_func_withscheme_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withScheme() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withScheme() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withscheme_0->args[0].value, attribute_NoDiscard_func_withscheme_0_arg0_str);
+	attribute_NoDiscard_func_withscheme_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withuserinfo_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withuserinfo_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withuserinfo", sizeof("withuserinfo") - 1), attribute_name_NoDiscard_func_withuserinfo_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withuserinfo_0);
+	zend_string *attribute_NoDiscard_func_withuserinfo_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withUserInfo() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withUserInfo() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withuserinfo_0->args[0].value, attribute_NoDiscard_func_withuserinfo_0_arg0_str);
+	attribute_NoDiscard_func_withuserinfo_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withuserinfo", sizeof("withuserinfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_string *attribute_name_NoDiscard_func_withhost_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withhost_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withhost", sizeof("withhost") - 1), attribute_name_NoDiscard_func_withhost_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withhost_0);
+	zend_string *attribute_NoDiscard_func_withhost_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withHost() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withHost() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withhost_0->args[0].value, attribute_NoDiscard_func_withhost_0_arg0_str);
+	attribute_NoDiscard_func_withhost_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withport_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withport", sizeof("withport") - 1), attribute_name_NoDiscard_func_withport_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withport_0);
+	zend_string *attribute_NoDiscard_func_withport_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withPort() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withPort() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withport_0->args[0].value, attribute_NoDiscard_func_withport_0_arg0_str);
+	attribute_NoDiscard_func_withport_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withpath_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withpath_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpath", sizeof("withpath") - 1), attribute_name_NoDiscard_func_withpath_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withpath_0);
+	zend_string *attribute_NoDiscard_func_withpath_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withPath() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withPath() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withpath_0->args[0].value, attribute_NoDiscard_func_withpath_0_arg0_str);
+	attribute_NoDiscard_func_withpath_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withquery_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withquery_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withquery", sizeof("withquery") - 1), attribute_name_NoDiscard_func_withquery_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withquery_0);
+	zend_string *attribute_NoDiscard_func_withquery_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withQuery() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withQuery() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withquery_0->args[0].value, attribute_NoDiscard_func_withquery_0_arg0_str);
+	attribute_NoDiscard_func_withquery_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withfragment_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withfragment_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withfragment", sizeof("withfragment") - 1), attribute_name_NoDiscard_func_withfragment_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withfragment_0);
+	zend_string *attribute_NoDiscard_func_withfragment_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withFragment() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withFragment() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withfragment_0->args[0].value, attribute_NoDiscard_func_withfragment_0_arg0_str);
+	attribute_NoDiscard_func_withfragment_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -481,7 +550,63 @@ static zend_class_entry *register_class_Uri_WhatWg_Url(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 
+	zend_string *attribute_name_NoDiscard_func_withscheme_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withscheme_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withscheme", sizeof("withscheme") - 1), attribute_name_NoDiscard_func_withscheme_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withscheme_0);
+	zend_string *attribute_NoDiscard_func_withscheme_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withScheme() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withScheme() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withscheme_0->args[0].value, attribute_NoDiscard_func_withscheme_0_arg0_str);
+	attribute_NoDiscard_func_withscheme_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withusername_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withusername_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withusername", sizeof("withusername") - 1), attribute_name_NoDiscard_func_withusername_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withusername_0);
+	zend_string *attribute_NoDiscard_func_withusername_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withUsername() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withUsername() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withusername_0->args[0].value, attribute_NoDiscard_func_withusername_0_arg0_str);
+	attribute_NoDiscard_func_withusername_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withpassword_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withpassword_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpassword", sizeof("withpassword") - 1), attribute_name_NoDiscard_func_withpassword_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withpassword_0);
+	zend_string *attribute_NoDiscard_func_withpassword_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withPassword() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withPassword() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withpassword_0->args[0].value, attribute_NoDiscard_func_withpassword_0_arg0_str);
+	attribute_NoDiscard_func_withpassword_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpassword", sizeof("withpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_string *attribute_name_NoDiscard_func_withhost_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withhost_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withhost", sizeof("withhost") - 1), attribute_name_NoDiscard_func_withhost_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withhost_0);
+	zend_string *attribute_NoDiscard_func_withhost_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withHost() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withHost() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withhost_0->args[0].value, attribute_NoDiscard_func_withhost_0_arg0_str);
+	attribute_NoDiscard_func_withhost_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withport_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withport_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withport", sizeof("withport") - 1), attribute_name_NoDiscard_func_withport_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withport_0);
+	zend_string *attribute_NoDiscard_func_withport_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withPort() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withPort() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withport_0->args[0].value, attribute_NoDiscard_func_withport_0_arg0_str);
+	attribute_NoDiscard_func_withport_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withpath_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withpath_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpath", sizeof("withpath") - 1), attribute_name_NoDiscard_func_withpath_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withpath_0);
+	zend_string *attribute_NoDiscard_func_withpath_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withPath() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withPath() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withpath_0->args[0].value, attribute_NoDiscard_func_withpath_0_arg0_str);
+	attribute_NoDiscard_func_withpath_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withquery_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withquery_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withquery", sizeof("withquery") - 1), attribute_name_NoDiscard_func_withquery_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withquery_0);
+	zend_string *attribute_NoDiscard_func_withquery_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withQuery() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withQuery() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withquery_0->args[0].value, attribute_NoDiscard_func_withquery_0_arg0_str);
+	attribute_NoDiscard_func_withquery_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_withfragment_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_attribute *attribute_NoDiscard_func_withfragment_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withfragment", sizeof("withfragment") - 1), attribute_name_NoDiscard_func_withfragment_0, 1);
+	zend_string_release(attribute_name_NoDiscard_func_withfragment_0);
+	zend_string *attribute_NoDiscard_func_withfragment_0_arg0_str = zend_string_init("as Uri\\Rfc3986\\Uri::withFragment() does not modify the object itself", strlen("as Uri\\Rfc3986\\Uri::withFragment() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_withfragment_0->args[0].value, attribute_NoDiscard_func_withfragment_0_arg0_str);
+	attribute_NoDiscard_func_withfragment_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }

@@ -37,12 +37,14 @@ namespace Uri\Rfc3986 {
 
         public function getRawScheme(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withScheme() does not modify the object itself")]
         public function withScheme(?string $scheme): static {}
 
         public function getUserInfo(): ?string {}
 
         public function getRawUserInfo(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withUserInfo() does not modify the object itself")]
         public function withUserInfo(#[\SensitiveParameter] ?string $userinfo): static {}
 
         public function getUsername(): ?string {}
@@ -57,28 +59,33 @@ namespace Uri\Rfc3986 {
 
         public function getRawHost(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withHost() does not modify the object itself")]
         public function withHost(?string $host): static {}
 
         public function getPort(): ?int {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withPort() does not modify the object itself")]
         public function withPort(?int $port): static {}
 
         public function getPath(): string {}
 
         public function getRawPath(): string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withPath() does not modify the object itself")]
         public function withPath(string $path): static {}
 
         public function getQuery(): ?string {}
 
         public function getRawQuery(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withQuery() does not modify the object itself")]
         public function withQuery(?string $query): static {}
 
         public function getFragment(): ?string {}
 
         public function getRawFragment(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withFragment() does not modify the object itself")]
         public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\Rfc3986\Uri $uri, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
@@ -160,16 +167,19 @@ namespace Uri\WhatWg {
 
         public function getScheme(): string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withScheme() does not modify the object itself")]
         public function withScheme(string $scheme): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
         public function getUsername(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withUsername() does not modify the object itself")]
         public function withUsername(?string $username): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}
 
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withPassword() does not modify the object itself")]
         public function withPassword(#[\SensitiveParameter] ?string $password): static {}
 
         public function getAsciiHost(): ?string {}
@@ -177,30 +187,35 @@ namespace Uri\WhatWg {
         public function getUnicodeHost(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withHost */
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withHost() does not modify the object itself")]
         public function withHost(?string $host): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPort */
         public function getPort(): ?int {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withPort */
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withPort() does not modify the object itself")]
         public function withPort(?int $port): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPath */
         public function getPath(): string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withPath */
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withPath() does not modify the object itself")]
         public function withPath(string $path): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withQuery() does not modify the object itself")]
         public function withQuery(?string $query): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
+        #[\NoDiscard(message: "as Uri\Rfc3986\Uri::withFragment() does not modify the object itself")]
         public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\WhatWg\Url $url, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
