@@ -1301,6 +1301,7 @@ PHP_FUNCTION(locale_filter_matches)
 		/* canonicalize lang_tag */
 		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
 		if( result <=0) {
+			zend_string_release_ex( can_loc_range, false );
 			intl_error_set( NULL, status,
 				"locale_filter_matches : unable to canonicalize lang_tag" , 0 );
 			RETURN_FALSE;
