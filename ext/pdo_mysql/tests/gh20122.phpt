@@ -24,7 +24,7 @@ echo $meta['native_type'], "\n";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 $pdo->query('DROP TABLE IF EXISTS test_gh20122');
 ?>
