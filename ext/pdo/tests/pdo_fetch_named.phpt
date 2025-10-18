@@ -13,15 +13,14 @@ PDOTest::skip();
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$table = str_replace('.php', '', basename(__FILE__));
-PDOTest::dropTableIfExists($db, $table);
+PDOTest::dropTableIfExists($db, 'pdo_fetch_named');
 ?>
 --FILE--
 <?php
 if (getenv('REDIR_TEST_DIR') === false) {
     putenv('REDIR_TEST_DIR=' . __DIR__ . '/../../pdo/tests/');
 }
-$table = str_replace('.php', '', basename(__FILE__));
+$table = 'pdo_fetch_named';
 require_once getenv('REDIR_TEST_DIR') . "/pdo_fetch_setup.php";
 
 $query = "SELECT {$table}.userid, {$table}.name, {$table}.country, {$table}.referred_by_userid, referrer.name
