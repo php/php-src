@@ -9,6 +9,13 @@ if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$table = str_replace('.php', '', basename(__FILE__));
+PDOTest::dropTableIfExists($db, $table);
+?>
 --FILE--
 <?php
 if (getenv('REDIR_TEST_DIR') === false) {
