@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
 
+- PDO:
+  . Fixed bug GH-20095 (Incorrect class name in deprecation message for PDO
+    mixins). (timwolla)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (nielsdos)
   . Invalid values now throw in Phar::mungServer() instead of being silently
