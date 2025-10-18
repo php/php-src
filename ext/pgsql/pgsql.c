@@ -3409,7 +3409,8 @@ PHP_FUNCTION(pg_copy_to)
 
 static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, zval *value)
 {
-	zend_string *tmp = zval_try_get_string(value);
+	zend_string *tmp_tmp;
+	zend_string *tmp = zval_try_get_tmp_string(value, &tmp_tmp);
 	if (UNEXPECTED(!tmp)) {
 		return FAILURE;
 	}
@@ -3423,11 +3424,11 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	}
 	if (PQputCopyData(pgsql, ZSTR_VAL(zquery), ZSTR_LEN(zquery)) != 1) {
 		zend_string_release_ex(zquery, false);
-		zend_string_release(tmp);
+		zend_tmp_string_release(tmp_tmp);
 		return FAILURE;
 	}
 	zend_string_release_ex(zquery, false);
-	zend_string_release(tmp);
+	zend_tmp_string_release(tmp_tmp);
 	return SUCCESS;
 }
 
