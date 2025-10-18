@@ -1,12 +1,7 @@
 <?php
-if (getenv('REDIR_TEST_DIR') === false) {
-    putenv('REDIR_TEST_DIR='. __DIR__ . '/../../../pdo/tests/');
-}
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
-$db = PDOTest::factory();
-
 error_reporting(E_ALL);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 # Note: code below is written to be compatible in PHP 5.1+ (and sqlite of that era) (when PDO was introduced)
 # This allows it to easily be used with 3v4l (et al) for historical behavior checks
@@ -18,8 +13,13 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 #  * 2 countries which have the same name (but aren't otherwise duplicates) (for FETCH_GROUP and FETCH_UNIQUE)
 #  * names and countries between 4 and 7 chars for nice TSV alignment
 
+if (! isset($table)) {
+    die("Must set \$table before including pdo_fetch_setup.php");
+}
+PDOTest::dropTableIfExists($db, $table);
+
 $db->exec(
-    "CREATE TABLE users (
+    "CREATE TABLE {$table} (
         userid INT PRIMARY KEY,
         name TEXT,
         country TEXT,
@@ -36,7 +36,7 @@ $records = array(
     array(110, 'Toni',  'Germany', NULL),
     array(111, 'Sean',  'France',  NULL)
 );
-$insertSql = "INSERT INTO users
+$insertSql = "INSERT INTO {$table}
         (userid, name, country, referred_by_userid)
         VALUES (:userid, :name, :country, :refid)";
 $insert = $db->prepare($insertSql);

@@ -1,5 +1,5 @@
 --TEST--
-PDO fetch mode NAMED with GROUP
+PDO Common: PDO::FETCH_NAMED with PDO::FETCH_GROUP
 --EXTENSIONS--
 pdo
 --SKIPIF--
@@ -11,15 +11,21 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . "/../setup.php";
+if (getenv('REDIR_TEST_DIR') === false) {
+    putenv('REDIR_TEST_DIR=' . __DIR__ . '/../../pdo/tests/');
+}
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$table = str_replace('.php', '', basename(__FILE__));
+require_once getenv('REDIR_TEST_DIR') . "/pdo_fetch_setup.php";
 
-$query = "SELECT users.country, users.userid, users.name, users.country, users.referred_by_userid, referrer.name
-    FROM users
-    LEFT JOIN users AS referrer ON users.referred_by_userid = referrer.userid";
+$query = "SELECT {$table}.country, {$table}.userid, {$table}.name, {$table}.country, {$table}.referred_by_userid, referrer.name
+    FROM {$table}
+    LEFT JOIN {$table} AS referrer ON {$table}.referred_by_userid = referrer.userid";
 $fetchMode = \PDO::FETCH_NAMED | \PDO::FETCH_GROUP;
 
 print "fetch:\n";
-$stmt = $db->query($query . " WHERE users.userid IN (104, 107)");
+$stmt = $db->query($query . " WHERE {$table}.userid IN (104, 107)");
 while (false !== ($result = $stmt->fetch($fetchMode))) {
     var_dump($result);
 }
