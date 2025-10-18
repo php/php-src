@@ -20,12 +20,15 @@ if (! isset($table)) {
 }
 PDOTest::dropTableIfExists($db, $table);
 
+# SQL Server requires this; Firebird error on it.
+$nullable = (($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'dblib') ? 'NULL' : '');
+
 $db->exec(
     "CREATE TABLE {$table} (
         userid INT PRIMARY KEY,
         name VARCHAR(20),
         country VARCHAR(20),
-        referred_by_userid INT NULL
+        referred_by_userid INT {$nullable}
     )"
 );
 
