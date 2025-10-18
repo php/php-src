@@ -3414,21 +3414,20 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	if (UNEXPECTED(!tmp)) {
 		return FAILURE;
 	}
-	zend_string *zquery = zend_string_alloc(ZSTR_LEN(tmp) + 2, false);
-	memcpy(ZSTR_VAL(zquery), ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
-	ZSTR_LEN(zquery) = ZSTR_LEN(tmp);
-	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(zquery)[ZSTR_LEN(tmp) - 1]  != '\n') {
-		ZSTR_VAL(zquery)[ZSTR_LEN(tmp)] = '\n';
-		ZSTR_VAL(zquery)[ZSTR_LEN(tmp) + 1] = '\0';
-		ZSTR_LEN(zquery) ++;
+	char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
+	memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
+	size_t zquery_len = ZSTR_LEN(tmp);
+	if (ZSTR_LEN(tmp) > 0 && zquery[ZSTR_LEN(tmp) - 1] != '\n') {
+		zquery[ZSTR_LEN(tmp)] = '\n';
+		zquery[ZSTR_LEN(tmp) + 1] = '\0';
+		zquery_len++;
 	}
-	if (PQputCopyData(pgsql, ZSTR_VAL(zquery), ZSTR_LEN(zquery)) != 1) {
-		zend_string_release_ex(zquery, false);
-		zend_tmp_string_release(tmp_tmp);
+	zend_tmp_string_release(tmp_tmp);
+	if (PQputCopyData(pgsql, zquery, zquery_len) != 1) {
+		efree(zquery);
 		return FAILURE;
 	}
-	zend_string_release_ex(zquery, false);
-	zend_tmp_string_release(tmp_tmp);
+	efree(zquery);
 	return SUCCESS;
 }
 
