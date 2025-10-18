@@ -45,6 +45,8 @@ $query = "SELECT {$table}.country, {$table}.name, {$table}.userid
 $stmt = $db->query($query);
 $result = $stmt->fetchAll($fetchMode);
 var_dump($result);
+# ODBC does not like leaving the result unfetched
+$ignore = $stmt->fetchAll(\PDO::FETCH_OBJ);
 
 print "\nToo few columns:\n";
 $query = "SELECT {$table}.country
@@ -52,6 +54,8 @@ $query = "SELECT {$table}.country
 $stmt = $db->query($query);
 $result = $stmt->fetchAll($fetchMode);
 var_dump($result);
+# ODBC does not like leaving the result unfetched
+$ignore = $stmt->fetchAll(\PDO::FETCH_OBJ);
 
 print "\nSame column:\n";
 $query = "SELECT {$table}.country, {$table}.country
