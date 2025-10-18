@@ -45,7 +45,7 @@ var_dump($result);
 fetch:
 array(4) {
   ["userid"]=>
-  int(104)
+  string(3) "104"
   ["name"]=>
   array(2) {
     [0]=>
@@ -60,7 +60,7 @@ array(4) {
 }
 array(4) {
   ["userid"]=>
-  int(107)
+  string(3) "107"
   ["name"]=>
   array(2) {
     [0]=>
@@ -71,7 +71,7 @@ array(4) {
   ["country"]=>
   string(7) "Germany"
   ["referred_by_userid"]=>
-  int(104)
+  string(3) "104"
 }
 
 fetchAll:
@@ -102,6 +102,6 @@ array(2) {
     ["country"]=>
     string(7) "Germany"
     ["referred_by_userid"]=>
-    int(104)
+    string(3) "104"
   }
 }

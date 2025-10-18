@@ -1,7 +1,6 @@
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 # Note: code below is written to be compatible in PHP 5.1+ (and sqlite of that era) (when PDO was introduced)

@@ -51,7 +51,7 @@ array(4) {
     string(7) "Ukraine"
   }
   ["userid"]=>
-  int(104)
+  string(3) "104"
   ["name"]=>
   array(2) {
     [0]=>
@@ -71,7 +71,7 @@ array(4) {
     string(7) "Germany"
   }
   ["userid"]=>
-  int(107)
+  string(3) "107"
   ["name"]=>
   array(2) {
     [0]=>
@@ -80,7 +80,7 @@ array(4) {
     string(5) "Chris"
   }
   ["referred_by_userid"]=>
-  int(104)
+  string(3) "104"
 }
 
 fetchAll:
@@ -90,7 +90,7 @@ array(4) {
     [0]=>
     array(4) {
       ["userid"]=>
-      int(104)
+      string(3) "104"
       ["name"]=>
       array(2) {
         [0]=>
@@ -106,7 +106,7 @@ array(4) {
     [1]=>
     array(4) {
       ["userid"]=>
-      int(108)
+      string(3) "108"
       ["name"]=>
       array(2) {
         [0]=>
@@ -125,7 +125,7 @@ array(4) {
     [0]=>
     array(4) {
       ["userid"]=>
-      int(105)
+      string(3) "105"
       ["name"]=>
       array(2) {
         [0]=>
@@ -144,7 +144,7 @@ array(4) {
     [0]=>
     array(4) {
       ["userid"]=>
-      int(107)
+      string(3) "107"
       ["name"]=>
       array(2) {
         [0]=>
@@ -155,12 +155,12 @@ array(4) {
       ["country"]=>
       string(7) "Germany"
       ["referred_by_userid"]=>
-      int(104)
+      string(3) "104"
     }
     [1]=>
     array(4) {
       ["userid"]=>
-      int(109)
+      string(3) "109"
       ["name"]=>
       array(2) {
         [0]=>
@@ -176,7 +176,7 @@ array(4) {
     [2]=>
     array(4) {
       ["userid"]=>
-      int(110)
+      string(3) "110"
       ["name"]=>
       array(2) {
         [0]=>
@@ -195,7 +195,7 @@ array(4) {
     [0]=>
     array(4) {
       ["userid"]=>
-      int(111)
+      string(3) "111"
       ["name"]=>
       array(2) {
         [0]=>
