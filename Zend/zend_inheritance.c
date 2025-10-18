@@ -916,7 +916,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 	smart_str str = {0};
 
 	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-		smart_str_appends(&str, "& ");
+		smart_str_appendc(&str, '&');
 	}
 
 	if (fptr->common.scope) {
