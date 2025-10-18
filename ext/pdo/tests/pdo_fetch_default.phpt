@@ -14,30 +14,31 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) {
     putenv('REDIR_TEST_DIR=' . __DIR__ . '/../../pdo/tests/');
 }
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
-$db = PDOTest::factory();
+$table = str_replace('.php', '', basename(__FILE__));
+require_once getenv('REDIR_TEST_DIR') . "/pdo_fetch_setup.php";
 
+$query = "SELECT name, country FROM {$table} LIMIT 1";
 $expectedFetchMode = \PDO::FETCH_OBJ;
 $db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, $expectedFetchMode);
 
 print "Original:\n";
-$stmt = $db->query("SELECT 'v1' AS c1, 'v2' AS c2");
+$stmt = $db->query($query);
 print_r($stmt->fetch());
 
 /*
 FIXME https://github.com/php/php-src/issues/20214
 print "\nPDOStatement::setFetchMode:\n";
-$stmt = $db->query("SELECT 'v1' AS c1, 'v2' AS c2");
+$stmt = $db->query($query);
 $stmt->setFetchMode(\PDO::FETCH_DEFAULT);
 print_r($stmt->fetch());
 */
 
 print "\nPDOStatement::fetch:\n";
-$stmt = $db->query("SELECT 'v1' AS c1, 'v2' AS c2");
+$stmt = $db->query($query);
 print_r($stmt->fetch(\PDO::FETCH_DEFAULT));
 
 print "\nPDOStatement::fetchAll:\n";
-$stmt = $db->query("SELECT 'v1' AS c1, 'v2' AS c2");
+$stmt = $db->query($query);
 print_r($stmt->fetchAll(\PDO::FETCH_DEFAULT));
 
 print "\nPDO::setAttribute:\n";
@@ -57,15 +58,15 @@ print "Done!\n";
 Original:
 stdClass Object
 (
-    [c1] => v1
-    [c2] => v2
+    [name] => Chris
+    [country] => Ukraine
 )
 
 PDOStatement::fetch:
 stdClass Object
 (
-    [c1] => v1
-    [c2] => v2
+    [name] => Chris
+    [country] => Ukraine
 )
 
 PDOStatement::fetchAll:
@@ -73,8 +74,8 @@ Array
 (
     [0] => stdClass Object
         (
-            [c1] => v1
-            [c2] => v2
+            [name] => Chris
+            [country] => Ukraine
         )
 
 )
