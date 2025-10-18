@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20121 (JIT broken in ZTS builds on MacOS 15).
     (Arnaud, Shivam Mathur)
 
+- PgSql:
+  . Fix memory leak when first string conversion fails. (nielsdos)
+
 - Phar:
   . Fix memory leak of argument in webPhar. (nielsdos)
   . Fix memory leak when setAlias() fails. (nielsdos)
