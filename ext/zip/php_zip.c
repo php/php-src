@@ -174,7 +174,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
-			zend_string_release_ex(file_basename, 0);
+			zend_string_release_ex(file_basename, false);
 			efree(new_state.cwd);
 			return false;
 		}
@@ -186,7 +186,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 		if (!ret) {
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
-				zend_string_release_ex(file_basename, 0);
+				zend_string_release_ex(file_basename, false);
 			}
 			efree(new_state.cwd);
 			return false;
@@ -203,14 +203,14 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, ZSTR_VAL(file_basename));
 	if (!len) {
 		efree(file_dirname_fullpath);
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex(file_basename, false);
 		efree(new_state.cwd);
 		return true;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(fullpath);
 		efree(file_dirname_fullpath);
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex(file_basename, false);
 		efree(new_state.cwd);
 		return false;
 	}
@@ -222,7 +222,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 	if (ZIP_OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(fullpath);
 		efree(file_dirname_fullpath);
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex(file_basename, false);
 		efree(new_state.cwd);
 		return false;
 	}
@@ -259,7 +259,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 
 done:
 	efree(fullpath);
-	zend_string_release_ex(file_basename, 0);
+	zend_string_release_ex(file_basename, false);
 	efree(file_dirname_fullpath);
 	efree(new_state.cwd);
 
@@ -568,7 +568,7 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_value) /* {{{ */
+int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* {{{ */
 {
 	int cwd_skip = 0;
 #ifdef ZTS
@@ -577,8 +577,10 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	char *result;
 #endif
 	php_glob_t globbuf;
-	size_t n;
 	int ret;
+
+	char *pattern = ZSTR_VAL(spattern);
+	size_t pattern_len = ZSTR_LEN(spattern);
 
 	if (pattern_len >= MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
@@ -639,7 +641,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	}
 
 	array_init(return_value);
-	for (n = 0; n < globbuf.gl_pathc; n++) {
+	for (size_t n = 0; n < globbuf.gl_pathc; n++) {
 		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following:
@@ -710,7 +712,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 		re = pcre_get_compiled_regex(regexp, &capture_count);
 		if (!re) {
 			for (i = 0; i < files_cnt; i++) {
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 			}
 			efree(namelist);
 			php_error_docref(NULL, E_WARNING, "Invalid expression");
@@ -727,28 +729,28 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if ((namelist_len == 1 && ZSTR_VAL(namelist[i])[0] == '.') ||
 				(namelist_len == 2 && ZSTR_VAL(namelist[i])[0] == '.' && ZSTR_VAL(namelist[i])[1] == '.')) {
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				continue;
 			}
 
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				break;
 			}
 
 			match_data = php_pcre_create_match_data(capture_count, re);
 			if (!match_data) {
 				/* Allocation failed, but can proceed to the next pattern. */
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				continue;
 			}
 			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, 0, match_data, mctx);
 			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (rc < 0) {
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				continue;
 			}
 
@@ -756,17 +758,17 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if (0 != VCWD_STAT(fullpath, &s)) {
 				php_error_docref(NULL, E_WARNING, "Cannot read <%s>", fullpath);
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				continue;
 			}
 
 			if (S_IFDIR == (s.st_mode & S_IFMT)) {
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex(namelist[i], false);
 				continue;
 			}
 
 			add_next_index_string(return_value, fullpath);
-			zend_string_release_ex(namelist[i], 0);
+			zend_string_release_ex(namelist[i], false);
 		}
 		efree(namelist);
 	}
@@ -799,9 +801,9 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 	hnd.read_const_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.type = rettype;
-	str = zend_string_init_interned(name, strlen(name), 1);
+	str = zend_string_init_interned(name, strlen(name), true);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(zip_prop_handler));
-	zend_string_release_ex(str, 1);
+	zend_string_release_ex(str, true);
 }
 /* }}} */
 
@@ -954,12 +956,12 @@ static HashTable *php_zip_get_properties(zend_object *object)/* {{{ */
 	zend_string *key;
 
 	obj = php_zip_fetch_object(object);
-	props = zend_std_get_properties(object);
 
 	if (obj->prop_handler == NULL) {
 		return NULL;
 	}
 
+	props = zend_std_get_properties(object);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(obj->prop_handler, key, hnd) {
 		zval *ret, val;
 		ret = php_zip_property_reader(obj, hnd, &val);
@@ -1314,7 +1316,7 @@ PHP_FUNCTION(zip_entry_read)
 	}
 
 	if (zr_rsrc->zf) {
-		buffer = zend_string_safe_alloc(1, len, 0, 0);
+		buffer = zend_string_safe_alloc(1, len, 0, false);
 		n = zip_fread(zr_rsrc->zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 		if (n > 0) {
 			ZSTR_VAL(buffer)[n] = '\0';
@@ -1727,19 +1729,16 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	}
 
 	if (type == 1) {
-		found = php_zip_glob(ZSTR_VAL(pattern), ZSTR_LEN(pattern), glob_flags, return_value);
+		found = php_zip_glob(pattern, glob_flags, return_value);
 	} else {
 		found = php_zip_pcre(pattern, path, path_len, return_value);
 	}
 
 	if (found > 0) {
-		int i;
 		zval *zval_file;
-		ze_zip_object *ze_obj;
+		ze_zip_object *ze_obj = Z_ZIP_P(self);
 
-		ze_obj = Z_ZIP_P(self);
-
-		for (i = 0; i < found; i++) {
+		for (int i = 0; i < found; i++) {
 			char *file_stripped, *entry_name;
 			size_t entry_name_len, file_stripped_len;
 			char entry_name_buf[MAXPATHLEN];
@@ -1766,7 +1765,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				if (opts.add_path) {
 					if ((opts.add_path_len + file_stripped_len) > MAXPATHLEN) {
 						if (basename) {
-							zend_string_release_ex(basename, 0);
+							zend_string_release_ex(basename, false);
 						}
 						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (opts.add_path_len + file_stripped_len));
@@ -1781,7 +1780,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				entry_name = entry_name_buf;
 				entry_name_len = strlen(entry_name);
 				if (basename) {
-					zend_string_release_ex(basename, 0);
+					zend_string_release_ex(basename, false);
 					basename = NULL;
 				}
 

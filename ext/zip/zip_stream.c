@@ -82,7 +82,7 @@ static ssize_t php_zip_ops_write(php_stream *stream, const char *buf, size_t cou
 		return -1;
 	}
 
-	return count;
+	return (ssize_t)count;
 }
 /* }}} */
 
