@@ -1214,7 +1214,7 @@ PHP_FUNCTION(zip_read)
 		RETURN_THROWS();
 	}
 
-	if (rsrc_int && rsrc_int->za) {
+	if (rsrc_int->za) {
 		if (rsrc_int->index_current >= rsrc_int->num_files) {
 			RETURN_FALSE;
 		}
@@ -1267,11 +1267,7 @@ PHP_FUNCTION(zip_entry_open)
 		RETURN_THROWS();
 	}
 
-	if (zr_rsrc->zf != NULL) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zr_rsrc->zf != NULL);
 }
 /* }}} */
 
@@ -1509,12 +1505,7 @@ PHP_METHOD(ZipArchive, setPassword)
 		RETURN_FALSE;
 	}
 
-	int res = zip_set_default_password(intern, (const char *)password);
-	if (res == 0) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zip_set_default_password(intern, (const char *)password) == 0);
 }
 /* }}} */
 
@@ -1564,11 +1555,7 @@ PHP_METHOD(ZipArchive, close)
 	ze_obj->filename_len = 0;
 	ze_obj->za = NULL;
 
-	if (!err) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(!err);
 }
 /* }}} */
 
@@ -2052,11 +2039,7 @@ PHP_METHOD(ZipArchive, setArchiveComment)
 		RETURN_THROWS();
 	}
 
-	if (zip_set_archive_comment(intern, (const char *)comment, comment_len)) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_set_archive_comment(intern, (const char *)comment, comment_len) == 0);
 }
 /* }}} */
 
@@ -2095,11 +2078,7 @@ PHP_METHOD(ZipArchive, setArchiveFlag)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zip_set_archive_flag(intern, flag, (int)value)) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_set_archive_flag(intern, flag, (int)value) == 0);
 }
 
 PHP_METHOD(ZipArchive, getArchiveFlag)
@@ -2205,10 +2184,7 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 
 	idx = zip_name_locate(intern, name, 0);
 
-	if (idx < 0) {
-		RETURN_FALSE;
-	}
-	if (zip_file_set_external_attributes(intern, idx, (zip_flags_t)flags,
+	if (idx < 0 || zip_file_set_external_attributes(intern, idx, (zip_flags_t)flags,
 			(zip_uint8_t)(opsys&0xff), (zip_uint32_t)attr) < 0) {
 		RETURN_FALSE;
 	}
@@ -2232,11 +2208,8 @@ PHP_METHOD(ZipArchive, setExternalAttributesIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
-	if (zip_file_set_external_attributes(intern, (zip_uint64_t)index,
-			(zip_flags_t)flags, (zip_uint8_t)(opsys&0xff), (zip_uint32_t)attr) < 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_set_external_attributes(intern, (zip_uint64_t)index,
+			(zip_flags_t)flags, (zip_uint8_t)(opsys&0xff), (zip_uint32_t)attr) == 0);
 }
 /* }}} */
 
@@ -2266,10 +2239,7 @@ PHP_METHOD(ZipArchive, getExternalAttributesName)
 
 	idx = zip_name_locate(intern, name, 0);
 
-	if (idx < 0) {
-		RETURN_FALSE;
-	}
-	if (zip_file_get_external_attributes(intern, idx,
+	if (idx < 0 || zip_file_get_external_attributes(intern, idx,
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
@@ -2370,10 +2340,7 @@ PHP_METHOD(ZipArchive, setEncryptionIndex)
 		RETURN_FALSE;
 	}
 
-	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_set_encryption(intern, index, (zip_uint16_t)method, password) == 0);
 }
 /* }}} */
 #endif
@@ -2464,11 +2431,8 @@ PHP_METHOD(ZipArchive, setCompressionName)
 		RETURN_FALSE;
 	}
 
-	if (zip_set_file_compression(intern, (zip_uint64_t)idx,
-			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_set_file_compression(intern, (zip_uint64_t)idx,
+			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) == 0);
 }
 /* }}} */
 
@@ -2487,11 +2451,8 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zip_set_file_compression(intern, (zip_uint64_t)index,
-			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_set_file_compression(intern, (zip_uint64_t)index,
+			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) == 0);
 }
 /* }}} */
 
@@ -2524,11 +2485,8 @@ PHP_METHOD(ZipArchive, setMtimeName)
 		RETURN_FALSE;
 	}
 
-	if (zip_file_set_mtime(intern, (zip_uint64_t)idx,
-			(time_t)mtime, (zip_uint32_t)flags) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_set_mtime(intern, (zip_uint64_t)idx,
+			(time_t)mtime, (zip_uint32_t)flags) == 0);
 }
 /* }}} */
 
@@ -2547,11 +2505,8 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zip_file_set_mtime(intern, (zip_uint64_t)index,
-			(time_t)mtime, (zip_uint32_t)flags) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_set_mtime(intern, (zip_uint64_t)index,
+			(time_t)mtime, (zip_uint32_t)flags) == 0);
 }
 /* }}} */
 #endif
@@ -2573,11 +2528,7 @@ PHP_METHOD(ZipArchive, deleteIndex)
 		RETURN_FALSE;
 	}
 
-	if (zip_delete(intern, index) < 0) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(zip_delete(intern, index) == 0);
 }
 /* }}} */
 
@@ -2632,11 +2583,7 @@ PHP_METHOD(ZipArchive, renameIndex)
 		RETURN_THROWS();
 	}
 
-	if (zip_file_rename(intern, index, (const char *)new_name, 0) != 0) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_rename(intern, index, (const char *)new_name, 0) == 0);
 }
 /* }}} */
 
@@ -2662,11 +2609,7 @@ PHP_METHOD(ZipArchive, renameName)
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 
-	if (zip_file_rename(intern, sb.index, (const char *)new_name, 0)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(zip_file_rename(intern, sb.index, (const char *)new_name, 0) == 0);
 }
 /* }}} */
 
@@ -2687,11 +2630,7 @@ PHP_METHOD(ZipArchive, unchangeIndex)
 		RETURN_FALSE;
 	}
 
-	if (zip_unchange(intern, index) != 0) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_unchange(intern, index) == 0);
 }
 /* }}} */
 
@@ -2716,11 +2655,7 @@ PHP_METHOD(ZipArchive, unchangeName)
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 
-	if (zip_unchange(intern, sb.index) != 0) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_unchange(intern, sb.index) == 0);
 }
 /* }}} */
 
@@ -2736,11 +2671,7 @@ PHP_METHOD(ZipArchive, unchangeAll)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zip_unchange_all(intern) != 0) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_unchange_all(intern) == 0);
 }
 /* }}} */
 
@@ -2756,11 +2687,7 @@ PHP_METHOD(ZipArchive, unchangeArchive)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zip_unchange_archive(intern) != 0) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(zip_unchange_archive(intern) == 0);
 }
 /* }}} */
 
