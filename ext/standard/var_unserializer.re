@@ -1394,6 +1394,12 @@ object ":" uiv ":" ["]	{
 		goto fail;
 	}
 
+	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+        zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
+            ZSTR_VAL(ce->name));
+        goto fail;
+    }
+
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
