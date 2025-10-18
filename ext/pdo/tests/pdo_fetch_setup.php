@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL);
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
