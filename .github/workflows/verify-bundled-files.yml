@@ -1,0 +1,40 @@
+name: Verify Bundled Files
+
+on:
+  push:
+  pull_request:
+  schedule:
+   - cron: "0 1 * * *"
+  workflow_dispatch: ~
+
+permissions:
+  contents: read
+
+jobs:
+  VERIFY_BUNDLED_FILES:
+    name: Verify Bundled Files
+    runs-on: ubuntu-22.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          base: master
+          filters: |
+            opcache_jit_ir:
+              - 'ext/opcache/jit/ir/**'
+
+      - name: Opcache JIT IR - Download
+        if: (success() || failure()) && (steps.changes.outputs.opcache_jit_ir == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request'))
+        run: |
+          rm -rf ext/opcache/jit/ir
+          git clone --revision=5a81104e650ebd7ac24eb63d4dff67db723a5278 https://github.com/dstogov/ir.git ext/opcache/jit/ir
+      - name: Opcache JIT IR - Verify files
+        if: (success() || failure()) && (steps.changes.outputs.opcache_jit_ir == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request'))
+        run: |
+          cd ext/opcache/jit/ir
+          rm -r .git .github/workflows bench examples tests tools README.md TODO ir.g ir_cpuinfo.c ir_emit_c.c ir_emit_llvm.c ir_load.c ir_load_llvm.c ir_main.c ir_mem2ssa.c
+          git restore README
+          git add . -N && git diff -a --exit-code .
