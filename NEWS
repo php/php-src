@@ -57,6 +57,8 @@ PHP                                                                        NEWS
     of type size_t. (Girgias)
   . Fix memory leak when openssl polyfill returns garbage. (nielsdos)
   . Fix file descriptor leak in phar_zip_flush() on failure. (nielsdos)
+  . Fix memory leak when opening temp file fails while trying to open
+    gzip-compressed archive. (nielsdos)
 
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
