@@ -3414,21 +3414,22 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	if (UNEXPECTED(!tmp)) {
 		return FAILURE;
 	}
-	char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
-	memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
-	size_t zquery_len = ZSTR_LEN(tmp);
-	if (ZSTR_LEN(tmp) > 0 && zquery[ZSTR_LEN(tmp) - 1] != '\n') {
+
+	int result;
+	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
+		char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
+		memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
 		zquery[ZSTR_LEN(tmp)] = '\n';
 		zquery[ZSTR_LEN(tmp) + 1] = '\0';
-		zquery_len++;
-	}
-	zend_tmp_string_release(tmp_tmp);
-	if (PQputCopyData(pgsql, zquery, zquery_len) != 1) {
+		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
 		efree(zquery);
-		return FAILURE;
+	} else {
+		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 	}
-	efree(zquery);
-	return SUCCESS;
+
+	zend_tmp_string_release(tmp_tmp);
+
+	return result != 1 ? FAILURE : SUCCESS;
 }
 
 /* {{{ Copy table from array */
