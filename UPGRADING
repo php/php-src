@@ -51,6 +51,11 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now supports reference values.
 
+- Zip:
+  . ZipArchive::extractTo now raises a TypeError for the
+    files argument if one or more of the entries is not
+    a string.
+
 ========================================
 6. New Functions
 ========================================
