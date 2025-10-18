@@ -155,19 +155,3 @@ an existing module called `foo`.
     ZEND_GET_MODULE(foo)
 #endif
 ```
-
-## PECL site conformity
-
-If you plan to release an extension to the PECL website, there are several
-points to be regarded.
-
-1. Add `LICENSE` or `COPYING` to the `package.xml`
-
-2. The following should be defined in one of the extension header files
-
-```c
-#define PHP_FOO_VERSION "1.2.3"
-```
-
-This macro has to be used within your foo_module_entry to indicate the
-extension version.

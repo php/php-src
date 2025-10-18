@@ -16,25 +16,15 @@ DEBUGGER_CMD=
 DEBUGGER_ARGS=
 !endif
 
-all: $(EXT_TARGETS) $(PECL_TARGETS)
+all: $(EXT_TARGETS)
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
-
-clean-pecl:
-	@echo Cleaning PECL targets only
-	-rd /s /q $(BUILD_DIR)\pecl
 
 clean-all:
 	@echo Cleaning standard build dirs
 	cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.manifest $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
-
-clean: clean-pecl
-	@echo Cleaning distribution build dirs
-	cd $(BUILD_DIR)
-	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
-	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 
 !if "$(EXT_TARGETS)" == ""
 _EXTENSION_DLL=$(PECL_TARGETS)
