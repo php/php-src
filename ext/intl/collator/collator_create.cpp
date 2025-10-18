@@ -17,7 +17,14 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include "php_intl.h"
+}
 #include "collator_class.h"
 #include "intl_data.h"
 
@@ -29,7 +36,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval*            object;
 	Collator_object* co;
 
-	intl_error_reset( NULL );
+	intl_error_reset( nullptr );
 	object = return_value;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(locale, locale_len)
@@ -50,7 +57,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 /* {{{ Create collator. */
-PHP_FUNCTION( collator_create )
+U_CFUNC PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
 	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -61,7 +68,7 @@ PHP_FUNCTION( collator_create )
 /* }}} */
 
 /* {{{ Collator object constructor. */
-PHP_METHOD( Collator, __construct )
+U_CFUNC PHP_METHOD( Collator, __construct )
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);

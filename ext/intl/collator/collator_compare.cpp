@@ -17,12 +17,19 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include "php_intl.h"
-#include "collator_class.h"
 #include "intl_convert.h"
+}
+#include "collator_class.h"
 
 /* {{{ Compare two strings. */
-PHP_FUNCTION( collator_compare )
+U_CFUNC PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
