@@ -14,8 +14,6 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) {
     putenv('REDIR_TEST_DIR=' . __DIR__ . '/../../pdo/tests/');
 }
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
-$db = PDOTest::factory();
 $table = str_replace('.php', '', basename(__FILE__));
 require_once getenv('REDIR_TEST_DIR') . "/pdo_fetch_setup.php";
 
