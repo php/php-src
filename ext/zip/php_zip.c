@@ -2743,14 +2743,13 @@ PHP_METHOD(ZipArchive, extractTo)
 		for (i = 0; i < nelems; i++) {
 			zval *zval_file;
 			if ((zval_file = zend_hash_index_find_deref(files_ht, i)) != NULL) {
-				switch (Z_TYPE_P(zval_file)) {
-					case IS_LONG:
-						break;
-					case IS_STRING:
+				if (Z_TYPE_P(zval_file) == IS_STRING) {
 						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
 							RETURN_FALSE;
 						}
-						break;
+				} else {
+						zend_argument_type_error(2, "must only have elements of type string, %s given", zend_zval_value_name(zval_file));
+						RETURN_THROWS();
 				}
 			}
 		}
