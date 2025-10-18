@@ -17,6 +17,9 @@ if (getenv('REDIR_TEST_DIR') === false) {
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
+$expectedFetchMode = \PDO::FETCH_OBJ;
+$db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, $expectedFetchMode);
+
 print "Original:\n";
 $stmt = $db->query("SELECT 'v1' AS c1, 'v2' AS c2");
 print_r($stmt->fetch());
@@ -77,5 +80,5 @@ Array
 )
 
 PDO::setAttribute:
-Could not set fetch mode using PDO::setAttribute: Fetch mode must be a bitmask of PDO::FETCH_* constants
+Could not set fetch mode using PDO::setAttribute: PDO::setAttribute(): Argument #2 ($value) Fetch mode must be a bitmask of PDO::FETCH_* constants
 Done!
