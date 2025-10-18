@@ -23,9 +23,9 @@ PDOTest::dropTableIfExists($db, $table);
 $db->exec(
     "CREATE TABLE {$table} (
         userid INT PRIMARY KEY,
-        name TEXT,
-        country TEXT,
-        referred_by_userid INT
+        name VARCHAR(20),
+        country VARCHAR(20),
+        referred_by_userid INT NULL
     )"
 );
 
