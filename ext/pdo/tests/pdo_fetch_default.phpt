@@ -17,7 +17,7 @@ if (getenv('REDIR_TEST_DIR') === false) {
 $table = str_replace('.php', '', basename(__FILE__));
 require_once getenv('REDIR_TEST_DIR') . "/pdo_fetch_setup.php";
 
-$query = "SELECT name, country FROM {$table} LIMIT 1";
+$query = "SELECT name, country FROM {$table} WHERE userid = 104";
 $expectedFetchMode = \PDO::FETCH_OBJ;
 $db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, $expectedFetchMode);
 

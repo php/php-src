@@ -2,7 +2,6 @@
 error_reporting(E_ALL);
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 # Note: code below is written to be compatible in PHP 5.1+ (and sqlite of that era) (when PDO was introduced)
@@ -18,7 +17,9 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 if (! isset($table)) {
     die("Must set \$table before including pdo_fetch_setup.php");
 }
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 PDOTest::dropTableIfExists($db, $table);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 # SQL Server requires this; Firebird error on it.
 $nullable = (($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'dblib') ? 'NULL' : '');
