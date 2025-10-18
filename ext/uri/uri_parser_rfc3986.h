@@ -17,16 +17,11 @@
 #ifndef PHP_URI_PARSER_RFC3986_H
 #define PHP_URI_PARSER_RFC3986_H
 
-#include <uriparser/Uri.h>
 #include "php_uri_common.h"
 
 extern const php_uri_parser php_uri_parser_rfc3986;
 
-typedef struct php_uri_parser_rfc3986_uris {
-	UriUriA uri;
-	UriUriA normalized_uri;
-	bool normalized_uri_initialized;
-} php_uri_parser_rfc3986_uris;
+typedef struct php_uri_parser_rfc3986_uris php_uri_parser_rfc3986_uris;
 
 zend_result php_uri_parser_rfc3986_userinfo_read(void *uri, php_uri_component_read_mode read_mode, zval *retval);
 zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *errors);
