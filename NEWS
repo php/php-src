@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20070 (Return type violation in imagefilter when an invalid
     filter is provided). (Girgias)
 
+- Intl:
+  . Fix memory leak on error in locale_filter_matches(). (nielsdos)
+
 - LibXML:
   . Fix not thread safe schema/relaxng calls. (SpencerMalone, nielsdos)
 
