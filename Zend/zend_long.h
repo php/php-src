@@ -51,9 +51,6 @@ typedef int32_t zend_off_t;
 #endif
 
 
-/* Conversion macros. */
-#define ZEND_LTOA_BUF_LEN 65
-
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # define ZEND_LONG_FMT "%" PRId64
 # define ZEND_ULONG_FMT "%" PRIu64
