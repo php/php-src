@@ -234,7 +234,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
-	char *p = buf, *ext, *actual_alias = NULL;
+	char *ext, *actual_alias = NULL;
 	char *metadata = NULL;
 
 	size = php_stream_tell(fp);
@@ -261,7 +261,16 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 		return FAILURE;
 	}
 
-	if ((p = phar_find_eocd(buf, size)) != NULL) {
+	char *p = phar_find_eocd(buf, size);
+	if (!p) {
+		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: end of central directory not found in zip-based phar \"%s\"", fname);
+		}
+		return FAILURE;
+	}
+
+	{
 		memcpy((void *)&locator, (void *) p, sizeof(locator));
 		if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
 			/* split archives not handled */
@@ -301,18 +310,8 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 		} else {
 			ZVAL_UNDEF(&mydata->metadata_tracker.val);
 		}
-
-		goto foundit;
 	}
 
-	php_stream_close(fp);
-
-	if (error) {
-		spprintf(error, 4096, "phar error: end of central directory not found in zip-based phar \"%s\"", fname);
-	}
-
-	return FAILURE;
-foundit:
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
