@@ -64,6 +64,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix shm corruption with coercion in options of unserialize(). (nielsdos)
 
+- Tidy:
+  . Fixed GH-19021 (improved tidyOptGetCategory detection).
+    (arjendekorte, David Carlier, Peter Kokot)
+
 - XMLReader:
   . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
     (nielsdos)
