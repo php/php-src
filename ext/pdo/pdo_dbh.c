@@ -1394,7 +1394,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		func.type = ZEND_INTERNAL_FUNCTION;
 		func.handler = funcs->handler;
 		func.function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
-		func.scope = dbh_obj->std.ce;
+		func.scope = pdo_dbh_ce;
 		func.prototype = NULL;
 		ZEND_MAP_PTR(func.run_time_cache) = rt_cache_size ? pecalloc(rt_cache_size, 1, dbh->is_persistent) : NULL;
 		func.T = ZEND_OBSERVER_ENABLED;
