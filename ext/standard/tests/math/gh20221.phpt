@@ -35,6 +35,11 @@ foreach ([-0.0, 0.0] as $a) {
 	}
 }
 
+var_dump(min( 0, -0.0 ));
+var_dump(min( -0.0, 0 ));
+var_dump(max( 0, -0.0 ));
+var_dump(max( -0.0, 0 ));
+
 ?>
 --EXPECT--
 min(-0, 0)   = -0
@@ -78,3 +83,8 @@ min(0, 0, -0)   = -0
 min([0, 0, -0]) = -0
 max(0, 0, -0)   = 0
 max([0, 0, -0]) = 0
+
+float(-0)
+float(-0)
+int(0)
+int(0)

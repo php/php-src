@@ -1278,7 +1278,7 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 	Z_FLF_PARAM_ZVAL(1, lhs);
 	Z_FLF_PARAM_ZVAL(2, rhs);
 
-	double lhs_dval;
+	double lhs_dval, rhs_dval;
 
 	if (Z_TYPE_P(lhs) == IS_LONG) {
 		zend_long lhs_lval = Z_LVAL_P(lhs);
@@ -1297,10 +1297,13 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
-			RETURN_COPY_VALUE(lhs_dval < Z_DVAL_P(rhs) || UNEXPECTED(signbit(lhs_dval) > signbit(Z_DVAL_P(rhs))) ? lhs : rhs);
+			rhs_dval = Z_DVAL_P(rhs);
+double_compare2:
+			RETURN_COPY_VALUE(lhs_dval < rhs_dval || UNEXPECTED(signbit(lhs_dval) > signbit(rhs_dval)) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
-			RETURN_COPY_VALUE(lhs_dval < (double)Z_LVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = (double)Z_LVAL_P(rhs);
+			goto double_compare2;
 		} else {
 			goto generic_compare;
 		}
@@ -1406,7 +1409,7 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 	Z_FLF_PARAM_ZVAL(1, lhs);
 	Z_FLF_PARAM_ZVAL(2, rhs);
 
-	double lhs_dval;
+	double lhs_dval, rhs_dval;
 
 	if (Z_TYPE_P(lhs) == IS_LONG) {
 		zend_long lhs_lval = Z_LVAL_P(lhs);
@@ -1425,10 +1428,13 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
-			RETURN_COPY_VALUE(lhs_dval > Z_DVAL_P(rhs) || UNEXPECTED(signbit(lhs_dval) < signbit(Z_DVAL_P(rhs))) ? lhs : rhs);
+			rhs_dval = Z_DVAL_P(rhs);
+double_compare2:
+			RETURN_COPY_VALUE(lhs_dval > rhs_dval || UNEXPECTED(signbit(lhs_dval) < signbit(rhs_dval)) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
-			RETURN_COPY_VALUE(lhs_dval >= (double)Z_LVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = (double)Z_LVAL_P(rhs);
+			goto double_compare2;
 		} else {
 			goto generic_compare;
 		}
