@@ -39,6 +39,10 @@ PHP                                                                        NEWS
     exposes INDIRECTs). (nielsdos)
   . Improve __unserialize() hardening for SplHeap/SplPriorityQueue. (nielsdos)
 
+- Tidy:
+  . Fixed GH-19021 (improved tidyOptGetCategory detection).
+    (arjendekorte, David Carlier, Peter Kokot)
+
 - URI:
   . Fixed bug GH-20088 (Heap-use-after-free in PHP URI WHATWG parser
     during malformed URL processing). (lexborisov)
