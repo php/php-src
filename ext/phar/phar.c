@@ -1108,11 +1108,11 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
-		zend_get_hash_value, destroy_phar_manifest_entry, (bool)mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
@@ -1451,7 +1451,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
