@@ -558,7 +558,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 				  php_stream_statbuf *ssb, php_stream_context *context) /* {{{ */
 {
 	php_url *resource = NULL;
-	char *internal_file, *error;
+	char *internal_file;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	size_t internal_file_len;
@@ -582,15 +582,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, NULL)) {
 		php_url_free(resource);
-		if (error) {
-			efree(error);
-		}
 		return FAILURE;
-	}
-	if (error) {
-		efree(error);
 	}
 	if (*internal_file == '\0') {
 		/* root directory requested */
