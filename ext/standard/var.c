@@ -1117,6 +1117,12 @@ again:
 					return;
 				}
 
+				if (ce->ce_flags & ZEND_ACC_NO_SERIALIZE) {
+					/* we should write value even the object not serialized*/
+					smart_str_appendl(buf, "N;", 2);
+					return;
+				}
+
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
 					PHP_CLASS_ATTRIBUTES;
 
