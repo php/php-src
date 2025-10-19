@@ -63,6 +63,10 @@ PHP                                                                        NEWS
   . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
     to work). (nielsdos)
 
+- Tidy:
+  . Fixed GH-19021 (improved tidyOptGetCategory detection).
+    (arjendekorte, David Carlier, Peter Kokot)
+
 - XMLReader:
   . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
     (nielsdos)
