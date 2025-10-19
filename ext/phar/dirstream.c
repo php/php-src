@@ -188,8 +188,6 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 			entry = safe_emalloc(keylen, 1, 1);
 			memcpy(entry, ZSTR_VAL(str_key), keylen);
 			entry[keylen] = '\0';
-
-			goto PHAR_ADD_ENTRY;
 		} else {
 			if (0 != memcmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				/* entry in directory not found */
@@ -199,7 +197,6 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 					continue;
 				}
 			}
-		}
 
 		const char *save = ZSTR_VAL(str_key);
 		save += dirlen + 1; /* seek to just past the path separator */
@@ -220,7 +217,8 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 			entry[keylen - dirlen - 1] = '\0';
 			keylen = keylen - dirlen - 1;
 		}
-PHAR_ADD_ENTRY:
+		}
+
 		if (keylen) {
 			/**
 			 * Add an empty element to avoid duplicates
