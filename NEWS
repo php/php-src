@@ -56,6 +56,7 @@ PHP                                                                        NEWS
   . Fix potential buffer length truncation due to usage of type int instead
     of type size_t. (Girgias)
   . Fix memory leak when openssl polyfill returns garbage. (nielsdos)
+  . Fix file descriptor leak in phar_zip_flush() on failure. (nielsdos)
 
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
