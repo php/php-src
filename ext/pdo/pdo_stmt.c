@@ -1052,7 +1052,7 @@ PHP_METHOD(PDOStatement, fetch)
 		array_init_size(return_value, 1);
 		bool success = pdo_do_key_pair_fetch(stmt, ori, off, Z_ARRVAL_P(return_value));
 		if (!success) {
-			zval_dtor(return_value);
+			zval_ptr_dtor_nogc(return_value);
 			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
