@@ -198,25 +198,25 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 				}
 			}
 
-		const char *save = ZSTR_VAL(str_key);
-		save += dirlen + 1; /* seek to just past the path separator */
+			const char *save = ZSTR_VAL(str_key);
+			save += dirlen + 1; /* seek to just past the path separator */
 
-		const char *has_slash = memchr(save, '/', keylen - dirlen - 1);
-		if (has_slash) {
-			/* is subdirectory */
-			save -= dirlen + 1;
-			entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
-			keylen = has_slash - save - dirlen - 1;
-			entry[keylen] = '\0';
-		} else {
-			/* is file */
-			save -= dirlen + 1;
-			entry = safe_emalloc(keylen - dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
-			entry[keylen - dirlen - 1] = '\0';
-			keylen = keylen - dirlen - 1;
-		}
+			const char *has_slash = memchr(save, '/', keylen - dirlen - 1);
+			if (has_slash) {
+				/* is subdirectory */
+				save -= dirlen + 1;
+				entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
+				keylen = has_slash - save - dirlen - 1;
+				entry[keylen] = '\0';
+			} else {
+				/* is file */
+				save -= dirlen + 1;
+				entry = safe_emalloc(keylen - dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
+				entry[keylen - dirlen - 1] = '\0';
+				keylen = keylen - dirlen - 1;
+			}
 		}
 
 		if (keylen) {
