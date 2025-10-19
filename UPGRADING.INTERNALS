@@ -32,6 +32,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
     unsafe. Directly use ZEND_LONG_FMT with a function from the
     printf family.
+  . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
+    Call zval_ptr_dtor_nogc() directly instead.
 
 ========================
 2. Build system changes
