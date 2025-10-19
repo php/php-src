@@ -270,46 +270,44 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 		return FAILURE;
 	}
 
-	{
-		memcpy((void *)&locator, (void *) p, sizeof(locator));
-		if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
-			/* split archives not handled */
-			php_stream_close(fp);
+	memcpy((void *)&locator, (void *) p, sizeof(locator));
+	if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
+		/* split archives not handled */
+		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+		}
+		return FAILURE;
+	}
+
+	if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
+		if (error) {
+			spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
+		}
+		php_stream_close(fp);
+		return FAILURE;
+	}
+
+	mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
+	mydata->is_persistent = PHAR_G(persist);
+
+	/* read in archive comment, if any */
+	if (PHAR_GET_16(locator.comment_len)) {
+
+		metadata = p + sizeof(locator);
+
+		if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
 			if (error) {
-				spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+				spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
 			}
+			php_stream_close(fp);
+			pefree(mydata, mydata->is_persistent);
 			return FAILURE;
 		}
 
-		if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
-			if (error) {
-				spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
-			}
-			php_stream_close(fp);
-			return FAILURE;
-		}
-
-		mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
-		mydata->is_persistent = PHAR_G(persist);
-
-		/* read in archive comment, if any */
-		if (PHAR_GET_16(locator.comment_len)) {
-
-			metadata = p + sizeof(locator);
-
-			if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
-				if (error) {
-					spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
-				}
-				php_stream_close(fp);
-				pefree(mydata, mydata->is_persistent);
-				return FAILURE;
-			}
-
-			phar_parse_metadata_lazy(metadata, &mydata->metadata_tracker, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
-		} else {
-			ZVAL_UNDEF(&mydata->metadata_tracker.val);
-		}
+		phar_parse_metadata_lazy(metadata, &mydata->metadata_tracker, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
+	} else {
+		ZVAL_UNDEF(&mydata->metadata_tracker.val);
 	}
 
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
