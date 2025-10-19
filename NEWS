@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-20257 (mail() heap overflow with an empty message in lf mode).
     (David Carlier)
+  . Fixed bug GH-20201 (AVIF images misdetected as HEIF after introducing HEIF
+    support in getimagesize()). (nielsdos)
 
 - Streams:
   . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
