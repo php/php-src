@@ -1395,8 +1395,8 @@ fperror:
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass);
 
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
-	if (pass_error) {
-has_pass_error:
+	if (pass_error
+	 || FAILURE == phar_zip_applysignature(phar, &pass)) {
 		spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, pass_error);
 		efree(pass_error);
 nopasserror:
@@ -1407,11 +1407,6 @@ nocentralerror:
 			php_stream_close(oldfile);
 		}
 		return;
-	}
-
-	if (FAILURE == phar_zip_applysignature(phar, &pass)) {
-		ZEND_ASSERT(pass_error != NULL);
-		goto has_pass_error;
 	}
 
 	/* save zip */
