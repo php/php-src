@@ -4315,10 +4315,7 @@ PHP_METHOD(Phar, extractTo)
 	}
 
 	if (ZSTR_LEN(path_to) >= MAXPATHLEN) {
-		char *tmp = estrndup(ZSTR_VAL(path_to), 50);
-		/* truncate for error message */
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%s...\", destination directory is too long for filesystem", tmp);
-		efree(tmp);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%.50s...\", destination directory is too long for filesystem", ZSTR_VAL(path_to));
 		RETURN_THROWS();
 	}
 
