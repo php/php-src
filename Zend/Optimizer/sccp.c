@@ -2295,7 +2295,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						break;
 					case ZEND_INIT_ARRAY:
 					case ZEND_ADD_ARRAY_ELEMENT:
-						if (opline->op2_type == IS_UNUSED || opline->op2_type == IS_NULL) {
+						if (opline->op2_type == IS_UNUSED) {
 							return 0;
 						}
 						/* break missing intentionally */
