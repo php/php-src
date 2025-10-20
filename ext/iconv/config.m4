@@ -122,7 +122,10 @@ int main(void) {
 size_t iconv(iconv_t cd, const char **src, size_t *srcleft, char **dst, size_t *dstleft);
     ])],
     [php_cv_iconv_const=const],
-    [php_cv_iconv_const=])])
+    [php_cv_iconv_const=non-const])])
+  dnl non-const is just used for display, set it back
+  AS_VAR_IF([php_cv_iconv_const], [non-const],
+    [php_cv_iconv_const=])
 
     AC_MSG_CHECKING([if iconv supports //IGNORE])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
