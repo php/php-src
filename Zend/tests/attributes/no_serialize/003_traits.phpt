@@ -10,7 +10,7 @@ trait T {
 }
 
 class Base {
-   use T;
+    use T;
 }
 
 $base = new Base;
