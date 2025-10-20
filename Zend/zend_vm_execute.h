@@ -7947,6 +7947,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -10430,6 +10431,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -11375,6 +11377,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -12994,6 +12997,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -21300,6 +21304,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -21748,6 +21753,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -22210,6 +22216,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -22621,6 +22628,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -26568,6 +26576,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -29124,6 +29133,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -31234,6 +31244,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -33660,6 +33671,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -46178,6 +46190,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -50022,6 +50035,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -52050,6 +52064,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -55788,6 +55803,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -63435,6 +63451,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -65918,6 +65935,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -66761,6 +66779,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -68380,6 +68399,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -76586,6 +76606,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -77034,6 +77055,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -77496,6 +77518,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -77907,6 +77930,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -81854,6 +81878,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -84410,6 +84435,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -86520,6 +86546,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -88946,6 +88973,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -101464,6 +101492,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -105308,6 +105337,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -107234,6 +107264,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
@@ -110972,6 +111003,7 @@ num_index:
 		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
 				HANDLE_EXCEPTION();
 			}
 			str = ZSTR_EMPTY_ALLOC();
