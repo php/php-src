@@ -21,7 +21,7 @@ ob_end_clean();
 preg_match(",Openssl default config [^ ]* (.*),", $info, $m);
 
 if (isset($m[1])) {
-    var_dump(str_replace('/', '\\', strtolower($m[1])));
+    var_dump(str_replace('\\/', '\\', strtolower($m[1])));
 } else {
     echo $info;
 }
