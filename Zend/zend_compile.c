@@ -9004,12 +9004,12 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			if (no_serialize_attribute) {
 				if (info->flags & ZEND_ACC_STATIC) {
 					zend_error(E_COMPILE_WARNING,
-					"Static property %s::$%s is not serializable",
+					"Cannot apply #[\\NoSerialize] to static property %s::$%s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(name));
 				}
 				if (info->flags & ZEND_ACC_VIRTUAL) {
 					zend_error(E_COMPILE_WARNING,
-					"Virtual property %s::$%s is not serializable",
+					"Cannot apply #[\\NoSerialize] to virtual property %s::$%s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(name));
 				}
 				info->flags |= ZEND_ACC_NO_SERIALIZE;
