@@ -81,7 +81,8 @@ if test "$PHP_TIDY" != "no"; then
   ])
   AS_VAR_IF([php_ac_cv_have_tidyoptgetcategory], [yes],
     [AC_DEFINE([HAVE_TIDYOPTGETCATEGORY], [1],
-      [Define to 1 if tidyOptGetCategory is available.])])
+      [Define to 1 if Tidy library has the 'tidyOptGetCategory' function and
+      supports the 'TidyInternalCategory' enumeration.])])
 
   CPPFLAGS=$old_CPPFLAGS
 
