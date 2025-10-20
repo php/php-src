@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
   . Fixed deprecation for default case statement followed by semicolon not
     being emitted. (theodorejb)
+  . Fixed bug GH-20177 (Accessing overridden private property in
+    get_object_vars() triggers assertion error). (ilutov)
 
 - DOM:
   . Fix getNamedItemNS() incorrect namespace check. (nielsdos)
