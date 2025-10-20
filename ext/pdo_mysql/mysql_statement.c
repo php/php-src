@@ -715,7 +715,7 @@ static int pdo_mysql_stmt_get_col(
 
 static char *type_to_name_native(int type) /* {{{ */
 {
-#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
+#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case MYSQL_TYPE_##x: return #x;
 
 	switch (type) {
 		PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
@@ -749,10 +749,11 @@ static char *type_to_name_native(int type) /* {{{ */
 #ifdef FIELD_TYPE_NEWDATE
 		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
 #endif
-#ifdef FIELD_TYPE_VECTOR
+		/* The following 2 don't have BC FIELD_TYPE_* aliases. */
+#if MYSQL_VERSION_ID >= 90000 && !defined(MARIADB_BASE_VERSION) /* TODO: mysqlnd support (added in 8.4 via a1ab846231aeff49c0441a30ebd44463fc7825b1) */
 		PDO_MYSQL_NATIVE_TYPE_NAME(VECTOR)
 #endif
-#ifdef FIELD_TYPE_JSON
+#if MYSQL_VERSION_ID >= 80000 || defined(PDO_USE_MYSQLND)
 		PDO_MYSQL_NATIVE_TYPE_NAME(JSON)
 #endif
 		PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
