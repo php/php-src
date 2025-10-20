@@ -450,7 +450,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 
 	if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
-		efree(error);
 		zend_string_efree(entry.filename);
 		return 0;
 	}
