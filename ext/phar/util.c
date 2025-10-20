@@ -1520,7 +1520,6 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	zval_ptr_dtor_str(&zp[2]);
 
 	switch (Z_TYPE(retval)) {
-		default:
 		case IS_LONG:
 			zval_ptr_dtor(&zp[1]);
 			if (1 == Z_LVAL(retval)) {
@@ -1532,6 +1531,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 			*signature_len = Z_STRLEN(zp[1]);
 			zval_ptr_dtor(&zp[1]);
 			return SUCCESS;
+		default:
+			zval_ptr_dtor(&retval);
+			ZEND_FALLTHROUGH;
 		case IS_FALSE:
 			zval_ptr_dtor(&zp[1]);
 			return FAILURE;
