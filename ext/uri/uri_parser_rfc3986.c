@@ -20,6 +20,14 @@
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 
+#include <uriparser/Uri.h>
+
+struct php_uri_parser_rfc3986_uris {
+	UriUriA uri;
+	UriUriA normalized_uri;
+	bool normalized_uri_initialized;
+};
+
 static void *php_uri_parser_rfc3986_memory_manager_malloc(UriMemoryManager *memory_manager, size_t size)
 {
 	return emalloc(size);
