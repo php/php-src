@@ -259,6 +259,13 @@ PHP 8.5 UPGRADE NOTES
   . Add OffsetTime* Exif tags.
   . Added support for HEIF/HEIC.
 
+- Filter:
+  . Add new FILTER_THROW_ON_FAILURE flag which can be passed to the filter
+    functions and will force an exception to be triggered when validation fails.
+    The new flag cannot be combined with FILTER_NULL_ON_FAILURE; trying
+    to do so will result in a ValueError being thrown.
+    RFC: https://wiki.php.net/rfc/filter_throw_on_failure
+
 - Intl:
   . Added class constants NumberFormatter::CURRENCY_ISO,
     NumberFormatter::CURRENCY_PLURAL, NumberFormatter::CASH_CURRENCY,
@@ -807,6 +814,11 @@ PHP 8.5 UPGRADE NOTES
     across multiple PHP requests.
     RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
+- Filter:
+  . Filter\FilterException and Filter\FilterFailedException for use
+    when FILTER_THROW_ON_FAILURE has been enabled.
+    RFC: https://wiki.php.net/rfc/filter_throw_on_failure
+
 - URI:
   . Uri\UriException, Uri\InvalidUriException, Uri\UriComparisonMode,
     Uri\Rfc3986\Uri, Uri\WhatWg\InvalidUrlException,
@@ -885,6 +897,9 @@ PHP 8.5 UPGRADE NOTES
   . CURLFOLLOW_ALL.
   . CURLFOLLOW_OBEYCODE.
   . CURLFOLLOW_FIRSTONLY.
+
+- Filter:
+  . FILTER_THROW_ON_FAILURE.
 
 - Intl:
   . DECIMAL_COMPACT_SHORT.

@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
 
+- DOM:
+  . Fix getNamedItemNS() incorrect namespace check. (nielsdos)
+
 - FPM:
   . Fixed bug GH-19817 (Decode SCRIPT_FILENAME issue in php 8.5).
     (Jakub Zelenka)
@@ -23,10 +26,22 @@ PHP                                                                        NEWS
   . Fixed bug GH-19994 (openssl_get_cipher_methods inconsistent with fetching).
     (Jakub Zelenka)
 
+- PDO:
+  . Fixed bug GH-20095 (Incorrect class name in deprecation message for PDO
+    mixins). (timwolla)
+
+- Phar:
+  . Fix potential buffer length truncation due to usage of type int instead
+    of type size_t. (Girgias)
+
 - SPL:
   . Fixed bug GH-20101 (SplHeap/SplPriorityQueue serialization
     exposes INDIRECTs). (nielsdos)
   . Improve __unserialize() hardening for SplHeap/SplPriorityQueue. (nielsdos)
+
+- Tidy:
+  . Fixed GH-19021 (improved tidyOptGetCategory detection).
+    (arjendekorte, David Carlier, Peter Kokot)
 
 - URI:
   . Fixed bug GH-20088 (Heap-use-after-free in PHP URI WHATWG parser

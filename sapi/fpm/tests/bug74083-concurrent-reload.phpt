@@ -4,6 +4,7 @@ Concurrent reload signals should not kill PHP-FPM master process. (Bug: #74083)
 <?php
 include "skipif.inc";
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") die("skip Potential cause for GitHub Actions crash");
 ?>
 --FILE--
 <?php

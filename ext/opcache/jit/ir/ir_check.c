@@ -36,6 +36,7 @@ void ir_consistency_check(void)
 	IR_ASSERT((IR_UGT ^ 3) == IR_ULT);
 	IR_ASSERT((IR_ULE ^ 3) == IR_UGE);
 	IR_ASSERT((IR_UGE ^ 3) == IR_ULE);
+	IR_ASSERT((IR_ORDERED ^ 1) == IR_UNORDERED);
 
 	IR_ASSERT(IR_ADD + 1 == IR_SUB);
 }
