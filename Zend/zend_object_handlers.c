@@ -561,6 +561,11 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 				return FAILURE;
 			}
 		} else {
+			/* We were looking for a protected property but found a private one
+			 * belonging to the parent class. */
+			if (property_info->flags & ZEND_ACC_PRIVATE) {
+				return FAILURE;
+			}
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		}
 		return SUCCESS;
