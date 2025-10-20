@@ -59,6 +59,10 @@ PHP                                                                        NEWS
 - Random:
   . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
 
+- Reflection:
+  . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
+    for classes with property hooks). (alexandre-daubois)
+
 - SimpleXML:
   . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
     to work). (nielsdos)

@@ -5696,7 +5696,8 @@ ZEND_METHOD(ReflectionClass, isIterable)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(ce->get_iterator || instanceof_function(ce, zend_ce_traversable));
+	RETURN_BOOL((ce->get_iterator && ce->get_iterator != zend_hooked_object_get_iterator)
+				|| instanceof_function(ce, zend_ce_traversable));
 }
 /* }}} */
 
