@@ -102,8 +102,11 @@ typedef void (*zend_object_write_dimension_t)(zend_object *object, zval *offset,
  *  * &EG(error_zval), if an exception has been thrown.
  *  * NULL, if acquiring a direct pointer is not possible.
  *    In this case, the VM will fall back to using read_property and write_property.
+ * If 'container' is not NULL, it is set to the actual container of the zval
+ * pointer. The pointer remains valid as long as a reference on the container is
+ * held by the caller.
  */
-typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_string *member, int type, void **cache_slot);
+typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container);
 
 /* Used to check if a property of the object exists */
 /* param has_set_exists:
@@ -259,7 +262,7 @@ ZEND_API HashTable *zend_get_properties_no_lazy_init(zend_object *zobj);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
 ZEND_API zend_result zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
-ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
+ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container);
 ZEND_API zval *zend_std_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 ZEND_API zval *zend_std_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 ZEND_API int zend_std_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot);

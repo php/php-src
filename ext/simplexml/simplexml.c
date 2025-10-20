@@ -622,7 +622,7 @@ static void sxe_dimension_write(zend_object *object, zval *offset, zval *value)
 }
 /* }}} */
 
-static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int fetch_type, void **cache_slot) /* {{{ */
+static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int fetch_type, void **cache_slot, zend_refcounted **container) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -633,6 +633,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 
 	if (cache_slot) {
 		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
+	if (container) {
+		*container = (zend_refcounted*)object;
 	}
 
 	sxe = php_sxe_fetch_object(object);

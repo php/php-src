@@ -1378,7 +1378,7 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 }
 /* }}} */
 
-ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *name, int type, void **cache_slot) /* {{{ */
+ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *name, int type, void **cache_slot, zend_refcounted **container) /* {{{ */
 {
 	zval *retval = NULL;
 	uintptr_t property_offset;
@@ -1402,7 +1402,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						return &EG(error_zval);
 					}
 
-					return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot);
+					return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot, container);
 				}
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					if (prop_info) {
@@ -1440,6 +1440,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
 		    if (EXPECTED((retval = zend_hash_find(zobj->properties, name)) != NULL)) {
+				if (container) {
+					*container = (zend_refcounted*)zobj->properties;
+				}
 				return retval;
 		    }
 		}
@@ -1460,7 +1463,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 					return &EG(error_zval);
 				}
 
-				return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot);
+				return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot, container);
 			}
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties_internal(zobj);
@@ -1474,6 +1477,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 		retval = &EG(error_zval);
 	}
 
+	if (container) {
+		*container = (zend_refcounted*)zobj;
+	}
 	return retval;
 }
 /* }}} */
