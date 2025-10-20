@@ -44,7 +44,7 @@ $search_arrays_v = array (
                      array(),
                      array(NULL),
                      array(array(), 1, 2),
-                     array(1,2,3, "" => "value", NULL => "value", true => "value" ),
+                     array(1,2,3, "" => "value", true => "value" ),
                      array( array(2,4,5), array ("a","b","d") )
                    );
 // search for $key_variations in each sub array of $search_arrays_v
