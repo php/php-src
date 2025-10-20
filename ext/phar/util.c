@@ -1504,7 +1504,6 @@ static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, ze
 			zval_ptr_dtor(&retval);
 			ZEND_FALLTHROUGH;
 		case IS_FALSE:
-		default:
 			zval_ptr_dtor(&zp[1]);
 			return FAILURE;
 	}
