@@ -512,7 +512,13 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 #endif
 #ifdef SO_REUSEPORT
 		if (sockopts & STREAM_SOCKOP_SO_REUSEPORT) {
+# ifdef SO_REUSEPORT_LB
+			/* Historically, SO_REUSEPORT on FreeBSD predates Linux version, however does not
+			 * involve load balancing grouping thus SO_REUSEPORT_LB is the genuine equivalent.*/
+			setsockopt(sock, SOL_SOCKET, SO_REUSEPORT_LB, (char*)&sockoptval, sizeof(sockoptval));
+# else
 			setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&sockoptval, sizeof(sockoptval));
+# endif
 		}
 #endif
 #ifdef SO_BROADCAST
