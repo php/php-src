@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-20121 (JIT broken in ZTS builds on MacOS 15).
     (Arnaud, Shivam Mathur)
+  . Fixed bug GH-19875 (JIT 1205 segfault on large file compiled in subprocess).
+    (Arnaud)
 
 - PgSql:
   . Fix memory leak when first string conversion fails. (nielsdos)
