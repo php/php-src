@@ -613,8 +613,8 @@ PHP 8.5 UPGRADE NOTES
     have dropped the false from the return type union. Returning false
     was actually never possible.
   . grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
-    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
-    grapheme_levenshtein() functions add $locale parameter.
+    grapheme_strripos(), grapheme_substr(), grapheme_strstr()
+    and grapheme_stristr() functions add $locale parameter.
     RFC: https://wiki.php.net/rfc/grapheme_add_locale_for_case_insensitive
 
 - LDAP:
