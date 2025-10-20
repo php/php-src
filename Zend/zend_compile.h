@@ -262,7 +262,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* has #[\NoSerialize] attribute                          |     |     |     */
-#define ZEND_ACC_NO_SERIALIZE            (1 << 31) /*  X  |     |  X  |     */
+#define ZEND_ACC_NO_SERIALIZE            (1U << 31) /* X  |     |  X  |     */
 /*                                                        |     |     |     */
 /* Property Flags (unused: 13-27,29,30)                   |     |     |     */
 /* ===========                                            |     |     |     */
