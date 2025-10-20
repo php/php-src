@@ -217,7 +217,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
-    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_strripos(), grapheme_substr(), grapheme_strstr(), grapheme_stristr() and
     grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
   . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
     and NumberFormatter). (alexandre-daubois)
