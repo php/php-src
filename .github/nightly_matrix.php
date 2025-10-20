@@ -49,8 +49,8 @@ function get_current_version(): array {
 
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
-$monday = date('w', time()) === '1';
-$discard_cache = $monday
+$sunday = date('w', time()) === '0';
+$discard_cache = $sunday
     || ($trigger === 'schedule' && $attempt !== 1)
     || $trigger === 'workflow_dispatch';
 if ($discard_cache) {
