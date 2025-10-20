@@ -621,7 +621,7 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_destroy(lexbor_uri);
 }
 
-const php_uri_parser php_uri_parser_whatwg = {
+PHPAPI const php_uri_parser php_uri_parser_whatwg = {
 	.name = PHP_URI_PARSER_WHATWG,
 	.parse = php_uri_parser_whatwg_parse,
 	.clone = php_uri_parser_whatwg_clone,
