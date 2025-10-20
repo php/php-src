@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 - URI:
   . Fixed bug GH-20088 (Heap-use-after-free in PHP URI WHATWG parser
     during malformed URL processing). (lexborisov)
+  . Fixed bug GH-19868 (Unable to use uri_parser_rfc3986.h from external
+    extensions). (timwolla)
 
 09 Oct 2025, PHP 8.5.0RC2
 
