@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20113 (Missing new Foo(...) error in constant expressions).
     (ilutov)
   . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
+  . Fixed deprecation for default case statement followed by semicolon not
+    being emitted. (theodorejb)
 
 - DOM:
   . Fix getNamedItemNS() incorrect namespace check. (nielsdos)
