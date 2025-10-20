@@ -138,12 +138,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
-
   LINUX_X64:
     services:
       mysql:
@@ -272,11 +266,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
     strategy:
       fail-fast: false
@@ -358,11 +347,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
     strategy:
       fail-fast: false
@@ -418,11 +402,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
     if: inputs.branch == 'master'
     services:
@@ -483,11 +462,6 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
     strategy:
       fail-fast: false
@@ -674,11 +648,6 @@ jobs:
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
     services:
       mysql:
@@ -760,11 +729,6 @@ jobs:
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
     name: MSAN
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -851,11 +815,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -898,11 +857,6 @@ jobs:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
     if: inputs.branch == 'master'
     runs-on: ubuntu-22.04
@@ -1010,11 +964,6 @@ jobs:
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
     strategy:
       fail-fast: false

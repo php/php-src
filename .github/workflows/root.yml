@@ -31,11 +31,6 @@ jobs:
       - name: Generate Matrix
         id: set-matrix
         run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   NIGHTLY:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}

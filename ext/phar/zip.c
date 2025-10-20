@@ -234,7 +234,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
-	char *p = buf, *ext, *actual_alias = NULL;
+	char *ext, *actual_alias = NULL;
 	char *metadata = NULL;
 
 	size = php_stream_tell(fp);
@@ -261,58 +261,55 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 		return FAILURE;
 	}
 
-	if ((p = phar_find_eocd(buf, size)) != NULL) {
-		memcpy((void *)&locator, (void *) p, sizeof(locator));
-		if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
-			/* split archives not handled */
-			php_stream_close(fp);
+	char *p = phar_find_eocd(buf, size);
+	if (!p) {
+		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: end of central directory not found in zip-based phar \"%s\"", fname);
+		}
+		return FAILURE;
+	}
+
+	memcpy((void *)&locator, (void *) p, sizeof(locator));
+	if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
+		/* split archives not handled */
+		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+		}
+		return FAILURE;
+	}
+
+	if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
+		if (error) {
+			spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
+		}
+		php_stream_close(fp);
+		return FAILURE;
+	}
+
+	mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
+	mydata->is_persistent = PHAR_G(persist);
+
+	/* read in archive comment, if any */
+	if (PHAR_GET_16(locator.comment_len)) {
+
+		metadata = p + sizeof(locator);
+
+		if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
 			if (error) {
-				spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+				spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
 			}
+			php_stream_close(fp);
+			pefree(mydata, mydata->is_persistent);
 			return FAILURE;
 		}
 
-		if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
-			if (error) {
-				spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
-			}
-			php_stream_close(fp);
-			return FAILURE;
-		}
-
-		mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
-		mydata->is_persistent = PHAR_G(persist);
-
-		/* read in archive comment, if any */
-		if (PHAR_GET_16(locator.comment_len)) {
-
-			metadata = p + sizeof(locator);
-
-			if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
-				if (error) {
-					spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
-				}
-				php_stream_close(fp);
-				pefree(mydata, mydata->is_persistent);
-				return FAILURE;
-			}
-
-			phar_parse_metadata_lazy(metadata, &mydata->metadata_tracker, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
-		} else {
-			ZVAL_UNDEF(&mydata->metadata_tracker.val);
-		}
-
-		goto foundit;
+		phar_parse_metadata_lazy(metadata, &mydata->metadata_tracker, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
+	} else {
+		ZVAL_UNDEF(&mydata->metadata_tracker.val);
 	}
 
-	php_stream_close(fp);
-
-	if (error) {
-		spprintf(error, 4096, "phar error: end of central directory not found in zip-based phar \"%s\"", fname);
-	}
-
-	return FAILURE;
-foundit:
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
@@ -336,11 +333,11 @@ foundit:
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
 	/* read in central directory */
 	zend_hash_init(&mydata->manifest, PHAR_GET_16(locator.count),
-		zend_get_hash_value, destroy_phar_manifest_entry, (bool)mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, PHAR_GET_16(locator.count) * 2,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
@@ -1395,8 +1392,8 @@ fperror:
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass);
 
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
-	if (pass_error) {
-has_pass_error:
+	if (pass_error
+	 || FAILURE == phar_zip_applysignature(phar, &pass)) {
 		spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, pass_error);
 		efree(pass_error);
 nopasserror:
@@ -1407,11 +1404,6 @@ nocentralerror:
 			php_stream_close(oldfile);
 		}
 		return;
-	}
-
-	if (FAILURE == phar_zip_applysignature(phar, &pass)) {
-		ZEND_ASSERT(pass_error != NULL);
-		goto has_pass_error;
 	}
 
 	/* save zip */
