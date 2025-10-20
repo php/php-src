@@ -515,11 +515,11 @@ static xmlNodePtr dom_map_get_ns_named_item_prop(dom_nnodemap_object *map, const
 {
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	if (nodep) {
-		if (php_dom_follow_spec_intern(map->baseobj)) {
-			return (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
+		if (ns) {
+			return (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
 		} else {
-			if (ns) {
-				return (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
+			if (php_dom_follow_spec_intern(map->baseobj)) {
+				return (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
 			} else {
 				return (xmlNodePtr) xmlHasProp(nodep, BAD_CAST ZSTR_VAL(named));
 			}
