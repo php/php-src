@@ -9,9 +9,6 @@ Test array_combine() function : usage variations - associative array with differ
 */
 
 echo "*** Testing array_combine() : assoc array with diff keys to both \$keys and \$values argument ***\n";
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -23,11 +20,6 @@ class classA
     return "Class A object";
   }
 }
-
-// get a heredoc string
-$heredoc = <<<EOT
-Hello world
-EOT;
 
 // different variations of associative arrays to be passed to $arr1 argument
 $arrays = array (
@@ -45,15 +37,14 @@ $arrays = array (
              '\v\fworld' => 2.2, 'pen\n' => 33),
        array("\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33),
-       array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-/*10*/ array(@$unset_var => "hello", $fp => 'resource'),
+/*10*/ array($fp => 'resource'),
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
              $fp => 'resource', 133 => "int",
-             @$unset_var => "unset", $heredoc => "heredoc")
+             )
 );
 
 // array to be passsed to $arr2 argument
@@ -128,21 +119,12 @@ array(4) {
   int(33)
 }
 -- Iteration 7 --
-array(2) {
-  ["hello"]=>
-  string(5) "hello"
-  ["string"]=>
-  string(6) "string"
-}
--- Iteration 8 --
-array(2) {
-  ["hello"]=>
-  string(5) "hello"
+array(1) {
   ["resource"]=>
   string(8) "resource"
 }
--- Iteration 9 --
-array(6) {
+-- Iteration 8 --
+array(4) {
   [1]=>
   int(1)
   ["2.2"]=>
@@ -151,9 +133,5 @@ array(6) {
   string(8) "resource"
   ["int"]=>
   string(3) "int"
-  ["unset"]=>
-  string(5) "unset"
-  ["heredoc"]=>
-  string(7) "heredoc"
 }
 Done

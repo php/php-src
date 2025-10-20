@@ -23,10 +23,9 @@ $values = array(
   /* 5  */  array('color' => 'red' , 'item' => 'pen'),
             array( 'color' => 'red' , 2 => 'green ' ),
             array("colour" => "red" , "item" => "pen"),
-            array( TRUE => "red" , FALSE => "green" ),
-            array( true => "red" , FALSE => "green" ),
+            array( true => "red" , false => "green" ),
   /* 10 */  array( 1 => "Hi" , "color" => "red" , 'item' => 'pen'),
-            array( NULL => "Hi", '1' => "Hello" , "1" => "Green"),
+            array( '' => "Hi", '1' => "Hello" , "1" => "Green"),
             array( ""=>1, "color" => "green"),
   /* 13 */  array('Saffron' , 'White' , 'Green')
 );
@@ -193,39 +192,39 @@ array(2) {
 -- Iteration 9 --
 array(2) {
   [0]=>
-  array(2) {
+  array(3) {
     [1]=>
+    string(2) "Hi"
+    ["color"]=>
     string(3) "red"
-    [0]=>
-    string(5) "green"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
-  array(2) {
+  array(3) {
     [1]=>
+    string(2) "Hi"
+    ["color"]=>
     string(3) "red"
-    [0]=>
-    string(5) "green"
+    ["item"]=>
+    string(3) "pen"
   }
 }
 -- Iteration 10 --
 array(2) {
   [0]=>
-  array(3) {
-    [1]=>
+  array(2) {
+    [""]=>
     string(2) "Hi"
-    ["color"]=>
-    string(3) "red"
-    ["item"]=>
-    string(3) "pen"
+    [1]=>
+    string(5) "Green"
   }
   [1]=>
-  array(3) {
-    [1]=>
+  array(2) {
+    [""]=>
     string(2) "Hi"
-    ["color"]=>
-    string(3) "red"
-    ["item"]=>
-    string(3) "pen"
+    [1]=>
+    string(5) "Green"
   }
 }
 -- Iteration 11 --
@@ -233,36 +232,19 @@ array(2) {
   [0]=>
   array(2) {
     [""]=>
-    string(2) "Hi"
-    [1]=>
-    string(5) "Green"
+    int(1)
+    ["color"]=>
+    string(5) "green"
   }
   [1]=>
   array(2) {
     [""]=>
-    string(2) "Hi"
-    [1]=>
-    string(5) "Green"
+    int(1)
+    ["color"]=>
+    string(5) "green"
   }
 }
 -- Iteration 12 --
-array(2) {
-  [0]=>
-  array(2) {
-    [""]=>
-    int(1)
-    ["color"]=>
-    string(5) "green"
-  }
-  [1]=>
-  array(2) {
-    [""]=>
-    int(1)
-    ["color"]=>
-    string(5) "green"
-  }
-}
--- Iteration 13 --
 array(2) {
   [0]=>
   array(3) {

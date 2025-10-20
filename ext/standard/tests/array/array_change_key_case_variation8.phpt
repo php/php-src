@@ -10,7 +10,7 @@ echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 $inputs = array (
     // group of escape sequences
-    array(null => 1, NULL => 2, "\a" => 3, "\cx" => 4, "\e" => 5, "\f" => 6, "\n" => 7, "\t" => 8, "\xhh" => 9, "\ddd" => 10, "\v" => 11),
+    array("\a" => 3, "\cx" => 4, "\e" => 5, "\f" => 6, "\n" => 7, "\t" => 8, "\xhh" => 9, "\ddd" => 10, "\v" => 11),
 
     // array contains combination of capital/small letters
     array("lemoN" => 1, "Orange" => 2, "banana" => 3, "apple" => 4, "Test" => 5, "TTTT" => 6, "ttt" => 7, "ww" => 8, "x" => 9, "X" => 10, "oraNGe" => 11, "BANANA" => 12)
@@ -29,9 +29,7 @@ echo "Done";
 *** Testing array_change_key_case() : usage variations ***
 
 -- $case = default --
-array(10) {
-  [""]=>
-  int(2)
+array(9) {
   ["\a"]=>
   int(3)
   ["\cx"]=>
@@ -53,9 +51,7 @@ array(10) {
   int(11)
 }
 -- $case = upper --
-array(10) {
-  [""]=>
-  int(2)
+array(9) {
   ["\A"]=>
   int(3)
   ["\CX"]=>
