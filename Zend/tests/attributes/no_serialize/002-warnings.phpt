@@ -12,8 +12,13 @@ class Base {
         get => 1;
     }
 }
+
+#[NoSerialize]
+class C extends Base {
+    public $a = 'a';
+}
 ?>
 --EXPECTF--
-Warning: Static property Base::$b1 is not serializable in %s on line %d
+Warning: Cannot apply #[\NoSerialize] to static property Base::$b1 in %s on line %d
 
-Warning: Virtual property Base::$b2 is not serializable in %s on line %d
+Warning: Cannot apply #[\NoSerialize] to virtual property Base::$b2 in %s on line %d

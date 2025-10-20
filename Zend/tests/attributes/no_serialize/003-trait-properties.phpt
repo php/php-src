@@ -1,5 +1,5 @@
 --TEST--
-#[\NoSerialize]: Traits test.
+#[\NoSerialize]: Traits properties test.
 --FILE--
 <?php
 
