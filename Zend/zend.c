@@ -1978,7 +1978,6 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 	zend_result ret = SUCCESS;
 	if (op_array) {
 		zend_execute(op_array, retval);
-		zend_exception_restore();
 		if (UNEXPECTED(EG(exception))) {
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();

@@ -4797,10 +4797,8 @@ ZEND_VM_COLD_CONST_HANDLER(108, ZEND_THROW, CONST|TMPVAR|CV, ANY)
 		}
 	} while (0);
 
-	zend_exception_save();
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
-	zend_exception_restore();
 	FREE_OP1();
 	HANDLE_EXCEPTION();
 }
@@ -4813,7 +4811,6 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
-	zend_exception_restore();
 	if (EG(exception) == NULL) {
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}

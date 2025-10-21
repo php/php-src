@@ -54,6 +54,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     ZEND_ACC_USER_ARG_INFO flag was set.
   . Added zend_ast_call_get_args() to fetch the argument node from any call
     node.
+  . The zend_exception_save() and zend_exception_restore() functions were
+    removed.
 
 ========================
 2. Build system changes

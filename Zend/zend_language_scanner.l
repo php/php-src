@@ -2765,7 +2765,8 @@ skip_escape_conversion:
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
-		zend_exception_save();
+		zend_object *prev_exception = EG(exception);
+		EG(exception) = NULL;
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
@@ -2794,7 +2795,7 @@ skip_escape_conversion:
 					heredoc_nesting_level = 0;
 			}
 		}
-		zend_exception_restore();
+		EG(exception) = prev_exception;
 
 		if (
 		    (first_token == T_VARIABLE

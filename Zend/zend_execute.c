@@ -1315,6 +1315,7 @@ ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_exe
 
 	if ((fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
 			!zend_verify_internal_arg_types(fbc, call)) {
+		zend_clear_exception();
 		return 1;
 	}
 
