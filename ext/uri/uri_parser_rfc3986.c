@@ -615,7 +615,7 @@ static void php_uri_parser_rfc3986_destroy(void *uri)
 	efree(uriparser_uris);
 }
 
-const php_uri_parser php_uri_parser_rfc3986 = {
+PHPAPI const php_uri_parser php_uri_parser_rfc3986 = {
 	.name = PHP_URI_PARSER_RFC3986,
 	.parse = php_uri_parser_rfc3986_parse,
 	.clone = php_uri_parser_rfc3986_clone,

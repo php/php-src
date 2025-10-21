@@ -19,7 +19,7 @@
 
 #include "php_uri_common.h"
 
-extern const php_uri_parser php_uri_parser_rfc3986;
+PHPAPI extern const php_uri_parser php_uri_parser_rfc3986;
 
 typedef struct php_uri_parser_rfc3986_uris php_uri_parser_rfc3986_uris;
 
