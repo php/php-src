@@ -1269,7 +1269,7 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(con
 	const zend_function *old_function;
 
 	ZEND_ASSERT(zv != NULL);
-	old_function = (const zend_function*)Z_PTR_P(zv);
+	old_function = Z_PTR_P(zv);
 	if (old_function->type == ZEND_USER_FUNCTION
 		&& old_function->op_array.last > 0) {
 		zend_error_noreturn(error_level, "Cannot redeclare function %s() (previously declared in %s:%d)",
@@ -6536,8 +6536,7 @@ static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)
 		 * pipe optimization that uses a temporary znode for the reference elimination.
 		 * Therefore, disable the optimization for assert.
 		 * Note that "assert" as a name is always treated as fully qualified. */
-		const zend_string *str = zend_ast_get_str(ast);
-		return !zend_string_equals_literal_ci(str, "assert");
+		return !zend_string_equals_literal_ci(zend_ast_get_str(ast), "assert");
 	}
 
 	return true;
@@ -7773,7 +7772,7 @@ static bool zend_property_is_virtual(const zend_class_entry *ce, const zend_stri
 
 	const zend_ast_list *hooks = zend_ast_get_list(hooks_ast);
 	for (uint32_t i = 0; i < hooks->children; i++) {
-		const zend_ast_decl *hook = (zend_ast_decl *) hooks->child[i];
+		const zend_ast_decl *hook = (const zend_ast_decl *) hooks->child[i];
 		zend_ast *body = hook->child[2];
 		if (body && zend_property_hook_uses_property(property_name, hook->name, body)) {
 			is_virtual = false;
@@ -8174,7 +8173,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 		}
 	} else if (ast->kind == ZEND_AST_CLOSURE) {
 		/* For normal closures add the use() list. */
-		const zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
+		const zend_ast_decl *closure_ast = (const zend_ast_decl *) ast;
 		zend_ast *uses_ast = closure_ast->child[1];
 		if (uses_ast) {
 			const zend_ast_list *uses_list = zend_ast_get_list(uses_ast);
@@ -11643,7 +11642,7 @@ typedef struct {
 
 static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 {
-	const const_expr_context *ctx = (const const_expr_context *) context;
+	const const_expr_context *ctx = context;
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
 		return;
