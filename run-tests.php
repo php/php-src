@@ -2881,6 +2881,11 @@ function is_flaky(TestFile $test): bool
     if ($test->hasSection('FLAKY')) {
         return true;
     }
+    if ($test->hasSection('SKIPIF')) {
+        if (strpos($test->getSection('SKIPIF'), 'SKIP_PERF_SENSITIVE') !== false) {
+            return true;
+        }
+    }
     if (!$test->hasSection('FILE')) {
         return false;
     }
