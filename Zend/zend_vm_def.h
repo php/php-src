@@ -4797,7 +4797,7 @@ ZEND_VM_COLD_CONST_HANDLER(108, ZEND_THROW, CONST|TMPVAR|CV, ANY)
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
