@@ -46,6 +46,7 @@ try {
 	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
+?>
 --CLEAN--
 <?php
 include('config.inc');
