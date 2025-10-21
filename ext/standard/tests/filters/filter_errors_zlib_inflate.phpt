@@ -1,7 +1,7 @@
 --TEST--
 Filter errors: zlib.inflate
---SKIPIF--
-<?php require 'filter_errors.inc'; filter_errors_skipif('zlib.inflate'); ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 require 'filter_errors.inc';
