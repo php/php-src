@@ -839,7 +839,7 @@ static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *
 
 	if (Z_TYPE(retval) != IS_ARRAY) {
 		zval_ptr_dtor(&retval);
-		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize, null, or no value", ZSTR_VAL(obj->ce->name));
+		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array of property names, or return null/void to delegate to default serialization", ZSTR_VAL(obj->ce->name));
 		return NULL;
 	}
 
@@ -916,7 +916,7 @@ static int php_var_serialize_get_sleep_props(
 		ZVAL_DEREF(name_val);
 		if (Z_TYPE_P(name_val) != IS_STRING) {
 			php_error_docref(NULL, E_WARNING,
-					"%s::__sleep() should return an array only containing the names of instance-variables to serialize, null, or no value",
+					"%s::__sleep() should return an array only containing the names of instance-variables to serialize",
 					ZSTR_VAL(ce->name));
 		}
 
