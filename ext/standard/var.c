@@ -1224,6 +1224,9 @@ again:
 						}
 
 						OBJ_RELEASE(Z_OBJ(tmp));
+						if (EG(exception)) {
+							return;
+						}
 					}
 				}
 
