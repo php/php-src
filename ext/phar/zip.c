@@ -1278,6 +1278,7 @@ void phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_def
 			return;
 		}
 		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+			php_stream_close(entry.fp);
 			if (error) {
 				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			}
