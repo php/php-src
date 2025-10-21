@@ -34,5 +34,5 @@ var_dump(serialize(new Bar()));
 string(31) "O:3:"Foo":1:{s:6:"%0Foo%0a";i:2;}"
 string(30) "O:7:"FooNull":1:{s:1:"a";i:2;}"
 
-Warning: serialize(): Bar::__sleep() should return an array of property names, or return null/void to delegate to default serialization in /Users/dkulyk/Projects/src/php-src/ext/standard/tests/serialize/007.php on line 28
+Warning: serialize(): Bar::__sleep() should return an array of property names, or return null/void to delegate to default serialization in %s on line %d
 string(26) "O:3:"Bar":1:{s:1:"a";i:2;}"
