@@ -273,7 +273,7 @@ slightly different steps. We'll call attention where the steps differ.
    The NEWS is updated at the *start* of the cycle for the next tag, e.g.
    [Update NEWS for PHP 8.2.0 alpha2][] was sent as part of tagging 8.2.0 alpha **1**.
 
-   🔷 **For post-GA releases only,** switch back to the *version branch* for
+   🔷 **For post-GA releases, and the final pre-GA RC** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac` and `NEWS`. This prepares
    the version branch for the next version.
@@ -981,6 +981,13 @@ feature development that cannot go into the new version.
    to upmerge that commit 5 times to get it to `master`. For example:
 
    * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
+
+9. Update the `.github/workflows/push.yml` file with the new branch. This fil
+   does not need to be updated on the lowest supported branch; just update the
+   newly cut branch to add the new branch to the branches that the workflow
+   runs on. For example:
+
+   * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/77af4780ccbbc96a2f85a3102d45a15f5e26f9c9)
 
 ## Preparing for the initial stable version (PHP X.Y.0)
 
