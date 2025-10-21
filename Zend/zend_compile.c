@@ -8005,7 +8005,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				if (no_serialize_attribute) {
 					if (prop->flags & ZEND_ACC_VIRTUAL) {
 						zend_error(E_COMPILE_WARNING,
-						"Virtual property %s::$%s is not serializable",
+						"Cannot apply #[\\NoSerialize] to virtual property %s::$%s",
 						ZSTR_VAL(scope->name), ZSTR_VAL(name));
 					}
 					prop->flags |= ZEND_ACC_NO_SERIALIZE;
