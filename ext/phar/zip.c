@@ -1259,6 +1259,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) void phar_zip_flush(phar_archive_data *phar, z
 			return;
 		}
 		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+			php_stream_close(entry.fp);
 			spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			return;
 		}
