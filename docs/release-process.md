@@ -976,18 +976,29 @@ feature development that cannot go into the new version.
 > minor improvements and bug fixes. All major improvements and new features must
 > wait.
 
-8. Update the `.github/nightly_matrix.php` file with the new branch. As CI
-   configuration is maintained on the lowest supported branch, you will need
-   to upmerge that commit 5 times to get it to `master`. For example:
+8. Most CI configuration is maintained on the lowest supported branch; update the
+   applicable files there to reflect the branch cut, and then upmerge that commit
+   5 times to get it to `master`. The following files need to be updated:
 
-   * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
+   * `.github/nightly_matrix.php` (add new branch, update version for `master`)
+   [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
 
-9. Update the `.github/workflows/push.yml` file with the new branch. This fil
+   * `.github/scripts/windows/find-target-branch.bat` (update version for `master`)
+   [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/107075605db6f1b15ce275e345d1c6de04a464b0)
+
+9. Update the `.github/workflows/push.yml` file with the new branch. This file
    does not need to be updated on the lowest supported branch; just update the
    newly cut branch to add the new branch to the branches that the workflow
-   runs on. For example:
+   runs on (and then upmerge once to `master`). For example:
 
    * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/77af4780ccbbc96a2f85a3102d45a15f5e26f9c9)
+
+10. Update the version of `php/php-sdk-binary-tools` used for the `master` branch for the `nightly`
+    and `push` jobs to account for the new version; this can be done before the branch cut if
+    the new version is ready. If the new version is not ready when the branch is cut, file an
+    issue reporting the problem. For example:
+
+    * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/f7e39a91d5a9de53fc4e184f6fce6116ca3388a1)
 
 ## Preparing for the initial stable version (PHP X.Y.0)
 
