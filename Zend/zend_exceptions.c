@@ -145,31 +145,6 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 }
 /* }}} */
 
-void zend_exception_save(void) /* {{{ */
-{
-	if (EG(prev_exception)) {
-		zend_exception_set_previous(EG(exception), EG(prev_exception));
-	}
-	if (EG(exception)) {
-		EG(prev_exception) = EG(exception);
-	}
-	EG(exception) = NULL;
-}
-/* }}} */
-
-void zend_exception_restore(void) /* {{{ */
-{
-	if (EG(prev_exception)) {
-		if (EG(exception)) {
-			zend_exception_set_previous(EG(exception), EG(prev_exception));
-		} else {
-			EG(exception) = EG(prev_exception);
-		}
-		EG(prev_exception) = NULL;
-	}
-}
-/* }}} */
-
 static zend_always_inline bool is_handle_exception_set(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return !execute_data
@@ -241,10 +216,6 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 ZEND_API void zend_clear_exception(void) /* {{{ */
 {
 	zend_object *exception;
-	if (EG(prev_exception)) {
-		OBJ_RELEASE(EG(prev_exception));
-		EG(prev_exception) = NULL;
-	}
 	if (!EG(exception)) {
 		return;
 	}
