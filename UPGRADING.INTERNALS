@@ -159,7 +159,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     were removed. Use the corresponding headers in Zend/ instead.
 
 - URI:
-  . Internal API for URI handling was added via the php_uri_*() functions.
+  . New extension with an internal API for URI handling is available via the
+    php_uri_* symbols exposed in the ext/uri/ headers.
 
 ========================
 4. OpCode changes
