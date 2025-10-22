@@ -19,5 +19,3 @@ $view_def    = "CREATE VIEW {$view_name} AS SELECT * FROM {$table_name};";
 $table_def    = "CREATE TABLE {$table_name} (num int, str text, bin bytea);";
 $table_def_92 = "CREATE TABLE {$table_name_92} (textary text[],  jsn json);";
 $field_name = "num";             // For pg_field_num()
-
-?>
