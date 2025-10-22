@@ -5497,7 +5497,34 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		opline->op2.num = zend_alloc_cache_slot();
 	}
 
-	zend_compile_call_common(&ctor_result, args_ast, NULL, ast->lineno);
+	zend_class_entry *ce = NULL;
+	if (opline->op1_type == IS_CONST) {
+		zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
+		ce = zend_hash_find_ptr(CG(class_table), lcname);
+		if (ce) {
+			if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
+				ce = NULL;
+			}
+		} else if (CG(active_class_entry)
+				&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
+			ce = CG(active_class_entry);
+		}
+	} else if (opline->op1_type == IS_UNUSED
+			&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+			&& zend_is_scope_known()) {
+		ce = CG(active_class_entry);
+	}
+
+
+	zend_function *fbc = NULL;
+	if (ce
+			&& ce->default_object_handlers->get_constructor == zend_std_get_constructor
+			&& ce->constructor
+			&& is_func_accessible(ce->constructor)) {
+		fbc = ce->constructor;
+	}
+
+	zend_compile_call_common(&ctor_result, args_ast, fbc, ast->lineno);
 	zend_do_free(&ctor_result);
 }
 /* }}} */
