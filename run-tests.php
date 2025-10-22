@@ -2674,6 +2674,7 @@ COMMAND $cmd
 
         if (!$leaked && !$failed_headers) {
             // If the test passed and CLEAN produced output, report test as borked.
+            var_dump("clean output: ",$clean_output);
             if ($clean_output) {
                 show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
                     $PHP_FAILED_TESTS['BORKED'][] = [
