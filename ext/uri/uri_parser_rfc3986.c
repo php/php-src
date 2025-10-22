@@ -149,7 +149,7 @@ static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, z
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(php_uri_parser_rfc3986_uris *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
@@ -162,7 +162,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *ur
 	return SUCCESS;
 }
 
-zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *errors)
+zend_result php_uri_parser_rfc3986_userinfo_write(php_uri_parser_rfc3986_uris *uri, zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
