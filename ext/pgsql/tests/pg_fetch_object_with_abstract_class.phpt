@@ -50,8 +50,8 @@ try {
 --CLEAN--
 <?php
 include('config.inc');
-$db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
+$db = @pg_connect($conn_str);
+@pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
 ?>
 --EXPECT--
 Error: Cannot instantiate interface I
