@@ -10,7 +10,7 @@
 # The PHP Interpreter
 
 PHP is a popular general-purpose scripting language that is especially suited to
-web development. Fast, flexible and pragmatic, PHP powers everything from your
+web development. Fast, flexible, and pragmatic, PHP powers everything from your
 blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
@@ -28,7 +28,7 @@ The PHP manual is available at [php.net/docs](https://www.php.net/docs).
 Prebuilt packages and binaries can be used to get up and running fast with PHP.
 
 For Windows, the PHP binaries can be obtained from
-[windows.php.net](https://windows.php.net). After extracting the archive the
+[windows.php.net](https://windows.php.net). After extracting the archive, the
 `*.exe` files are ready to use.
 
 For other systems, see the [installation chapter](https://www.php.net/install).
