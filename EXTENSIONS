@@ -510,6 +510,7 @@ EXTENSION:           tidy
 PRIMARY MAINTAINER:  John Coggeshall <john@php.net> (2003 - 2006)
                      Ilia Alshanetsky <iliaa@php.net> (2003 - 2009)
                      Nuno Lopes <nlopess@php.net> (2006 - 2012)
+                     Niels Dossche <nielsdos@php.net> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
