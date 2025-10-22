@@ -51,6 +51,7 @@
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/tidy @nielsdos
 /ext/xml @nielsdos
 /ext/xmlreader @nielsdos
 /ext/xmlwriter @nielsdos
