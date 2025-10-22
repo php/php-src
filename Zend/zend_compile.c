@@ -5491,13 +5491,10 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	opline = zend_emit_op(result, ZEND_NEW, NULL, NULL);
 
-	if (class_node.op_type == IS_CONST) {
-		opline->op1_type = IS_CONST;
-		opline->op1.constant = zend_add_class_name_literal(
-			Z_STR(class_node.u.constant));
+	zend_set_class_name_op1(opline, &class_node);
+
+	if (opline->op1_type == IS_CONST) {
 		opline->op2.num = zend_alloc_cache_slot();
-	} else {
-		SET_NODE(opline->op1, &class_node);
 	}
 
 	zend_compile_call_common(&ctor_result, args_ast, NULL, ast->lineno);
