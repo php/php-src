@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
 
+- Standard:
+  . Fixed bug GH-20257 (mail() heap overflow with an empty message in lf mode).
+    (David Carlier)
+
 23 Oct 2025, PHP 8.5.0RC3
 
 - Core:
