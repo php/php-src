@@ -2538,7 +2538,7 @@ COMMAND $cmd
         }
 
         if (!$cfg['keep']['clean']) {
-            @unlink($test_clean);
+            // @unlink($test_clean);
         }
     }
 
@@ -2674,8 +2674,8 @@ COMMAND $cmd
 
         if (!$leaked && !$failed_headers) {
             // If the test passed and CLEAN produced output, report test as borked.
-            var_dump("clean output: ",bin2hex($clean_output??''));
-            var_dump(file_get_contents($temp_clean));
+            var_dump("clean output: ",bin2hex(string: $clean_output??''));
+            var_dump(file_get_contents($test_clean));
             $clean_output = trim($clean_output ?? '');
             if ($clean_output) {
                 show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
