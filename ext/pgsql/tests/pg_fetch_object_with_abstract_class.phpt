@@ -46,12 +46,12 @@ try {
 	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
 ?>
 --CLEAN--
 <?php
 include('config.inc');
-$db = @pg_connect($conn_str);
-@pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
 ?>
 --EXPECT--
 Error: Cannot instantiate interface I
