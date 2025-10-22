@@ -5011,6 +5011,7 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 	znode copy;
 	if (rope_result.op_type != IS_CONST) {
 		/* Note: ZEND_COPY_TMP is only valid for TMPVAR. */
+		ZEND_ASSERT(rope_result.op_type == IS_TMP_VAR);
 		zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
 		zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
 		zend_emit_op_tmp(result, ZEND_STRLEN, &copy, NULL);
