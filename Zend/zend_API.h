@@ -413,10 +413,10 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
 #define IS_CALLABLE_SUPPRESS_DEPRECATIONS (1<<1)
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
-ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);
+ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, const zend_object *object);
 ZEND_API zend_string *zend_get_callable_name(zval *callable);
 ZEND_API bool zend_is_callable_at_frame(
-		zval *callable, zend_object *object, zend_execute_data *frame,
+		zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
@@ -900,7 +900,7 @@ ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *
 
 static zend_always_inline zend_result zend_forbid_dynamic_call(void)
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	const zend_execute_data *ex = EG(current_execute_data);
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
@@ -931,7 +931,7 @@ ZEND_API bool zend_is_iterable(const zval *iterable);
 ZEND_API bool zend_is_countable(const zval *countable);
 
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
-		zval *default_value_zval, zend_internal_arg_info *arg_info);
+		zval *default_value_zval, const zend_internal_arg_info *arg_info);
 
 END_EXTERN_C()
 
