@@ -52,6 +52,7 @@
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/tidy @nielsdos
 /ext/uri @kocsismate
 /ext/xml @nielsdos
 /ext/xmlreader @nielsdos
