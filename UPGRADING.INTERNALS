@@ -34,6 +34,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     printf family.
   . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
     Call zval_ptr_dtor_nogc() directly instead.
+  . The internal zend_copy_parameters_array() function is no longer exposed.
 
 ========================
 2. Build system changes

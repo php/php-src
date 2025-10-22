@@ -347,9 +347,6 @@ ZEND_API void zend_set_dl_use_deepbind(bool use_deepbind);
 
 ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array);
 
-/* internal function to efficiently copy parameters when executing __call() */
-ZEND_API zend_result zend_copy_parameters_array(uint32_t param_count, zval *argument_array);
-
 #define zend_get_parameters_array(ht, param_count, argument_array) \
 	zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_parse_parameters_none() \
