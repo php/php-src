@@ -5368,17 +5368,27 @@ static bool zend_is_constructor(zend_string *name) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_get_compatible_func_or_null(zend_class_entry *ce, zend_string *lcname) /* {{{ */
+static bool is_func_accessible(const zend_function *fbc)
 {
-	zend_function *fbc = zend_hash_find_ptr(&ce->function_table, lcname);
-	if (!fbc || (fbc->common.fn_flags & ZEND_ACC_PUBLIC) || ce == CG(active_class_entry)) {
-		return fbc;
+	if ((fbc->common.fn_flags & ZEND_ACC_PUBLIC) || fbc->common.scope == CG(active_class_entry)) {
+		return true;
 	}
 
 	if (!(fbc->common.fn_flags & ZEND_ACC_PRIVATE)
 		&& (fbc->common.scope->ce_flags & ZEND_ACC_LINKED)
 		&& (!CG(active_class_entry) || (CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED))
 		&& zend_check_protected(zend_get_function_root_class(fbc), CG(active_class_entry))) {
+		return true;
+	}
+
+	return false;
+}
+
+static zend_function *zend_get_compatible_func_or_null(zend_class_entry *ce, zend_string *lcname) /* {{{ */
+{
+	zend_function *fbc = zend_hash_find_ptr(&ce->function_table, lcname);
+
+	if (!fbc || is_func_accessible(fbc)) {
 		return fbc;
 	}
 
