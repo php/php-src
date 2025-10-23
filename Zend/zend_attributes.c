@@ -33,6 +33,7 @@ ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
 ZEND_API zend_class_entry *zend_ce_nodiscard;
 ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
+ZEND_API zend_class_entry *zend_ce_no_serialize;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -264,6 +265,22 @@ ZEND_METHOD(NoDiscard, __construct)
 		RETURN_THROWS();
 	}
 }
+
+static zend_string *validate_no_serialize(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
+		return NULL;
+	}
+	if (scope->ce_flags & (ZEND_ACC_TRAIT|ZEND_ACC_INTERFACE)) {
+		const char *type = zend_get_object_type_case(scope, false);
+		return zend_strpprintf(0, "Cannot apply #[\\NoSerialize] to %s %s", type, ZSTR_VAL(scope->name));
+	}
+
+	scope->ce_flags |= ZEND_ACC_NO_SERIALIZE;
+	return NULL;
+}
+
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
@@ -606,6 +623,10 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
+
+	zend_ce_no_serialize = register_class_NoSerialize();
+	attr = zend_mark_internal_attribute(zend_ce_no_serialize);
+	attr->validator = validate_no_serialize;
 }
 
 void zend_attributes_shutdown(void)
