@@ -89,7 +89,7 @@ Options:
 
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
                 Write temporary files to <tdir> by replacing <sdir> from the
-                filenames to generate with <tdir>. In general you want to make
+                filenames to generate with <tdir>. In general, you want to make
                 <sdir> the path to your source files and <tdir> some path in
                 your web page hierarchy with <url> pointing to <tdir>.
 
@@ -136,13 +136,13 @@ HELP;
 /**
  * One function to rule them all, one function to find them, one function to
  * bring them all and in the darkness bind them.
- * This is the entry point and exit point überfunction. It contains all the
+ * This is the entry point and exit point uberfunction. It contains all the
  * code that was previously found at the top level. It could and should be
  * refactored to be smaller and more manageable.
  */
 function main(): void
 {
-    /* This list was derived in a naïve mechanical fashion. If a member
+    /* This list was derived in a naive mechanical fashion. If a member
      * looks like it doesn't belong, it probably doesn't; cull at will.
      */
     global $DETAILED, $PHP_FAILED_TESTS, $SHOW_ONLY_GROUPS, $argc, $argv, $cfg,
@@ -216,19 +216,19 @@ function main(): void
         $environment['TEMP'] = sys_get_temp_dir();
 
         if (empty($environment['TEMP'])) {
-            // For example, OpCache on Windows will fail in this case because
+            // For example, OPcache on Windows will fail in this case because
             // child processes (for tests) will not get a TEMP variable, so
             // GetTempPath() will fallback to c:\windows, while GetTempPath()
-            // will return %TEMP% for parent (likely a different path). The
-            // parent will initialize the OpCache in that path, and child will
-            // fail to reattach to the OpCache because it will be using the
+            // will return %TEMP% for the parent (likely a different path). The
+            // parent will initialize the OPcache in that path, and child will
+            // fail to reattach to the OPcache because it will be using the
             // wrong path.
             die("TEMP environment is NOT set");
         }
 
         if (count($environment) == 1) {
             // Not having other environment variables, only having TEMP, is
-            // probably ok, but strange and may make a difference in the
+            // probably OK, but strange and may make a difference in the
             // test pass rate, so warn the user.
             echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" , PHP_EOL;
         }
@@ -428,7 +428,7 @@ function main(): void
                     if ($test_list) {
                         foreach ($test_list as $test) {
                             $matches = [];
-                            if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
+                            if (preg_match('/^#.*\[(.*)]:\s+(.*)$/', $test, $matches)) {
                                 $redir_tests[] = [$matches[1], $matches[2]];
                             } elseif (strlen($test)) {
                                 $test_files[] = trim($test);
@@ -959,10 +959,10 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
             $autoconf = shell_exec('autoconf --version');
         }
 
-        /* Always use the generated libtool - Mac OSX uses 'glibtool' */
+        /* Always use the generated libtool - Mac OS X uses 'glibtool' */
         $libtool = shell_exec(INIT_DIR . '/libtool --version');
 
-        /* Use shtool to find out if there is glibtool present (MacOSX) */
+        /* Use shtool to find out if there is glibtool present (Mac OS X) */
         $sys_libtool_path = shell_exec(__DIR__ . '/build/shtool path glibtool libtool');
 
         if ($sys_libtool_path) {
@@ -1144,7 +1144,7 @@ function system_with_timeout(
 ) {
     global $valgrind;
 
-    // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
+    // when a proc_open() cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
     if (IS_WINDOWS) {
@@ -1228,11 +1228,11 @@ function system_with_timeout(
     if ($stat['signaled']) {
         $data .= "\nTermsig=" . $stat['stopsig'] . "\n";
     }
-    if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
-        $data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
-    } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
+    if ($stat['exitcode'] > 128 && $stat['exitcode'] < 160) {
+        $data .= "\nTermsig=" . ($stat['exitcode'] - 128) . "\n";
+    } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat['exitcode'] >> 28) & 0b1111) === 0b1100) {
         // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
-        $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
+        $data .= "\nTermsig=" . $stat['exitcode'] . "\n";
     }
 
     proc_close($proc);
@@ -1633,7 +1633,7 @@ escape:
     kill_children($workerProcs);
 
     if ($testsInProgress < 0) {
-        error("$testsInProgress test batches “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
+        error("$testsInProgress test batches \"in progress\", which is less than zero. THIS SHOULD NOT HAPPEN.");
     }
 }
 
@@ -1646,8 +1646,8 @@ escape:
  */
 function safe_fwrite($stream, string $data)
 {
-    // safe_fwrite was tested by adding $message['unused'] = str_repeat('a', 20_000_000); in send_message()
-    // fwrites on tcp sockets can return false or less than strlen if the recipient is busy.
+    // safe_fwrite() was tested by adding $message['unused'] = str_repeat('a', 20_000_000); in send_message()
+    // fwrite()s on tcp sockets can return false or less than strlen if the recipient is busy.
     // (e.g. fwrite(): Send of 577 bytes failed with errno=35 Resource temporarily unavailable)
     $bytes_written = 0;
     while ($bytes_written < strlen($data)) {
@@ -1770,7 +1770,7 @@ function show_file_block(string $file, string $block, ?string $section = null): 
         }
         if ($section === 'DIFF' && $colorize) {
             // '-' is Light Red for removal, '+' is Light Green for addition
-            $block = preg_replace('/^[0-9]+\-\s.*$/m', "\e[1;31m\\0\e[0m", $block);
+            $block = preg_replace('/^[0-9]+-\s.*$/m', "\e[1;31m\\0\e[0m", $block);
             $block = preg_replace('/^[0-9]+\+\s.*$/m', "\e[1;32m\\0\e[0m", $block);
         }
 
@@ -1886,7 +1886,7 @@ TEST $file
         $cmdRedirect = '';
     }
 
-    /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
+    /* For GET/POST/PUT tests, check if CGI SAPI is available and if it is, use it. */
     $uses_cgi = false;
     if ($test->isCGI()) {
         if (!$php_cgi) {
@@ -1899,7 +1899,7 @@ TEST $file
         }
     }
 
-    /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
+    /* For phpdbg tests, check if phpdbg SAPI is available and if it is, use it. */
     $extra_options = '';
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
@@ -2436,7 +2436,7 @@ TEST $file
         if (isset($env['SKIP_ASAN'])) {
             // $env['LSAN_OPTIONS'] = 'detect_leaks=0';
             /* For unknown reasons, LSAN_OPTIONS=detect_leaks=0 would occasionally not be picked up
-             * in CI. Skip the test with ASAN, as it's not worth investegating. */
+             * in CI. Skip the test with ASAN, as it's not worth investigating. */
             return skip_test($tested, $tested_file, $shortname, 'xleak does not work with asan');
         }
     }
@@ -2749,7 +2749,7 @@ $output
             $env_lines = ['unset $(env | cut -d= -f1)'];
             foreach ($env as $env_var => $env_val) {
                 if (strval($env_val) === '') {
-                    // proc_open does not pass empty env vars
+                    // proc_open() does not pass empty env vars
                     continue;
                 }
                 $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
@@ -2857,7 +2857,7 @@ function expectf_to_regex(?string $wanted): string
 
     $wanted_re = preg_replace('/\r\n/', "\n", $wanted_re);
 
-    // do preg_quote, but miss out any %r delimited sections
+    // do preg_quote(), but miss out any %r delimited sections
     $temp = "";
     $r = "%r";
     $startOffset = 0;
@@ -3044,6 +3044,8 @@ function get_summary(bool $show_ext_summary): string
     $summary = '';
 
     if ($show_ext_summary) {
+        $exts_skipped = (array) $exts_skipped;
+        sort($exts_skipped);
         $summary .= '
 =====================================================================
 TEST RESULT SUMMARY
@@ -3360,7 +3362,7 @@ class JUnit
     }
 
     public function markTestAs(
-        $type,
+        string|array $type,
         string $file_name,
         string $test_name,
         ?int $time = null,
