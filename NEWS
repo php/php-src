@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC4
 
+- PCRE:
+  . Upgraded to pcre2lib from 10.46 to 10.47. (nielsdos)
+
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
@@ -13,7 +16,6 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
     condition for Win32/Win64. (Jakub Zelenka)
-
 
 23 Oct 2025, PHP 8.5.0RC3
 

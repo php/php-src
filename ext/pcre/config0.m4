@@ -68,6 +68,7 @@ else
     pcre2lib/pcre2_chartables.c
     pcre2lib/pcre2_chkdint.c
     pcre2lib/pcre2_compile.c
+    pcre2lib/pcre2_compile_cgroup.c
     pcre2lib/pcre2_compile_class.c
     pcre2lib/pcre2_config.c
     pcre2lib/pcre2_context.c
@@ -78,8 +79,9 @@ else
     pcre2lib/pcre2_find_bracket.c
     pcre2lib/pcre2_jit_compile.c
     pcre2lib/pcre2_maketables.c
-    pcre2lib/pcre2_match_data.c
     pcre2lib/pcre2_match.c
+    pcre2lib/pcre2_match_data.c
+    pcre2lib/pcre2_match_next.c
     pcre2lib/pcre2_newline.c
     pcre2lib/pcre2_ord2utf.c
     pcre2lib/pcre2_pattern_info.c
