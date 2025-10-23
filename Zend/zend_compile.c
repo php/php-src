@@ -5009,9 +5009,17 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 	 * pass in the Zend Optimizer if the result of the printf() is in fact
 	 * unused */
 	znode copy;
-	zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
-	zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
-	zend_emit_op_tmp(result, ZEND_STRLEN, &copy, NULL);
+	if (rope_result.op_type != IS_CONST) {
+		/* Note: ZEND_COPY_TMP is only valid for TMPVAR. */
+		ZEND_ASSERT(rope_result.op_type == IS_TMP_VAR);
+		zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
+		zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
+		zend_emit_op_tmp(result, ZEND_STRLEN, &copy, NULL);
+	} else {
+		zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
+		result->op_type = IS_CONST;
+		ZVAL_LONG(&result->u.constant, Z_STRLEN(rope_result.u.constant));
+	}
 
 	return SUCCESS;
 }
