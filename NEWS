@@ -75,6 +75,10 @@ PHP                                                                        NEWS
   . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
     to work). (nielsdos)
 
+- Streams:
+  . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
+    condition for Win32/Win64. (Jakub Zelenka)
+
 - Tidy:
   . Fixed GH-19021 (improved tidyOptGetCategory detection).
     (arjendekorte, David Carlier, Peter Kokot)
