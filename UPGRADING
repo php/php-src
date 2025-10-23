@@ -103,6 +103,8 @@ PHP 8.6 UPGRADE NOTES
   . `printf()` using only `%s` and `%d` will be compiled into the equivalent
     string interpolation, avoiding the overhead of a function call and repeatedly
     parsing the format string.
+  . Arguments are now passed more efficiently to known constructors (e.g. when
+    using new self()).
 
 - JSON:
   . Improve performance of encoding arrays and objects.
