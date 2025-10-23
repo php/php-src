@@ -35,6 +35,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
     Call zval_ptr_dtor_nogc() directly instead.
   . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_make_callable() function has been removed, if a callable zval
+    needs to be obtained use the zend_get_callable_zval_from_fcc() function
+    instead. If this was used to store a callable, then an FCC should be
+    stored instead.
 
 ========================
 2. Build system changes
