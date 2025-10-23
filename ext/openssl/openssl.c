@@ -56,6 +56,10 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
 
+/* OpenSSLException class */
+
+zend_class_entry *php_openssl_exception_ce;
+
 /* OpenSSLCertificate class */
 
 zend_class_entry *php_openssl_certificate_ce;
@@ -163,6 +167,302 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 
 	EVP_PKEY_free(key_object->pkey);
 	zend_object_std_dtor(&key_object->std);
+}
+
+/* OpenSSLSession class */
+
+zend_class_entry *php_openssl_session_ce;
+
+static zend_object_handlers php_openssl_session_object_handlers;
+
+bool php_openssl_is_session_ce(zval *val)
+{
+	return Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_session_ce;
+}
+
+SSL_SESSION *php_openssl_session_from_zval(zval *zv)
+{
+	if (!php_openssl_is_session_ce(zv)) {
+		return NULL;
+	}
+	return Z_OPENSSL_SESSION_P(zv)->session;
+}
+
+void php_openssl_session_object_init(zval *zv, SSL_SESSION *session)
+{
+	object_init_ex(zv, php_openssl_session_ce);
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(zv);
+	obj->session = session;
+
+	unsigned int id_len = 0;
+	const unsigned char *id = SSL_SESSION_get_id(session, &id_len);
+	zend_update_property_stringl(php_openssl_session_ce, Z_OBJ_P(zv),
+			ZEND_STRL("id"), (char *)id, id_len);
+}
+
+static zend_object *php_openssl_session_create_object(zend_class_entry *class_type)
+{
+	php_openssl_session_object *intern = zend_object_alloc(sizeof(php_openssl_session_object), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+
+	return &intern->std;
+}
+
+static zend_function *php_openssl_session_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL,
+		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
+	return NULL;
+}
+
+static void php_openssl_session_free_obj(zend_object *object)
+{
+	php_openssl_session_object *session_object = php_openssl_session_from_obj(object);
+
+	if (session_object->session) {
+		SSL_SESSION_free(session_object->session);
+		session_object->session = NULL;
+	}
+	zend_object_std_dtor(&session_object->std);
+}
+
+#define PHP_OPENSSL_SESSION_CHECK() \
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS); \
+	if (!obj->session) { \
+		zend_throw_exception(php_openssl_exception_ce, "Session is not valid", 0); \
+		RETURN_THROWS(); \
+	}
+
+PHP_METHOD(Openssl_Session, export)
+{
+	zend_long format = ENCODING_PEM;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(format)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_OPENSSL_SESSION_CHECK();
+
+	if (format == ENCODING_DER) {
+		int len = i2d_SSL_SESSION(obj->session, NULL);
+		if (len <= 0) {
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session", 0);
+			RETURN_THROWS();
+		}
+
+		zend_string *result = zend_string_alloc(len, 0);
+		unsigned char *p = (unsigned char *)ZSTR_VAL(result);
+		i2d_SSL_SESSION(obj->session, &p);
+		ZSTR_VAL(result)[len] = '\0';
+
+		RETURN_NEW_STR(result);
+	}
+
+	if (format == ENCODING_PEM) {
+		BIO *bio = BIO_new(BIO_s_mem());
+		if (!bio) {
+			zend_throw_exception(php_openssl_exception_ce, "Failed to create BIO", 0);
+			RETURN_THROWS();
+		}
+
+		if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
+			BIO_free(bio);
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session as PEM", 0);
+			RETURN_THROWS();
+		}
+
+		char *data;
+		long len = BIO_get_mem_data(bio, &data);
+		zend_string *result = zend_string_init(data, len, 0);
+		BIO_free(bio);
+
+		RETURN_NEW_STR(result);
+	}
+
+	zend_argument_value_error(1, "must be OPENSSL_ENCODING_DER or OPENSSL_ENCODING_PEM");
+	RETURN_THROWS();
+}
+
+PHP_METHOD(Openssl_Session, import)
+{
+	zend_string *data;
+	zend_long format = ENCODING_PEM;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(data)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(format)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SSL_SESSION *session = NULL;
+
+	if (format == ENCODING_DER) {
+		const unsigned char *p = (const unsigned char *)ZSTR_VAL(data);
+		session = d2i_SSL_SESSION(NULL, &p, ZSTR_LEN(data));
+	} else if (format == ENCODING_PEM) {
+		BIO *bio = BIO_new_mem_buf(ZSTR_VAL(data), ZSTR_LEN(data));
+		if (bio) {
+			session = PEM_read_bio_SSL_SESSION(bio, NULL, NULL, NULL);
+			BIO_free(bio);
+		}
+	} else {
+		zend_argument_value_error(2, "must be OPENSSL_ENCODING_DER or OPENSSL_ENCODING_PEM");
+		RETURN_THROWS();
+	}
+
+	if (!session) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to import session data", 0);
+		RETURN_THROWS();
+	}
+
+	php_openssl_session_object_init(return_value, session);
+}
+
+PHP_METHOD(Openssl_Session, isResumable)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	RETURN_BOOL(SSL_SESSION_is_resumable(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getTimeout)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+	RETURN_LONG((zend_long)SSL_SESSION_get_timeout(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getCreatedAt)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+#if PHP_OPENSSL_API_VERSION >= 0x30300
+	RETURN_LONG((zend_long)SSL_SESSION_get_time_ex(obj->session));
+#else
+	RETURN_LONG((zend_long)SSL_SESSION_get_time(obj->session));
+#endif
+}
+
+PHP_METHOD(Openssl_Session, getProtocol)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	int version = SSL_SESSION_get_protocol_version(obj->session);
+
+	switch (version) {
+		case TLS1_3_VERSION:
+			RETURN_STRING("TLSv1.3");
+		case TLS1_2_VERSION:
+			RETURN_STRING("TLSv1.2");
+		case TLS1_1_VERSION:
+			RETURN_STRING("TLSv1.1");
+		case TLS1_VERSION:
+			RETURN_STRING("TLSv1.0");
+		default:
+			RETURN_NULL();
+	}
+}
+
+PHP_METHOD(Openssl_Session, getCipher)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	const SSL_CIPHER *cipher = SSL_SESSION_get0_cipher(obj->session);
+	if (!cipher) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRING(SSL_CIPHER_get_name(cipher));
+}
+
+PHP_METHOD(Openssl_Session, hasTicket)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	RETURN_BOOL(SSL_SESSION_has_ticket(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getTicketLifetimeHint)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	if (!SSL_SESSION_has_ticket(obj->session)) {
+		RETURN_NULL();
+	}
+
+	RETURN_LONG((zend_long)SSL_SESSION_get_ticket_lifetime_hint(obj->session));
+}
+PHP_METHOD(Openssl_Session, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PHP_OPENSSL_SESSION_CHECK();
+
+	BIO *bio = BIO_new(BIO_s_mem());
+	if (!bio) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
+		RETURN_THROWS();
+	}
+
+	if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
+		BIO_free(bio);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
+		RETURN_THROWS();
+	}
+
+	char *data;
+	long len = BIO_get_mem_data(bio, &data);
+	zend_string *pem = zend_string_init(data, len, 0);
+	BIO_free(bio);
+
+	array_init(return_value);
+	add_assoc_str(return_value, "pem", pem);
+}
+
+PHP_METHOD(Openssl_Session, __unserialize)
+{
+	HashTable *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *pem_zv = zend_hash_str_find(data, ZEND_STRL("pem"));
+	if (!pem_zv || Z_TYPE_P(pem_zv) != IS_STRING) {
+		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
+		RETURN_THROWS();
+	}
+
+	BIO *bio = BIO_new_mem_buf(Z_STRVAL_P(pem_zv), Z_STRLEN_P(pem_zv));
+	if (!bio) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
+		RETURN_THROWS();
+	}
+
+	SSL_SESSION *session = PEM_read_bio_SSL_SESSION(bio, NULL, NULL, NULL);
+	BIO_free(bio);
+
+	if (!session) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
+		RETURN_THROWS();
+	}
+
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
+	obj->session = session;
+
+	/* Populate id property */
+	unsigned int id_len = 0;
+	const unsigned char *id = SSL_SESSION_get_id(session, &id_len);
+	zend_update_property_stringl(php_openssl_session_ce, Z_OBJ_P(ZEND_THIS),
+		ZEND_STRL("id"), (char *)id, id_len);
 }
 
 #if defined(HAVE_OPENSSL_ARGON2)
@@ -381,6 +681,8 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(openssl)
 {
+	php_openssl_exception_ce = register_class_Openssl_OpensslException(zend_ce_exception);
+
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
 	php_openssl_certificate_ce->default_object_handlers = &php_openssl_certificate_object_handlers;
@@ -413,6 +715,17 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
 	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
+
+	php_openssl_session_ce = register_class_Openssl_Session();
+	php_openssl_session_ce->create_object = php_openssl_session_create_object;
+	php_openssl_session_ce->default_object_handlers = &php_openssl_session_object_handlers;
+
+	memcpy(&php_openssl_session_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_openssl_session_object_handlers.offset = offsetof(php_openssl_session_object, std);
+	php_openssl_session_object_handlers.free_obj = php_openssl_session_free_obj;
+	php_openssl_session_object_handlers.get_constructor = php_openssl_session_get_constructor;
+	php_openssl_session_object_handlers.clone_obj = NULL;
+	php_openssl_session_object_handlers.compare = zend_objects_not_comparable;
 
 	register_openssl_symbols(module_number);
 

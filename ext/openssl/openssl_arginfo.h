@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: a571945d38a3460de017405454b61609811fe1b1 */
+ * Stub hash: c0b746f3a9fff06533a7682a35f44f5df951d12f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -406,6 +406,39 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_export, 0, 0, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "OPENSSL_ENCODING_PEM")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Openssl_Session_import, 0, 1, Openssl\\Session, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "OPENSSL_ENCODING_PEM")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_isResumable, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_getTimeout, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Openssl_Session_getCreatedAt arginfo_class_Openssl_Session_getTimeout
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_getProtocol, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Openssl_Session_getCipher arginfo_class_Openssl_Session_getProtocol
+
+#define arginfo_class_Openssl_Session_hasTicket arginfo_class_Openssl_Session_isResumable
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_getTicketLifetimeHint, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Openssl_Session___serialize arginfo_openssl_get_cert_locations
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -473,6 +506,17 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_METHOD(Openssl_Session, export);
+ZEND_METHOD(Openssl_Session, import);
+ZEND_METHOD(Openssl_Session, isResumable);
+ZEND_METHOD(Openssl_Session, getTimeout);
+ZEND_METHOD(Openssl_Session, getCreatedAt);
+ZEND_METHOD(Openssl_Session, getProtocol);
+ZEND_METHOD(Openssl_Session, getCipher);
+ZEND_METHOD(Openssl_Session, hasTicket);
+ZEND_METHOD(Openssl_Session, getTicketLifetimeHint);
+ZEND_METHOD(Openssl_Session, __serialize);
+ZEND_METHOD(Openssl_Session, __unserialize);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -545,6 +589,21 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Openssl_Session_methods[] = {
+	ZEND_ME(Openssl_Session, export, arginfo_class_Openssl_Session_export, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, import, arginfo_class_Openssl_Session_import, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Openssl_Session, isResumable, arginfo_class_Openssl_Session_isResumable, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, getTimeout, arginfo_class_Openssl_Session_getTimeout, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, getCreatedAt, arginfo_class_Openssl_Session_getCreatedAt, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, getProtocol, arginfo_class_Openssl_Session_getProtocol, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, getCipher, arginfo_class_Openssl_Session_getCipher, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, hasTicket, arginfo_class_Openssl_Session_hasTicket, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, getTicketLifetimeHint, arginfo_class_Openssl_Session_getTicketLifetimeHint, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, __serialize, arginfo_class_Openssl_Session___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(Openssl_Session, __unserialize, arginfo_class_Openssl_Session___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -749,6 +808,32 @@ static void register_openssl_symbols(int module_number)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_verify", sizeof("openssl_password_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
+}
+
+static zend_class_entry *register_class_Openssl_OpensslException(zend_class_entry *class_entry_Openssl_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Openssl", "OpensslException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_Exception, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Openssl_Session(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Openssl", "Session", class_Openssl_Session_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_id_default_value;
+	ZVAL_UNDEF(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_id_name, true);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_OpenSSLCertificate(void)

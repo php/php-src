@@ -141,6 +141,15 @@ PHP 8.6 UPGRADE NOTES
   . Added extra info about error location to the JSON error messages returned
     from json_last_error_msg() and JsonException message.
 
+- OpenSSL:
+  . Added TLS session resumption support for streams with new stream context
+    options: session_data, session_new_cb, session_cache, session_cache_size,
+    session_timeout, session_id_context, session_get_cb, session_remove_cb,
+    and num_tickets. This allows saving and restoring client sessions across
+    requests, implementing custom server-side session storage, and controlling
+    session cache behavior.
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
+
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
     influences the result of the phar buildFrom family of functions.
@@ -231,6 +240,11 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- OpenSSL:
+  . Openssl\OpensslException
+  . Openssl\Session
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
 
 - Standard:
   . enum SortDirection
