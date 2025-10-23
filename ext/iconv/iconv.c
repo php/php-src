@@ -43,11 +43,11 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__) || (defined(__sun) && defined(__SVR4))
-// unfortunately, netbsd has still the old non posix conformant signature
-// libiconv tends to match the eventual system's iconv too.
-#define ICONV_CONST const
-#else
+/* iconv can have different constiness for src on some platforms;
+ * this is explained in config.m4. On Windows, it's always non-const,
+ * but it can be awkward to set that on the command line. Do it here.
+ */
+#ifndef ICONV_CONST
 #define ICONV_CONST
 #endif
 
