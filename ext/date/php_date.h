@@ -19,6 +19,7 @@
 
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
+#include "Zend/zend_time.h"
 
 /* Same as SIZEOF_ZEND_LONG but using TIMELIB_LONG_MAX/MIN */
 #if TIMELIB_LONG_MAX == INT32_MAX
@@ -129,8 +130,8 @@ ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 
-/* DEPRECATED, use zend_realtime_get() instead */
-#define php_time() zend_realtime_get()
+ZEND_ATTRIBUTE_DEPRECATED
+PHPAPI time_t php_time(void);
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);

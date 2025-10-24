@@ -56,7 +56,7 @@ PHP_FUNCTION(uniqid)
 	 * another process, causing a pause of around 10ms.
 	 */
 	do {
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		tv_usec = ts.tv_nsec / 1000;
 	} while (ts.tv_sec == prev_tv_sec && tv_usec == prev_tv_usec);
 

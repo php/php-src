@@ -36,7 +36,7 @@ PHP_FUNCTION(unixtojd)
 	}
 
 	if (tl_is_null) {
-		ts = zend_realtime_get();
+		ts = zend_time_real_get();
 	} else if (tl >= 0) {
 		ts = (time_t) tl;
 	} else {

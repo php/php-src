@@ -1200,7 +1200,7 @@ PHP_FUNCTION(time_sleep_until)
 		RETURN_THROWS();
 	}
 
-	zend_realtime_spec(&ts);
+	zend_time_real_spec(&ts);
 
 	target_ns = (uint64_t) (target_secs * ns_per_sec);
 	current_ns = ((uint64_t) ts.tv_sec) * ns_per_sec + ((uint64_t) ts.tv_nsec);

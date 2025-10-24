@@ -1262,7 +1262,7 @@ CACHE_LIMITER_FUNC(public)
 	time_t expire_at;
 
 
-	expire_at = zend_realtime_get() + PS(cache_expire) * 60;
+	expire_at = zend_time_real_get() + PS(cache_expire) * 60;
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &expire_at);
 	ADD_HEADER(buf);
@@ -1385,7 +1385,7 @@ static zend_result php_session_send_cookie(void)
 	if (PS(cookie_lifetime) > 0) {
 		time_t t;
 
-		t = zend_realtime_get() + PS(cookie_lifetime);
+		t = zend_time_real_get() + PS(cookie_lifetime);
 
 		if (t > 0) {
 			date_fmt = php_format_date(ZEND_STRL("D, d M Y H:i:s \\G\\M\\T"), t, false);
@@ -3120,7 +3120,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, b
 		if (PS(rfc1867_min_freq) > 0.0) {
 			struct timespec ts;
 			double dtv;
-			zend_realtime_spec(&ts);
+			zend_time_real_spec(&ts);
 			dtv = (double)(ts.tv_sec + ts.tv_nsec / 1000000000.0);
 			if (dtv < progress->next_update_time) {
 				return;
@@ -3261,7 +3261,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("error"), 0);
 
 			add_assoc_bool_ex(&progress->current_file, ZEND_STRL("done"), 0);
-			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)zend_realtime_get());
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)zend_time_real_get());
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("bytes_processed"), 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);

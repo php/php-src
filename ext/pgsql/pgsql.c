@@ -470,7 +470,7 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 	}
 
 	if (timeout != (time_t)ts) {
-		time_t cur = zend_realtime_get();
+		time_t cur = zend_time_real_get();
 
 		if (timeout > cur) {
 			ts = (timeout - cur) * 1000;

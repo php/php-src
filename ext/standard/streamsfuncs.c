@@ -138,7 +138,7 @@ PHP_FUNCTION(stream_socket_client)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		zend_time_dbl2val(timeout, tv);
+		zend_time_dbl2val(timeout, &tv);
 		tv_pointer = &tv;
 	}
 
@@ -278,7 +278,7 @@ PHP_FUNCTION(stream_socket_accept)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		zend_time_dbl2val(timeout, tv);
+		zend_time_dbl2val(timeout, &tv);
 		tv_pointer = &tv;
 	}
 
@@ -784,7 +784,7 @@ PHP_FUNCTION(stream_select)
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
-		zend_time_sec2val(sec + (usec / 1000000), tv);
+		zend_time_sec2val(sec + (usec / 1000000), &tv);
 		tv.tv_usec = (long)(usec % 1000000);
 		tv_p = &tv;
 	}
@@ -1370,10 +1370,10 @@ PHP_FUNCTION(stream_set_timeout)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 3) {
-		zend_time_sec2val(seconds + (microseconds / 1000000), tv);
+		zend_time_sec2val(seconds + (microseconds / 1000000), &tv);
 		tv.tv_usec = (long)(microseconds % 1000000);
 	} else {
-		zend_time_sec2val(seconds, tv);
+		zend_time_sec2val(seconds, &tv);
 	}
 
 	RETURN_BOOL(PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv));

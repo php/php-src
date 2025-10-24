@@ -358,7 +358,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	int has_timeout = timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec > 0));
 	if (has_timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-		limit_us = (zend_monotime_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
+		limit_us = (zend_time_mono_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
 	}
 
 	while (true) {
@@ -366,7 +366,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		if (n < 0) {
 			if (errno == EINTR) {
 				if (has_timeout) {
-					now_us = zend_monotime_fallback() / 1000;
+					now_us = zend_time_mono_fallback() / 1000;
 
 					if (now_us > limit_us) {
 						/* time limit expired; no need for another poll */
@@ -374,7 +374,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 						break;
 					} else {
 						/* work out remaining time */
-						zend_time_usec2val(limit_us - now_us, working_timeout);
+						zend_time_usec2val(limit_us - now_us, &working_timeout);
 					}
 				}
 				continue;
@@ -801,7 +801,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 	if (has_timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-		limit_us = (zend_monotime_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
+		limit_us = (zend_time_mono_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
 	}
 
 	for (sal = psal; !fatal && *sal != NULL; sal++) {
@@ -912,14 +912,14 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 		/* adjust timeout for next attempt */
 		if (has_timeout) {
-			now_us = zend_monotime_fallback() / 1000;
+			now_us = zend_time_mono_fallback() / 1000;
 
 			if (now_us > limit_us) {
 				/* time limit expired; don't attempt any further connections */
 				fatal = 1;
 			} else {
 				/* work out remaining time */
-				zend_time_usec2val(limit_us - now_us, working_timeout);
+				zend_time_usec2val(limit_us - now_us, &working_timeout);
 			}
 		}
 

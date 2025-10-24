@@ -249,7 +249,7 @@ void LSAPI_Log(int flag, const char * fmt, ...)
     {
         struct timespec ts;
         struct tm       tm;
-        zend_realtime_spec(&ts);
+        zend_time_real_spec(&ts);
         localtime_r(&ts.tv_sec, &tm);
         if (flag & LSAPI_LOG_TIMESTAMP_FULL)
         {

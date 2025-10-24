@@ -59,8 +59,8 @@ int fpm_status_export_to_zval(zval *status)
 
 	scoreboard_p = fpm_scoreboard_copy(NULL, 1);
 
-	now_epoch = zend_realtime_get();
-	now_ns    = zend_monotime_fallback();
+	now_epoch = zend_time_real_get();
+	now_ns    = zend_time_mono_fallback();
 
 	array_init(status);
 	add_assoc_string(status, "pool",  scoreboard_p->pool);
@@ -475,7 +475,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 		}
 
-		now_epoch = zend_realtime_get();
+		now_epoch = zend_time_real_get();
 		if (has_start_time) {
 			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard_p->start_epoch));
 			spprintf(&buffer, 0, short_syntax,
@@ -529,7 +529,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			uint64_t duration_ns, now_ns;
 			float cpu;
 
-			now_ns = zend_monotime_fallback();
+			now_ns = zend_time_mono_fallback();
 
 			if (full_pre) {
 				PUTS(full_pre);

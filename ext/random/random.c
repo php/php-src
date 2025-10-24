@@ -658,7 +658,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 	PHP_SHA1Init(&c);
 	if (!state->initialized) {
 		/* Current time. */
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Various PIDs. */
 		pid = getpid();
@@ -677,7 +677,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 		pointer = &c;
 		fallback_seed_add(&c, &pointer, sizeof(pointer));
 		/* Updated time. */
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Hostname. */
 		memset(buf, 0, sizeof(buf));
@@ -689,11 +689,11 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 			fallback_seed_add(&c, buf, 16);
 		}
 		/* Updated time. */
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		fallback_seed_add(&c, &ts, sizeof(ts));
 	} else {
 		/* Current time. */
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Previous state. */
 		fallback_seed_add(&c, state->seed, 20);

@@ -740,7 +740,7 @@ static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char
 	header_buffer = ecalloc(1, MAIL_BUFFER_SIZE);
 
 	if (!xheaders || !strstr(headers_lc, "date:")) {
-		time_t tNow = zend_realtime_get();
+		time_t tNow = zend_time_real_get();
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
 		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", ZSTR_VAL(dt));

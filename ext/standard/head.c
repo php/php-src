@@ -155,7 +155,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			smart_str_append(&buf, dt);
 			zend_string_free(dt);
 
-			diff = difftime(expires, zend_realtime_get());
+			diff = difftime(expires, zend_time_real_get());
 			if (diff < 0) {
 				diff = 0;
 			}

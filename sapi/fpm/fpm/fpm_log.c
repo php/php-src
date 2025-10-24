@@ -128,7 +128,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 		test = true;
 	}
 
-	now_epoch = zend_realtime_get();
+	now_epoch = zend_time_real_get();
 
 	if (!test) {
 		scoreboard = fpm_scoreboard_get();

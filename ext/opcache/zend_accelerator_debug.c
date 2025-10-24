@@ -36,7 +36,7 @@ static void zend_accel_error_va_args(int type, const char *format, va_list args)
 
 	if (type <= ZCG(accel_directives).log_verbosity_level) {
 
-	timestamp = zend_realtime_get();
+	timestamp = zend_time_real_get();
 	time_string = asctime(localtime(&timestamp));
 	time_string[24] = 0;
 

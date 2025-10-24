@@ -384,7 +384,7 @@ static void fpm_pctl_perform_idle_server_maintenance(void) /* {{{ */
 
 			if (!last_idle_child) continue;
 
-			now_ns = zend_monotime_fallback();
+			now_ns = zend_time_mono_fallback();
 			fpm_request_last_activity(last_idle_child, &last_ns);
 			if (last_ns < now_ns - wp->config->pm_process_idle_timeout * ZEND_NANO_IN_SEC) {
 				fpm_pctl_kill_idle_child(last_idle_child);

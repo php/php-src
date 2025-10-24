@@ -191,7 +191,7 @@ static php_stream* http_connect(zval* this_ptr, php_uri *uri, int use_ssl, php_s
 
 	tmp = Z_CLIENT_CONNECTION_TIMEOUT_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
-		zend_time_sec2val(Z_LVAL_P(tmp), tv);
+		zend_time_sec2val(Z_LVAL_P(tmp), &tv);
 		timeout = &tv;
 	}
 

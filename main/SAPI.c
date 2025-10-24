@@ -1101,7 +1101,7 @@ SAPI_API double sapi_get_request_time(void)
 	if (!sapi_module.get_request_time
 			|| sapi_module.get_request_time(&SG(global_request_time)) == FAILURE) {
 		struct timespec ts;
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		SG(global_request_time) = (double)(ts.tv_sec + ts.tv_nsec / (double)ZEND_NANO_IN_SEC);
 	}
 	return SG(global_request_time);

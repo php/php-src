@@ -159,7 +159,7 @@ static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ *
 	struct tm *tm, tmbuf;
 	time_t now;
 
-	now = zend_realtime_get();
+	now = zend_time_real_get();
 	tm = php_localtime_r(&now, &tmbuf);
 
 	tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
@@ -1237,7 +1237,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) void phar_zip_flush(phar_archive_data *phar, z
 	uint32_t cdir_size, cdir_offset;
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = zend_realtime_get();
+	entry.timestamp = zend_time_real_get();
 	entry.is_modified = 1;
 	entry.is_zip = true;
 	entry.phar = phar;

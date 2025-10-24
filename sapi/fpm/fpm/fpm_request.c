@@ -46,7 +46,7 @@ void fpm_request_accepting(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_ACCEPTING;
-	proc->last_activity_ns = zend_monotime_fallback();
+	proc->last_activity_ns = zend_time_mono_fallback();
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
@@ -63,8 +63,8 @@ void fpm_request_reading_headers(void)
 	struct tms cpu;
 #endif
 
-	now_ns = zend_monotime_fallback();
-	now_epoch = zend_realtime_get();
+	now_ns = zend_time_mono_fallback();
+	now_epoch = zend_time_real_get();
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
@@ -106,7 +106,7 @@ void fpm_request_info(void)
 	char *query_string = fpm_php_query_string();
 	char *auth_user = fpm_php_auth_user();
 	size_t content_length = fpm_php_content_length();
-	uint64_t now_ns = zend_monotime_fallback();
+	uint64_t now_ns = zend_time_mono_fallback();
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -147,7 +147,7 @@ void fpm_request_info(void)
 void fpm_request_executing(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	uint64_t now_ns = zend_monotime_fallback();
+	uint64_t now_ns = zend_time_mono_fallback();
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -163,7 +163,7 @@ void fpm_request_executing(void)
 void fpm_request_end(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	uint64_t now_ns = zend_monotime_fallback();
+	uint64_t now_ns = zend_time_mono_fallback();
 #ifdef HAVE_TIMES
 	struct tms cpu;
 #endif
@@ -205,7 +205,7 @@ void fpm_request_finished(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_FINISHED;
-	proc->last_activity_ns = zend_monotime_fallback();
+	proc->last_activity_ns = zend_time_mono_fallback();
 	fpm_scoreboard_proc_release(proc);
 }
 
@@ -223,7 +223,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, int terminate_timeou
 	proc = *proc_p;
 	fpm_scoreboard_proc_release(proc_p);
 
-	now_ns = zend_monotime_fallback();
+	now_ns = zend_time_mono_fallback();
 
 #if HAVE_FPM_TRACE
 	if (child->slow_logged_ns && child->slow_logged_ns != proc.accepted_ns) {
