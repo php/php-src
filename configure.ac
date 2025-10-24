@@ -1761,6 +1761,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_generators.c
     zend_hash.c
     zend_highlight.c
+    zend_time.c
     zend_hrtime.c
     zend_inheritance.c
     zend_ini_parser.c

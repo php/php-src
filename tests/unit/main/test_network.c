@@ -36,16 +36,11 @@ int __wrap_getsockopt(int fd, int level, int optname, void *optval, socklen_t *o
 	return mock_type(int);
 }
 
-// Mocked gettimeofday
-int __wrap_gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
+// Mocked zend_time_mono_fallback
+uint64_t __wrap_zend_time_mono_fallback(void)
 {
 	function_called();
-	struct timeval *now = mock_ptr_type(struct timeval *);
-	if (now) {
-		time_Info->tv_sec = now->tv_sec;
-		time_Info->tv_usec = now->tv_usec;
-	}
-	return mock_type(int);
+	return mock_type(uint64_t);
 }
 
 // Test successful connection
@@ -74,9 +69,8 @@ static void test_php_network_connect_socket_progress_success(void **state) {
 	will_return(__wrap_connect, EINPROGRESS);
 
 	// Mock time setting - ignored
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, NULL);
-	will_return(__wrap_gettimeofday, 0);
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, 0);
 
 	// Mock poll to return success
 	expect_function_call(__wrap_poll);
@@ -96,8 +90,8 @@ static void test_php_network_connect_socket_progress_success(void **state) {
 
 static void test_php_network_connect_socket_eintr_t1(void **state) {
 	struct timeval timeout_tv = { .tv_sec = 2, .tv_usec = 500000 };
-	struct timeval start_time = { .tv_sec = 1000, .tv_usec = 0 };  // Initial time
-	struct timeval retry_time = { .tv_sec = 1001, .tv_usec = 200000 };  // Time after EINTR
+	uint64_t start_time = 1000000000000;  // Initial time
+	uint64_t retry_time = 1001200000000;  // Time after EINTR
 	php_socket_t sockfd = 12;
 	int error_code = 0;
 
@@ -105,20 +99,18 @@ static void test_php_network_connect_socket_eintr_t1(void **state) {
 	expect_function_call(__wrap_connect);
 	will_return(__wrap_connect, EINPROGRESS);
 
-	// Mock gettimeofday for initial call
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &start_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback for initial call
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, start_time);
 
 	// Mock poll to return EINTR first
 	expect_function_call(__wrap_poll);
 	expect_value(__wrap_poll, timeout, 2500);
 	will_return(__wrap_poll, -EINTR);
 
-	// Mock gettimeofday after EINTR
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &retry_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback after EINTR
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, retry_time);
 
 	// Mock poll to succeed on retry
 	expect_function_call(__wrap_poll);
@@ -139,8 +131,8 @@ static void test_php_network_connect_socket_eintr_t1(void **state) {
 
 static void test_php_network_connect_socket_eintr_t2(void **state) {
 	struct timeval timeout_tv = { .tv_sec = 2, .tv_usec = 1500000 };
-	struct timeval start_time = { .tv_sec = 1000, .tv_usec = 300000 };  // Initial time
-	struct timeval retry_time = { .tv_sec = 1001, .tv_usec = 200000 };  // Time after EINTR
+	uint64_t start_time = 1000300000000;  // Initial time
+	uint64_t retry_time = 1001200000000;  // Time after EINTR
 	php_socket_t sockfd = 12;
 	int error_code = 0;
 
@@ -148,20 +140,18 @@ static void test_php_network_connect_socket_eintr_t2(void **state) {
 	expect_function_call(__wrap_connect);
 	will_return(__wrap_connect, EINPROGRESS);
 
-	// Mock gettimeofday for initial call
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &start_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback for initial call
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, start_time);
 
 	// Mock poll to return EINTR first
 	expect_function_call(__wrap_poll);
 	expect_value(__wrap_poll, timeout, 3500);
 	will_return(__wrap_poll, -EINTR);
 
-	// Mock gettimeofday after EINTR
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &retry_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback after EINTR
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, retry_time);
 
 	// Mock poll to succeed on retry
 	expect_function_call(__wrap_poll);
@@ -182,8 +172,8 @@ static void test_php_network_connect_socket_eintr_t2(void **state) {
 
 static void test_php_network_connect_socket_eintr_t3(void **state) {
 	struct timeval timeout_tv = { .tv_sec = 2, .tv_usec = 500000 };
-	struct timeval start_time = { .tv_sec = 1002, .tv_usec = 300000 };  // Initial time
-	struct timeval retry_time = { .tv_sec = 1001, .tv_usec = 2200000 };  // Time after EINTR
+	uint64_t start_time = 1002300000000;  // Initial time
+	uint64_t retry_time = 1003200000000;  // Time after EINTR
 	php_socket_t sockfd = 12;
 	int error_code = 0;
 
@@ -191,20 +181,18 @@ static void test_php_network_connect_socket_eintr_t3(void **state) {
 	expect_function_call(__wrap_connect);
 	will_return(__wrap_connect, EINPROGRESS);
 
-	// Mock gettimeofday for initial call
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &start_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback for initial call
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, start_time);
 
 	// Mock poll to return EINTR first
 	expect_function_call(__wrap_poll);
 	expect_value(__wrap_poll, timeout, 2500);
 	will_return(__wrap_poll, -EINTR);
 
-	// Mock gettimeofday after EINTR
-	expect_function_call(__wrap_gettimeofday);
-	will_return(__wrap_gettimeofday, &retry_time);
-	will_return(__wrap_gettimeofday, 0);
+	// Mock zend_time_mono_fallback after EINTR
+	expect_function_call(__wrap_zend_time_mono_fallback);
+	will_return(__wrap_zend_time_mono_fallback, retry_time);
 
 	// Mock poll to succeed on retry
 	expect_function_call(__wrap_poll);
