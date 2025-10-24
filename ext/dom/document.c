@@ -1032,7 +1032,7 @@ PHP_METHOD(DOMDocument, getElementById)
 	char *idname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(idname, idname_len)
+		Z_PARAM_PATH(idname, idname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
@@ -1051,20 +1051,10 @@ PHP_METHOD(DOMDocument, getElementById)
 		 * the element the ID is actually removed by libxml2. Since libxml2 has such behaviour deeply
 		 * ingrained in the library, and uses the cache for various purposes, it seems like a bad
 		 * idea and lost cause to fight it. */
-
 		const xmlNode *base = (const xmlNode *) docp;
-		const xmlNode *node = base->children;
-		while (node != NULL) {
-			if (node->type == XML_ELEMENT_NODE) {
-				for (const xmlAttr *attr = node->properties; attr != NULL; attr = attr->next) {
-					if (attr->atype == XML_ATTRIBUTE_ID && dom_compare_value(attr, BAD_CAST idname)) {
-						DOM_RET_OBJ((xmlNodePtr) node, intern);
-						return;
-					}
-				}
-			}
-
-			node = php_dom_next_in_tree_order(node, base);
+		xmlNodePtr node = dom_scan_id(base, BAD_CAST idname);
+		if (node) {
+			DOM_RET_OBJ(node, intern);
 		}
 	}
 }

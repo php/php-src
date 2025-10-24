@@ -93,4 +93,23 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 }
 /* }}} */
 
+PHP_METHOD(Dom_DocumentFragment, getElementById)
+{
+	xmlNodePtr base;
+	size_t idname_len;
+	dom_object *intern;
+	char *idname;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(idname, idname_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	DOM_GET_OBJ(base, ZEND_THIS, xmlNodePtr, intern);
+
+	xmlNodePtr node = dom_scan_id(base, BAD_CAST idname);
+	if (node) {
+		DOM_RET_OBJ(node, intern);
+	}
+}
+
 #endif
