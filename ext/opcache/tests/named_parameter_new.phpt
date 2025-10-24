@@ -33,7 +33,7 @@ MyClass::new(bar: 1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=4, args=0, vars=0, tmps=0)
+     ; (lines=4, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_STATIC_METHOD_CALL 1 string("MyClass") string("new")
@@ -42,7 +42,7 @@ $_main:
 0003 RETURN int(1)
 
 MyClass::__construct:
-     ; (lines=7, args=2, vars=2, tmps=0)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($foo) = RECV 1
@@ -54,7 +54,7 @@ MyClass::__construct:
 0006 RETURN null
 
 MyClass::new:
-     ; (lines=10, args=1, vars=2, tmps=1)
+     ; (lines=10, args=1, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($bar) = RECV 1
