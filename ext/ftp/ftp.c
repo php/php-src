@@ -1108,7 +1108,7 @@ time_t ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	tm.tm_isdst = -1;
 
 	/* figure out the GMT offset */
-	stamp = zend_realtime_get();
+	stamp = zend_time_real_get();
 	gmt = php_gmtime_r(&stamp, &tmbuf);
 	if (!gmt) {
 		return -1;
@@ -1373,11 +1373,11 @@ static int my_poll(php_socket_t fd, int events, int timeout) {
 	uint64_t timeout_ns = (uint64_t) timeout * 1000000;
 
 	while (true) {
-		uint64_t start_ns = zend_monotime_fallback();
+		uint64_t start_ns = zend_time_mono_fallback();
 		n = php_pollfd_for_ms(fd, events, (int) (timeout_ns / 1000000));
 
 		if (n == -1 && php_socket_errno() == EINTR) {
-			uint64_t delta_ns = zend_monotime_fallback() - start_ns;
+			uint64_t delta_ns = zend_time_mono_fallback() - start_ns;
 			if (delta_ns > timeout_ns) {
 #ifndef PHP_WIN32
 				errno = ETIMEDOUT;
@@ -1607,7 +1607,7 @@ static databuf_t* ftp_getdata(ftpbuf_t *ftp)
 		/* connect */
 		/* Win 95/98 seems not to like size > sizeof(sockaddr_in) */
 		size = php_sockaddr_size(&ftp->pasvaddr);
-		zend_time_sec2val(ftp->timeout_sec, tv);
+		zend_time_sec2val(ftp->timeout_sec, &tv);
 		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
 			php_error_docref(NULL, E_WARNING, "php_connect_nonb() failed: %s (%d)", strerror(errno), errno);
 			goto bail;

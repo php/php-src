@@ -2243,7 +2243,7 @@ parent_loop_end:
 							repeats = atoi(php_optarg);
 						}
 					}
-					start = zend_monotime_fallback();
+					start = zend_time_mono_fallback();
 					break;
 				case 'h':
 				case '?':
@@ -2574,7 +2574,7 @@ fastcgi_request_done:
 					if (warmup_repeats) {
 						warmup_repeats--;
 						if (!warmup_repeats) {
-							start = zend_monotime_fallback();
+							start = zend_time_mono_fallback();
 						}
 						continue;
 					} else {
@@ -2624,7 +2624,7 @@ fastcgi_request_done:
 
 out:
 	if (benchmark) {
-		elapsed = zend_monotime_fallback() - start;
+		elapsed = zend_time_mono_fallback() - start;
 		fprintf(stderr, "\nElapsed time: %lu.%09lu sec\n", (unsigned long)(elapsed / ZEND_NANO_IN_SEC), (unsigned long)(elapsed % ZEND_NANO_IN_SEC));
 	}
 

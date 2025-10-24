@@ -392,8 +392,8 @@ void fpm_event_loop(int err) /* {{{ */
 			return;
 		}
 
-		now_ns = zend_monotime_fallback();
-		zend_time_usec2val(now_ns / 1000, now_tv);
+		now_ns = zend_time_mono_fallback();
+		zend_time_usec2val(now_ns / 1000, &now_tv);
 		timerclear(&timeout_tv);
 
 		/* search in the timeout queue for the next timer to trigger */
@@ -432,8 +432,8 @@ void fpm_event_loop(int err) /* {{{ */
 		q = fpm_event_queue_timer;
 		while (q) {
 			struct fpm_event_queue_s *next = q->next;
-			now_ns = zend_monotime_fallback();
-			zend_time_usec2val(now_ns / 1000, now_tv);
+			now_ns = zend_time_mono_fallback();
+			zend_time_usec2val(now_ns / 1000, &now_tv);
 			if (q->ev) {
 				if (timercmp(&now_tv, &q->ev->timeout, >) || timercmp(&now_tv, &q->ev->timeout, ==)) {
 					struct fpm_event_s *ev = q->ev;
@@ -520,8 +520,8 @@ int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
 	/* it's a timer event */
 	ev->which = FPM_EV_TIMEOUT;
 
-	now_ns = zend_monotime_fallback();
-	zend_time_usec2val(now_ns / 1000, now_tv);
+	now_ns = zend_time_mono_fallback();
+	zend_time_usec2val(now_ns / 1000, &now_tv);
 	if (frequency >= 1000) {
 		tmp.tv_sec = frequency / 1000;
 		tmp.tv_usec = (frequency % 1000) * 1000;

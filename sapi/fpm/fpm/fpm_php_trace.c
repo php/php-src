@@ -46,7 +46,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 	long path_translated;
 	long l;
 
-	zend_realtime_spec(&ts);
+	zend_time_real_spec(&ts);
 
 	zlog_print_time(&ts, buf, sizeof(buf));
 

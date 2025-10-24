@@ -472,9 +472,9 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			php_uri_struct_free(resource);
 			return NULL;
 		}
-		zend_time_dbl2val(d, timeout);
+		zend_time_dbl2val(d, &timeout);
 	} else {
-		zend_time_sec2val(FG(default_socket_timeout), timeout);
+		zend_time_sec2val(FG(default_socket_timeout), &timeout);
 	}
 
 	stream = php_stream_xport_create(ZSTR_VAL(transport_string), ZSTR_LEN(transport_string), options,

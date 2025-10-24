@@ -1565,11 +1565,11 @@ int main( int argc, char * argv[] )
         }
 #endif
         if ( slow_script_msec ) {
-            req_begin_ns = zend_monotime_fallback();
+            req_begin_ns = zend_time_mono_fallback();
         }
         ret = processReq();
         if ( slow_script_msec ) {
-            req_end_ns = zend_monotime_fallback();
+            req_end_ns = zend_time_mono_fallback();
             n = (long) (req_end_ns - req_begin_ns) / 1000000;
             if ( n > slow_script_msec )
             {

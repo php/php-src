@@ -864,7 +864,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 		}
 		if (!success) {
 			/* errno is not ESRCH or we ran out of tries to kill the locker */
-			ZCSG(force_restart_time) = zend_realtime_get(); /* restore forced restart request */
+			ZCSG(force_restart_time) = zend_time_real_get(); /* restore forced restart request */
 			/* cannot kill the locker, bail out with error */
 			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Cannot kill process %d!", mem_usage_check->l_pid);
 		}
@@ -918,7 +918,7 @@ static inline bool accel_is_inactive(void)
 
 	if (ZCG(accel_directives).force_restart_timeout
 		&& ZCSG(force_restart_time)
-		&& (now = zend_realtime_get()) >= ZCSG(force_restart_time)) {
+		&& (now = zend_time_real_get()) >= ZCSG(force_restart_time)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %lld (after " ZEND_LONG_FMT " seconds), locked by %d", (long long)now, ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
@@ -2923,7 +2923,7 @@ static zend_result zend_accel_init_shm(void)
 	ZCSG(manual_restarts) = 0;
 
 	ZCSG(accelerator_enabled) = true;
-	ZCSG(start_time) = zend_realtime_get();
+	ZCSG(start_time) = zend_time_real_get();
 	ZCSG(last_restart_time) = 0;
 	ZCSG(restart_in_progress) = false;
 
@@ -3539,7 +3539,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	ZCSG(accelerator_enabled) = false;
 
 	if (ZCG(accel_directives).force_restart_timeout) {
-		ZCSG(force_restart_time) = zend_realtime_get() + ZCG(accel_directives).force_restart_timeout;
+		ZCSG(force_restart_time) = zend_time_real_get() + ZCG(accel_directives).force_restart_timeout;
 	} else {
 		ZCSG(force_restart_time) = 0;
 	}

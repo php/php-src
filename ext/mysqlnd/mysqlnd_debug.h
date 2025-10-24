@@ -84,9 +84,9 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
 #ifndef MYSQLND_PROFILING_DISABLED
 #define DBG_PROFILE_START_TIME() \
-	__dbg_prof_start = zend_monotime_fallback();
+	__dbg_prof_start = zend_time_mono_fallback();
 #define DBG_PROFILE_END_TIME(duration) \
-	(duration) = zend_monotime_fallback() - __dbg_prof_start;
+	(duration) = zend_time_mono_fallback() - __dbg_prof_start;
 #else
 #define DBG_PROFILE_START_TIME()
 #define DBG_PROFILE_END_TIME(duration)

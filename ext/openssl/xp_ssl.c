@@ -1079,7 +1079,7 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	now = (zend_long)zend_realtime_get();
+	now = (zend_long)zend_time_real_get();
 
 	/* The initial handshake is never rate-limited */
 	if (sslsock->reneg->prev_handshake == 0) {
@@ -1836,7 +1836,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
 		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec));
 		if (has_timeout) {
-			start_usec = zend_monotime_fallback() / 1000;
+			start_usec = zend_time_mono_fallback() / 1000;
 		}
 
 		do {
@@ -1848,7 +1848,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			}
 
 			if (has_timeout) {
-				elapsed_usec = (zend_monotime_fallback() / 1000) - start_usec;
+				elapsed_usec = (zend_time_mono_fallback() / 1000) - start_usec;
 				if (php_openssl_cmp_usec2val(elapsed_usec, *timeout) > 0) {
 					php_error_docref(NULL, E_WARNING, "SSL: Handshake timed out");
 					return -1;
@@ -1965,7 +1965,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
 			has_timeout = true;
-			start_usec = zend_monotime_fallback() / 1000;
+			start_usec = zend_time_mono_fallback() / 1000;
 		}
 
 		/* Main IO loop. */
@@ -1975,7 +1975,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			/* If we have a timeout to check, figure out how much time has elapsed since we started. */
 			if (has_timeout) {
 				/* Determine how much time we've taken so far. */
-				elapsed_usec = (zend_monotime_fallback() / 1000) - start_usec;
+				elapsed_usec = (zend_time_mono_fallback() / 1000) - start_usec;
 
 				/* and return an error if we've taken too long. */
 				if (php_openssl_cmp_usec2val(elapsed_usec, *timeout) > 0) {
@@ -2354,12 +2354,12 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 				if (value == -1) {
 					if (sslsock->s.timeout.tv_sec == -1) {
-						zend_time_sec2val(FG(default_socket_timeout), tv);
+						zend_time_sec2val(FG(default_socket_timeout), &tv);
 					} else {
 						tv = sslsock->connect_timeout;
 					}
 				} else {
-					zend_time_sec2val(value, tv);
+					zend_time_sec2val(value, &tv);
 				}
 
 				if (sslsock->s.socket == -1) {
@@ -2394,7 +2394,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 						if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
 							has_timeout = true;
-							start_usec  = zend_monotime_fallback() / 1000;
+							start_usec  = zend_time_mono_fallback() / 1000;
 						}
 
 						/* Main IO loop. */
@@ -2402,7 +2402,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 							/* If we have a timeout to check, figure out how much time has elapsed since we started. */
 							if (has_timeout) {
 								/* Determine how much time we've taken so far. */
-								elapsed_usec = (zend_monotime_fallback() / 1000) - start_usec;
+								elapsed_usec = (zend_time_mono_fallback() / 1000) - start_usec;
 
 								/* and return an error if we've taken too long. */
 								if (php_openssl_cmp_usec2val(elapsed_usec, *timeout) > 0 ) {
@@ -2671,7 +2671,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 
 	sslsock->s.is_blocked = true;
 	/* this timeout is used by standard stream funcs, therefore it should use the default value */
-	zend_time_sec2val(FG(default_socket_timeout), sslsock->s.timeout);
+	zend_time_sec2val(FG(default_socket_timeout), &sslsock->s.timeout);
 
 	/* use separate timeout for our private funcs */
 	sslsock->connect_timeout.tv_sec  = timeout->tv_sec;

@@ -104,7 +104,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		zend_argument_value_error(6, "must be -1 or between 0 and " ZEND_ULONG_FMT, ((double) PHP_TIMEOUT_ULL_MAX / 1000000.0));
 		RETURN_THROWS();
 	} else {
-		zend_time_dbl2val(timeout, tv);
+		zend_time_dbl2val(timeout, &tv);
 	}
 
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,

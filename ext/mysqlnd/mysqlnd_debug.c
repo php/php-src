@@ -79,7 +79,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 		/* The following from FF's DBUG library, which is in the public domain */
 		struct timespec ts;
 		struct tm *tm_p;
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		if ((tm_p = localtime((const time_t *)&ts.tv_sec))) {
 			snprintf(time_buffer, sizeof(time_buffer) - 1,
 						/* "%04d-%02d-%02d " */
@@ -164,7 +164,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 		/* The following from FF's DBUG library, which is in the public domain */
 		struct timespec ts;
 		struct tm *tm_p;
-		zend_realtime_spec(&ts);
+		zend_time_real_spec(&ts);
 		if ((tm_p = localtime((const time_t *)&ts.tv_sec))) {
 			snprintf(time_buffer, sizeof(time_buffer) - 1,
 						/* "%04d-%02d-%02d " */

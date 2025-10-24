@@ -227,7 +227,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 
 	PHP_SAFE_FD_SET(fd, &wfd);
 
-	zend_time_sec2val(FG(default_socket_timeout), tv);
+	zend_time_sec2val(FG(default_socket_timeout), &tv);
 
 	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
 

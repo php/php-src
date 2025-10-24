@@ -46,7 +46,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		Z_PARAM_BOOL(get_as_float)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_realtime_spec(&ts);
+	zend_time_real_spec(&ts);
 
 	if (get_as_float) {
 		RETURN_DOUBLE((double)(ts.tv_sec + ts.tv_nsec / 1000000000.0));

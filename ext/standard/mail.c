@@ -476,7 +476,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 			zend_string *date_str;
 			size_t len;
 
-			curtime = zend_realtime_get();
+			curtime = zend_time_real_get();
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
 

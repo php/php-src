@@ -43,7 +43,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 
 	/* Default to the current year if year parameter is not given */
 	if (year_is_null) {
-		time_t a = zend_realtime_get();
+		time_t a = zend_time_real_get();
 		struct tm b, *res;
 		res = php_localtime_r(&a, &b);
 		if (!res) {

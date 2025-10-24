@@ -956,7 +956,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			size_t len;
 			zend_string *error_time_str;
 
-			error_time = zend_realtime_get();
+			error_time = zend_time_real_get();
 #ifdef ZTS
 			if (!php_during_module_startup()) {
 				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
@@ -1815,7 +1815,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 			break;
 		case ZMSG_LOG_SCRIPT_NAME: {
 				struct tm *ta, tmbuf;
-				time_t curtime = zend_realtime_get();
+				time_t curtime = zend_time_real_get();
 				char *datetime_str, asctimebuf[52];
 				char memory_leak_buf[4096];
 

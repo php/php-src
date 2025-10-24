@@ -99,7 +99,7 @@ int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 		case P_LOG:
 			if (msg) {
 				struct timespec ts;
-				zend_realtime_spec(&ts);
+				zend_time_real_spec(&ts);
 				msgoutlen = phpdbg_asprintf(&msgout, "[%lld %.8F]: %.*s\n", (long long)ts.tv_sec, ts.tv_nsec / 1000000000., msglen, msg);
 			}
 			break;

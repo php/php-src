@@ -782,7 +782,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        time_t the_time;
 	        struct tm *ta, tmbuf;
 
-	        the_time = zend_realtime_get();
+	        the_time = zend_time_real_get();
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
 			php_info_print("<a href=\"https://www.php.net/\"><img src=\"");

@@ -49,6 +49,11 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 #define DATE_A64I(i, s) i = strtoll(s, NULL, 10)
 #endif
 
+ZEND_ATTRIBUTE_DEPRECATED
+PHPAPI time_t php_time(void) {
+	return zend_time_real_get();
+}
+
 /*
  * RFC822, Section 5.1: http://www.ietf.org/rfc/rfc822.txt
  *  date-time   =  [ day "," ] date time        ; dd mm yy hh:mm:ss zzz
@@ -847,7 +852,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ts_is_null) {
-		ts = zend_realtime_get();
+		ts = zend_time_real_get();
 	}
 
 	RETURN_STR(php_format_date(ZSTR_VAL(format), ZSTR_LEN(format), ts, localtime));
@@ -1011,7 +1016,7 @@ PHP_FUNCTION(idate)
 	}
 
 	if (ts_is_null) {
-		ts = zend_realtime_get();
+		ts = zend_time_real_get();
 	}
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
@@ -1091,7 +1096,7 @@ PHP_FUNCTION(strtotime)
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(now,
-		!preset_ts_is_null ? (timelib_sll) preset_ts : (timelib_sll) zend_realtime_get());
+		!preset_ts_is_null ? (timelib_sll) preset_ts : (timelib_sll) zend_time_real_get());
 
 	t = timelib_strtotime(ZSTR_VAL(times), ZSTR_LEN(times), &error,
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
@@ -1142,7 +1147,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	/* Initialize structure with current time */
 	now = timelib_time_ctor();
 	if (gmt) {
-		timelib_unixtime2gmt(now, (timelib_sll) zend_realtime_get());
+		timelib_unixtime2gmt(now, (timelib_sll) zend_time_real_get());
 	} else {
 		tzi = get_timezone_info();
 		if (!tzi) {
@@ -1150,7 +1155,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		}
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(now, (timelib_sll) zend_realtime_get());
+		timelib_unixtime2local(now, (timelib_sll) zend_time_real_get());
 	}
 
 	now->h = hou;
@@ -1260,7 +1265,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	}
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get();
+		timestamp = (zend_long) zend_time_real_get();
 	}
 
 	ts = timelib_time_ctor();
@@ -1356,7 +1361,7 @@ PHP_FUNCTION(time)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG((zend_long) zend_realtime_get());
+	RETURN_LONG((zend_long) zend_time_real_get());
 }
 /* }}} */
 
@@ -1376,7 +1381,7 @@ PHP_FUNCTION(localtime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get();
+		timestamp = (zend_long) zend_time_real_get();
 	}
 
 	tzi = get_timezone_info();
@@ -1431,7 +1436,7 @@ PHP_FUNCTION(getdate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get();
+		timestamp = (zend_long) zend_time_real_get();
 	}
 
 	tzi = get_timezone_info();
@@ -2333,15 +2338,6 @@ static void php_date_set_time_fraction(timelib_time *time, int microsecond)
 	time->us = microsecond;
 }
 
-static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
-{
-	struct timespec ts;
-
-	zend_realtime_spec(&ts);
-	*sec = ts.tv_sec;
-	*usec = ts.tv_nsec / 1000;
-}
-
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags) /* {{{ */
 {
 	timelib_time   *now;
@@ -2350,8 +2346,7 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
 	char *new_abbr = NULL;
 	timelib_sll new_offset = 0;
-	time_t sec;
-	suseconds_t usec;
+	struct timespec ts;
 	int options = 0;
 
 	if (dateobj->time) {
@@ -2430,9 +2425,9 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 			now->tz_abbr = new_abbr;
 			break;
 	}
-	php_date_get_current_time_with_fraction(&sec, &usec);
-	timelib_unixtime2local(now, (timelib_sll) sec);
-	php_date_set_time_fraction(now, usec);
+	zend_time_real_spec(&ts);
+	timelib_unixtime2local(now, (timelib_sll) ts.tv_sec);
+	php_date_set_time_fraction(now, ts.tv_nsec / 1000);
 
 	if (!format
 	 && time_str_len == sizeof("now") - 1

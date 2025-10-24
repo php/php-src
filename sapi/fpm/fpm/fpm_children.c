@@ -289,7 +289,7 @@ void fpm_children_bury(void)
 
 			fpm_scoreboard_proc_free(child);
 
-			now_ns     = zend_monotime_fallback();
+			now_ns     = zend_time_mono_fallback();
 			elapsed_ns = now_ns - child->started_ns;
 
 			if (restart_child) {
@@ -472,7 +472,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				zlog(ZLOG_DEBUG, "unblocking signals, child born");
 				fpm_signals_unblock();
 				child->pid = pid;
-				child->started_ns = zend_monotime_fallback();
+				child->started_ns = zend_time_mono_fallback();
 				fpm_parent_resources_use(child);
 
 				zlog(is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);

@@ -62,7 +62,7 @@ int fpm_scoreboard_init_main(void)
 		wp->scoreboard = shm_mem;
 		wp->scoreboard->pm = wp->config->pm;
 		wp->scoreboard->nprocs = wp->config->pm_max_children;
-		wp->scoreboard->start_epoch = zend_realtime_get();
+		wp->scoreboard->start_epoch = zend_time_real_get();
 		strlcpy(wp->scoreboard->pool, wp->config->name, sizeof(wp->scoreboard->pool));
 
 		if (wp->shared) {
@@ -434,7 +434,7 @@ void fpm_scoreboard_child_use(struct fpm_child_s *child, pid_t pid) /* {{{ */
 		return;
 	}
 	proc->pid = pid;
-	proc->start_epoch = zend_realtime_get();
+	proc->start_epoch = zend_time_real_get();
 }
 /* }}} */
 

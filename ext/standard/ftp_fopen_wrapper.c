@@ -852,7 +852,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		tm.tm_isdst = -1;
 
 		/* figure out the GMT offset */
-		stamp = zend_realtime_get();
+		stamp = zend_time_real_get();
 		gmt = php_gmtime_r(&stamp, &tmbuf);
 		if (!gmt) {
 			goto mdtm_error;

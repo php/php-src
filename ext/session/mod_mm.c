@@ -406,7 +406,7 @@ PS_WRITE_FUNC(mm)
 		if (sd) {
 			sd->datalen = val->len;
 			memcpy(sd->data, val->val, val->len);
-			sd->ctime = zend_realtime_get();
+			sd->ctime = zend_time_real_get();
 		}
 	}
 
@@ -442,7 +442,7 @@ PS_GC_FUNC(mm)
 	*nrdels = 0;
 	ps_mm_debug(("gc\n"));
 
-	limit = zend_realtime_get() - maxlifetime;
+	limit = zend_time_real_get() - maxlifetime;
 
 	mm_lock(data->mm, MM_LOCK_RW);
 

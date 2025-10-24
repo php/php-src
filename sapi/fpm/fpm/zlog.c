@@ -174,7 +174,7 @@ static size_t zlog_buf_prefix(
 #endif
 	{
 		if (!fpm_globals.is_child) {
-			zend_realtime_spec(&ts);
+			zend_time_real_spec(&ts);
 			len = zlog_print_time(&ts, buf, buf_size);
 		}
 		if (zlog_level == ZLOG_DEBUG) {
