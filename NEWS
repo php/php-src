@@ -354,7 +354,7 @@ PHP                                                                        NEWS
   . Added support for partitioned cookies. (nielsdos)
 
 - SOAP:
-  . Added support for configuring the URI parser for SoapClient::_doRequest()
+  . Added support for configuring the URI parser for SoapClient::__doRequest()
     as described in https://wiki.php.net/rfc/url_parsing_api#plugability.
     (kocsismate)
 
