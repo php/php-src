@@ -82,6 +82,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed GH-19021 (improved tidyOptGetCategory detection).
     (arjendekorte, David Carlier, Peter Kokot)
+  . Fix UAF in tidy when tidySetErrorBuffer() fails. (nielsdos)
 
 - XMLReader:
   . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
