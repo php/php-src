@@ -118,7 +118,11 @@ static const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"max_execution_time=0\n"
-	"max_input_time=-1\n";
+	"max_input_time=-1\n"
+	"register_argc_argv=1\n";
+
+static const char SERVER_HARDCODED_INI[] =
+	"register_argc_argv=1\n";
 
 
 const opt_struct OPTIONS[] = {
@@ -1321,6 +1325,8 @@ exit_loop:
 
 	if (sapi_module_ptr == &cli_sapi_module) {
 		php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
+	} else {
+		php_ini_builder_prepend_literal(&ini_builder, SERVER_HARDCODED_INI);
 	}
 
 	sapi_module_ptr->ini_entries = php_ini_builder_finish(&ini_builder);
