@@ -15,6 +15,5 @@ var_dump($url2->toAsciiString());
 ?>
 --EXPECT--
 NULL
-string(0) ""
+NULL
 string(21) "https://example.com/#"
-
