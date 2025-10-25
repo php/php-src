@@ -5008,10 +5008,10 @@ PHP_FUNCTION(array_unique)
 			array_init(return_value);
 
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
-				if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
-					val = Z_REFVAL_P(val);
-				}
-				zend_long int_val = Z_LVAL_P(val);
+				/* Dereference if this is a reference */
+				zval *deref_val = val;
+				ZVAL_DEREF(deref_val);
+				zend_long int_val = Z_LVAL_P(deref_val);
 
 				/* Use integer value as hash key for O(1) lookup */
 				if (!zend_hash_index_exists(&seen, int_val)) {
