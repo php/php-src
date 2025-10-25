@@ -5134,7 +5134,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
@@ -15673,7 +15673,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_THROW_SPEC_TM
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
@@ -41742,7 +41742,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_THROW_SPEC_CV
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
@@ -60578,7 +60578,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_THROW
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
@@ -71015,7 +71015,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_THROW_SPEC_TMPVAR_
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
@@ -96984,7 +96984,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_THROW_SPEC_CV_TAIL
 		}
 	} while (0);
 
-	zend_exception_save();
+	ZEND_ASSERT(!EG(exception));
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
