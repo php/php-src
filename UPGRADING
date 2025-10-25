@@ -924,6 +924,10 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
+  . ETH_P_IP (Linux only).
+  . ETH_P_IPV6 (Linux only).
+  . ETH_P_LOOP (Linux only).
+  . ETH_P_ALL (Linux only).
   . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
   . SO_BUSY_POLL (Linux only).
   . UDP_SEGMENT (Linux only).
