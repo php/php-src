@@ -14,6 +14,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
     condition for Win32/Win64. (Jakub Zelenka)
 
+- Zip:
+  . Fixed missing zend_release_fcall_info_cache on the following methods
+    ZipArchive::registerProgressCallback() and ZipArchive::registerCancelCallback()
+    on failure. (David Carlier)
+
 
 23 Oct 2025, PHP 8.5.0RC3
 
