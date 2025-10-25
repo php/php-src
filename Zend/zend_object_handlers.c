@@ -2178,10 +2178,9 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 	return zend_std_get_static_property_with_info(ce, property_name, type, &prop_info);
 }
 
-ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name) /* {{{ */
+ZEND_API ZEND_COLD void zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name) /* {{{ */
 {
 	zend_throw_error(NULL, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-	return 0;
 }
 /* }}} */
 
