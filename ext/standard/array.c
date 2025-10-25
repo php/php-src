@@ -4964,6 +4964,9 @@ PHP_FUNCTION(array_unique)
 	bucket_compare_func_t cmp;
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	uint32_t i, idx;
+	zend_long num_key;
+	zend_string *str_key;
+	zval *val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(array)
@@ -4973,6 +4976,247 @@ PHP_FUNCTION(array_unique)
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
 		ZVAL_COPY(return_value, array);
+		return;
+	}
+
+	if (sort_type == PHP_SORT_REGULAR) {
+		/* Detect data types in array to choose optimal algorithm */
+		bool all_integers = true;
+		bool has_complex_types = false;  /* arrays, objects only (NOT resources) */
+		zval *check_val;
+
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), check_val) {
+			ZVAL_DEREF(check_val);
+			uint8_t type = Z_TYPE_P(check_val);
+
+			if (type != IS_LONG) {
+				all_integers = false;
+			}
+
+			/* Arrays and objects need sorting (they have deep comparison semantics).
+			 * Resources use identity comparison, so they can stay in scalar path. */
+			if (type == IS_ARRAY || type == IS_OBJECT) {
+				has_complex_types = true;
+				break;  /* No point continuing - we'll use sort path */
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* For integer-only arrays, we can use a real hash table for O(N) performance */
+		if (all_integers) {
+			HashTable seen;
+			zend_hash_init(&seen, zend_hash_num_elements(Z_ARRVAL_P(array)), NULL, NULL, 0);
+			array_init(return_value);
+
+			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
+				/* Dereference if this is a reference */
+				zval *deref_val = val;
+				ZVAL_DEREF(deref_val);
+				zend_long int_val = Z_LVAL_P(deref_val);
+
+				/* Use integer value as hash key for O(1) lookup */
+				if (!zend_hash_index_exists(&seen, int_val)) {
+					zend_hash_index_add_empty_element(&seen, int_val);
+
+					/* Add to result */
+					Z_TRY_ADDREF_P(val);
+
+					if (str_key) {
+						zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, val);
+					} else {
+						zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
+					}
+				}
+
+				if (UNEXPECTED(EG(exception))) {
+					zend_hash_destroy(&seen);
+					return;
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			zend_hash_destroy(&seen);
+			return;
+		}
+
+		if (has_complex_types) {
+			/* Arrays and objects need sort-based deduplication.
+			 * Fall through to the standard sort path below. */
+			goto sort_based_dedup;
+		}
+
+		uint32_t num_elements = Z_ARRVAL_P(array)->nNumOfElements;
+		uint32_t bucket_count;
+
+		if (num_elements < 64) {
+			bucket_count = 64;
+		} else if (num_elements < 256) {
+			bucket_count = 256;
+		} else if (num_elements < 1024) {
+			bucket_count = 1024;
+		} else if (num_elements < 4096) {
+			bucket_count = 4096;
+		} else {
+			bucket_count = 16384;
+		}
+
+		#define SAFE_UNIQUE_HASH_BUCKETS bucket_count
+
+		typedef struct {
+			zval *values;
+			uint32_t count;
+			uint32_t capacity;
+		} safe_value_bucket;
+
+		safe_value_bucket *buckets = ecalloc(SAFE_UNIQUE_HASH_BUCKETS, sizeof(safe_value_bucket));
+		cmp = php_get_data_compare_func_unstable(sort_type, 0);
+		array_init(return_value);
+
+		#define CLEANUP_BUCKETS() do { \
+			for (uint32_t _i = 0; _i < SAFE_UNIQUE_HASH_BUCKETS; _i++) { \
+				if (buckets[_i].values) { \
+					for (uint32_t _j = 0; _j < buckets[_i].count; _j++) { \
+						zval_ptr_dtor(&buckets[_i].values[_j]); \
+					} \
+					efree(buckets[_i].values); \
+				} \
+			} \
+			efree(buckets); \
+		} while (0)
+
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
+			zval *deref_val = val;
+			ZVAL_DEREF(deref_val);
+
+			zend_ulong hash;
+
+			if (Z_TYPE_P(deref_val) == IS_LONG) {
+				/* Hash integer value directly */
+				hash = (zend_ulong)Z_LVAL_P(deref_val);
+			} else if (Z_TYPE_P(deref_val) == IS_DOUBLE) {
+				/* Hash double as integer if it's a whole number */
+				double dval = Z_DVAL_P(deref_val);
+				if (zend_isnan(dval)) {
+					hash = 0xDEADBEEF;  /* All NaNs to same bucket, cmp() ensures correctness */
+				} else if (zend_isinf(dval)) {
+					/* +INF and -INF get distinct hashes */
+					hash = dval > 0 ? ZEND_ULONG_MAX : ZEND_ULONG_MAX - 1;
+				} else if (dval == (double)(zend_long)dval) {
+					hash = (zend_ulong)(zend_long)dval;  /* 5.0 hashes like 5 */
+				} else {
+					/* Non-integer double - use bit pattern as hash to avoid string conversion */
+					union { double d; zend_ulong ul; } u;
+					u.d = dval;
+					hash = u.ul;
+				}
+			} else if (Z_TYPE_P(deref_val) == IS_STRING) {
+				/* Check if it's a numeric string */
+				zend_long lval;
+				double dval;
+				zend_uchar str_type = is_numeric_string(Z_STRVAL_P(deref_val), Z_STRLEN_P(deref_val), &lval, &dval, 0);
+
+				if (str_type == IS_LONG) {
+					/* Numeric string - hash as integer so "5" hashes like 5 */
+					hash = (zend_ulong)lval;
+				} else if (str_type == IS_DOUBLE) {
+					/* Numeric string with decimal */
+					if (dval == (double)(zend_long)dval) {
+						hash = (zend_ulong)(zend_long)dval;
+					} else {
+						hash = zend_string_hash_val(Z_STR_P(deref_val));
+					}
+				} else if (Z_STRLEN_P(deref_val) == 0) {
+					/* Empty string "" compares equal to false/null/0 in SORT_REGULAR */
+					hash = 0;
+				} else {
+					/* Non-numeric, non-empty string - use string hash */
+					hash = zend_string_hash_val(Z_STR_P(deref_val));
+				}
+			} else if (Z_TYPE_P(deref_val) == IS_TRUE) {
+				hash = 1;  /* true hashes like integer 1 */
+			} else if (Z_TYPE_P(deref_val) == IS_FALSE || Z_TYPE_P(deref_val) == IS_NULL) {
+				hash = 0;  /* false/null hash like integer 0 */
+			} else if (Z_TYPE_P(deref_val) == IS_RESOURCE) {
+				/* Resources use identity comparison (like ===), hash by handle and type
+				 * Include type to prevent collisions between different resource types */
+				hash = (zend_ulong)Z_RES_HANDLE_P(deref_val) ^ (zend_ulong)Z_RES_TYPE_P(deref_val);
+			} else {
+				/* Note: Arrays and objects should never reach here as they trigger
+				 * has_complex_types and use the sort path instead. This is just
+				 * a fallback for any unexpected types. */
+				hash = (zend_ulong)Z_TYPE_P(deref_val);
+			}
+
+			uint32_t bucket_idx = hash % SAFE_UNIQUE_HASH_BUCKETS;
+			safe_value_bucket *bucket = &buckets[bucket_idx];
+
+			/* Check if duplicate exists in this bucket only */
+			bool is_duplicate = false;
+			for (uint32_t i = 0; i < bucket->count; i++) {
+				Bucket b1 = {.val = *deref_val}, b2 = {.val = bucket->values[i]};
+				if (cmp(&b1, &b2) == 0) {
+					is_duplicate = true;
+					break;
+				}
+
+				if (UNEXPECTED(EG(exception))) {
+					CLEANUP_BUCKETS();
+					return;
+				}
+			}
+
+			if (!is_duplicate) {
+				/* Grow bucket if needed - with overflow protection */
+				if (UNEXPECTED(bucket->count >= bucket->capacity)) {
+					uint32_t new_capacity = bucket->capacity ? bucket->capacity * 2 : 4;
+					/* Check for overflow in capacity doubling */
+					if (UNEXPECTED(new_capacity < bucket->capacity || new_capacity > UINT32_MAX / sizeof(zval))) {
+						/* Bucket too large - free all buckets and throw error */
+						for (uint32_t j = 0; j < SAFE_UNIQUE_HASH_BUCKETS; j++) {
+							if (buckets[j].values) {
+								for (uint32_t k = 0; k < buckets[j].count; k++) {
+									zval_ptr_dtor(&buckets[j].values[k]);
+								}
+								efree(buckets[j].values);
+							}
+						}
+						efree(buckets);
+						zend_throw_error(NULL, "Array too large for array_unique()");
+						RETURN_THROWS();
+					}
+					bucket->values = safe_erealloc(bucket->values, new_capacity, sizeof(zval), 0);
+					bucket->capacity = new_capacity;
+				}
+
+				/* Store value in bucket */
+				ZVAL_COPY(&bucket->values[bucket->count], deref_val);
+				bucket->count++;
+
+				if (UNEXPECTED(EG(exception))) {
+					CLEANUP_BUCKETS();
+					return;
+				}
+
+				/* Add to result */
+				if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
+					ZVAL_DEREF(val);
+				}
+				Z_TRY_ADDREF_P(val);
+
+				if (str_key) {
+					zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, val);
+				} else {
+					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
+				}
+
+				if (UNEXPECTED(EG(exception))) {
+					CLEANUP_BUCKETS();
+					return;
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		CLEANUP_BUCKETS();
+		#undef CLEANUP_BUCKETS
+
 		return;
 	}
 
@@ -4996,8 +5240,12 @@ PHP_FUNCTION(array_unique)
 				zend_tmp_string_release(tmp_str_val);
 			}
 
+			if (UNEXPECTED(EG(exception))) {
+				zend_hash_destroy(&seen);
+				return;
+			}
+
 			if (retval) {
-				/* First occurrence of the value */
 				if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
 					ZVAL_DEREF(val);
 				}
@@ -5008,6 +5256,11 @@ PHP_FUNCTION(array_unique)
 				} else {
 					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
 				}
+
+				if (UNEXPECTED(EG(exception))) {
+					zend_hash_destroy(&seen);
+					return;
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -5015,6 +5268,7 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
+sort_based_dedup:
 	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
 	bool in_place = zend_may_modify_arg_in_place(array);
@@ -5025,7 +5279,17 @@ PHP_FUNCTION(array_unique)
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
+	uint32_t num_elements = Z_ARRVAL_P(array)->nNumOfElements;
+	if (UNEXPECTED(num_elements >= UINT32_MAX - 1)) {
+		zend_throw_error(NULL, "Array is too large for array_unique()");
+		RETURN_THROWS();
+	}
+	size_t alloc_size = (num_elements + 1) * sizeof(struct bucketindex);
+	if (UNEXPECTED(alloc_size / sizeof(struct bucketindex) != (num_elements + 1))) {
+		zend_throw_error(NULL, "Array is too large for array_unique()");
+		RETURN_THROWS();
+	}
+	arTmp = pemalloc(alloc_size, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
 	if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
 		zval *zv = Z_ARRVAL_P(array)->arPacked;
 		for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++, zv++) {
