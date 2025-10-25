@@ -17,52 +17,51 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include "php_intl.h"
-#include "collator_class.h"
-
-/* {{{ Get collator's last error code. */
-PHP_FUNCTION( collator_get_error_code )
-{
-	COLLATOR_METHOD_INIT_VARS
-
-	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
-		&object, Collator_ce_ptr ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
-
-	/* Fetch the object (without resetting its last error code). */
-	co = Z_INTL_COLLATOR_P(object);
-	if( co == NULL )
-		RETURN_FALSE;
-
-	/* Return collator's last error code. */
-	RETURN_LONG( COLLATOR_ERROR_CODE( co ) );
 }
-/* }}} */
+#include "collator_class.h"
+#include "intl_convert.h"
 
-/* {{{ Get text description for collator's last error code. */
-PHP_FUNCTION( collator_get_error_message )
+#include <zend_API.h>
+
+/* {{{ Gets the locale name of the collator. */
+U_CFUNC PHP_FUNCTION( collator_get_locale )
 {
-	zend_string* message = NULL;
+	zend_long   type        = 0;
+	char*  locale_name = nullptr;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
-		&object, Collator_ce_ptr ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
+		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
 
-	/* Fetch the object (without resetting its last error code). */
-	co = Z_INTL_COLLATOR_P( object );
-	if( co == NULL )
-		RETURN_FALSE;
+	/* Fetch the object. */
+	COLLATOR_METHOD_FETCH_OBJECT;
 
-	/* Return last error message. */
-	message = intl_error_get_message( COLLATOR_ERROR_P( co ) );
-	RETURN_STR(message);
+	if (!co || !co->ucoll) {
+		intl_error_set_code( nullptr, COLLATOR_ERROR_CODE( co ) );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
+		zend_throw_error(nullptr, "Object not initialized");
+
+		RETURN_THROWS();
+	}
+
+	/* Get locale by specified type. */
+	locale_name = (char*) ucol_getLocaleByType(
+		co->ucoll, static_cast<ULocDataLocaleType>(type), COLLATOR_ERROR_CODE_P( co ) );
+	COLLATOR_CHECK_STATUS( co, "Error getting locale by type" );
+
+	/* Return it. */
+	RETVAL_STRINGL( locale_name, strlen(locale_name) );
 }
 /* }}} */

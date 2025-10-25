@@ -17,9 +17,16 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include <php.h>
 #include "grapheme.h"
 #include "grapheme_util.h"
+}
 
 #include <unicode/utypes.h>
 #include <unicode/utf8.h>
@@ -30,11 +37,11 @@
 /* }}} */
 
 /* {{{ Get number of graphemes in a string */
-PHP_FUNCTION(grapheme_strlen)
+U_CFUNC PHP_FUNCTION(grapheme_strlen)
 {
 	char* string;
 	size_t string_len;
-	UChar* ustring = NULL;
+	UChar* ustring = nullptr;
 	int ustring_len = 0;
 	zend_long ret_len;
 	UErrorCode status;
@@ -54,17 +61,17 @@ PHP_FUNCTION(grapheme_strlen)
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, status );
+		intl_error_set_code( nullptr, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16");
+		intl_error_set_custom_msg( nullptr, "Error converting input string to UTF-16");
 		if (ustring) {
 			efree( ustring );
 		}
 		RETURN_NULL();
 	}
 
-	ret_len = grapheme_split_string(ustring, ustring_len, NULL, 0 );
+	ret_len = grapheme_split_string(ustring, ustring_len, nullptr, 0 );
 
 	if (ustring) {
 		efree( ustring );
@@ -79,7 +86,7 @@ PHP_FUNCTION(grapheme_strlen)
 /* }}} */
 
 /* {{{ Find position of first occurrence of a string within another */
-PHP_FUNCTION(grapheme_strpos)
+U_CFUNC PHP_FUNCTION(grapheme_strpos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -122,7 +129,7 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* fIgnoreCase */ 0, /* last */ 0, locale);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, nullptr, /* fIgnoreCase */ 0, /* last */ 0, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -133,7 +140,7 @@ PHP_FUNCTION(grapheme_strpos)
 /* }}} */
 
 /* {{{ Find position of first occurrence of a string within another, ignoring case differences */
-PHP_FUNCTION(grapheme_stripos)
+U_CFUNC PHP_FUNCTION(grapheme_stripos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -187,7 +194,7 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* fIgnoreCase */ 1, /*last */ 0, locale);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, nullptr, /* fIgnoreCase */ 1, /*last */ 0, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -199,7 +206,7 @@ PHP_FUNCTION(grapheme_stripos)
 /* }}} */
 
 /* {{{ Find position of last occurrence of a string within another */
-PHP_FUNCTION(grapheme_strrpos)
+U_CFUNC PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
 	char *locale = "";
@@ -246,7 +253,7 @@ PHP_FUNCTION(grapheme_strrpos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* f_ignore_case */ 0, /* last */ 1, locale);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, nullptr, /* f_ignore_case */ 0, /* last */ 1, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -259,7 +266,7 @@ PHP_FUNCTION(grapheme_strrpos)
 /* }}} */
 
 /* {{{ Find position of last occurrence of a string within another, ignoring case */
-PHP_FUNCTION(grapheme_strripos)
+U_CFUNC PHP_FUNCTION(grapheme_strripos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -314,7 +321,7 @@ PHP_FUNCTION(grapheme_strripos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* f_ignore_case */ 1, /*last */ 1, locale);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, nullptr, /* f_ignore_case */ 1, /*last */ 1, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -327,7 +334,7 @@ PHP_FUNCTION(grapheme_strripos)
 /* }}} */
 
 /* {{{ Returns part of a string */
-PHP_FUNCTION(grapheme_substr)
+U_CFUNC PHP_FUNCTION(grapheme_substr)
 {
 	char *str, *locale = "";
 	zend_string *u8_sub_str;
@@ -339,7 +346,7 @@ PHP_FUNCTION(grapheme_substr)
 	int iter_val;
 	UErrorCode status;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
-	UBreakIterator* bi = NULL;
+	UBreakIterator* bi = nullptr;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
 	bool no_length = true;
@@ -375,25 +382,25 @@ PHP_FUNCTION(grapheme_substr)
 		char *sub_str;
 		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
 
-		if ( NULL == sub_str ) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "invalid parameters");
+		if ( nullptr == sub_str ) {
+			intl_error_set( nullptr, U_ILLEGAL_ARGUMENT_ERROR, "invalid parameters");
 			RETURN_FALSE;
 		}
 
 		RETURN_STRINGL(sub_str, asub_str_len);
 	}
 
-	ustr = NULL;
+	ustr = nullptr;
 	ustr_len = 0;
 	status = U_ZERO_ERROR;
 	intl_convert_utf8_to_utf16(&ustr, &ustr_len, str, str_len, &status);
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, status );
+		intl_error_set_code( nullptr, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16");
+		intl_error_set_custom_msg( nullptr, "Error converting input string to UTF-16");
 		if (ustr) {
 			efree( ustr );
 		}
@@ -458,10 +465,10 @@ PHP_FUNCTION(grapheme_substr)
 
 		if ( !u8_sub_str ) {
 			/* Set global error code. */
-			intl_error_set_code( NULL, status );
+			intl_error_set_code( nullptr, status );
 
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8");
+			intl_error_set_custom_msg( nullptr, "Error converting output string to UTF-8");
 
 			RETURN_FALSE;
 		}
@@ -527,10 +534,10 @@ PHP_FUNCTION(grapheme_substr)
 
 	if ( !u8_sub_str ) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, status );
+		intl_error_set_code( nullptr, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8");
+		intl_error_set_custom_msg( nullptr, "Error converting output string to UTF-8");
 
 		RETURN_FALSE;
 	}
@@ -602,14 +609,14 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 /* }}} */
 
 /* {{{ Finds first occurrence of a string within another */
-PHP_FUNCTION(grapheme_strstr)
+U_CFUNC PHP_FUNCTION(grapheme_strstr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 /* f_ignore_case */);
 }
 /* }}} */
 
 /* {{{ Finds first occurrence of a string within another */
-PHP_FUNCTION(grapheme_stristr)
+U_CFUNC PHP_FUNCTION(grapheme_stristr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1 /* f_ignore_case */);
 }
@@ -712,7 +719,7 @@ static const grapheme_extract_iter grapheme_extract_iters[] = {
 /* }}} */
 
 /* {{{ Function to extract a sequence of default grapheme clusters */
-PHP_FUNCTION(grapheme_extract)
+U_CFUNC PHP_FUNCTION(grapheme_extract)
 {
 	char *str, *pstr;
 	UText ut = UTEXT_INITIALIZER;
@@ -723,9 +730,9 @@ PHP_FUNCTION(grapheme_extract)
 	zend_long extract_type = GRAPHEME_EXTRACT_TYPE_COUNT;
 	UErrorCode status;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
-	UBreakIterator* bi = NULL;
+	UBreakIterator* bi = nullptr;
 	int ret_pos;
-	zval *next = NULL; /* return offset of next part of the string */
+	zval *next = nullptr; /* return offset of next part of the string */
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STRING(str, str_len)
@@ -740,7 +747,7 @@ PHP_FUNCTION(grapheme_extract)
 		lstart += str_len;
 	}
 
-	if ( NULL != next ) {
+	if ( nullptr != next ) {
 		ZEND_ASSERT(Z_ISREF_P(next));
 		ZEND_TRY_ASSIGN_REF_LONG(next, lstart);
 		if (UNEXPECTED(EG(exception))) {
@@ -754,7 +761,7 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string");
+		intl_error_set( nullptr, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string");
 		RETURN_FALSE;
 	}
 
@@ -785,7 +792,7 @@ PHP_FUNCTION(grapheme_extract)
 			pstr++;
 			start++;
 			if ( pstr >= str_end ) {
-				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+				intl_error_set( nullptr, U_ILLEGAL_ARGUMENT_ERROR,
 					"grapheme_extract: invalid input string");
 
 				RETURN_FALSE;
@@ -801,7 +808,7 @@ PHP_FUNCTION(grapheme_extract)
 
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
 		size_t nsize = MIN(size, str_len);
-		if ( NULL != next ) {
+		if ( nullptr != next ) {
 			ZEND_TRY_ASSIGN_REF_LONG(next, start + nsize);
 		}
 		RETURN_STRINGL(pstr, nsize);
@@ -812,15 +819,15 @@ PHP_FUNCTION(grapheme_extract)
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, status );
+		intl_error_set_code( nullptr, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text");
+		intl_error_set_custom_msg( nullptr, "Error opening UTF-8 text");
 
 		RETURN_FALSE;
 	}
 
-	bi = NULL;
+	bi = nullptr;
 	status = U_ZERO_ERROR;
 	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status );
 
@@ -835,14 +842,14 @@ PHP_FUNCTION(grapheme_extract)
 	utext_close(&ut);
 	ubrk_close(bi);
 
-	if ( NULL != next ) {
+	if ( nullptr != next ) {
 		ZEND_TRY_ASSIGN_REF_LONG(next, start + ret_pos);
 	}
 
 	RETURN_STRINGL(((char *)pstr), ret_pos);
 }
 
-PHP_FUNCTION(grapheme_str_split)
+U_CFUNC PHP_FUNCTION(grapheme_str_split)
 {
 	char *pstr, *end;
 	zend_string *str;
@@ -852,7 +859,7 @@ PHP_FUNCTION(grapheme_str_split)
 	UErrorCode ustatus = U_ZERO_ERROR;
 	int32_t pos, current, i, end_len = 0;
 	UBreakIterator* bi;
-	UText *ut = NULL;
+	UText *ut = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
@@ -874,15 +881,15 @@ PHP_FUNCTION(grapheme_str_split)
 
 	if ( U_FAILURE( ustatus ) ) {
 		/* Set global error code. */
-		intl_error_set_code( NULL, ustatus );
+		intl_error_set_code( nullptr, ustatus );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text");
+		intl_error_set_custom_msg( nullptr, "Error opening UTF-8 text");
 
 		RETURN_FALSE;
 	}
 
-	bi = NULL;
+	bi = nullptr;
 	ustatus = U_ZERO_ERROR;
 	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &ustatus );
 
@@ -920,7 +927,7 @@ PHP_FUNCTION(grapheme_str_split)
 	ubrk_close(bi);
 }
 
-PHP_FUNCTION(grapheme_levenshtein)
+U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 {
 	zend_string *string1, *string2;
 	zend_long cost_ins = 1;
@@ -959,11 +966,17 @@ PHP_FUNCTION(grapheme_levenshtein)
 	size_t i2;
 	char *pstr1, *pstr2;
 
-	UChar *ustring1 = NULL;
-	UChar *ustring2 = NULL;
+	UChar *ustring1 = nullptr;
+	UChar *ustring2 = nullptr;
 
 	int32_t ustring1_len = 0;
 	int32_t ustring2_len = 0;
+	int32_t current1 = 0;
+	int32_t current2 = 0;
+	int32_t pos1 = 0;
+	int32_t pos2 = 0;
+
+	UCollator *collator = nullptr;
 
 	UErrorCode ustatus = U_ZERO_ERROR;
 
@@ -1002,8 +1015,8 @@ PHP_FUNCTION(grapheme_levenshtein)
 	UBreakIterator *bi1, *bi2;
 
 	int32_t strlen_1, strlen_2;
-	strlen_1 = grapheme_split_string(ustring1, ustring1_len, NULL, 0);
-	strlen_2 = grapheme_split_string(ustring2, ustring2_len, NULL, 0);
+	strlen_1 = grapheme_split_string(ustring1, ustring1_len, nullptr, 0);
+	strlen_2 = grapheme_split_string(ustring2, ustring2_len, nullptr, 0);
 	if (UNEXPECTED(strlen_1 < 0 || strlen_2 < 0)) {
 		RETVAL_FALSE;
 		goto out_ustring2;
@@ -1053,7 +1066,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 		RETVAL_FALSE;
 		goto out_bi2;
 	}
-	UCollator *collator = ucol_open(locale, &ustatus);
+	collator = ucol_open(locale, &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
@@ -1063,17 +1076,12 @@ PHP_FUNCTION(grapheme_levenshtein)
 	}
 
 	zend_long *p1, *p2, *tmp;
-	p1 = safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0);
-	p2 = safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0);
+	p1 = reinterpret_cast<zend_long *>(safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0));
+	p2 = reinterpret_cast<zend_long *>(safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0));
 
 	for (i2 = 0; i2 <= strlen_2; i2++) {
 		p1[i2] = i2 * cost_ins;
 	}
-
-	int32_t current1 = 0;
-	int32_t current2 = 0;
-	int32_t pos1 = 0;
-	int32_t pos2 = 0;
 
 	while (true) {
 		current1 = ubrk_current(bi1);

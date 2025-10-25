@@ -8,23 +8,11 @@ if test "$PHP_INTL" != "no"; then
   PHP_SUBST([INTL_SHARED_LIBADD])
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION([intl], m4_normalize([
-      collator/collator_attr.c
-      collator/collator_class.c
-      collator/collator_compare.c
-      collator/collator_convert.c
-      collator/collator_create.c
-      collator/collator_error.c
-      collator/collator_is_numeric.c
-      collator/collator_locale.c
-      collator/collator_sort.c
       common/common_error.c
       dateformat/dateformat_class.c
       formatter/formatter_class.c
-      grapheme/grapheme_string.c
-      grapheme/grapheme_util.c
       intl_convert.c
       intl_error.c
-      listformatter/listformatter_class.c
       php_intl.c
       resourcebundle/resourcebundle_class.c
       resourcebundle/resourcebundle_iterator.c
@@ -32,14 +20,21 @@ if test "$PHP_INTL" != "no"; then
       spoofchecker/spoofchecker_class.c
       spoofchecker/spoofchecker_create.c
       spoofchecker/spoofchecker_main.c
-      transliterator/transliterator_class.c
-      transliterator/transliterator_methods.c
     ]),
     [$ext_shared],,
     [$INTL_COMMON_FLAGS],
     [cxx])
 
   PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
+    collator/collator_attr.cpp \
+    collator/collator_class.cpp \
+    collator/collator_compare.cpp \
+    collator/collator_convert.cpp \
+    collator/collator_create.cpp \
+    collator/collator_error.cpp \
+    collator/collator_is_numeric.cpp \
+    collator/collator_locale.cpp \
+    collator/collator_sort.cpp \
     common/common_enum.cpp \
     common/common_date.cpp \
     converter/converter.cpp \
@@ -54,6 +49,8 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_parse.cpp \
     dateformat/datepatterngenerator_class.cpp \
     dateformat/datepatterngenerator_methods.cpp \
+    grapheme/grapheme_string.cpp \
+    grapheme/grapheme_util.cpp \
     msgformat/msgformat_helpers.cpp \
     rangeformatter/rangeformatter_class.cpp \
     timezone/timezone_class.cpp \
@@ -80,6 +77,9 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp \
+    listformatter/listformatter_class.cpp \
+    transliterator/transliterator_class.cpp \
+    transliterator/transliterator_methods.cpp \
     idn/idn.cpp \
     locale/locale_class.cpp \
     locale/locale_methods.cpp \

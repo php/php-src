@@ -13,15 +13,15 @@ if (PHP_INTL != "no") {
 								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		ADD_EXTENSION_DEP('intl', 'date');
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
-				collator_attr.c \
-				collator_class.c \
-				collator_compare.c \
-				collator_convert.c \
-				collator_create.c \
-				collator_error.c \
-				collator_is_numeric.c \
-				collator_locale.c \
-				collator_sort.c \
+				collator_attr.cpp \
+				collator_class.cpp \
+				collator_compare.cpp \
+				collator_convert.cpp \
+				collator_create.cpp \
+				collator_error.cpp \
+				collator_is_numeric.cpp \
+				collator_locale.cpp \
+				collator_sort.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/common", "\
 				common_error.c \
@@ -40,7 +40,7 @@ if (PHP_INTL != "no") {
 				formatter_parse.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/listformatter", "\
-				listformatter_class.c \
+				listformatter_class.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/locale", "\
 				locale.cpp \
@@ -57,7 +57,7 @@ if (PHP_INTL != "no") {
 				msgformat_parse.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/grapheme", "\
-                                grapheme_string.c grapheme_util.c  \
+                                grapheme_string.cpp grapheme_util.cpp  \
                                 ", "intl");
 		ADD_SOURCES(configure_module_dirname + "/normalizer", "\
 				normalizer_class.cpp \
@@ -101,8 +101,8 @@ if (PHP_INTL != "no") {
 		}
 
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
-				transliterator_class.c \
-				transliterator_methods.c",
+				transliterator_class.cpp \
+				transliterator_methods.cpp",
 				"intl");
 
 		ADD_SOURCES(configure_module_dirname + "/timezone", "\

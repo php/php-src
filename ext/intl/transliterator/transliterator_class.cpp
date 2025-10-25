@@ -13,22 +13,24 @@
  */
 
 #include "transliterator_class.h"
+extern "C" {
 #include "php_intl.h"
-#include "transliterator_arginfo.h"
 #include "intl_error.h"
 #include "intl_convert.h"
 #include "intl_data.h"
+#include "transliterator_arginfo.h"
+}
 
 #include <unicode/utrans.h>
 
-zend_class_entry *Transliterator_ce_ptr = NULL;
+zend_class_entry *Transliterator_ce_ptr = nullptr;
 
 zend_object_handlers Transliterator_handlers;
 
 /* {{{ int transliterator_object_construct( zval *object, UTransliterator *utrans, UErrorCode *status )
  * Initialize internals of Transliterator_object.
  */
-int transliterator_object_construct( zval *object,
+U_CFUNC int transliterator_object_construct( zval *object,
 									 UTransliterator *utrans,
 									 UErrorCode *status )
 {
@@ -40,7 +42,7 @@ int transliterator_object_construct( zval *object,
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
 
-	assert( to->utrans == NULL );
+	assert( to->utrans == nullptr );
 	/* this assignment must happen before any return with failure because the
 	 * caller relies on it always being made (so it can just destroy the object
 	 * to close the transliterator) */
@@ -88,7 +90,7 @@ static void transliterator_object_destroy( Transliterator_object* to )
 	if( to->utrans )
 	{
 		utrans_close( to->utrans );
-		to->utrans = NULL;
+		to->utrans = nullptr;
 	}
 
 	intl_error_reset( TRANSLITERATOR_ERROR_P( to ) );
@@ -111,7 +113,7 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 {
 	Transliterator_object* intern;
 
-	intern = zend_object_alloc(sizeof(Transliterator_object), ce);
+	intern = reinterpret_cast<Transliterator_object *>(zend_object_alloc(sizeof(Transliterator_object), ce));
 
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init( &intern->zo, ce );
@@ -133,22 +135,22 @@ static zend_object *Transliterator_clone_obj( zend_object *object )
 	Transliterator_object  *to_new = php_intl_transliterator_fetch_object(ret_val);
 
 	zend_objects_clone_members( &to_new->zo, &to_orig->zo );
-	if (to_orig->utrans != NULL) {
-		/* guaranteed to return NULL if it fails */
+	if (to_orig->utrans != nullptr) {
+		/* guaranteed to return nullptr if it fails */
 		UErrorCode error = U_ZERO_ERROR;
 		UTransliterator *utrans = utrans_clone( to_orig->utrans, &error);
 
 		if (U_FAILURE(error)) {
-			if (utrans != NULL) {
+			if (utrans != nullptr) {
 				transliterator_object_destroy(to_new);
 			}
-			zend_throw_error(NULL, "Failed to clone Transliterator");
+			zend_throw_error(nullptr, "Failed to clone Transliterator");
 		} else {
 			to_new->utrans = utrans;
 		}
 	} else {
 		/* We shouldn't have unconstructed objects in the first place */
-		zend_throw_error(NULL, "Cannot clone uninitialized Transliterator");
+		zend_throw_error(nullptr, "Cannot clone uninitialized Transliterator");
 	}
 
 	return ret_val;
@@ -158,7 +160,7 @@ static zend_object *Transliterator_clone_obj( zend_object *object )
 /* {{{ transliterator_register_Transliterator_class
  * Initialize 'Transliterator' class
  */
-void transliterator_register_Transliterator_class( void )
+U_CFUNC void transliterator_register_Transliterator_class( void )
 {
 	/* Create and register 'Transliterator' class. */
 	Transliterator_ce_ptr = register_class_Transliterator();
