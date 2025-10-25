@@ -37,7 +37,6 @@ static int le_protocols;
 
 struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
-	char * protoname;
 	zend_class_entry *ce;
 	zend_resource *resource;
 };
@@ -72,7 +71,6 @@ static void stream_wrapper_dtor(zend_resource *rsrc)
 {
 	struct php_user_stream_wrapper * uwrap = (struct php_user_stream_wrapper*)rsrc->ptr;
 
-	efree(uwrap->protoname);
 	efree(uwrap);
 }
 
@@ -468,7 +466,6 @@ PHP_FUNCTION(stream_wrapper_register)
 
 	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
 	uwrap->ce = ce;
-	uwrap->protoname = estrndup(ZSTR_VAL(protocol), ZSTR_LEN(protocol));
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
