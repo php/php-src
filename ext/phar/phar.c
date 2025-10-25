@@ -2034,45 +2034,40 @@ woohoo:
 		}
 	}
 
-	// TODO Use some sort of loop here instead of a goto
 	pos = memchr(filename + 1, '.', filename_len);
-next_extension:
-	if (!pos) {
-		return FAILURE;
-	}
-
-	while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
-		pos = memchr(pos + 1, '.', filename_len - (pos - filename) - 1);
-		if (!pos) {
-			return FAILURE;
+	while (pos) {
+		while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
+			pos = memchr(pos + 1, '.', filename_len - (pos - filename) - 1);
+			if (!pos) {
+				return FAILURE;
+			}
 		}
-	}
 
-	slash = memchr(pos, '/', filename_len - (pos - filename));
+		slash = memchr(pos, '/', filename_len - (pos - filename));
 
-	if (!slash) {
-		/* this is a url like "phar://blah.phar" with no directory */
+		if (!slash) {
+			/* this is a url like "phar://blah.phar" with no directory */
+			*ext_str = pos;
+			*ext_len = strlen(pos);
+
+			/* file extension must contain "phar" */
+			return phar_check_str(filename, *ext_str, *ext_len, executable, for_create);
+		}
+
+		/* we've found an extension that ends at a directory separator */
 		*ext_str = pos;
-		*ext_len = strlen(pos);
+		*ext_len = slash - pos;
 
-		/* file extension must contain "phar" */
-		return phar_check_str(filename, *ext_str, *ext_len, executable, for_create);
-	}
+		if (phar_check_str(filename, *ext_str, *ext_len, executable, for_create) == SUCCESS) {
+			return SUCCESS;
+		}
 
-	/* we've found an extension that ends at a directory separator */
-	*ext_str = pos;
-	*ext_len = slash - pos;
-
-	if (phar_check_str(filename, *ext_str, *ext_len, executable, for_create) == SUCCESS) {
-		return SUCCESS;
-	}
-
-	/* look for more extensions */
-	pos = strchr(pos + 1, '.');
-	if (pos) {
-		*ext_str = NULL;
-		*ext_len = 0;
-		goto next_extension;
+		/* look for more extensions */
+		pos = strchr(pos + 1, '.');
+		if (pos) {
+			*ext_str = NULL;
+			*ext_len = 0;
+		}
 	}
 
 	return FAILURE;
