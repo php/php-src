@@ -820,7 +820,7 @@ PHP_FUNCTION(ftp_nb_get)
 }
 /* }}} */
 
-/* {{{ Continues retrieving/sending a file non-blocking */
+/* {{{ Continues to retrieve or send a file in non-blocking mode */
 PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
