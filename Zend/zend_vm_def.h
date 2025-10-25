@@ -1051,13 +1051,16 @@ ZEND_VM_C_LABEL(assign_op_object):
 			}
 		}
 		cache_slot = (OP2_TYPE == IS_CONST) ? CACHE_ADDR((opline+1)->extended_value) : _cache_slot;
-		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		zend_refcounted *container;
+		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, &container)) != NULL)) {
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
 				zend_reference *ref;
+
+				GC_ADDREF(container);
 
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
@@ -1081,6 +1084,8 @@ ZEND_VM_C_LABEL(assign_op_object):
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 				}
+
+				GC_DTOR(container);
 			}
 		} else {
 			zend_assign_op_overloaded_property(zobj, name, cache_slot, value OPLINE_CC EXECUTE_DATA_CC);
@@ -1328,7 +1333,7 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 			}
 		}
 		cache_slot = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : _cache_slot;
-		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1398,7 +1403,7 @@ ZEND_VM_C_LABEL(post_incdec_object):
 			}
 		}
 		cache_slot = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : _cache_slot;
-		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
