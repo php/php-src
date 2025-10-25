@@ -170,6 +170,10 @@ PHP 8.5 UPGRADE NOTES
     precision previously incorrectly reset the precision instead of treating
     it as a precision of 0. See GH-18897.
 
+- SOAP:
+  . SoapClient::__doRequest() expects a new, optional $uriParserClass parameter
+    as described in https://wiki.php.net/rfc/url_parsing_api#plugability.
+
 ========================================
 2. New Features
 ========================================
