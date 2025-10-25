@@ -387,7 +387,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, const zend_obj
 				efree(intern->ptdoc->errbuf);
 				tidyRelease(intern->ptdoc->doc);
 				efree(intern->ptdoc);
-				efree(intern);
+				/* TODO: convert to exception */
 				php_error_docref(NULL, E_ERROR, "Could not set Tidy error buffer");
 			}
 

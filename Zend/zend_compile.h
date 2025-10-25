@@ -894,7 +894,7 @@ void shutdown_scanner(void);
 ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename);
 ZEND_API void zend_restore_compiled_filename(zend_string *original_compiled_filename);
 ZEND_API zend_string *zend_get_compiled_filename(void);
-ZEND_API int zend_get_compiled_lineno(void);
+ZEND_API uint32_t zend_get_compiled_lineno(void);
 ZEND_API size_t zend_get_scanned_file_offset(void);
 
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var);

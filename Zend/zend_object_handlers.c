@@ -566,6 +566,11 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 				return FAILURE;
 			}
 		} else {
+			/* We were looking for a protected property but found a private one
+			 * belonging to the parent class. */
+			if (property_info->flags & ZEND_ACC_PRIVATE) {
+				return FAILURE;
+			}
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		}
 		return SUCCESS;
@@ -2001,7 +2006,6 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 
 ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 {
-	int i;
 	zval *p;
 
 	if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
@@ -2010,7 +2014,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 		}
 
 		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
-		for (i = 0; i < class_type->default_static_members_count; i++) {
+		for (uint32_t i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
 				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];

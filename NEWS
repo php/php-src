@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored. (nielsdos)
 
+- Reflection:
+  . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
+    for classes with property hooks). (alexandre-daubois)
+
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)

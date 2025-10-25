@@ -1108,11 +1108,11 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
-		zend_get_hash_value, destroy_phar_manifest_entry, (bool)mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
@@ -1451,7 +1451,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
@@ -1647,17 +1647,18 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 				if (!PHAR_G(has_zlib)) {
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
+
+				/* entire file is gzip-compressed, uncompress to temporary file */
+				if (!(temp = php_stream_fopen_tmpfile())) {
+					MAPPHAR_ALLOC_FAIL("unable to create temporary file for decompression of gzipped phar archive \"%s\"")
+				}
+
 				array_init(&filterparams);
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
 				add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS + 32);
-
-				/* entire file is gzip-compressed, uncompress to temporary file */
-				if (!(temp = php_stream_fopen_tmpfile())) {
-					MAPPHAR_ALLOC_FAIL("unable to create temporary file for decompression of gzipped phar archive \"%s\"")
-				}
 
 				php_stream_rewind(fp);
 				filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp));
@@ -2033,45 +2034,40 @@ woohoo:
 		}
 	}
 
-	// TODO Use some sort of loop here instead of a goto
 	pos = memchr(filename + 1, '.', filename_len);
-next_extension:
-	if (!pos) {
-		return FAILURE;
-	}
-
-	while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
-		pos = memchr(pos + 1, '.', filename_len - (pos - filename) - 1);
-		if (!pos) {
-			return FAILURE;
+	while (pos) {
+		while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
+			pos = memchr(pos + 1, '.', filename_len - (pos - filename) - 1);
+			if (!pos) {
+				return FAILURE;
+			}
 		}
-	}
 
-	slash = memchr(pos, '/', filename_len - (pos - filename));
+		slash = memchr(pos, '/', filename_len - (pos - filename));
 
-	if (!slash) {
-		/* this is a url like "phar://blah.phar" with no directory */
+		if (!slash) {
+			/* this is a url like "phar://blah.phar" with no directory */
+			*ext_str = pos;
+			*ext_len = strlen(pos);
+
+			/* file extension must contain "phar" */
+			return phar_check_str(filename, *ext_str, *ext_len, executable, for_create);
+		}
+
+		/* we've found an extension that ends at a directory separator */
 		*ext_str = pos;
-		*ext_len = strlen(pos);
+		*ext_len = slash - pos;
 
-		/* file extension must contain "phar" */
-		return phar_check_str(filename, *ext_str, *ext_len, executable, for_create);
-	}
+		if (phar_check_str(filename, *ext_str, *ext_len, executable, for_create) == SUCCESS) {
+			return SUCCESS;
+		}
 
-	/* we've found an extension that ends at a directory separator */
-	*ext_str = pos;
-	*ext_len = slash - pos;
-
-	if (phar_check_str(filename, *ext_str, *ext_len, executable, for_create) == SUCCESS) {
-		return SUCCESS;
-	}
-
-	/* look for more extensions */
-	pos = strchr(pos + 1, '.');
-	if (pos) {
-		*ext_str = NULL;
-		*ext_len = 0;
-		goto next_extension;
+		/* look for more extensions */
+		pos = strchr(pos + 1, '.');
+		if (pos) {
+			*ext_str = NULL;
+			*ext_len = 0;
+		}
 	}
 
 	return FAILURE;

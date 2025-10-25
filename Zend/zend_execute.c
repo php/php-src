@@ -4935,7 +4935,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					if (last->opcode == ZEND_ROPE_INIT) {
 						zend_string_release_ex(*rope, 0);
 					} else {
-						int j = last->extended_value;
+						uint32_t j = last->extended_value;
 						do {
 							zend_string_release_ex(rope[j], 0);
 						} while (j--);

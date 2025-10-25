@@ -233,11 +233,11 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 	myphar->is_persistent = PHAR_G(persist);
 	/* estimate number of entries, can't be certain with tar files */
 	zend_hash_init(&myphar->manifest, 2 + (totalsize >> 12),
-		zend_get_hash_value, destroy_phar_manifest_entry, (bool)myphar->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, myphar->is_persistent);
 	zend_hash_init(&myphar->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, myphar->is_persistent);
 	zend_hash_init(&myphar->virtual_dirs, 4 + (totalsize >> 11),
-		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -1240,12 +1240,6 @@ nostub:
 
 	if (must_close_old_file) {
 		php_stream_close(oldfile);
-	}
-
-	/* on error in the hash iterator above, error is set */
-	if (*error) {
-		php_stream_close(newfile);
-		return;
 	}
 
 	if (phar->fp && pass.free_fp) {

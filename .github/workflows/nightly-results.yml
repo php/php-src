@@ -1,0 +1,16 @@
+name: Nightly results
+on:
+  workflow_run:
+    workflows:
+      - Nightly
+    types:
+      - completed
+jobs:
+  on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'php/php-src' && github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get install -y curl
+          curl -X POST -H 'Content-type: application/json' --data '{"attachments": [{"text": "Job(s) in *nightly* failed", "footer": "<${{ github.event.workflow_run.html_url }}|View Run>", "color": "danger", "mrkdwn_in": ["text"]}]}' ${{ secrets.ACTION_MONITORING_SLACK }}

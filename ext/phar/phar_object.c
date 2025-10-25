@@ -184,9 +184,6 @@ static phar_action_status phar_file_action(phar_archive_data *phar, phar_entry_i
 			highlight_file(name, &syntax_highlighter_ini);
 
 			efree(name);
-#ifdef PHP_WIN32
-			efree(arch);
-#endif
 			return PHAR_ACT_DO_EXIT;
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
@@ -274,9 +271,6 @@ static phar_action_status phar_file_action(phar_archive_data *phar, phar_entry_i
 			}
 
 			zend_destroy_file_handle(&file_handle);
-#ifdef PHP_WIN32
-			efree(arch);
-#endif
 			if (new_op_array) {
 				ZVAL_UNDEF(&result);
 
@@ -4321,10 +4315,7 @@ PHP_METHOD(Phar, extractTo)
 	}
 
 	if (ZSTR_LEN(path_to) >= MAXPATHLEN) {
-		char *tmp = estrndup(ZSTR_VAL(path_to), 50);
-		/* truncate for error message */
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%s...\", destination directory is too long for filesystem", tmp);
-		efree(tmp);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%.50s...\", destination directory is too long for filesystem", ZSTR_VAL(path_to));
 		RETURN_THROWS();
 	}
 
