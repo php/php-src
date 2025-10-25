@@ -680,7 +680,7 @@ static ZEND_FUNCTION(zend_parent_hook_set_trampoline);
 
 static bool zend_is_in_hook(const zend_property_info *prop_info)
 {
-	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_execute_data *execute_data = EG(current_execute_data);
 	if (!execute_data || !EX(func) || !EX(func)->common.prop_info) {
 		return false;
 	}
@@ -996,7 +996,7 @@ exit:
 /* }}} */
 
 static zend_always_inline bool property_uses_strict_types(void) {
-	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
 		&& execute_data->func
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));

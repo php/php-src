@@ -4346,7 +4346,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
  */
 static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 {
-	zend_op_array *op_array = &EX(func)->op_array;
+	const zend_op_array *op_array = &EX(func)->op_array;
 	uint32_t first_extra_arg = op_array->num_args;
 	uint32_t num_args = EX_NUM_ARGS();
 	zval *src;
@@ -4926,7 +4926,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					zval_ptr_dtor_nogc(var);
 				} else if (kind == ZEND_LIVE_ROPE) {
 					zend_string **rope = (zend_string **)var;
-					zend_op *last = EX(func)->op_array.opcodes + op_num;
+					const zend_op *last = EX(func)->op_array.opcodes + op_num;
 					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
 							|| last->result.var != var_num) {
 						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
@@ -4982,7 +4982,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 		return NULL;
 	}
 
-	zend_op_array *op_array = &EX(func)->op_array;
+	const zend_op_array *op_array = &EX(func)->op_array;
 
 	if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 		uint32_t i, num_cvs = EX(func)->op_array.last_var;
@@ -4993,7 +4993,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 
 	if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
 		zval *zv = EX_VAR_NUM(op_array->last_var + op_array->T);
-		zval *end = zv + (EX_NUM_ARGS() - op_array->num_args);
+		const zval *end = zv + (EX_NUM_ARGS() - op_array->num_args);
 		while (zv != end) {
 			zend_get_gc_buffer_add_zval(gc_buffer, zv++);
 		}
@@ -5462,7 +5462,7 @@ static zend_never_inline zend_result ZEND_FASTCALL zend_quick_check_constant(
 } /* }}} */
 
 static zend_always_inline uint32_t zend_get_arg_offset_by_name(
-		zend_function *fbc, zend_string *arg_name, void **cache_slot) {
+		const zend_function *fbc, const zend_string *arg_name, void **cache_slot) {
 	/* Due to closures, the `fbc` address isn't unique if the memory address is reused.
 	 * The argument info will be however and uniquely positions the arguments.
 	 * We do support NULL arg_info, so we have to distinguish that from an uninitialized cache slot. */
@@ -5477,7 +5477,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)
 			|| EXPECTED(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		for (uint32_t i = 0; i < num_args; i++) {
-			zend_arg_info *arg_info = &fbc->common.arg_info[i];
+			const zend_arg_info *arg_info = &fbc->common.arg_info[i];
 			if (zend_string_equals(arg_name, arg_info->name)) {
 				if (fbc->type == ZEND_USER_FUNCTION && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE))) {
 					*cache_slot = unique_id;
@@ -5489,7 +5489,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	} else {
 		ZEND_ASSERT(num_args == 0 || fbc->internal_function.arg_info);
 		for (uint32_t i = 0; i < num_args; i++) {
-			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			const zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
 			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
 				*cache_slot = unique_id;
@@ -5517,7 +5517,7 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
 		uint32_t *arg_num_ptr, void **cache_slot) {
 	zend_execute_data *call = *call_ptr;
-	zend_function *fbc = call->func;
+	const zend_function *fbc = call->func;
 	uint32_t arg_offset = zend_get_arg_offset_by_name(fbc, arg_name, cache_slot);
 	if (UNEXPECTED(arg_offset == (uint32_t) -1)) {
 		zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
@@ -5603,7 +5603,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				continue;
 			}
 
-			zend_op *opline = &op_array->opcodes[i];
+			const zend_op *opline = &op_array->opcodes[i];
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {

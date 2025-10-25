@@ -601,9 +601,9 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
+ZEND_API const zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
 {
-	zend_function *func = EX(func);
+	const zend_function *func = EX(func);
 
 	/* Resolve function if op is a frameless call. */
 	if (ZEND_USER_CODE(func->type)) {
@@ -717,7 +717,7 @@ ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 
 ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	const zend_execute_data *ex = EG(current_execute_data);
 
 	while (1) {
 		if (!ex) {
