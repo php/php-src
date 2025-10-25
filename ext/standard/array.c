@@ -5038,88 +5038,9 @@ PHP_FUNCTION(array_unique)
 		}
 
 		if (has_complex_types) {
-			/* Use the standard sort-based deduplication (same as other sort types) */
-			cmp = php_get_data_compare_func_unstable(sort_type, 0);
-
-			bool in_place = zend_may_modify_arg_in_place(array);
-			if (in_place) {
-				RETVAL_ARR(Z_ARRVAL_P(array));
-			} else {
-				RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
-			}
-
-			/* Guard against integer overflow in allocation */
-			uint32_t num_elements = Z_ARRVAL_P(array)->nNumOfElements;
-			if (UNEXPECTED(num_elements >= UINT32_MAX - 1)) {
-				zend_throw_error(NULL, "Array is too large for array_unique()");
-				RETURN_THROWS();
-			}
-			size_t alloc_size = (num_elements + 1) * sizeof(struct bucketindex);
-			if (UNEXPECTED(alloc_size / sizeof(struct bucketindex) != (num_elements + 1))) {
-				zend_throw_error(NULL, "Array is too large for array_unique()");
-				RETURN_THROWS();
-			}
-
-			arTmp = pemalloc(alloc_size, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
-
-			/* Copy array buckets to arTmp */
-			if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
-				zval *zv = Z_ARRVAL_P(array)->arPacked;
-				for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++, zv++) {
-					if (Z_TYPE_P(zv) == IS_UNDEF) continue;
-					ZVAL_COPY_VALUE(&arTmp[i].b.val, zv);
-					arTmp[i].b.h = idx;
-					arTmp[i].b.key = NULL;
-					arTmp[i].i = i;
-					i++;
-				}
-			} else {
-				p = Z_ARRVAL_P(array)->arData;
-				for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++, p++) {
-					if (Z_TYPE(p->val) == IS_UNDEF) continue;
-					arTmp[i].b = *p;
-					arTmp[i].i = i;
-					i++;
-				}
-			}
-			ZVAL_UNDEF(&arTmp[i].b.val);
-
-			/* Sort array */
-			zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
-					(compare_func_t) cmp, (swap_func_t) array_bucketindex_swap);
-
-			if (UNEXPECTED(EG(exception))) {
-				pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
-				return;
-			}
-
-			/* Remove adjacent duplicates from sorted array */
-			lastkept = arTmp;
-			for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
-				if (cmp(&lastkept->b, &cmpdata->b)) {
-					lastkept = cmpdata;
-				} else {
-					if (lastkept->i > cmpdata->i) {
-						p = &lastkept->b;
-						lastkept = cmpdata;
-					} else {
-						p = &cmpdata->b;
-					}
-					if (p->key == NULL) {
-						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
-					} else {
-						zend_hash_del(Z_ARRVAL_P(return_value), p->key);
-					}
-				}
-			}
-
-			pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
-
-			if (in_place) {
-				Z_ADDREF_P(return_value);
-			}
-
-			return;
+			/* Arrays and objects need sort-based deduplication.
+			 * Fall through to the standard sort path below. */
+			goto sort_based_dedup;
 		}
 
 		uint32_t num_elements = Z_ARRVAL_P(array)->nNumOfElements;
@@ -5347,6 +5268,7 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
+sort_based_dedup:
 	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
 	bool in_place = zend_may_modify_arg_in_place(array);
