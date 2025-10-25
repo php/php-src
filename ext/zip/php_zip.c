@@ -3026,6 +3026,7 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 
 	/* register */
 	if (zip_register_progress_callback_with_state(intern, rate, php_zip_progress_callback, php_zip_progress_callback_free, obj)) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 	zend_fcc_dup(&obj->progress_callback, &fcc);
@@ -3081,6 +3082,7 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 
 	/* register */
 	if (zip_register_cancel_callback_with_state(intern, php_zip_cancel_callback, php_zip_cancel_callback_free, obj)) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 	zend_fcc_dup(&obj->cancel_callback, &fcc);
