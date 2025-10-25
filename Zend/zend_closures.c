@@ -287,13 +287,13 @@ ZEND_METHOD(Closure, bindTo)
 	do_closure_bind(return_value, ZEND_THIS, newthis, scope_obj, scope_str);
 }
 
-static void zend_copy_parameters_array(uint32_t param_count, HashTable *argument_array) /* {{{ */
+static void zend_copy_parameters_array(const uint32_t param_count, HashTable *argument_array) /* {{{ */
 {
-	zval *param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);;
+	zval *param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
 
 	ZEND_ASSERT(param_count <= ZEND_CALL_NUM_ARGS(EG(current_execute_data)));
 
-	while (param_count-->0) {
+	for (uint32_t i = 0; i < param_count; i++) {
 		Z_TRY_ADDREF_P(param_ptr);
 		zend_hash_next_index_insert_new(argument_array, param_ptr);
 		param_ptr++;
