@@ -1828,12 +1828,6 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	return func;
 }
 
-static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, false);
-}
-/* }}} */
-
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope) /* {{{ */
 {
 	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
@@ -1875,7 +1869,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_user_call_function(zobj->ce, method_name);
+			return zend_get_call_trampoline_func(zobj->ce, method_name, false);
 		} else {
 			return NULL;
 		}
@@ -1901,7 +1895,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_user_call_function(zobj->ce, method_name);
+					fbc = zend_get_call_trampoline_func(zobj->ce, method_name, false);
 				} else {
 					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
@@ -1922,14 +1916,8 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, true);
-}
-/* }}} */
-
 static zend_always_inline zend_function *get_static_method_fallback(
-		zend_class_entry *ce, zend_string *function_name)
+		const zend_class_entry *ce, zend_string *function_name)
 {
 	zend_object *object;
 	if (ce->__call &&
@@ -1939,9 +1927,9 @@ static zend_always_inline zend_function *get_static_method_fallback(
 		 * see: tests/classes/__call_004.phpt  */
 
 		ZEND_ASSERT(object->ce->__call);
-		return zend_get_user_call_function(object->ce, function_name);
+		return zend_get_call_trampoline_func(object->ce, function_name, false);
 	} else if (ce->__callstatic) {
-		return zend_get_user_callstatic_function(ce, function_name);
+		return zend_get_call_trampoline_func(ce, function_name, true);
 	} else {
 		return NULL;
 	}
