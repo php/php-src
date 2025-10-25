@@ -906,11 +906,11 @@ PHP 8.5 UPGRADE NOTES
   . DECIMAL_COMPACT_LONG.
 
 - OpenSSL:
-  . OPENSSL_PKCS1_PSS_PADDING
-  . PKCS7_NOSMIMECAP
-  . PKCS7_CRLFEOL
-  . PKCS7_NOCRL
-  . PKCS7_NO_DUAL_CONTENT
+  . OPENSSL_PKCS1_PSS_PADDING.
+  . PKCS7_NOSMIMECAP.
+  . PKCS7_CRLFEOL.
+  . PKCS7_NOCRL.
+  . PKCS7_NO_DUAL_CONTENT.
 
 - POSIX:
   . POSIX_SC_OPEN_MAX.
@@ -924,12 +924,16 @@ PHP 8.5 UPGRADE NOTES
   . TCP_REUSPORT_LB_NUMA_CURDOM (FreeBSD only).
   . TCP_BBR_ALGORITHM (FreeBSD only).
   . AF_PACKET (Linux only).
+  . ETH_P_IP (Linux only).
+  . ETH_P_IPV6 (Linux only).
+  . ETH_P_LOOP (Linux only).
+  . ETH_P_ALL (Linux only).
   . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
   . SO_BUSY_POLL (Linux only).
   . UDP_SEGMENT (Linux only).
-  - SHUT_RD.
-  - SHUT_WR.
-  - SHUT_RDWR.
+  . SHUT_RD.
+  . SHUT_WR.
+  . SHUT_RDWR.
 
 - Tokenizer:
   . T_VOID_CAST.
