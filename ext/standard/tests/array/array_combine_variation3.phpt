@@ -23,13 +23,6 @@ the lazy dog
 This is a double quoted string
 EOT;
 
-// heredoc with different whitespaces
-$diff_whitespaces = <<<EOT
-hello\r world\t
-1111\t\t != 2222\v\v
-heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
-EOT;
-
 // heredoc with quoted strings and numeric values
 $numeric_string = <<<EOT
 11 < 12. 123 >22
@@ -45,9 +38,9 @@ $arrays = array (
        array(false,true), // with default keys and boolean values
        array(), // empty array
 /*5*/  array(NULL), // with NULL
-       array("a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
-       array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $numeric_string),  // with heredocs
+       array("a\v\f","aaaa\n","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
+       array('a\v\f','aaaa\n','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
+       array("h1" => $blank_line, "h2" => $multiline_string, $numeric_string),  // with heredocs
 
        // associative arrays
 /*9*/  array(1 => "one", 2 => "two", 3 => "three"),  // explicit numeric keys, string values
@@ -57,11 +50,11 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*14*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -113,8 +106,10 @@ array(1) {
 array(6) {
   ["a"]=>
   string(3) "a"
-  ["aaaa"]=>
-  string(5) "aaaa"
+  ["aaaa
+"]=>
+  string(5) "aaaa
+"
   ["b"]=>
   string(1) "b"
   ["b	bbb"]=>
@@ -128,8 +123,8 @@ array(6) {
 array(6) {
   ["a\v\f"]=>
   string(5) "a\v\f"
-  ["aaaa\r"]=>
-  string(6) "aaaa\r"
+  ["aaaa\n"]=>
+  string(6) "aaaa\n"
   ["b"]=>
   string(1) "b"
   ["b\tbbb"]=>
@@ -140,7 +135,7 @@ array(6) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
-array(4) {
+array(3) {
   ["
 "]=>
   string(1) "
@@ -153,14 +148,6 @@ This is a double quoted string"]=>
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  ["hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"]=>
-  string(88) "hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"
   ["11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
@@ -220,13 +207,6 @@ array(3) {
   string(4) "four"
 }
 -- Iteration 14 --
-array(2) {
-  ["null"]=>
-  string(4) "null"
-  [""]=>
-  NULL
-}
--- Iteration 15 --
 array(4) {
   ["true"]=>
   string(4) "true"
@@ -237,30 +217,30 @@ array(4) {
   [1]=>
   bool(true)
 }
--- Iteration 16 --
+-- Iteration 15 --
 array(2) {
   ["emptys"]=>
   string(6) "emptys"
   [""]=>
   string(0) ""
 }
--- Iteration 17 --
+-- Iteration 16 --
 array(2) {
   [""]=>
   bool(false)
   [1]=>
   bool(true)
 }
--- Iteration 18 --
+-- Iteration 17 --
 array(3) {
-  [4]=>
-  int(4)
+  [2]=>
+  int(2)
   [5]=>
   int(5)
   [6]=>
   int(6)
 }
--- Iteration 19 --
+-- Iteration 18 --
 array(3) {
   [10]=>
   int(10)

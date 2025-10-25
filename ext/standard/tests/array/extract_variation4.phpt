@@ -6,7 +6,7 @@ Test extract() function (variation 4)
 $mixed_array = array(
   array( 1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five" ),
   array( "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
-         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 ),
+         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL),
   array( 12, "name", 'age', '45' ),
 );
 

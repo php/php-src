@@ -14,11 +14,9 @@ const EXPECTED_RESULT = [
     "\v" => "\v",
     "\n" => "\n",
     "\t" => "\t",
-    null => null,
 ];
 
 $array = [
-    null => null,
     "\a" => "\a",
     "\cx" => "\cx",
     "\e" => "\e",
