@@ -649,6 +649,66 @@ const T_UNSET_CAST = UNKNOWN;
 const T_VOID_CAST = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_NULLABLE_INT_CAST
+ */
+const T_NULLABLE_INT_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NULLABLE_DOUBLE_CAST
+ */
+const T_NULLABLE_DOUBLE_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NULLABLE_STRING_CAST
+ */
+const T_NULLABLE_STRING_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NULLABLE_ARRAY_CAST
+ */
+const T_NULLABLE_ARRAY_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NULLABLE_OBJECT_CAST
+ */
+const T_NULLABLE_OBJECT_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NULLABLE_BOOL_CAST
+ */
+const T_NULLABLE_BOOL_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_INT_CAST
+ */
+const T_NONNULL_INT_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_DOUBLE_CAST
+ */
+const T_NONNULL_DOUBLE_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_STRING_CAST
+ */
+const T_NONNULL_STRING_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_ARRAY_CAST
+ */
+const T_NONNULL_ARRAY_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_OBJECT_CAST
+ */
+const T_NONNULL_OBJECT_CAST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_NONNULL_BOOL_CAST
+ */
+const T_NONNULL_BOOL_CAST = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_OBJECT_OPERATOR
  */
 const T_OBJECT_OPERATOR = UNKNOWN;
