@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <time.h>
 #ifdef ZEND_WIN32
 # include <process.h>
 #endif
+#include "zend_time.h"
 #include "ZendAccelerator.h"
 
 static void zend_accel_error_va_args(int type, const char *format, va_list args)
@@ -36,7 +36,7 @@ static void zend_accel_error_va_args(int type, const char *format, va_list args)
 
 	if (type <= ZCG(accel_directives).log_verbosity_level) {
 
-	timestamp = time(NULL);
+	timestamp = zend_time_real_get();
 	time_string = asctime(localtime(&timestamp));
 	time_string[24] = 0;
 

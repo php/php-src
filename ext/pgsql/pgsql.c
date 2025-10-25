@@ -31,14 +31,12 @@
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
-#ifdef PHP_WIN32
-# include "win32/time.h"
-#endif
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
+#include "zend_time.h"
 #include "php_network.h"
 
 #ifdef HAVE_PGSQL
@@ -472,7 +470,7 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 	}
 
 	if (timeout != (time_t)ts) {
-		time_t cur = time(NULL);
+		time_t cur = zend_time_real_get();
 
 		if (timeout > cur) {
 			ts = (timeout - cur) * 1000;

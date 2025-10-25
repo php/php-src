@@ -66,7 +66,6 @@
 #ifdef PHP_WIN32
 #include "win32/readdir.h"
 #endif
-#include <time.h>
 
 #include <fcntl.h>
 #include <errno.h>
@@ -75,6 +74,7 @@
 #include <unistd.h>
 #endif
 
+#include "zend_time.h"
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
@@ -292,7 +292,7 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 		return -1;
 	}
 
-	time(&now);
+	now = zend_time_real_get();
 
 	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));

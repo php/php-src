@@ -23,6 +23,7 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#include "zend_time.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -137,14 +138,7 @@ PHP_FUNCTION(stream_socket_client)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
-		tv.tv_sec = (long)(conv / 1000000);
-		tv.tv_usec = (long)(conv % 1000000);
-#else
-		tv.tv_sec = conv / 1000000;
-		tv.tv_usec = conv % 1000000;
-#endif
+		zend_time_dbl2val(timeout, &tv);
 		tv_pointer = &tv;
 	}
 
@@ -284,14 +278,7 @@ PHP_FUNCTION(stream_socket_accept)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
-		tv.tv_sec = (long)(conv / 1000000);
-		tv.tv_usec = (long)(conv % 1000000);
-#else
-		tv.tv_sec = conv / 1000000;
-		tv.tv_usec = conv % 1000000;
-#endif
+		zend_time_dbl2val(timeout, &tv);
 		tv_pointer = &tv;
 	}
 
@@ -797,7 +784,7 @@ PHP_FUNCTION(stream_select)
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
-		tv.tv_sec = (long)(sec + (usec / 1000000));
+		zend_time_sec2val(sec + (usec / 1000000), &tv);
 		tv.tv_usec = (long)(usec % 1000000);
 		tv_p = &tv;
 	}
@@ -1371,7 +1358,7 @@ PHP_FUNCTION(stream_set_blocking)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zend_long seconds, microseconds = 0;
-	struct timeval t;
+	struct timeval tv;
 	php_stream *stream;
 	int argc = ZEND_NUM_ARGS();
 
@@ -1382,27 +1369,14 @@ PHP_FUNCTION(stream_set_timeout)
 		Z_PARAM_LONG(microseconds)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef PHP_WIN32
-	t.tv_sec = (long)seconds;
-
 	if (argc == 3) {
-		t.tv_usec = (long)(microseconds % 1000000);
-		t.tv_sec +=(long)(microseconds / 1000000);
+		zend_time_sec2val(seconds + (microseconds / 1000000), &tv);
+		tv.tv_usec = (long)(microseconds % 1000000);
 	} else {
-		t.tv_usec = 0;
+		zend_time_sec2val(seconds, &tv);
 	}
-#else
-	t.tv_sec = seconds;
 
-	if (argc == 3) {
-		t.tv_usec = microseconds % 1000000;
-		t.tv_sec += microseconds / 1000000;
-	} else {
-		t.tv_usec = 0;
-	}
-#endif
-
-	RETURN_BOOL(PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t));
+	RETURN_BOOL(PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv));
 }
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
