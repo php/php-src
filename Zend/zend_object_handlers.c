@@ -1674,18 +1674,16 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static) /* {{{ */
+ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
+	const zend_function *magic_call, zend_string *method_name, bool is_static) /* {{{ */
 {
 	size_t mname_len;
 	zend_op_array *func;
-	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 	/* We use non-NULL value to avoid useless run_time_cache allocation.
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
 	static const zend_arg_info arg_info[1] = {{0}};
-
-	ZEND_ASSERT(fbc);
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline).op_array;
@@ -1700,16 +1698,16 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+		| (magic_call->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
 	func->fn_flags2 = 0;
 	/* Attributes outlive the trampoline because they are created by the compiler. */
-	func->attributes = fbc->common.attributes;
+	func->attributes = magic_call->common.attributes;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
 	func->opcodes = &EG(call_trampoline_op);
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void**)dummy);
-	func->scope = fbc->common.scope;
+	func->scope = magic_call->common.scope;
 	/* reserve space for arguments, local and temporary variables */
 	/* EG(trampoline) is reused from other places, like FFI (e.g. zend_ffi_cdata_get_closure()) where
 	 * it is used as an internal function. It may set fields that don't belong to common, thus
@@ -1718,10 +1716,10 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	 * frame. This didn't cause any issues until now due to "lucky" structure layout. */
 	func->last_var = 0;
 	uint32_t min_T = 2 + ZEND_OBSERVER_ENABLED;
-	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, min_T) : min_T;
-	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
-	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
-	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
+	func->T = (magic_call->type == ZEND_USER_FUNCTION)? MAX(magic_call->op_array.last_var + magic_call->op_array.T, min_T) : min_T;
+	func->filename = (magic_call->type == ZEND_USER_FUNCTION)? magic_call->op_array.filename : ZSTR_EMPTY_ALLOC();
+	func->line_start = (magic_call->type == ZEND_USER_FUNCTION)? magic_call->op_array.line_start : 0;
+	func->line_end = (magic_call->type == ZEND_USER_FUNCTION)? magic_call->op_array.line_end : 0;
 
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
@@ -1867,7 +1865,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_call_trampoline_func(zobj->ce, method_name, false);
+			return zend_get_call_trampoline_func(zobj->ce->__call, method_name, false);
 		} else {
 			return NULL;
 		}
@@ -1893,7 +1891,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_call_trampoline_func(zobj->ce, method_name, false);
+					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name, false);
 				} else {
 					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
@@ -1925,9 +1923,9 @@ static zend_always_inline zend_function *get_static_method_fallback(
 		 * see: tests/classes/__call_004.phpt  */
 
 		ZEND_ASSERT(object->ce->__call);
-		return zend_get_call_trampoline_func(object->ce, function_name, false);
+		return zend_get_call_trampoline_func(object->ce->__call, function_name, false);
 	} else if (ce->__callstatic) {
-		return zend_get_call_trampoline_func(ce, function_name, true);
+		return zend_get_call_trampoline_func(ce->__callstatic, function_name, true);
 	} else {
 		return NULL;
 	}

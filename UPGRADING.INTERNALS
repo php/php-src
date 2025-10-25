@@ -35,6 +35,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
     Call zval_ptr_dtor_nogc() directly instead.
   . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_get_call_trampoline_func() API now takes the __call or
+    __callStatic zend_function* instead of a CE.
 
 ========================
 2. Build system changes
