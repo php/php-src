@@ -1242,12 +1242,6 @@ nostub:
 		php_stream_close(oldfile);
 	}
 
-	/* on error in the hash iterator above, error is set */
-	if (*error) {
-		php_stream_close(newfile);
-		return;
-	}
-
 	if (phar->fp && pass.free_fp) {
 		php_stream_close(phar->fp);
 	}
