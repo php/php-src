@@ -2042,7 +2042,7 @@ TEST $file
     @unlink($temp_skipif);
     @unlink($test_skipif);
     @unlink($tmp_post);
-    @unlink($temp_clean);
+    // @unlink($temp_clean);
     @unlink($test_clean);
     @unlink($preload_filename);
 
@@ -2534,11 +2534,12 @@ COMMAND $cmd
         if (!$no_clean) {
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
+            var_dump($test_clean);
             $clean_output = system_with_timeout("$extra $orig_php $pass_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
         }
 
         if (!$cfg['keep']['clean']) {
-            @unlink($test_clean);
+            // @unlink($test_clean);
         }
     }
 
@@ -2674,6 +2675,8 @@ COMMAND $cmd
 
         if (!$leaked && !$failed_headers) {
             // If the test passed and CLEAN produced output, report test as borked.
+            var_dump("clean output: ",bin2hex(string: $clean_output??''));
+            $clean_output = trim($clean_output ?? '');
             if ($clean_output) {
                 show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
                     $PHP_FAILED_TESTS['BORKED'][] = [
