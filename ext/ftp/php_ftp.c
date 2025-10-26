@@ -120,7 +120,7 @@ PHP_MINIT_FUNCTION(ftp)
 	ftp_object_handlers.clone_obj = NULL;
 
 	register_ftp_symbols(module_number);
-
+	php_ftp_pollfd_for_ms = php_pollfd_for_ms;
 	return SUCCESS;
 }
 

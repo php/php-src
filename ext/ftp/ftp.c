@@ -64,6 +64,8 @@
 # define ETIMEDOUT WSAETIMEDOUT
 #endif
 
+PHPAPI int(*php_ftp_pollfd_for_ms)(php_socket_t, int, int);
+
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
@@ -1467,7 +1469,7 @@ static int my_poll(php_socket_t fd, int events, int timeout) {
 
 	while (true) {
 		zend_hrtime_t start_ns = zend_hrtime();
-		n = php_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
+		n = php_ftp_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
 
 		if (n == -1 && php_socket_errno() == EINTR) {
 			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;

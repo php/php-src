@@ -22,6 +22,7 @@ extern zend_module_entry php_ftp_module_entry;
 #define phpext_ftp_ptr &php_ftp_module_entry
 
 #include "php_version.h"
+#include "php_network.h"
 #define PHP_FTP_VERSION PHP_VERSION
 
 #define PHP_FTP_OPT_TIMEOUT_SEC	0
@@ -31,5 +32,9 @@ extern zend_module_entry php_ftp_module_entry;
 
 PHP_MINIT_FUNCTION(ftp);
 PHP_MINFO_FUNCTION(ftp);
+
+/* expose this interface to enable coroutine support for FTP in other extensions
+ */
+PHPAPI extern int(*php_ftp_pollfd_for_ms)(php_socket_t, int, int);
 
 #endif
