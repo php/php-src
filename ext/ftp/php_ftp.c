@@ -38,6 +38,7 @@
 
 static zend_class_entry *php_ftp_ce = NULL;
 static zend_object_handlers ftp_object_handlers;
+PHP_FTP_API int(*php_ftp_pollfd_for_ms)(php_socket_t, int, int);
 
 zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
@@ -120,7 +121,7 @@ PHP_MINIT_FUNCTION(ftp)
 	ftp_object_handlers.clone_obj = NULL;
 
 	register_ftp_symbols(module_number);
-
+	php_ftp_pollfd_for_ms = php_pollfd_for_ms;
 	return SUCCESS;
 }
 
