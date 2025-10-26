@@ -3424,9 +3424,18 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
+	bool trailing1 = false, trailing2 = false;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	/* Use allow_errors=true to extract leading numeric values even with trailing data.
+	 * If BOTH strings have numeric prefixes, do numeric comparison to maintain transitivity.
+	 * This ensures the comparison function is transitive, which is required for
+	 * stable sorting and correct behavior in array_unique() with SORT_REGULAR.
+	 */
+	ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, true, &oflow1, &trailing1);
+	ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, true, &oflow2, &trailing2);
+
+	/* If BOTH strings have numeric prefixes, do numeric comparison */
+	if (ret1 && ret2) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -3456,8 +3465,24 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 				goto string_cmp;
 			}
 			dval1 = dval1 - dval2;
+			if (dval1 == 0.0) {
+				/* Numeric values are equal, check trailing data for tie-breaker */
+				if (!trailing1 && trailing2) {
+					return -1; /* No trailing data < has trailing data */
+				} else if (trailing1 && !trailing2) {
+					return 1;  /* Has trailing data > no trailing data */
+				}
+			}
 			return ZEND_NORMALIZE_BOOL(dval1);
 		} else { /* they both have to be long's */
+			if (lval1 == lval2) {
+				/* Numeric values are equal, check trailing data for tie-breaker */
+				if (!trailing1 && trailing2) {
+					return -1; /* No trailing data < has trailing data */
+				} else if (trailing1 && !trailing2) {
+					return 1;  /* Has trailing data > no trailing data */
+				}
+			}
 			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
 		}
 	} else {
