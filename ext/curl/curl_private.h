@@ -123,6 +123,8 @@ typedef struct {
 
 typedef struct {
 	zend_fcall_info_cache server_push;
+	zend_fcall_info_cache socket_function;
+	zend_fcall_info_cache timer_function;
 } php_curlm_handlers;
 
 typedef struct {
