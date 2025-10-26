@@ -1638,6 +1638,18 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 }
 /* }}} */
 
+/* Get crypto status */
+PHP_FUNCTION(stream_socket_get_crypto_status)
+{
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		PHP_Z_PARAM_STREAM(stream)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(php_stream_xport_crypto_get_status(stream));
+}
+
 /* {{{ Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
