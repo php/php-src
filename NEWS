@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
     execution). (Jakub Zelenka, txuna)
 
+- FTP:
+  . Fixed bug GH-20240 (FTP with SSL: ftp_fput(): Connection timed out on
+    successful writes). (nielsdos)
+
 - GD:
   . Fixed bug GH-20070 (Return type violation in imagefilter when an invalid
     filter is provided). (Girgias)
