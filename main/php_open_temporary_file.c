@@ -303,7 +303,16 @@ def_tmp:
 		if (temp_dir &&
 		    *temp_dir != '\0' &&
 		    (!(flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ON_FALLBACK) || !php_check_open_basedir(temp_dir))) {
-			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p);
+			fd = php_do_open_temporary_file(temp_dir, pfx, opened_path_p);
+			if (!(flags & PHP_TMP_FILE_SILENT) && dir && *dir != '\0') {
+				/* Default temporary directory fallback. */
+				if (UNEXPECTED(fd == -1)) {
+					/* TODO: decide whether we should notice that even the fallback failed? */
+				} else {
+					php_error_docref(NULL, E_NOTICE, "file created in the system's temporary directory");
+				}
+			}
+			return fd;
 		} else {
 			return -1;
 		}
@@ -317,9 +326,6 @@ def_tmp:
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p);
 	if (fd == -1) {
 		/* Use default temporary directory. */
-		if (!(flags & PHP_TMP_FILE_SILENT)) {
-			php_error_docref(NULL, E_NOTICE, "file created in the system's temporary directory");
-		}
 		goto def_tmp;
 	}
 	return fd;
