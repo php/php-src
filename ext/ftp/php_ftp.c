@@ -809,7 +809,7 @@ PHP_FUNCTION(ftp_nb_get)
 }
 /* }}} */
 
-/* {{{ Continues retrieving/sending a file nbronously */
+/* {{{ Continues to retrieve or send a file in non-blocking mode */
 PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
@@ -822,7 +822,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (!ftp->nb) {
-		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue");
+		php_error_docref(NULL, E_WARNING, "No non-blocking transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
