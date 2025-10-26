@@ -137,9 +137,9 @@ int(2)
 -- Call to readdir() --
 array(16) {
   [0]=>
-  string(9) "-10.5.tmp"
-  [1]=>
   string(9) "-2345.tmp"
+  [1]=>
+  string(9) "-10.5.tmp"
   [2]=>
   string(1) "."
   [3]=>
@@ -147,11 +147,11 @@ array(16) {
   [4]=>
   string(4) ".tmp"
   [5]=>
-  string(7) "0.5.tmp"
-  [6]=>
   string(5) "0.tmp"
-  [7]=>
+  [6]=>
   string(17) "1.23456789E-9.tmp"
+  [7]=>
+  string(7) "0.5.tmp"
   [8]=>
   string(5) "1.tmp"
   [9]=>
