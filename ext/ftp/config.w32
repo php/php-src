@@ -5,7 +5,7 @@ ARG_ENABLE("ftp", "ftp support", "no");
 if (PHP_FTP != "no") {
 
 	EXTENSION("ftp", "php_ftp.c ftp.c");
-
+    PHP_INSTALL_HEADERS("ext/ftp/", "php_ftp.h");
 	var ret = SETUP_OPENSSL("ftp", PHP_FTP);
 
 	if (ret >= 2) {

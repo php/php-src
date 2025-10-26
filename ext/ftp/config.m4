@@ -20,7 +20,7 @@ if test "$PHP_FTP" = "yes"; then
   AC_DEFINE([HAVE_FTP], [1],
     [Define to 1 if the PHP extension 'ftp' is available.])
   PHP_NEW_EXTENSION([ftp], [php_ftp.c ftp.c], [$ext_shared])
-
+  PHP_INSTALL_HEADERS([ext/ftp], [php_ftp.h])
   AS_VAR_IF([PHP_FTP_SSL], [no],, [
     PHP_SETUP_OPENSSL([FTP_SHARED_LIBADD])
     PHP_SUBST([FTP_SHARED_LIBADD])
