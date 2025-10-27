@@ -447,6 +447,15 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "BMP Support", "enabled");
 #ifdef HAVE_GD_AVIF
 	php_info_print_table_row(2, "AVIF Support", "enabled");
+#ifdef HAVE_GD_BUNDLED
+#include <avif/avif.h>
+	{
+		php_info_print_table_row(2, "AVIF Version", avifVersion());
+		char tmp[256];
+		avifCodecVersions(tmp);
+		php_info_print_table_row(2, "AVIF Codecs", tmp);
+	}
+#endif
 #endif
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
 	php_info_print_table_end();
