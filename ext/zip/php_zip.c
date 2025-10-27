@@ -205,7 +205,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 		efree(file_dirname_fullpath);
 		zend_string_release_ex(file_basename, false);
 		efree(new_state.cwd);
-		return true;
+		return false;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(fullpath);
@@ -579,7 +579,7 @@ int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* 
 	php_glob_t globbuf;
 	int ret;
 
-	char *pattern = ZSTR_VAL(spattern);
+	const char *pattern = ZSTR_VAL(spattern);
 	size_t pattern_len = ZSTR_LEN(spattern);
 
 	if (pattern_len >= MAXPATHLEN) {
