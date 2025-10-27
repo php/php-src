@@ -8,7 +8,7 @@ if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL < 3.2');
 ?>
 --FILE--
 <?php
-$cert = "file://" . __DIR__ . "/cert.crt";
+$cert = "file://" . __DIR__ . "/crit.crt";
 
 $parsedCert = openssl_x509_parse($cert);
 var_dump($parsedCert === openssl_x509_parse(openssl_x509_read($cert)));
