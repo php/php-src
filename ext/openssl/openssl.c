@@ -1014,6 +1014,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *str_serial;
 	char *hex_serial;
 	char buf[256];
+	char *crit_name = NULL;
+	int crit_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
@@ -1115,9 +1117,6 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_zval(return_value, "purposes", &subitem);
 
 	array_init(&subitem);
-
-	char *crit_name = NULL;
-	int crit_len = 0;
 
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
 		int nid;
