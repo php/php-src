@@ -1118,30 +1118,31 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	char *crit_name = NULL;
 	int crit_len = 0;
-	int crit = 0;
 
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
 		int nid;
 		extension = X509_get_ext(cert, i);
 		nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
-		crit = X509_EXTENSION_get_critical(extension);
 		if (nid != NID_undef) {
-			extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+			extname = (char *)OBJ_nid2sn(nid);
 		} else {
 			OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
 			extname = buf;
 		}
-		if (crit) {
-			if (strlen(extname) + 10 > crit_len) {
+		if (X509_EXTENSION_get_critical(extension)) {
+			int new_len = strlen(extname) + 10;
+			if (new_len > crit_len) {
 				if (crit_name) {
 					efree(crit_name);
 				}
-				crit_len = strlen(extname) + 10;
+				crit_len = new_len;
 				crit_name = emalloc(crit_len);
 			}
-			strcpy(crit_name, extname);
-			strcat(crit_name, ":critical");
-			add_assoc_bool(&subitem, crit_name, 1);
+			if (crit_name) {
+				strcpy(crit_name, extname);
+				strcat(crit_name, ":critical");
+				add_assoc_bool(&subitem, crit_name, 1);
+			}
 		}
 
 		bio_out = BIO_new(BIO_s_mem());
