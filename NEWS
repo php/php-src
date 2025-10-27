@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core: 
   . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
+  . Fixed bug GH-20183 (Stale EG(opline_before_exception) pointer through eval).
+    (ilutov)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
