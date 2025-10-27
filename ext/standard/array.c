@@ -305,6 +305,20 @@ static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucke
 			return -1;
 		}
 	}
+
+	zval *lhs = &f->val;
+	ZVAL_DEREF(lhs);
+	if (Z_TYPE_P(lhs) == IS_STRING && Z_TYPE_P(rhs) == IS_STRING) {
+		bool lhs_is_numeric = is_numeric_string(Z_STRVAL_P(lhs), Z_STRLEN_P(lhs), NULL, NULL, false);
+		bool rhs_is_numeric = is_numeric_string(Z_STRVAL_P(rhs), Z_STRLEN_P(rhs), NULL, NULL, false);
+
+		if (lhs_is_numeric != rhs_is_numeric) {
+			/* One is numeric, one is not. For transitivity, we order:
+			 * non-numeric < numeric (to maintain common expectations). */
+			return lhs_is_numeric ? 1 : -1;
+		}
+	}
+
 	return result;
 }
 /* }}} */
