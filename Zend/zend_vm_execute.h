@@ -24124,6 +24124,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -24139,6 +24142,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -24200,21 +24206,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = RT_CONSTANT(opline, opline->op2);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -27191,6 +27220,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -27206,6 +27238,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -27267,22 +27302,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+assign_op_end:
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -29687,6 +29744,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -29702,6 +29762,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -31601,6 +31664,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -31616,6 +31682,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -31677,21 +31746,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -43532,6 +43624,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -43547,6 +43642,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -43609,21 +43707,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = RT_CONSTANT(opline, opline->op2);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 
@@ -47609,6 +47730,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -47624,6 +47748,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -47686,22 +47813,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+assign_op_end:
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 
@@ -50785,6 +50934,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -50800,6 +50952,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -53241,6 +53396,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -53256,6 +53414,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -53318,21 +53479,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_SPE
 	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 
@@ -79366,6 +79550,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -79381,6 +79568,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -79442,21 +79632,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_VAR
 	value = RT_CONSTANT(opline, opline->op2);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -82433,6 +82646,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -82448,6 +82664,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -82509,22 +82728,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_VAR
 	value = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+assign_op_end:
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -84929,6 +85170,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -84944,6 +85188,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -86843,6 +87090,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -86858,6 +87108,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -86919,21 +87172,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_VAR
 	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_VAR == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -98774,6 +99050,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -98789,6 +99068,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -98851,21 +99133,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_CV_
 	value = RT_CONSTANT(opline, opline->op2);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 
@@ -102851,6 +103156,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -102866,6 +103174,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -102928,22 +103239,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_CV_
 	value = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+assign_op_end:
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
 
@@ -106027,6 +106360,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -106042,6 +106378,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -108381,6 +108720,9 @@ assign_dim_op_new_array:
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 
+		/* Prevents array from being released or updated during binary_op */
+		GC_ADDREF(ht);
+
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
 				zend_reference *ref = Z_REF_P(var_ptr);
@@ -108396,6 +108738,9 @@ assign_dim_op_new_array:
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+
+		GC_DTOR(ht);
+
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
@@ -108458,21 +108803,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_SPEC_CV_
 	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
 
-	do {
-		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
-			zend_reference *ref = Z_REF_P(var_ptr);
-			var_ptr = Z_REFVAL_P(var_ptr);
-			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-				break;
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+assign_op_ref:;
+		zend_reference *ref = Z_REF_P(var_ptr);
+		GC_ADDREF(ref);
+
+		var_ptr = Z_REFVAL_P(var_ptr);
+		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+			zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+		} else {
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		}
+
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+			} else {
+				zval_ptr_dtor(var_ptr);
 			}
+			efree_size(ref, sizeof(zend_reference));
+			goto assign_op_end;
+		}
+	} else {
+		if (IS_CV == IS_VAR) {
+			ZEND_ASSERT(Z_TYPE_P(EX_VAR(opline->op1.num)) == IS_INDIRECT);
+			/* op1 is a var-var, var_ptr is a symbol table slot which may be
+			 * invalidated by the binary operation. Turn it into a ref so we
+			 * control the lifetime of the zval slot. */
+			ZVAL_MAKE_REF(var_ptr);
+			goto assign_op_ref;
 		}
 		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-	} while (0);
+	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_end:
 
 
 
