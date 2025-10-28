@@ -15,7 +15,10 @@ fwrite($socket1w, "test data");
 fclose($socket1r);
 pt_expect_events($poll_ctx->wait(100), [
     [
-        'events' => POLL_EVENT_WRITE|POLL_EVENT_ERROR|POLL_EVENT_HUP,
+        'events' => [
+            'default' => POLL_EVENT_WRITE|POLL_EVENT_ERROR|POLL_EVENT_HUP,
+            'kqueue' => POLL_EVENT_WRITE|POLL_EVENT_HUP,
+        ],
         'data' => 'socket2_data'
     ]
 ], $poll_ctx);
