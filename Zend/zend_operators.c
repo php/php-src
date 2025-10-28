@@ -2271,6 +2271,12 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
 	}
 
+	/* String is non-numeric. In transitive mode, enforce: numeric < non-numeric.
+	 * Since lval is numeric and str is non-numeric, lval < str, so return -1. */
+	if (UNEXPECTED(EG(transitive_compare_mode))) {
+		return -1;
+	}
+
 	zend_string *lval_as_str = zend_long_to_str(lval);
 	int cmp_result = zend_binary_strcmp(
 		ZSTR_VAL(lval_as_str), ZSTR_LEN(lval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
@@ -2293,6 +2299,12 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 
 	if (type == IS_DOUBLE) {
 		return ZEND_THREEWAY_COMPARE(dval, str_dval);
+	}
+
+	/* String is non-numeric. In transitive mode, enforce: numeric < non-numeric.
+	 * Since dval is numeric and str is non-numeric, dval < str, so return -1. */
+	if (UNEXPECTED(EG(transitive_compare_mode))) {
+		return -1;
 	}
 
 	zend_string *dval_as_str = zend_double_to_str(dval);
@@ -3425,8 +3437,17 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL);
+	ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL);
+
+	/* When in transitive comparison mode (used by SORT_REGULAR), enforce transitivity
+	 * by consistently ordering numeric vs non-numeric strings. */
+	if (UNEXPECTED(EG(transitive_compare_mode)) && (ret1 != 0) != (ret2 != 0)) {
+		/* One is numeric, one is not. Order: numeric < non-numeric (matches PHP 8+ rules) */
+		return ret1 ? -1 : 1;
+	}
+
+	if (ret1 && ret2) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
