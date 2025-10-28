@@ -215,7 +215,6 @@ PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void
 		return SUCCESS;
 	}
 
-	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -232,7 +231,6 @@ PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, v
 		return SUCCESS;
 	}
 
-	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -249,7 +247,6 @@ PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 		return SUCCESS;
 	}
 
-	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -263,10 +260,6 @@ PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_even
 
 	/* Delegate to backend - it handles everything including ET simulation if needed */
 	int nfds = ctx->backend_ops->wait(ctx, events, max_events, timeout);
-
-	if (UNEXPECTED(nfds < 0)) {
-		php_poll_set_current_errno_error(ctx);
-	}
 
 	return nfds;
 }
