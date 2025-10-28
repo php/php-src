@@ -2,10 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC4
 
-- Core: 
+- Core:
   . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
   . Fixed bug GH-20183 (Stale EG(opline_before_exception) pointer through eval).
     (ilutov)
+
+- Opcache:
+  . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
