@@ -87,6 +87,14 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 # define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
+#ifdef SO_REUSEPORT_LB
+// Historically, SO_REUSEPORT on FreeBSD predates Linux version
+// however does not involve load balancing grouping thus
+// SO_REUSEPORT_LB is the genuine equivalent.
+# undef SO_REUSEPORT
+# define SO_REUSEPORT SO_REUSEPORT_LB
+#endif
+
 #ifdef HAVE_GETADDRINFO
 # if !defined(PHP_WIN32) && !defined(HAVE_GAI_STRERROR)
 /* {{{ php_gai_strerror */
