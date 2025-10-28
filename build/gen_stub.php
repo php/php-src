@@ -3029,6 +3029,7 @@ class StringBuilder {
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
         "clone" => "ZEND_STR_CLONE",
+        "memory_limit" => "ZEND_STR_MEMORY_LIMIT",
         '8.0' => 'ZEND_STR_8_DOT_0',
         '8.1' => 'ZEND_STR_8_DOT_1',
         '8.2' => 'ZEND_STR_8_DOT_2',
