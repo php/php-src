@@ -601,8 +601,9 @@ static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference
 		return &EG(uninitialized_zval);
 	}
 
+	zval tmp;
+	ZVAL_COPY(&tmp, value_ptr);
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
-	Z_TRY_ADDREF_P(value_ptr);
 	return zend_assign_to_variable_ex(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
