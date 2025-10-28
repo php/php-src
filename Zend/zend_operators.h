@@ -120,6 +120,9 @@ ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
 ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d);
 ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s);
 ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type);
+ZEND_API void ZEND_COLD zend_null_cast_deprecated(const char *target_type);
+ZEND_API void ZEND_COLD zend_malformed_string_cast_deprecated(const char *str, const char *target_type);
+ZEND_API void ZEND_COLD zend_object_cast_deprecated(const char *class_name, const char *target_type);
 
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 

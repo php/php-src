@@ -37,9 +37,14 @@ foreach ($vars as $var) {
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from malformed string "string" to int is deprecated in %s on line %d
 int(0)
 int(8754456)
+
+Deprecated: Implicit conversion from malformed string "" to int is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit conversion from malformed string "%c" to int is deprecated in %s on line %d
 int(0)
 int(9876545)
 int(0)
@@ -47,8 +52,12 @@ int(0)
 int(1)
 int(0)
 int(1)
+
+Deprecated: Implicit conversion from null to int is deprecated in %s on line %d
 int(0)
 int(%d)
+
+Deprecated: Implicit conversion from test to int is deprecated in %s on line %d
 
 Warning: Object of class test could not be converted to int in %s on line %d
 int(1)

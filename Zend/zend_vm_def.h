@@ -6484,12 +6484,43 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 
 	switch (opline->extended_value) {
 		case IS_LONG:
+			/* Check for deprecated conversions */
+			if (Z_TYPE_P(expr) == IS_NULL) {
+				zend_null_cast_deprecated("int");
+			} else if (Z_TYPE_P(expr) == IS_STRING) {
+				zend_long lval;
+				double dval;
+				bool trailing_data = false;
+				uint8_t type = _is_numeric_string_ex(Z_STRVAL_P(expr), Z_STRLEN_P(expr), &lval, &dval, true, NULL, &trailing_data);
+				if (type == 0 || trailing_data) {
+					zend_malformed_string_cast_deprecated(Z_STRVAL_P(expr), "int");
+				}
+			} else if (Z_TYPE_P(expr) == IS_OBJECT) {
+				zend_object_cast_deprecated(ZSTR_VAL(Z_OBJCE_P(expr)->name), "int");
+			}
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
 		case IS_DOUBLE:
+			/* Check for deprecated conversions */
+			if (Z_TYPE_P(expr) == IS_NULL) {
+				zend_null_cast_deprecated("float");
+			} else if (Z_TYPE_P(expr) == IS_STRING) {
+				zend_long lval;
+				double dval;
+				bool trailing_data = false;
+				uint8_t type = _is_numeric_string_ex(Z_STRVAL_P(expr), Z_STRLEN_P(expr), &lval, &dval, true, NULL, &trailing_data);
+				if (type == 0 || trailing_data) {
+					zend_malformed_string_cast_deprecated(Z_STRVAL_P(expr), "float");
+				}
+			} else if (Z_TYPE_P(expr) == IS_OBJECT) {
+				zend_object_cast_deprecated(ZSTR_VAL(Z_OBJCE_P(expr)->name), "float");
+			}
 			ZVAL_DOUBLE(result, zval_get_double(expr));
 			break;
 		case IS_STRING:
+			if (Z_TYPE_P(expr) == IS_NULL) {
+				zend_null_cast_deprecated("string");
+			}
 			ZVAL_STR(result, zval_get_string(expr));
 			break;
 		default:
@@ -6511,9 +6542,15 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 			}
 
 			if (opline->extended_value == IS_ARRAY) {
+				if (Z_TYPE_P(expr) == IS_NULL) {
+					zend_null_cast_deprecated("array");
+				}
 				zend_cast_zval_to_array(result, expr, OP1_TYPE);
 			} else {
 				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
+				if (Z_TYPE_P(expr) == IS_NULL) {
+					zend_null_cast_deprecated("object");
+				}
 				zend_cast_zval_to_object(result, expr, OP1_TYPE);
 			}
 	}
