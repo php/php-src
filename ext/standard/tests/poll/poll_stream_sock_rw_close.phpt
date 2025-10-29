@@ -17,8 +17,7 @@ pt_expect_events($poll_ctx->wait(100), [
     [
         'events' => [
             'default' => POLL_EVENT_WRITE|POLL_EVENT_ERROR|POLL_EVENT_HUP,
-            'kqueue' => POLL_EVENT_WRITE|POLL_EVENT_HUP,
-            'eventport' => POLL_EVENT_WRITE, // it removes event after write is possible
+            'kqueue|eventport' => POLL_EVENT_WRITE|POLL_EVENT_HUP,
         ],
         'data' => 'socket2_data'
     ]
