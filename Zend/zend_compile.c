@@ -10287,9 +10287,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 					/* Incompatible float will generate an error, leave this to run-time */
 					if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
-						zval_ptr_dtor_nogc(value);
-						zval_ptr_dtor(result);
-						return 0;
+						goto fail;
 					}
 					zend_hash_index_update(Z_ARRVAL_P(result), lval, value);
 					break;
@@ -10301,13 +10299,14 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_hash_index_update(Z_ARRVAL_P(result), 1, value);
 					break;
 				case IS_NULL:
-					zend_hash_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), value);
-					break;
+					/* Null key will generate a warning at run-time. */
+					goto fail;
 				default:
 					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
 					break;
 			}
 		} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
+fail:
 			zval_ptr_dtor_nogc(value);
 			zval_ptr_dtor(result);
 			return 0;

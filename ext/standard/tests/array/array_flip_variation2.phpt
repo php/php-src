@@ -8,25 +8,12 @@ Test array_flip() function : usage variations - 'input' array with different key
 
 echo "*** Testing array_flip() : different keys for 'input' array argument ***\n";
 
-// different heredoc strings
-$empty_heredoc = <<<EOT1
-EOT1;
-
-$simple_heredoc = <<<EOT4
-simple
-EOT4;
-
-$multiline_heredoc = <<<EOT7
-multiline heredoc with 123 and
-speci@! ch@r$...checking\nand\talso
-EOT7;
-
 $input = array(
   // default key
-  'one',  //expected: default key 0, value will be replaced by 'bool_key4'
+  'one',  //expected: default key 0, value will be replaced by 'bool_key2'
 
   // numeric keys
-  1 => 'int_key', // expected: value will be replaced by 'bool_key3'
+  1 => 'int_key', // expected: value will be replaced by 'bool_key1'
   -2 => 'negative_key',
   012 => 'octal_key',
   0x34 => 'hex_key',
@@ -41,21 +28,10 @@ $input = array(
   // bool keys
   true => 'bool_key1',
   false => 'bool_key2',
-  TRUE => 'bool_key3',
-  FALSE => 'bool_key4',
-
-  // null keys
-  null => 'null_key1',  // expected: value will be replaced by 'null_key2'
-  NULL => 'null_key2',
 
   // binary key
   "a".chr(0)."b" => 'binary_key1',
   b"binary" => 'binary_key2',
-
-  //heredoc keys
-  $empty_heredoc => 'empty_heredoc',
-  $simple_heredoc => 'simple_heredoc',
-  $multiline_heredoc => 'multiline_heredoc',
 );
 
 var_dump( array_flip($input) );
@@ -64,10 +40,10 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_flip() : different keys for 'input' array argument ***
-array(13) {
-  ["bool_key4"]=>
+array(11) {
+  ["bool_key2"]=>
   int(0)
-  ["bool_key3"]=>
+  ["bool_key1"]=>
   int(1)
   ["negative_key"]=>
   int(-2)
@@ -79,7 +55,7 @@ array(13) {
   string(3) "key"
   ["string_key2"]=>
   string(3) "two"
-  ["empty_heredoc"]=>
+  ["string_key4"]=>
   string(0) ""
   ["string_key5"]=>
   string(1) " "
@@ -87,11 +63,5 @@ array(13) {
   string(3) "a%0b"
   ["binary_key2"]=>
   string(6) "binary"
-  ["simple_heredoc"]=>
-  string(6) "simple"
-  ["multiline_heredoc"]=>
-  string(6%d) "multiline heredoc with 123 and
-speci@! ch@r$...checking
-and	also"
 }
 Done

@@ -5253,7 +5253,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_INIT_ARRAY:
 			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_ADD_ARRAY_ELEMENT:
-			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_NULL|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_COUNT:

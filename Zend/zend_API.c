@@ -2233,9 +2233,6 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 		case IS_STRING:
 			result = zend_symtable_update(ht, Z_STR_P(key), value);
 			break;
-		case IS_NULL:
-			result = zend_hash_update(ht, ZSTR_EMPTY_ALLOC(), value);
-			break;
 		case IS_RESOURCE:
 			zend_use_resource_as_offset(key);
 			result = zend_hash_index_update(ht, Z_RES_HANDLE_P(key), value);
@@ -2251,6 +2248,13 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			break;
 		case IS_DOUBLE:
 			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
+			break;
+		case IS_NULL:
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
+			result = zend_hash_update(ht, ZSTR_EMPTY_ALLOC(), value);
 			break;
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), key, BP_VAR_W);

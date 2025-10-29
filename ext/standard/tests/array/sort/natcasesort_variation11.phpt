@@ -8,10 +8,6 @@ Test natcasesort() function : usage variations - Different array keys
 
 echo "*** Testing natcasesort() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -28,29 +24,10 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // null data
-/*4*/  'null uppercase' => array(
-       NULL => 'null 1',
-       ),
-
-/*5*/  'null lowercase' => array(
-       null => 'null 2',
-       ),
-
        // boolean data
 /*6*/ 'bool lowercase' => array(
        true => 'lowert',
        false => 'lowerf',
-       ),
-
-/*7*/  'bool uppercase' => array(
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ),
-
-       // empty data
-/*8*/ 'empty double quotes' => array(
-       "" => 'emptyd',
        ),
 
 /*9*/  'empty single quotes' => array(
@@ -62,16 +39,6 @@ $inputs = array(
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ),
-
-       // undefined data
-/*11*/ 'undefined' => array(
-       @$undefined_var => 'undefined',
-       ),
-
-       // unset data
-/*12*/ 'unset' => array(
-       @$unset_var => 'unset',
        ),
 
        // duplicate values
@@ -112,20 +79,6 @@ array(4) {
 
 -- Iteration 2 --
 bool(true)
-array(1) {
-  [""]=>
-  string(6) "null 1"
-}
-
--- Iteration 3 --
-bool(true)
-array(1) {
-  [""]=>
-  string(6) "null 2"
-}
-
--- Iteration 4 --
-bool(true)
 array(2) {
   [0]=>
   string(6) "lowerf"
@@ -133,30 +86,14 @@ array(2) {
   string(6) "lowert"
 }
 
--- Iteration 5 --
-bool(true)
-array(2) {
-  [0]=>
-  string(6) "upperf"
-  [1]=>
-  string(6) "uppert"
-}
-
--- Iteration 6 --
-bool(true)
-array(1) {
-  [""]=>
-  string(6) "emptyd"
-}
-
--- Iteration 7 --
+-- Iteration 3 --
 bool(true)
 array(1) {
   [""]=>
   string(6) "emptys"
 }
 
--- Iteration 8 --
+-- Iteration 4 --
 bool(true)
 array(3) {
   ["stringd"]=>
@@ -167,21 +104,7 @@ array(3) {
   string(7) "strings"
 }
 
--- Iteration 9 --
-bool(true)
-array(1) {
-  [""]=>
-  string(9) "undefined"
-}
-
--- Iteration 10 --
-bool(true)
-array(1) {
-  [""]=>
-  string(5) "unset"
-}
-
--- Iteration 11 --
+-- Iteration 5 --
 bool(true)
 array(3) {
   ["foo"]=>
