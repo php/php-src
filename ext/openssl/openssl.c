@@ -1674,7 +1674,7 @@ PHP_FUNCTION(openssl_csr_export)
  */
 static int parse_time_range(zval *validity, time_t *from_time, time_t *to_time) {
 	zval *tmp;
-	long lval;
+	zend_long lval;
 	double dval;
 	ASN1_TIME *t;
 	time_t from = -1;
