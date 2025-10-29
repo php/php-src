@@ -535,13 +535,29 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
+
+				/* See GH-17733. Reset Z_EXTRA_P(op2) of ZEND_INIT_FCALL to avoid
+				 * calling incorrect function when environment changes. */
+				if (opline->opcode == ZEND_INIT_FCALL) {
+					zval *op2 = opline->op2.zv;
+					UNSERIALIZE_PTR(op2);
+					Z_EXTRA_P(op2) = 0;
+					ZEND_VM_SET_OPCODE_HANDLER(opline);
+				}
 			}
 #else
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.constant = RT_CONSTANT(opline, opline->op1) - literals;
 			}
 			if (opline->op2_type == IS_CONST) {
-				opline->op2.constant = RT_CONSTANT(opline, opline->op2) - literals;
+				zval *op2 = RT_CONSTANT(opline, opline->op2);
+				opline->op2.constant = op2 - literals;
+
+				/* See GH-17733 and comment above. */
+				if (opline->opcode == ZEND_INIT_FCALL) {
+					Z_EXTRA_P(op2) = 0;
+					ZEND_VM_SET_OPCODE_HANDLER(opline);
+				}
 			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR
