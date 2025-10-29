@@ -2788,7 +2788,7 @@ try_again:
 			case IS_FALSE:
 			case IS_LONG:
 			case IS_DOUBLE:
-				ZVAL_COPY(&entry_tmp, entry);
+				ZVAL_COPY_VALUE(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(
