@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
   . Fixed bug GH-20183 (Stale EG(opline_before_exception) pointer through eval).
     (ilutov)
+  . Fixed bug GH-20194 (null offset deprecation not emitted for writes).
+    (Girgias)
 
 - Opcache:
   . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
