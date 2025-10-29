@@ -261,25 +261,18 @@ static void eventport_handle_reassociation(
 		return;
 	}
 
-	/* Determine which events to re-associate with */
-	uint32_t reassoc_events = entry->events;
-	if (entry->events & PHP_POLL_ET) {
-		/* Edge-triggered: don't re-associate with events that just fired */
-		reassoc_events &= ~fired_events;
-		reassoc_events &= ~PHP_POLL_ET; /* Remove ET flag for port_associate */
+	/* Re-associate for continued monitoring */
+	int native_events = eventport_events_to_native(entry->events);
+	if (native_events == 0) {
+		/* Nothing meaningful to watch - stop tracking */
+		php_poll_fd_table_remove(backend_data->fd_table, fd);
+		backend_data->active_associations--;
+		return;
 	}
 
-	if (reassoc_events != 0) {
-		/* Re-associate for continued monitoring */
-		int native_events = eventport_events_to_native(reassoc_events);
-		if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, entry->data)
-				!= 0) {
-			/* Re-association failed - might be due to fd being closed */
-			php_poll_fd_table_remove(backend_data->fd_table, fd);
-			backend_data->active_associations--;
-		}
-	} else {
-		/* No events to re-associate with */
+	if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, entry->data)
+			!= 0) {
+		/* Re-association failed - might be due to fd being closed */
 		php_poll_fd_table_remove(backend_data->fd_table, fd);
 		backend_data->active_associations--;
 	}
@@ -401,7 +394,8 @@ const php_poll_backend_ops php_poll_backend_eventport_ops = {
 	.wait = eventport_backend_wait,
 	.is_available = eventport_backend_is_available,
 	.get_suitable_max_events = eventport_backend_get_suitable_max_events,
-	.supports_et = true /* Supports both level and edge triggering */
+	.supports_et = false
 };
 
 #endif /* HAVE_EVENT_PORTS */
+

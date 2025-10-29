@@ -3,7 +3,7 @@ Poll stream - socket write / read few time only
 --SKIPIF--
 <?php
 require_once __DIR__ . '/poll.inc';
-pt_skip_for_backend(['poll', 'wsapoll'], 'does not support edge triggering')
+pt_skip_for_backend(['poll', 'wsapoll', 'eventport'], 'does not support edge triggering')
 ?>
 --FILE--
 <?php
