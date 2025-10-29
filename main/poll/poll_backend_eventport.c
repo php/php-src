@@ -288,6 +288,9 @@ static int eventport_backend_wait(
 	int result = port_getn(backend_data->port_fd, backend_data->events, max_events, &nget, tsp);
 
 	if (result == -1) {
+		if (php_poll_is_timeout_error()) {
+			return 0;
+		}
 		php_poll_set_current_errno_error(ctx);
 		return -1;
 	}
