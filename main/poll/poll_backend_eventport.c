@@ -312,21 +312,21 @@ static int eventport_backend_wait(
 			/* Get entry and handle re-association */
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 			if (entry) {
+				/* Check if there are other events we're monitoring */
+				uint32_t monitored = entry->events & (PHP_POLL_READ | PHP_POLL_WRITE);
+				uint32_t unfired = monitored & ~fired;
+
+				if (unfired) {
+					/* Store unfired events for potential second-round check */
+					events[i].events = unfired;
+					check_count++;
+				}
+
 				if (entry->events & PHP_POLL_ONESHOT) {
 					/* Oneshot: remove from tracking */
 					php_poll_fd_table_remove(backend_data->fd_table, fd);
 					backend_data->active_associations--;
 				} else {
-					/* Check if there are other events we're monitoring */
-					uint32_t monitored = entry->events & (PHP_POLL_READ | PHP_POLL_WRITE);
-					uint32_t unfired = monitored & ~fired;
-
-					if (unfired) {
-						/* Store unfired events for potential second-round check */
-						events[i].events = unfired;
-						check_count++;
-					}
-
 					/* Re-associate immediately with all originally registered events */
 					int native_events = eventport_events_to_native(entry->events);
 					if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events,
