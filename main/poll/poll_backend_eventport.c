@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <poll.h>
 
 typedef struct {
 	int port_fd;
@@ -245,39 +246,6 @@ static zend_result eventport_backend_remove(php_poll_ctx *ctx, int fd)
 	return SUCCESS;
 }
 
-/* Handle re-association after event */
-static void eventport_handle_reassociation(
-		eventport_backend_data_t *backend_data, int fd, uint32_t fired_events)
-{
-	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
-	if (!entry) {
-		return;
-	}
-
-	if (entry->events & PHP_POLL_ONESHOT) {
-		/* Oneshot: remove from tracking */
-		php_poll_fd_table_remove(backend_data->fd_table, fd);
-		backend_data->active_associations--;
-		return;
-	}
-
-	/* Re-associate for continued monitoring */
-	int native_events = eventport_events_to_native(entry->events);
-	if (native_events == 0) {
-		/* Nothing meaningful to watch - stop tracking */
-		php_poll_fd_table_remove(backend_data->fd_table, fd);
-		backend_data->active_associations--;
-		return;
-	}
-
-	if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, entry->data)
-			!= 0) {
-		/* Re-association failed - might be due to fd being closed */
-		php_poll_fd_table_remove(backend_data->fd_table, fd);
-		backend_data->active_associations--;
-	}
-}
-
 /* Wait for events using event port */
 static int eventport_backend_wait(
 		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
@@ -321,30 +289,101 @@ static int eventport_backend_wait(
 
 	if (result == -1) {
 		php_poll_set_current_errno_error(ctx);
+		return -1;
 	}
 
 	int nfds = (int) nget;
+	int check_count = 0;
 
-	/* Process the events and handle re-association */
+	/* First pass: process events, identify unfired events, and re-associate */
 	for (int i = 0; i < nfds; i++) {
 		port_event_t *port_event = &backend_data->events[i];
 
 		/* Only handle PORT_SOURCE_FD events */
 		if (port_event->portev_source == PORT_SOURCE_FD) {
 			int fd = (int) port_event->portev_object;
+			uint32_t fired = eventport_events_from_native(port_event->portev_events);
+
 			events[i].fd = fd;
-			events[i].events = 0; /* Not used in results */
-			events[i].revents = eventport_events_from_native(port_event->portev_events);
+			events[i].events = 0;
+			events[i].revents = fired;
 			events[i].data = port_event->portev_user;
 
-			/* Handle re-association based on event type */
-			eventport_handle_reassociation(backend_data, fd, events[i].revents);
+			/* Get entry and handle re-association */
+			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
+			if (entry) {
+				if (entry->events & PHP_POLL_ONESHOT) {
+					/* Oneshot: remove from tracking */
+					php_poll_fd_table_remove(backend_data->fd_table, fd);
+					backend_data->active_associations--;
+				} else {
+					/* Check if there are other events we're monitoring */
+					uint32_t monitored = entry->events & (PHP_POLL_READ | PHP_POLL_WRITE);
+					uint32_t unfired = monitored & ~fired;
+
+					if (unfired) {
+						/* Store unfired events for potential second-round check */
+						events[i].events = unfired;
+						check_count++;
+					}
+
+					/* Re-associate immediately with all originally registered events */
+					int native_events = eventport_events_to_native(entry->events);
+					if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events,
+								entry->data)
+							!= 0) {
+						/* Re-association failed - remove from tracking */
+						php_poll_fd_table_remove(backend_data->fd_table, fd);
+						backend_data->active_associations--;
+					}
+				}
+			}
 		} else {
 			/* Handle other event sources if needed (timers, user events, etc.) */
 			events[i].fd = -1;
 			events[i].events = 0;
 			events[i].revents = 0;
 			events[i].data = port_event->portev_user;
+		}
+	}
+
+	/* Second pass: if we have unfired events, check them with poll() */
+	if (check_count > 0) {
+		struct pollfd *check_fds
+				= php_poll_calloc(check_count, sizeof(struct pollfd), ctx->persistent);
+		int *check_indices = php_poll_calloc(check_count, sizeof(int), ctx->persistent);
+
+		if (check_fds && check_indices) {
+			int check_idx = 0;
+			for (int i = 0; i < nfds; i++) {
+				if (events[i].events != 0 && events[i].fd >= 0) {
+					check_fds[check_idx].fd = events[i].fd;
+					check_fds[check_idx].events = eventport_events_to_native(events[i].events);
+					check_fds[check_idx].revents = 0;
+					check_indices[check_idx] = i;
+					check_idx++;
+					events[i].events = 0; /* Clear it as it was just temporary */
+				}
+			}
+
+			/* Non-blocking poll to check if other events are ready */
+			if (poll(check_fds, check_count, 0) > 0) {
+				for (int j = 0; j < check_count; j++) {
+					if (check_fds[j].revents != 0) {
+						int evt_idx = check_indices[j];
+						uint32_t additional = eventport_events_from_native(check_fds[j].revents);
+						/* Add the additional ready events to revents */
+						events[evt_idx].revents |= additional;
+					}
+				}
+			}
+		}
+
+		if (check_fds) {
+			pefree(check_fds, ctx->persistent);
+		}
+		if (check_indices) {
+			pefree(check_indices, ctx->persistent);
 		}
 	}
 
@@ -394,8 +433,7 @@ const php_poll_backend_ops php_poll_backend_eventport_ops = {
 	.wait = eventport_backend_wait,
 	.is_available = eventport_backend_is_available,
 	.get_suitable_max_events = eventport_backend_get_suitable_max_events,
-	.supports_et = false
+	.supports_et = false /* Event ports are level-triggered only */
 };
 
 #endif /* HAVE_EVENT_PORTS */
-
