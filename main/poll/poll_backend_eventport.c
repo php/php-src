@@ -232,10 +232,13 @@ static bool eventport_associate_callback(int fd, php_poll_fd_entry *entry, void 
 				== -1) {
 			/* Association failed - could set error here if needed */
 			switch (errno) {
+				case EBADFD:
+					/* fd got closed - remove it */
+					php_poll_fd_table_remove(assoc_ctx->backend_data->fd_table, fd);
+					return true;
 				case ENOMEM:
 					php_poll_set_error(assoc_ctx->ctx, PHP_POLL_ERR_NOMEM);
 					break;
-				case EBADF:
 				case EINVAL:
 					php_poll_set_error(assoc_ctx->ctx, PHP_POLL_ERR_INVALID);
 					break;
