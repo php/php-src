@@ -5038,7 +5038,7 @@ static zend_result zend_compile_func_clone(znode *result, zend_ast_list *args)
 	return SUCCESS;
 }
 
-static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
+static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, uint32_t type) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
@@ -5131,7 +5131,7 @@ static zend_result zend_try_compile_special_func(znode *result, zend_string *lcn
 		return FAILURE;
 	}
 
-	if (zend_try_compile_special_func_ex(result, lcname, args, fbc, type) == SUCCESS) {
+	if (zend_try_compile_special_func_ex(result, lcname, args, type) == SUCCESS) {
 		return SUCCESS;
 	}
 
