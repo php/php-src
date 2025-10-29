@@ -107,7 +107,7 @@ final class DelayedTargetValidation {}
 /**
  * @strict-properties
  */
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_PROPERTY)]
 final class NoSerialize
 {
 }

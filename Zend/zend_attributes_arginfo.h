@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bce966c937262161357a51453bf7ac858f193502 */
+ * Stub hash: a24033fd1376cbe4914c046344c859deb582d9d0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -302,7 +302,7 @@ static zend_class_entry *register_class_NoSerialize(void)
 	zend_string *attribute_name_Attribute_class_NoSerialize_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_NoSerialize_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NoSerialize_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_NoSerialize_0, true);
-	ZVAL_LONG(&attribute_Attribute_class_NoSerialize_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PROPERTY | ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_LONG(&attribute_Attribute_class_NoSerialize_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 
 	return class_entry;
 }
