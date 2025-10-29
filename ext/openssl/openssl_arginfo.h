@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: 28a534a72142f6813e1e93e0ed42db2c2a2cbea0 */
+ * Stub hash: eb5099d9a15edde17ced4cec8967f3f53e23446a */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
