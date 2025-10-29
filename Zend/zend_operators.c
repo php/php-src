@@ -2271,10 +2271,16 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
 	}
 
-	/* String is non-numeric. In transitive mode, enforce: numeric < non-numeric.
-	 * Since lval is numeric and str is non-numeric, lval < str, so return -1. */
+	/* String is non-numeric. In transitive mode, enforce consistent ordering.
+	 * Empty string < numeric < non-numeric string.
+	 * Since str is non-numeric, check if it's empty. */
 	if (UNEXPECTED(EG(transitive_compare_mode))) {
-		return -1;
+		/* Empty string comes before everything */
+		if (ZSTR_LEN(str) == 0) {
+			return 1;  /* lval > empty string */
+		}
+		/* Non-empty, non-numeric string comes after numbers */
+		return -1;  /* lval < non-numeric string */
 	}
 
 	zend_string *lval_as_str = zend_long_to_str(lval);
@@ -2301,10 +2307,16 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 		return ZEND_THREEWAY_COMPARE(dval, str_dval);
 	}
 
-	/* String is non-numeric. In transitive mode, enforce: numeric < non-numeric.
-	 * Since dval is numeric and str is non-numeric, dval < str, so return -1. */
+	/* String is non-numeric. In transitive mode, enforce consistent ordering.
+	 * Empty string < numeric < non-numeric string.
+	 * Since str is non-numeric, check if it's empty. */
 	if (UNEXPECTED(EG(transitive_compare_mode))) {
-		return -1;
+		/* Empty string comes before everything */
+		if (ZSTR_LEN(str) == 0) {
+			return 1;  /* dval > empty string */
+		}
+		/* Non-empty, non-numeric string comes after numbers */
+		return -1;  /* dval < non-numeric string */
 	}
 
 	zend_string *dval_as_str = zend_double_to_str(dval);
@@ -3443,7 +3455,18 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	/* When in transitive comparison mode (used by SORT_REGULAR), enforce transitivity
 	 * by consistently ordering numeric vs non-numeric strings. */
 	if (UNEXPECTED(EG(transitive_compare_mode)) && (ret1 != 0) != (ret2 != 0)) {
-		/* One is numeric, one is not. Order: numeric < non-numeric (matches PHP 8+ rules) */
+		/* One is numeric, one is not.
+		 * Special case: empty strings are non-numeric but sort BEFORE numeric strings.
+		 * Order: empty < numeric < non-numeric (matches PHP 8+ comparison semantics) */
+		bool is_empty1 = (s1->len == 0);
+		bool is_empty2 = (s2->len == 0);
+		
+		if (is_empty1 || is_empty2) {
+			/* If one is empty, empty comes first */
+			return is_empty1 ? -1 : 1;
+		}
+		
+		/* Neither is empty: numeric < non-numeric */
 		return ret1 ? -1 : 1;
 	}
 
