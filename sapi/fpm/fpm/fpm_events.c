@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <php.h>
+#include <zend_time.h>
 
 #include "fpm.h"
 #include "fpm_process_ctl.h"
@@ -17,7 +18,6 @@
 #include "fpm_signals.h"
 #include "fpm_children.h"
 #include "zlog.h"
-#include "fpm_clock.h"
 #include "fpm_log.h"
 
 #include "events/select.h"
@@ -380,10 +380,11 @@ void fpm_event_loop(int err) /* {{{ */
 
 	while (1) {
 		struct fpm_event_queue_s *q, *q2;
-		struct timeval ms;
+		struct timeval timeout_tv;
 		struct timeval tmp;
-		struct timeval now;
-		unsigned long int timeout;
+		struct timeval now_tv;
+		uint64_t now_ns;
+		unsigned long int timeout_ms;
 		int ret;
 
 		/* sanity check */
@@ -391,31 +392,32 @@ void fpm_event_loop(int err) /* {{{ */
 			return;
 		}
 
-		fpm_clock_get(&now);
-		timerclear(&ms);
+		now_ns = zend_time_mono_fallback();
+		zend_time_usec2val(now_ns / 1000, &now_tv);
+		timerclear(&timeout_tv);
 
 		/* search in the timeout queue for the next timer to trigger */
 		q = fpm_event_queue_timer;
 		while (q) {
-			if (!timerisset(&ms)) {
-				ms = q->ev->timeout;
+			if (!timerisset(&timeout_tv)) {
+				timeout_tv = q->ev->timeout;
 			} else {
-				if (timercmp(&q->ev->timeout, &ms, <)) {
-					ms = q->ev->timeout;
+				if (timercmp(&q->ev->timeout, &timeout_tv, <)) {
+					timeout_tv = q->ev->timeout;
 				}
 			}
 			q = q->next;
 		}
 
 		/* 1s timeout if none has been set */
-		if (!timerisset(&ms) || timercmp(&ms, &now, <) || timercmp(&ms, &now, ==)) {
-			timeout = 1000;
+		if (!timerisset(&timeout_tv) || timercmp(&timeout_tv, &now_tv, <) || timercmp(&timeout_tv, &now_tv, ==)) {
+			timeout_ms = ZEND_MILLI_IN_SEC;
 		} else {
-			timersub(&ms, &now, &tmp);
-			timeout = (tmp.tv_sec * 1000) + (tmp.tv_usec / 1000) + 1;
+			timersub(&timeout_tv, &now_tv, &tmp);
+			timeout_ms = (tmp.tv_sec * ZEND_MILLI_IN_SEC) + (tmp.tv_usec / ZEND_MILLI_IN_SEC) + 1;
 		}
 
-		ret = module->wait(fpm_event_queue_fd, timeout);
+		ret = module->wait(fpm_event_queue_fd, timeout_ms);
 
 		/* is a child, nothing to do here */
 		if (ret == -2) {
@@ -430,12 +432,13 @@ void fpm_event_loop(int err) /* {{{ */
 		q = fpm_event_queue_timer;
 		while (q) {
 			struct fpm_event_queue_s *next = q->next;
-			fpm_clock_get(&now);
+			now_ns = zend_time_mono_fallback();
+			zend_time_usec2val(now_ns / 1000, &now_tv);
 			if (q->ev) {
-				if (timercmp(&now, &q->ev->timeout, >) || timercmp(&now, &q->ev->timeout, ==)) {
+				if (timercmp(&now_tv, &q->ev->timeout, >) || timercmp(&now_tv, &q->ev->timeout, ==)) {
 					struct fpm_event_s *ev = q->ev;
 					if (ev->flags & FPM_EV_PERSIST) {
-						fpm_event_set_timeout(ev, now);
+						fpm_event_set_timeout(ev, now_tv);
 					} else {
 						/* Delete the event. Make sure this happens before it is fired,
 						 * so that the event callback may register the same timer again. */
@@ -495,7 +498,8 @@ int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(st
 
 int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
 {
-	struct timeval now;
+	uint64_t now_ns;
+	struct timeval now_tv;
 	struct timeval tmp;
 
 	if (!ev) {
@@ -516,7 +520,8 @@ int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
 	/* it's a timer event */
 	ev->which = FPM_EV_TIMEOUT;
 
-	fpm_clock_get(&now);
+	now_ns = zend_time_mono_fallback();
+	zend_time_usec2val(now_ns / 1000, &now_tv);
 	if (frequency >= 1000) {
 		tmp.tv_sec = frequency / 1000;
 		tmp.tv_usec = (frequency % 1000) * 1000;
@@ -525,7 +530,7 @@ int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
 		tmp.tv_usec = frequency * 1000;
 	}
 	ev->frequency = tmp;
-	fpm_event_set_timeout(ev, now);
+	fpm_event_set_timeout(ev, now_tv);
 
 	if (fpm_event_queue_add(&fpm_event_queue_timer, ev) != 0) {
 		return -1;

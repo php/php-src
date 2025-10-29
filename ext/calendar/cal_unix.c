@@ -19,7 +19,7 @@
 #include "php.h"
 #include "php_calendar.h"
 #include "sdncal.h"
-#include <time.h>
+#include "zend_time.h"
 
 #define SECS_PER_DAY (24 * 3600)
 
@@ -36,7 +36,7 @@ PHP_FUNCTION(unixtojd)
 	}
 
 	if (tl_is_null) {
-		ts = time(NULL);
+		ts = zend_time_real_get();
 	} else if (tl >= 0) {
 		ts = (time_t) tl;
 	} else {

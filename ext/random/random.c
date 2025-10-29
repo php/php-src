@@ -30,6 +30,7 @@
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_time.h"
 
 #include "php_random.h"
 #include "php_random_csprng.h"
@@ -40,11 +41,8 @@
 #endif
 
 #ifdef PHP_WIN32
-# include "win32/time.h"
 # include "win32/winutil.h"
 # include <process.h>
-#else
-# include <sys/time.h>
 #endif
 
 #ifdef HAVE_SYS_PARAM_H
@@ -649,7 +647,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 	 * being cryptographically safe.
 	 */
 	PHP_SHA1_CTX c;
-	struct timeval tv;
+	struct timespec ts;
 	void *pointer;
 	pid_t pid;
 #ifdef ZTS
@@ -660,8 +658,8 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 	PHP_SHA1Init(&c);
 	if (!state->initialized) {
 		/* Current time. */
-		gettimeofday(&tv, NULL);
-		fallback_seed_add(&c, &tv, sizeof(tv));
+		zend_time_real_spec(&ts);
+		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Various PIDs. */
 		pid = getpid();
 		fallback_seed_add(&c, &pid, sizeof(pid));
@@ -679,8 +677,8 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 		pointer = &c;
 		fallback_seed_add(&c, &pointer, sizeof(pointer));
 		/* Updated time. */
-		gettimeofday(&tv, NULL);
-		fallback_seed_add(&c, &tv, sizeof(tv));
+		zend_time_real_spec(&ts);
+		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Hostname. */
 		memset(buf, 0, sizeof(buf));
 		if (gethostname(buf, sizeof(buf) - 1) == 0) {
@@ -691,12 +689,12 @@ PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_st
 			fallback_seed_add(&c, buf, 16);
 		}
 		/* Updated time. */
-		gettimeofday(&tv, NULL);
-		fallback_seed_add(&c, &tv, sizeof(tv));
+		zend_time_real_spec(&ts);
+		fallback_seed_add(&c, &ts, sizeof(ts));
 	} else {
 		/* Current time. */
-		gettimeofday(&tv, NULL);
-		fallback_seed_add(&c, &tv, sizeof(tv));
+		zend_time_real_spec(&ts);
+		fallback_seed_add(&c, &ts, sizeof(ts));
 		/* Previous state. */
 		fallback_seed_add(&c, state->seed, 20);
 	}

@@ -21,6 +21,7 @@
 #include "php_variables.h"
 #include "zend_highlight.h"
 #include "zend_portability.h"
+#include "zend_time.h"
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
@@ -46,7 +47,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/time.h>
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 #include "lscriu.c"
@@ -1452,8 +1452,8 @@ int main( int argc, char * argv[] )
     char * php_bind     = NULL;
     int n;
     int climode = 0;
-    struct timeval tv_req_begin;
-    struct timeval tv_req_end;
+    int64_t req_begin_ns, req_end_ns;
+    time_t req_end_sec;
     int slow_script_msec = 0;
     char time_buf[40];
 
@@ -1565,16 +1565,16 @@ int main( int argc, char * argv[] )
         }
 #endif
         if ( slow_script_msec ) {
-            gettimeofday( &tv_req_begin, NULL );
+            req_begin_ns = zend_time_mono_fallback();
         }
         ret = processReq();
         if ( slow_script_msec ) {
-            gettimeofday( &tv_req_end, NULL );
-            n = ((long) tv_req_end.tv_sec - tv_req_begin.tv_sec ) * 1000
-                + (tv_req_end.tv_usec - tv_req_begin.tv_usec) / 1000;
+            req_end_ns = zend_time_mono_fallback();
+            n = (long) (req_end_ns - req_begin_ns) / 1000000;
             if ( n > slow_script_msec )
             {
-                strftime( time_buf, 30, "%d/%b/%Y:%H:%M:%S", localtime( &tv_req_end.tv_sec ) );
+                req_end_sec = (time_t) (req_end_ns / ZEND_NANO_IN_SEC);
+                strftime( time_buf, 30, "%d/%b/%Y:%H:%M:%S", localtime( &req_end_sec ) );
                 fprintf( stderr, "[%s] Slow PHP script: %d ms\n  URL: %s %s\n  Query String: %s\n  Script: %s\n",
                          time_buf, n,  LSAPI_GetRequestMethod(),
                          LSAPI_GetScriptName(), LSAPI_GetQueryString(),

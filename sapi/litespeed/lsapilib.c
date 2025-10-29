@@ -93,6 +93,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <Zend/zend_portability.h>
+#include <Zend/zend_time.h>
 
 struct lsapi_MD5Context {
     uint32 buf[4];
@@ -246,15 +247,15 @@ void LSAPI_Log(int flag, const char * fmt, ...)
     if ((flag & LSAPI_LOG_TIMESTAMP_BITS)
         && !(s_stderr_is_pipe))
     {
-        struct timeval  tv;
+        struct timespec ts;
         struct tm       tm;
-        gettimeofday(&tv, NULL);
-        localtime_r(&tv.tv_sec, &tm);
+        zend_time_real_spec(&ts);
+        localtime_r(&ts.tv_sec, &tm);
         if (flag & LSAPI_LOG_TIMESTAMP_FULL)
         {
-            p += snprintf(p, 1024, "%04d-%02d-%02d %02d:%02d:%02d.%06d ",
+            p += snprintf(p, 1024, "%04d-%02d-%02d %02d:%02d:%02d.%09ld ",
                 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-                tm.tm_hour, tm.tm_min, tm.tm_sec, (int)tv.tv_usec);
+                tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
         }
         else if (flag & LSAPI_LOG_TIMESTAMP_HMS)
         {

@@ -2,18 +2,19 @@
 
 #include "fpm_config.h"
 
+#include "zend_time.h"
+
 #include <stdio.h>
 #include <unistd.h>
-#include <time.h>
 #include <string.h>
 #include <stdarg.h>
-#include <sys/time.h>
 #include <errno.h>
 
 #include "php_syslog.h"
 
 #include "zlog.h"
 #include "fpm.h"
+
 #include "zend_portability.h"
 
 /* buffer is used for fmt result and it should never be over 2048 */
@@ -74,15 +75,15 @@ void zlog_set_launched(void) /* {{{ */
 }
 /* }}} */
 
-size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /* {{{ */
+size_t zlog_print_time(struct timespec *ts, char *timebuf, size_t timebuf_len) /* {{{ */
 {
 	struct tm t;
 	size_t len;
 
 	len = strftime(timebuf, timebuf_len, "[%d-%b-%Y %H:%M:%S",
-			localtime_r((const time_t *) &tv->tv_sec, &t));
+			localtime_r(&ts->tv_sec, &t));
 	if (zlog_level == ZLOG_DEBUG) {
-		len += snprintf(timebuf + len, timebuf_len - len, ".%06d", (int) tv->tv_usec);
+		len += snprintf(timebuf + len, timebuf_len - len, ".%09ld", ts->tv_nsec);
 	}
 	len += snprintf(timebuf + len, timebuf_len - len, "] ");
 	return len;
@@ -158,7 +159,7 @@ static size_t zlog_buf_prefix(
 		const char *function, int line, int flags,
 		char *buf, size_t buf_size, int use_syslog) /* {{{ */
 {
-	struct timeval tv;
+	struct timespec ts;
 	size_t len = 0;
 
 #ifdef HAVE_SYSLOG_H
@@ -173,8 +174,8 @@ static size_t zlog_buf_prefix(
 #endif
 	{
 		if (!fpm_globals.is_child) {
-			gettimeofday(&tv, 0);
-			len = zlog_print_time(&tv, buf, buf_size);
+			zend_time_real_spec(&ts);
+			len = zlog_print_time(&ts, buf, buf_size);
 		}
 		if (zlog_level == ZLOG_DEBUG) {
 			if (!fpm_globals.is_child) {

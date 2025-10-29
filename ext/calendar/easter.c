@@ -20,7 +20,7 @@
 #include "php.h"
 #include "php_calendar.h"
 #include "sdncal.h"
-#include <time.h>
+#include "zend_time.h"
 
 /**
  * If `gm` is true this will return the timestamp at midnight on Easter of the given year. If it is false this
@@ -43,9 +43,8 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 
 	/* Default to the current year if year parameter is not given */
 	if (year_is_null) {
-		time_t a;
+		time_t a = zend_time_real_get();
 		struct tm b, *res;
-		time(&a);
 		res = php_localtime_r(&a, &b);
 		if (!res) {
 			year = 1900;

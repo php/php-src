@@ -21,6 +21,7 @@
 #include "phar_internal.h"
 #include "stream.h"
 #include "dirstream.h"
+#include "zend_time.h"
 
 static const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
@@ -470,7 +471,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	if (data->internal_file->is_modified) {
-		data->internal_file->timestamp = time(0);
+		data->internal_file->timestamp = zend_time_real_get();
 		phar_flush(data->phar, &error);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS, "%s", error);

@@ -15,15 +15,13 @@
  */
 
 #include "php.h"
+#include "zend_time.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef PHP_WIN32
-#include "win32/time.h"
 #include "win32/getrusage.h"
-#else
-#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -38,44 +36,37 @@
 
 #include "ext/date/php_date.h"
 
-#define NUL  '\0'
-#define MICRO_IN_SEC 1000000.00
-#define SEC_IN_MIN 60
-
-#ifdef HAVE_GETTIMEOFDAY
 static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	bool get_as_float = 0;
-	struct timeval tp = {0};
+	struct timespec ts;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(get_as_float)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (gettimeofday(&tp, NULL)) {
-		ZEND_ASSERT(0 && "gettimeofday() can't fail");
-	}
+	zend_time_real_spec(&ts);
 
 	if (get_as_float) {
-		RETURN_DOUBLE((double)(tp.tv_sec + tp.tv_usec / MICRO_IN_SEC));
+		RETURN_DOUBLE((double)(ts.tv_sec + ts.tv_nsec / 1000000000.0));
 	}
 
 	if (mode) {
 		timelib_time_offset *offset;
 
-		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info());
+		offset = timelib_get_time_zone_info(ts.tv_sec, get_timezone_info());
 
 		array_init(return_value);
-		add_assoc_long(return_value, "sec", tp.tv_sec);
-		add_assoc_long(return_value, "usec", tp.tv_usec);
+		add_assoc_long(return_value, "sec", ts.tv_sec);
+		add_assoc_long(return_value, "usec", ts.tv_nsec / 1000);
 
-		add_assoc_long(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
+		add_assoc_long(return_value, "minuteswest", -offset->offset / 60);
 		add_assoc_long(return_value, "dsttime", offset->is_dst);
 
 		timelib_time_offset_dtor(offset);
 	} else {
-		RETURN_NEW_STR(zend_strpprintf(0, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, (long)tp.tv_sec));
+		RETURN_NEW_STR(zend_strpprintf(0, "0.%08ld %lld", ts.tv_nsec / 10, (long long) ts.tv_sec));
 	}
 }
 
@@ -91,7 +82,6 @@ PHP_FUNCTION(gettimeofday)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-#endif
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE

@@ -22,6 +22,7 @@
 #include "php_network.h"
 #include "php_ini.h"
 #include "zend_exceptions.h"
+#include "zend_time.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -851,7 +852,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		tm.tm_isdst = -1;
 
 		/* figure out the GMT offset */
-		stamp = time(NULL);
+		stamp = zend_time_real_get();
 		gmt = php_gmtime_r(&stamp, &tmbuf);
 		if (!gmt) {
 			goto mdtm_error;

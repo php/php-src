@@ -4,10 +4,11 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "zend_time.h"
 
 #include "fpm.h"
 #include "fpm_children.h"
@@ -19,7 +20,6 @@
 #include "fpm_conf.h"
 #include "fpm_cleanup.h"
 #include "fpm_events.h"
-#include "fpm_clock.h"
 #include "fpm_stdio.h"
 #include "fpm_unix.h"
 #include "fpm_env.h"
@@ -283,23 +283,22 @@ void fpm_children_bury(void)
 
 		if (child) {
 			struct fpm_worker_pool_s *wp = child->wp;
-			struct timeval tv1, tv2;
+			uint64_t now_ns, elapsed_ns;
 
 			fpm_child_unlink(child);
 
 			fpm_scoreboard_proc_free(child);
 
-			fpm_clock_get(&tv1);
-
-			timersub(&tv1, &child->started, &tv2);
+			now_ns     = zend_time_mono_fallback();
+			elapsed_ns = now_ns - child->started_ns;
 
 			if (restart_child) {
 				if (!fpm_pctl_can_spawn_children()) {
 					severity = ZLOG_DEBUG;
 				}
-				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", wp->config->name, (int) pid, buf, (long)tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(severity, "[pool %s] child %d exited %s after %ld.%09ld seconds from start", wp->config->name, (int) pid, buf, (long) (elapsed_ns / ZEND_NANO_IN_SEC), (long) (elapsed_ns % ZEND_NANO_IN_SEC));
 			} else {
-				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", wp->config->name, (int) pid, (long)tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%09ld seconds from start", wp->config->name, (int) pid, (long) (elapsed_ns / ZEND_NANO_IN_SEC), (long) (elapsed_ns % ZEND_NANO_IN_SEC));
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -307,18 +306,18 @@ void fpm_children_bury(void)
 			fpm_pctl_child_exited();
 
 			if (last_faults && (WTERMSIG(status) == SIGSEGV || WTERMSIG(status) == SIGBUS)) {
-				time_t now = tv1.tv_sec;
+				time_t now_sec = (time_t) (now_ns / ZEND_NANO_IN_SEC);
 				int restart_condition = 1;
 				int i;
 
-				last_faults[fault++] = now;
+				last_faults[fault++] = now_sec;
 
 				if (fault == fpm_global_config.emergency_restart_threshold) {
 					fault = 0;
 				}
 
 				for (i = 0; i < fpm_global_config.emergency_restart_threshold; i++) {
-					if (now - last_faults[i] > fpm_global_config.emergency_restart_interval) {
+					if (now_sec - last_faults[i] > fpm_global_config.emergency_restart_interval) {
 						restart_condition = 0;
 						break;
 					}
@@ -473,7 +472,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				zlog(ZLOG_DEBUG, "unblocking signals, child born");
 				fpm_signals_unblock();
 				child->pid = pid;
-				fpm_clock_get(&child->started);
+				child->started_ns = zend_time_mono_fallback();
 				fpm_parent_resources_use(child);
 
 				zlog(is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
