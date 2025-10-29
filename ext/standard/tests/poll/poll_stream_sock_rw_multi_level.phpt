@@ -43,13 +43,7 @@ pt_expect_events($poll_ctx->wait(100), [
 
 fclose($socket1r);
 pt_expect_events($poll_ctx->wait(100), [
-    [
-        'events' => [
-            'default' => POLL_EVENT_WRITE|POLL_EVENT_HUP,
-            'eventport' => POLL_EVENT_WRITE, // it removes event after write happens
-        ],
-        'data' => 'socket2_data'
-    ]
+    ['events' => POLL_EVENT_WRITE|POLL_EVENT_HUP, 'data' => 'socket2_data']
 ], $poll_ctx);
 
 fclose($socket1w);
