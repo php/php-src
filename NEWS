@@ -84,6 +84,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Added "read_filters" and "write_filters" keys to stream_get_meta_data().
+    (ndossche)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
