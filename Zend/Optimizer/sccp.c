@@ -1106,6 +1106,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 			if (op2) {
 				SKIP_IF_TOP(op2);
+				if (Z_TYPE_P(op2) == IS_NULL) {
+					/* Emits deprecation at run-time. */
+					SET_RESULT_BOT(result);
+					return;
+				}
 			}
 
 			/* We want to avoid keeping around intermediate arrays for each SSA variable in the

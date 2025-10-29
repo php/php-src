@@ -7944,7 +7944,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -10423,7 +10437,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -11364,7 +11392,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -12979,7 +13021,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -21281,7 +21337,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -21725,7 +21795,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -22183,7 +22267,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -22590,7 +22688,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -26533,7 +26645,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -29085,7 +29211,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -31191,7 +31331,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -33613,7 +33767,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -46127,7 +46295,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -49967,7 +50149,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -51991,7 +52187,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -55725,7 +55935,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -63368,7 +63592,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -65847,7 +66085,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -66686,7 +66938,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -68301,7 +68567,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -76503,7 +76783,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -76947,7 +77241,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -77405,7 +77713,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -77812,7 +78134,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -81755,7 +82091,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -84307,7 +84657,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -86413,7 +86777,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -88835,7 +89213,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -101349,7 +101741,21 @@ num_index:
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -105189,7 +105595,21 @@ num_index:
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -107111,7 +107531,21 @@ num_index:
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -110845,7 +111279,21 @@ num_index:
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (UNEXPECTED(Z_TYPE_P(offset) == IS_NULL)) {
+			zval tmp;
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				ZVAL_COPY(&tmp, expr_ptr);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+				/* A userland error handler can do funky things to the expression, so reset it */
+				zval_ptr_dtor(expr_ptr);
+				ZVAL_COPY_VALUE(expr_ptr, &tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(expr_ptr);
+				HANDLE_EXCEPTION();
+			}
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {

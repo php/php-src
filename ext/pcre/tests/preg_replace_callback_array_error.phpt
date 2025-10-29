@@ -21,18 +21,6 @@ var_dump(
     )
 );
 
-var_dump(
-    preg_replace_callback_array(
-        [
-            '/a/' => 'b',
-            null => function () {
-                return 'ok';
-            },
-        ],
-        'a'
-    )
-);
-
 // backslashes
 
 var_dump(
@@ -89,9 +77,6 @@ var_dump(
 
 ?>
 --EXPECTF--
-Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line %d
-NULL
-
 Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line %d
 NULL
 

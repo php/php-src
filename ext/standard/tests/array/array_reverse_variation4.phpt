@@ -9,10 +9,6 @@ Test array_reverse() function : usage variations - assoc. array with diff. keys 
 
 echo "*** Testing array_reverse() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //get a class
 class classA{
   public function __toString(){
@@ -42,10 +38,10 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(@$unset_var => "hello", STDERR => 'resource'),
+       array(STDERR => 'resource'),
 
        // array with mixed values
-/*11*/ array('hello' => 1, "fruit" => 2.2, STDERR => 'resource', 133 => "int", @$unset_var => "unset", $heredoc => "heredoc")
+/*11*/ array('hello' => 1, "fruit" => 2.2, STDERR => 'resource', 133 => "int", $heredoc => "heredoc")
 );
 
 // loop through the various elements of $arrays to test array_reverse()
@@ -245,33 +241,25 @@ array(2) {
 }
 -- Iteration 8 --
 - default argument -
-array(2) {
+array(1) {
   [0]=>
   string(8) "resource"
-  [""]=>
-  string(5) "hello"
 }
 - $preserve keys = true -
-array(2) {
+array(1) {
   [3]=>
   string(8) "resource"
-  [""]=>
-  string(5) "hello"
 }
 - $preserve_keys = false -
-array(2) {
+array(1) {
   [0]=>
   string(8) "resource"
-  [""]=>
-  string(5) "hello"
 }
 -- Iteration 9 --
 - default argument -
-array(6) {
+array(5) {
   ["Hello world"]=>
   string(7) "heredoc"
-  [""]=>
-  string(5) "unset"
   [0]=>
   string(3) "int"
   [1]=>
@@ -282,11 +270,9 @@ array(6) {
   int(1)
 }
 - $preserve keys = true -
-array(6) {
+array(5) {
   ["Hello world"]=>
   string(7) "heredoc"
-  [""]=>
-  string(5) "unset"
   [133]=>
   string(3) "int"
   [3]=>
@@ -297,11 +283,9 @@ array(6) {
   int(1)
 }
 - $preserve_keys = false -
-array(6) {
+array(5) {
   ["Hello world"]=>
   string(7) "heredoc"
-  [""]=>
-  string(5) "unset"
   [0]=>
   string(3) "int"
   [1]=>
