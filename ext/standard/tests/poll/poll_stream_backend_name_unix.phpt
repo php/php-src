@@ -9,6 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 require_once __DIR__ . '/poll.inc';
+// this just prints default poll ctx
+$poll_ctx = new PollContext();
+var_dump($poll_ctx->getBackendName());
 // poll is always available on Unix systems
 $poll_ctx = new PollContext(POLL_BACKEND_POLL);
 var_dump($poll_ctx->getBackendName());
@@ -17,6 +20,7 @@ $poll_ctx = new PollContext('poll');
 var_dump($poll_ctx->getBackendName());
 
 ?>
---EXPECT--
+--EXPECTF--
+string(%d) %s
 string(4) "poll"
 string(4) "poll"
