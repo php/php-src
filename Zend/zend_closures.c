@@ -888,7 +888,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 /* __call and __callStatic name the arguments "$arguments" in the docs. */
 static zend_internal_arg_info trampoline_arg_info[] = {ZEND_ARG_VARIADIC_TYPE_INFO(false, arguments, IS_MIXED, false)};
 
-void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {{{ */
+void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
 	zend_internal_function trampoline;
 	zend_function *mptr = call->func;

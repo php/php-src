@@ -480,7 +480,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 /* }}} */
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
-	zend_function *func = zend_active_function();
+	const zend_function *func = zend_active_function();
 	ZEND_ASSERT(arg_num > 0);
 	uint32_t arg_offset = arg_num - 1;
 	if (arg_offset >= func->common.num_args) {
@@ -488,7 +488,7 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 		arg_offset = func->common.num_args;
 	}
 
-	zend_arg_info *arg_info = &func->common.arg_info[arg_offset];
+	const zend_arg_info *arg_info = &func->common.arg_info[arg_offset];
 	zend_string *func_name = get_active_function_or_method_name();
 	const char *arg_name = get_active_function_arg_name(arg_num);
 
@@ -1118,7 +1118,7 @@ ZEND_API zend_result zend_parse_parameter(int flags, uint32_t arg_num, zval *arg
 }
 
 static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
-	zend_function *active_function = EG(current_execute_data)->func;
+	const zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope
 		? ZSTR_VAL(active_function->common.scope->name) : "";
 	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): %s",
@@ -3681,12 +3681,12 @@ ZEND_API void zend_disable_functions(const char *function_list) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline zend_class_entry *get_scope(zend_execute_data *frame)
+static zend_always_inline zend_class_entry *get_scope(const zend_execute_data *frame)
 {
 	return frame && frame->func ? frame->func->common.scope : NULL;
 }
 
-static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *scope, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool *strict_class, char **error, bool suppress_deprecation) /* {{{ */
+static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *scope, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool *strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	bool ret = false;
 	zend_class_entry *ce;
@@ -3790,7 +3790,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
-static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
+static zend_always_inline bool zend_is_callable_check_func(zval *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = false;
@@ -4036,7 +4036,7 @@ get_function_via_handler:
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object) /* {{{ */
+ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, const zend_object *object) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(callable)) {
@@ -4070,7 +4070,7 @@ try_again:
 		}
 		case IS_OBJECT:
 		{
-			zend_class_entry *ce = Z_OBJCE_P(callable);
+			const zend_class_entry *ce = Z_OBJCE_P(callable);
 
 			if (ce == zend_ce_closure) {
 				const zend_function *fn = zend_get_closure_method_def(Z_OBJ_P(callable));
@@ -4101,7 +4101,7 @@ ZEND_API zend_string *zend_get_callable_name(zval *callable) /* {{{ */
 /* }}} */
 
 ZEND_API bool zend_is_callable_at_frame(
-		zval *callable, zend_object *object, zend_execute_data *frame,
+		zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
 	bool ret;
@@ -4214,7 +4214,7 @@ check_func:
 ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
 	/* Determine callability at the first parent user frame. */
-	zend_execute_data *frame = EG(current_execute_data);
+	const zend_execute_data *frame = EG(current_execute_data);
 	while (frame && (!frame->func || !ZEND_USER_CODE(frame->func->type))) {
 		frame = frame->prev_execute_data;
 	}
@@ -5274,7 +5274,7 @@ static zend_string *try_parse_string(const char *str, size_t len, char quote) {
 }
 
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
-		zval *default_value_zval, zend_internal_arg_info *arg_info)
+		zval *default_value_zval, const zend_internal_arg_info *arg_info)
 {
 	const char *default_value = arg_info->default_value;
 	if (!default_value) {

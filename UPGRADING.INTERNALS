@@ -39,6 +39,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     needs to be obtained use the zend_get_callable_zval_from_fcc() function
     instead. If this was used to store a callable, then an FCC should be
     stored instead.
+  . The zend_active_function{_ex}() functions now return a const zend_function
+    pointer.
 
 ========================
 2. Build system changes
