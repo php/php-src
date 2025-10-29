@@ -55,6 +55,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19875 (JIT 1205 segfault on large file compiled in subprocess).
     (Arnaud)
   . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
+  . Partially fixed bug GH-17733 (Avoid calling wrong function when reusing file
+    caches across differing environments). (ilutov)
 
 - PgSql:
   . Fix memory leak when first string conversion fails. (nielsdos)
