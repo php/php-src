@@ -137,6 +137,20 @@ static inline bool php_poll_is_not_found_error(void)
 	return errno == ENOENT;
 }
 
+static inline bool php_poll_is_timeout_error(void)
+{
+#if defined(ETIME) && defined(ETIMEDOUT)
+	return errno == ETIME || errno == ETIMEDOUT;
+#elif defined(ETIME)
+	return errno == ETIME;
+#elif defined(ETIMEDOUT)
+	return errno = ETIMEDOUT;
+#else
+	return false;
+#endif
+}
+
+
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
 	ctx->last_error = error;
