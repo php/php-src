@@ -611,7 +611,7 @@ PHP_METHOD(PollContext, getBackend)
 
 	if (!strcmp(backend_name, "epoll")) {
 		entryname = "Epoll";
-	} else if (!strcmp(backend_name, "kqueu")) {
+	} else if (!strcmp(backend_name, "kqueue")) {
 		entryname = "Kqueue";
 	} else if (!strcmp(backend_name, "wsapoll")) {
 		entryname = "WSAPoll";
