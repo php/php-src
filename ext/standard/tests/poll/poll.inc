@@ -3,7 +3,7 @@
 
 function pt_new_stream_poll(): PollContext {
     $backend = getenv('POLL_TEST_BACKEND');
-    return new PollContext($backend === false ? POLL_BACKEND_AUTO : $backend);
+    return new PollContext($backend === false ? PollBackend::Auto : PollBackend::from($backend));
 }
 
 function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): PollWatcher {
@@ -12,9 +12,9 @@ function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): PollWatc
 
 function pt_skip_for_backend($backend, $msg): void {
     $backends_to_skip = is_array($backend) ? $backend : array($backend);
-    $current_backend = pt_new_stream_poll()->getBackendName();
-    if (in_array($current_backend, $backends_to_skip)) {
-        die("skip backend $current_backend $msg\n");
+    $current_backend = pt_new_stream_poll()->getBackend();
+    if (in_array($current_backend->value, $backends_to_skip)) {
+        die("skip backend $current_backend->value $msg\n");
     }
 }
 
@@ -119,12 +119,12 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
     $event_count = count($watchers);
     $expected_count = count($expected);
 
-    // Get current backend name for backend-specific expectations
-    $backend_name = $poll_ctx ? $poll_ctx->getBackendName() : 'unknown';
+    // Get the current backend for backend-specific expectations
+    $backend = $poll_ctx ? $poll_ctx->getBackend() : 'unknown';
 
     if ($event_count !== $expected_count) {
         echo "Event count mismatch: got $event_count, expected $expected_count\n";
-        pt_print_mismatched_events($watchers, $expected, [], $backend_name);
+        pt_print_mismatched_events($watchers, $expected, [], $backend->value);
         return;
     }
 
@@ -149,7 +149,7 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
         $resolved_event = $exp_event;
 
         if (isset($exp_event['events']) && is_array($exp_event['events'])) {
-            $resolved_event['events'] = pt_resolve_backend_specific_value($exp_event['events'], $backend_name);
+            $resolved_event['events'] = pt_resolve_backend_specific_value($exp_event['events'], $backend->value);
         }
 
         $resolved_expected[] = $resolved_event;
@@ -195,7 +195,7 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
         echo "Events matched - count: $event_count\n";
     } else {
         echo "Events did not match:\n";
-        pt_print_mismatched_events($watchers, $expected, $matched, $backend_name);
+        pt_print_mismatched_events($watchers, $expected, $matched, $backend->value);
     }
 }
 

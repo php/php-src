@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 900953be32e526a0bdba88d0a1b78eb11f809609 */
+ * Stub hash: 570673f0db4be1e20029e4f4def78cdac4af6ce4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollHandle_getFileDescriptor, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -53,7 +53,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollWatcher_remove, 0, 0, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PollContext___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, backend, MAY_BE_LONG|MAY_BE_STRING, "POLL_BACKEND_AUTO")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, backend, PollBackend, 0, "PollBackend::Auto")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PollContext_add, 0, 2, PollWatcher, 0)
@@ -67,7 +67,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollContext_wait, 0, 0, IS
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxEvents, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollContext_getBackendName, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PollContext_getBackend, 0, 0, PollBackend, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(PollHandle, getFileDescriptor);
@@ -88,7 +88,7 @@ ZEND_METHOD(PollWatcher, remove);
 ZEND_METHOD(PollContext, __construct);
 ZEND_METHOD(PollContext, add);
 ZEND_METHOD(PollContext, wait);
-ZEND_METHOD(PollContext, getBackendName);
+ZEND_METHOD(PollContext, getBackend);
 
 static const zend_function_entry class_PollHandle_methods[] = {
 	ZEND_ME(PollHandle, getFileDescriptor, arginfo_class_PollHandle_getFileDescriptor, ZEND_ACC_PROTECTED)
@@ -121,7 +121,7 @@ static const zend_function_entry class_PollContext_methods[] = {
 	ZEND_ME(PollContext, __construct, arginfo_class_PollContext___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(PollContext, add, arginfo_class_PollContext_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(PollContext, wait, arginfo_class_PollContext_wait, ZEND_ACC_PUBLIC)
-	ZEND_ME(PollContext, getBackendName, arginfo_class_PollContext_getBackendName, ZEND_ACC_PUBLIC)
+	ZEND_ME(PollContext, getBackend, arginfo_class_PollContext_getBackend, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -134,12 +134,43 @@ static void register_poll_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("POLL_EVENT_RDHUP", PHP_POLL_RDHUP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POLL_EVENT_ONESHOT", PHP_POLL_ONESHOT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POLL_EVENT_ET", PHP_POLL_ET, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_AUTO", PHP_POLL_BACKEND_AUTO, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_POLL", PHP_POLL_BACKEND_POLL, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_EPOLL", PHP_POLL_BACKEND_EPOLL, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_KQUEUE", PHP_POLL_BACKEND_KQUEUE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_EVENTPORT", PHP_POLL_BACKEND_EVENTPORT, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POLL_BACKEND_WSAPOLL", PHP_POLL_BACKEND_WSAPOLL, CONST_PERSISTENT);
+}
+
+static zend_class_entry *register_class_PollBackend(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("PollBackend", IS_STRING, NULL);
+
+	zval enum_case_Auto_value;
+	zend_string *enum_case_Auto_value_str = zend_string_init("auto", strlen("auto"), 1);
+	ZVAL_STR(&enum_case_Auto_value, enum_case_Auto_value_str);
+	zend_enum_add_case_cstr(class_entry, "Auto", &enum_case_Auto_value);
+
+	zval enum_case_Poll_value;
+	zend_string *enum_case_Poll_value_str = zend_string_init("poll", strlen("poll"), 1);
+	ZVAL_STR(&enum_case_Poll_value, enum_case_Poll_value_str);
+	zend_enum_add_case_cstr(class_entry, "Poll", &enum_case_Poll_value);
+
+	zval enum_case_Epoll_value;
+	zend_string *enum_case_Epoll_value_str = zend_string_init("epoll", strlen("epoll"), 1);
+	ZVAL_STR(&enum_case_Epoll_value, enum_case_Epoll_value_str);
+	zend_enum_add_case_cstr(class_entry, "Epoll", &enum_case_Epoll_value);
+
+	zval enum_case_Kqueue_value;
+	zend_string *enum_case_Kqueue_value_str = zend_string_init("kqueue", strlen("kqueue"), 1);
+	ZVAL_STR(&enum_case_Kqueue_value, enum_case_Kqueue_value_str);
+	zend_enum_add_case_cstr(class_entry, "Kqueue", &enum_case_Kqueue_value);
+
+	zval enum_case_EventPorts_value;
+	zend_string *enum_case_EventPorts_value_str = zend_string_init("eventport", strlen("eventport"), 1);
+	ZVAL_STR(&enum_case_EventPorts_value, enum_case_EventPorts_value_str);
+	zend_enum_add_case_cstr(class_entry, "EventPorts", &enum_case_EventPorts_value);
+
+	zval enum_case_WSAPoll_value;
+	zend_string *enum_case_WSAPoll_value_str = zend_string_init("wsapoll", strlen("wsapoll"), 1);
+	ZVAL_STR(&enum_case_WSAPoll_value, enum_case_WSAPoll_value_str);
+	zend_enum_add_case_cstr(class_entry, "WSAPoll", &enum_case_WSAPoll_value);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_PollHandle(void)
