@@ -3454,7 +3454,9 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 
 	/* When in transitive comparison mode (used by SORT_REGULAR), enforce transitivity
 	 * by consistently ordering numeric vs non-numeric strings. */
-	if (UNEXPECTED(EG(transitive_compare_mode)) && (ret1 != 0) != (ret2 != 0)) {
+	bool num1 = ret1 != 0;
+	bool num2 = ret2 != 0;
+	if (UNEXPECTED(EG(transitive_compare_mode)) && (num1 ^ num2)) {
 		/* One is numeric, one is not.
 		 * Special case: empty strings are non-numeric but sort BEFORE numeric strings.
 		 * Order: empty < numeric < non-numeric (matches PHP 8+ comparison semantics) */
