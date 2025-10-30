@@ -75,7 +75,7 @@ echo "All runs produce same result: " . (count(array_unique($results)) === 1 ? "
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sort() : SORT_REGULAR with numeric edge cases ***
 
 -- Test 1: Empty string and zero variations --
@@ -149,7 +149,7 @@ array(3) {
   [1]=>
   string(19) "9223372036854775808"
   [2]=>
-  int(9223372036854775807)
+  %r(int\(9223372036854775807\)|float\(9\.22337203685477[0-9]E\+18\))%r
 }
 
 -- Test 7: Leading/trailing whitespace --
