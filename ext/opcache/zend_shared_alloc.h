@@ -200,7 +200,7 @@ const char *zend_accel_get_shared_model(void);
  * @param protected true to protect shared memory (read-only), false
  * to unprotect shared memory (writable)
  */
-void zend_accel_shared_protect(bool protected);
+ZEND_API void zend_accel_shared_protect(bool protected);
 
 #ifdef USE_MMAP
 extern const zend_shared_memory_handlers zend_alloc_mmap_handlers;
