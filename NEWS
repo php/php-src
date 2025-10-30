@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.29
 
+- Opcache:
+  . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
+    buffer). (Arnaud)
+
 - Tidy:
   . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
 
