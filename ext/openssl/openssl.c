@@ -2089,7 +2089,7 @@ get_next:
 			case V_ASN1_NUMERICSTRING:
 			case V_ASN1_UTF8STRING:
 			case V_ASN1_IA5STRING:
-			    add_assoc_stringl(&subitem, objbuf, bs->data, bs->length);
+			    add_assoc_stringl(&subitem, objbuf, (char *)bs->data, bs->length);
 			    break;
 			default:
 			    add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
