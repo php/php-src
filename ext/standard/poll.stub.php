@@ -38,37 +38,15 @@ const POLL_EVENT_ONESHOT = UNKNOWN;
  */
 const POLL_EVENT_ET = UNKNOWN;
 
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_AUTO
- */
-const POLL_BACKEND_AUTO = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_POLL
- */
-const POLL_BACKEND_POLL = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_EPOLL
- */
-const POLL_BACKEND_EPOLL = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_KQUEUE
- */
-const POLL_BACKEND_KQUEUE = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_EVENTPORT
- */
-const POLL_BACKEND_EVENTPORT = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_POLL_BACKEND_WSAPOLL
- */
-const POLL_BACKEND_WSAPOLL = UNKNOWN;
-
+enum PollBackend : string
+{
+    case Auto = "auto";
+    case Poll = "poll";
+    case Epoll = "epoll";
+    case Kqueue = "kqueue";
+    case EventPorts = "eventport";
+    case WSAPoll = "wsapoll";
+}
 
 abstract class PollHandle
 {
@@ -113,13 +91,13 @@ final class PollWatcher
 
 final class PollContext
 {
-    public function __construct(int|string $backend = POLL_BACKEND_AUTO) {}
+    public function __construct(PollBackend $backend = PollBackend::Auto) {}
 
     public function add(PollHandle $handle, int $events, mixed $data = null): PollWatcher {}
 
     public function wait(int $timeout = -1, int $maxEvents = -1): array {}
 
-    public function getBackendName(): string {}
+    public function getBackend(): PollBackend {}
 }
 
 class PollException extends Exception

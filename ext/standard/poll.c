@@ -15,12 +15,14 @@
 */
 
 #include "php.h"
+#include "zend_enum.h"
+#include "zend_exceptions.h"
 #include "php_network.h"
 #include "php_poll.h"
 #include "poll_arginfo.h"
-#include "zend_exceptions.h"
 
 /* Class entries */
+static zend_class_entry *php_poll_backend_class_entry;
 static zend_class_entry *php_poll_context_class_entry;
 static zend_class_entry *php_poll_watcher_class_entry;
 static zend_class_entry *php_poll_handle_class_entry;
@@ -453,19 +455,19 @@ PHP_METHOD(PollWatcher, remove)
 
 PHP_METHOD(PollContext, __construct)
 {
-	zend_long backend_long = PHP_POLL_BACKEND_AUTO;
-	zend_string *backend_str = NULL;
+	zval *backend_obj;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_LONG(backend_str, backend_long)
+		Z_PARAM_OBJECT_OF_CLASS(backend_obj, php_poll_backend_class_entry)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 
-	if (backend_str == NULL) {
-		intern->ctx = php_poll_create((php_poll_backend_type) backend_long, 0);
+	if (backend_obj == NULL) {
+		intern->ctx = php_poll_create(PHP_POLL_BACKEND_AUTO, 0);
 	} else {
+		const zend_string *backend_str = Z_STR_P(zend_enum_fetch_case_value(Z_OBJ_P(backend_obj)));
 		intern->ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), 0);
 	}
 
@@ -599,13 +601,29 @@ PHP_METHOD(PollContext, wait)
 	efree(events);
 }
 
-PHP_METHOD(PollContext, getBackendName)
+PHP_METHOD(PollContext, getBackend)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 	const char *backend_name = php_poll_backend_name(intern->ctx);
-	RETURN_STRING(backend_name);
+	const char *entryname = NULL;
+
+	if (!strcmp(backend_name, "epoll")) {
+		entryname = "Epoll";
+	} else if (!strcmp(backend_name, "kqueu")) {
+		entryname = "Kqueue";
+	} else if (!strcmp(backend_name, "wsapoll")) {
+		entryname = "WSAPoll";
+	} else if (!strcmp(backend_name, "eventport")) {
+		entryname = "EventPorts";
+	} else if (!strcmp(backend_name, "poll")) {
+		entryname = "Poll";
+	} else {
+		entryname = "Auto"; /* This should never happen */
+	}
+
+	RETURN_OBJ_COPY(zend_enum_get_case_cstr(php_poll_backend_class_entry, entryname));
 }
 
 /* Initialize the stream poll classes - add to PHP_MINIT_FUNCTION */
@@ -613,6 +631,9 @@ PHP_MINIT_FUNCTION(poll)
 {
 	/* Register symbols */
 	register_poll_symbols(module_number);
+
+	/* Register backend */
+	php_poll_backend_class_entry = register_class_PollBackend();
 
 	/* Register base PollHandle class */
 	php_poll_handle_class_entry = register_class_PollHandle();

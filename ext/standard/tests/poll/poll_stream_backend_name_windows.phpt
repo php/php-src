@@ -9,14 +9,16 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 require_once __DIR__ . '/poll.inc';
-// wsapoll is always available on Windows
-$poll_ctx = new PollContext(POLL_BACKEND_WSAPOLL);
-var_dump($poll_ctx->getBackendName());
-// test with string
-$poll_ctx = new PollContext('wsapoll');
-var_dump($poll_ctx->getBackendName());
-
+// this just prints default poll ctx
+$poll_ctx = new PollContext();
+var_dump($poll_ctx->getBackend());
+// test with WSAPoll
+$poll_ctx = new PollContext(PollBackend::WSAPoll);
+$backend = $poll_ctx->getBackend();
+var_dump($backend->name);
+var_dump($backend->value);
 ?>
---EXPECT--
-string(7) "wsapoll"
+--EXPECTF--
+enum(PollBackend::%s)
+string(7) "WSAPoll"
 string(7) "wsapoll"
