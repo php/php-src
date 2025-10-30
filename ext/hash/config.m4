@@ -3,9 +3,71 @@ PHP_ARG_WITH([mhash],
   [AS_HELP_STRING([--with-mhash],
     [Include mhash support])])
 
+PHP_ARG_WITH([crc-fast],
+  [for crc-fast support],
+  [AS_HELP_STRING([--with-crc-fast[=DIR]],
+    [Include crc-fast support. DIR is the crc-fast install prefix.])])
+
 AS_VAR_IF([PHP_MHASH], [no],, [
   AC_MSG_WARN([The --with-mhash option and mhash* functions are deprecated as of PHP 8.1.0])
   AC_DEFINE([PHP_MHASH_BC], [1], [Define to 1 if mhash support is enabled.])
+])
+
+dnl Check for crc-fast library support
+AS_VAR_IF([PHP_CRC_FAST], [no],, [
+  AC_MSG_CHECKING([for crc-fast support])
+  
+  dnl Set default search paths
+  CRC_FAST_SEARCH_PATHS="/usr/local /usr /opt/local"
+  
+  dnl If a path was specified, use it
+  AS_VAR_IF([PHP_CRC_FAST], [yes], [
+    CRC_FAST_SEARCH_PATHS="/usr/local /usr /opt/local"
+  ], [
+    CRC_FAST_SEARCH_PATHS="$PHP_CRC_FAST /usr/local /usr /opt/local"
+  ])
+  
+  dnl Search for header file
+  CRC_FAST_HEADER_FOUND=no
+  for i in $CRC_FAST_SEARCH_PATHS; do
+    AS_IF([test -f "$i/include/libcrc_fast.h"], [
+      CRC_FAST_INCDIR="$i/include"
+      CRC_FAST_HEADER_FOUND=yes
+      break
+    ])
+  done
+  
+  AS_VAR_IF([CRC_FAST_HEADER_FOUND], [no], [
+    AC_MSG_ERROR([crc-fast header file libcrc_fast.h not found. Please install crc-fast library or specify correct path with --with-crc-fast=DIR])
+  ])
+  
+  dnl Search for library file
+  CRC_FAST_LIB_FOUND=no
+  for i in $CRC_FAST_SEARCH_PATHS; do
+    for j in lib lib64; do
+      AS_IF([test -f "$i/$j/libcrc_fast.dylib" -o -f "$i/$j/libcrc_fast.so" -o -f "$i/$j/libcrc_fast.a"], [
+        CRC_FAST_LIBDIR="$i/$j"
+        CRC_FAST_LIB_FOUND=yes
+        break 2
+      ])
+    done
+  done
+  
+  AS_VAR_IF([CRC_FAST_LIB_FOUND], [no], [
+    AC_MSG_ERROR([crc-fast library libcrc_fast not found. Please install crc-fast library or specify correct path with --with-crc-fast=DIR])
+  ])
+  
+  dnl Test compilation and linking
+  PHP_CHECK_LIBRARY([crc_fast], [crc_fast_checksum], [
+    AC_DEFINE([HAVE_CRC_FAST], [1], [Define to 1 if crc-fast support is enabled.])
+    PHP_ADD_LIBRARY_WITH_PATH([crc_fast], [$CRC_FAST_LIBDIR], [HASH_SHARED_LIBADD])
+    PHP_ADD_INCLUDE([$CRC_FAST_INCDIR])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_ERROR([crc-fast library test compilation failed. Please check that crc-fast is properly installed.])
+  ], [
+    -L$CRC_FAST_LIBDIR -I$CRC_FAST_INCDIR
+  ])
 ])
 
 AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
@@ -33,10 +95,20 @@ AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
   PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded"
 ])
 
+dnl Set crc-fast sources if enabled
+AS_VAR_IF([PHP_CRC_FAST], [no], [
+  EXT_HASH_CRC_FAST_SOURCES=""
+], [
+  EXT_HASH_CRC_FAST_SOURCES="hash_crc_fast.c"
+])
+
 PHP_NEW_EXTENSION([hash], m4_normalize([
     $EXT_HASH_SHA3_SOURCES
+    $EXT_HASH_CRC_FAST_SOURCES
     hash_adler32.c
+    hash_crc_common.c
     hash_crc32.c
+    hash_crc64.c
     hash_fnv.c
     hash_gost.c
     hash_haval.c
@@ -60,9 +132,19 @@ PHP_NEW_EXTENSION([hash], m4_normalize([
   [$PHP_HASH_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
+dnl Set crc-fast headers if enabled
+AS_VAR_IF([PHP_CRC_FAST], [no], [
+  EXT_HASH_CRC_FAST_HEADERS=""
+], [
+  EXT_HASH_CRC_FAST_HEADERS="php_hash_crc_fast.h php_hash_crc_common.h"
+])
+
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([
   php_hash_adler32.h
   php_hash_crc32.h
+  php_hash_crc64.h
+  php_hash_crc64_tables.h
+  $EXT_HASH_CRC_FAST_HEADERS
   php_hash_fnv.h
   php_hash_gost.h
   php_hash_haval.h

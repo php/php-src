@@ -9,7 +9,7 @@ var_dump(hash_algos());
 ?>
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
-array(60) {
+array(65) {
   [%d]=>
   string(3) "md2"
   [%d]=>
@@ -76,6 +76,16 @@ array(60) {
   string(6) "crc32b"
   [%d]=>
   string(6) "crc32c"
+  [%d]=>
+  string(14) "crc32-iso-hdlc"
+  [%d]=>
+  string(11) "crc32-iscsi"
+  [%d]=>
+  string(9) "crc32-php"
+  [%d]=>
+  string(10) "crc64-nvme"
+  [%d]=>
+  string(14) "crc64-ecma-182"
   [%d]=>
   string(6) "fnv132"
   [%d]=>
