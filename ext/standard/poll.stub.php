@@ -66,7 +66,7 @@ final class StreamPollHandle extends PollHandle
 
 final class PollWatcher
 {
-    public function __construct(PollHandle $handle, int $events, mixed $data = null) {}
+    private final function __construct() {}
 
     public function getHandle(): PollHandle {}
 

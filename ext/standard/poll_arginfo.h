@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 570673f0db4be1e20029e4f4def78cdac4af6ce4 */
+ * Stub hash: 722b7022a8e74575214de72df26cf935a66283c7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollHandle_getFileDescriptor, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -14,11 +14,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamPollHandle_isValid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PollWatcher___construct, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, handle, PollHandle, 0)
-	ZEND_ARG_TYPE_INFO(0, events, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_MIXED, 0, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_PollWatcher___construct arginfo_class_StreamPollHandle_getStream
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PollWatcher_getHandle, 0, 0, PollHandle, 0)
 ZEND_END_ARG_INFO()
@@ -103,7 +99,7 @@ static const zend_function_entry class_StreamPollHandle_methods[] = {
 };
 
 static const zend_function_entry class_PollWatcher_methods[] = {
-	ZEND_ME(PollWatcher, __construct, arginfo_class_PollWatcher___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(PollWatcher, __construct, arginfo_class_PollWatcher___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(PollWatcher, getHandle, arginfo_class_PollWatcher_getHandle, ZEND_ACC_PUBLIC)
 	ZEND_ME(PollWatcher, getWatchedEvents, arginfo_class_PollWatcher_getWatchedEvents, ZEND_ACC_PUBLIC)
 	ZEND_ME(PollWatcher, getTriggeredEvents, arginfo_class_PollWatcher_getTriggeredEvents, ZEND_ACC_PUBLIC)
