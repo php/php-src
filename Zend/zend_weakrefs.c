@@ -109,15 +109,15 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 	void *tagged_ptr = Z_PTR_P(zv);
 	if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_HT) {
 		HashTable *ht = ZEND_WEAKREF_GET_PTR(tagged_ptr);
-		zend_hash_index_add_new_ptr(ht, (zend_ulong) payload, payload);
+		zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) payload, payload);
 		return;
 	}
 
 	/* Convert simple pointer to hashtable. */
 	HashTable *ht = emalloc(sizeof(HashTable));
 	zend_hash_init(ht, 0, NULL, NULL, 0);
-	zend_hash_index_add_new_ptr(ht, (zend_ulong) tagged_ptr, tagged_ptr);
-	zend_hash_index_add_new_ptr(ht, (zend_ulong) payload, payload);
+	zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) tagged_ptr, tagged_ptr);
+	zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) payload, payload);
 	/* Replace the single WeakMap or WeakReference entry in EG(weakrefs) with a HashTable with 2 entries in place. */
 	ZVAL_PTR(zv, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_HT));
 }
@@ -146,11 +146,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 
 	HashTable *ht = ptr;
 #if ZEND_DEBUG
-	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
+	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong)(uintptr_t) payload);
 	ZEND_ASSERT(old_payload && "Weakref not registered?");
 	ZEND_ASSERT(old_payload == payload);
 #endif
-	zend_hash_index_del(ht, (zend_ulong) payload);
+	zend_hash_index_del(ht, (zend_ulong)(uintptr_t) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 		zend_hash_destroy(ht);
