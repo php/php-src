@@ -2,10 +2,6 @@
 openssl_csr_parse() tests
 --EXTENSIONS--
 openssl
---SKIPIF--
-<?php
-if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL < 3.2');
-?>
 --FILE--
 <?php
 $csr = "file://" . __DIR__ . "/parse.csr";
@@ -17,7 +13,7 @@ var_dump(openssl_csr_parse($csr, false));
 ?>
 --EXPECTF--
 bool(true)
-array(8) {
+array(9) {
   ["name"]=>
   string(71) "/C=UK/ST=England/L=London/CN=test.php.net/emailAddress=test.php@php.net"
   ["subject"]=>
@@ -43,13 +39,32 @@ array(8) {
   string(23) "sha256WithRSAEncryption"
   ["signatureTypeNID"]=>
   int(668)
+  ["attributes"]=>
+  array(8) {
+    ["streetAddress"]=>
+    string(0) ""
+    ["facsimileTelephoneNumber"]=>
+    string(0) ""
+    ["postalCode"]=>
+    string(3) "N11"
+    ["telephoneNumber"]=>
+    string(9) "012345678"
+    ["name"]=>
+    string(12) "Organisation"
+    ["1.3.6.1.4.1.11278.1150.2.1"]=>
+    string(8) "11112222"
+    ["1.3.6.1.4.1.11278.1150.2.2"]=>
+    string(8) "12345678"
+    ["emailAddress"]=>
+    string(16) "info@example.com"
+  }
   ["extensions"]=>
   array(1) {
     ["basicConstraints"]=>
     string(8) "CA:FALSE"
   }
 }
-array(8) {
+array(9) {
   ["name"]=>
   string(71) "/C=UK/ST=England/L=London/CN=test.php.net/emailAddress=test.php@php.net"
   ["subject"]=>
@@ -75,6 +90,25 @@ array(8) {
   string(23) "sha256WithRSAEncryption"
   ["signatureTypeNID"]=>
   int(668)
+  ["attributes"]=>
+  array(8) {
+    ["streetAddress"]=>
+    string(0) ""
+    ["facsimileTelephoneNumber"]=>
+    string(0) ""
+    ["postalCode"]=>
+    string(3) "N11"
+    ["telephoneNumber"]=>
+    string(9) "012345678"
+    ["name"]=>
+    string(12) "Organisation"
+    ["1.3.6.1.4.1.11278.1150.2.1"]=>
+    string(8) "11112222"
+    ["1.3.6.1.4.1.11278.1150.2.2"]=>
+    string(8) "12345678"
+    ["emailAddress"]=>
+    string(16) "info@example.com"
+  }
   ["extensions"]=>
   array(1) {
     ["basicConstraints"]=>
