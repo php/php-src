@@ -14,6 +14,7 @@ foreach ($classNames as $className) {
 --EXPECT--
 AssertionError
 Directory
+PollBackend
 PollContext
 PollException
 PollHandle
