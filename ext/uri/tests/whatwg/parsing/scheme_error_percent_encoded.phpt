@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - scheme - percent encoded character
 
 try {
     new Uri\WhatWg\Url("http%2F://example.com");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (MissingSchemeNonRelativeUrl)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (MissingSchemeNonRelativeUrl)

@@ -5,10 +5,10 @@ Test Uri\Rfc3986\Uri parsing - port - multibyte character
 
 try {
     new Uri\Rfc3986\Uri("https://example.com:Ȏ");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed
+Uri\InvalidUriException: The specified URI is malformed

@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - host - empty
 
 try {
     new Uri\WhatWg\Url("https://");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (HostMissing)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (HostMissing)

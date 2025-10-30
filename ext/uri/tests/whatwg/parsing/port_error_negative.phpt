@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - port - negative value
 
 try {
     var_dump(new Uri\WhatWg\Url("http://example.com:-1"));
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (PortInvalid)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (PortInvalid)

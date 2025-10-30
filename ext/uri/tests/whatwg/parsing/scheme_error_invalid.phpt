@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - scheme - invalid character
 
 try {
     new Uri\WhatWg\Url("http&://example.com");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (MissingSchemeNonRelativeUrl)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (MissingSchemeNonRelativeUrl)

@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - host - IPvFuture
 
 try {
     new Uri\WhatWg\Url("https://[v7.host]");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (Ipv6InvalidCodePoint)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (Ipv6InvalidCodePoint)

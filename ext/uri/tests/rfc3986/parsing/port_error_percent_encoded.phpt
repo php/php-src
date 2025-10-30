@@ -5,10 +5,10 @@ Test Uri\Rfc3986\Uri parsing - port - percent encoded character
 
 try {
     new Uri\Rfc3986\Uri("https://example.com:%30");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed
+Uri\InvalidUriException: The specified URI is malformed

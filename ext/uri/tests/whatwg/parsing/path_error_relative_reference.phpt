@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - path - relative reference
 
 try {
     new Uri\WhatWg\Url("foo");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
---EXPECTF--
-The specified URI is malformed (MissingSchemeNonRelativeUrl)
+--EXPECT--
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (MissingSchemeNonRelativeUrl)
