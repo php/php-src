@@ -455,7 +455,7 @@ PHP_METHOD(PollWatcher, remove)
 
 PHP_METHOD(PollContext, __construct)
 {
-	zval *backend_obj;
+	zval *backend_obj = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
