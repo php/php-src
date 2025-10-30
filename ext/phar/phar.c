@@ -464,17 +464,10 @@ ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **err
 		| ((uint32_t)(((unsigned char*)(buffer))[1]) <<  8) \
 		| ((uint32_t)((unsigned char*)(buffer))[0]); \
 	(buffer) += 4
-# define PHAR_GET_16(buffer, var) \
-	var = ((uint16_t)(((unsigned char*)(buffer))[1]) <<  8) \
-		| ((uint16_t)((unsigned char*)(buffer))[0]); \
-	(buffer) += 2
 #else
 # define PHAR_GET_32(buffer, var) \
 	memcpy(&var, buffer, sizeof(var)); \
 	buffer += 4
-# define PHAR_GET_16(buffer, var) \
-	var = *(uint16_t*)(buffer); \
-	buffer += 2
 #endif
 #define PHAR_ZIP_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
 	(((uint16_t)var[1]) & 0xff) << 8))
