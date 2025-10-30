@@ -295,30 +295,7 @@ PHP_METHOD(StreamPollHandle, isValid)
 
 PHP_METHOD(PollWatcher, __construct)
 {
-	zval *handle_obj;
-	zend_long events;
-	zval *data = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_OBJECT_OF_CLASS(handle_obj, php_poll_handle_class_entry)
-		Z_PARAM_LONG(events)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(data)
-	ZEND_PARSE_PARAMETERS_END();
-
-	php_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZV(getThis());
-	intern->handle = PHP_POLL_HANDLE_OBJ_FROM_ZV(handle_obj);
-	intern->watched_events = (uint32_t) events;
-	intern->triggered_events = 0;
-	intern->active = false;
-
-	GC_ADDREF(&intern->handle->std);
-
-	if (data) {
-		ZVAL_COPY(&intern->data, data);
-	} else {
-		ZVAL_NULL(&intern->data);
-	}
+	zend_throw_error(NULL, "Cannot directly construct PollWatcher, use PollContext::add");
 }
 
 PHP_METHOD(PollWatcher, getHandle)
