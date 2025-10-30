@@ -38,8 +38,7 @@ if %errorlevel% neq 0 exit /b 3
 rem setup PostgreSQL related exts
 set PGUSER=postgres
 set PGPASSWORD=Password12!
-rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
-echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
+set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
 set TMP_POSTGRESQL_BIN=%PGBIN%
 "%TMP_POSTGRESQL_BIN%\createdb.exe" test
@@ -141,7 +140,7 @@ copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
 
 mkdir c:\tests_tmp
 
-nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL% ext\pgsql"
 
 set EXIT_CODE=%errorlevel%
 

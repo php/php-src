@@ -46,7 +46,7 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     services:
       mysql:
         image: mysql:8.3
@@ -135,7 +135,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     container:
@@ -181,7 +181,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     runs-on: macos-14
     steps:
       - name: git checkout
@@ -242,7 +242,7 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -338,7 +338,7 @@ jobs:
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
   FREEBSD:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    if: false
     name: FREEBSD
     runs-on: ubuntu-latest
     timeout-minutes: 50

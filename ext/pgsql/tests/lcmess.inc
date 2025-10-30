@@ -17,5 +17,3 @@ function _set_lc_messages($conn, $lc_messages = 'C')
 
     return true;
 }
-
-?>
