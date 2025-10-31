@@ -6765,11 +6765,11 @@ PHP_FUNCTION(array_all)
 PHP_FUNCTION(array_map)
 {
 	zval *arrays = NULL;
-	int n_arrays = 0;
+	uint32_t n_arrays = 0;
 	zval result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	int i;
+	uint32_t i;
 	uint32_t k, maxlen = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
