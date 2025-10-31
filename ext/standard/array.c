@@ -6916,6 +6916,10 @@ PHP_FUNCTION(array_map)
 		} else {
 			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
 
+			fci.retval = &result;
+			fci.param_count = n_arrays;
+			fci.params = params;
+
 			/* We iterate through all the arrays at once. */
 			for (k = 0; k < maxlen; k++) {
 				for (i = 0; i < n_arrays; i++) {
@@ -6948,10 +6952,6 @@ PHP_FUNCTION(array_map)
 						}
 					}
 				}
-
-				fci.retval = &result;
-				fci.param_count = n_arrays;
-				fci.params = params;
 
 				zend_result ret = zend_call_function(&fci, &fci_cache);
 				ZEND_ASSERT(ret == SUCCESS);
