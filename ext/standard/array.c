@@ -2826,20 +2826,28 @@ PHP_FUNCTION(array_fill_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize return array */
-	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(keys)));
+	uint32_t keys_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+	array_init_size(return_value, keys_count);
+
+	if (Z_REFCOUNTED_P(val)) {
+		GC_ADDREF_EX(Z_COUNTED_P(val), keys_count);
+	}
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry) {
 		ZVAL_DEREF(entry);
-		Z_TRY_ADDREF_P(val);
 		if (Z_TYPE_P(entry) == IS_LONG) {
-			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
+			zend_hash_index_add(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
 			zend_string *tmp_key;
 			zend_string *key = zval_get_tmp_string(entry, &tmp_key);
-			zend_symtable_update(Z_ARRVAL_P(return_value), key, val);
+			zend_symtable_add(Z_ARRVAL_P(return_value), key, val);
 			zend_tmp_string_release(tmp_key);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (Z_REFCOUNTED_P(val)) {
+		GC_DELREF_EX(Z_COUNTED_P(val), keys_count - zend_hash_num_elements(Z_ARRVAL_P(return_value)));
+	}
 }
 /* }}} */
 
