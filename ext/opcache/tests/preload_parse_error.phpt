@@ -9,7 +9,6 @@ opcache.preload={PWD}/preload_parse_error.inc
 opcache
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 if (getenv('SKIP_ASAN')) die('xleak Startup failure leak');
 ?>
 --FILE--
