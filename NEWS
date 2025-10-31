@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
+  . Partially fixed bug GH-17733 (Avoid calling wrong function when reusing file
+    caches across differing environments). (ilutov)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
