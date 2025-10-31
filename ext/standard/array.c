@@ -6819,8 +6819,7 @@ PHP_FUNCTION(array_map)
 						ZEND_IGNORE_VALUE(ret);
 						if (UNEXPECTED(Z_ISUNDEF(result))) {
 							ZEND_HASH_FILL_FINISH();
-							zend_array_destroy(output);
-							RETURN_NULL();
+							RETURN_THROWS();
 						}
 					} else {
 						ZVAL_UNDEF(&result);
@@ -6843,8 +6842,7 @@ PHP_FUNCTION(array_map)
 				ZEND_ASSERT(ret == SUCCESS);
 				ZEND_IGNORE_VALUE(ret);
 				if (UNEXPECTED(Z_ISUNDEF(result))) {
-					zend_array_destroy(output);
-					RETURN_NULL();
+					RETURN_THROWS();
 				}
 				if (str_key) {
 					_zend_hash_append(output, str_key, &result);
@@ -6957,9 +6955,8 @@ PHP_FUNCTION(array_map)
 
 				if (Z_TYPE(result) == IS_UNDEF) {
 					efree(array_pos);
-					zend_array_destroy(Z_ARR_P(return_value));
 					efree(params);
-					RETURN_NULL();
+					RETURN_THROWS();
 				}
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
