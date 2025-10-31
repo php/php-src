@@ -121,16 +121,17 @@ ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *re
 	(ref)->sources
 
 #define ZEND_REF_HAS_TYPE_SOURCES(ref) \
-	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+	(ZEND_PROPERTY_INFO_SOURCE_TO_PTR(ZEND_REF_TYPE_SOURCES(ref).ptr) != NULL)
 
 #define ZEND_REF_FIRST_SOURCE(ref) \
 	(ZEND_PROPERTY_INFO_SOURCE_IS_LIST((ref)->sources.list) \
 		? ZEND_PROPERTY_INFO_SOURCE_TO_LIST((ref)->sources.list)->ptr[0] \
-		: (ref)->sources.ptr)
+		: ZEND_PROPERTY_INFO_SOURCE_TO_PTR((ref)->sources.ptr))
 
 
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
+ZEND_API void ZEND_FASTCALL zend_ref_cleanup_type_sources(zend_property_info_source_list *source_list);
 
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
@@ -598,6 +599,21 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 #define ZEND_REF_DEL_TYPE_SOURCE(ref, source) \
 	zend_ref_del_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
 
+#define ZEND_REF_CLEANUP_TYPE_SOURCES(ref) \
+	zend_ref_cleanup_type_sources(&ZEND_REF_TYPE_SOURCES(ref))
+
+#define ZEND_REF_SET_TYPE_SOURCES_ITERATED(ref) \
+	ZEND_PROPERTY_INFO_SOURCE_SET_ITERATED(&ZEND_REF_TYPE_SOURCES(ref))
+
+#define ZEND_REF_UNSET_TYPE_SOURCES_ITERATED(ref) \
+	ZEND_PROPERTY_INFO_SOURCE_UNSET_ITERATED(&ZEND_REF_TYPE_SOURCES(ref))
+
+#define ZEND_REF_TYPE_SOURCES_ITERATED(ref) \
+	ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED(&ZEND_REF_TYPE_SOURCES(ref))
+
+#define ZEND_REF_TYPE_SOURCES_DIRTY(ref) \
+	ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY(&ZEND_REF_TYPE_SOURCES(ref))
+
 #define ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) do { \
 		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
 		zend_property_info **_prop, **_end; \
@@ -608,16 +624,49 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 				_prop = _list->ptr; \
 				_end = _list->ptr + _list->num; \
 			} else { \
-				_prop = &_source_list->ptr; \
+				_prop = (zend_property_info**)&_source_list->ptr; \
 				_end = _prop + 1; \
 			} \
 			for (; _prop < _end; _prop++) { \
-				prop = *_prop; \
+				if (!*_prop) { \
+					continue; \
+				} \
+				prop = ZEND_PROPERTY_INFO_SOURCE_TO_PTR(*_prop); \
 
 #define ZEND_REF_FOREACH_TYPE_SOURCES_END() \
 			} \
 		} \
 	} while (0)
+
+/* Same as ZEND_REF_FOREACH_TYPE_SOURCES(), but the source list may be modified
+ * safely during iteration. The ref must be marked with
+ * ZEND_REF_SET_TYPE_SOURCES_ITERATED() before iteration, and unmarked after */
+#define ZEND_REF_FOREACH_TYPE_SOURCES_CONCURRENT(ref, prop) do { \
+	ZEND_ASSERT(ZEND_REF_TYPE_SOURCES_ITERATED(ref)); \
+	{ /* To match ZEND_REF_FOREACH_TYPE_SOURCES_END() */ \
+		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
+		zend_property_info *_prop; \
+		for (size_t _offset = 0; ; _offset++) { \
+			if (!ZEND_PROPERTY_INFO_SOURCE_TO_PTR(_source_list->ptr)) { \
+				break; \
+			} \
+			if (ZEND_PROPERTY_INFO_SOURCE_IS_LIST(_source_list->list)) { \
+				zend_property_info_list *_list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(_source_list->list); \
+				if (_offset >= _list->num) { \
+					break; \
+				} \
+				_prop = _list->ptr[_offset]; \
+				if (!_prop) { \
+					continue; \
+				} \
+			} else { \
+				if (_offset > 0 && ZEND_PROPERTY_INFO_SOURCE_TO_PTR(_source_list->ptr) == _prop) { \
+					break; \
+				} \
+				_prop = ZEND_PROPERTY_INFO_SOURCE_TO_PTR(_source_list->ptr); \
+				_offset = 0; \
+			} \
+			prop = _prop; \
 
 ZEND_COLD void zend_match_unhandled_error(const zval *value);
 
