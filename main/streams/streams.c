@@ -1361,6 +1361,40 @@ PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
 	return stream->position;
 }
 
+static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_start_seeking)
+{
+	while (filter) {
+		if (filter->seekable == PHP_STREAM_FILTER_SEEKABLE_NEVER ||
+				(!is_start_seeking && filter->seekable == PHP_STREAM_FILTER_SEEKABLE_START)) {
+			php_error_docref(NULL, E_WARNING, "Stream filter %s is not seekable", filter->fops->label);
+			return false;
+		}
+		filter = filter->next;
+	}
+	return true;
+}
+
+static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter, bool is_start_seeking)
+{
+	while (filter) {
+		if ((filter->seekable == PHP_STREAM_FILTER_SEEKABLE_START && is_start_seeking &&
+				filter->feops->seek(stream, filter, 0, SEEK_SET))) {
+			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
+			return FAILURE;
+		}
+		filter = filter->next;
+	}
+	return SUCCESS;
+}
+
+static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking)
+{
+	return php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking) == SUCCESS &&
+			php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking) == SUCCESS;
+}
+
+
+
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
@@ -1373,6 +1407,18 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		}
 	}
 
+	bool is_start_seeking = whence == SEEK_SET && offset == 0;
+
+	if (stream->writefilters.head) {
+		_php_stream_flush(stream, 0);
+		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking)) {
+			return -1;
+		}
+	}
+	if (stream->readfilters.head && !php_stream_are_filters_seekable(stream->readfilters.head, is_start_seeking)) {
+		return -1;
+	}
+
 	/* handle the case where we are in the buffer */
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
@@ -1382,6 +1428,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position += offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
+					php_stream_filters_seek_all(stream, is_start_seeking);
 					return 0;
 				}
 				break;
@@ -1392,6 +1439,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position = offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
+					php_stream_filters_seek_all(stream, is_start_seeking);
 					return 0;
 				}
 				break;
@@ -1401,11 +1449,6 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 		int ret;
-
-		if (stream->writefilters.head) {
-			_php_stream_flush(stream, 0);
-		}
-
 		switch(whence) {
 			case SEEK_CUR:
 				ZEND_ASSERT(stream->position >= 0);
@@ -1431,6 +1474,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 			/* invalidate the buffer contents */
 			stream->readpos = stream->writepos = 0;
+
+			php_stream_filters_seek_all(stream, is_start_seeking);
 
 			return ret;
 		}
