@@ -2826,12 +2826,7 @@ PHP_FUNCTION(array_fill_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize return array */
-	uint32_t keys_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
-	array_init_size(return_value, keys_count);
-
-	if (Z_REFCOUNTED_P(val)) {
-		GC_ADDREF_EX(Z_COUNTED_P(val), keys_count);
-	}
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(keys)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry) {
 		ZVAL_DEREF(entry);
@@ -2846,7 +2841,7 @@ PHP_FUNCTION(array_fill_keys)
 	} ZEND_HASH_FOREACH_END();
 
 	if (Z_REFCOUNTED_P(val)) {
-		GC_DELREF_EX(Z_COUNTED_P(val), keys_count - zend_hash_num_elements(Z_ARRVAL_P(return_value)));
+		GC_ADDREF_EX(Z_COUNTED_P(val), zend_hash_num_elements(Z_ARRVAL_P(return_value)));
 	}
 }
 /* }}} */
