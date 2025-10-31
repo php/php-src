@@ -2043,6 +2043,12 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
  	FILL_PUSH(y+1, x, x, -1);
 	while (sp>stack) {
 		FILL_POP(y, x1, x2, dy);
+		if (y > im->sy) {
+			y = im->sy;
+		}
+		if (x > im->sx) {
+			x = im->sx;
+		}
 		for (x=x1; x>=0 && (!pts[y][x] && gdImageGetPixel(im,x,y)==oc); x--) {
 			nc = gdImageTileGet(im,x,y);
 			pts[y][x] = 1;
