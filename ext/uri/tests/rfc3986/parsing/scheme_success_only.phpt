@@ -3,7 +3,7 @@ Test Uri\Rfc3986\Uri parsing - scheme - only scheme
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986\Uri::parse("http://");
+$uri = Uri\Rfc3986\Uri::parse("http:");
 
 var_dump($uri);
 var_dump($uri->toRawString());
@@ -19,7 +19,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(0) ""
+  NULL
   ["port"]=>
   NULL
   ["path"]=>
@@ -29,5 +29,5 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(7) "http://"
-string(7) "http://"
+string(5) "http:"
+string(5) "http:"
