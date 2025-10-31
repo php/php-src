@@ -6928,7 +6928,7 @@ PHP_FUNCTION(array_map)
 								ZVAL_NULL(&params[i]);
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
+								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
 								array_pos[i] = pos + 1;
 								break;
 							}
@@ -6940,7 +6940,7 @@ PHP_FUNCTION(array_map)
 								ZVAL_NULL(&params[i]);
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
+								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
 								array_pos[i] = pos + 1;
 								break;
 							}
@@ -6960,15 +6960,8 @@ PHP_FUNCTION(array_map)
 				if (Z_TYPE(result) == IS_UNDEF) {
 					efree(array_pos);
 					zend_array_destroy(Z_ARR_P(return_value));
-					for (i = 0; i < n_arrays; i++) {
-						zval_ptr_dtor(&params[i]);
-					}
 					efree(params);
 					RETURN_NULL();
-				} else {
-					for (i = 0; i < n_arrays; i++) {
-						zval_ptr_dtor(&params[i]);
-					}
 				}
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
