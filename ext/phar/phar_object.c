@@ -4391,6 +4391,9 @@ PHP_METHOD(PharFileInfo, __construct)
 	entry_obj->entry = entry_info;
 	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {
 		++entry_info->fp_refcount;
+		/* The phar data must exist to keep the alias locked. */
+		ZEND_ASSERT(!phar_data->is_persistent);
+		++phar_data->refcount;
 	}
 
 	ZVAL_STRINGL(&arg1, fname, fname_len);
@@ -4421,19 +4424,23 @@ PHP_METHOD(PharFileInfo, __destruct)
 
 	PHAR_ENTRY_OBJECT_EX(false);
 
-	if (entry_obj->entry->is_temp_dir) {
-		if (entry_obj->entry->filename) {
-			zend_string_efree(entry_obj->entry->filename);
-			entry_obj->entry->filename = NULL;
+	phar_entry_info *entry = entry_obj->entry;
+
+	if (entry->is_temp_dir) {
+		if (entry->filename) {
+			zend_string_release_ex(entry->filename, false);
+			entry->filename = NULL;
 		}
 
-		efree(entry_obj->entry);
-	} else if (!entry_obj->entry->is_persistent) {
-		--entry_obj->entry->fp_refcount;
-		/* It is necessarily still in the manifest, which will ultimately free this. */
+		efree(entry);
+		entry_obj->entry = NULL;
+	} else if (!entry->is_persistent) {
+		--entry->fp_refcount;
+		/* The entry itself still lives in the manifest,
+		 * which will either be freed here if the file info was the last reference; or freed later. */
+		entry_obj->entry = NULL;
+		phar_archive_delref(entry->phar);
 	}
-
-	entry_obj->entry = NULL;
 }
 /* }}} */
 
