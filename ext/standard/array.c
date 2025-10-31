@@ -6854,12 +6854,9 @@ PHP_FUNCTION(array_map)
 			} ZEND_HASH_FOREACH_END();
 		}
 	} else {
-		uint32_t *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
-
 		for (i = 0; i < n_arrays; i++) {
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 				zend_argument_type_error(i + 2, "must be of type array, %s given", zend_zval_value_name(&arrays[i]));
-				efree(array_pos);
 				RETURN_THROWS();
 			}
 			if (zend_hash_num_elements(Z_ARRVAL(arrays[i])) > maxlen) {
@@ -6867,6 +6864,7 @@ PHP_FUNCTION(array_map)
 			}
 		}
 
+		uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
 		array_init_size(return_value, maxlen);
 
 		if (!ZEND_FCI_INITIALIZED(fci)) {
