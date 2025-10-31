@@ -2,6 +2,10 @@
 GH-20286 use after destroy on userland stream_close
 --CREDITS--
 vi3tL0u1s
+--SKIPIF--
+<?php
+if (PHP_DEBUG) die('skip requires release build');
+?>
 --FILE--
 <?php
 class lib {
