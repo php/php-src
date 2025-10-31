@@ -991,7 +991,7 @@ static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, in
 	return zend_std_read_property(obj, name, type, cache_slot, rv);
 }
 
-static zval *bcmath_number_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+static zval *bcmath_number_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container)
 {
 	/* Must always go through read property because all properties are virtual, and no dynamic properties are allowed. */
 	return NULL;
