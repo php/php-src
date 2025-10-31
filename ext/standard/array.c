@@ -6854,10 +6854,10 @@ PHP_FUNCTION(array_map)
 			}
 		}
 
-		uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
 		array_init_size(return_value, maxlen);
 
 		if (!ZEND_FCI_INITIALIZED(fci)) {
+			uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
 			zval zv;
 
 			/* We iterate through all the arrays at once. */
@@ -6901,8 +6901,15 @@ PHP_FUNCTION(array_map)
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
 			}
+
+			efree(array_pos);
 		} else {
 			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
+
+			/* Remember next starting point in the array, initialize those as zeros. */
+			for (i = 0; i < n_arrays; i++) {
+				Z_EXTRA(params[i]) = 0;
+			}
 
 			fci.retval = &result;
 			fci.param_count = n_arrays;
@@ -6913,7 +6920,7 @@ PHP_FUNCTION(array_map)
 				for (i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
-					uint32_t pos = array_pos[i];
+					uint32_t pos = Z_EXTRA(params[i]);
 					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
 						while (1) {
 							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
@@ -6921,7 +6928,7 @@ PHP_FUNCTION(array_map)
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
 								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								array_pos[i] = pos + 1;
+								Z_EXTRA(params[i]) = pos + 1;
 								break;
 							}
 							pos++;
@@ -6933,7 +6940,7 @@ PHP_FUNCTION(array_map)
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
 								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
-								array_pos[i] = pos + 1;
+								Z_EXTRA(params[i]) = pos + 1;
 								break;
 							}
 							pos++;
@@ -6946,7 +6953,6 @@ PHP_FUNCTION(array_map)
 				ZEND_IGNORE_VALUE(ret);
 
 				if (Z_TYPE(result) == IS_UNDEF) {
-					efree(array_pos);
 					efree(params);
 					RETURN_THROWS();
 				}
@@ -6956,7 +6962,6 @@ PHP_FUNCTION(array_map)
 
 			efree(params);
 		}
-		efree(array_pos);
 	}
 }
 /* }}} */
