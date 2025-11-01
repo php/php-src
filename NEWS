@@ -28,6 +28,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
     condition for Win32/Win64. (Jakub Zelenka)
 
+- URI:
+  . Use the "includes credentials" rule of the WHATWG URL Standard to
+    decide whether Uri\WhatWg\Url::getUsername() and ::getPassword()
+    getters should return null or an empty string. (timwolla)
+
 - Zip:
   . Fixed missing zend_release_fcall_info_cache on the following methods
     ZipArchive::registerProgressCallback() and ZipArchive::registerCancelCallback()
