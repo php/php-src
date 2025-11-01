@@ -96,7 +96,6 @@ jobs:
               --with-pdo-pgsql \
               --with-pdo-sqlite \
               --enable-intl \
-              --without-pear \
               --enable-gd \
               --with-jpeg \
               --with-webp \
