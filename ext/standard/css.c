@@ -30,16 +30,19 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}\n");
 	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
+	PUTS("h1.p {color: #fff;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
 	PUTS("h2 > a {text-decoration: none;}\n");
 	PUTS("h2 > a:hover {text-decoration: underline;}\n");
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
-	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
+	PUTS(".h {background-color: #99c; font-weight: bold; position: relative;}\n");
+	PUTS(".t {background-color: var(--php-dark-blue); font-weight: bold; color: #fff}\n");
 	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}\n");
 	PUTS(".v i {color: #999;}\n");
-	PUTS("img {float: right; border: 0;}\n");
+	PUTS("img, svg {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
+	PUTS(".g {position: absolute;right: -11px;width: 110px;bottom: -6px;}\n");
 	PUTS(":root {--php-dark-grey: #333; --php-dark-blue: #4F5B93; --php-medium-blue: #8892BF; --php-light-blue: #E2E4EF; --php-accent-purple: #793862}");
 	PUTS(
 		"@media (prefers-color-scheme: dark) {\n"
