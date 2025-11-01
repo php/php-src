@@ -285,7 +285,7 @@ static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_compon
 	const lxb_url_t *lexbor_uri = uri;
 
 	if (includes_credentials(lexbor_uri)) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -314,7 +314,7 @@ static zend_result php_uri_parser_whatwg_password_read(void *uri, php_uri_compon
 	const lxb_url_t *lexbor_uri = uri;
 
 	if (includes_credentials(lexbor_uri)) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
