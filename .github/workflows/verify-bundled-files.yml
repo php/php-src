@@ -24,9 +24,7 @@ jobs:
           base: master
           filters: |
             pcre2:
-              - 'ext/pcre/pcre2lib/!(sljit/**)/**'
-            sljit:
-              - 'ext/pcre/pcre2lib/sljit/**'
+              - 'ext/pcre/pcre2lib/**'
 
       - name: PCRE2 - Download
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
@@ -35,11 +33,3 @@ jobs:
       - name: PCRE2 - Verify files
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
         run: .github/scripts/download-bundled/verify-directory-unchanged.sh ext/pcre/pcre2lib
-
-      - name: SLJIT - Download
-        if: ${{ !cancelled() && (steps.changes.outputs.sljit == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: .github/scripts/download-bundled/sljit.sh
-
-      - name: SLJIT - Verify files
-        if: ${{ !cancelled() && (steps.changes.outputs.sljit == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: .github/scripts/download-bundled/verify-directory-unchanged.sh ext/pcre/pcre2lib/sljit
