@@ -1535,9 +1535,7 @@ static zend_result php_array_walk(
 
 			/* Call the userland function */
 			result = zend_call_function(&fci, &context->fci_cache);
-			if (result == SUCCESS) {
-				zval_ptr_dtor(&retval);
-			}
+			zval_ptr_dtor(&retval);
 		}
 
 		zval_ptr_dtor_str(&args[1]);
