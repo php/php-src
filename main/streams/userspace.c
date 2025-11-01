@@ -695,6 +695,10 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 
 	assert(us != NULL);
 
+	if (UNEXPECTED(stream->wrapper->wops != &user_stream_wops)) {
+		stream->wrapper->wops = &user_stream_wops;
+	}
+
 	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1);
 
 	call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
