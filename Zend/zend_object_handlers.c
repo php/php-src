@@ -1787,7 +1787,9 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name)
 {
-	static const zend_arg_info arg_info[1] = {{0}};
+	static const zend_internal_arg_info arg_info[2] = {
+		{ .name = "value" }
+	};
 	zend_function *func;
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);

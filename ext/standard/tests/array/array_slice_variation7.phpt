@@ -13,10 +13,6 @@ echo "*** Testing array_slice() : usage variations ***\n";
 $offset = 0;
 $length = 10; // to ensure all elements are displayed
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -33,30 +29,13 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // null data
-/*4*/ 'null uppercase' => array(
-       NULL => 'null 1',
-       ),
-
-/*5*/  'null lowercase' => array(
-       null => 'null 2',
-       ),
-
        // boolean data
 /*6*/ 'bool lowercase' => array(
        true => 'lowert',
        false => 'lowerf',
        ),
 
-/*7*/  'bool uppercase' => array(
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ),
-
        // empty data
-/*8*/ 'empty double quotes' => array(
-       "" => 'emptyd',
-       ),
 
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
@@ -67,16 +46,6 @@ $inputs = array(
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ),
-
-       // undefined data
-/*11*/ 'undefined' => array(
-       @$undefined_var => 'undefined',
-       ),
-
-       // unset data
-/*12*/ 'unset' => array(
-       @$unset_var => 'unset',
        ),
 );
 
@@ -120,31 +89,7 @@ array(4) {
   string(8) "negative"
 }
 
--- Iteration 2 : key type is null uppercase --
-$preserve_keys = TRUE
-array(1) {
-  [""]=>
-  string(6) "null 1"
-}
-$preserve_keys = FALSE
-array(1) {
-  [""]=>
-  string(6) "null 1"
-}
-
--- Iteration 3 : key type is null lowercase --
-$preserve_keys = TRUE
-array(1) {
-  [""]=>
-  string(6) "null 2"
-}
-$preserve_keys = FALSE
-array(1) {
-  [""]=>
-  string(6) "null 2"
-}
-
--- Iteration 4 : key type is bool lowercase --
+-- Iteration 2 : key type is bool lowercase --
 $preserve_keys = TRUE
 array(2) {
   [1]=>
@@ -160,35 +105,7 @@ array(2) {
   string(6) "lowerf"
 }
 
--- Iteration 5 : key type is bool uppercase --
-$preserve_keys = TRUE
-array(2) {
-  [1]=>
-  string(6) "uppert"
-  [0]=>
-  string(6) "upperf"
-}
-$preserve_keys = FALSE
-array(2) {
-  [0]=>
-  string(6) "uppert"
-  [1]=>
-  string(6) "upperf"
-}
-
--- Iteration 6 : key type is empty double quotes --
-$preserve_keys = TRUE
-array(1) {
-  [""]=>
-  string(6) "emptyd"
-}
-$preserve_keys = FALSE
-array(1) {
-  [""]=>
-  string(6) "emptyd"
-}
-
--- Iteration 7 : key type is empty single quotes --
+-- Iteration 3 : key type is empty single quotes --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -200,7 +117,7 @@ array(1) {
   string(6) "emptys"
 }
 
--- Iteration 8 : key type is string --
+-- Iteration 4 : key type is string --
 $preserve_keys = TRUE
 array(3) {
   ["stringd"]=>
@@ -218,29 +135,5 @@ array(3) {
   string(7) "strings"
   ["hello world"]=>
   string(7) "stringh"
-}
-
--- Iteration 9 : key type is undefined --
-$preserve_keys = TRUE
-array(1) {
-  [""]=>
-  string(9) "undefined"
-}
-$preserve_keys = FALSE
-array(1) {
-  [""]=>
-  string(9) "undefined"
-}
-
--- Iteration 10 : key type is unset --
-$preserve_keys = TRUE
-array(1) {
-  [""]=>
-  string(5) "unset"
-}
-$preserve_keys = FALSE
-array(1) {
-  [""]=>
-  string(5) "unset"
 }
 Done

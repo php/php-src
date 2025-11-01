@@ -27,7 +27,7 @@ var_dump( array_map('callback', array(), array(1, 2, 3), array('a', 'b')) );  //
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_map() : arrays with diff. size ***
 array(3) {
   [0]=>
@@ -46,6 +46,12 @@ array(3) {
     NULL
   }
 }
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 array(3) {
   [0]=>
   array(1) {
@@ -97,6 +103,12 @@ array(3) {
     NULL
   }
 }
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 array(3) {
   [0]=>
   array(1) {
