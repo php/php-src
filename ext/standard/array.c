@@ -3743,18 +3743,34 @@ PHP_FUNCTION(array_unshift)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_hash_init(&new_hash, zend_hash_num_elements(Z_ARRVAL_P(stack)) + argc, NULL, ZVAL_PTR_DTOR, 0);
-	for (uint32_t i = 0; i < argc; i++) {
-		Z_TRY_ADDREF(args[i]);
-		zend_hash_next_index_insert_new(&new_hash, &args[i]);
-	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
-		if (key) {
-			zend_hash_add_new(&new_hash, key, value);
-		} else {
-			zend_hash_next_index_insert_new(&new_hash, value);
+	if (HT_IS_PACKED(Z_ARRVAL_P(stack))) {
+		zend_hash_real_init_packed(&new_hash);
+
+		ZEND_HASH_FILL_PACKED(&new_hash) {
+			for (uint32_t i = 0; i < argc; i++) {
+				Z_TRY_ADDREF(args[i]);
+				ZEND_HASH_FILL_ADD(&args[i]);
+			}
+
+			ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(stack), value) {
+				ZEND_HASH_FILL_ADD(value);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+	} else {
+		for (uint32_t i = 0; i < argc; i++) {
+			Z_TRY_ADDREF(args[i]);
+			zend_hash_next_index_insert_new(&new_hash, &args[i]);
 		}
-	} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+			if (key) {
+				zend_hash_add_new(&new_hash, key, value);
+			} else {
+				zend_hash_next_index_insert_new(&new_hash, value);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	if (UNEXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
