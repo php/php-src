@@ -202,7 +202,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(v
 		} else if (c != NULL && c - uriparser_uri->userInfo.first > 0) {
 			ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, c - uriparser_uri->userInfo.first);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_EMPTY_STRING(retval);
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -221,7 +221,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(v
 		if (c != NULL && uriparser_uri->userInfo.afterLast - c - 1 > 0) {
 			ZVAL_STRINGL(retval, c + 1, uriparser_uri->userInfo.afterLast - c - 1);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_EMPTY_STRING(retval);
 		}
 	} else {
 		ZVAL_NULL(retval);
