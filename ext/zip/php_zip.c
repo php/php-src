@@ -496,17 +496,11 @@ static zend_long php_zip_status(ze_zip_object *obj) /* {{{ */
 	int zep = obj->err_zip; /* saved err if closed */
 
 	if (obj->za) {
-#if LIBZIP_VERSION_MAJOR < 1
-		int syp;
-
-		zip_error_get(obj->za, &zep, &syp);
-#else
 		zip_error_t *err;
 
 		err = zip_get_error(obj->za);
 		zep = zip_error_code_zip(err);
 		zip_error_fini(err);
-#endif
 	}
 	return zep;
 }
@@ -523,17 +517,11 @@ static zend_long php_zip_status_sys(ze_zip_object *obj) /* {{{ */
 	int syp = obj->err_sys;  /* saved err if closed */
 
 	if (obj->za) {
-#if LIBZIP_VERSION_MAJOR < 1
-		int zep;
-
-		zip_error_get(obj->za, &zep, &syp);
-#else
 		zip_error_t *err;
 
 		err = zip_get_error(obj->za);
 		syp = zip_error_code_system(err);
 		zip_error_fini(err);
-#endif
 	}
 	return syp;
 }
@@ -1529,18 +1517,12 @@ PHP_METHOD(ZipArchive, close)
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		/* Save error for property reader */
-		#if LIBZIP_VERSION_MAJOR < 1
-			zip_error_get(intern, &ze_obj->err_zip, &ze_obj->err_sys);
-		#else
-			{
-			zip_error_t *ziperr;
+		zip_error_t *ziperr;
 
-			ziperr = zip_get_error(intern);
-			ze_obj->err_zip = zip_error_code_zip(ziperr);
-			ze_obj->err_sys = zip_error_code_system(ziperr);
-			zip_error_fini(ziperr);
-			}
-		#endif
+		ziperr = zip_get_error(intern);
+		ze_obj->err_zip = zip_error_code_zip(ziperr);
+		ze_obj->err_sys = zip_error_code_system(ziperr);
+		zip_error_fini(ziperr);
 		zip_discard(intern);
 	} else {
 		ze_obj->err_zip = 0;
@@ -1601,10 +1583,6 @@ PHP_METHOD(ZipArchive, clearError)
 PHP_METHOD(ZipArchive, getStatusString)
 {
 	zval *self = ZEND_THIS;
-#if LIBZIP_VERSION_MAJOR < 1
-	int zep, syp, len;
-	char error_string[128];
-#endif
 	ze_zip_object *ze_obj;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1613,15 +1591,6 @@ PHP_METHOD(ZipArchive, getStatusString)
 
 	ze_obj = Z_ZIP_P(self); /* not ZIP_FROM_OBJECT as we can use saved error after close */
 
-#if LIBZIP_VERSION_MAJOR < 1
-	if (ze_obj->za) {
-		zip_error_get(ze_obj->za, &zep, &syp);
-		len = zip_error_to_str(error_string, 128, zep, syp);
-	} else {
-		len = zip_error_to_str(error_string, 128, ze_obj->err_zip, ze_obj->err_sys);
-	}
-	RETVAL_STRINGL(error_string, len);
-#else
 	if (ze_obj->za) {
 		zip_error_t *err;
 
@@ -1636,7 +1605,6 @@ PHP_METHOD(ZipArchive, getStatusString)
 		RETVAL_STRING(zip_error_strerror(&err));
 		zip_error_fini(&err);
 	}
-#endif
 }
 /* }}} */
 
