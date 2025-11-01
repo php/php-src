@@ -36,5 +36,7 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
+  . Support minimum version for libzip dependency updated to 1.0.0.
+    (David Carlier)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
