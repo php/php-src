@@ -716,10 +716,6 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	phpdbg_writeln("%s", ZSTR_VAL(msg));
 	zend_string_release(msg);
 
-	if (EG(prev_exception)) {
-		OBJ_RELEASE(EG(prev_exception));
-		EG(prev_exception) = 0;
-	}
 	OBJ_RELEASE(ex);
 	EG(opline_before_exception) = NULL;
 
@@ -876,7 +872,6 @@ free_cmd:
 		} zend_end_try();
 
 		if (restore) {
-			zend_exception_restore();
 			zend_try {
 				zend_try_exception_handler();
 				PHPDBG_G(in_execution) = 1;
