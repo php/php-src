@@ -33,6 +33,7 @@ ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
 ZEND_API zend_class_entry *zend_ce_nodiscard;
 ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
+ZEND_API zend_class_entry *zend_ce_not_serializable;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -239,6 +240,18 @@ static zend_string *validate_nodiscard(
 	}
 	zend_op_array *op_array = CG(active_op_array);
 	op_array->fn_flags |= ZEND_ACC_NODISCARD;
+	return NULL;
+}
+
+static zend_string *validate_not_serializable(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (scope->ce_flags & (ZEND_ACC_TRAIT|ZEND_ACC_INTERFACE)) {
+		const char *type = zend_get_object_type_case(scope, false);
+		return zend_strpprintf(0, "Cannot apply #[\\NotSerializable] to %s %s", type, ZSTR_VAL(scope->name));
+	}
+
+	scope->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	return NULL;
 }
 
@@ -606,6 +619,10 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
+
+	zend_ce_not_serializable = register_class_NotSerializable();
+	attr = zend_mark_internal_attribute(zend_ce_not_serializable);
+	attr->validator = validate_not_serializable;
 }
 
 void zend_attributes_shutdown(void)

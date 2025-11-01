@@ -103,3 +103,9 @@ final class NoDiscard
  */
 #[Attribute(Attribute::TARGET_ALL)]
 final class DelayedTargetValidation {}
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_CLASS)]
+final class NotSerializable {}
