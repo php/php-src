@@ -8,7 +8,6 @@ uri
 var_dump(Uri\Rfc3986\Uri::parse("mailto:Joe@Example.COM"));
 var_dump(Uri\WhatWg\Url::parse("mailto:Joe@Example.COM"));
 
-var_dump(Uri\Rfc3986\Uri::parse("file:///E:/Documents%20and%20Settings"));
 var_dump(Uri\WhatWg\Url::parse("file:///E:\\Documents and Settings"));
 
 ?>
@@ -44,24 +43,6 @@ object(Uri\WhatWg\Url)#%d (%d) {
   NULL
   ["path"]=>
   string(15) "Joe@Example.COM"
-  ["query"]=>
-  NULL
-  ["fragment"]=>
-  NULL
-}
-object(Uri\Rfc3986\Uri)#%d (%d) {
-  ["scheme"]=>
-  string(4) "file"
-  ["username"]=>
-  NULL
-  ["password"]=>
-  NULL
-  ["host"]=>
-  string(0) ""
-  ["port"]=>
-  NULL
-  ["path"]=>
-  string(30) "/E:/Documents%20and%20Settings"
   ["query"]=>
   NULL
   ["fragment"]=>

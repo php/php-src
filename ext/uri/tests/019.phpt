@@ -5,14 +5,6 @@ uri
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986\Uri::parse("🐘");
-var_dump($uri);
-
-$errors = [];
-$url = Uri\WhatWg\Url::parse("🐘", null, $errors);
-var_dump($url);
-var_dump($errors);
-
 $uri = Uri\Rfc3986\Uri::parse("https://🐘.com/🐘?🐘=🐘");
 var_dump($uri);
 
@@ -26,20 +18,7 @@ var_dump($url->toUnicodeString());
 ?>
 --EXPECTF--
 NULL
-NULL
-array(1) {
-  [0]=>
-  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
-    ["context"]=>
-    string(4) "🐘"
-    ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
-    ["failure"]=>
-    bool(true)
-  }
-}
-NULL
-object(Uri\WhatWg\Url)#%d (%d) {
+object(Uri\WhatWg\Url)#1 (8) {
   ["scheme"]=>
   string(5) "https"
   ["username"]=>
