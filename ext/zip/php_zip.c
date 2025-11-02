@@ -2391,13 +2391,19 @@ PHP_METHOD(ZipArchive, setCompressionName)
 		RETURN_THROWS();
 	}
 
-	ZIP_FROM_OBJECT(intern, this);
+
+	if (comp_flags < 0 || comp_flags > USHRT_MAX) {
+		// comp_flags is cast down accordingly in libzip, zip_entry_t compression_level is of zip_uint16_t
+		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
 
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, this);
 	idx = zip_name_locate(intern, name, 0);
 
 	if (idx < 0) {
@@ -2428,7 +2434,8 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 
 	if (comp_flags < 0 || comp_flags > USHRT_MAX) {
 		// comp_flags is cast down accordingly in libzip, zip_entry_t compression_level is of zip_uint16_t
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
