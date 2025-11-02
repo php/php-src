@@ -9,10 +9,10 @@ $url = Uri\WhatWg\Url::parse("foo://example.com");
 
 try {
     $url = $url->withHost("ex@mple.com");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified host is malformed (HostInvalidCodePoint)
+Uri\WhatWg\InvalidUrlException: The specified host is malformed (HostInvalidCodePoint)
