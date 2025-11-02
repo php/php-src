@@ -9,10 +9,10 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 
 try {
     $url->withPort(65536);
-} catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified port is malformed (PortOutOfRange)
+Uri\WhatWg\InvalidUrlException: The specified port is malformed (PortOutOfRange)

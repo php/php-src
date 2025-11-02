@@ -9,10 +9,10 @@ $uri = Uri\Rfc3986\Uri::parse("https://example.com");
 
 try {
     $uri->withHost("ex#mple.com");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified host is malformed
+Uri\InvalidUriException: The specified host is malformed
