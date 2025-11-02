@@ -1476,7 +1476,8 @@ static void create_date_period_datetime(timelib_time *datetime, zend_class_entry
 	if (datetime) {
 		php_date_obj *date_obj;
 
-		object_init_ex(zv, ce);
+		zend_result result = object_init_ex(zv, ce);
+		ZEND_ASSERT(result == SUCCESS && "should succeed as it reuses an existing object's ce");
 		date_obj = Z_PHPDATE_P(zv);
 		date_obj->time = timelib_time_clone(datetime);
 	} else {
@@ -2345,6 +2346,7 @@ static void add_common_properties(HashTable *myht, zend_object *zobj)
 }
 
 /* Advanced Interface */
+/* TODO: remove this API because it is unsafe to use as-is, as it does not propagate the failure/success status. */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object) /* {{{ */
 {
 	object_init_ex(object, pce);
@@ -2564,7 +2566,9 @@ PHP_FUNCTION(date_create_from_format)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2586,7 +2590,9 @@ PHP_FUNCTION(date_create_immutable_from_format)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2642,7 +2648,9 @@ PHP_METHOD(DateTime, createFromImmutable)
 	old_obj = Z_PHPDATE_P(datetimeimmutable_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeimmutable_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2663,7 +2671,9 @@ PHP_METHOD(DateTime, createFromInterface)
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeinterface_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2684,7 +2694,9 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	old_obj = Z_PHPDATE_P(datetime_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetime_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2705,7 +2717,9 @@ PHP_METHOD(DateTimeImmutable, createFromInterface)
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeinterface_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -4950,7 +4964,9 @@ PHP_METHOD(DatePeriod, createFromISO8601String)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_period);
+	if (object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_period) != SUCCESS) {
+		RETURN_THROWS();
+	}
 	dpobj = Z_PHPPERIOD_P(return_value);
 
 	dpobj->current = NULL;

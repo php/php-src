@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.29
 
+- Date:
+  . Fix crashes when trying to instantiate uninstantiable classes via date
+    static constructors. (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
