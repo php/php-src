@@ -15,16 +15,18 @@
 
 #include "collator.h"
 #include "collator_class.h"
+extern "C" {
 #include "php_intl.h"
+#include "intl_error.h"
+#include "collator_arginfo.h"
+}
 #include "collator_sort.h"
 #include "collator_convert.h"
-#include "intl_error.h"
 
 #include <unicode/ucol.h>
 
-#include "collator_arginfo.h"
 
-zend_class_entry *Collator_ce_ptr = NULL;
+zend_class_entry *Collator_ce_ptr = nullptr;
 static zend_object_handlers Collator_handlers;
 
 /*
@@ -43,9 +45,9 @@ void Collator_objects_free(zend_object *object )
 /* }}} */
 
 /* {{{ Collator_object_create */
-zend_object *Collator_object_create(zend_class_entry *ce )
+U_CFUNC zend_object *Collator_object_create(zend_class_entry *ce )
 {
-	Collator_object *intern = zend_object_alloc(sizeof(Collator_object), ce);
+	Collator_object *intern = reinterpret_cast<Collator_object *>(zend_object_alloc(sizeof(Collator_object), ce));
 	intl_error_init(COLLATOR_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -61,7 +63,7 @@ zend_object *Collator_object_create(zend_class_entry *ce )
 /* {{{ collator_register_Collator_symbols
  * Initialize 'Collator' class
  */
-void collator_register_Collator_symbols(int module_number)
+U_CFUNC void collator_register_Collator_symbols(int module_number)
 {
 	register_collator_symbols(module_number);
 
@@ -75,7 +77,7 @@ void collator_register_Collator_symbols(int module_number)
 	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer
 	   for which we don't have the place to keep */
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
-	Collator_handlers.clone_obj = NULL;
+	Collator_handlers.clone_obj = nullptr;
 	Collator_handlers.free_obj = Collator_objects_free;
 }
 /* }}} */
@@ -84,7 +86,7 @@ void collator_register_Collator_symbols(int module_number)
  * Initialize internals of Collator_object.
  * Must be called before any other call to 'collator_object_...' functions.
  */
-void collator_object_init( Collator_object* co )
+U_CFUNC void collator_object_init( Collator_object* co )
 {
 	if( !co )
 		return;
@@ -96,7 +98,7 @@ void collator_object_init( Collator_object* co )
 /* {{{ void collator_object_destroy( Collator_object* co )
  * Clean up mem allocted by internals of Collator_object
  */
-void collator_object_destroy( Collator_object* co )
+U_CFUNC void collator_object_destroy( Collator_object* co )
 {
 	if( !co )
 		return;
@@ -104,7 +106,7 @@ void collator_object_destroy( Collator_object* co )
 	if( co->ucoll )
 	{
 		ucol_close( co->ucoll );
-		co->ucoll = NULL;
+		co->ucoll = nullptr;
 	}
 
 	intl_error_reset( COLLATOR_ERROR_P( co ) );

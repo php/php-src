@@ -17,14 +17,21 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include "php_intl.h"
+}
 #include "collator_class.h"
 #include "collator_convert.h"
 
 #include <unicode/ustring.h>
 
 /* {{{ Get collation attribute value. */
-PHP_FUNCTION( collator_get_attribute )
+U_CFUNC PHP_FUNCTION( collator_get_attribute )
 {
 	zend_long attribute, value;
 
@@ -40,7 +47,7 @@ PHP_FUNCTION( collator_get_attribute )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	value = ucol_getAttribute( co->ucoll, attribute, COLLATOR_ERROR_CODE_P( co ) );
+	value = ucol_getAttribute( co->ucoll, static_cast<UColAttribute>(attribute), COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error getting attribute value" );
 
 	RETURN_LONG( value );
@@ -48,7 +55,7 @@ PHP_FUNCTION( collator_get_attribute )
 /* }}} */
 
 /* {{{ Set collation attribute. */
-PHP_FUNCTION( collator_set_attribute )
+U_CFUNC PHP_FUNCTION( collator_set_attribute )
 {
 	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
@@ -65,7 +72,7 @@ PHP_FUNCTION( collator_set_attribute )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	/* Set new value for the given attribute. */
-	ucol_setAttribute( co->ucoll, attribute, value, COLLATOR_ERROR_CODE_P( co ) );
+	ucol_setAttribute( co->ucoll, static_cast<UColAttribute>(attribute), static_cast<UColAttributeValue>(value), COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error setting attribute value" );
 
 	RETURN_TRUE;
@@ -73,7 +80,7 @@ PHP_FUNCTION( collator_set_attribute )
 /* }}} */
 
 /* {{{ Returns the current collation strength. */
-PHP_FUNCTION( collator_get_strength )
+U_CFUNC PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
 
@@ -93,7 +100,7 @@ PHP_FUNCTION( collator_get_strength )
 /* }}} */
 
 /* {{{ Set the collation strength. */
-PHP_FUNCTION( collator_set_strength )
+U_CFUNC PHP_FUNCTION( collator_set_strength )
 {
 	zend_long strength;
 
@@ -110,7 +117,7 @@ PHP_FUNCTION( collator_set_strength )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	/* Set given strength. */
-	ucol_setStrength( co->ucoll, strength );
+	ucol_setStrength( co->ucoll, static_cast<UColAttributeValue>(strength) );
 
 	RETURN_TRUE;
 }
