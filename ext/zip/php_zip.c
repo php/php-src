@@ -374,6 +374,10 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
 					zend_zval_value_name(option));
 			}
+			zend_long comp_flags = zval_get_long(option);
+			if (comp_flags < 0 || comp_flags > USHRT_MAX) {
+				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be between 0 and %u", USHRT_MAX);
+			}
 			opts->comp_flags = zval_get_long(option);
 		}
 	}
