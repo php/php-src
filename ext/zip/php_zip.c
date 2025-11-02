@@ -74,6 +74,17 @@ static int le_zip_entry;
 # define add_ascii_assoc_string add_assoc_string
 # define add_ascii_assoc_long add_assoc_long
 
+static bool php_zip_file_set_encryption(struct zip *intern, zend_long index, zend_long method, char *password) {
+	// FIXME: is a workaround to reset/free the password in case of consecutive calls.
+	// when libzip 1.11.5 is available, we can save this call in this case.
+	if (UNEXPECTED(zip_file_set_encryption(intern, (zip_uint64_t)index, ZIP_EM_NONE, NULL) < 0)) {
+		php_error_docref(NULL, E_WARNING, "password reset failed");
+		return false;
+	}
+
+	return (zip_file_set_encryption(intern, (zip_uint64_t)index, (zip_uint16_t)method, password) == 0);
+}
+
 /* Flatten a path by making a relative path (to .)*/
 static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 {
@@ -1756,12 +1767,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 #ifdef HAVE_ENCRYPTION
 				if (opts.enc_method >= 0) {
-					if (UNEXPECTED(zip_file_set_encryption(ze_obj->za, ze_obj->last_id, ZIP_EM_NONE, NULL) < 0)) {
-						zend_array_destroy(Z_ARR_P(return_value));
-						php_error_docref(NULL, E_WARNING, "password reset failed");
-						RETURN_FALSE;
-					}
-					if (zip_file_set_encryption(ze_obj->za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
+					if (php_zip_file_set_encryption(ze_obj->za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
@@ -2284,15 +2290,7 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 		RETURN_FALSE;
 	}
 
-	if (UNEXPECTED(zip_file_set_encryption(intern, idx, ZIP_EM_NONE, NULL) < 0)) {
-		php_error_docref(NULL, E_WARNING, "password reset failed");
-		RETURN_FALSE;
-	}
-
-	if (zip_file_set_encryption(intern, idx, (zip_uint16_t)method, password)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(php_zip_file_set_encryption(intern, idx, method, password));
 }
 /* }}} */
 
@@ -2312,12 +2310,7 @@ PHP_METHOD(ZipArchive, setEncryptionIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (UNEXPECTED(zip_file_set_encryption(intern, index, ZIP_EM_NONE, NULL) < 0)) {
-		php_error_docref(NULL, E_WARNING, "password reset failed");
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(zip_file_set_encryption(intern, index, (zip_uint16_t)method, password) == 0);
+	RETURN_BOOL(php_zip_file_set_encryption(intern, index, method, password));
 }
 /* }}} */
 #endif
