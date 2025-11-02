@@ -1,0 +1,13 @@
+diff --git a/ext/pcre/pcre2lib/pcre2_jit_compile.c b/ext/pcre/pcre2lib/pcre2_jit_compile.c
+index 175eb68..7fd10d5 100644
+--- a/ext/pcre/pcre2lib/pcre2_jit_compile.c
++++ b/ext/pcre/pcre2lib/pcre2_jit_compile.c
+@@ -82,7 +82,7 @@ pcre2_memctl *allocator = ((pcre2_memctl*)allocator_data);
+ allocator->free(ptr, allocator->memory_data);
+ }
+ 
+-#include "../deps/sljit/sljit_src/sljitLir.c"
++#include "sljit/sljitLir.c"
+ 
+ #if defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED
+ #error Unsupported architecture
