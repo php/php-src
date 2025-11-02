@@ -1,6 +1,11 @@
 #!/bin/sh
-set -e
+set -ex
 cd "$(dirname "$0")/../../.."
 
-cd $1
+cd "$1"
+
+# display overview of changed files
+git status
+
+# display & detect all changes
 git add . -N && git diff --cached -a --exit-code . && git diff -a --exit-code .
