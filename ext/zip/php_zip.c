@@ -2424,7 +2424,6 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 }
 /* }}} */
 
-#ifdef HAVE_SET_MTIME
 /* {{{ Set the modification time of a file in zip, using its name */
 PHP_METHOD(ZipArchive, setMtimeName)
 {
@@ -2477,7 +2476,6 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 			(time_t)mtime, (zip_uint32_t)flags) == 0);
 }
 /* }}} */
-#endif
 
 /* {{{ Delete a file using its index */
 PHP_METHOD(ZipArchive, deleteIndex)
