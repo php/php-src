@@ -389,7 +389,7 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 			if (comp_flags < 0 || comp_flags > USHRT_MAX) {
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be between 0 and %u", USHRT_MAX);
 			}
-			opts->comp_flags = zval_get_long(option);
+			opts->comp_flags = (zip_uint32_t)comp_flags;
 		}
 	}
 
@@ -1767,7 +1767,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 #ifdef HAVE_ENCRYPTION
 				if (opts.enc_method >= 0) {
-					if (php_zip_file_set_encryption(ze_obj->za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
+					if (!php_zip_file_set_encryption(ze_obj->za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}

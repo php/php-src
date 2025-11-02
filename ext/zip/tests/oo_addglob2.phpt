@@ -78,6 +78,7 @@ include $dirname . 'utils.inc';
 rmdir_rf(__DIR__ . '/__tmp_oo_addglob2/');
 ?>
 --EXPECTF--
+
 Warning: ZipArchive::addGlob(): Option "comp_flags" must be between 0 and 65535 in %s on line %d
 
 Warning: ZipArchive::addGlob(): Option "comp_flags" must be between 0 and 65535 in %s on line %d
