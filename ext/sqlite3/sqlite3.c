@@ -1916,7 +1916,6 @@ PHP_METHOD(SQLite3Stmt, __construct)
 	errcode = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
 		php_sqlite3_error(db_obj, errcode, "Unable to prepare statement: %s", sqlite3_errmsg(db_obj->db));
-		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 	stmt_obj->initialised = true;
