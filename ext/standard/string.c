@@ -2972,7 +2972,7 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 				len = ZSTR_LEN(key_used);
 				if (UNEXPECTED(len > slen)) {
 					/* skip long patterns */
-					zend_string_release(key_used);
+					zend_string_release_ex(key_used, false);
 					continue;
 				}
 				if (len > maxlen) {
