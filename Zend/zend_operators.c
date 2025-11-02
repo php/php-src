@@ -954,6 +954,21 @@ ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type)
 	zend_error(E_WARNING, "unexpected NAN value was coerced to %s", zend_get_type_by_const(type));
 }
 
+ZEND_API void ZEND_COLD zend_null_cast_deprecated(const char *target_type)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion from null to %s is deprecated", target_type);
+}
+
+ZEND_API void ZEND_COLD zend_malformed_string_cast_deprecated(const char *str, const char *target_type)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion from malformed string \"%s\" to %s is deprecated", str, target_type);
+}
+
+ZEND_API void ZEND_COLD zend_object_cast_deprecated(const char *class_name, const char *target_type)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion from %s to %s is deprecated", class_name, target_type);
+}
+
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
 {
 try_again:

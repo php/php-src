@@ -46,4 +46,6 @@ int(9223372036854775807)
 
 Warning: The float-string "1.0E+301" is not representable as an int, cast occurred in %s on line %d
 int(9223372036854775807)
+
+Deprecated: Implicit conversion from malformed string "NAN" to int is deprecated in %s on line %d
 int(0)

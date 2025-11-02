@@ -51,6 +51,8 @@ Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(0) ""
 string(1) "1"
+
+Deprecated: Implicit conversion from null to string is deprecated in %s on line %d
 string(0) ""
 string(%d) "Resource id #%d"
 string(2) "10"

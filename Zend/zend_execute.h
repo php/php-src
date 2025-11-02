@@ -135,6 +135,13 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
 
+typedef enum {
+	FLOAT_TO_INT_SUCCESS,
+	FLOAT_TO_INT_RESULT_NAN,
+	FLOAT_TO_INT_OUT_OF_RANGE,
+	FLOAT_TO_INT_PRECISION_LOSS,
+} zend_float_to_int_cast_result;
+
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
 {
 	zend_refcounted *ref = NULL;
@@ -280,6 +287,80 @@ static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr,
 			ZVAL_EMPTY_ARRAY(result);
 		}
 	}
+}
+
+static zend_always_inline zend_float_to_int_cast_result zend_check_float_to_int_cast(double dval, zend_long *lval_out) {
+	if (UNEXPECTED(zend_isnan(dval))) {
+		return FLOAT_TO_INT_RESULT_NAN;
+	}
+
+	if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(dval))) {
+		return FLOAT_TO_INT_OUT_OF_RANGE;
+	}
+
+	zend_long lval = zend_dval_to_lval(dval);
+	if (UNEXPECTED(!zend_is_long_compatible(dval, lval))) {
+		return FLOAT_TO_INT_PRECISION_LOSS;
+	}
+
+	*lval_out = lval;
+	return FLOAT_TO_INT_SUCCESS;
+}
+
+/* Helper function to handle float-to-int casting for nullable/nonnull cast operators.
+ * Checks both direct floats and float-strings for precision loss.
+ * Returns true if handled (either successfully converted or threw error), false if not applicable.
+ */
+static zend_always_inline bool zend_handle_float_to_int_cast_strict(zval *result, zval *expr) {
+	double dval;
+	zend_long lval;
+	int check_result;
+	bool is_float_string = false;
+
+	if (Z_TYPE_P(result) == IS_DOUBLE) {
+		dval = Z_DVAL_P(result);
+	} else if (Z_TYPE_P(result) == IS_STRING) {
+		zend_long lval_tmp;
+		uint8_t str_type = is_numeric_str_function(Z_STR_P(result), &lval_tmp, &dval);
+		if (str_type != IS_DOUBLE) {
+			return false; /* Not a float-string, caller should use normal validation */
+		}
+		is_float_string = true;
+	} else {
+		return false; /* Not a float or float-string */
+	}
+
+	check_result = zend_check_float_to_int_cast(dval, &lval);
+	if (check_result != FLOAT_TO_INT_SUCCESS) {
+		zval_ptr_dtor(result);
+		if (is_float_string) {
+			const char *str_val = ZSTR_VAL(Z_STR_P(result));
+			if (check_result == FLOAT_TO_INT_RESULT_NAN) {
+				zend_type_error("Cannot cast float-string \"NAN\" to int");
+			} else if (check_result == FLOAT_TO_INT_OUT_OF_RANGE) {
+				zend_type_error("Cannot cast float-string \"%s\" to int (out of range)", str_val);
+			} else {
+				zend_type_error("Cannot cast float-string \"%s\" to int (precision loss)", str_val);
+			}
+		} else {
+			if (check_result == FLOAT_TO_INT_RESULT_NAN) {
+				zend_type_error("Cannot cast float NAN to int");
+			} else if (check_result == FLOAT_TO_INT_OUT_OF_RANGE) {
+				zend_type_error("Cannot cast float %g to int (out of range)", dval);
+			} else {
+				zend_type_error("Cannot cast float %g to int (precision loss)", dval);
+			}
+		}
+
+		ZVAL_UNDEF(result);
+
+		return true;
+	}
+
+	zval_ptr_dtor(result);
+	ZVAL_LONG(result, lval);
+
+	return true; /* Handled successfully */
 }
 
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp);

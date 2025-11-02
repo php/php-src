@@ -83,6 +83,8 @@ array(1) {
   [0]=>
   bool(true)
 }
+
+Deprecated: Implicit conversion from null to array is deprecated in %s on line %d
 array(0) {
 }
 array(1) {
