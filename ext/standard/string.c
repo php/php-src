@@ -2109,13 +2109,11 @@ PHP_FUNCTION(strripos)
 	needle_dup = zend_string_tolower(needle);
 	if ((found = (char *)zend_memnrstr(p, ZSTR_VAL(needle_dup), ZSTR_LEN(needle_dup), e))) {
 		RETVAL_LONG(found - ZSTR_VAL(haystack_dup));
-		zend_string_release_ex(needle_dup, 0);
-		zend_string_release_ex(haystack_dup, 0);
 	} else {
-		zend_string_release_ex(needle_dup, 0);
-		zend_string_release_ex(haystack_dup, 0);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	zend_string_release_ex(needle_dup, false);
+	zend_string_release_ex(haystack_dup, false);
 }
 /* }}} */
 
