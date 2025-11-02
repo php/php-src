@@ -28,16 +28,8 @@ jobs:
 
       - name: Opcache JIT IR - Download
         if: ${{ !cancelled() && (steps.changes.outputs.opcache_jit_ir == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        uses: actions/checkout@v5
-        with:
-          repository: dstogov/ir
-          ref: 5a81104e650ebd7ac24eb63d4dff67db723a5278
-          path: ext/opcache/jit/ir
+        run: .github/scripts/download-bundled/opcache-jit-ir.sh
 
       - name: Opcache JIT IR - Verify files
         if: ${{ !cancelled() && (steps.changes.outputs.opcache_jit_ir == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: |
-          cd ext/opcache/jit/ir
-          rm -r .git .github/workflows bench examples tests tools README.md TODO ir.g ir_cpuinfo.c ir_emit_c.c ir_emit_llvm.c ir_load.c ir_load_llvm.c ir_main.c ir_mem2ssa.c
-          git restore README
-          git add . -N && git diff --cached -a --exit-code . && git diff -a --exit-code .
+        run: .github/scripts/download-bundled/verify-directory-unchanged.sh ext/opcache/jit/ir
