@@ -32,7 +32,7 @@ PHP                                                                        NEWS
   . Use the "includes credentials" rule of the WHATWG URL Standard to
     decide whether Uri\WhatWg\Url::getUsername() and ::getPassword()
     getters should return null or an empty string. (timwolla)
-  . Fixed the distinction between empty and missing query/fragment
+  . Fixed the distinction between empty and missing username/password
     components of Uri\Rfc3986\Uri.
     (kocsismate)
 
