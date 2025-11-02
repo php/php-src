@@ -285,7 +285,16 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 
 static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
+	/* Enable transitive comparison mode for this comparison tree.
+	 * Save the previous state to handle reentrancy (e.g., usort with callback that calls sort). */
+	bool old_transitive_mode = EG(transitive_compare_mode);
+	EG(transitive_compare_mode) = true;
+
 	int result = zend_compare(&f->val, &s->val);
+
+	/* Restore previous state */
+	EG(transitive_compare_mode) = old_transitive_mode;
+
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
 	 * that would be observable via comparison operators. */
 	zval *rhs = &s->val;

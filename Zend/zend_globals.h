@@ -301,6 +301,10 @@ struct _zend_executor_globals {
 	uint32_t num_errors;
 	zend_error_info **errors;
 
+	/* If transitive_compare_mode is enabled, string comparisons in zendi_smart_strcmp
+	 * will enforce transitivity by consistently ordering numeric vs non-numeric strings. */
+	bool transitive_compare_mode;
+
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
 	zend_long lineno_override;
