@@ -129,16 +129,17 @@ PHP_METHOD(DOMText, splitText)
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
 
-	xmlNodeSetContent(node, first);
-	nnode = xmlNewDocText(node->doc, second);
-
-	xmlFree(first);
-	xmlFree(second);
+	xmlNodeSetContent(node, NULL);
+	node->content = first;
+	nnode = xmlNewDocText(node->doc, NULL);
 
 	if (nnode == NULL) {
+		xmlFree(second);
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
+
+	nnode->content = second;
 
 	if (node->parent != NULL) {
 		nnode->type = XML_ELEMENT_NODE;

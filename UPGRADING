@@ -111,5 +111,8 @@ PHP 8.6 UPGRADE NOTES
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
 
+- DOM:
+  . Made splitText() faster and consume less memory.
+
 - JSON:
   . Improve performance of encoding arrays and objects.
