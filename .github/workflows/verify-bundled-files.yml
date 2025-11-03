@@ -24,6 +24,7 @@ jobs:
           base: master
           filters: |
             pcre2:
+              - '.github/scripts/download-bundled/pcre2.sh'
               - 'ext/pcre/pcre2lib/**'
 
       - name: PCRE2 - Download
