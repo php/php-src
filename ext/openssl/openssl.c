@@ -2014,7 +2014,7 @@ PHP_FUNCTION(openssl_csr_parse)
 	BIO *bio_out;
 	BUF_MEM *bio_buf;
 	char buf[256];
-	STACK_OF(X509_EXTENSION) *exts;
+	STACK_OF(X509_EXTENSION) *exts = NULL;
 	char *crit_name = NULL;
 	int crit_len = 0;
 
