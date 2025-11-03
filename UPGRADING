@@ -46,6 +46,9 @@ PHP 8.6 UPGRADE NOTES
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
+  . Added stream socket context options so_keepalive, tcp_keepidle,
+    tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
+    options.
 
 ========================================
 3. Changes in SAPI modules

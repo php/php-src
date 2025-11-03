@@ -73,6 +73,8 @@ PHP                                                                        NEWS
     while COW violation flag is still set). (alexandre-daubois)
 
 - Streams:
+  . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
+    socket context options.
   . Added so_reuseaddr streams context socket option that allows disabling
     address resuse.
   . Fixed bug GH-20370 (User stream filters could violate typed property
