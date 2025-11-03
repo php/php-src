@@ -329,8 +329,8 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 
 	/* state */
 	array_init(&t);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 	if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
-		zval_ptr_dtor_nogc(&t);
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
