@@ -324,8 +324,7 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 	array_init(return_value);
 
 	/* members */
-	ZVAL_ARR(&t, zend_std_get_properties(&engine->std));
-	Z_TRY_ADDREF(t);
+	ZVAL_EMPTY_ARRAY(&t);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 
 	/* state */
