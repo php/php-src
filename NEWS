@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.29
 
+- Tidy:
+  . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
 
 20 Nov 2025, PHP 8.3.28
 
