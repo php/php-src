@@ -122,3 +122,6 @@ PHP 8.6 UPGRADE NOTES
 
 - JSON:
   . Improve performance of encoding arrays and objects.
+
+- Standard:
+  . Improved performance of array_fill_keys().
