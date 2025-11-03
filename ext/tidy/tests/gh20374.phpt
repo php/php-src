@@ -24,6 +24,7 @@ class MyThrowingStringable {
 $values = [
 	'string blocklevel' => 'blocklevel',
 	'int' => 1,
+	'double overflow' => (string) (2.0**80.0),
 	'numeric string int 1' => '1',
 	'numeric string double 1.0' => '1.0',
 	'false' => false,
@@ -69,6 +70,15 @@ foreach ($values as $key => $value) {
 </head>
 <body>
 <custom-html-element>test</custom-html-element>
+</body>
+</html>
+--- double overflow ---
+<html>
+<head>
+<title></title>
+</head>
+<body>
+test
 </body>
 </html>
 --- numeric string int 1 ---
