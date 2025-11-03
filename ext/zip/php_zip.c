@@ -1752,6 +1752,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 #ifdef HAVE_ENCRYPTION
 				if (opts.enc_method >= 0) {
+					if (UNEXPECTED(zip_file_set_encryption(ze_obj->za, ze_obj->last_id, ZIP_EM_NONE, NULL) < 0)) {
+						zend_array_destroy(Z_ARR_P(return_value));
+						php_error_docref(NULL, E_WARNING, "password reset failed");
+						RETURN_FALSE;
+					}
 					if (zip_file_set_encryption(ze_obj->za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
@@ -2424,7 +2429,6 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 }
 /* }}} */
 
-#ifdef HAVE_SET_MTIME
 /* {{{ Set the modification time of a file in zip, using its name */
 PHP_METHOD(ZipArchive, setMtimeName)
 {
@@ -2477,7 +2481,6 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 			(time_t)mtime, (zip_uint32_t)flags) == 0);
 }
 /* }}} */
-#endif
 
 /* {{{ Delete a file using its index */
 PHP_METHOD(ZipArchive, deleteIndex)
