@@ -1,7 +1,7 @@
 --TEST--
 ob_start(): Check behaviour with deprecation when OOM triggers handler removal (handler returns true)
 --INI--
-memory_limit=2M
+memory_limit=4M
 --FILE--
 <?php
 
