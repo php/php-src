@@ -1,8 +1,7 @@
 #!/bin/sh
 set -ex
-cd "$(dirname "$0")/../../.."
 
-cd "$1"
+cd "$(dirname "$0")/../../$1"
 
 # display overview of changed files
 git status

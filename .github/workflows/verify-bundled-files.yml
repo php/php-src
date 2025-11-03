@@ -33,4 +33,4 @@ jobs:
 
       - name: PCRE2 - Verify files
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: .github/scripts/download-bundled/verify-directory-unchanged.sh ext/pcre/pcre2lib
+        run: .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
