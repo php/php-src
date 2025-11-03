@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-20194 (null offset deprecation not emitted for writes).
     (Girgias)
+  . Fixed bug GH-GH-20377 (final promoted properties without explicit visibility
+    not automatically assigned). (DanielEScherzer)
 
 - Opcache:
   . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
