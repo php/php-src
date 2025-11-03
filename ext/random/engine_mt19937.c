@@ -330,6 +330,7 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 	/* state */
 	array_init(&t);
 	if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
+		zval_ptr_dtor_nogc(&t);
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
