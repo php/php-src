@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: be84c5056d3f53dc0c0a3d1b665bb69a4473cfbb */
+ * Stub hash: efdf9d30c34dea440fd4c5cfa9f69205a6c781e0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -406,7 +406,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_oid_lookup, 0, 1, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_oid_lookup, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, txt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
