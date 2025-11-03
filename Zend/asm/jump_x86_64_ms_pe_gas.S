@@ -89,6 +89,7 @@
 .file	"jump_x86_64_ms_pe_gas.asm"
 .text
 .p2align 4,,15
+.globl	jump_fcontext
 .def	jump_fcontext;	.scl	2;	.type	32;	.endef
 .seh_proc	jump_fcontext
 jump_fcontext:
@@ -203,3 +204,6 @@ jump_fcontext:
     /* indirect jump to context */
     jmp  *%r10
 .seh_endproc
+
+.section .drectve
+.ascii " -export:\"jump_fcontext\""
