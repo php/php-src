@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.29
 
+- Core:
+  . Sync all boost.context files with release 1.86.0. (mvorisek)
+
 - Date:
   . Fix crashes when trying to instantiate uninstantiable classes via date
     static constructors. (ndossche)
