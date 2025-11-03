@@ -147,12 +147,12 @@ php_stream_filter_status_t userfilter_filter(
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
-	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	/* Give the userfilter class a hook back to the stream */
+	zval *stream_prop = zend_hash_str_find(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
 	if (stream_prop) {
-		/* Give the userfilter class a hook back to the stream */
-		zval_ptr_dtor(stream_prop);
-		php_stream_to_zval(stream, stream_prop);
-		Z_ADDREF_P(stream_prop);
+		zval stream_zval;
+		php_stream_to_zval(stream, &stream_zval);
+		zend_update_property(Z_OBJCE_P(obj), Z_OBJ_P(obj), "stream", sizeof("stream")-1, &stream_zval);
 	}
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
@@ -197,7 +197,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
 	if (stream_prop) {
-		convert_to_null(stream_prop);
+		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), "stream", sizeof("stream")-1);
 	}
 
 	zval_ptr_dtor(&args[3]);
