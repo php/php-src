@@ -334,7 +334,6 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 }
 /* }}} */
 
