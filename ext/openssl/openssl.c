@@ -2056,51 +2056,51 @@ PHP_FUNCTION(openssl_csr_parse)
 	array_init(&subitem);
 	int attrcnt = X509_REQ_get_attr_count(csr);
 	if (attrcnt > 0) {
-	    for (i = 0; i < attrcnt; i++) {
-		X509_ATTRIBUTE *attr = X509_REQ_get_attr(csr,i);
-		char unknown[] = "Unknown";
-		if (attr) {
-		    char objbuf[80];
-		    /* Adapted from openssl's "req" app */
-		    ASN1_TYPE *at;
-		    ASN1_BIT_STRING *bs = NULL;
-		    ASN1_OBJECT *aobj;
-		    int j, type = 0, count = 1, ii = 0;
+		for (i = 0; i < attrcnt; i++) {
+			X509_ATTRIBUTE *attr = X509_REQ_get_attr(csr,i);
+			char unknown[] = "Unknown";
+			if (attr) {
+				char objbuf[80];
+				/* Adapted from openssl's "req" app */
+				ASN1_TYPE *at;
+				ASN1_BIT_STRING *bs = NULL;
+				ASN1_OBJECT *aobj;
+				int j, type = 0, count = 1, ii = 0;
 
-		    aobj = X509_ATTRIBUTE_get0_object(attr);
-		    if (X509_REQ_extension_nid(OBJ_obj2nid(aobj)))
-			continue;
-		    if ((j = i2t_ASN1_OBJECT(objbuf, sizeof(objbuf), aobj)) > 0) {
-			ii = 0;
-			count = X509_ATTRIBUTE_count(attr);
-			if (count == 0) {
-			    RETURN_FALSE;
-			}
+				aobj = X509_ATTRIBUTE_get0_object(attr);
+				if (X509_REQ_extension_nid(OBJ_obj2nid(aobj)))
+					continue;
+				if ((j = i2t_ASN1_OBJECT(objbuf, sizeof(objbuf), aobj)) > 0) {
+					ii = 0;
+					count = X509_ATTRIBUTE_count(attr);
+					if (count == 0) {
+						goto err_subitem;
+					}
 get_next:
-			at = X509_ATTRIBUTE_get0_type(attr, ii);
-			type = at->type;
-			bs = at->value.asn1_string;
-		    } else {
-			strcpy(objbuf, unknown);
-		    }
-		    switch (type) {
-			case V_ASN1_PRINTABLESTRING:
-			case V_ASN1_T61STRING:
-			case V_ASN1_NUMERICSTRING:
-			case V_ASN1_UTF8STRING:
-			case V_ASN1_IA5STRING:
-			    add_assoc_stringl(&subitem, objbuf, (char *)bs->data, bs->length);
-			    break;
-			default:
-			    add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
-			    break;
-		    }
-		    if (++ii < count)
-			goto get_next;
+					at = X509_ATTRIBUTE_get0_type(attr, ii);
+					type = at->type;
+					bs = at->value.asn1_string;
+				} else {
+					strcpy(objbuf, unknown);
+				}
+				switch (type) {
+					case V_ASN1_PRINTABLESTRING:
+					case V_ASN1_T61STRING:
+					case V_ASN1_NUMERICSTRING:
+					case V_ASN1_UTF8STRING:
+					case V_ASN1_IA5STRING:
+						add_assoc_stringl(&subitem, objbuf, (char *)bs->data, bs->length);
+						break;
+					default:
+						add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
+						break;
+				}
+				if (++ii < count)
+					goto get_next;
 
+			}
 		}
-	    }
-	    add_assoc_zval(return_value, "attributes", &subitem);
+		add_assoc_zval(return_value, "attributes", &subitem);
 	}
 
 	array_init(&subitem);
@@ -2156,22 +2156,27 @@ get_next:
 		}
 		add_assoc_zval(return_value, "extensions", &subitem);
 		if (crit_name) {
-		    efree(crit_name);
+			efree(crit_name);
 		}
+		sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
+		exts = NULL;
 	}
 	if (csr) {
-	    X509_REQ_free(csr);
+		X509_REQ_free(csr);
 	}
 	return;
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
 	if (crit_name) {
-	    efree(crit_name);
+		efree(crit_name);
 	}
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (csr) {
-	    X509_REQ_free(csr);
+		X509_REQ_free(csr);
+	}
+	if (exts) {
+		sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
 	}
 	RETURN_FALSE;
 }
