@@ -700,4 +700,8 @@ function openssl_password_hash(string $algo, #[\SensitiveParameter] string $pass
 function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
 #endif
 
-function openssl_oid_lookup(string $txt): array {}
+/**
+ * @return array<string, string>|false
+ * @refcount 1
+ */
+function openssl_oid_lookup(string $txt): array|false {}
