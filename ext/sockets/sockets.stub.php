@@ -643,11 +643,15 @@ const TCP_KEEPALIVE = UNKNOWN;
  * @cvalue TCP_KEEPIDLE
  */
 const TCP_KEEPIDLE = UNKNOWN;
+#endif
+#ifdef TCP_KEEPINTVL
 /**
  * @var int
  * @cvalue TCP_KEEPINTVL
  */
 const TCP_KEEPINTVL = UNKNOWN;
+#endif
+#ifdef TCP_KEEPCNT
 /**
  * @var int
  * @cvalue TCP_KEEPCNT
