@@ -96,7 +96,6 @@ Since:
 */
 PHP_METHOD(DOMText, splitText)
 {
-	zval       *id;
 	xmlChar    *first;
 	xmlChar    *second;
 	xmlNodePtr  node;
@@ -105,11 +104,10 @@ PHP_METHOD(DOMText, splitText)
 	int         length;
 	dom_object	*intern;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		RETURN_THROWS();
 	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
 
 	if (offset < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
@@ -155,21 +153,11 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
-	zval       *id;
 	xmlNodePtr  node;
 	dom_object	*intern;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
-
-	if (xmlIsBlankNode(node)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
+	RETURN_BOOL(xmlIsBlankNode(node));
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 
