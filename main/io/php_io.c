@@ -16,7 +16,6 @@
 #include "php_io.h"
 #include "php_io_internal.h"
 #include <sys/stat.h>
-#include <sys/socket.h>
 
 #ifdef PHP_WIN32
 #include <io.h>
@@ -43,25 +42,35 @@ PHPAPI php_io_fd_type php_io_detect_fd_type(int fd)
 	struct stat st;
 
 	if (fstat(fd, &st) != 0) {
-		return PHP_IO_FD_UNKNOWN;
+		/* Can't stat - assume generic (safest fallback) */
+		return PHP_IO_FD_GENERIC;
 	}
 
 	if (S_ISREG(st.st_mode)) {
 		return PHP_IO_FD_FILE;
-	} else if (S_ISSOCK(st.st_mode)) {
-		return PHP_IO_FD_SOCKET;
-	} else if (S_ISFIFO(st.st_mode)) {
-		return PHP_IO_FD_PIPE;
 	}
 
-	/* Additional socket detection for systems where S_ISSOCK doesn't work */
-	int sock_type;
-	socklen_t sock_type_len = sizeof(sock_type);
-	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, &sock_type, &sock_type_len) == 0) {
-		return PHP_IO_FD_SOCKET;
-	}
+	/* Everything else (socket, pipe, fifo, char device, etc.) is generic */
+	return PHP_IO_FD_GENERIC;
+}
 
-	return PHP_IO_FD_UNKNOWN;
+/* High-level copy function with dispatch */
+PHPAPI zend_result php_io_copy(int src_fd, php_io_fd_type src_type, int dest_fd,
+		php_io_fd_type dest_type, size_t len, size_t *copied)
+{
+	php_io *io = php_io_get();
+
+	/* Dispatch to appropriate copy function based on fd types */
+	if (src_type == PHP_IO_FD_FILE && dest_type == PHP_IO_FD_FILE) {
+		return io->copy.file_to_file(src_fd, dest_fd, len, copied);
+	} else if (src_type == PHP_IO_FD_FILE && dest_type == PHP_IO_FD_GENERIC) {
+		return io->copy.file_to_generic(src_fd, dest_fd, len, copied);
+	} else if (src_type == PHP_IO_FD_GENERIC && dest_type == PHP_IO_FD_FILE) {
+		return io->copy.generic_to_file(src_fd, dest_fd, len, copied);
+	} else {
+		/* generic to generic */
+		return io->copy.generic_to_generic(src_fd, dest_fd, len, copied);
+	}
 }
 
 /* Generic read/write fallback implementation */

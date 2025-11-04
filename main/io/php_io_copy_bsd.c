@@ -23,7 +23,7 @@
 #include <sys/uio.h>
 #endif
 
-zend_result php_io_bsd_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SENDFILE
 	/* BSD sendfile signature: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags) */
