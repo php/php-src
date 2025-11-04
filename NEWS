@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.15
+?? ??? ????, PHP 8.4.16
+
+
+20 Nov 2025, PHP 8.4.15
 
 - Core:
   . Fixed bug GH-19934 (CGI with auto_globals_jit=0 causes uouv). (ilutov)
