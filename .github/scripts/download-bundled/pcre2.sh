@@ -2,13 +2,12 @@
 set -ex
 cd "$(dirname "$0")/../../.."
 
-revision=refs/tags/pcre2-10.46
+revision=refs/tags/pcre2-10.44
 
 git clone --depth 1 --recurse-submodules --revision=$revision https://github.com/PCRE2Project/pcre2.git /tmp/php-src-bundled/pcre2
 
 rm -rf ext/pcre/pcre2lib
 cp -R /tmp/php-src-bundled/pcre2/src ext/pcre/pcre2lib
-cp -R /tmp/php-src-bundled/pcre2/deps/sljit/sljit_src ext/pcre/pcre2lib/sljit
 
 cd ext/pcre/pcre2lib
 
@@ -31,6 +30,3 @@ mv pcre2_chartables.c.dist pcre2_chartables.c
 
 # add extra files
 git restore config.h # based on config.h.generic but with many changes
-
-# patch customized files
-git apply -v ../../../.github/scripts/download-bundled/pcre2-adjust-sljit-directory.patch
