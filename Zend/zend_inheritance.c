@@ -97,11 +97,11 @@ static zend_function *zend_duplicate_internal_function(zend_function *func, zend
 	zend_function *new_function;
 
 	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-		new_function = pemalloc(sizeof(zend_internal_function), 1);
-		memcpy(new_function, func, sizeof(zend_internal_function));
+		new_function = pemalloc(sizeof(zend_function), 1);
+		memcpy(new_function, func, sizeof(zend_function));
 	} else {
-		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-		memcpy(new_function, func, sizeof(zend_internal_function));
+		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_function));
+		memcpy(new_function, func, sizeof(zend_function));
 		new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	}
 	if (EXPECTED(new_function->common.function_name)) {

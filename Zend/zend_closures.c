@@ -175,11 +175,7 @@ ZEND_METHOD(Closure, call)
 		ZVAL_UNDEF(&fake_closure->this_ptr);
 		fake_closure->called_scope = NULL;
 		my_function = &fake_closure->func;
-		if (ZEND_USER_CODE(closure->func.type)) {
-			memcpy(my_function, &closure->func, sizeof(zend_op_array));
-		} else {
-			memcpy(my_function, &closure->func, sizeof(zend_internal_function));
-		}
+		memcpy(my_function, &closure->func, sizeof(zend_function));
 		/* use scope of passed object */
 		my_function->common.scope = newclass;
 		if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
@@ -787,7 +783,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		}
 		ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
 	} else {
-		memcpy(&closure->func, func, sizeof(zend_internal_function));
+		memcpy(&closure->func, func, sizeof(zend_function));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
