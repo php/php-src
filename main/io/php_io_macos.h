@@ -12,20 +12,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_io_internal.h"
+#ifndef PHP_IO_MACOS_H
+#define PHP_IO_MACOS_H
 
-/* Generic fallback - used when no platform-specific ring implementation is compiled */
-#if !defined(__linux__) && !defined(_WIN32) && !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__APPLE__) && !defined(__sun)
+/* Copy operations */
+zend_result php_io_macos_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied);
+zend_result php_io_macos_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied);
 
-void php_io_register_ring(php_io_ring_ops *ops, uint32_t *capabilities)
-{
-    /* No ring support in generic implementation */
-    ops->create = NULL;
-    ops->submit = NULL;
-    ops->wait_cqe = NULL;
-    ops->cqe_seen = NULL;
-    ops->destroy = NULL;
-    ops->capabilities = 0;
-}
+/* Instance initialization macros */
+#define PHP_IO_PLATFORM_COPY_OPS \
+	{ \
+		.file_to_file = php_io_macos_copy_file_to_file, \
+		.file_to_socket = php_io_macos_copy_file_to_socket, \
+		.socket_to_fd = php_io_generic_copy_fallback, \
+	}
 
-#endif
+#define PHP_IO_PLATFORM_NAME "macos"
+
+#endif /* PHP_IO_MACOS_H */

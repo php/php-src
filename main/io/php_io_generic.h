@@ -12,27 +12,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_IO_INTERNAL_H
-#define PHP_IO_INTERNAL_H
+#ifndef PHP_IO_GENERIC_H
+#define PHP_IO_GENERIC_H
 
-#include "php_io.h"
+/* Instance initialization macros */
+#define PHP_IO_PLATFORM_COPY_OPS \
+	{ \
+		.file_to_file = php_io_generic_copy_fallback, \
+		.file_to_socket = php_io_generic_copy_fallback, \
+		.socket_to_fd = php_io_generic_copy_fallback, \
+	}
 
-/* Internal utility functions */
-zend_result php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t len, size_t *copied);
+#define PHP_IO_PLATFORM_NAME "generic"
 
-/* Platform-specific headers */
-#ifdef __linux__
-#include "php_io_linux.h"
-#elif defined(PHP_WIN32)
-#include "php_io_windows.h"
-#elif defined(__APPLE__)
-#include "php_io_macos.h"
-#elif defined(__sun)
-#include "php_io_solaris.h"
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#include "php_io_bsd.h"
-#else
-#include "php_io_generic.h"
-#endif
-
-#endif /* PHP_IO_INTERNAL_H */
+#endif /* PHP_IO_GENERIC_H */
