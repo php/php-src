@@ -323,16 +323,16 @@ slightly different steps. We'll call attention where the steps differ.
     git merge PHP-X.Y+1
     ```
 
-   > 🗒 **Note** \
-   >  When resolving the conflicts, ignore the changes from PHP-X.Y in higher
-   >  branches. It means using something like `git checkout --ours .` when on
-   >  PHP.X.Y+1 or master after the merge resulting in the conflicts.
+    > 🗒 **Note** \
+    >  When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+    >  branches. It means using something like `git checkout --ours .` when on
+    >  PHP.X.Y+1 or master after the merge resulting in the conflicts.
 
-   >  ```shell
-   >  git checkout --ours .
-   >  git add -p
-   >  git commit
-   >  ```
+    >  ```shell
+    >  git checkout --ours .
+    >  git add -p
+    >  git commit
+    >  ```
 
 11. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
