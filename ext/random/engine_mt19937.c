@@ -392,11 +392,11 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 
 	if (engine->engine.algo->serialize) {
 		array_init(&t);
-		zend_hash_str_add(Z_ARR_P(return_value), "__states", strlen("__states"), &t);
 		if (!engine->engine.algo->serialize(engine->engine.state, Z_ARRVAL(t))) {
 			zend_throw_exception(NULL, "Engine serialize failed", 0);
 			RETURN_THROWS();
 		}
+		zend_hash_str_add(Z_ARR_P(return_value), "__states", strlen("__states"), &t);
 	}
 }
 /* }}} */
