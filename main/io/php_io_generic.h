@@ -15,12 +15,13 @@
 #ifndef PHP_IO_GENERIC_H
 #define PHP_IO_GENERIC_H
 
-/* Instance initialization macros */
+/* Instance initialization macros - all use the generic fallback */
 #define PHP_IO_PLATFORM_COPY_OPS \
 	{ \
 		.file_to_file = php_io_generic_copy_fallback, \
-		.file_to_socket = php_io_generic_copy_fallback, \
-		.socket_to_fd = php_io_generic_copy_fallback, \
+		.file_to_generic = php_io_generic_copy_fallback, \
+		.generic_to_file = php_io_generic_copy_fallback, \
+		.generic_to_generic = php_io_generic_copy_fallback, \
 	}
 
 #define PHP_IO_PLATFORM_NAME "generic"
