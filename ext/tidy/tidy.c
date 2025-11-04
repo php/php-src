@@ -553,8 +553,7 @@ static zend_result tidy_node_cast_handler(zend_object *in, zval *out, int type)
 		case IS_STRING:
 			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&buf);
-			if (obj->ptdoc) {
-				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+			if (obj->ptdoc && tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf)) {
 				ZVAL_STRINGL(out, (char *) buf.bp, buf.size-1);
 			} else {
 				ZVAL_EMPTY_STRING(out);
@@ -611,7 +610,7 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	char *name;
 
 	tidyBufInit(&buf);
-	tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+	(void) tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 
 	zend_update_property_stringl(
 		tidy_ce_node,
