@@ -253,10 +253,37 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value)
 			zend_tmp_string_release(tmp_str);
 			break;
 
-		case TidyInteger:
-			lval = zval_get_long(value);
-			if (tidyOptSetInt(doc, tidyOptGetId(opt), lval)) {
-				return SUCCESS;
+		case TidyInteger: /* integer or enum */
+			ZVAL_DEREF(value);
+			/* Enum will correspond to a non-numeric string or object */
+			if (Z_TYPE_P(value) == IS_STRING || Z_TYPE_P(value) == IS_OBJECT) {
+				double dval;
+				str = zval_try_get_tmp_string(value, &tmp_str);
+				if (UNEXPECTED(!str)) {
+					return FAILURE;
+				}
+				uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, true);
+				if (type == IS_DOUBLE) {
+					lval = zend_dval_to_lval_cap(dval);
+					type = IS_LONG;
+				}
+				if (type == IS_LONG) {
+					if (tidyOptSetInt(doc, tidyOptGetId(opt), lval)) {
+						zend_tmp_string_release(tmp_str);
+						return SUCCESS;
+					}
+				} else {
+					if (tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str))) {
+						zend_tmp_string_release(tmp_str);
+						return SUCCESS;
+					}
+				}
+				zend_tmp_string_release(tmp_str);
+			} else {
+				lval = zval_get_long(value);
+				if (tidyOptSetInt(doc, tidyOptGetId(opt), lval)) {
+					return SUCCESS;
+				}
 			}
 			break;
 
