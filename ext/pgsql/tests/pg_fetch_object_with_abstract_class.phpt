@@ -4,7 +4,7 @@ pg_fetch_object() with abstract class name
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
@@ -17,7 +17,7 @@ enum E {
 	case A;
 }
 
-include "config.inc";
+include "inc/config.inc";
 $table_name = "pg_fetch_object_abstract_class";
 $db = pg_connect($conn_str);
 pg_query($db, "CREATE TABLE {$table_name} (a integer, b text)");
@@ -49,7 +49,7 @@ try {
 ?>
 --CLEAN--
 <?php
-include('config.inc');
+include('inc/config.inc');
 $db = @pg_connect($conn_str);
 @pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
 ?>
