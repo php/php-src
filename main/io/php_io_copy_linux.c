@@ -71,10 +71,10 @@ zend_result php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t len, 
 	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
 }
 
-zend_result php_io_linux_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SENDFILE
-	/* Use sendfile for zero-copy file to socket transfer */
+	/* Use sendfile for zero-copy file to socket/pipe transfer */
 	off_t offset = 0;
 	ssize_t result = sendfile(dest_fd, src_fd, &offset, len);
 
@@ -97,16 +97,15 @@ zend_result php_io_linux_copy_file_to_socket(int src_fd, int dest_fd, size_t len
 	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
 }
 
-zend_result php_io_linux_copy_socket_to_fd(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SPLICE
-	/* Use splice for zero-copy socket to fd transfer */
-	/* splice() can work directly between socket and file/pipe */
+	/* Use splice for zero-copy transfer from socket/pipe to any fd */
+	/* splice() works for: socket→file, socket→pipe, pipe→file, pipe→socket, etc. */
 	size_t total_copied = 0;
 	size_t remaining = len;
 
 	while (remaining > 0) {
-		/* splice from socket to destination fd */
 		ssize_t result
 				= splice(src_fd, NULL, dest_fd, NULL, remaining, SPLICE_F_MOVE | SPLICE_F_MORE);
 

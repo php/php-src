@@ -27,19 +27,7 @@
 #include <copyfile.h>
 #endif
 
-zend_result php_io_macos_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied)
-{
-#ifdef HAVE_COPYFILE
-	/* macOS copyfile() can be used, but it's designed for whole files */
-	/* For partial copies, it's complex to use properly */
-	/* TODO: Could implement copyfile() for whole-file copies in the future */
-#endif
-
-	/* For now, use generic implementation for file-to-file */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
-
-zend_result php_io_macos_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_macos_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SENDFILE
 	/* macOS sendfile signature: sendfile(fd, s, offset, len, hdtr, flags) */

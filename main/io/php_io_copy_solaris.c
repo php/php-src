@@ -22,7 +22,7 @@
 #include <sys/sendfile.h>
 #endif
 
-zend_result php_io_solaris_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SENDFILEV
 	/* Solaris sendfilev - very powerful but complex API */
