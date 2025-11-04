@@ -17,15 +17,16 @@
 
 /* Copy operations */
 zend_result php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied);
-zend_result php_io_linux_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied);
-zend_result php_io_linux_copy_socket_to_fd(int src_fd, int dest_fd, size_t len, size_t *copied);
+zend_result php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied);
+zend_result php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t len, size_t *copied);
 
 /* Instance initialization macros */
 #define PHP_IO_PLATFORM_COPY_OPS \
 	{ \
 		.file_to_file = php_io_linux_copy_file_to_file, \
-		.file_to_socket = php_io_linux_copy_file_to_socket, \
-		.socket_to_fd = php_io_linux_copy_socket_to_fd, \
+		.file_to_generic = php_io_linux_copy_file_to_generic, \
+		.generic_to_file = php_io_linux_copy_generic_to_any, \
+		.generic_to_generic = php_io_linux_copy_generic_to_any, \
 	}
 
 #define PHP_IO_PLATFORM_NAME "linux"
