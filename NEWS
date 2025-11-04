@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Downgrade back to PCRE2 10.44, see GH-20341. (nielsdos)
 
+- PgSql:
+  . Fix segfaults when attempting to fetch row into a non-instantiable class
+    name. (Girgias, nielsdos)
+
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
