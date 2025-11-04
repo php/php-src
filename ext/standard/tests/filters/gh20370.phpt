@@ -26,15 +26,19 @@ stream_filter_append($fp, "pass");
 try {
     fwrite($fp, "data");
 } catch (TypeError $e) {
-    echo "TypeError: Cannot assign resource to typed property\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
+
+try {
+    fclose($fp);
+} catch (TypeError $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+}
+
+unset($fp); // prevent cleanup at shutdown
 
 ?>
 --EXPECTF--
 Warning: fwrite(): Unprocessed filter buckets remaining on input brigade in %s on line %d
-TypeError: Cannot assign resource to typed property
-
-Fatal error: Uncaught TypeError: Cannot assign resource to property pass_filter::$stream of type int in %s
-Stack trace:
-#0 {main}
-  thrown in %s
+TypeError: Cannot assign resource to property pass_filter::$stream of type int
+TypeError: Cannot assign resource to property pass_filter::$stream of type int

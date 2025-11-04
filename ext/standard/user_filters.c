@@ -21,6 +21,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/user_filters_arginfo.h"
+#include "zend_exceptions.h"
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
@@ -148,12 +149,29 @@ php_stream_filter_status_t userfilter_filter(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	/* Give the userfilter class a hook back to the stream */
-	zval *stream_prop = zend_hash_str_find(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
-	if (stream_prop) {
+	zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = Z_OBJCE_P(obj);
+
+	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
+	if (Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL)) {
 		zval stream_zval;
 		php_stream_to_zval(stream, &stream_zval);
-		zend_update_property(Z_OBJCE_P(obj), Z_OBJ_P(obj), "stream", sizeof("stream")-1, &stream_zval);
+		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
+		/* If property update threw an exception, skip filter execution */
+		if (EG(exception)) {
+			if (buckets_in->head) {
+				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+			}
+			zend_string_release(stream_name);
+			EG(fake_scope) = old_scope;
+			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= orig_no_fclose;
+			return PSFS_ERR_FATAL;
+		}
 	}
+	zend_string_release(stream_name);
+
+	EG(fake_scope) = old_scope;
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
@@ -196,8 +214,19 @@ php_stream_filter_status_t userfilter_filter(
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
+	zend_property_info *prop_info = zend_hash_str_find_ptr(&Z_OBJCE_P(obj)->properties_info, "stream", sizeof("stream")-1);
+	zval *stream_prop = zend_hash_str_find(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+
 	if (stream_prop) {
-		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), "stream", sizeof("stream")-1);
+		if (prop_info) {
+			/* Declared property: set to UNDEF to make it uninitialized */
+			zval_ptr_dtor(stream_prop);
+			ZVAL_UNDEF(stream_prop);
+		} else {
+			/* Dynamic property: set to null */
+			zval_ptr_dtor(stream_prop);
+			ZVAL_NULL(stream_prop);
+		}
 	}
 
 	zval_ptr_dtor(&args[3]);
