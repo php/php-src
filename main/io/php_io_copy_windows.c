@@ -22,7 +22,7 @@
 
 zend_result php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
-	/* Try CopyFileEx for optimal file-to-file copying */
+	/* Use ReadFile/WriteFile for file-to-file copying */
 	HANDLE src_handle = (HANDLE) _get_osfhandle(src_fd);
 	HANDLE dest_handle = (HANDLE) _get_osfhandle(dest_fd);
 
@@ -32,7 +32,7 @@ zend_result php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t len
 		if (GetFileSizeEx(src_handle, &file_size)) {
 			DWORD bytes_to_copy = (DWORD) min(len, (size_t) file_size.QuadPart);
 
-			/* Use ReadFile/WriteFile for partial copies since CopyFileEx copies entire files */
+			/* Use ReadFile/WriteFile for partial copies */
 			char buffer[65536];
 			DWORD total_copied = 0;
 
@@ -68,7 +68,7 @@ zend_result php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t len
 	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
 }
 
-zend_result php_io_windows_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_windows_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 	/* Use TransmitFile for zero-copy file to socket transfer */
 	HANDLE file_handle = (HANDLE) _get_osfhandle(src_fd);
