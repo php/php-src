@@ -2,11 +2,6 @@
 setMtime
 --EXTENSIONS--
 zip
---SKIPIF--
-<?php
-/* $Id$ */
-if (!method_exists('ZipArchive', 'setMtimeName')) die('skip libzip too old');
-?>
 --INI--
 date.timezone=UTC
 --FILE--

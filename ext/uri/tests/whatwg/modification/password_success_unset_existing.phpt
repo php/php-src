@@ -15,5 +15,5 @@ var_dump($url2->toAsciiString());
 ?>
 --EXPECT--
 string(8) "password"
-NULL
+string(0) ""
 string(29) "https://username@example.com/"

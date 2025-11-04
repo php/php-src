@@ -36,6 +36,12 @@ PHP 8.6 UPGRADE NOTES
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
+
+- Streams:
+  . Added stream socket context option so_reuseaddr that allows disabling
+    address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
+    Windows.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -111,5 +117,11 @@ PHP 8.6 UPGRADE NOTES
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
 
+- DOM:
+  . Made splitText() faster and consume less memory.
+
 - JSON:
   . Improve performance of encoding arrays and objects.
+
+- Standard:
+  . Improved performance of array_fill_keys().

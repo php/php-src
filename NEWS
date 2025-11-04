@@ -33,8 +33,14 @@ PHP                                                                        NEWS
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
 
+- Streams:
+  . Added so_reuseaddr streams context socket option that allows disabling
+    address resuse.
+
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
+  . Support minimum version for libzip dependency updated to 1.0.0.
+    (David Carlier)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
