@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0RC4
+?? ??? ????, PHP 8.5.0
+
+
+06 Nov 2025, PHP 8.5.0RC4
 
 - Core:
   . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
