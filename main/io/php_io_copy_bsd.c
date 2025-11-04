@@ -23,67 +23,44 @@
 #include <sys/uio.h>
 #endif
 
-static zend_result php_io_copy_bsd_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied)
-{
-    /* BSD variants don't have a special file-to-file copy optimization */
-    return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
-
-static zend_result php_io_copy_bsd_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
+zend_result php_io_bsd_copy_file_to_socket(int src_fd, int dest_fd, size_t len, size_t *copied)
 {
 #ifdef HAVE_SENDFILE
-    /* BSD sendfile signature: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags) */
-    /* This signature is shared by FreeBSD, OpenBSD, and NetBSD */
-    off_t sbytes = 0;
-    int result = sendfile(src_fd, dest_fd, 0, len, NULL, &sbytes, 0);
-    
-    if (result == 0) {
-        /* Success - entire amount was sent */
-        *copied = len;
-        return SUCCESS;
-    } else if (result == -1 && sbytes > 0) {
-        /* Partial send - some data was transferred */
-        *copied = sbytes;
-        return SUCCESS;
-    } else if (result == -1) {
-        /* Error occurred */
-        switch (errno) {
-            case EAGAIN:
-            case EBUSY:
-                /* Would block or busy - could retry, but fall back for now */
-                break;
-            case EINVAL:
-                /* Invalid arguments - likely not a regular file or socket */
-                break;
-            case ENOTCONN:
-                /* Socket not connected */
-                break;
-            default:
-                /* Other errors */
-                break;
-        }
-    }
+	/* BSD sendfile signature: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags) */
+	/* This signature is shared by FreeBSD, OpenBSD, and NetBSD */
+	off_t sbytes = 0;
+	int result = sendfile(src_fd, dest_fd, 0, len, NULL, &sbytes, 0);
+
+	if (result == 0) {
+		/* Success - entire amount was sent */
+		*copied = len;
+		return SUCCESS;
+	} else if (result == -1 && sbytes > 0) {
+		/* Partial send - some data was transferred */
+		*copied = sbytes;
+		return SUCCESS;
+	} else if (result == -1) {
+		/* Error occurred */
+		switch (errno) {
+			case EAGAIN:
+			case EBUSY:
+				/* Would block or busy - could retry, but fall back for now */
+				break;
+			case EINVAL:
+				/* Invalid arguments - likely not a regular file or socket */
+				break;
+			case ENOTCONN:
+				/* Socket not connected */
+				break;
+			default:
+				/* Other errors */
+				break;
+		}
+	}
 #endif /* HAVE_SENDFILE */
-    
-    /* Fallback to generic implementation */
-    return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
 
-static zend_result php_io_copy_bsd_socket_to_fd(int src_fd, int dest_fd, size_t len, size_t *copied)
-{
-    /* No BSD-specific optimization for socket to fd */
-    return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
-
-void php_io_register_copy(php_io_copy_ops *ops, uint32_t *capabilities)
-{
-    ops->file_to_file = php_io_copy_bsd_file_to_file;
-    ops->file_to_socket = php_io_copy_bsd_file_to_socket;
-    ops->socket_to_fd = php_io_copy_bsd_socket_to_fd;
-    
-#ifdef HAVE_SENDFILE
-    *capabilities |= PHP_IO_CAP_SENDFILE | PHP_IO_CAP_ZERO_COPY;
-#endif
+	/* Fallback to generic implementation */
+	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
 }
 
 #endif /* FreeBSD, OpenBSD, NetBSD */
