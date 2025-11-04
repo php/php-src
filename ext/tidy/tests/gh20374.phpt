@@ -29,6 +29,8 @@ $values = [
 	'numeric string double 1.0' => '1.0',
 	'false' => false,
 	'true' => true,
+	'NAN' => NAN,
+	'INF' => INF,
 	'object with numeric string int 0' => new MyStringable('0'),
 	'object with string blocklevel' => new MyStringable('blocklevel'),
     'object with string empty' => new MyStringable('empty'),
@@ -115,6 +117,24 @@ test
 </head>
 <body>
 <custom-html-element>test</custom-html-element>
+</body>
+</html>
+--- NAN ---
+<html>
+<head>
+<title></title>
+</head>
+<body>
+test
+</body>
+</html>
+--- INF ---
+<html>
+<head>
+<title></title>
+</head>
+<body>
+test
 </body>
 </html>
 --- object with numeric string int 0 ---
