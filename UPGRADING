@@ -125,3 +125,4 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard:
   . Improved performance of array_fill_keys().
+  . Improved performance of array_walk().
