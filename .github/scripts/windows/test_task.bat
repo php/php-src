@@ -36,8 +36,7 @@ if %errorlevel% neq 0 exit /b 3
 rem setup PostgreSQL related exts
 set PGUSER=postgres
 set PGPASSWORD=Password12!
-rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
-echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
+set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
 set TMP_POSTGRESQL_BIN=%PGBIN%
 "%TMP_POSTGRESQL_BIN%\createdb.exe" test

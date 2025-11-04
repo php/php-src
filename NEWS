@@ -60,6 +60,8 @@ PHP                                                                        NEWS
 
 - PgSql:
   . Fix memory leak when first string conversion fails. (nielsdos)
+  . Fix segfaults when attempting to fetch row into a non-instantiable class
+    name. (Girgias, nielsdos)
 
 - Phar:
   . Fix memory leak of argument in webPhar. (nielsdos)
