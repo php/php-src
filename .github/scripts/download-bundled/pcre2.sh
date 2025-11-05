@@ -4,7 +4,7 @@ cd "$(dirname "$0")/../../.."
 
 revision=refs/tags/pcre2-10.44
 
-git clone --depth 1 --recurse-submodules --revision=$revision https://github.com/PCRE2Project/pcre2.git /tmp/php-src-bundled/pcre2
+git clone --depth 1 --recurse-submodules --revision="$revision" https://github.com/PCRE2Project/pcre2.git /tmp/php-src-bundled/pcre2
 
 rm -rf ext/pcre/pcre2lib
 cp -R /tmp/php-src-bundled/pcre2/src ext/pcre/pcre2lib
