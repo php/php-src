@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url equivalence - returns true - path is not percent-decoded during normalization
+Test Uri\WhatWg\Url equivalence - returns false - path is not percent-decoded during normalization
 --FILE--
 <?php
 
