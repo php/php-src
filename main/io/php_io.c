@@ -36,71 +36,63 @@ PHPAPI php_io *php_io_get(void)
 	return &php_io_instance;
 }
 
-/* Detect file descriptor type */
-PHPAPI php_io_fd_type php_io_detect_fd_type(int fd)
-{
-	struct stat st;
-
-	if (fstat(fd, &st) != 0) {
-		/* Can't stat - assume generic (safest fallback) */
-		return PHP_IO_FD_GENERIC;
-	}
-
-	if (S_ISREG(st.st_mode)) {
-		return PHP_IO_FD_FILE;
-	}
-
-	/* Everything else (socket, pipe, fifo, char device, etc.) is generic */
-	return PHP_IO_FD_GENERIC;
-}
-
 /* High-level copy function with dispatch */
-PHPAPI zend_result php_io_copy(int src_fd, php_io_fd_type src_type, int dest_fd,
-		php_io_fd_type dest_type, size_t len, size_t *copied)
+PHPAPI ssize_t php_io_copy(
+		int src_fd, php_io_fd_type src_type, int dest_fd, php_io_fd_type dest_type, size_t maxlen)
 {
 	php_io *io = php_io_get();
 
 	/* Dispatch to appropriate copy function based on fd types */
 	if (src_type == PHP_IO_FD_FILE && dest_type == PHP_IO_FD_FILE) {
-		return io->copy.file_to_file(src_fd, dest_fd, len, copied);
+		return io->copy.file_to_file(src_fd, dest_fd, maxlen);
 	} else if (src_type == PHP_IO_FD_FILE && dest_type == PHP_IO_FD_GENERIC) {
-		return io->copy.file_to_generic(src_fd, dest_fd, len, copied);
+		return io->copy.file_to_generic(src_fd, dest_fd, maxlen);
 	} else if (src_type == PHP_IO_FD_GENERIC && dest_type == PHP_IO_FD_FILE) {
-		return io->copy.generic_to_file(src_fd, dest_fd, len, copied);
+		return io->copy.generic_to_file(src_fd, dest_fd, maxlen);
 	} else {
 		/* generic to generic */
-		return io->copy.generic_to_generic(src_fd, dest_fd, len, copied);
+		return io->copy.generic_to_generic(src_fd, dest_fd, maxlen);
 	}
 }
 
 /* Generic read/write fallback implementation */
-zend_result php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 {
 	char buf[8192];
 	size_t total_copied = 0;
-	size_t remaining = len;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
-	while (remaining > 0 && total_copied < len) {
-		size_t to_read = remaining < sizeof(buf) ? remaining : sizeof(buf);
+	while (remaining > 0) {
+		size_t to_read = (remaining < sizeof(buf)) ? remaining : sizeof(buf);
 		ssize_t bytes_read = read(src_fd, buf, to_read);
 
-		if (bytes_read <= 0) {
-			break; /* EOF or error */
+		if (bytes_read < 0) {
+			/* Read error */
+			return total_copied > 0 ? (ssize_t) total_copied : -1;
+		} else if (bytes_read == 0) {
+			/* EOF reached */
+			return (ssize_t) total_copied;
 		}
 
 		ssize_t bytes_written = write(dest_fd, buf, bytes_read);
-		if (bytes_written <= 0) {
-			break; /* Error */
+		if (bytes_written < 0) {
+			/* Write error */
+			return total_copied > 0 ? (ssize_t) total_copied : -1;
+		} else if (bytes_written == 0) {
+			/* Couldn't write anything */
+			return total_copied > 0 ? (ssize_t) total_copied : -1;
 		}
 
 		total_copied += bytes_written;
-		remaining -= bytes_written;
+		if (maxlen != PHP_IO_COPY_ALL) {
+			remaining -= bytes_written;
+		}
 
 		if (bytes_written != bytes_read) {
-			break; /* Partial write */
+			/* Partial write - stop here */
+			return (ssize_t) total_copied;
 		}
 	}
 
-	*copied = total_copied;
-	return total_copied > 0 ? SUCCESS : FAILURE;
+	return (ssize_t) total_copied;
 }

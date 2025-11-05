@@ -20,55 +20,55 @@
 #include <winsock2.h>
 #include <mswsock.h>
 
-zend_result php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 {
 	/* Use ReadFile/WriteFile for file-to-file copying */
 	HANDLE src_handle = (HANDLE) _get_osfhandle(src_fd);
 	HANDLE dest_handle = (HANDLE) _get_osfhandle(dest_fd);
 
 	if (src_handle != INVALID_HANDLE_VALUE && dest_handle != INVALID_HANDLE_VALUE) {
-		/* Get source file size to determine copy length */
-		LARGE_INTEGER file_size;
-		if (GetFileSizeEx(src_handle, &file_size)) {
-			DWORD bytes_to_copy = (DWORD) min(len, (size_t) file_size.QuadPart);
+		char buffer[65536];
+		DWORD total_copied = 0;
+		DWORD remaining = (maxlen == PHP_IO_COPY_ALL) ? MAXDWORD : (DWORD) min(maxlen, MAXDWORD);
 
-			/* Use ReadFile/WriteFile for partial copies */
-			char buffer[65536];
-			DWORD total_copied = 0;
+		while (remaining > 0) {
+			DWORD to_read = min(sizeof(buffer), remaining);
+			DWORD bytes_read, bytes_written;
 
-			while (total_copied < bytes_to_copy) {
-				DWORD to_read = min(sizeof(buffer), bytes_to_copy - total_copied);
-				DWORD bytes_read, bytes_written;
-
-				if (!ReadFile(src_handle, buffer, to_read, &bytes_read, NULL)) {
-					break;
-				}
-
-				if (bytes_read == 0) {
-					break; /* EOF */
-				}
-
-				if (!WriteFile(dest_handle, buffer, bytes_read, &bytes_written, NULL)) {
-					break;
-				}
-
-				total_copied += bytes_written;
-
-				if (bytes_written != bytes_read) {
-					break; /* Partial write */
-				}
+			if (!ReadFile(src_handle, buffer, to_read, &bytes_read, NULL)) {
+				/* Read error */
+				return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
 
-			*copied = total_copied;
-			return total_copied > 0 ? SUCCESS : FAILURE;
+			if (bytes_read == 0) {
+				/* EOF */
+				return (ssize_t) total_copied;
+			}
+
+			if (!WriteFile(dest_handle, buffer, bytes_read, &bytes_written, NULL)) {
+				/* Write error */
+				return total_copied > 0 ? (ssize_t) total_copied : -1;
+			}
+
+			total_copied += bytes_written;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= bytes_written;
+			}
+
+			if (bytes_written != bytes_read) {
+				/* Partial write */
+				return (ssize_t) total_copied;
+			}
 		}
+
+		return (ssize_t) total_copied;
 	}
 
 	/* Fallback to generic implementation */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
-zend_result php_io_windows_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_windows_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 {
 	/* Use TransmitFile for zero-copy file to socket transfer */
 	HANDLE file_handle = (HANDLE) _get_osfhandle(src_fd);
@@ -76,24 +76,24 @@ zend_result php_io_windows_copy_file_to_generic(int src_fd, int dest_fd, size_t 
 
 	if (file_handle != INVALID_HANDLE_VALUE && sock != INVALID_SOCKET) {
 		/* TransmitFile can send entire file or partial */
-		DWORD bytes_to_send = (DWORD) len;
+		DWORD bytes_to_send = (maxlen == PHP_IO_COPY_ALL) ? 0 : (DWORD) min(maxlen, MAXDWORD);
 
 		if (TransmitFile(sock, file_handle, bytes_to_send, 0, NULL, NULL, 0)) {
-			*copied = bytes_to_send;
-			return SUCCESS;
+			/* TransmitFile succeeded - but we don't know exactly how much was sent without extra
+			 * syscalls */
+			/* For simplicity, assume the requested amount was sent */
+			return (maxlen == PHP_IO_COPY_ALL) ? 0 : (ssize_t) bytes_to_send;
 		}
 
 		/* TransmitFile failed, check if it's a recoverable error */
 		int error = WSAGetLastError();
 		if (error == WSAENOTSOCK) {
 			/* dest_fd is not a socket, fall back to generic copy */
-		} else {
-			/* Other TransmitFile error, could be network related */
 		}
 	}
 
 	/* Fallback to generic implementation */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
 #endif /* PHP_WIN32 */
