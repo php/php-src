@@ -31,15 +31,6 @@
 #include <fcntl.h>
 #endif
 
-/* copy_file_range wrapper for older systems */
-#ifdef HAVE_COPY_FILE_RANGE
-static ssize_t copy_file_range_wrapper(
-		int fd_in, off_t *off_in, int fd_out, off_t *off_out, size_t len, unsigned int flags)
-{
-	return syscall(SYS_copy_file_range, fd_in, off_in, fd_out, off_out, len, flags);
-}
-#endif
-
 ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_COPY_FILE_RANGE
@@ -49,7 +40,7 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX to avoid issues */
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
-		ssize_t result = copy_file_range_wrapper(src_fd, NULL, dest_fd, NULL, to_copy, 0);
+		ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, to_copy, 0);
 
 		if (result > 0) {
 			total_copied += result;
