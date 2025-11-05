@@ -3,6 +3,7 @@ FPM: bug68591 - config test user existence
 --SKIPIF--
 <?php
 include "skipif.inc";
+if (getenv("SKIP_ASAN") && getenv("GITHUB_ACTIONS")) die("skip leak sanitizer crashes");
 ?>
 --FILE--
 <?php
