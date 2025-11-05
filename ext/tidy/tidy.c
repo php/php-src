@@ -616,12 +616,14 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 		do {
 			const char *attr_name = tidyAttrName(tempattr);
 			if (attr_name) {
+				zval value;
 				const char *val = tidyAttrValue(tempattr);
 				if (val) {
-					add_assoc_string(&attribute, attr_name, val);
+					ZVAL_STRING_FAST(&value, val);
 				} else {
-					add_assoc_str(&attribute, attr_name, zend_empty_string);
+					ZVAL_EMPTY_STRING(&value);
 				}
+				zend_hash_str_add_new(Z_ARRVAL(attribute), attr_name, strlen(attr_name), &value);
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
 	} else {
