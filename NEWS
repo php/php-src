@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (nielsdos)
+  . Added BackedEnum::values() to retrieve an indexed array of all backing
+    values for enum cases. (RFC: Add values() Method to BackedEnum)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)

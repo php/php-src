@@ -30,6 +30,8 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
+  . Added BackedEnum::values() static method to retrieve an indexed array of
+    all backing values for enum cases.
 
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
