@@ -18,9 +18,16 @@
 #include <unistd.h>
 #include <errno.h>
 
-/* Linux-specific includes */
-#ifdef HAVE_COPY_FILE_RANGE
 #include <sys/syscall.h>
+
+/* Provide copy_file_range wrapper if libc doesn't have it but kernel does */
+#if !defined(HAVE_COPY_FILE_RANGE) && defined(__NR_copy_file_range)
+#define HAVE_COPY_FILE_RANGE 1
+static inline ssize_t copy_file_range(
+		int fd_in, off_t *off_in, int fd_out, off_t *off_out, size_t len, unsigned int flags)
+{
+	return syscall(__NR_copy_file_range, fd_in, off_in, fd_out, off_out, len, flags);
+}
 #endif
 
 #ifdef HAVE_SENDFILE
@@ -36,25 +43,33 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 #ifdef HAVE_COPY_FILE_RANGE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+	off_t src_offset = 0;
+	off_t dest_offset = 0;
+
+	/* Get current file positions */
+	src_offset = lseek(src_fd, 0, SEEK_CUR);
+	dest_offset = lseek(dest_fd, 0, SEEK_CUR);
+
+	if (src_offset == (off_t) -1 || dest_offset == (off_t) -1) {
+		/* Can't get positions, fall back to generic copy */
+		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+	}
 
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX to avoid issues */
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
-		ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, to_copy, 0);
+		ssize_t result = copy_file_range(src_fd, &src_offset, dest_fd, &dest_offset, to_copy, 0);
 
 		if (result > 0) {
 			total_copied += result;
+			/* Offsets are automatically updated by copy_file_range */
+
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
 			}
-
-			/* If we got less than requested, we likely hit EOF */
-			if ((size_t) result < to_copy) {
-				return (ssize_t) total_copied;
-			}
 		} else if (result == 0) {
-			/* EOF */
-			return (ssize_t) total_copied;
+			/* EOF - done */
+			break;
 		} else {
 			/* Error occurred */
 			switch (errno) {
@@ -62,9 +77,11 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 				case EXDEV:
 				case ENOSYS:
 					/* Expected failures - fall back to generic copy */
-					if (total_copied > 0) {
-						return (ssize_t) total_copied;
+					if (total_copied == 0) {
+						/* Haven't copied anything yet, can safely fall back */
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
+					/* If we already copied some, return what we have */
 					break;
 				default:
 					/* Unexpected error */
@@ -75,7 +92,7 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 
 		/* For bounded copies, stop if we reached maxlen */
 		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
-			return (ssize_t) total_copied;
+			break;
 		}
 	}
 
@@ -93,25 +110,31 @@ ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen
 #ifdef HAVE_SENDFILE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+	off_t src_offset = 0;
+
+	/* Get current source file position */
+	src_offset = lseek(src_fd, 0, SEEK_CUR);
+
+	if (src_offset == (off_t) -1) {
+		/* Can't get position, fall back to generic copy */
+		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+	}
 
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX */
 		size_t to_send = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
-		ssize_t result = sendfile(dest_fd, src_fd, NULL, to_send);
+		ssize_t result = sendfile(dest_fd, src_fd, &src_offset, to_send);
 
 		if (result > 0) {
 			total_copied += result;
+			/* src_offset is automatically updated by sendfile */
+
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
 			}
-
-			/* If we got less than requested, we likely hit EOF or would block */
-			if ((size_t) result < to_send) {
-				return (ssize_t) total_copied;
-			}
 		} else if (result == 0) {
-			/* EOF */
-			return (ssize_t) total_copied;
+			/* EOF - done */
+			break;
 		} else {
 			/* Error occurred */
 			if (errno == EAGAIN) {
@@ -119,15 +142,16 @@ ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen
 				return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
 			/* Other errors - fall back if we haven't copied anything yet */
-			if (total_copied > 0) {
-				return (ssize_t) total_copied;
+			if (total_copied == 0) {
+				return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 			}
+			/* Already copied some, return what we have */
 			break;
 		}
 
 		/* For bounded copies, stop if we reached maxlen */
 		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
-			return (ssize_t) total_copied;
+			break;
 		}
 	}
 
@@ -146,6 +170,7 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
+	/* splice doesn't take offsets - it uses fd's current position */
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX */
 		size_t to_splice = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
@@ -154,17 +179,13 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 
 		if (result > 0) {
 			total_copied += result;
+
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
 			}
-
-			/* If we got less than requested, we likely hit EOF or would block */
-			if ((size_t) result < to_splice) {
-				return (ssize_t) total_copied;
-			}
 		} else if (result == 0) {
-			/* EOF */
-			return (ssize_t) total_copied;
+			/* EOF - done */
+			break;
 		} else {
 			/* Error occurred */
 			switch (errno) {
@@ -173,18 +194,20 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 					return total_copied > 0 ? (ssize_t) total_copied : -1;
 				case EINVAL:
 					/* splice not supported for these fds */
-					if (total_copied > 0) {
-						return (ssize_t) total_copied;
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
+					/* Already copied some, return what we have */
 					break;
 				case EPIPE:
 					/* Broken pipe */
 					return total_copied > 0 ? (ssize_t) total_copied : -1;
 				default:
 					/* Other errors */
-					if (total_copied > 0) {
-						return (ssize_t) total_copied;
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
+					/* Already copied some, return what we have */
 					break;
 			}
 			break;
@@ -192,7 +215,7 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 
 		/* For bounded copies, stop if we reached maxlen */
 		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
-			return (ssize_t) total_copied;
+			break;
 		}
 	}
 
