@@ -410,9 +410,34 @@ static ZEND_NAMED_FUNCTION(zend_enum_from_func)
 
 static ZEND_NAMED_FUNCTION(zend_enum_try_from_func)
 {
-	zend_enum_from_base(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+    zend_enum_from_base(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
+static ZEND_NAMED_FUNCTION(zend_enum_values_func)
+{
+    zend_class_entry *ce = execute_data->func->common.scope;
+    zend_class_constant *c;
+
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    array_init(return_value);
+
+    ZEND_HASH_MAP_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
+        if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
+            continue;
+        }
+        zval *zv = &c->value;
+        if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
+            if (zval_update_constant_ex(zv, c->ce) == FAILURE) {
+                RETURN_THROWS();
+            }
+        }
+        zval *prop = zend_enum_fetch_case_value(Z_OBJ_P(zv));
+        zval tmp;
+        ZVAL_COPY(&tmp, prop);
+        zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+    } ZEND_HASH_FOREACH_END();
+}
 static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif) {
 	zend_string *name = ZSTR_KNOWN(name_id);
 	zif->type = ZEND_INTERNAL_FUNCTION;
@@ -469,6 +494,16 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->required_num_args = 1;
 		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
+
+		zend_internal_function *values_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+		values_function->handler = zend_enum_values_func;
+		values_function->function_name = ZSTR_KNOWN(ZEND_STR_VALUES);
+		values_function->fn_flags = fn_flags;
+		values_function->doc_comment = NULL;
+		values_function->num_args = 0;
+		values_function->required_num_args = 0;
+		values_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_values + 1);
+		zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
 	}
 }
 
@@ -495,10 +530,11 @@ static const zend_function_entry unit_enum_methods[] = {
 };
 
 static const zend_function_entry backed_enum_methods[] = {
-	ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_BackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	ZEND_FE_END
+    ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_BackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    ZEND_NAMED_ME(values, zend_enum_values_func, arginfo_class_BackedEnum_values, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    ZEND_FE_END
 };
 
 ZEND_API zend_class_entry *zend_register_internal_enum(
