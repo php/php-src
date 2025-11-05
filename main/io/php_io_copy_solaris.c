@@ -22,63 +22,74 @@
 #include <sys/sendfile.h>
 #endif
 
-zend_result php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_SENDFILEV
 	/* Solaris sendfilev - very powerful but complex API */
-	struct sendfilevec sfv;
-	size_t xferred = 0;
+	size_t total_copied = 0;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
-	/* Set up the sendfile vector */
-	sfv.sfv_fd = src_fd; /* Source file descriptor */
-	sfv.sfv_flag = SFV_FD; /* sfv_fd is a file descriptor */
-	sfv.sfv_off = 0; /* Offset in the file */
-	sfv.sfv_len = len; /* Number of bytes to send */
+	while (remaining > 0) {
+		struct sendfilevec sfv;
+		size_t xferred = 0;
+		size_t to_send = (remaining < SIZE_MAX) ? remaining : SIZE_MAX;
 
-	/* Perform the sendfile operation */
-	ssize_t result = sendfilev(dest_fd, &sfv, 1, &xferred);
+		/* Set up the sendfile vector */
+		sfv.sfv_fd = src_fd;
+		sfv.sfv_flag = SFV_FD;
+		sfv.sfv_off = 0;
+		sfv.sfv_len = to_send;
 
-	if (result == 0) {
-		/* Success - all data transferred */
-		*copied = xferred;
-		return SUCCESS;
-	} else if (result == -1) {
-		/* Error occurred */
-		switch (errno) {
-			case EAGAIN:
-				/* Would block - partial transfer possible */
-				if (xferred > 0) {
-					*copied = xferred;
-					return SUCCESS;
-				}
-				break;
-			case EINVAL:
-				/* Invalid arguments */
-				break;
-			case ENOTCONN:
-				/* Socket not connected */
-				break;
-			case EPIPE:
-				/* Broken pipe */
-				break;
-			case EAFNOSUPPORT:
-				/* Address family not supported */
-				break;
-			default:
-				/* Other errors */
-				break;
+		/* Perform the sendfile operation */
+		ssize_t result = sendfilev(dest_fd, &sfv, 1, &xferred);
+
+		if (result == 0 || xferred > 0) {
+			/* Success or partial transfer */
+			total_copied += xferred;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= xferred;
+			}
+
+			/* If we got less than requested or error occurred, stop */
+			if (result != 0 || xferred < to_send) {
+				return (ssize_t) total_copied;
+			}
+		} else {
+			/* Error occurred with no data transferred */
+			switch (errno) {
+				case EAGAIN:
+				case EINVAL:
+				case ENOTCONN:
+				case EPIPE:
+				case EAFNOSUPPORT:
+					/* Various errors */
+					if (total_copied > 0) {
+						return (ssize_t) total_copied;
+					}
+					break;
+				default:
+					/* Other errors */
+					if (total_copied > 0) {
+						return (ssize_t) total_copied;
+					}
+					break;
+			}
+			break;
 		}
 
-		/* Even on error, some data might have been transferred */
-		if (xferred > 0) {
-			*copied = xferred;
-			return SUCCESS;
+		/* For bounded copies, stop if we reached maxlen */
+		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
+			return (ssize_t) total_copied;
 		}
+	}
+
+	if (total_copied > 0) {
+		return (ssize_t) total_copied;
 	}
 #endif /* HAVE_SENDFILEV */
 
 	/* Fallback to generic implementation */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
 #endif /* __sun */

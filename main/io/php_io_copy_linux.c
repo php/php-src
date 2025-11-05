@@ -40,130 +40,178 @@ static ssize_t copy_file_range_wrapper(
 }
 #endif
 
-zend_result php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_COPY_FILE_RANGE
-	/* Try copy_file_range first - kernel-level optimization */
-	ssize_t result = copy_file_range_wrapper(src_fd, NULL, dest_fd, NULL, len, 0);
-
-	if (result > 0) {
-		*copied = (size_t) result;
-		return SUCCESS;
-	}
-
-	/* If copy_file_range fails, fall through to generic implementation */
-	if (result == -1) {
-		switch (errno) {
-			case EINVAL:
-			case EXDEV:
-			case ENOSYS:
-				/* Expected failures - fall back to generic copy */
-				break;
-			default:
-				/* Unexpected error */
-				*copied = 0;
-				return FAILURE;
-		}
-	}
-#endif
-
-	/* Fallback to generic read/write loop */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
-
-zend_result php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
-{
-#ifdef HAVE_SENDFILE
-	/* Use sendfile for zero-copy file to socket/pipe transfer */
-	off_t offset = 0;
-	ssize_t result = sendfile(dest_fd, src_fd, &offset, len);
-
-	if (result > 0) {
-		*copied = (size_t) result;
-		return SUCCESS;
-	}
-
-	/* Handle partial sends and errors */
-	if (result == -1) {
-		if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			/* Would block - for now, fall back to generic copy */
-			/* TODO: Could implement epoll-based retry here */
-		}
-		/* Other errors fall through to generic copy */
-	}
-#endif
-
-	/* Fallback to generic read/write loop */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
-}
-
-zend_result php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t len, size_t *copied)
-{
-#ifdef HAVE_SPLICE
-	/* Use splice for zero-copy transfer from socket/pipe to any fd */
-	/* splice() works for: socket→file, socket→pipe, pipe→file, pipe→socket, etc. */
 	size_t total_copied = 0;
-	size_t remaining = len;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
-		ssize_t result
-				= splice(src_fd, NULL, dest_fd, NULL, remaining, SPLICE_F_MOVE | SPLICE_F_MORE);
+		/* Clamp to SSIZE_MAX to avoid issues */
+		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
+		ssize_t result = copy_file_range_wrapper(src_fd, NULL, dest_fd, NULL, to_copy, 0);
 
 		if (result > 0) {
 			total_copied += result;
-			remaining -= result;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= result;
+			}
+
+			/* If we got less than requested, we likely hit EOF */
+			if ((size_t) result < to_copy) {
+				return (ssize_t) total_copied;
+			}
 		} else if (result == 0) {
 			/* EOF */
+			return (ssize_t) total_copied;
+		} else {
+			/* Error occurred */
+			switch (errno) {
+				case EINVAL:
+				case EXDEV:
+				case ENOSYS:
+					/* Expected failures - fall back to generic copy */
+					if (total_copied > 0) {
+						return (ssize_t) total_copied;
+					}
+					break;
+				default:
+					/* Unexpected error */
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
+			}
 			break;
+		}
+
+		/* For bounded copies, stop if we reached maxlen */
+		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
+			return (ssize_t) total_copied;
+		}
+	}
+
+	if (total_copied > 0) {
+		return (ssize_t) total_copied;
+	}
+#endif
+
+	/* Fallback to generic read/write loop */
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+}
+
+ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
+{
+#ifdef HAVE_SENDFILE
+	size_t total_copied = 0;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+
+	while (remaining > 0) {
+		/* Clamp to SSIZE_MAX */
+		size_t to_send = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
+		ssize_t result = sendfile(dest_fd, src_fd, NULL, to_send);
+
+		if (result > 0) {
+			total_copied += result;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= result;
+			}
+
+			/* If we got less than requested, we likely hit EOF or would block */
+			if ((size_t) result < to_send) {
+				return (ssize_t) total_copied;
+			}
+		} else if (result == 0) {
+			/* EOF */
+			return (ssize_t) total_copied;
+		} else {
+			/* Error occurred */
+			if (errno == EAGAIN) {
+				/* Would block - return what we have */
+				return total_copied > 0 ? (ssize_t) total_copied : -1;
+			}
+			/* Other errors - fall back if we haven't copied anything yet */
+			if (total_copied > 0) {
+				return (ssize_t) total_copied;
+			}
+			break;
+		}
+
+		/* For bounded copies, stop if we reached maxlen */
+		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
+			return (ssize_t) total_copied;
+		}
+	}
+
+	if (total_copied > 0) {
+		return (ssize_t) total_copied;
+	}
+#endif
+
+	/* Fallback to generic read/write loop */
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+}
+
+ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
+{
+#ifdef HAVE_SPLICE
+	size_t total_copied = 0;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+
+	while (remaining > 0) {
+		/* Clamp to SSIZE_MAX */
+		size_t to_splice = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
+		ssize_t result
+				= splice(src_fd, NULL, dest_fd, NULL, to_splice, SPLICE_F_MOVE | SPLICE_F_MORE);
+
+		if (result > 0) {
+			total_copied += result;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= result;
+			}
+
+			/* If we got less than requested, we likely hit EOF or would block */
+			if ((size_t) result < to_splice) {
+				return (ssize_t) total_copied;
+			}
+		} else if (result == 0) {
+			/* EOF */
+			return (ssize_t) total_copied;
 		} else {
 			/* Error occurred */
 			switch (errno) {
 				case EAGAIN:
-				case EWOULDBLOCK:
-					/* Would block - return what we've copied so far */
-					if (total_copied > 0) {
-						*copied = total_copied;
-						return SUCCESS;
-					}
-					/* Fall through to generic if nothing copied yet */
-					break;
+					/* Would block */
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
 				case EINVAL:
 					/* splice not supported for these fds */
 					if (total_copied > 0) {
-						/* We already copied some data, return success */
-						*copied = total_copied;
-						return SUCCESS;
+						return (ssize_t) total_copied;
 					}
-					/* Fall through to generic */
 					break;
 				case EPIPE:
 					/* Broken pipe */
-					if (total_copied > 0) {
-						*copied = total_copied;
-						return SUCCESS;
-					}
-					*copied = 0;
-					return FAILURE;
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
 				default:
 					/* Other errors */
 					if (total_copied > 0) {
-						*copied = total_copied;
-						return SUCCESS;
+						return (ssize_t) total_copied;
 					}
 					break;
 			}
 			break;
 		}
+
+		/* For bounded copies, stop if we reached maxlen */
+		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
+			return (ssize_t) total_copied;
+		}
 	}
 
 	if (total_copied > 0) {
-		*copied = total_copied;
-		return SUCCESS;
+		return (ssize_t) total_copied;
 	}
 #endif /* HAVE_SPLICE */
 
 	/* Fallback to generic read/write loop */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
 #endif /* __linux__ */
