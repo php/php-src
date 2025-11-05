@@ -1713,23 +1713,36 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
 			php_io_fd_type dest_type = php_stream_is(dest, PHP_STREAM_IS_STDIO) ? 
 									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
-			
-			/* Try optimized copy */
-			size_t io_maxlen = (maxlen == PHP_STREAM_COPY_ALL) ? PHP_IO_COPY_ALL : maxlen;
-			ssize_t result = php_io_copy(src_fd, src_type, dest_fd, dest_type, io_maxlen);
-			
-			if (result >= 0) {
-				/* Success - update positions */
-				haveread = result;
-				src->position += result;
-				dest->position += result;
-				*len = haveread;
-				return SUCCESS;
+
+			/* Check if destination file is opened in append mode as copy_file_range does not respect O_APPEND */
+			zend_bool can_use_optimized = 1;
+
+			if (dest_type == PHP_IO_FD_FILE && src_type == PHP_IO_FD_FILE) {
+				int dest_flags = 0;
+				if (php_stream_parse_fopen_modes(dest->mode, &dest_flags) == SUCCESS && (dest_flags & O_APPEND)) {
+					/* Append mode with file destination and source - cannot use optimized copy */
+					can_use_optimized = 0;
+				}
 			}
-			
-			/* I/O error occurred */
-			*len = 0;
-			return FAILURE;
+
+			if (can_use_optimized) {
+				/* Try optimized copy */
+				size_t io_maxlen = (maxlen == PHP_STREAM_COPY_ALL) ? PHP_IO_COPY_ALL : maxlen;
+				ssize_t result = php_io_copy(src_fd, src_type, dest_fd, dest_type, io_maxlen);
+
+				if (result >= 0) {
+					/* Success - update positions */
+					haveread = result;
+					src->position += result;
+					dest->position += result;
+					*len = haveread;
+					return SUCCESS;
+				}
+
+				/* I/O error occurred */
+				*len = 0;
+				return FAILURE;
+			}
 		}
 	}
 
