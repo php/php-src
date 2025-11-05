@@ -18,7 +18,7 @@
 #include "php_io.h"
 
 /* Internal utility functions */
-zend_result php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t len, size_t *copied);
+ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen);
 
 /* Platform-specific headers */
 #ifdef __linux__
