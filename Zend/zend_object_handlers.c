@@ -1674,18 +1674,16 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static) /* {{{ */
+ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
+	const zend_function *fbc, zend_string *method_name) /* {{{ */
 {
 	size_t mname_len;
 	zend_op_array *func;
-	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 	/* We use non-NULL value to avoid useless run_time_cache allocation.
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
 	static const zend_arg_info arg_info[1] = {{0}};
-
-	ZEND_ASSERT(fbc);
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline).op_array;
@@ -1700,13 +1698,10 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD|ZEND_ACC_STATIC));
 	func->fn_flags2 = 0;
 	/* Attributes outlive the trampoline because they are created by the compiler. */
 	func->attributes = fbc->common.attributes;
-	if (is_static) {
-		func->fn_flags |= ZEND_ACC_STATIC;
-	}
 	func->opcodes = &EG(call_trampoline_op);
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void**)dummy);
 	func->scope = fbc->common.scope;
@@ -1828,12 +1823,6 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	return func;
 }
 
-static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, false);
-}
-/* }}} */
-
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope) /* {{{ */
 {
 	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
@@ -1875,7 +1864,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_user_call_function(zobj->ce, method_name);
+			return zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 		} else {
 			return NULL;
 		}
@@ -1901,7 +1890,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_user_call_function(zobj->ce, method_name);
+					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {
 					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
@@ -1922,14 +1911,8 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, true);
-}
-/* }}} */
-
 static zend_always_inline zend_function *get_static_method_fallback(
-		zend_class_entry *ce, zend_string *function_name)
+		const zend_class_entry *ce, zend_string *function_name)
 {
 	zend_object *object;
 	if (ce->__call &&
@@ -1939,9 +1922,9 @@ static zend_always_inline zend_function *get_static_method_fallback(
 		 * see: tests/classes/__call_004.phpt  */
 
 		ZEND_ASSERT(object->ce->__call);
-		return zend_get_user_call_function(object->ce, function_name);
+		return zend_get_call_trampoline_func(object->ce->__call, function_name);
 	} else if (ce->__callstatic) {
-		return zend_get_user_callstatic_function(ce, function_name);
+		return zend_get_call_trampoline_func(ce->__callstatic, function_name);
 	} else {
 		return NULL;
 	}

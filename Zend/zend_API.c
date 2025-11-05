@@ -3955,7 +3955,7 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, const
 get_function_via_handler:
 		if (fcc->object && fcc->calling_scope == ce_org) {
 			if (strict_class && ce_org->__call) {
-				fcc->function_handler = zend_get_call_trampoline_func(ce_org, mname, 0);
+				fcc->function_handler = zend_get_call_trampoline_func(ce_org->__call, mname);
 				call_via_handler = 1;
 				retval = true;
 			} else {
