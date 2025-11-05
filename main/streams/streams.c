@@ -1702,7 +1702,8 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	}
 
 	/* Try to use optimized I/O if both streams are castable to fd and not filtered */
-	if (src->writepos == src->readpos) {  /* Read buffer must be empty */
+	if (!php_stream_is(src, PHP_STREAM_IS_USERSPACE) && !php_stream_is(dest, PHP_STREAM_IS_USERSPACE) &&
+			src->writepos == src->readpos) {  /* Read buffer must be empty */
 		int src_fd, dest_fd;
 		
 		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
