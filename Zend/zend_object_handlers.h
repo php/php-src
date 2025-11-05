@@ -316,8 +316,6 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(con
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
-ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
-
 ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj);
 
 /* Default behavior for get_properties_for. For use as a fallback in custom
