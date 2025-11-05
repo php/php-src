@@ -16,9 +16,8 @@
 #define PHP_IO_WINDOWS_H
 
 /* Copy operations */
-zend_result php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t len, size_t *copied);
-zend_result php_io_windows_copy_file_to_generic(
-		int src_fd, int dest_fd, size_t len, size_t *copied);
+ssize_t php_io_windows_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen);
+ssize_t php_io_windows_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen);
 
 /* Instance initialization macros */
 #define PHP_IO_PLATFORM_COPY_OPS \

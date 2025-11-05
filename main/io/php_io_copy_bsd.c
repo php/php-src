@@ -23,44 +23,65 @@
 #include <sys/uio.h>
 #endif
 
-zend_result php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t len, size_t *copied)
+ssize_t php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_SENDFILE
 	/* BSD sendfile signature: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags) */
-	/* This signature is shared by FreeBSD, OpenBSD, and NetBSD */
-	off_t sbytes = 0;
-	int result = sendfile(src_fd, dest_fd, 0, len, NULL, &sbytes, 0);
+	size_t total_copied = 0;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
-	if (result == 0) {
-		/* Success - entire amount was sent */
-		*copied = len;
-		return SUCCESS;
-	} else if (result == -1 && sbytes > 0) {
-		/* Partial send - some data was transferred */
-		*copied = sbytes;
-		return SUCCESS;
-	} else if (result == -1) {
-		/* Error occurred */
-		switch (errno) {
-			case EAGAIN:
-			case EBUSY:
-				/* Would block or busy - could retry, but fall back for now */
-				break;
-			case EINVAL:
-				/* Invalid arguments - likely not a regular file or socket */
-				break;
-			case ENOTCONN:
-				/* Socket not connected */
-				break;
-			default:
-				/* Other errors */
-				break;
+	while (remaining > 0) {
+		off_t to_send = (remaining < OFF_MAX) ? (off_t) remaining : OFF_MAX;
+		off_t sbytes = 0;
+		int result = sendfile(src_fd, dest_fd, 0, to_send, NULL, &sbytes, 0);
+
+		if (result == 0 || sbytes > 0) {
+			/* Success or partial send */
+			total_copied += sbytes;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= sbytes;
+			}
+
+			/* If result == 0, entire amount was sent, continue if needed */
+			/* If result == -1 but sbytes > 0, partial send occurred */
+			if (result == -1 || sbytes < to_send) {
+				return (ssize_t) total_copied;
+			}
+		} else {
+			/* Error occurred with no data transferred */
+			switch (errno) {
+				case EAGAIN:
+				case EBUSY:
+				case EINVAL:
+				case ENOTCONN:
+					/* Various errors */
+					if (total_copied > 0) {
+						return (ssize_t) total_copied;
+					}
+					break;
+				default:
+					/* Other errors */
+					if (total_copied > 0) {
+						return (ssize_t) total_copied;
+					}
+					break;
+			}
+			break;
 		}
+
+		/* For bounded copies, stop if we reached maxlen */
+		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
+			return (ssize_t) total_copied;
+		}
+	}
+
+	if (total_copied > 0) {
+		return (ssize_t) total_copied;
 	}
 #endif /* HAVE_SENDFILE */
 
 	/* Fallback to generic implementation */
-	return php_io_generic_copy_fallback(src_fd, dest_fd, len, copied);
+	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
 #endif /* FreeBSD, OpenBSD, NetBSD */
