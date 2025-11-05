@@ -43,17 +43,20 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 #ifdef HAVE_COPY_FILE_RANGE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
-	off_t src_offset = 0;
-	off_t dest_offset = 0;
+	loff_t src_offset = 0;
+	loff_t dest_offset = 0;
 
 	/* Get current file positions */
-	src_offset = lseek(src_fd, 0, SEEK_CUR);
-	dest_offset = lseek(dest_fd, 0, SEEK_CUR);
+	off_t current_src = lseek(src_fd, 0, SEEK_CUR);
+	off_t current_dest = lseek(dest_fd, 0, SEEK_CUR);
 
-	if (src_offset == (off_t) -1 || dest_offset == (off_t) -1) {
+	if (current_src == (off_t) -1 || current_dest == (off_t) -1) {
 		/* Can't get positions, fall back to generic copy */
 		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 	}
+
+	src_offset = current_src;
+	dest_offset = current_dest;
 
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX to avoid issues */
