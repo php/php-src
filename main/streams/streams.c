@@ -24,6 +24,7 @@
 #include "php_globals.h"
 #include "php_memory_streams.h"
 #include "php_network.h"
+#include "php_io.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
@@ -1636,164 +1637,17 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 	return result;
 }
 
-/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
-PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
+/* Fallback copy stream function */
+static ssize_t php_stream_copy_fallback(php_stream *src, php_stream *dest, size_t maxlen, size_t *len)
 {
 	char buf[CHUNK_SIZE];
 	size_t haveread = 0;
-	size_t towrite;
-	size_t dummy;
-
-	if (!len) {
-		len = &dummy;
-	}
-
-	if (maxlen == 0) {
-		*len = 0;
-		return SUCCESS;
-	}
-
-#ifdef HAVE_COPY_FILE_RANGE
-	if (php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			php_stream_is(dest, PHP_STREAM_IS_STDIO) &&
-			src->writepos == src->readpos) {
-		/* both php_stream instances are backed by a file descriptor, are not filtered and the
-		 * read buffer is empty: we can use copy_file_range() */
-		int src_fd, dest_fd, dest_open_flags = 0;
-
-		/* copy_file_range does not work with O_APPEND */
-		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
-				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS &&
-				/* get dest open flags to check if the stream is open in append mode */
-				php_stream_parse_fopen_modes(dest->mode, &dest_open_flags) == SUCCESS &&
-				!(dest_open_flags & O_APPEND)) {
-
-			/* clamp to INT_MAX to avoid EOVERFLOW */
-			const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
-
-			/* copy_file_range() is a Linux-specific system call which allows efficient copying
-			 * between two file descriptors, eliminating the need to transfer data from the kernel
-			 * to userspace and back. For networking file systems like NFS and Ceph, it even
-			 * eliminates copying data to the client, and local filesystems like Btrfs and XFS can
-			 * create shared extents. */
-			ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, cfr_max, 0);
-			if (result > 0) {
-				size_t nbytes = (size_t)result;
-				haveread += nbytes;
-
-				src->position += nbytes;
-				dest->position += nbytes;
-
-				if ((maxlen != PHP_STREAM_COPY_ALL && nbytes == maxlen) || php_stream_eof(src)) {
-					/* the whole request was satisfied or end-of-file reached - done */
-					*len = haveread;
-					return SUCCESS;
-				}
-
-				/* there may be more data; continue copying using the fallback code below */
-			} else if (result == 0) {
-				/* end of file */
-				*len = haveread;
-				return SUCCESS;
-			} else if (result < 0) {
-				switch (errno) {
-					case EINVAL:
-						/* some formal error, e.g. overlapping file ranges */
-						break;
-
-					case EXDEV:
-						/* pre Linux 5.3 error */
-						break;
-
-					case ENOSYS:
-						/* not implemented by this Linux kernel */
-						break;
-
-					case EIO:
-						/* Some filesystems will cause failures if the max length is greater than the file length
-						 * in certain circumstances and configuration. In those cases the errno is EIO and we will
-						 * fall back to other methods. We cannot use stat to determine the file length upfront because
-						 * that is prone to races and outdated caching. */
-						break;
-
-					default:
-						/* unexpected I/O error - give up, no fallback */
-						*len = haveread;
-						return FAILURE;
-				}
-
-				/* fall back to classic copying */
-			}
-		}
-	}
-#endif // HAVE_COPY_FILE_RANGE
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
 	}
 
-	if (php_stream_mmap_possible(src)) {
-		char *p;
-
-		do {
-			/* We must not modify maxlen here, because otherwise the file copy fallback below can fail */
-			size_t chunk_size, must_read, mapped;
-			if (maxlen == 0) {
-				/* Unlimited read */
-				must_read = chunk_size = PHP_STREAM_MMAP_MAX;
-			} else {
-				must_read = maxlen - haveread;
-				if (must_read >= PHP_STREAM_MMAP_MAX) {
-					chunk_size = PHP_STREAM_MMAP_MAX;
-				} else {
-					/* In case the length we still have to read from the file could be smaller than the file size,
-					 * chunk_size must not get bigger the size we're trying to read. */
-					chunk_size = must_read;
-				}
-			}
-
-			p = php_stream_mmap_range(src, php_stream_tell(src), chunk_size, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
-
-			if (p) {
-				ssize_t didwrite;
-
-				if (php_stream_seek(src, mapped, SEEK_CUR) != 0) {
-					php_stream_mmap_unmap(src);
-					break;
-				}
-
-				didwrite = php_stream_write(dest, p, mapped);
-				if (didwrite < 0) {
-					*len = haveread;
-					php_stream_mmap_unmap(src);
-					return FAILURE;
-				}
-
-				php_stream_mmap_unmap(src);
-
-				*len = haveread += didwrite;
-
-				/* we've got at least 1 byte to read
-				 * less than 1 is an error
-				 * AND read bytes match written */
-				if (mapped == 0 || mapped != didwrite) {
-					return FAILURE;
-				}
-				if (mapped < chunk_size) {
-					return SUCCESS;
-				}
-				/* If we're not reading as much as possible, so a bounded read */
-				if (maxlen != 0) {
-					must_read -= mapped;
-					if (must_read == 0) {
-						return SUCCESS;
-					}
-				}
-			}
-		} while (p);
-	}
-
-	while(1) {
+	while (1) {
 		size_t readchunk = sizeof(buf);
 		ssize_t didread;
 		char *writeptr;
@@ -1808,7 +1662,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 			return didread < 0 ? FAILURE : SUCCESS;
 		}
 
-		towrite = didread;
+		size_t towrite = didread;
 		writeptr = buf;
 		haveread += didread;
 
@@ -1830,6 +1684,57 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 	*len = haveread;
 	return SUCCESS;
+}
+
+/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
+PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
+{
+	size_t haveread = 0;
+	size_t dummy;
+
+	if (!len) {
+		len = &dummy;
+	}
+
+	if (maxlen == 0) {
+		*len = 0;
+		return SUCCESS;
+	}
+
+	/* Try to use optimized I/O if both streams are castable to fd and not filtered */
+	if (src->writepos == src->readpos) {  /* Read buffer must be empty */
+		int src_fd, dest_fd;
+		
+		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
+				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS) {
+			
+			/* Determine fd types based on stream type */
+			php_io_fd_type src_type = php_stream_is(src, PHP_STREAM_IS_STDIO) ? 
+									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
+			php_io_fd_type dest_type = php_stream_is(dest, PHP_STREAM_IS_STDIO) ? 
+									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
+			
+			/* Try optimized copy */
+			size_t io_maxlen = (maxlen == PHP_STREAM_COPY_ALL) ? PHP_IO_COPY_ALL : maxlen;
+			ssize_t result = php_io_copy(src_fd, src_type, dest_fd, dest_type, io_maxlen);
+			
+			if (result >= 0) {
+				/* Success - update positions */
+				haveread = result;
+				src->position += result;
+				dest->position += result;
+				*len = haveread;
+				return SUCCESS;
+			}
+			
+			/* I/O error occurred */
+			*len = 0;
+			return FAILURE;
+		}
+	}
+
+	/* Classic read/write loop fallback (if cast failed) */
+	return php_stream_copy_fallback(src, dest, maxlen, len);
 }
 
 /* Returns the number of bytes moved.
