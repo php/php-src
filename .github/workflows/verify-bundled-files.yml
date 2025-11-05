@@ -27,10 +27,12 @@ jobs:
               - '.github/scripts/download-bundled/pcre2.sh'
               - 'ext/pcre/pcre2lib/**'
 
-      - name: PCRE2 - Download
+      - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: .github/scripts/download-bundled/pcre2.sh
-
-      - name: PCRE2 - Verify files
-        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
-        run: .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/pcre2.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
+          echo "::endgroup::"
