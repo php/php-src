@@ -625,6 +625,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_CASES,                  "cases") \
 	_(ZEND_STR_FROM,                   "from") \
 	_(ZEND_STR_TRYFROM,                "tryFrom") \
+	_(ZEND_STR_VALUES,                 "values") \
 	_(ZEND_STR_TRYFROM_LOWERCASE,      "tryfrom") \
 	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
