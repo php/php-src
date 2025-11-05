@@ -28,6 +28,15 @@ ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxl
 	/* Solaris sendfilev - very powerful but complex API */
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+	off_t src_offset = 0;
+
+	/* Get current source file position */
+	src_offset = lseek(src_fd, 0, SEEK_CUR);
+
+	if (src_offset == (off_t) -1) {
+		/* Can't get position, fall back to generic copy */
+		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+	}
 
 	while (remaining > 0) {
 		struct sendfilevec sfv;
@@ -37,7 +46,7 @@ ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxl
 		/* Set up the sendfile vector */
 		sfv.sfv_fd = src_fd;
 		sfv.sfv_flag = SFV_FD;
-		sfv.sfv_off = 0;
+		sfv.sfv_off = src_offset;
 		sfv.sfv_len = to_send;
 
 		/* Perform the sendfile operation */
@@ -46,13 +55,15 @@ ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxl
 		if (result == 0 || xferred > 0) {
 			/* Success or partial transfer */
 			total_copied += xferred;
+			src_offset += xferred;
+
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= xferred;
 			}
 
-			/* If we got less than requested or error occurred, stop */
-			if (result != 0 || xferred < to_send) {
-				return (ssize_t) total_copied;
+			/* If result != 0, error occurred but some data was transferred */
+			if (result != 0) {
+				break;
 			}
 		} else {
 			/* Error occurred with no data transferred */
@@ -63,14 +74,15 @@ ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxl
 				case EPIPE:
 				case EAFNOSUPPORT:
 					/* Various errors */
-					if (total_copied > 0) {
-						return (ssize_t) total_copied;
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
+					/* Already copied some, return what we have */
 					break;
 				default:
 					/* Other errors */
-					if (total_copied > 0) {
-						return (ssize_t) total_copied;
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
 					break;
 			}
@@ -79,7 +91,7 @@ ssize_t php_io_solaris_copy_file_to_generic(int src_fd, int dest_fd, size_t maxl
 
 		/* For bounded copies, stop if we reached maxlen */
 		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
-			return (ssize_t) total_copied;
+			break;
 		}
 	}
 
