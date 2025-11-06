@@ -124,6 +124,7 @@ static inline bool may_have_side_effects(
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_ARRAY_KEY_EXISTS:
+		case ZEND_COPY_TMP:
 			/* No side effects */
 			return false;
 		case ZEND_FREE:
@@ -425,10 +426,12 @@ static bool dce_instr(const context *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 		return false;
 	}
 
-	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
+	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
 			if (may_be_refcounted(ssa->var_info[ssa_op->op1_use].type)
-					&& opline->opcode != ZEND_CASE && opline->opcode != ZEND_CASE_STRICT) {
+					&& opline->opcode != ZEND_CASE
+					&& opline->opcode != ZEND_CASE_STRICT
+					&& opline->opcode != ZEND_COPY_TMP) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}

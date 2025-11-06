@@ -387,7 +387,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, const zend_obj
 				efree(intern->ptdoc->errbuf);
 				tidyRelease(intern->ptdoc->doc);
 				efree(intern->ptdoc);
-				efree(intern);
+				/* TODO: convert to exception */
 				php_error_docref(NULL, E_ERROR, "Could not set Tidy error buffer");
 			}
 
@@ -473,8 +473,7 @@ static zend_result tidy_node_cast_handler(zend_object *in, zval *out, int type)
 		case IS_STRING:
 			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&buf);
-			if (obj->ptdoc) {
-				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+			if (obj->ptdoc && tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf)) {
 				ZVAL_STRINGL(out, (const char *) buf.bp, buf.size-1);
 			} else {
 				ZVAL_EMPTY_STRING(out);
@@ -530,7 +529,7 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	const char *name;
 
 	tidyBufInit(&buf);
-	tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
+	(void) tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 
 	zend_update_property_stringl(
 		tidy_ce_node,
@@ -616,12 +615,14 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 		do {
 			const char *attr_name = tidyAttrName(tempattr);
 			if (attr_name) {
+				zval value;
 				const char *val = tidyAttrValue(tempattr);
 				if (val) {
-					add_assoc_string(&attribute, attr_name, val);
+					ZVAL_STRING_FAST(&value, val);
 				} else {
-					add_assoc_str(&attribute, attr_name, zend_empty_string);
+					ZVAL_EMPTY_STRING(&value);
 				}
+				zend_hash_str_add_new(Z_ARRVAL(attribute), attr_name, strlen(attr_name), &value);
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
 	} else {
@@ -719,6 +720,7 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
 	zend_long lval;
+	zend_string *tmp_str;
 
 	if (!opt) {
 		zend_argument_value_error(arg, "Unknown Tidy configuration option \"%s\"", optname);
@@ -736,7 +738,6 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 
 	TidyOptionType type = tidyOptGetType(opt);
 	if (type == TidyString) {
-		zend_string *tmp_str;
 		const zend_string *str = zval_get_tmp_string(value, &tmp_str);
 		const bool result = tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str));
 		if (UNEXPECTED(!result)) {
@@ -744,9 +745,35 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 		}
 		zend_tmp_string_release(tmp_str);
 		return result;
-	} else if (type == TidyInteger) {
-		lval = zval_get_long(value);
-		return tidyOptSetInt(doc, tidyOptGetId(opt), lval);
+	} else if (type == TidyInteger) { /* integer or enum */
+		ZVAL_DEREF(value);
+		/* Enum will correspond to a non-numeric string or object */
+		if (Z_TYPE_P(value) == IS_STRING || Z_TYPE_P(value) == IS_OBJECT) {
+			double dval;
+			bool result;
+			const zend_string *str = zval_try_get_tmp_string(value, &tmp_str);
+			if (UNEXPECTED(!str)) {
+				return false;
+			}
+			uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, true);
+			if (type == IS_DOUBLE) {
+				lval = zend_dval_to_lval_cap(dval, str);
+				type = IS_LONG;
+			}
+			if (type == IS_LONG) {
+				result = tidyOptSetInt(doc, tidyOptGetId(opt), lval);
+			} else {
+				result = tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str));
+				if (UNEXPECTED(!result)) {
+					zend_argument_type_error(arg, "option \"%s\" does not accept \"%s\" as a value", optname, ZSTR_VAL(str));
+				}
+			}
+			zend_tmp_string_release(tmp_str);
+			return result;
+		} else {
+			lval = zval_get_long(value);
+			return tidyOptSetInt(doc, tidyOptGetId(opt), lval);
+		}
 	} else {
 		ZEND_ASSERT(type == TidyBoolean);
 		lval = zval_get_long(value);

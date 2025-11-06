@@ -1501,12 +1501,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
-		zend_execute_data *ex;
-		const zend_op *opline;
-
 		if (type & E_FATAL_ERRORS) {
-			ex = EG(current_execute_data);
-			opline = NULL;
+			zend_execute_data *ex = EG(current_execute_data);
+			const zend_op *opline = NULL;
+
 			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 				ex = ex->prev_execute_data;
 			}

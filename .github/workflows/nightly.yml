@@ -14,6 +14,9 @@ on:
       libmysqlclient_with_mysqli:
         required: true
         type: boolean
+      macos_arm64_version:
+        required: true
+        type: string
       run_alpine:
         required: true
         type: boolean
@@ -135,12 +138,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
-
   LINUX_X64:
     services:
       mysql:
@@ -269,11 +266,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
     strategy:
       fail-fast: false
@@ -355,22 +347,17 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
     strategy:
       fail-fast: false
       matrix:
         debug: [true, false]
         zts: [true, false]
-        os: ['13', '14']
+        arch: ['X64', 'ARM64']
         exclude:
-          - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
-    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.os }}
+          - arch: ${{ !inputs.run_macos_arm64 && 'ARM64' || '*never*' }}
+    name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || inputs.macos_arm64_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v5
@@ -393,7 +380,7 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: tracing
@@ -405,7 +392,7 @@ jobs:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: function
@@ -415,11 +402,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
     if: inputs.branch == 'master'
     services:
@@ -480,11 +462,6 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
     strategy:
       fail-fast: false
@@ -671,11 +648,6 @@ jobs:
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
     services:
       mysql:
@@ -757,11 +729,6 @@ jobs:
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
     name: MSAN
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -848,11 +815,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -895,11 +857,6 @@ jobs:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
     if: inputs.branch == 'master'
     runs-on: ubuntu-22.04
@@ -1007,11 +964,6 @@ jobs:
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
     strategy:
       fail-fast: false

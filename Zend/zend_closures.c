@@ -287,6 +287,19 @@ ZEND_METHOD(Closure, bindTo)
 	do_closure_bind(return_value, ZEND_THIS, newthis, scope_obj, scope_str);
 }
 
+static void zend_copy_parameters_array(const uint32_t param_count, HashTable *argument_array) /* {{{ */
+{
+	zval *param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+
+	ZEND_ASSERT(param_count <= ZEND_CALL_NUM_ARGS(EG(current_execute_data)));
+
+	for (uint32_t i = 0; i < param_count; i++) {
+		Z_TRY_ADDREF_P(param_ptr);
+		zend_hash_next_index_insert_new(argument_array, param_ptr);
+		param_ptr++;
+	}
+}
+
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -310,14 +323,14 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 		array_init_size(&fci.params[1], ZEND_NUM_ARGS() + zend_hash_num_elements(EX(extra_named_params)));
 		/* Avoid conversion from packed to mixed later. */
 		zend_hash_real_init_mixed(Z_ARRVAL(fci.params[1]));
-		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), Z_ARRVAL(fci.params[1]));
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, named_param_zval) {
 			Z_TRY_ADDREF_P(named_param_zval);
 			zend_hash_add_new(Z_ARRVAL(fci.params[1]), name, named_param_zval);
 		} ZEND_HASH_FOREACH_END();
 	} else if (ZEND_NUM_ARGS()) {
 		array_init_size(&fci.params[1], ZEND_NUM_ARGS());
-		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), Z_ARRVAL(fci.params[1]));
 	} else {
 		ZVAL_EMPTY_ARRAY(&fci.params[1]);
 	}
@@ -875,7 +888,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 /* __call and __callStatic name the arguments "$arguments" in the docs. */
 static zend_internal_arg_info trampoline_arg_info[] = {ZEND_ARG_VARIADIC_TYPE_INFO(false, arguments, IS_MIXED, false)};
 
-void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {{{ */
+void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
 	zend_internal_function trampoline;
 	zend_function *mptr = call->func;

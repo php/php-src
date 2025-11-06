@@ -48,6 +48,8 @@ var_dump(
 Warning: A non-numeric value encountered in %s on line %d
 
 Deprecated: Implicit conversion from float 3.14 to int loses precision in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 int(3)
 string(4) "1foo"
 bool(false)

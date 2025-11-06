@@ -273,9 +273,7 @@ void shutdown_destructors(void) /* {{{ */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
-	zend_try {
-		zend_close_rsrc_list(&EG(regular_list));
-	} zend_end_try();
+	zend_close_rsrc_list(&EG(regular_list));
 
 	/* No PHP callback functions should be called after this point. */
 	EG(active) = 0;
@@ -603,9 +601,9 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
+ZEND_API const zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
 {
-	zend_function *func = EX(func);
+	const zend_function *func = EX(func);
 
 	/* Resolve function if op is a frameless call. */
 	if (ZEND_USER_CODE(func->type)) {
@@ -719,7 +717,7 @@ ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 
 ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	const zend_execute_data *ex = EG(current_execute_data);
 
 	while (1) {
 		if (!ex) {
@@ -864,17 +862,16 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS;
 	}
 
-	call = zend_vm_stack_push_call_frame(call_info,
-		func, fci->param_count, object_or_called_scope);
-
 	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_DEPRECATED)) {
 		zend_deprecated_function(func);
 
 		if (UNEXPECTED(EG(exception))) {
-			zend_vm_stack_free_call_frame(call);
 			return SUCCESS;
 		}
 	}
+
+	call = zend_vm_stack_push_call_frame(call_info,
+		func, fci->param_count, object_or_called_scope);
 
 	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);

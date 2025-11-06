@@ -14,7 +14,7 @@ $arrays = array(
   array("a" => 1, "b" => 2, "c" =>3, "d" => array()),
   array(0 => 0, 1 => 1, 2 => 2, 3 => 3),
   array(0 =>3.000, 1 =>2, 1 =>3, "a"=>3, 3=>5, "5"=>3.000),
-  array(TRUE => TRUE, FALSE => FALSE, NULL => NULL, "\x000", "\000"),
+  array(TRUE => TRUE, FALSE => FALSE, "\x000", "\000"),
   array("a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ),
   array(0 => array(), 1=> array(0), 2 => array(1), ""=> array(),""=>"" )
 );
@@ -110,16 +110,14 @@ array(5) {
 }
 
 -- Iteration 9 --
-array(5) {
+array(4) {
   [0]=>
   int(1)
   [1]=>
   int(0)
   [2]=>
-  string(0) ""
-  [3]=>
   int(2)
-  [4]=>
+  [3]=>
   int(3)
 }
 

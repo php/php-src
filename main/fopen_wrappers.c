@@ -506,7 +506,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	php_stream_wrapper *wrapper;
 	zend_string *exec_filename;
 
-	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
+	if (!filename || zend_char_has_nul_byte(filename, filename_length)) {
 		return NULL;
 	}
 

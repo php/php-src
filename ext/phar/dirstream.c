@@ -188,8 +188,6 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 			entry = safe_emalloc(keylen, 1, 1);
 			memcpy(entry, ZSTR_VAL(str_key), keylen);
 			entry[keylen] = '\0';
-
-			goto PHAR_ADD_ENTRY;
 		} else {
 			if (0 != memcmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				/* entry in directory not found */
@@ -199,28 +197,28 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 					continue;
 				}
 			}
+
+			const char *save = ZSTR_VAL(str_key);
+			save += dirlen + 1; /* seek to just past the path separator */
+
+			const char *has_slash = memchr(save, '/', keylen - dirlen - 1);
+			if (has_slash) {
+				/* is subdirectory */
+				save -= dirlen + 1;
+				entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
+				keylen = has_slash - save - dirlen - 1;
+				entry[keylen] = '\0';
+			} else {
+				/* is file */
+				save -= dirlen + 1;
+				entry = safe_emalloc(keylen - dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
+				entry[keylen - dirlen - 1] = '\0';
+				keylen = keylen - dirlen - 1;
+			}
 		}
 
-		const char *save = ZSTR_VAL(str_key);
-		save += dirlen + 1; /* seek to just past the path separator */
-
-		const char *has_slash = memchr(save, '/', keylen - dirlen - 1);
-		if (has_slash) {
-			/* is subdirectory */
-			save -= dirlen + 1;
-			entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
-			keylen = has_slash - save - dirlen - 1;
-			entry[keylen] = '\0';
-		} else {
-			/* is file */
-			save -= dirlen + 1;
-			entry = safe_emalloc(keylen - dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
-			entry[keylen - dirlen - 1] = '\0';
-			keylen = keylen - dirlen - 1;
-		}
-PHAR_ADD_ENTRY:
 		if (keylen) {
 			/**
 			 * Add an empty element to avoid duplicates
@@ -394,7 +392,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, 1))) {
+	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, true))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
 			zend_string_efree(e->filename);
@@ -412,7 +410,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if (phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 0, &error, 1)) {
+	if (phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 0, &error, true)) {
 		/* entry exists as a file */
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
 		php_url_free(resource);
@@ -450,7 +448,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 
 	if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
-		efree(error);
 		zend_string_efree(entry.filename);
 		return 0;
 	}
@@ -523,7 +520,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	size_t path_len = ZSTR_LEN(resource->path) - 1;
 
-	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, 1))) {
+	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, true))) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 			efree(error);

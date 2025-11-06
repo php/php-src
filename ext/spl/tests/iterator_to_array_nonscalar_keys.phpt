@@ -21,4 +21,6 @@ try {
 ?>
 --EXPECTF--
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 Cannot access offset of type array on array

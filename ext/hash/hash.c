@@ -365,7 +365,7 @@ static void php_hash_do_hash(
 		RETURN_THROWS();
 	}
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
+		if (zend_char_has_nul_byte(data, data_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -508,7 +508,7 @@ static void php_hash_do_hash_hmac(
 	}
 
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
+		if (zend_char_has_nul_byte(data, data_len)) {
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}

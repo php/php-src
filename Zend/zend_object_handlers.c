@@ -566,6 +566,11 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 				return FAILURE;
 			}
 		} else {
+			/* We were looking for a protected property but found a private one
+			 * belonging to the parent class. */
+			if (property_info->flags & ZEND_ACC_PRIVATE) {
+				return FAILURE;
+			}
 			ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
 		}
 		return SUCCESS;
@@ -675,7 +680,7 @@ static ZEND_FUNCTION(zend_parent_hook_set_trampoline);
 
 static bool zend_is_in_hook(const zend_property_info *prop_info)
 {
-	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_execute_data *execute_data = EG(current_execute_data);
 	if (!execute_data || !EX(func) || !EX(func)->common.prop_info) {
 		return false;
 	}
@@ -991,7 +996,7 @@ exit:
 /* }}} */
 
 static zend_always_inline bool property_uses_strict_types(void) {
-	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
 		&& execute_data->func
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
@@ -1669,18 +1674,16 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static) /* {{{ */
+ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
+	const zend_function *fbc, zend_string *method_name) /* {{{ */
 {
 	size_t mname_len;
 	zend_op_array *func;
-	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 	/* We use non-NULL value to avoid useless run_time_cache allocation.
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
 	static const zend_arg_info arg_info[1] = {{0}};
-
-	ZEND_ASSERT(fbc);
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline).op_array;
@@ -1695,13 +1698,10 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
-		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD|ZEND_ACC_STATIC));
 	func->fn_flags2 = 0;
 	/* Attributes outlive the trampoline because they are created by the compiler. */
 	func->attributes = fbc->common.attributes;
-	if (is_static) {
-		func->fn_flags |= ZEND_ACC_STATIC;
-	}
 	func->opcodes = &EG(call_trampoline_op);
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void**)dummy);
 	func->scope = fbc->common.scope;
@@ -1783,7 +1783,9 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name)
 {
-	static const zend_arg_info arg_info[1] = {{0}};
+	static const zend_internal_arg_info arg_info[2] = {
+		{ .name = "value" }
+	};
 	zend_function *func;
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
@@ -1820,12 +1822,6 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 	return func;
 }
-
-static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, false);
-}
-/* }}} */
 
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope) /* {{{ */
 {
@@ -1868,7 +1864,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_user_call_function(zobj->ce, method_name);
+			return zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 		} else {
 			return NULL;
 		}
@@ -1894,7 +1890,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_user_call_function(zobj->ce, method_name);
+					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {
 					zend_bad_method_call(fbc, method_name, scope);
 					fbc = NULL;
@@ -1915,14 +1911,8 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return zend_get_call_trampoline_func(ce, method_name, true);
-}
-/* }}} */
-
 static zend_always_inline zend_function *get_static_method_fallback(
-		zend_class_entry *ce, zend_string *function_name)
+		const zend_class_entry *ce, zend_string *function_name)
 {
 	zend_object *object;
 	if (ce->__call &&
@@ -1932,9 +1922,9 @@ static zend_always_inline zend_function *get_static_method_fallback(
 		 * see: tests/classes/__call_004.phpt  */
 
 		ZEND_ASSERT(object->ce->__call);
-		return zend_get_user_call_function(object->ce, function_name);
+		return zend_get_call_trampoline_func(object->ce->__call, function_name);
 	} else if (ce->__callstatic) {
-		return zend_get_user_callstatic_function(ce, function_name);
+		return zend_get_call_trampoline_func(ce->__callstatic, function_name);
 	} else {
 		return NULL;
 	}
@@ -2001,7 +1991,6 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 
 ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 {
-	int i;
 	zval *p;
 
 	if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
@@ -2010,7 +1999,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 		}
 
 		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
-		for (i = 0; i < class_type->default_static_members_count; i++) {
+		for (uint32_t i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
 				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];

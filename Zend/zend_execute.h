@@ -359,7 +359,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 	}
 }
 
-static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
+static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, const zend_function *func)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args + func->common.T;
 
@@ -453,11 +453,11 @@ ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
 ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
-ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data);
+ZEND_API const zend_function *zend_active_function_ex(const zend_execute_data *execute_data);
 
-static zend_always_inline zend_function *zend_active_function(void)
+static zend_always_inline const zend_function *zend_active_function(void)
 {
-	zend_function *func = EG(current_execute_data)->func;
+	const zend_function *func = EG(current_execute_data)->func;
 	if (ZEND_USER_CODE(func->type)) {
 		return zend_active_function_ex(EG(current_execute_data));
 	} else {

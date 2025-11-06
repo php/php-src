@@ -20,6 +20,14 @@
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 
+#include <uriparser/Uri.h>
+
+struct php_uri_parser_rfc3986_uris {
+	UriUriA uri;
+	UriUriA normalized_uri;
+	bool normalized_uri_initialized;
+};
+
 static void *php_uri_parser_rfc3986_memory_manager_malloc(UriMemoryManager *memory_manager, size_t size)
 {
 	return emalloc(size);
@@ -141,7 +149,7 @@ static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, z
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(php_uri_parser_rfc3986_uris *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
@@ -154,7 +162,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *ur
 	return SUCCESS;
 }
 
-zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *errors)
+zend_result php_uri_parser_rfc3986_userinfo_write(php_uri_parser_rfc3986_uris *uri, zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -194,7 +202,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(v
 		} else if (c != NULL && c - uriparser_uri->userInfo.first > 0) {
 			ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, c - uriparser_uri->userInfo.first);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_EMPTY_STRING(retval);
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -213,7 +221,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(v
 		if (c != NULL && uriparser_uri->userInfo.afterLast - c - 1 > 0) {
 			ZVAL_STRINGL(retval, c + 1, uriparser_uri->userInfo.afterLast - c - 1);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_EMPTY_STRING(retval);
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -607,7 +615,7 @@ static void php_uri_parser_rfc3986_destroy(void *uri)
 	efree(uriparser_uris);
 }
 
-const php_uri_parser php_uri_parser_rfc3986 = {
+PHPAPI const php_uri_parser php_uri_parser_rfc3986 = {
 	.name = PHP_URI_PARSER_RFC3986,
 	.parse = php_uri_parser_rfc3986_parse,
 	.clone = php_uri_parser_rfc3986_clone,

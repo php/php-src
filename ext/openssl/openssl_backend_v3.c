@@ -903,6 +903,11 @@ X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in)
 	return xr;
 }
 
+STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in)
+{
+	return PEM_X509_INFO_read_bio_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
 EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)
 {
 	return PEM_read_bio_PUBKEY_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);

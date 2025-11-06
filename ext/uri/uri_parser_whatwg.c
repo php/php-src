@@ -274,12 +274,18 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 	return SUCCESS;
 }
 
+/* 4.2. URL miscellaneous: A URL includes credentials if its username or password is not the empty string. */
+static bool includes_credentials(const lxb_url_t *lexbor_uri)
+{
+	return lexbor_uri->username.length > 0 || lexbor_uri->password.length > 0;
+}
+
 static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->username.length) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
+	if (includes_credentials(lexbor_uri)) {
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -307,8 +313,8 @@ static zend_result php_uri_parser_whatwg_password_read(void *uri, php_uri_compon
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->password.length > 0) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
+	if (includes_credentials(lexbor_uri)) {
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -621,7 +627,7 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_destroy(lexbor_uri);
 }
 
-const php_uri_parser php_uri_parser_whatwg = {
+PHPAPI const php_uri_parser php_uri_parser_whatwg = {
 	.name = PHP_URI_PARSER_WHATWG,
 	.parse = php_uri_parser_whatwg_parse,
 	.clone = php_uri_parser_whatwg_clone,

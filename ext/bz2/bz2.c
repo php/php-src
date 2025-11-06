@@ -352,7 +352,7 @@ PHP_FUNCTION(bzopen)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_ZVAL_NULL_PATH(file)) {
+		if (zend_str_has_nul_byte(Z_STR_P(file))) {
 			zend_argument_type_error(1, "must not contain null bytes");
 			RETURN_THROWS();
 		}

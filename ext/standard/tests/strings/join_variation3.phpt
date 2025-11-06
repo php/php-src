@@ -24,12 +24,11 @@ $pieces_arrays = array (
   array( "one" => "ten", "two" => "twenty", "three" => "thirty"),  // string key/value
   array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
-  // associative array, containing null/empty/boolean values as key/value
-  array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+  // associative array, containing empty/boolean values as key/value
   array(true => "true", false => "false", "false" => false, "true" => true),
   array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-  array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-  array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+  array(1 => '', 2 => "", 5 => false, 6 => true),
+  array('' => 1, "" => 2, false => 5, true => 6),
 
   // array with repetitive keys
   array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -79,15 +78,13 @@ string(23) "ten], [twenty], [thirty"
 -- Iteration 12 --
 string(16) "1], [two], [four"
 -- Iteration 13 --
-string(12) "null], [], ["
--- Iteration 14 --
 string(22) "true], [false], [], [1"
--- Iteration 15 --
+-- Iteration 14 --
 string(14) "emptys], [], ["
+-- Iteration 15 --
+string(13) "], [], [], [1"
 -- Iteration 16 --
-string(21) "], [], [], [], [], [1"
+string(11) "2], [5], [6"
 -- Iteration 17 --
-string(11) "4], [5], [6"
--- Iteration 18 --
 string(13) "10], [20], [3"
 Done

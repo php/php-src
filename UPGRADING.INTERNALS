@@ -26,6 +26,23 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     call the variant without the leading underscore instead.
     Affected: _zval_get_long, _zval_get_double, _zval_get_string,
     _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
+  . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
+    unsafe. Directly use ZEND_LONG_FMT with a function from the
+    printf family.
+  . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
+    Call zval_ptr_dtor_nogc() directly instead.
+  . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_make_callable() function has been removed, if a callable zval
+    needs to be obtained use the zend_get_callable_zval_from_fcc() function
+    instead. If this was used to store a callable, then an FCC should be
+    stored instead.
+  . The zend_active_function{_ex}() functions now return a const zend_function
+    pointer.
+  . The zend_get_call_trampoline_func() API now takes the __call or
+    __callStatic zend_function* instead of a CE and a boolean argument.
   . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
     removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
     instead.

@@ -195,6 +195,7 @@ zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t r
 X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in);
 X509 *php_openssl_pem_read_bio_x509(BIO *in);
 X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in);
+STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in);
 EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in);
 EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u);
 PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in);

@@ -4,6 +4,10 @@ GH-19955: (imagefttext() memory leak)
 gd
 --CREDITS--
 YuanchengJiang
+--SKIPIF--
+<?php
+if(!function_exists('imagefttext')) die('skip imagefttext() not available');
+?>
 --FILE--
 <?php
 ini_set('error_reporting', E_ALL&~E_WARNING);

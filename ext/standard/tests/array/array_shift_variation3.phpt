@@ -8,10 +8,6 @@ Test array_shift() function : usage variations - Pass array with different data 
 
 echo "*** Testing array_shift() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -28,30 +24,13 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // null data
-/*4*/  'null uppercase' => array(
-       NULL => 'null 1',
-       ),
-
-/*5*/  'null lowercase' => array(
-       null => 'null 2',
-       ),
-
        // boolean data
 /*6*/  'bool lowercase' => array(
        true => 'lowert',
        false => 'lowerf',
        ),
 
-/*7*/  'bool uppercase' => array(
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ),
-
        // empty data
-/*8*/  'empty double quotes' => array(
-       "" => 'emptyd',
-       ),
 
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
@@ -62,16 +41,6 @@ $inputs = array(
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ),
-
-       // undefined data
-/*11*/ 'undefined' => array(
-       @$undefined_var => 'undefined',
-       ),
-
-       // unset data
-/*12*/ 'unset' => array(
-       @$unset_var => 'unset',
        ),
 );
 
@@ -100,56 +69,24 @@ array(3) {
   string(8) "negative"
 }
 
--- Iteration 2 : null uppercase data --
-string(6) "null 1"
-array(0) {
-}
-
--- Iteration 3 : null lowercase data --
-string(6) "null 2"
-array(0) {
-}
-
--- Iteration 4 : bool lowercase data --
+-- Iteration 2 : bool lowercase data --
 string(6) "lowert"
 array(1) {
   [0]=>
   string(6) "lowerf"
 }
 
--- Iteration 5 : bool uppercase data --
-string(6) "uppert"
-array(1) {
-  [0]=>
-  string(6) "upperf"
-}
-
--- Iteration 6 : empty double quotes data --
-string(6) "emptyd"
-array(0) {
-}
-
--- Iteration 7 : empty single quotes data --
+-- Iteration 3 : empty single quotes data --
 string(6) "emptys"
 array(0) {
 }
 
--- Iteration 8 : string data --
+-- Iteration 4 : string data --
 string(7) "stringd"
 array(2) {
   ["strings"]=>
   string(7) "strings"
   ["hello world"]=>
   string(7) "stringh"
-}
-
--- Iteration 9 : undefined data --
-string(9) "undefined"
-array(0) {
-}
-
--- Iteration 10 : unset data --
-string(5) "unset"
-array(0) {
 }
 Done

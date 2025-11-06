@@ -165,7 +165,7 @@ static void uri_parser_php_parse_url_destroy(void *uri)
 	php_url_free(parse_url_uri);
 }
 
-const php_uri_parser php_uri_parser_php_parse_url = {
+PHPAPI const php_uri_parser php_uri_parser_php_parse_url = {
 	.name = PHP_URI_PARSER_PHP_PARSE_URL,
 	.parse = uri_parser_php_parse_url_parse,
 	.clone = NULL,
