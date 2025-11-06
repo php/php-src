@@ -1687,10 +1687,9 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 	if (object->ce->default_properties_count) {
 		zval *prop;
 		zend_string *key;
-		zend_property_info *property_info;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(properties, key, prop) {
-			property_info = zend_get_property_info(object->ce, key, 1);
+			const zend_property_info *property_info = zend_get_property_info(object->ce, key, 1);
 			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
 			    property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
@@ -1719,7 +1718,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 	zval *prop, tmp;
 	zend_string *key;
 	zend_long h;
-	zend_property_info *property_info;
+	const zend_property_info *property_info;
 
 	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
