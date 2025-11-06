@@ -495,15 +495,18 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
 
-		zend_internal_function *values_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
-		values_function->handler = zend_enum_values_func;
-		values_function->function_name = ZSTR_KNOWN(ZEND_STR_VALUES);
-		values_function->fn_flags = fn_flags;
-		values_function->doc_comment = NULL;
-		values_function->num_args = 0;
-		values_function->required_num_args = 0;
-		values_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_values + 1);
-		zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
+		/* Avoid BC break: if user already declared values(), do not register native */
+		if (!zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_VALUES))) {
+			zend_internal_function *values_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+			values_function->handler = zend_enum_values_func;
+			values_function->function_name = ZSTR_KNOWN(ZEND_STR_VALUES);
+			values_function->fn_flags = fn_flags;
+			values_function->doc_comment = NULL;
+			values_function->num_args = 0;
+			values_function->required_num_args = 0;
+			values_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_values + 1);
+			zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
+		}
 	}
 }
 
