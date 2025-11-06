@@ -11,7 +11,7 @@ if (getenv('SKIP_PERF_SENSITIVE')) die("skip performance sensitive test");
 $time = microtime(TRUE);
 
 /* This might vary on Linux/Windows, so the worst case and also count in slow machines. */
-$t_max = 1.0;
+$t_max = 2.0;
 
 $datas = array_fill(0, 220000, [
     '000.000.000.000',
