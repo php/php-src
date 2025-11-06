@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0
 
+- Opcache:
+  . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
+    buffer). (Arnaud)
 
 06 Nov 2025, PHP 8.5.0RC4
 
