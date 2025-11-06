@@ -1281,7 +1281,7 @@ PHP_METHOD(DOMDocument, __construct)
 	}
 
 	if (encoding_len > 0) {
-		docp->encoding = (const xmlChar *) xmlStrdup(BAD_CAST encoding);
+		docp->encoding = xmlStrdup((const xmlChar *) encoding);
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
