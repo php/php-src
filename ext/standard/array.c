@@ -3763,7 +3763,7 @@ PHP_FUNCTION(array_unshift)
 			zend_hash_next_index_insert_new(&new_hash, &args[i]);
 		}
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
 			if (key) {
 				zend_hash_add_new(&new_hash, key, value);
 			} else {
