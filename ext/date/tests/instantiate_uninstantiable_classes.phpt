@@ -40,6 +40,12 @@ try {
 }
 
 try {
+    MyDateTimeImmutable::createFromFormat('Y-m-d', '2025-01-01');
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
     MyDateTimeImmutable::createFromMutable(new DateTime());
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
@@ -57,5 +63,6 @@ Cannot instantiate abstract class MyDatePeriod
 Cannot instantiate abstract class MyDateTime
 Cannot instantiate abstract class MyDateTime
 Cannot instantiate abstract class MyDateTime
+Cannot instantiate abstract class MyDateTimeImmutable
 Cannot instantiate abstract class MyDateTimeImmutable
 Cannot instantiate abstract class MyDateTimeImmutable
