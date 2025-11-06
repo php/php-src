@@ -415,7 +415,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_try_from_func)
 
 static ZEND_NAMED_FUNCTION(zend_enum_values_func)
 {
-    zend_class_entry *ce = execute_data->func->common.scope;
+    zend_class_entry *ce = EX(func)->common.scope;
     zend_class_constant *c;
 
     ZEND_PARSE_PARAMETERS_NONE();
@@ -433,9 +433,8 @@ static ZEND_NAMED_FUNCTION(zend_enum_values_func)
             }
         }
         zval *prop = zend_enum_fetch_case_value(Z_OBJ_P(zv));
-        zval tmp;
-        ZVAL_COPY(&tmp, prop);
-        zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+        Z_TRY_ADDREF_P(prop);
+        zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), prop);
     } ZEND_HASH_FOREACH_END();
 }
 static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif) {
