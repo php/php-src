@@ -1,10 +1,10 @@
 name: Verify Bundled Files
 
 on:
-  push:
-  pull_request:
+  push: ~
+  pull_request: ~
   schedule:
-   - cron: "0 1 * * *"
+    - cron: "0 1 * * *"
   workflow_dispatch: ~
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   VERIFY_BUNDLED_FILES:
     name: Verify Bundled Files
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: git checkout
         uses: actions/checkout@v5
@@ -29,7 +29,7 @@ jobs:
               - 'ext/pcre/pcre2lib/**'
 
       - name: PCRE2
-        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || (github.event_name != 'push' && github.event_name != 'pull_request')) }}
+        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
         run: |
           echo "::group::Download"
           .github/scripts/download-bundled/pcre2.sh
