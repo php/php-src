@@ -8563,6 +8563,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
 	}
 
+	if (CG(file_context).current_namespace) {
+		op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
+	}
+
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;
 	op_array->line_start = decl->start_lineno;

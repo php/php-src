@@ -560,6 +560,7 @@ struct _zend_op_array {
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
+	zend_string *namespace_name;
 
 	uint32_t last_literal;
 	uint32_t num_dynamic_func_defs;

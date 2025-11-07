@@ -66,6 +66,7 @@ void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 	op_array->filename = zend_string_copy(zend_get_compiled_filename());
 	op_array->doc_comment = NULL;
 	op_array->attributes = NULL;
+	op_array->namespace_name = NULL;
 
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
@@ -610,6 +611,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zend_string_release_ex(op_array->filename, 0);
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
+	}
+	if (op_array->namespace_name) {
+		zend_string_release_ex(op_array->namespace_name, 0);
 	}
 	if (op_array->attributes) {
 		zend_hash_release(op_array->attributes);
