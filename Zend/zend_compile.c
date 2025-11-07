@@ -873,6 +873,10 @@ static const char *zend_modifier_token_to_string(uint32_t token)
 			return "protected(set)";
 		case T_PRIVATE_SET:
 			return "private(set)";
+		case T_PRIVATE_NAMESPACE:
+			return "private(namespace)";
+		case T_PRIVATE_NAMESPACE_SET:
+			return "private(namespace)(set)";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -927,6 +931,16 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 				return ZEND_ACC_PRIVATE_SET;
 			}
 			break;
+	case T_PRIVATE_NAMESPACE:
+		if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
+			return ZEND_ACC_NAMESPACE_PRIVATE;
+		}
+		break;
+	case T_PRIVATE_NAMESPACE_SET:
+		if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+			return ZEND_ACC_NAMESPACE_PRIVATE_SET;
+		}
+		break;
 	}
 
 	char *member;
