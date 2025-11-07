@@ -691,7 +691,6 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 	zend_string *class_name;
 	zend_class_entry *instance_ce;
 	bool allow_string = only_subclass;
-	bool retval;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ZVAL(obj)
@@ -718,21 +717,19 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 	}
 
 	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
-		retval = 1;
-	} else {
-		const zend_class_entry *ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-		if (!ce) {
-			retval = 0;
-		} else {
-			if (only_subclass && instance_ce == ce) {
-				retval = 0;
-			} else {
-				retval = instanceof_function(instance_ce, ce);
-			}
-		}
+		RETURN_TRUE;
 	}
 
-	RETURN_BOOL(retval);
+	const zend_class_entry *ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	if (!ce) {
+		RETURN_FALSE;
+	}
+
+	if (only_subclass && instance_ce == ce) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(instanceof_function(instance_ce, ce));
 }
 /* }}} */
 
