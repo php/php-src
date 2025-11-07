@@ -884,8 +884,6 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params);
 
-ZEND_API zend_result zend_delete_global_variable(zend_string *name);
-
 ZEND_API zend_array *zend_rebuild_symbol_table(void);
 ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data);
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
