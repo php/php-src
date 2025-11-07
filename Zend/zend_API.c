@@ -5299,3 +5299,62 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 #endif
 	return get_default_via_ast(default_value_zval, default_value);
 }
+
+/* Namespace extraction helpers for private(namespace) visibility */
+
+/* Extract namespace from a fully-qualified name
+ * Examples:
+ *   "Foo\\Bar\\ClassName" -> "Foo\\Bar"
+ *   "ClassName" -> "" (empty string for global namespace)
+ */
+ZEND_API zend_string* zend_extract_namespace(const zend_string *name)
+{
+	const char *class_name = ZSTR_VAL(name);
+	const char *last_separator = zend_memrchr(class_name, '\\', ZSTR_LEN(name));
+
+	if (last_separator == NULL) {
+		/* No namespace separator found: global namespace */
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	/* Extract namespace part (everything before the last backslash) */
+	size_t namespace_len = last_separator - class_name;
+	return zend_string_init(class_name, namespace_len, 0);
+}
+
+/* Get namespace from a class entry */
+ZEND_API zend_string* zend_get_class_namespace(const zend_class_entry *ce)
+{
+	return zend_extract_namespace(ce->name);
+}
+
+/* Get the namespace of the currently executing code */
+ZEND_API zend_string* zend_get_caller_namespace(void)
+{
+	zend_execute_data *ex = EG(current_execute_data);
+
+	if (!ex || !ex->func) {
+		/* No execution context - global namespace */
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	/* Case 1: Called from a method: use the class namespace
+	 * For trait methods, scope is the class that uses the trait,
+	 * not the trait itself. This is the desired behavior. */
+	if (ex->func->common.scope) {
+		return zend_get_class_namespace(ex->func->common.scope);
+	}
+
+	/* Case 2: Called from a user function or top-level code */
+	if (ex->func->type == ZEND_USER_FUNCTION) {
+		zend_op_array *op_array = &ex->func->op_array;
+
+		/* Use the namespace_name field we added to op_array */
+		if (op_array->namespace_name) {
+			return op_array->namespace_name;
+		}
+	}
+
+	/* Case 3: Internal function or global namespace */
+	return ZSTR_EMPTY_ALLOC();
+}
