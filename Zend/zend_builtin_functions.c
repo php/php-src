@@ -247,7 +247,7 @@ ZEND_FUNCTION(func_num_args)
 	}
 
 	if (zend_forbid_dynamic_call() == FAILURE) {
-		RETURN_LONG(-1);
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
