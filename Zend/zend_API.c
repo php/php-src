@@ -4449,6 +4449,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 				"Property with asymmetric visibility %s::$%s must have type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
+		/* Validate asymmetric visibility hierarchy: public < protected < private(namespace) < private
+		 * Set visibility must be equal to or more restrictive than get visibility. */
 		uint32_t get_visibility = zend_visibility_to_set_visibility(access_type & ZEND_ACC_PPP_MASK);
 		uint32_t set_visibility = access_type & ZEND_ACC_PPP_SET_MASK;
 		if (get_visibility > set_visibility) {
@@ -4459,7 +4461,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		/* Remove equivalent set visibility. */
 		if (((access_type & (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET)) == (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET))
 		 || ((access_type & (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET)) == (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET))
-		 || ((access_type & (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET)) == (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET))) {
+		 || ((access_type & (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET)) == (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET))
+		 || ((access_type & (ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE_SET)) == (ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE_SET))) {
 			access_type &= ~ZEND_ACC_PPP_SET_MASK;
 		}
 		/* private(set) properties are implicitly final. */

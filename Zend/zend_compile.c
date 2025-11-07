@@ -1037,6 +1037,7 @@ uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
+	/* Prevent combining visibility modifiers (public, protected, private, private(namespace)) */
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Multiple access type modifiers are not allowed", 0);
