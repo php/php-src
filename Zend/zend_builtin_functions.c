@@ -82,10 +82,10 @@ ZEND_FUNCTION(clone)
 
 	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
 
-	zend_class_entry *scope = zend_get_executed_scope();
+	const zend_class_entry *scope = zend_get_executed_scope();
 
-	zend_class_entry *ce = zobj->ce;
-	zend_function *clone = ce->clone;
+	const zend_class_entry *ce = zobj->ce;
+	const zend_function *clone = ce->clone;
 
 	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
@@ -237,7 +237,7 @@ ZEND_FUNCTION(gc_status)
 /* {{{ Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	zend_execute_data *ex = EX(prev_execute_data);
+	const zend_execute_data *ex = EX(prev_execute_data);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -525,7 +525,7 @@ static bool validate_constant_array_argument(HashTable *ht, uint32_t argument_nu
 }
 /* }}} */
 
-static void copy_constant_array(zval *dst, zval *src) /* {{{ */
+static void copy_constant_array(zval *dst, const zval *src) /* {{{ */
 {
 	zend_string *key;
 	zend_ulong idx;
@@ -624,7 +624,7 @@ ZEND_FUNCTION(get_class)
 	}
 
 	if (!obj) {
-		zend_class_entry *scope = zend_get_executed_scope();
+		const zend_class_entry *scope = zend_get_executed_scope();
 
 		if (scope) {
 			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
@@ -645,7 +645,7 @@ ZEND_FUNCTION(get_class)
 /* {{{ Retrieves the "Late Static Binding" class name */
 ZEND_FUNCTION(get_called_class)
 {
-	zend_class_entry *called_scope;
+	const zend_class_entry *called_scope;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -690,7 +690,6 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 	zval *obj;
 	zend_string *class_name;
 	zend_class_entry *instance_ce;
-	zend_class_entry *ce;
 	bool allow_string = only_subclass;
 	bool retval;
 
@@ -721,7 +720,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
 		retval = 1;
 	} else {
-		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		const zend_class_entry *ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (!ce) {
 			retval = 0;
 		} else {
@@ -752,7 +751,7 @@ ZEND_FUNCTION(is_a)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool statics, zval *return_value)
+static void add_class_vars(const zend_class_entry *scope, zend_class_entry *ce, bool statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -803,7 +802,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 /* {{{ Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
 {
-	zend_class_entry *ce = NULL, *scope;
+	zend_class_entry *ce = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C", &ce) == FAILURE) {
 		RETURN_THROWS();
@@ -816,7 +815,7 @@ ZEND_FUNCTION(get_class_vars)
 		}
 	}
 
-	scope = zend_get_executed_scope();
+	const zend_class_entry *scope = zend_get_executed_scope();
 	add_class_vars(scope, ce, false, return_value);
 	add_class_vars(scope, ce, true, return_value);
 }
@@ -942,7 +941,6 @@ ZEND_FUNCTION(get_class_methods)
 {
 	zval method_name;
 	zend_class_entry *ce = NULL;
-	zend_class_entry *scope;
 	zend_function *mptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -950,7 +948,7 @@ ZEND_FUNCTION(get_class_methods)
 	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);
-	scope = zend_get_executed_scope();
+	const zend_class_entry *scope = zend_get_executed_scope();
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
 		if (zend_check_method_accessible(mptr, scope)) {
@@ -1025,10 +1023,9 @@ ZEND_FUNCTION(method_exists)
 }
 /* }}} */
 
-static void _property_exists(zval *return_value, zval *object, zend_string *property)
+static void _property_exists(zval *return_value, const zval *object, zend_string *property)
 {
 	zend_class_entry *ce;
-	zend_property_info *property_info;
 
 	if (Z_TYPE_P(object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(object));
@@ -1042,7 +1039,7 @@ static void _property_exists(zval *return_value, zval *object, zend_string *prop
 		RETURN_THROWS();
 	}
 
-	property_info = zend_hash_find_ptr(&ce->properties_info, property);
+	const zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property);
 	if (property_info != NULL
 	 && (!(property_info->flags & ZEND_ACC_PRIVATE)
 	  || property_info->ce == ce)) {
@@ -1423,7 +1420,6 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 {
 	zend_string *key;
 	zval *zv;
-	zend_class_entry *ce;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1431,7 +1427,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
-			ce = Z_PTR_P(zv);
+			const zend_class_entry *ce = Z_PTR_P(zv);
 			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
 			 && ZSTR_VAL(key)[0] != 0) {
