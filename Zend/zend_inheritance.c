@@ -1150,12 +1150,15 @@ static inheritance_status do_inheritance_check_on_method(
 			} \
 		} while(0)
 
-	if (UNEXPECTED((parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)) == ZEND_ACC_PRIVATE)) {
+	if (UNEXPECTED(
+			((parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)) == ZEND_ACC_PRIVATE)
+			|| ((parent_flags & (ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)) == ZEND_ACC_NAMESPACE_PRIVATE)
+	)) {
 		if (flags & ZEND_INHERITANCE_SET_CHILD_CHANGED) {
 			SEPARATE_METHOD();
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
-		/* The parent method is private and not an abstract so we don't need to check any inheritance rules */
+		/* The parent method is private/private(namespace) and not abstract so we don't need to check any inheritance rules */
 		return INHERITANCE_SUCCESS;
 	}
 
@@ -1455,14 +1458,14 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		zend_property_info *child_info = Z_PTR_P(child);
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_CHANGED)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		}
 		if (parent_info->flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final property %s::$%s",
 				ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key));
 		}
-		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
+		if (!(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE))) {
 			if (!(parent_info->ce->ce_flags & ZEND_ACC_INTERFACE)) {
 				child_info->prototype = parent_info->prototype;
 			}
