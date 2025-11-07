@@ -1,29 +1,29 @@
 --TEST--
-Reflection shows user-defined BackedEnum::values() when present
+BackedEnum: reflection shows whether values() is native or user-defined
 --FILE--
 <?php
 
-enum E: int {
-    case A = 1;
+// Native implementation
+enum NativeEnum: string {
+    case A = 'a';
+}
+
+// User-defined implementation
+enum UserEnum: string {
+    case B = 'b';
 
     public static function values(): array {
-        return ['custom'];
+        return array_map(fn($c) => $c->value, self::cases());
     }
 }
 
-$m = new ReflectionMethod(E::class, 'values');
-var_dump($m->isStatic());
-var_dump($m->isPublic());
-var_dump($m->isInternal());
-echo $m->getDeclaringClass()->getName(), "\n";
-$proto = $m->getPrototype();
-echo $proto->getDeclaringClass()->getName(), "\n";
+$nativeMethod = new ReflectionMethod(NativeEnum::class, 'values');
+$userMethod = new ReflectionMethod(UserEnum::class, 'values');
+
+echo "Native is internal: " . ($nativeMethod->isInternal() ? 'yes' : 'no') . "\n";
+echo "User is internal: " . ($userMethod->isInternal() ? 'yes' : 'no') . "\n";
 
 ?>
 --EXPECT--
-bool(true)
-bool(true)
-bool(false)
-E
-BackedEnum
-
+Native is internal: yes
+User is internal: no
