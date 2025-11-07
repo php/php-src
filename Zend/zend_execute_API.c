@@ -1805,12 +1805,6 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string 
 }
 /* }}} */
 
-ZEND_API zend_result zend_delete_global_variable(zend_string *name) /* {{{ */
-{
-	return zend_hash_del_ind(&EG(symbol_table), name);
-}
-/* }}} */
-
 ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 {
 	zend_execute_data *ex;

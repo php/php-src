@@ -255,7 +255,7 @@ static void php_session_track_init(void)
 	zval session_vars;
 	zend_string *var_name = ZSTR_INIT_LITERAL("_SESSION", 0);
 	/* Unconditionally destroy existing array -- possible dirty data */
-	zend_delete_global_variable(var_name);
+	zend_hash_del_ind(&EG(symbol_table), var_name);
 
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
