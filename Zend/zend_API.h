@@ -884,8 +884,6 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params);
 
-ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...);
-
 ZEND_API zend_result zend_delete_global_variable(zend_string *name);
 
 ZEND_API zend_array *zend_rebuild_symbol_table(void);

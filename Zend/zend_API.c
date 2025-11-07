@@ -3611,29 +3611,6 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 }
 /* }}} */
 
-// TODO num_symbol_tables as unsigned int?
-ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...) /* {{{ */
-{
-	HashTable *symbol_table;
-	va_list symbol_table_list;
-
-	if (num_symbol_tables <= 0) return FAILURE;
-
-	if (is_ref) {
-		ZVAL_MAKE_REF(symbol);
-	}
-
-	va_start(symbol_table_list, num_symbol_tables);
-	while (num_symbol_tables-- > 0) {
-		symbol_table = va_arg(symbol_table_list, HashTable *);
-		zend_hash_str_update(symbol_table, name, name_length, symbol);
-		Z_TRY_ADDREF_P(symbol);
-	}
-	va_end(symbol_table_list);
-	return SUCCESS;
-}
-/* }}} */
-
 /* Disabled functions support */
 
 static void zend_disable_function(const char *function_name, size_t function_name_length)
