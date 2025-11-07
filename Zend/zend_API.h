@@ -384,13 +384,13 @@ ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
 ZEND_API void zend_destroy_modules(void);
 ZEND_API void zend_check_magic_method_implementation(
-		const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type);
-ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, zend_string *lcname);
+		const zend_class_entry *ce, const zend_function *fptr, const zend_string *lcname, int error_type);
+ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, const zend_string *lcname);
 
-ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry);
-ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce);
-ZEND_API zend_class_entry *zend_register_internal_class_with_flags(zend_class_entry *class_entry, zend_class_entry *parent_ce, uint32_t flags);
-ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry);
+ZEND_API zend_class_entry *zend_register_internal_class(const zend_class_entry *class_entry);
+ZEND_API zend_class_entry *zend_register_internal_class_ex(const zend_class_entry *class_entry, zend_class_entry *parent_ce);
+ZEND_API zend_class_entry *zend_register_internal_class_with_flags(const zend_class_entry *class_entry, zend_class_entry *parent_ce, uint32_t flags);
+ZEND_API zend_class_entry *zend_register_internal_interface(const zend_class_entry *orig_class_entry);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
 
 ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, bool persistent);
@@ -404,7 +404,7 @@ static zend_always_inline zend_result zend_register_class_alias(const char *name
 ZEND_API void zend_disable_functions(const char *function_list);
 
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
-ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
+ZEND_API ZEND_COLD void zend_wrong_property_read(const zval *object, zval *property);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
 #define IS_CALLABLE_SUPPRESS_DEPRECATIONS (1<<1)
@@ -413,7 +413,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, const zend_object *object);
 ZEND_API zend_string *zend_get_callable_name(zval *callable);
 ZEND_API bool zend_is_callable_at_frame(
-		zval *callable, zend_object *object, const zend_execute_data *frame,
+		const zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
@@ -443,7 +443,7 @@ ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const cha
 
 ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope);
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
-ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type);
+ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *class_type);
 
 static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry *ce) {
 	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
@@ -539,9 +539,9 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
-ZEND_API void object_properties_load(zend_object *object, HashTable *properties);
+ZEND_API void object_properties_load(zend_object *object, const HashTable *properties);
 
-ZEND_API void zend_merge_properties(zval *obj, HashTable *properties);
+ZEND_API void zend_merge_properties(const zval *obj, const HashTable *properties);
 
 ZEND_API void add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n);
 ZEND_API void add_assoc_null_ex(zval *arg, const char *key, size_t key_len);
@@ -1548,14 +1548,14 @@ typedef enum _zend_expected_type {
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(uint32_t num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_error(uint32_t num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_or_null_error(uint32_t num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_error(uint32_t num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_null_error(uint32_t num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t num, const char *name, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(uint32_t num, const char *name, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_error(uint32_t num, const char *name, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_or_null_error(uint32_t num, const char *name, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_error(uint32_t num, const char *name, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_null_error(uint32_t num, const char *name, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_or_null_error(uint32_t num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void);
