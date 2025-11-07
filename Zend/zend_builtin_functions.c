@@ -626,7 +626,7 @@ ZEND_FUNCTION(get_class)
 	}
 
 	if (!obj) {
-		zend_class_entry *scope = zend_get_executed_scope();
+		const zend_class_entry *scope = zend_get_executed_scope();
 
 		if (scope) {
 			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
@@ -1026,7 +1026,6 @@ ZEND_FUNCTION(method_exists)
 static void _property_exists(zval *return_value, const zval *object, zend_string *property)
 {
 	zend_class_entry *ce;
-	zend_property_info *property_info;
 
 	if (Z_TYPE_P(object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(object));
@@ -1040,7 +1039,7 @@ static void _property_exists(zval *return_value, const zval *object, zend_string
 		RETURN_THROWS();
 	}
 
-	property_info = zend_hash_find_ptr(&ce->properties_info, property);
+	const zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property);
 	if (property_info != NULL
 	 && (!(property_info->flags & ZEND_ACC_PRIVATE)
 	  || property_info->ce == ce)) {
@@ -1421,7 +1420,6 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 {
 	zend_string *key;
 	zval *zv;
-	zend_class_entry *ce;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1429,7 +1427,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
-			ce = Z_PTR_P(zv);
+			const zend_class_entry *ce = Z_PTR_P(zv);
 			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
 			 && ZSTR_VAL(key)[0] != 0) {
