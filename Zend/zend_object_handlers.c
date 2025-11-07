@@ -391,7 +391,7 @@ dynamic:
 	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
-	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = get_fake_or_executed_scope();
 
 		if (property_info->ce != scope) {
@@ -420,6 +420,14 @@ wrong:
 						zend_bad_property_access(property_info, ce, member);
 					}
 					return ZEND_WRONG_PROPERTY_OFFSET;
+				}
+			} else if (flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+				/* Check namespace visibility */
+				zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+				zend_string *caller_namespace = zend_get_caller_namespace();
+
+				if (!zend_string_equals(property_namespace, caller_namespace)) {
+					goto wrong;
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
@@ -491,7 +499,7 @@ dynamic:
 	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
-	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
@@ -515,6 +523,14 @@ wrong:
 						zend_bad_property_access(property_info, ce, member);
 					}
 					return ZEND_WRONG_PROPERTY_INFO;
+				}
+			} else if (flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+				/* Check namespace visibility */
+				zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+				zend_string *caller_namespace = zend_get_caller_namespace();
+
+				if (!zend_string_equals(property_namespace, caller_namespace)) {
+					goto wrong;
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
@@ -593,6 +609,18 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 	if (prop_info->ce == scope) {
 		return true;
 	}
+
+	/* Check namespace_private(set) visibility */
+	if (prop_info->flags & ZEND_ACC_NAMESPACE_PRIVATE_SET) {
+		zend_string *property_namespace = zend_get_class_namespace(prop_info->ce);
+		zend_string *caller_namespace = zend_get_caller_namespace();
+
+		if (zend_string_equals(property_namespace, caller_namespace)) {
+			return true;
+		}
+		return false;
+	}
+
 	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
 		&& is_protected_compatible_scope(prop_info->prototype->ce, scope));
 }
@@ -2055,6 +2083,19 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+				if (type != BP_VAR_IS) {
+					zend_bad_property_access(property_info, ce, property_name);
+				}
+				return NULL;
+			}
+		}
+
+		/* Check namespace visibility */
+		if (UNEXPECTED(property_info->flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			if (!zend_string_equals(property_namespace, caller_namespace)) {
 				if (type != BP_VAR_IS) {
 					zend_bad_property_access(property_info, ce, property_name);
 				}
