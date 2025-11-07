@@ -501,7 +501,7 @@ ZEND_FUNCTION(error_reporting)
 }
 /* }}} */
 
-static bool validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
+static bool validate_constant_array_argument(HashTable *ht, uint32_t argument_number) /* {{{ */
 {
 	bool ret = true;
 	zval *val;
