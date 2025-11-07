@@ -753,9 +753,7 @@ PHP_METHOD(ArrayObject, getArrayCopy)
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 } /* }}} */
@@ -1086,9 +1084,7 @@ PHP_METHOD(ArrayObject, getIteratorClass)
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_string_addref(intern->ce_get_iterator->name);
 	RETURN_STR(intern->ce_get_iterator->name);
@@ -1101,9 +1097,7 @@ PHP_METHOD(ArrayObject, getFlags)
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
 }
@@ -1150,9 +1144,7 @@ PHP_METHOD(ArrayObject, getIterator)
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_OBJ(spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
 }
@@ -1203,9 +1195,7 @@ PHP_METHOD(ArrayObject, count)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(spl_array_object_count_elements_helper(intern));
 } /* }}} */
@@ -1305,9 +1295,7 @@ PHP_METHOD(ArrayObject, serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
@@ -1453,9 +1441,7 @@ PHP_METHOD(ArrayObject, __serialize)
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1559,9 +1545,7 @@ PHP_METHOD(ArrayObject, __unserialize)
 /* {{{ */
 PHP_METHOD(ArrayObject, __debugInfo)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_ARR(spl_array_get_debug_info(Z_OBJ_P(ZEND_THIS)));
 } /* }}} */
@@ -1739,9 +1723,7 @@ PHP_METHOD(ArrayIterator, rewind)
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_rewind(intern);
 }
@@ -1783,9 +1765,7 @@ PHP_METHOD(ArrayIterator, current)
 	zval *entry;
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
 		RETURN_NULL();
@@ -1812,9 +1792,7 @@ void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
 /* {{{ Return current array key */
 PHP_METHOD(ArrayIterator, key)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_iterator_key(ZEND_THIS, return_value);
 } /* }}} */
@@ -1826,9 +1804,7 @@ PHP_METHOD(ArrayIterator, next)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_next_ex(intern, aht);
 }
@@ -1841,9 +1817,7 @@ PHP_METHOD(ArrayIterator, valid)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS);
 }
@@ -1858,9 +1832,7 @@ PHP_METHOD(RecursiveArrayIterator, hasChildren)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
 		RETURN_FALSE;
@@ -1898,9 +1870,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
 		RETURN_NULL();

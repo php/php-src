@@ -216,9 +216,7 @@ PHP_FUNCTION(class_uses)
 /* {{{ Return an array containing the names of all classes and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -619,9 +617,7 @@ PHP_FUNCTION(spl_autoload_functions)
 {
 	autoload_func_info *alfi;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	if (spl_autoload_functions) {
