@@ -21,7 +21,7 @@ var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 
 ?>
 --EXPECTF--
-Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %sgrep2.php on line %d
+Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset %r(0|1)%r in %sgrep2.php on line %d
 bool(false)
 array(3) {
   [5]=>

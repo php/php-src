@@ -16,7 +16,7 @@ var_dump(preg_split('/\d*/', 'ab2c3u', -1, PREG_SPLIT_NO_EMPTY));
 
 ?>
 --EXPECTF--
-Warning: preg_split(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %ssplit.php on line %d
+Warning: preg_split(): Compilation failed: quantifier does not follow a repeatable item at offset %r(0|1)%r in %ssplit.php on line %d
 bool(false)
 array(3) {
   [0]=>
