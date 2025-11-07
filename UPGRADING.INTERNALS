@@ -44,6 +44,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zend_get_call_trampoline_func() API now takes the __call or
     __callStatic zend_function* instead of a CE and a boolean argument.
   . The zend_set_hash_symbol() API has been removed.
+  . Added zend_hash_str_lookup().
 
 ========================
 2. Build system changes
