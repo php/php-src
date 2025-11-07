@@ -12,6 +12,7 @@ cp -R /tmp/php-src-bundled/pcre2/src ext/pcre/pcre2lib
 cd ext/pcre/pcre2lib
 
 # remove unneeded files
+rm config.h.generic
 rm pcre2.h.in
 rm pcre2_dftables.c
 rm pcre2_fuzzsupport.c
@@ -24,7 +25,6 @@ rm pcre2posix_test.c
 rm pcre2test.c
 
 # move renamed files
-mv config.h.generic config.h
 mv pcre2.h.generic pcre2.h
 mv pcre2_chartables.c.dist pcre2_chartables.c
 
