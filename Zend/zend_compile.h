@@ -222,7 +222,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PRIVATE                 (1 <<  2) /*     |  X  |  X  |  X  */
 /*                                                        |     |     |     */
 /* Namespace-scoped visibility                            |     |     |     */
-#define ZEND_ACC_NAMESPACE_PRIVATE       (1 << 30) /*     |  X  |  X  |     */
+#define ZEND_ACC_NAMESPACE_PRIVATE       (1 << 14) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */

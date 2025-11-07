@@ -4580,6 +4580,10 @@ skip_property_storage:
 		property_info->name = zend_string_copy(name);
 	} else if (access_type & ZEND_ACC_PRIVATE) {
 		property_info->name = zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
+	} else if (access_type & ZEND_ACC_NAMESPACE_PRIVATE) {
+		/* Mangle with namespace name to prevent external access while allowing same-namespace access */
+		zend_string *namespace = zend_get_class_namespace(ce);
+		property_info->name = zend_mangle_property_name(ZSTR_VAL(namespace), ZSTR_LEN(namespace), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
 	} else {
 		ZEND_ASSERT(access_type & ZEND_ACC_PROTECTED);
 		property_info->name = zend_mangle_property_name("*", 1, ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
@@ -5380,7 +5384,8 @@ ZEND_API zend_string* zend_get_caller_namespace(void)
 	 * For trait methods, scope is the class that uses the trait,
 	 * not the trait itself. This is the desired behavior. */
 	if (ex->func->common.scope) {
-		return zend_get_class_namespace(ex->func->common.scope);
+		zend_string *ns = zend_get_class_namespace(ex->func->common.scope);
+		return ns;
 	}
 
 	/* Case 2: Called from a user function or top-level code */
