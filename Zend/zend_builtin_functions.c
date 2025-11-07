@@ -1549,7 +1549,7 @@ ZEND_FUNCTION(get_resource_type)
 	if (resource_type) {
 		RETURN_STRING(resource_type);
 	} else {
-		RETURN_STRING("Unknown");
+		RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED));
 	}
 }
 /* }}} */
