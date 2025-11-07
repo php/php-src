@@ -1885,7 +1885,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
 	bool fake_frame = false;
-	int lineno, frameno = 0;
+	int frameno = 0;
 	zend_function *func;
 	zend_string *filename;
 	zend_string *include_filename = NULL;
@@ -1906,12 +1906,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		EG(filename_override) = NULL;
 		EG(lineno_override) = -1;
 
-		zend_string *filename = zend_get_executed_filename_ex();
-		zend_long lineno = zend_get_executed_lineno();
-		if (filename && (!zend_string_equals(filename, filename_override) || lineno != lineno_override)) {
+		zend_string *executed_filename = zend_get_executed_filename_ex();
+		uint32_t lineno = zend_get_executed_lineno();
+		if (executed_filename && (!zend_string_equals(executed_filename, filename_override) || lineno != lineno_override)) {
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			ZVAL_STR_COPY(&tmp, filename);
+			ZVAL_STR_COPY(&tmp, executed_filename);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
 			ZVAL_LONG(&tmp, lineno);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
@@ -1974,19 +1974,21 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				zval *arg = zend_get_zval_ptr(op_data, op_data->op1_type, &op_data->op1, call);
 				if (Z_TYPE_P(arg) == IS_UNDEF) goto not_frameless_call;
 			}
-			zend_function *func = ZEND_FLF_FUNC(opline);
+			zend_function *frameless_func = ZEND_FLF_FUNC(opline);
 			/* Assume frameless functions are not recursive with themselves.
 			 * This condition may be true when observers are enabled:
 			 * Observers will put a call frame on top of the frameless opcode. */
-			if (last_call && last_call->func == func) {
+			if (last_call && last_call->func == frameless_func) {
 				goto not_frameless_call;
 			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			ZVAL_STR_COPY(&tmp, func->common.function_name);
+			ZVAL_STR_COPY(&tmp, frameless_func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 			/* Steal file and line from the previous frame. */
 			if (call->func && ZEND_USER_CODE(call->func->common.type)) {
+				uint32_t lineno;
+
 				filename = call->func->op_array.filename;
 				if (call->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 					if (EG(opline_before_exception)) {
@@ -2038,6 +2040,8 @@ not_frameless_call:
 		zend_hash_real_init_mixed(stack_frame);
 
 		if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+			uint32_t lineno;
+
 			filename = prev->func->op_array.filename;
 			if (prev->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
