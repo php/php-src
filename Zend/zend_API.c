@@ -3933,7 +3933,11 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 			zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
-			if (!zend_string_equals(method_namespace, caller_namespace)) {
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				if (fcc->calling_scope &&
 				    ((fcc->object && fcc->calling_scope->__call) ||
 				     (!fcc->object && fcc->calling_scope->__callstatic))) {
@@ -4019,7 +4023,11 @@ get_function_via_handler:
 				zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
 				zend_string *caller_namespace = zend_get_caller_namespace();
 
-				if (!zend_string_equals(method_namespace, caller_namespace)) {
+				bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+				zend_string_release(method_namespace);
+				zend_string_release(caller_namespace);
+
+				if (!namespace_match) {
 					if (error) {
 						if (*error) {
 							efree(*error);
@@ -4584,6 +4592,7 @@ skip_property_storage:
 		/* Mangle with namespace name to prevent external access while allowing same-namespace access */
 		zend_string *namespace = zend_get_class_namespace(ce);
 		property_info->name = zend_mangle_property_name(ZSTR_VAL(namespace), ZSTR_LEN(namespace), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
+		zend_string_release(namespace);
 	} else {
 		ZEND_ASSERT(access_type & ZEND_ACC_PROTECTED);
 		property_info->name = zend_mangle_property_name("*", 1, ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
@@ -5394,7 +5403,8 @@ ZEND_API zend_string* zend_get_caller_namespace(void)
 
 		/* Use the namespace_name field we added to op_array */
 		if (op_array->namespace_name) {
-			return op_array->namespace_name;
+			/* Increment refcount since caller will release it */
+			return zend_string_copy(op_array->namespace_name);
 		}
 	}
 

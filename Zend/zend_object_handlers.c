@@ -309,9 +309,20 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(co
 }
 /* }}} */
 
+static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(void);
+
 static ZEND_COLD zend_never_inline void zend_bad_property_access(const zend_property_info *property_info, const zend_class_entry *ce, const zend_string *member) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	if (property_info->flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+		const zend_class_entry *scope = get_fake_or_executed_scope();
+		zend_throw_error(NULL, "Cannot access %s property %s::$%s from scope %s",
+			zend_visibility_string(property_info->flags),
+			ZSTR_VAL(ce->name),
+			ZSTR_VAL(member),
+			scope ? ZSTR_VAL(scope->name) : "{main}");
+	} else {
+		zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	}
 }
 /* }}} */
 
@@ -444,8 +455,11 @@ wrong:
 			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
 
-			if (!zend_string_equals(property_namespace, caller_namespace)) {
+			if (!namespace_match) {
 				goto wrong;
 			}
 		}
@@ -553,8 +567,11 @@ wrong:
 			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
 
-			if (!zend_string_equals(property_namespace, caller_namespace)) {
+			if (!namespace_match) {
 				goto wrong;
 			}
 		}
@@ -634,7 +651,11 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 		zend_string *property_namespace = zend_get_class_namespace(prop_info->ce);
 		zend_string *caller_namespace = zend_get_caller_namespace();
 
-		if (zend_string_equals(property_namespace, caller_namespace)) {
+		bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+		zend_string_release(property_namespace);
+		zend_string_release(caller_namespace);
+
+		if (namespace_match) {
 			return true;
 		}
 		return false;
@@ -1951,7 +1972,11 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
-			if (!zend_string_equals(method_namespace, caller_namespace)) {
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {
@@ -2023,7 +2048,11 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
-			if (!zend_string_equals(method_namespace, caller_namespace)) {
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				const zend_class_entry *scope = zend_get_executed_scope();
 				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
 				if (!fallback_fbc) {
@@ -2117,9 +2146,18 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
-			if (!zend_string_equals(property_namespace, caller_namespace)) {
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				if (type != BP_VAR_IS) {
-					zend_bad_property_access(property_info, ce, property_name);
+					const zend_class_entry *scope = get_fake_or_executed_scope();
+					zend_throw_error(NULL, "Cannot access %s property %s::$%s from scope %s",
+						zend_visibility_string(property_info->flags),
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(property_name),
+						scope ? ZSTR_VAL(scope->name) : "{main}");
 				}
 				return NULL;
 			}
@@ -2212,7 +2250,11 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 			zend_string *method_namespace = zend_get_class_namespace(constructor->common.scope);
 			zend_string *caller_namespace = zend_get_caller_namespace();
 
-			if (!zend_string_equals(method_namespace, caller_namespace)) {
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				const zend_class_entry *scope = get_fake_or_executed_scope();
 				zend_bad_constructor_call(constructor, scope);
 				zend_object_store_ctor_failed(zobj);
