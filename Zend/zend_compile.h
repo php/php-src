@@ -221,6 +221,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED               (1 <<  1) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PRIVATE                 (1 <<  2) /*     |  X  |  X  |  X  */
 /*                                                        |     |     |     */
+/* Namespace-scoped visibility                            |     |     |     */
+#define ZEND_ACC_NAMESPACE_PRIVATE       (1 << 30) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
@@ -274,6 +277,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PUBLIC_SET              (1 << 10) /*     |     |  X  |     */
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
+#define ZEND_ACC_NAMESPACE_PRIVATE_SET   (1 << 13) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
@@ -418,8 +422,8 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
 
-#define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
-#define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
+#define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE | ZEND_ACC_NAMESPACE_PRIVATE)
+#define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET | ZEND_ACC_NAMESPACE_PRIVATE_SET)
 
 static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t visibility)
 {
@@ -430,6 +434,8 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 			return ZEND_ACC_PROTECTED_SET;
 		case ZEND_ACC_PRIVATE:
 			return ZEND_ACC_PRIVATE_SET;
+		case ZEND_ACC_NAMESPACE_PRIVATE:
+			return ZEND_ACC_NAMESPACE_PRIVATE_SET;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }

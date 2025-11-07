@@ -204,6 +204,8 @@ const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
+	} else if (fn_flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+		return "private(namespace)";
 	} else if (fn_flags & ZEND_ACC_PRIVATE) {
 		return "private";
 	} else {
@@ -215,7 +217,9 @@ const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 
 static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PRIVATE_SET) {
+	if (fn_flags & ZEND_ACC_NAMESPACE_PRIVATE_SET) {
+		return "private(namespace)(set)";
+	} else if (fn_flags & ZEND_ACC_PRIVATE_SET) {
 		return "private(set)";
 	} else if (fn_flags & ZEND_ACC_PROTECTED_SET) {
 		return "protected(set)";
