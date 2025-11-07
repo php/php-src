@@ -3,8 +3,7 @@ set -ex
 
 cd "$(dirname "$0")/../../$1"
 
-# notify git about untracked files
-# add -f to detect even ignored files
+# notify git about untracked (except ignored) files
 git add -N .
 
 # display overview of changed files
