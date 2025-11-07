@@ -1871,7 +1871,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	fbc = Z_FUNC_P(func);
 
 	/* Check access level */
-	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = zend_get_executed_scope();
 
 		if (fbc->common.scope != scope) {
@@ -1887,6 +1887,21 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			}
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+				if (zobj->ce->__call) {
+					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
+				} else {
+					zend_bad_method_call(fbc, method_name, scope);
+					fbc = NULL;
+				}
+			}
+		}
+
+		/* Check namespace visibility */
+		if (fbc && UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			if (!zend_string_equals(method_namespace, caller_namespace)) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {
@@ -1945,6 +1960,21 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 			const zend_class_entry *scope = zend_get_executed_scope();
 			ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(fbc, scope)) {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
+					zend_bad_method_call(fbc, function_name, scope);
+				}
+				fbc = fallback_fbc;
+			}
+		}
+
+		/* Check namespace visibility */
+		if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			if (!zend_string_equals(method_namespace, caller_namespace)) {
+				const zend_class_entry *scope = zend_get_executed_scope();
 				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
 				if (!fallback_fbc) {
 					zend_bad_method_call(fbc, function_name, scope);
@@ -2108,6 +2138,19 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 			const zend_class_entry *scope = get_fake_or_executed_scope();
 			ZEND_ASSERT(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(constructor, scope)) {
+				zend_bad_constructor_call(constructor, scope);
+				zend_object_store_ctor_failed(zobj);
+				constructor = NULL;
+			}
+		}
+
+		/* Check namespace visibility */
+		if (constructor && UNEXPECTED(constructor->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(constructor->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			if (!zend_string_equals(method_namespace, caller_namespace)) {
+				const zend_class_entry *scope = get_fake_or_executed_scope();
 				zend_bad_constructor_call(constructor, scope);
 				zend_object_store_ctor_failed(zobj);
 				constructor = NULL;

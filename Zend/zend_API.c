@@ -3927,6 +3927,25 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 				goto get_function_via_handler;
 			}
 		}
+
+		/* Check namespace visibility */
+		if (fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			if (!zend_string_equals(method_namespace, caller_namespace)) {
+				if (fcc->calling_scope &&
+				    ((fcc->object && fcc->calling_scope->__call) ||
+				     (!fcc->object && fcc->calling_scope->__callstatic))) {
+					retval = false;
+					fcc->function_handler = NULL;
+					goto get_function_via_handler;
+				} else {
+					retval = false;
+					fcc->function_handler = NULL;
+				}
+			}
+		}
 	} else {
 get_function_via_handler:
 		if (fcc->object && fcc->calling_scope == ce_org) {
@@ -3985,6 +4004,22 @@ get_function_via_handler:
 				scope = get_scope(frame);
 				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
 				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+					if (error) {
+						if (*error) {
+							efree(*error);
+						}
+						zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+					}
+					retval = false;
+				}
+			}
+
+			/* Check namespace visibility */
+			if (retval && fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+				zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
+				zend_string *caller_namespace = zend_get_caller_namespace();
+
+				if (!zend_string_equals(method_namespace, caller_namespace)) {
 					if (error) {
 						if (*error) {
 							efree(*error);
