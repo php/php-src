@@ -588,11 +588,7 @@ ZEND_FUNCTION(define)
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) != NULL) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_register_constant(&c) != NULL);
 }
 /* }}} */
 
@@ -606,11 +602,7 @@ ZEND_FUNCTION(defined)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT));
 }
 /* }}} */
 
@@ -1043,11 +1035,10 @@ static void _property_exists(zval *return_value, const zval *object, zend_string
 		RETURN_TRUE;
 	}
 
-	if (Z_TYPE_P(object) == IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property)(Z_OBJ_P(object), property, ZEND_PROPERTY_EXISTS, NULL)) {
-		RETURN_TRUE;
-	}
-	RETURN_FALSE;
+	RETURN_BOOL(
+		Z_TYPE_P(object) == IS_OBJECT &&
+		Z_OBJ_HANDLER_P(object, has_property)(Z_OBJ_P(object), property, ZEND_PROPERTY_EXISTS, NULL)
+	);
 }
 
 /* {{{ Checks if the object or class has a property */
@@ -1107,11 +1098,7 @@ static inline void _class_exists_impl(zval *return_value, zend_string *name, boo
 		ce = zend_lookup_class(name);
 	}
 
-	if (ce) {
-		RETURN_BOOL(((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(ce && ((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
 }
 /* {{{ */
 
@@ -2223,11 +2210,7 @@ ZEND_FUNCTION(extension_loaded)
 	}
 
 	lcname = zend_string_tolower(extension_name);
-	if (zend_hash_exists(&module_registry, lcname)) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_exists(&module_registry, lcname));
 	zend_string_release_ex(lcname, 0);
 }
 /* }}} */
