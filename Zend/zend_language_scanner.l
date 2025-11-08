@@ -1375,6 +1375,11 @@ int start_line = CG(zend_lineno);
 
 	ZVAL_UNDEF(zendlval);
 restart:
+	/* Clean up any previous token value before scanning next token */
+	if (Z_TYPE_P(zendlval) == IS_STRING) {
+		zval_ptr_dtor_str(zendlval);
+		ZVAL_UNDEF(zendlval);
+	}
 	SCNG(yy_text) = YYCURSOR;
 
 /*!re2c
@@ -3204,9 +3209,7 @@ nowdoc_scan_done:
 */
 
 emit_token_with_str:
-	if (PARSER_MODE()) {
-		zend_copy_value(zendlval, (yytext + offset), (yyleng - offset));
-	}
+	zend_copy_value(zendlval, (yytext + offset), (yyleng - offset));
 
 emit_token_with_val:
 	if (PARSER_MODE()) {
