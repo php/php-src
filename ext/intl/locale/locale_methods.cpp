@@ -810,12 +810,17 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char
 			/* element value is not a string */
 			return FAILURE;
 		}
-		if(strcmp(key_name, LOC_LANG_TAG) != 0 &&
-		   strcmp(key_name, LOC_GRANDFATHERED_LANG_TAG)!=0 ) {
-			/* not lang or grandfathered tag */
-			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+		if(strcmp(key_name, LOC_TIMEZONE) != 0) {
+			if(strcmp(key_name, LOC_LANG_TAG) != 0 &&
+					strcmp(key_name, LOC_GRANDFATHERED_LANG_TAG)!=0) {
+				/* not lang or grandfathered tag */
+				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+			}
+			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+		} else {
+			smart_str_appends(loc_name, "@timezone=");
+			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 		return SUCCESS;
 	}
 
@@ -987,6 +992,12 @@ U_CFUNC PHP_FUNCTION(locale_compose)
 
 	/* Region */
 	result = append_key_value( loc_name, hash_arr , LOC_REGION_TAG);
+	if( !handleAppendResult( result, loc_name)){
+		RETURN_FALSE;
+	}
+
+	/* Timezone */
+	result = append_key_value( loc_name, hash_arr , LOC_TIMEZONE);
 	if( !handleAppendResult( result, loc_name)){
 		RETURN_FALSE;
 	}

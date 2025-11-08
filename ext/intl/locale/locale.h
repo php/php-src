@@ -26,6 +26,7 @@
 #define LOC_GRANDFATHERED_LANG_TAG "grandfathered"
 #define LOC_PRIVATE_TAG "private"
 #define LOC_CANONICALIZE_TAG "canonicalize"
+#define LOC_TIMEZONE "timezone"
 
 #define LOCALE_INI_NAME "intl.default_locale"
 
