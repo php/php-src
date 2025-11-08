@@ -7080,8 +7080,6 @@ PHP_FUNCTION(array_chunk)
 		}
 		zval_add_ref(entry);
 
-		/* If reached the chunk size, add it to the result array, and reset the
-		 * pointer. */
 		if (++current == size) {
 			current = 0;
 		}
