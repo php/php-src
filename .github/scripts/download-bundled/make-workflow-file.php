@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Phpsrc\Ci\DownloadBundled;
 
 $bundles = [
+    new Bundle('boost.context', ['Zend/asm']),
     new Bundle('PCRE2', ['ext/pcre/pcre2lib']),
 ];
 
