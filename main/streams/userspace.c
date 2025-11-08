@@ -88,7 +88,7 @@ PHP_MINIT_FUNCTION(user_streams)
 
 struct _php_userstream_data {
 	struct php_user_stream_wrapper * wrapper;
-	zval object;
+	zend_object *object;
 };
 typedef struct _php_userstream_data php_userstream_data_t;
 
@@ -249,36 +249,36 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 	}}} **/
 
-static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
+static zend_object *user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context)
 {
 	if (uwrap->ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		ZVAL_UNDEF(object);
-		return;
+		return NULL;
 	}
 
 	/* create an instance of our class */
-	if (object_init_ex(object, uwrap->ce) == FAILURE) {
-		ZVAL_UNDEF(object);
-		return;
+	zval zobj;
+	if (object_init_ex(&zobj, uwrap->ce) == FAILURE) {
+		return NULL;
 	}
 
 	if (context) {
 		GC_ADDREF(context->res);
-		add_property_resource(object, "context", context->res);
+		add_property_resource(&zobj, "context", context->res);
 	} else {
-		add_property_null(object, "context");
+		add_property_null(&zobj, "context");
 	}
 
 	if (EG(exception) != NULL) {
-		zval_ptr_dtor(object);
-		ZVAL_UNDEF(object);
-		return;
+		zval_ptr_dtor(&zobj);
+		return NULL;
 	}
 
 	if (uwrap->ce->constructor) {
 		zend_call_known_instance_method_with_0_params(
-			uwrap->ce->constructor, Z_OBJ_P(object), NULL);
+			uwrap->ce->constructor, Z_OBJ(zobj), NULL);
 	}
+
+	return Z_OBJ(zobj);
 }
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,
@@ -314,8 +314,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	/* zend_call_method_if_exists() may unregister the stream wrapper. Hold on to it. */
 	GC_ADDREF(us->wrapper->resource);
 
-	user_stream_create_object(uwrap, context, &us->object);
-	if (Z_ISUNDEF(us->object)) {
+	us->object = user_stream_create_object(uwrap, context);
+	if (!us->object) {
 		goto end;
 	}
 
@@ -326,7 +326,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	ZVAL_NEW_REF(&args[3], &EG(uninitialized_zval));
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_OPEN, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &zretval, 4, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &zretval, 4, args);
 	zend_string_release_ex(func_name, false);
 
 	/* Keep arg3 alive if it has assigned the reference */
@@ -355,7 +355,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		// TODO Warn when assigning a non string value to the reference?
 
 		/* set wrapper data to be a reference to our object */
-		ZVAL_COPY(&stream->wrapperdata, &us->object);
+		ZVAL_OBJ_COPY(&stream->wrapperdata, us->object);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -368,7 +368,9 @@ end:
 	FG(user_stream_current_filename) = NULL;
 	PG(in_user_include) = old_in_user_include;
 	if (stream == NULL) {
-		zval_ptr_dtor(&us->object);
+		if (us->object) {
+			OBJ_RELEASE(us->object);
+		}
 		zend_list_delete(us->wrapper->resource);
 		efree(us);
 	}
@@ -404,8 +406,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	/* zend_call_method_if_exists() may unregister the stream wrapper. Hold on to it. */
 	GC_ADDREF(us->wrapper->resource);
 
-	user_stream_create_object(uwrap, context, &us->object);
-	if (Z_TYPE(us->object) == IS_UNDEF) {
+	us->object = user_stream_create_object(uwrap, context);
+	if (!us->object) {
 		goto end;
 	}
 
@@ -414,7 +416,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	ZVAL_LONG(&args[1], options);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_DIR_OPEN, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &zretval, 2, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &zretval, 2, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
 
@@ -433,7 +435,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 		stream = php_stream_alloc_rel(&php_stream_userspace_dir_ops, us, 0, mode);
 
 		/* set wrapper data to be a reference to our object */
-		ZVAL_COPY(&stream->wrapperdata, &us->object);
+		ZVAL_OBJ_COPY(&stream->wrapperdata, us->object);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -443,7 +445,9 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 end:
 	FG(user_stream_current_filename) = NULL;
 	if (stream == NULL) {
-		zval_ptr_dtor(&us->object);
+		if (us->object) {
+			OBJ_RELEASE(us->object);
+		}
 		zend_list_delete(us->wrapper->resource);
 		efree(us);
 	}
@@ -567,7 +571,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_WRITE, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
 
@@ -616,7 +620,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 
 	ZVAL_LONG(&args[0], count);
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_READ, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
@@ -654,7 +658,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
 	func_name = ZSTR_INIT_LITERAL(USERSTREAM_EOF, false);
-	call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -693,13 +697,12 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 	assert(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_CLOSE, false);
-	zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	zval_ptr_dtor(&retval);
 
-	zval_ptr_dtor(&us->object);
-	ZVAL_UNDEF(&us->object);
+	OBJ_RELEASE(us->object);
 
 	efree(us);
 
@@ -714,7 +717,7 @@ static int php_userstreamop_flush(php_stream *stream)
 	assert(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_FLUSH, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
@@ -740,7 +743,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_SEEK, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 2, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 2, args);
 	zend_string_release_ex(func_name, false);
 
 	if (call_result == FAILURE) {
@@ -767,7 +770,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 	/* now determine where we are */
 	func_name = ZSTR_INIT_LITERAL(USERSTREAM_TELL, false);
-	call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_LONG) {
@@ -834,7 +837,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	int ret = -1;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_STAT, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -862,7 +865,7 @@ static int user_stream_set_check_liveliness(const php_userstream_data_t *us)
 	zval retval;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_EOF, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -912,7 +915,7 @@ static int user_stream_set_locking(const php_userstream_data_t *us, int value)
 
 	/* TODO wouldblock */
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_LOCK, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, &zlock);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 1, &zlock);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -947,7 +950,7 @@ static int user_stream_set_truncation(const php_userstream_data_t *us, int value
 	if (value == PHP_STREAM_TRUNCATE_SUPPORTED) {
 		zval zstr;
 		ZVAL_STR(&zstr, func_name);
-		bool is_callable = zend_is_callable_ex(&zstr, Z_OBJ(us->object), IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, NULL, NULL);
+		bool is_callable = zend_is_callable_ex(&zstr, us->object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, NULL, NULL);
 		// Frees func_name
 		zval_ptr_dtor(&zstr);
 		return is_callable ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
@@ -965,7 +968,7 @@ static int user_stream_set_truncation(const php_userstream_data_t *us, int value
 	zval size;
 
 	ZVAL_LONG(&size, (zend_long)new_size);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, &size);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 1, &size);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -1009,7 +1012,7 @@ static int user_stream_set_option(const php_userstream_data_t *us, int option, i
 
 	zval retval;
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_SET_OPTION, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 3, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 3, args);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -1063,12 +1066,11 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[1];
-	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		return ret;
 	}
 
@@ -1077,10 +1079,10 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_UNLINK, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 1, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 1, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_UNLINK " is not implemented!", ZSTR_VAL(uwrap->ce->name));
@@ -1100,12 +1102,11 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[2];
-	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		return ret;
 	}
 
@@ -1114,11 +1115,11 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	ZVAL_STRING(&args[1], url_to);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_RENAME, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 2, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 2, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_RENAME " is not implemented!", ZSTR_VAL(uwrap->ce->name));
@@ -1138,12 +1139,11 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[3];
-	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		return ret;
 	}
 
@@ -1153,10 +1153,10 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	ZVAL_LONG(&args[2], options);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_MKDIR, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 3, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 3, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_MKDIR " is not implemented!", ZSTR_VAL(uwrap->ce->name));
@@ -1176,12 +1176,11 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[2];
-	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		return ret;
 	}
 
@@ -1190,10 +1189,10 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	ZVAL_LONG(&args[1], options);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_RMDIR, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 2, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 2, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_RMDIR " is not implemented!", ZSTR_VAL(uwrap->ce->name));
@@ -1213,7 +1212,6 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[3];
-	zval object;
 	int ret = 0;
 
 	switch(option) {
@@ -1240,8 +1238,8 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		zval_ptr_dtor(&args[2]);
 		return ret;
 	}
@@ -1251,11 +1249,11 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	ZVAL_LONG(&args[1], option);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_METADATA, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 3, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 3, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[2]);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_METADATA " is not implemented!", ZSTR_VAL(uwrap->ce->name));
@@ -1276,12 +1274,11 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval zretval;
 	zval args[2];
-	zval object;
 	int ret = -1;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);
-	if (Z_TYPE(object) == IS_UNDEF) {
+	zend_object *object = user_stream_create_object(uwrap, context);
+	if (!object) {
 		return -1;
 	}
 
@@ -1290,10 +1287,10 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	ZVAL_LONG(&args[1], flags);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_STATURL, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(object), func_name, &zretval, 2, args);
+	zend_result call_result = zend_call_method_if_exists(object, func_name, &zretval, 2, args);
 	zend_string_release_ex(func_name, false);
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&object);
+	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STATURL " is not implemented!",
@@ -1328,7 +1325,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	}
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_DIR_READ, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
@@ -1364,12 +1361,11 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle)
 	assert(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_DIR_CLOSE, false);
-	zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&us->object);
-	ZVAL_UNDEF(&us->object);
+	OBJ_RELEASE(us->object);
 	efree(us);
 
 	return 0;
@@ -1381,7 +1377,7 @@ static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_DIR_REWIND, false);
-	zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+	zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
 	zval_ptr_dtor(&retval);
@@ -1413,7 +1409,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_CAST, false);
-	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
+	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
