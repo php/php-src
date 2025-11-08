@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
 
+- Standard:
+  . Fix memory leak in array_diff() with custom type checks. (ndossche)
+
 - Tidy:
   . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
 
