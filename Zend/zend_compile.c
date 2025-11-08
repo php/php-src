@@ -1274,6 +1274,9 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->common.function_name) {
 		zend_string_addref(function->common.function_name);
 	}
+	if (function->type == ZEND_USER_FUNCTION && function->op_array.namespace_name) {
+		zend_string_addref(function->op_array.namespace_name);
+	}
 }
 /* }}} */
 
@@ -1310,6 +1313,9 @@ ZEND_API zend_result do_bind_function(zend_function *func, const zval *lcname) /
 	}
 	if (func->common.function_name) {
 		zend_string_addref(func->common.function_name);
+	}
+	if (func->type == ZEND_USER_FUNCTION && func->op_array.namespace_name) {
+		zend_string_addref(func->op_array.namespace_name);
 	}
 	zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
 	return SUCCESS;

@@ -126,6 +126,9 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (EXPECTED(func->op_array.function_name)) {
 			zend_string_addref(func->op_array.function_name);
 		}
+		if (func->op_array.namespace_name) {
+			zend_string_addref(func->op_array.namespace_name);
+		}
 		return func;
 	}
 }
