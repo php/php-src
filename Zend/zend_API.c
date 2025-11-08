@@ -5393,8 +5393,8 @@ static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_e
 		return zend_get_class_namespace(ex->func->common.scope);
 	}
 
-	/* Case 2: Called from a user function or top-level code */
-	if (ex->func->type == ZEND_USER_FUNCTION) {
+	/* Case 2: Called from a user function, eval code, or top-level code */
+	if (ex->func->type == ZEND_USER_FUNCTION || ex->func->type == ZEND_EVAL_CODE) {
 		zend_op_array *op_array = &ex->func->op_array;
 
 		/* Use the namespace_name field we added to op_array */
