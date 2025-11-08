@@ -7053,8 +7053,7 @@ PHP_FUNCTION(array_chunk)
 
 	if (size > num_in) {
 		if (num_in == 0) {
-			RETVAL_EMPTY_ARRAY();
-			return;
+			RETURN_EMPTY_ARRAY();
 		}
 		size = num_in;
 	}
@@ -7062,12 +7061,11 @@ PHP_FUNCTION(array_chunk)
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	ZVAL_UNDEF(&chunk);
-
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, str_key, entry) {
 		/* If new chunk, create and initialize it. */
-		if (Z_TYPE(chunk) == IS_UNDEF) {
+		if (current == 0) {
 			array_init_size(&chunk, (uint32_t)size);
+			add_next_index_zval(return_value, &chunk);
 		}
 
 		/* Add entry to the chunk, preserving keys if necessary. */
@@ -7085,16 +7083,9 @@ PHP_FUNCTION(array_chunk)
 		/* If reached the chunk size, add it to the result array, and reset the
 		 * pointer. */
 		if (++current == size) {
-			add_next_index_zval(return_value, &chunk);
-			ZVAL_UNDEF(&chunk);
 			current = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	/* Add the final chunk if there is one. */
-	if (Z_TYPE(chunk) != IS_UNDEF) {
-		add_next_index_zval(return_value, &chunk);
-	}
 }
 /* }}} */
 
