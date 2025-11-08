@@ -3,9 +3,11 @@ private(namespace) in global namespace blocks access from namespaced code
 --FILE--
 <?php
 
-class GlobalService {
-    private(namespace) function test(): string {
-        return "global";
+namespace {
+    class GlobalService {
+        private(namespace) function test(): string {
+            return "global";
+        }
     }
 }
 

@@ -3770,6 +3770,8 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
+static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_execute_data *ex);
+
 static zend_always_inline bool zend_is_callable_check_func(const zval *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
@@ -3931,7 +3933,7 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 		/* Check namespace visibility */
 		if (fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
 			zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
-			zend_string *caller_namespace = zend_get_caller_namespace();
+			zend_string *caller_namespace = zend_get_caller_namespace_ex(frame);
 
 			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
 			zend_string_release(method_namespace);
@@ -4004,7 +4006,8 @@ get_function_via_handler:
 				}
 			}
 			if (retval
-			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
 				scope = get_scope(frame);
 				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
 				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
@@ -4021,7 +4024,7 @@ get_function_via_handler:
 			/* Check namespace visibility */
 			if (retval && fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
 				zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
-				zend_string *caller_namespace = zend_get_caller_namespace();
+				zend_string *caller_namespace = zend_get_caller_namespace_ex(frame);
 
 				bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
 				zend_string_release(method_namespace);
@@ -5380,10 +5383,8 @@ ZEND_API zend_string* zend_get_class_namespace(const zend_class_entry *ce)
 }
 
 /* Get the namespace of the currently executing code */
-ZEND_API zend_string* zend_get_caller_namespace(void)
+static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_execute_data *ex)
 {
-	zend_execute_data *ex = EG(current_execute_data);
-
 	if (!ex || !ex->func) {
 		/* No execution context - global namespace */
 		return ZSTR_EMPTY_ALLOC();
@@ -5410,4 +5411,9 @@ ZEND_API zend_string* zend_get_caller_namespace(void)
 
 	/* Case 3: Internal function or global namespace */
 	return ZSTR_EMPTY_ALLOC();
+}
+
+ZEND_API zend_string* zend_get_caller_namespace(void)
+{
+	return zend_get_caller_namespace_ex(EG(current_execute_data));
 }

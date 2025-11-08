@@ -619,6 +619,16 @@ static zend_op_array *zend_compile(int type)
 		zend_file_context_begin(&original_file_context);
 		zend_oparray_context_begin(&original_oparray_context, op_array);
 		zend_compile_top_stmt(CG(ast));
+
+		/* Capture namespace for top-level code visibility checking.
+		 * For files with non-bracketed namespace declarations, this will be the file's namespace.
+		 * For files with multiple bracketed namespace blocks, this may be NULL or the last namespace.
+		 * Note: This is a best-effort approach - perfect namespace tracking for multiple
+		 * bracketed namespaces in one file would require runtime tracking. */
+		if (CG(file_context).current_namespace) {
+			op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
+		}
+
 		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;

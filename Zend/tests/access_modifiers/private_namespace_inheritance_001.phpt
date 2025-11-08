@@ -24,7 +24,7 @@ namespace Other {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to undefined method Other\Child::test() in %s:%d
+Fatal error: Uncaught Error: Call to private(namespace) method App\ParentClass::test() from scope Other\Child in %s:%d
 Stack trace:
 #0 %s(%d): Other\Child->callTest()
 #1 {main}

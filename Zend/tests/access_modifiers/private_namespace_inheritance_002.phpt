@@ -22,7 +22,7 @@ namespace Other {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access private(namespace) property App\ParentClass::$value from scope Other\Child in %s:%d
+Fatal error: Uncaught Error: Cannot access private(namespace) property Other\Child::$value from scope Other\Child in %s:%d
 Stack trace:
 #0 %s(%d): Other\Child->getValue()
 #1 {main}
