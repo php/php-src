@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
 
+- Standard:
+  . Fix memory leak in array_diff() with custom type checks. (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
