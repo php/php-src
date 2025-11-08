@@ -17,11 +17,13 @@
 #include <config.h>
 #endif
 
+extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
+}
 
 /* {{{ Get code of the last occurred error. */
-PHP_FUNCTION( intl_get_error_code )
+U_CFUNC PHP_FUNCTION( intl_get_error_code )
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -30,7 +32,7 @@ PHP_FUNCTION( intl_get_error_code )
 /* }}} */
 
 /* {{{ Get text description of the last occurred error. */
-PHP_FUNCTION( intl_get_error_message )
+U_CFUNC PHP_FUNCTION( intl_get_error_message )
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -42,7 +44,7 @@ PHP_FUNCTION( intl_get_error_message )
  * Returns true if it does, and false if the code
  * indicates success or a warning.
  */
-PHP_FUNCTION( intl_is_failure )
+U_CFUNC PHP_FUNCTION( intl_is_failure )
 {
 	zend_long err_code;
 
@@ -50,14 +52,14 @@ PHP_FUNCTION( intl_is_failure )
 		Z_PARAM_LONG(err_code)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL( U_FAILURE( err_code ) );
+	RETURN_BOOL( U_FAILURE( static_cast<UErrorCode>(err_code) ) );
 }
 /* }}} */
 
 /* {{{ Return a string for a given error code.
  * The string will be the same as the name of the error code constant.
  */
-PHP_FUNCTION( intl_error_name )
+U_CFUNC PHP_FUNCTION( intl_error_name )
 {
 	zend_long err_code;
 
@@ -65,6 +67,6 @@ PHP_FUNCTION( intl_error_name )
 		Z_PARAM_LONG(err_code)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STRING( (char*)u_errorName( err_code ) );
+	RETURN_STRING( (char*)u_errorName( static_cast<UErrorCode>(err_code) ) );
 }
 /* }}} */

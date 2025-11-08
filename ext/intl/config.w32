@@ -24,7 +24,7 @@ if (PHP_INTL != "no") {
 				collator_sort.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/common", "\
-				common_error.c \
+				common_error.cpp \
 				common_enum.cpp \
 				common_date.cpp \
 				", "intl");
@@ -33,7 +33,7 @@ if (PHP_INTL != "no") {
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
 				formatter_attr.cpp \
-				formatter_class.c \
+				formatter_class.cpp \
 				formatter_data.cpp \
 				formatter_format.cpp \
 				formatter_main.cpp \
@@ -68,7 +68,7 @@ if (PHP_INTL != "no") {
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/dateformat", "\
 				dateformat.cpp \
-				dateformat_class.c \
+				dateformat_class.cpp \
 				dateformat_attr.cpp \
 				dateformat_format.cpp \
 				dateformat_format_object.cpp \
@@ -87,16 +87,16 @@ if (PHP_INTL != "no") {
 				idn.cpp",
 				"intl");
 		ADD_SOURCES(configure_module_dirname + "/resourcebundle", "\
-				resourcebundle.c \
-				resourcebundle_class.c \
-				resourcebundle_iterator.c",
+				resourcebundle.cpp \
+				resourcebundle_class.cpp \
+				resourcebundle_iterator.cpp",
 				"intl");
 
 		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
 			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
-					spoofchecker_class.c \
-					spoofchecker_create.c \
-					spoofchecker_main.c",
+					spoofchecker_class.cpp \
+					spoofchecker_create.cpp \
+					spoofchecker_main.cpp",
 					"intl");
 		}
 

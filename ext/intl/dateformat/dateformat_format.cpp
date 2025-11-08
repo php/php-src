@@ -17,7 +17,7 @@
 #endif
 
 #include <unicode/ustring.h>
-#include <unicode/ucal.h>
+#include <unicode/unum.h>
 
 extern "C" {
 #include "../php_intl.h"
