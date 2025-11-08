@@ -227,6 +227,16 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	if (op_array->namespace_name) {
+		const zend_string *old_name = op_array->namespace_name;
+		ADD_INTERNED_STRING(op_array->namespace_name);
+		/* Remember old namespace name, so it can be released multiple times if shared. */
+		if (op_array->namespace_name != old_name
+				&& !zend_shared_alloc_get_xlat_entry(&op_array->namespace_name)) {
+			zend_shared_alloc_register_xlat_entry(&op_array->namespace_name, old_name);
+		}
+	}
+
 	if (op_array->scope) {
 		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
 			/* already stored */
@@ -392,6 +402,12 @@ static void zend_persist_class_method_calc(zend_op_array *op_array)
 			zend_shared_alloc_get_xlat_entry(&old_op_array->function_name);
 		if (old_function_name) {
 			zend_string_release_ex(old_function_name, 0);
+		}
+		/* Same for namespace_name */
+		zend_string *old_namespace_name =
+			zend_shared_alloc_get_xlat_entry(&old_op_array->namespace_name);
+		if (old_namespace_name) {
+			zend_string_release_ex(old_namespace_name, 0);
 		}
 	}
 }
