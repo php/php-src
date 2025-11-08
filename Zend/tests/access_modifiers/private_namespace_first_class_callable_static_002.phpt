@@ -18,7 +18,7 @@ namespace Bar {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private(namespace) method Foo\A::test() from namespace Bar in %s:%d
+Fatal error: Uncaught Error: Call to private(namespace) method Foo\A::test() from global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

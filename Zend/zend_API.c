@@ -5390,8 +5390,7 @@ static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_e
 	 * For trait methods, scope is the class that uses the trait,
 	 * not the trait itself. This is the desired behavior. */
 	if (ex->func->common.scope) {
-		zend_string *ns = zend_get_class_namespace(ex->func->common.scope);
-		return ns;
+		return zend_get_class_namespace(ex->func->common.scope);
 	}
 
 	/* Case 2: Called from a user function or top-level code */
@@ -5402,6 +5401,11 @@ static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_e
 		if (op_array->namespace_name) {
 			/* Increment refcount since caller will release it */
 			return zend_string_copy(op_array->namespace_name);
+		}
+
+		/* Fallback: Extract namespace from function name */
+		if (op_array->function_name) {
+			return zend_extract_namespace(op_array->function_name);
 		}
 	}
 

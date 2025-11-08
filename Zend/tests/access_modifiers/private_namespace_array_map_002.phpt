@@ -19,7 +19,8 @@ namespace Bar {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: array_map(): Argument #1 ($callback) must be a valid callback, cannot access private(namespace) method Foo\A::double() in %s:%d
+Fatal error: Uncaught TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private(namespace) method Foo\A::double() in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): array_map(Array, Array)
+#1 {main}
   thrown in %s on line %d

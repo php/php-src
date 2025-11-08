@@ -21,5 +21,6 @@ namespace Bar {
 --EXPECTF--
 Fatal error: Uncaught TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access private(namespace) method Foo\A::test() in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): call_user_func(Array)
+#1 {main}
   thrown in %s on line %d

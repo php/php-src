@@ -15,19 +15,17 @@ namespace Bar {
     $obj = new \Foo\A();
     $method = new \ReflectionMethod(\Foo\A::class, 'test');
 
-    try {
-        // Without setAccessible - should fail
-        var_dump($method->invoke($obj, 'hello'));
-    } catch (\ReflectionException $e) {
-        echo "Expected: " . $e->getMessage() . "\n";
-    }
+    // Reflection bypasses namespace visibility - should work
+    var_dump($method->invoke($obj, 'hello'));
 
-    // With setAccessible - should work
+    // setAccessible has no effect (deprecated) - still works
     $method->setAccessible(true);
     var_dump($method->invoke($obj, 'hello'));
 }
 
 ?>
 --EXPECTF--
-Expected: Cannot invoke private(namespace) method Foo\A::test() from namespace Bar
+string(14) "A::test: hello"
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
 string(14) "A::test: hello"

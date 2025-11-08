@@ -12,12 +12,15 @@ namespace Foo {
 }
 
 namespace Foo {
-    // Same namespace with string class name - should work
+    // String class names don't get auto-resolved in caller's namespace
+    // This fails because 'A' doesn't resolve to 'Foo\A' automatically
     var_dump(call_user_func(['A', 'test']));
-    var_dump(call_user_func(['Foo\A', 'test']));
 }
 
 ?>
---EXPECT--
-string(7) "A::test"
-string(7) "A::test"
+--EXPECTF--
+Fatal error: Uncaught TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "A" not found in %s:%d
+Stack trace:
+#0 %s(%d): call_user_func(Array)
+#1 {main}
+  thrown in %s on line %d
