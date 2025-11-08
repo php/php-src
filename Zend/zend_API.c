@@ -3930,8 +3930,11 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 			}
 		}
 
-		/* Check namespace visibility */
-		if (fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+		/* Check namespace visibility - only do early check if __call/__callstatic exists */
+		if (fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE) &&
+		    (fcc->calling_scope &&
+		     ((fcc->object && fcc->calling_scope->__call) ||
+		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
 			zend_string *caller_namespace = zend_get_caller_namespace_ex(frame);
 
@@ -3940,16 +3943,9 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 			zend_string_release(caller_namespace);
 
 			if (!namespace_match) {
-				if (fcc->calling_scope &&
-				    ((fcc->object && fcc->calling_scope->__call) ||
-				     (!fcc->object && fcc->calling_scope->__callstatic))) {
-					retval = false;
-					fcc->function_handler = NULL;
-					goto get_function_via_handler;
-				} else {
-					retval = false;
-					fcc->function_handler = NULL;
-				}
+				retval = false;
+				fcc->function_handler = NULL;
+				goto get_function_via_handler;
 			}
 		}
 	} else {
