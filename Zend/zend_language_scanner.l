@@ -3204,7 +3204,9 @@ nowdoc_scan_done:
 */
 
 emit_token_with_str:
-	zend_copy_value(zendlval, (yytext + offset), (yyleng - offset));
+	if (PARSER_MODE()) {
+		zend_copy_value(zendlval, (yytext + offset), (yyleng - offset));
+	}
 
 emit_token_with_val:
 	if (PARSER_MODE()) {
