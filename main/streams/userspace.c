@@ -563,7 +563,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	zval args[1];
 	ssize_t didwrite;
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	ZVAL_STRINGL(&args[0], (char*)buf, count);
 
@@ -613,7 +613,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
@@ -694,7 +694,7 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 	zval retval;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_CLOSE, false);
 	zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
@@ -714,7 +714,7 @@ static int php_userstreamop_flush(php_stream *stream)
 	zval retval;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_FLUSH, false);
 	zend_result call_result = zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
@@ -734,7 +734,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval args[2];
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
@@ -1358,7 +1358,7 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle)
 	zval retval;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
-	assert(us != NULL);
+	ZEND_ASSERT(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_DIR_CLOSE, false);
 	zend_call_method_if_exists(us->object, func_name, &retval, 0, NULL);
