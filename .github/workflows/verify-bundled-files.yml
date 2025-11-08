@@ -4,6 +4,7 @@ on:
   push:
     paths: &paths
       - '.github/scripts/download-bundled/**'
+      - 'Zend/asm/**'
       - 'ext/pcre/pcre2lib/**'
   pull_request:
     paths: *paths
@@ -28,10 +29,22 @@ jobs:
         with:
           base: master
           filters: |
+            'boost-context':
+              - '.github/scripts/download-bundled/boost-context.*'
+              - 'Zend/asm/**'
             pcre2:
               - '.github/scripts/download-bundled/pcre2.*'
               - 'ext/pcre/pcre2lib/**'
 
+      - name: 'boost.context'
+        if: ${{ !cancelled() && (steps.changes.outputs.boost-context == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/boost-context.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh "Zend/asm"
+          echo "::endgroup::"
       - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
         run: |
