@@ -8578,7 +8578,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
 	}
 
-	if (CG(file_context).current_namespace) {
+	/* Only set namespace_name for standalone functions, not for methods.
+	 * Methods get their namespace from the class name at runtime via zend_get_caller_namespace(). */
+	if (CG(file_context).current_namespace && !CG(active_class_entry)) {
 		op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
 	}
 

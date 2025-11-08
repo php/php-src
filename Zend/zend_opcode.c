@@ -567,6 +567,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zend_string_release_ex(op_array->function_name, 0);
 	}
 
+	if (op_array->namespace_name) {
+		zend_string_release_ex(op_array->namespace_name, 0);
+	}
+
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
 		return;
 	}
@@ -611,9 +615,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zend_string_release_ex(op_array->filename, 0);
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
-	}
-	if (op_array->namespace_name) {
-		zend_string_release_ex(op_array->namespace_name, 0);
 	}
 	if (op_array->attributes) {
 		zend_hash_release(op_array->attributes);

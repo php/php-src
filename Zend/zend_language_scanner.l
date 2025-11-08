@@ -609,10 +609,6 @@ static zend_op_array *zend_compile(int type)
 		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 		CG(active_op_array) = op_array;
 
-		if (CG(file_context).current_namespace) {
-			op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
-		}
-
 		/* Use heap to not waste arena memory */
 		op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 
