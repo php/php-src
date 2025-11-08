@@ -3869,7 +3869,6 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
-		/* This properly handles both packed and unpacked arrays. */
 		return ht->arData + offset;
 	}
 	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
@@ -3896,7 +3895,6 @@ static inline zval* find_packed_val_at_offset(HashTable* ht, zend_long offset)
 	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
-		/* This properly handles both packed and unpacked arrays. */
 		return ht->arPacked + offset;
 	}
 	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
