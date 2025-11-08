@@ -136,7 +136,6 @@ PHP_METHOD(Spoofchecker, setChecks)
 /* }}} */
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
