@@ -1062,7 +1062,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_new(HashTable *ht, const char *st
 	return _zend_hash_str_add_or_update_i(ht, str, len, h, pData, HASH_ADD_NEW);
 }
 
-ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_lookup(HashTable *ht, const char *str, size_t len)
+ZEND_API zval* ZEND_FASTCALL zend_hash_str_lookup(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong h = zend_hash_func(str, len);
 

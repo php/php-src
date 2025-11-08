@@ -356,7 +356,7 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		zval *element = zend_hash_str_add_lookup(Z_ARRVAL_P(return_value), key, strlen(key));
+		zval *element = zend_hash_str_lookup(Z_ARRVAL_P(return_value), key, strlen(key));
 		if (Z_ISNULL_P(element)) {
 			array_init(element);
 		}
