@@ -9,10 +9,10 @@ $uri = Uri\Rfc3986\Uri::parse("https://example.com");
 
 try {
     $uri->withScheme("http%73");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified scheme is malformed
+Uri\InvalidUriException: The specified scheme is malformed

@@ -1,6 +1,23 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0RC4
+?? ??? ????, PHP 8.5.0
+
+- Core:
+  . Sync all boost.context files with release 1.86.0. (mvorisek)
+
+- Standard:
+  . Fix memory leak in array_diff() with custom type checks. (ndossche)
+
+- Opcache:
+  . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
+    buffer). (Arnaud)
+
+- URI:
+  . Fixed the distinction between an empty and a missing query/fragment
+    when using Uri\WhatWg\Url::getQuery() and Uri\WhatWg\Url::getFragment().
+    (kocsismate)
+
+06 Nov 2025, PHP 8.5.0RC4
 
 - Core:
   . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
@@ -8,11 +25,20 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-20194 (null offset deprecation not emitted for writes).
     (Girgias)
+  . Fixed bug GH-GH-20377 (final promoted properties without explicit visibility
+    not automatically assigned). (DanielEScherzer)
 
 - Opcache:
   . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
   . Partially fixed bug GH-17733 (Avoid calling wrong function when reusing file
     caches across differing environments). (ilutov)
+
+- PCRE:
+  . Downgrade back to PCRE2 10.44, see GH-20341. (nielsdos)
+
+- PgSql:
+  . Fix segfaults when attempting to fetch row into a non-instantiable class
+    name. (Girgias, nielsdos)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
@@ -32,8 +58,8 @@ PHP                                                                        NEWS
   . Use the "includes credentials" rule of the WHATWG URL Standard to
     decide whether Uri\WhatWg\Url::getUsername() and ::getPassword()
     getters should return null or an empty string. (timwolla)
-  . Fixed the distinction between an empty and a missing query/fragment
-    when using Uri\WhatWg\Url::getQuery() and Uri\WhatWg\Url::getFragment().
+  . Fixed the distinction between empty and missing username/password
+    components of Uri\Rfc3986\Uri.
     (kocsismate)
 
 - Zip:

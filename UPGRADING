@@ -869,9 +869,6 @@ PHP 8.5 UPGRADE NOTES
     URIs and URLs according to RFC 3986 and WHATWG URL.
     RFC: https://wiki.php.net/rfc/url_parsing_api
 
-- PCRE:
-  . Upgraded pcre2lib from 10.44 to 10.46.
-
 - PDO_Sqlite:
   . Increased minimum release version support from 3.7.7 to 3.7.17.
 

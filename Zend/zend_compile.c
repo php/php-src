@@ -7770,6 +7770,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		}
 	}
 
+	const uint32_t promotion_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL;
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *param_ast = list->child[i];
 		zend_ast *type_ast = param_ast->child[0];
@@ -7781,7 +7782,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
+		uint32_t property_flags = param_ast->attr & promotion_flags;
 		bool is_promoted = property_flags || hooks_ast;
 
 		CG(zend_lineno) = param_ast->lineno;
@@ -8008,7 +8009,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_ast *param_ast = list->child[i];
 		zend_ast *hooks_ast = param_ast->child[5];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
-		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
+		uint32_t flags = param_ast->attr & promotion_flags;
 		bool is_promoted = flags || hooks_ast;
 		if (!is_promoted) {
 			continue;

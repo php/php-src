@@ -135,17 +135,13 @@ static int zend_file_cache_flock(int fd, int type)
 			(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
 		} \
 	} while (0)
+
 #define SERIALIZE_STR(ptr) do { \
 		if (ptr) { \
 			if (IS_ACCEL_INTERNED(ptr)) { \
 				(ptr) = zend_file_cache_serialize_interned((zend_string*)(ptr), info); \
 			} else { \
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
-				/* script->corrupted shows if the script in SHM or not */ \
-				if (EXPECTED(script->corrupted)) { \
-					GC_ADD_FLAGS(ptr, IS_STR_INTERNED); \
-					GC_DEL_FLAGS(ptr, IS_STR_PERMANENT); \
-				} \
 				(ptr) = (void*)((char*)(ptr) - (char*)script->mem); \
 			} \
 		} \
@@ -164,6 +160,7 @@ static int zend_file_cache_flock(int fd, int type)
 					GC_ADD_FLAGS(ptr, IS_STR_INTERNED); \
 					GC_DEL_FLAGS(ptr, IS_STR_PERMANENT); \
 				} \
+				GC_DEL_FLAGS(ptr, IS_STR_CLASS_NAME_MAP_PTR); \
 			} \
 		} \
 	} while (0)

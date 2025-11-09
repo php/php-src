@@ -9,10 +9,10 @@ $uri = Uri\Rfc3986\Uri::parse("https://example.com");
 
 try {
     $uri->withQuery("ő");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-The specified query is malformed
+Uri\InvalidUriException: The specified query is malformed
