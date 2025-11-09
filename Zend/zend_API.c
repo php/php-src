@@ -4491,11 +4491,33 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 				"Property with asymmetric visibility %s::$%s must have type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
-		/* Validate asymmetric visibility hierarchy: public < protected < private(namespace) < private
-		 * Set visibility must be equal to or more restrictive than get visibility. */
-		uint32_t get_visibility = zend_visibility_to_set_visibility(access_type & ZEND_ACC_PPP_MASK);
+		/* Validate asymmetric visibility hierarchy.
+		 *
+		 * Visibility modifiers form two partial orders
+		 * - Inheritance axis: public ⊇ protected ⊇ private
+		 * - Namespace axis: public ⊇ private(namespace) ⊇ private
+		 *
+		 * protected and private(namespace) are incomparable (neither is a subset of the other).
+		 *
+		 * For asymmetric properties, the set visibility must satisfy: C[set] ⊇ C[base]
+		 * This means the set of callers who can write must be a subset of those who can read.
+		 */
+		uint32_t get_visibility = access_type & ZEND_ACC_PPP_MASK;
 		uint32_t set_visibility = access_type & ZEND_ACC_PPP_SET_MASK;
-		if (get_visibility > set_visibility) {
+
+		/* Check for incompatible combinations (protected and private(namespace) on different axes). */
+		if ((get_visibility == ZEND_ACC_PROTECTED && set_visibility == ZEND_ACC_NAMESPACE_PRIVATE_SET) ||
+		    (get_visibility == ZEND_ACC_NAMESPACE_PRIVATE && set_visibility == ZEND_ACC_PROTECTED_SET)) {
+			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"Property %s::$%s has incompatible visibility modifiers: "
+				"protected and private(namespace) operate on different axes (inheritance vs namespace) "
+				"and cannot be combined in asymmetric visibility",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+
+		/* Check hierarchy using numeric comparison within each axis. */
+		uint32_t get_visibility_as_set = zend_visibility_to_set_visibility(get_visibility);
+		if (get_visibility_as_set > set_visibility) {
 			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 				"Visibility of property %s::$%s must not be weaker than set visibility",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));

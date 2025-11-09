@@ -216,7 +216,11 @@ typedef struct _zend_oparray_context {
 /* Common flags                                           |     |     |     */
 /* ============                                           |     |     |     */
 /*                                                        |     |     |     */
-/* Visibility flags (public < protected < private)        |     |     |     */
+/* Visibility flags                                       |     |     |     */
+/* Two partial orders (not linear):                       |     |     |     */
+/* - Inheritance axis: public ⊇ protected ⊇ private       |     |     |     */
+/* - Namespace axis: public ⊇ private(namespace) ⊇ private|     |     |     */
+/* protected and private(namespace) are incomparable      |     |     |     */
 #define ZEND_ACC_PUBLIC                  (1 <<  0) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PROTECTED               (1 <<  1) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PRIVATE                 (1 <<  2) /*     |  X  |  X  |  X  */
