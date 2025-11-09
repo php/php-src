@@ -575,20 +575,16 @@ ZEND_FUNCTION(define)
 		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
 	}
 
-	if (Z_TYPE_P(val) == IS_ARRAY) {
-		if (Z_REFCOUNTED_P(val)) {
-			if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
-				RETURN_THROWS();
-			} else {
-				copy_constant_array(&c.value, val);
-				goto register_constant;
-			}
+	if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
+		if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
+			RETURN_THROWS();
+		} else {
+			copy_constant_array(&c.value, val);
 		}
+	} else {
+		ZVAL_COPY(&c.value, val);
 	}
 
-	ZVAL_COPY(&c.value, val);
-
-register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
