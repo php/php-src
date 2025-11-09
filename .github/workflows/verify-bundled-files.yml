@@ -34,6 +34,9 @@ jobs:
             pcre2:
               - '.github/scripts/download-bundled/pcre2.*'
               - 'ext/pcre/pcre2lib/**'
+            uriparser:
+              - '.github/scripts/download-bundled/uriparser.*'
+              - 'ext/uri/uriparser/**'
 
       - name: 'boost.context'
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
@@ -52,4 +55,13 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh "ext/pcre/pcre2lib"
+          echo "::endgroup::"
+      - name: uriparser
+        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/uriparser.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh "ext/uri/uriparser"
           echo "::endgroup::"
