@@ -555,7 +555,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 ZEND_FUNCTION(define)
 {
 	zend_string *name;
-	zval *val, val_free;
+	zval *val;
 	bool non_cs = 0;
 	zend_constant c;
 
@@ -575,8 +575,6 @@ ZEND_FUNCTION(define)
 		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
 	}
 
-	ZVAL_UNDEF(&val_free);
-
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		if (Z_REFCOUNTED_P(val)) {
 			if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
@@ -589,7 +587,6 @@ ZEND_FUNCTION(define)
 	}
 
 	ZVAL_COPY(&c.value, val);
-	zval_ptr_dtor(&val_free);
 
 register_constant:
 	/* non persistent */
