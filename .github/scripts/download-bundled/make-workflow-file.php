@@ -185,8 +185,14 @@ class Generator
             set -ex
             cd "$(dirname "$0")/../../.."
 
+            tmp_dir=%tmp_dir%
+            rm -rf "$tmp_dir"
+
 
             EOD;
+
+        $header = str_replace('%tmp_dir%', '/tmp/php-src-download-bundled/' . $bundle->getNameForPath(), $header);
+
         if (!str_starts_with($content, $header)) {
             $content = $header . $content;
         }
