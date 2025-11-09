@@ -2,12 +2,15 @@
 set -ex
 cd "$(dirname "$0")/../../.."
 
+tmp_dir=/tmp/php-src-download-bundled/boost-context
+rm -rf "$tmp_dir"
+
 revision=refs/tags/boost-1.86.0
 
-git clone --depth 1 --revision="$revision" https://github.com/boostorg/context.git /tmp/php-src-bundled/boost-context
+git clone --depth 1 --revision="$revision" https://github.com/boostorg/context.git "$tmp_dir"
 
 rm -rf Zend/asm
-cp -R /tmp/php-src-bundled/boost-context/src/asm Zend/asm
+cp -R "$tmp_dir"/src/asm Zend/asm
 
 cd Zend/asm
 
