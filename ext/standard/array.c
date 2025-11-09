@@ -3049,7 +3049,7 @@ PHP_FUNCTION(range)
 			goto handle_numeric_inputs;
 		}
 
-		/* Generate array of characters */
+		/* Generate array of characters, as ints to make bounds checking possible in the loop condition */
 		int low = Z_STRVAL_P(user_start)[0];
 		int high = Z_STRVAL_P(user_end)[0];
 
