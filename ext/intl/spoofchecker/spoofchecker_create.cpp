@@ -16,12 +16,19 @@
 #include <config.h>
 #endif
 
+#if __cplusplus >= 201703L
+#include <string_view>
+#include <unicode/unistr.h>
+#endif
+
+extern "C" {
 #include "php_intl.h"
-#include "spoofchecker_class.h"
 #include "intl_data.h"
+}
+#include "spoofchecker_class.h"
 
 /* {{{ Spoofchecker object constructor. */
-PHP_METHOD(Spoofchecker, __construct)
+U_CFUNC PHP_METHOD(Spoofchecker, __construct)
 {
 #if U_ICU_VERSION_MAJOR_NUM < 58
 	int checks;

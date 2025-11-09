@@ -16,9 +16,15 @@
 
 #include <php.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
+#ifdef __cplusplus
+}
+#endif
 #include "dateformat_data.h"
 
 typedef struct {

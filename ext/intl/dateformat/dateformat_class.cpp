@@ -11,13 +11,15 @@
    | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
    +----------------------------------------------------------------------+
 */
-#include <unicode/unum.h>
+#include <unicode/udat.h>
 
+extern "C" {
 #include "dateformat_class.h"
 #include "php_intl.h"
 #include "dateformat_data.h"
 #include "dateformat.h"
 #include "dateformat_arginfo.h"
+}
 
 #include <zend_exceptions.h>
 
@@ -48,7 +50,7 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 {
 	IntlDateFormatter_object*     intern;
 
-	intern = zend_object_alloc(sizeof(IntlDateFormatter_object), ce);
+	intern = reinterpret_cast<IntlDateFormatter_object *>(zend_object_alloc(sizeof(IntlDateFormatter_object), ce));
 	dateformat_data_init( &intern->datef_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
