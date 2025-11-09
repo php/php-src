@@ -4310,8 +4310,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		if (ret) {
 			if (HT_IS_PACKED(Z_ARRVAL_P(ret))) {
 				if (HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(ret))) {
-					ZVAL_COPY(return_value, ret);
-					return;
+					RETURN_COPY(ret);
 				}
 			} else {
 				bool copy = 1;
@@ -4324,8 +4323,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 					}
 				} ZEND_HASH_FOREACH_END();
 				if (copy) {
-					ZVAL_COPY(return_value, ret);
-					return;
+					RETURN_COPY(ret);
 				}
 			}
 		}
@@ -4340,7 +4338,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		if (HT_IS_WITHOUT_HOLES(src) && zend_may_modify_arg_in_place(arg)) {
 			dest = src;
 			in_place = true;
-			ZVAL_ARR(return_value, dest);
+			RETVAL_ARR(dest);
 		} else {
 			array_init_size(return_value, count);
 			dest = Z_ARRVAL_P(return_value);
