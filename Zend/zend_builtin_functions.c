@@ -1798,11 +1798,29 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_string *name;
 		zval *arg;
+
+		ZEND_ASSERT(call->func->common.fn_flags & ZEND_ACC_VARIADIC);
+
+		zend_attribute *attribute = zend_get_parameter_attribute_str(
+			call->func->common.attributes,
+			"sensitiveparameter",
+			sizeof("sensitiveparameter") - 1,
+			call->func->common.num_args
+		);
+		bool is_sensitive = attribute != NULL;
+
 		SEPARATE_ARRAY(arg_array);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
 			ZVAL_DEREF(arg);
-			Z_TRY_ADDREF_P(arg);
-			zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+			if (is_sensitive) {
+				zval redacted_arg;
+				object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+				zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, arg);
+				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, &redacted_arg);
+			} else {
+				Z_TRY_ADDREF_P(arg);
+				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 }
