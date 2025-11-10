@@ -129,6 +129,8 @@ ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 
+BEGIN_EXTERN_C()
+
 PHPAPI time_t php_time(void);
 
 /* Backwards compatibility wrapper */
@@ -162,5 +164,6 @@ PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
 PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
+END_EXTERN_C()
 
 #endif /* PHP_DATE_H */
