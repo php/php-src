@@ -20,12 +20,10 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
-extern "C" {
 #include "converter.h"
 #include "php_intl.h"
 #include "../intl_error.h"
 #include "../intl_common.h"
-}
 #include "converter_arginfo.h"
 
 typedef struct _php_converter_object {
@@ -970,7 +968,7 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 /* }}} */
 
 /* {{{ php_converter_minit */
-U_CFUNC int php_converter_minit(INIT_FUNC_ARGS) {
+int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce = register_class_UConverter();
 	php_converter_ce->create_object = php_converter_create_object;
 	php_converter_ce->default_object_handlers = &php_converter_object_handlers;

@@ -19,10 +19,8 @@
 #include <unicode/ustring.h>
 #include <math.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "dateformat.h"
 #include "dateformat_class.h"
 #include "dateformat_data.h"
@@ -128,7 +126,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 
 
 /* {{{ Parse the string $value starting at parse_pos to a Unix timestamp -int */
-U_CFUNC PHP_FUNCTION(datefmt_parse)
+PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
@@ -167,7 +165,7 @@ U_CFUNC PHP_FUNCTION(datefmt_parse)
 }
 /* }}} */
 
-U_CFUNC PHP_METHOD(IntlDateFormatter, parseToCalendar)
+PHP_METHOD(IntlDateFormatter, parseToCalendar)
 {
 	zend_string *text_to_parse = NULL;
 	zval* z_parse_pos = NULL;
@@ -210,7 +208,7 @@ U_CFUNC PHP_METHOD(IntlDateFormatter, parseToCalendar)
 }
 
 /* {{{ Parse the string $value to a localtime array */
-U_CFUNC PHP_FUNCTION(datefmt_localtime)
+PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;

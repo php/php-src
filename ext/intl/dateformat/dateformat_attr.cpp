@@ -15,10 +15,8 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_convert.h"
-}
 #include "dateformat_class.h"
 #include "dateformat_class.h"
 
@@ -26,7 +24,7 @@ extern "C" {
 #include <unicode/udat.h>
 
 /* {{{ Get formatter datetype. */
-U_CFUNC PHP_FUNCTION( datefmt_get_datetype )
+PHP_FUNCTION( datefmt_get_datetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -46,7 +44,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_datetype )
 /* }}} */
 
 /* {{{ Get formatter timetype. */
-U_CFUNC PHP_FUNCTION( datefmt_get_timetype )
+PHP_FUNCTION( datefmt_get_timetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -66,7 +64,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_timetype )
 /* }}} */
 
 /* {{{ Get formatter pattern. */
-U_CFUNC PHP_FUNCTION( datefmt_get_pattern )
+PHP_FUNCTION( datefmt_get_pattern )
 {
 	UChar  value_buf[64];
 	uint32_t    length = USIZE( value_buf );
@@ -102,7 +100,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_pattern )
 /* }}} */
 
 /* {{{ Set formatter pattern. */
-U_CFUNC PHP_FUNCTION( datefmt_set_pattern )
+PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = nullptr;
 	size_t      value_len = 0;
@@ -138,7 +136,7 @@ U_CFUNC PHP_FUNCTION( datefmt_set_pattern )
 /* }}} */
 
 /* {{{ Get formatter locale. */
-U_CFUNC PHP_FUNCTION( datefmt_get_locale )
+PHP_FUNCTION( datefmt_get_locale )
 {
 	const char *loc;
 	zend_long  loc_type =ULOC_ACTUAL_LOCALE;
@@ -163,7 +161,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_locale )
 /* }}} */
 
 /* {{{ Get formatter isLenient. */
-U_CFUNC PHP_FUNCTION( datefmt_is_lenient )
+PHP_FUNCTION( datefmt_is_lenient )
 {
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -184,7 +182,7 @@ U_CFUNC PHP_FUNCTION( datefmt_is_lenient )
 /* }}} */
 
 /* {{{ Set formatter lenient. */
-U_CFUNC PHP_FUNCTION( datefmt_set_lenient )
+PHP_FUNCTION( datefmt_set_lenient )
 {
 	bool isLenient = false;
 

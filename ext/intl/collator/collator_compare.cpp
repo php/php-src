@@ -22,14 +22,12 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "collator_class.h"
 
 /* {{{ Compare two strings. */
-U_CFUNC PHP_FUNCTION( collator_compare )
+PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;

@@ -16,16 +16,14 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "formatter_class.h"
 
 #include <unicode/ustring.h>
 
 /* {{{ Get formatter attribute value. */
-U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
+PHP_FUNCTION( numfmt_get_attribute )
 {
 	zend_long lattribute, value;
 	FORMATTER_METHOD_INIT_VARS;
@@ -89,7 +87,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 /* }}} */
 
 /* {{{ Get formatter attribute value. */
-U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
+PHP_FUNCTION( numfmt_get_text_attribute )
 {
 	zend_long   lattribute;
 	UChar   value_buf[64];
@@ -128,7 +126,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 /* }}} */
 
 /* {{{ Get formatter attribute value. */
-U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
+PHP_FUNCTION( numfmt_set_attribute )
 {
 	zend_long lattribute;
 	zval *value;
@@ -183,7 +181,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 /* }}} */
 
 /* {{{ Get formatter attribute value. */
-U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
+PHP_FUNCTION( numfmt_set_text_attribute )
 {
 	int32_t slength = 0;
 	UChar *svalue = NULL;
@@ -218,7 +216,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
 /* }}} */
 
 /* {{{ Get formatter symbol value. */
-U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
+PHP_FUNCTION( numfmt_get_symbol )
 {
 	zend_long lsymbol;
 	UChar value_buf[4];
@@ -261,7 +259,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 /* }}} */
 
 /* {{{ Set formatter symbol value. */
-U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
+PHP_FUNCTION( numfmt_set_symbol )
 {
 	zend_long  lsymbol;
 	char*      value     = NULL;
@@ -303,7 +301,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 /* }}} */
 
 /* {{{ Get formatter pattern. */
-U_CFUNC PHP_FUNCTION( numfmt_get_pattern )
+PHP_FUNCTION( numfmt_get_pattern )
 {
 	UChar   value_buf[64];
 	uint32_t length = USIZE( value_buf );
@@ -338,7 +336,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_pattern )
 /* }}} */
 
 /* {{{ Set formatter pattern. */
-U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
+PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
 	size_t      value_len = 0;
@@ -377,7 +375,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
 /* }}} */
 
 /* {{{ Get formatter locale. */
-U_CFUNC PHP_FUNCTION( numfmt_get_locale )
+PHP_FUNCTION( numfmt_get_locale )
 {
 	zend_long type = ULOC_ACTUAL_LOCALE;
 	const char* loc;

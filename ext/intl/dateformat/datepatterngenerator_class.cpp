@@ -20,13 +20,11 @@
 
 #include <unicode/dtptngen.h>
 
-extern "C" {
 #define USE_DATETIMEPATTERNGENERATOR_POINTER 1
 #include "datepatterngenerator_class.h"
 #include "datepatterngenerator_arginfo.h"
 #include <zend_exceptions.h>
 #include <assert.h>
-}
 
 using icu::DateTimePatternGenerator;
 using icu::Locale;

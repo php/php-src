@@ -22,16 +22,14 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "collator_class.h"
 #include "intl_convert.h"
 
 #include <zend_API.h>
 
 /* {{{ Gets the locale name of the collator. */
-U_CFUNC PHP_FUNCTION( collator_get_locale )
+PHP_FUNCTION( collator_get_locale )
 {
 	zend_long   type        = 0;
 	char*  locale_name = nullptr;

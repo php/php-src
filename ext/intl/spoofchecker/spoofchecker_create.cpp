@@ -21,14 +21,12 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
-}
 #include "spoofchecker_class.h"
 
 /* {{{ Spoofchecker object constructor. */
-U_CFUNC PHP_METHOD(Spoofchecker, __construct)
+PHP_METHOD(Spoofchecker, __construct)
 {
 #if U_ICU_VERSION_MAJOR_NUM < 58
 	int checks;

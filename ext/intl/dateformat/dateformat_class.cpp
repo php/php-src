@@ -13,13 +13,11 @@
 */
 #include <unicode/udat.h>
 
-extern "C" {
 #include "dateformat_class.h"
 #include "php_intl.h"
 #include "dateformat_data.h"
 #include "dateformat.h"
 #include "dateformat_arginfo.h"
-}
 
 #include <zend_exceptions.h>
 

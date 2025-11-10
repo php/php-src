@@ -18,15 +18,9 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "../intl_common.h"
 #include "../intl_error.h"
 #include "../intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <unicode/ucol.h>
 
@@ -52,15 +46,9 @@ static inline Collator_object *php_intl_collator_fetch_object(zend_object *obj) 
 }
 #define Z_INTL_COLLATOR_P(zv) php_intl_collator_fetch_object(Z_OBJ_P(zv))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void collator_register_Collator_symbols(int module_number);
 void collator_object_init( Collator_object* co );
 void collator_object_destroy( Collator_object* co );
-#ifdef __cplusplus
-}
-#endif
 
 extern zend_class_entry *Collator_ce_ptr;
 

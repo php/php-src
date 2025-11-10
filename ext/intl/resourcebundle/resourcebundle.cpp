@@ -17,14 +17,12 @@
 #include <zend.h>
 #include <zend_API.h>
 
-extern "C" {
 #include "intl_convert.h"
 #include "intl_data.h"
 #include "resourcebundle/resourcebundle_class.h"
-}
 
 /* {{{ ResourceBundle_extract_value */
-U_CFUNC void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
+void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
 {
 	UResType               restype;
 	const UChar*           ufield;
