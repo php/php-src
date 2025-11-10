@@ -18,9 +18,7 @@
 #define INTL_COMMON_H
 /* Auxiliary macros */
 
-BEGIN_EXTERN_C()
 #include <php.h>
-END_EXTERN_C()
 #include <unicode/utypes.h>
 
 #ifndef UBYTES
@@ -41,8 +39,6 @@ END_EXTERN_C()
 #define INTL_ZSTR_VAL(str) (UChar*) ZSTR_VAL(str)
 #define INTL_ZSTR_LEN(str) UCHARS(ZSTR_LEN(str))
 
-BEGIN_EXTERN_C()
 extern zend_class_entry *IntlException_ce_ptr;
-END_EXTERN_C()
 
 #endif /* INTL_COMMON_H */
