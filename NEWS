@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
+  . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
+    passing to variadic parameter). (ndossche)
 
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
@@ -11,6 +13,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
+
+- Phar:
+  . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
+    __halt_compiler() when reading stub). (ndossche, TimWolla)
 
 06 Nov 2025, PHP 8.5.0RC4
 
