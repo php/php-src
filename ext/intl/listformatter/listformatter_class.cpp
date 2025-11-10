@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
 #include "php.h"
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include <unicode/ulistformatter.h>
 #include "listformatter_class.h"
 #include "listformatter_arginfo.h"

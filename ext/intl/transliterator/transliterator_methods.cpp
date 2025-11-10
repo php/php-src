@@ -21,11 +21,9 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
 #include "intl_convert.h"
-}
 #include "transliterator.h"
 #include "transliterator_class.h"
 
@@ -99,7 +97,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 }
 
 /* {{{ Opens a transliterator by id. */
-U_CFUNC PHP_FUNCTION( transliterator_create )
+PHP_FUNCTION( transliterator_create )
 {
 	char     *str_id;
 	size_t    str_id_len;
@@ -126,7 +124,7 @@ U_CFUNC PHP_FUNCTION( transliterator_create )
 /* }}} */
 
 /* {{{ Opens a transliterator by id. */
-U_CFUNC PHP_FUNCTION( transliterator_create_from_rules )
+PHP_FUNCTION( transliterator_create_from_rules )
 {
 	char		    *str_rules;
 	size_t          str_rules_len;
@@ -192,7 +190,7 @@ U_CFUNC PHP_FUNCTION( transliterator_create_from_rules )
 /* }}} */
 
 /* {{{ Opens the inverse transliterator transliterator. */
-U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
+PHP_FUNCTION( transliterator_create_inverse )
 {
 	Transliterator_object *to_orig;
 	UTransliterator       *utrans;
@@ -221,7 +219,7 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 /* }}} */
 
 /* {{{ Return an array with the registered transliterator IDs. */
-U_CFUNC PHP_FUNCTION( transliterator_list_ids )
+PHP_FUNCTION( transliterator_list_ids )
 {
 	UEnumeration  *en;
 	const UChar	  *elem;
@@ -264,7 +262,7 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 /* }}} */
 
 /* {{{ Transliterate a string. */
-U_CFUNC PHP_FUNCTION( transliterator_transliterate )
+PHP_FUNCTION( transliterator_transliterate )
 {
 	char	    *str;
 	UChar		*ustr		= nullptr,
@@ -419,7 +417,7 @@ cleanup_object:
 }
 /* }}} */
 
-U_CFUNC PHP_METHOD( Transliterator, __construct )
+PHP_METHOD( Transliterator, __construct )
 {
 	/* this constructor shouldn't be called as it's private */
 	zend_throw_exception( nullptr,
@@ -428,7 +426,7 @@ U_CFUNC PHP_METHOD( Transliterator, __construct )
 }
 
 /* {{{ Get the last error code for this transliterator. */
-U_CFUNC PHP_FUNCTION( transliterator_get_error_code )
+PHP_FUNCTION( transliterator_get_error_code )
 {
 	TRANSLITERATOR_METHOD_INIT_VARS
 
@@ -447,7 +445,7 @@ U_CFUNC PHP_FUNCTION( transliterator_get_error_code )
 
 
 /* {{{ Get the last error message for this transliterator. */
-U_CFUNC PHP_FUNCTION( transliterator_get_error_message )
+PHP_FUNCTION( transliterator_get_error_message )
 {
 	zend_string* message = nullptr;
 	TRANSLITERATOR_METHOD_INIT_VARS

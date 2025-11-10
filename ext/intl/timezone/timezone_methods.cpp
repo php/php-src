@@ -22,31 +22,28 @@
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
 #include <unicode/calendar.h>
-#include "intl_convertcpp.h"
+#include "intl_convert.h"
 
 #include "../common/common_date.h"
 
-extern "C" {
 #include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
-#include "intl_convert.h"
 #include <zend_exceptions.h>
 #include <ext/date/php_date.h>
-}
 #include "common/common_enum.h"
 
 using icu::Locale;
 using icu::Calendar;
 
-U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
+PHP_METHOD(IntlTimeZone, __construct)
 {
 	zend_throw_exception( NULL,
 		"An object of this type cannot be created with the new operator",
 		0 );
 }
 
-U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
+PHP_FUNCTION(intltz_create_time_zone)
 {
 	char	*str_id;
 	size_t	 str_id_len;
@@ -69,7 +66,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 	timezone_object_construct(tz, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
+PHP_FUNCTION(intltz_from_date_time_zone)
 {
 	zval				*zv_timezone;
 	TimeZone			*tz;
@@ -94,7 +91,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 	timezone_object_construct(tz, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_create_default)
+PHP_FUNCTION(intltz_create_default)
 {
 	intl_error_reset(NULL);
 
@@ -104,7 +101,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_default)
 	timezone_object_construct(tz, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_gmt)
+PHP_FUNCTION(intltz_get_gmt)
 {
 	intl_error_reset(NULL);
 
@@ -113,7 +110,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 	timezone_object_construct(TimeZone::getGMT(), return_value, 0);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_unknown)
+PHP_FUNCTION(intltz_get_unknown)
 {
 	intl_error_reset(NULL);
 
@@ -122,7 +119,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 	timezone_object_construct(&TimeZone::getUnknown(), return_value, 0);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
+PHP_FUNCTION(intltz_create_enumeration)
 {
 	zend_string *timezone = nullptr;
 	zend_long timezone_shift = 0;
@@ -158,7 +155,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
+PHP_FUNCTION(intltz_count_equivalent_ids)
 {
 	char	*str_id;
 	size_t	 str_id_len;
@@ -180,7 +177,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
+PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 {
 	zend_long zoneType,
 			  offset_arg;
@@ -224,7 +221,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
+PHP_FUNCTION(intltz_get_canonical_id)
 {
 	char	*str_id;
 	size_t	 str_id_len;
@@ -260,7 +257,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_region)
+PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
 	size_t	 str_id_len;
@@ -285,7 +282,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 	RETURN_STRINGL(outbuf, region_len);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
+PHP_FUNCTION(intltz_get_tz_data_version)
 {
 	intl_error_reset(NULL);
 
@@ -298,7 +295,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 	RETURN_STRING(res);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
+PHP_FUNCTION(intltz_get_equivalent_id)
 {
 	char	   *str_id;
 	size_t		str_id_len;
@@ -332,7 +329,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 }
 
 #if U_ICU_VERSION_MAJOR_NUM >= 74
-U_CFUNC PHP_FUNCTION(intltz_get_iana_id)
+PHP_FUNCTION(intltz_get_iana_id)
 {
 	char	*str_id;
 	size_t	 str_id_len;
@@ -361,7 +358,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_iana_id)
 }
 #endif
 
-U_CFUNC PHP_FUNCTION(intltz_get_id)
+PHP_FUNCTION(intltz_get_id)
 {
 	TIMEZONE_METHOD_INIT_VARS;
 
@@ -384,7 +381,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 	RETVAL_NEW_STR(u8str);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
+PHP_FUNCTION(intltz_use_daylight_time)
 {
 	TIMEZONE_METHOD_INIT_VARS;
 
@@ -398,7 +395,7 @@ U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
 	RETURN_BOOL(to->utimezone->useDaylightTime());
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_offset)
+PHP_FUNCTION(intltz_get_offset)
 {
 	double		date;
 	bool	local;
@@ -427,7 +424,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_raw_offset)
+PHP_FUNCTION(intltz_get_raw_offset)
 {
 	TIMEZONE_METHOD_INIT_VARS;
 
@@ -441,7 +438,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_raw_offset)
 	RETURN_LONG(to->utimezone->getRawOffset());
 }
 
-U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
+PHP_FUNCTION(intltz_has_same_rules)
 {
 	zval			*other_object;
 	TimeZone_object	*other_to;
@@ -469,7 +466,7 @@ static constexpr TimeZone::EDisplayType display_types[] = {
 	TimeZone::SHORT_COMMONLY_USED,	TimeZone::GENERIC_LOCATION
 };
 
-U_CFUNC PHP_FUNCTION(intltz_get_display_name)
+PHP_FUNCTION(intltz_get_display_name)
 {
 	bool	daylight		= 0;
 	zend_long	display_type	= TimeZone::LONG;
@@ -509,7 +506,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	RETVAL_NEW_STR(u8str);
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
+PHP_FUNCTION(intltz_get_dst_savings)
 {
 	TIMEZONE_METHOD_INIT_VARS;
 
@@ -523,7 +520,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 	RETURN_LONG((zend_long)to->utimezone->getDSTSavings());
 }
 
-U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
+PHP_FUNCTION(intltz_to_date_time_zone)
 {
 	zval tmp;
 	TIMEZONE_METHOD_INIT_VARS;
@@ -545,7 +542,7 @@ U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_error_code)
+PHP_FUNCTION(intltz_get_error_code)
 {
 	TIMEZONE_METHOD_INIT_VARS
 
@@ -562,7 +559,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_code)
 	RETURN_LONG((zend_long)TIMEZONE_ERROR_CODE(to));
 }
 
-U_CFUNC PHP_FUNCTION(intltz_get_error_message)
+PHP_FUNCTION(intltz_get_error_message)
 {
 	zend_string* message = NULL;
 	TIMEZONE_METHOD_INIT_VARS
@@ -586,7 +583,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 /* {{{ Translate a system timezone (e.g. "America/Los_Angeles" into a
 Windows Timezone (e.g. "Pacific Standard Time")
  */
-U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
+PHP_FUNCTION(intltz_get_windows_id)
 {
 	zend_string *id, *winID;
 	UnicodeString uID, uWinID;
@@ -622,7 +619,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 /* {{{ Translate a windows timezone (e.g. "Pacific Time Zone" into a
 System Timezone (e.g. "America/Los_Angeles")
  */
-U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
+PHP_FUNCTION(intltz_get_id_for_windows_id)
 {
 	zend_string *winID, *region = NULL, *id;
 	UnicodeString uWinID, uID;

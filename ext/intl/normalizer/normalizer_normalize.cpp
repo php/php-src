@@ -21,13 +21,11 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include <unicode/unorm2.h>
 #include "normalizer.h"
 #include "normalizer_class.h"
 #include "intl_convert.h"
-}
 #include <unicode/utf8.h>
 
 
@@ -78,7 +76,7 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 }/*}}}*/
 
 /* {{{ Normalize a string. */
-U_CFUNC PHP_FUNCTION( normalizer_normalize )
+PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
@@ -207,7 +205,7 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 /* }}} */
 
 /* {{{ Test if a string is in a given normalization form. */
-U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
+PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
@@ -283,7 +281,7 @@ U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
 /* }}} */
 
 /* {{{ Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
-U_CFUNC PHP_FUNCTION( normalizer_get_raw_decomposition )
+PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
 	char* input = NULL;
 	size_t input_length = 0;

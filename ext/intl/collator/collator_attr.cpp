@@ -22,16 +22,14 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "collator_class.h"
 #include "collator_convert.h"
 
 #include <unicode/ustring.h>
 
 /* {{{ Get collation attribute value. */
-U_CFUNC PHP_FUNCTION( collator_get_attribute )
+PHP_FUNCTION( collator_get_attribute )
 {
 	zend_long attribute, value;
 
@@ -55,7 +53,7 @@ U_CFUNC PHP_FUNCTION( collator_get_attribute )
 /* }}} */
 
 /* {{{ Set collation attribute. */
-U_CFUNC PHP_FUNCTION( collator_set_attribute )
+PHP_FUNCTION( collator_set_attribute )
 {
 	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
@@ -80,7 +78,7 @@ U_CFUNC PHP_FUNCTION( collator_set_attribute )
 /* }}} */
 
 /* {{{ Returns the current collation strength. */
-U_CFUNC PHP_FUNCTION( collator_get_strength )
+PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
 
@@ -100,7 +98,7 @@ U_CFUNC PHP_FUNCTION( collator_get_strength )
 /* }}} */
 
 /* {{{ Set the collation strength. */
-U_CFUNC PHP_FUNCTION( collator_set_strength )
+PHP_FUNCTION( collator_set_strength )
 {
 	zend_long strength;
 

@@ -16,15 +16,13 @@
 
 #include <unicode/dtptngen.h>
 
-#include "../intl_convertcpp.h"
+#include "../intl_convert.h"
 
-extern "C" {
 #include "php_intl.h"
 #define USE_DATETIMEPATTERNGENERATOR_POINTER 1
 #include "datepatterngenerator_class.h"
 #include <zend_exceptions.h>
 #include <assert.h>
-}
 
 using icu::DateTimePatternGenerator;
 using icu::Locale;
@@ -70,7 +68,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	return SUCCESS;
 }
 
-U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
+PHP_METHOD( IntlDatePatternGenerator, create )
 {
     object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
     if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -79,7 +77,7 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
 	}
 }
 
-U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
+PHP_METHOD( IntlDatePatternGenerator, __construct )
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);
@@ -97,7 +95,7 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 }
 
 
-U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
+PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 {
 	char			*skeleton_str	= NULL;
 	size_t			skeleton_len;

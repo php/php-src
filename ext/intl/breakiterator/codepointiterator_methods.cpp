@@ -14,10 +14,8 @@
 
 #include "codepointiterator_internal.h"
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
-}
 
 using PHP::CodePointBreakIterator;
 
@@ -25,7 +23,7 @@ static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
 	return (CodePointBreakIterator*)bio->biter;
 }
 
-U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
+PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;

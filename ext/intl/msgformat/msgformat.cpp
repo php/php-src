@@ -19,12 +19,10 @@
 #include <unicode/ustring.h>
 #include <unicode/umsg.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
-}
 
 /* {{{ */
 static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
@@ -101,7 +99,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 /* {{{ Create formatter. */
-U_CFUNC PHP_FUNCTION( msgfmt_create )
+PHP_FUNCTION( msgfmt_create )
 {
 	object_init_ex( return_value, MessageFormatter_ce_ptr );
 	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -112,7 +110,7 @@ U_CFUNC PHP_FUNCTION( msgfmt_create )
 /* }}} */
 
 /* {{{ MessageFormatter object constructor. */
-U_CFUNC PHP_METHOD( MessageFormatter, __construct )
+PHP_METHOD( MessageFormatter, __construct )
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);
@@ -129,7 +127,7 @@ U_CFUNC PHP_METHOD( MessageFormatter, __construct )
 /* }}} */
 
 /* {{{ Get formatter's last error code. */
-U_CFUNC PHP_FUNCTION( msgfmt_get_error_code )
+PHP_FUNCTION( msgfmt_get_error_code )
 {
 	zval*                    object  = NULL;
 	MessageFormatter_object*  mfo     = NULL;
@@ -149,7 +147,7 @@ U_CFUNC PHP_FUNCTION( msgfmt_get_error_code )
 /* }}} */
 
 /* {{{ Get text description for formatter's last error code. */
-U_CFUNC PHP_FUNCTION( msgfmt_get_error_message )
+PHP_FUNCTION( msgfmt_get_error_message )
 {
 	zend_string*             message = NULL;
 	zval*                    object  = NULL;

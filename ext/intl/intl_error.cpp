@@ -52,7 +52,7 @@ static void intl_free_custom_error_msg( intl_error* err )
 /* {{{ Create and initialize  internals of 'intl_error'. */
 intl_error* intl_error_create( void )
 {
-	intl_error* err = ecalloc( 1, sizeof( intl_error ) );
+	intl_error* err = reinterpret_cast<intl_error *>(ecalloc( 1, sizeof( intl_error ) ));
 
 	intl_error_init( err );
 

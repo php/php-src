@@ -17,16 +17,10 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
 #include "formatter_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct {
 	formatter_data  nf_data;
@@ -38,14 +32,8 @@ static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_o
 }
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void formatter_register_class( void );
 extern zend_class_entry *NumberFormatter_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
 
 /* Auxiliary macros */
 

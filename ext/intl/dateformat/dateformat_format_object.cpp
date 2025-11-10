@@ -21,16 +21,14 @@
 #include <unicode/smpdtfmt.h>
 #include <unicode/locid.h>
 
-#include "../intl_convertcpp.h"
+#include "../intl_convert.h"
 
-extern "C" {
 #include "../php_intl.h"
 #include "../locale/locale.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
 #include <ext/date/php_date.h>
 #include "../common/common_date.h"
-}
 
 using icu::Locale;
 using icu::DateFormat;
@@ -63,7 +61,7 @@ static bool valid_format(zval *z) {
 	return false;
 }
 
-U_CFUNC PHP_FUNCTION(datefmt_format_object)
+PHP_FUNCTION(datefmt_format_object)
 {
 	zend_object			*object;
 	zval				*format = NULL;

@@ -17,15 +17,12 @@
 #include <unicode/uenum.h>
 
 
-extern "C" {
 #include <zend.h>
 #include <php.h>
-}
 
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
 #include "intl_common.h"
@@ -33,7 +30,6 @@ extern "C" {
 #include "resourcebundle/resourcebundle_iterator.h"
 #include "resourcebundle/resourcebundle_class.h"
 #include "resourcebundle/resourcebundle_arginfo.h"
-}
 
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
@@ -157,7 +153,7 @@ PHP_METHOD( ResourceBundle, __construct )
 /* }}} */
 
 /* {{{ */
-U_CFUNC PHP_FUNCTION( resourcebundle_create )
+PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
 	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -239,7 +235,7 @@ static zval *resource_bundle_array_fetch(
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-U_CFUNC zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
+zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (offset == NULL) {
 		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");
@@ -259,7 +255,7 @@ U_CFUNC zval *resourcebundle_array_get(zend_object *object, zval *offset, int ty
 /* }}} */
 
 /* {{{ Get resource identified by numerical index or key name. */
-U_CFUNC PHP_FUNCTION( resourcebundle_get )
+PHP_FUNCTION( resourcebundle_get )
 {
 	bool fallback = true;
 	zend_object *resource_bundle = NULL;
@@ -317,7 +313,7 @@ static zend_result resourcebundle_array_count(zend_object *object, zend_long *co
 /* }}} */
 
 /* {{{ Get resources count */
-U_CFUNC PHP_FUNCTION( resourcebundle_count )
+PHP_FUNCTION( resourcebundle_count )
 {
 	int32_t                len;
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
@@ -333,7 +329,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_count )
 }
 
 /* {{{ Get available locales from ResourceBundle name */
-U_CFUNC PHP_FUNCTION( resourcebundle_locales )
+PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
 	size_t    bundlename_len = 0;
@@ -373,7 +369,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 /* }}} */
 
 /* {{{ Get text description for ResourceBundle's last error code. */
-U_CFUNC PHP_FUNCTION( resourcebundle_get_error_code )
+PHP_FUNCTION( resourcebundle_get_error_code )
 {
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
@@ -390,7 +386,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_get_error_code )
 /* }}} */
 
 /* {{{ Get text description for ResourceBundle's last error. */
-U_CFUNC PHP_FUNCTION( resourcebundle_get_error_message )
+PHP_FUNCTION( resourcebundle_get_error_message )
 {
 	zend_string* message = NULL;
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
@@ -416,7 +412,7 @@ PHP_METHOD(ResourceBundle, getIterator) {
 /* {{{ resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
-U_CFUNC void resourcebundle_register_class( void )
+void resourcebundle_register_class( void )
 {
 	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
 	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;

@@ -73,7 +73,6 @@
 #include <unicode/uclean.h>
 #include <ext/standard/info.h>
 
-#include "php_ini.h"
 
 #include "zend_attributes.h"
 

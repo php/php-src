@@ -22,32 +22,27 @@
 
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
-#include "../intl_convertcpp.h"
+#include "../intl_convert.h"
 #include "../intl_common.h"
 
 #include "../common/common_date.h"
 
-extern "C" {
-#include "../intl_convert.h"
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
 #include "timezone_arginfo.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <ext/date/php_date.h>
-}
 
 using icu::Calendar;
 
 /* {{{ Global variables */
-U_CDECL_BEGIN
-zend_class_entry *TimeZone_ce_ptr = NULL;
+zend_class_entry *TimeZone_ce_ptr = nullptr;
 zend_object_handlers TimeZone_handlers;
-U_CDECL_END
 /* }}} */
 
 /* {{{ timezone_object_construct */
-U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int owned)
+void timezone_object_construct(const TimeZone *zone, zval *object, int owned)
 {
 	TimeZone_object	*to;
 
@@ -60,7 +55,7 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
 
 /* {{{ timezone_convert_to_datetimezone
  *	   Convert from TimeZone to DateTimeZone object */
-U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
+zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 											   intl_error *outside_error,
 											   zval *ret)
 {
@@ -120,7 +115,7 @@ static void timezone_throw_exception_with_call_location(const char *msg, const c
 
 /* {{{ timezone_process_timezone_argument
  * TimeZone argument processor. outside_error may be nullptr (for static functions/constructors) */
-U_CFUNC TimeZone *timezone_process_timezone_argument(
+TimeZone *timezone_process_timezone_argument(
 	zend_object *timezone_object, zend_string *timezone_string, intl_error *outside_error)
 {
 	std::unique_ptr<TimeZone>	timeZone;
@@ -212,7 +207,7 @@ static zend_object *TimeZone_clone_obj(zend_object *object)
 
 	zend_objects_clone_members(&to_new->zo, &to_orig->zo);
 
-	if (to_orig->utimezone != NULL) {
+	if (to_orig->utimezone != nullptr) {
 		TimeZone *newTimeZone = to_orig->utimezone->clone();
 		to_new->should_delete = true;
 		if (!newTimeZone) {
@@ -240,7 +235,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 	to1 = Z_INTL_TIMEZONE_P(object1);
 	to2 = Z_INTL_TIMEZONE_P(object2);
 
-	if (to1->utimezone == NULL || to2->utimezone == NULL) {
+	if (to1->utimezone == nullptr || to2->utimezone == nullptr) {
 		zend_throw_exception(NULL, "Comparison with at least one unconstructed "
 				"IntlTimeZone operand", 0);
 		/* intentionally not returning */
@@ -272,7 +267,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 	to = php_intl_timezone_fetch_object(object);
 	tz = to->utimezone;
 
-	if (tz == NULL) {
+	if (tz == nullptr) {
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 		return debug_info;
@@ -312,7 +307,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 static void TimeZone_object_init(TimeZone_object *to)
 {
 	intl_error_init(TIMEZONE_ERROR_P(to));
-	to->utimezone = NULL;
+	to->utimezone = nullptr;
 	to->should_delete = 0;
 }
 /* }}} */
@@ -324,7 +319,7 @@ static void TimeZone_objects_free(zend_object *object)
 
 	if (to->utimezone && to->should_delete) {
 		delete to->utimezone;
-		to->utimezone = NULL;
+		to->utimezone = nullptr;
 	}
 	intl_error_reset(TIMEZONE_ERROR_P(to));
 
@@ -348,7 +343,7 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
 /* {{{ timezone_register_IntlTimeZone_class
  * Initialize 'IntlTimeZone' class
  */
-U_CFUNC void timezone_register_IntlTimeZone_class(void)
+void timezone_register_IntlTimeZone_class(void)
 {
 	/* Create and register 'IntlTimeZone' class. */
 	TimeZone_ce_ptr = register_class_IntlTimeZone();

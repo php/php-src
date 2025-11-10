@@ -24,20 +24,17 @@
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
 
-#include "../intl_convertcpp.h"
+#include "../intl_convert.h"
 #include "../common/common_date.h"
 
-extern "C" {
 #include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
-#include "../intl_convert.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <ext/date/php_date.h>
-}
 #include "../common/common_enum.h"
 
 using icu::Locale;
@@ -63,14 +60,14 @@ using icu::Locale;
 		RETURN_THROWS(); \
 	}
 
-U_CFUNC PHP_METHOD(IntlCalendar, __construct)
+PHP_METHOD(IntlCalendar, __construct)
 {
 	zend_throw_exception( NULL,
 		"An object of this type cannot be created with the new operator",
 		0 );
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_create_instance)
+PHP_FUNCTION(intlcal_create_instance)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
@@ -158,7 +155,7 @@ private:
 };
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(BugStringCharEnumeration)
 
-U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
+PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 {
 	UErrorCode	status = U_ZERO_ERROR;
 	char		*key,
@@ -186,7 +183,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_now)
+PHP_FUNCTION(intlcal_get_now)
 {
 	intl_error_reset(NULL);
 
@@ -195,7 +192,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_now)
 	RETURN_DOUBLE((double)Calendar::getNow());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
+PHP_FUNCTION(intlcal_get_available_locales)
 {
 	intl_error_reset(NULL);
 
@@ -233,13 +230,13 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get)
+PHP_FUNCTION(intlcal_get)
 {
 	_php_intlcal_field_uec_ret_in32t_method(&Calendar::get,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_time)
+PHP_FUNCTION(intlcal_get_time)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -256,7 +253,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time)
 	RETURN_DOUBLE((double)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set_time)
+PHP_FUNCTION(intlcal_set_time)
 {
 	double	time_arg;
 	CALENDAR_METHOD_INIT_VARS;
@@ -274,7 +271,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_add)
+PHP_FUNCTION(intlcal_add)
 {
 	zend_long	field,
 			amount;
@@ -297,7 +294,7 @@ U_CFUNC PHP_FUNCTION(intlcal_add)
 }
 
 /* {{{ Set formatter's timezone. */
-U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
+PHP_FUNCTION(intlcal_set_time_zone)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
@@ -326,7 +323,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_METHOD(IntlCalendar, setTimeZone)
+PHP_METHOD(IntlCalendar, setTimeZone)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
@@ -383,17 +380,17 @@ static void _php_intlcal_before_after(
 	RETURN_BOOL((int)res);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_after)
+PHP_FUNCTION(intlcal_after)
 {
 	_php_intlcal_before_after(&Calendar::after, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_before)
+PHP_FUNCTION(intlcal_before)
 {
 	_php_intlcal_before_after(&Calendar::before, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set)
+PHP_FUNCTION(intlcal_set)
 {
 	zend_long args[6];
 
@@ -442,7 +439,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_METHOD(IntlCalendar, setDate)
+PHP_METHOD(IntlCalendar, setDate)
 {
 	zend_long year, month, day;
 
@@ -464,7 +461,7 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDate)
 	co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day);
 }
 
-U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
+PHP_METHOD(IntlCalendar, setDateTime)
 {
 	zend_long year, month, day, hour, minute, second = 0;
 	bool second_is_null = true;
@@ -494,7 +491,7 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_roll)
+PHP_FUNCTION(intlcal_roll)
 {
 	zval *zvalue;
 	zend_long field, value;
@@ -523,7 +520,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_clear)
+PHP_FUNCTION(intlcal_clear)
 {
 	zend_long field;
 	bool field_is_null = 1;
@@ -547,7 +544,7 @@ U_CFUNC PHP_FUNCTION(intlcal_clear)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_field_difference)
+PHP_FUNCTION(intlcal_field_difference)
 {
 	zend_long	field;
 	double	when;
@@ -569,19 +566,19 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_actual_maximum)
+PHP_FUNCTION(intlcal_get_actual_maximum)
 {
 	_php_intlcal_field_uec_ret_in32t_method(&Calendar::getActualMaximum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_actual_minimum)
+PHP_FUNCTION(intlcal_get_actual_minimum)
 {
 	_php_intlcal_field_uec_ret_in32t_method(&Calendar::getActualMinimum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
+PHP_FUNCTION(intlcal_get_day_of_week_type)
 {
 	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
@@ -602,7 +599,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
+PHP_FUNCTION(intlcal_get_first_day_of_week)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -641,19 +638,19 @@ static void _php_intlcal_field_ret_in32t_method(
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_greatest_minimum)
+PHP_FUNCTION(intlcal_get_greatest_minimum)
 {
 	_php_intlcal_field_ret_in32t_method(&Calendar::getGreatestMinimum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_least_maximum)
+PHP_FUNCTION(intlcal_get_least_maximum)
 {
 	_php_intlcal_field_ret_in32t_method(&Calendar::getLeastMaximum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_locale)
+PHP_FUNCTION(intlcal_get_locale)
 {
 	zend_long	locale_type;
 	CALENDAR_METHOD_INIT_VARS;
@@ -677,13 +674,13 @@ U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 	RETURN_STRING(locale.getName());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_maximum)
+PHP_FUNCTION(intlcal_get_maximum)
 {
 	_php_intlcal_field_ret_in32t_method(&Calendar::getMaximum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
+PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -701,13 +698,13 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 	RETURN_LONG((zend_long)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_minimum)
+PHP_FUNCTION(intlcal_get_minimum)
 {
 	_php_intlcal_field_ret_in32t_method(&Calendar::getMinimum,
 		INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
+PHP_FUNCTION(intlcal_get_time_zone)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -728,7 +725,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 	timezone_object_construct(tz, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_type)
+PHP_FUNCTION(intlcal_get_type)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -742,7 +739,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_type)
 	RETURN_STRING(co->ucal->getType());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
+PHP_FUNCTION(intlcal_get_weekend_transition)
 {
 	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
@@ -763,7 +760,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 	RETURN_LONG((zend_long)res);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
+PHP_FUNCTION(intlcal_in_daylight_time)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -780,7 +777,7 @@ U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 	RETURN_BOOL((int)ret);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
+PHP_FUNCTION(intlcal_is_equivalent_to)
 {
 	zval			*other_object;
 	Calendar_object *other_co;
@@ -803,7 +800,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 	RETURN_BOOL((int)co->ucal->isEquivalentTo(*other_co->ucal));
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_is_lenient)
+PHP_FUNCTION(intlcal_is_lenient)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -817,7 +814,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_lenient)
 	RETURN_BOOL((int)co->ucal->isLenient());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_is_set)
+PHP_FUNCTION(intlcal_is_set)
 {
 	zend_long field;
 	CALENDAR_METHOD_INIT_VARS;
@@ -834,7 +831,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 	RETURN_BOOL((int)co->ucal->isSet((UCalendarDateFields)field));
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
+PHP_FUNCTION(intlcal_is_weekend)
 {
 	double date;
 	bool date_is_null = 1;
@@ -857,7 +854,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 }
 
 
-U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
+PHP_FUNCTION(intlcal_set_first_day_of_week)
 {
 	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
@@ -876,7 +873,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
+PHP_FUNCTION(intlcal_set_lenient)
 {
 	bool is_lenient;
 	CALENDAR_METHOD_INIT_VARS;
@@ -893,7 +890,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
+PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 {
 	zend_long	num_days;
 	CALENDAR_METHOD_INIT_VARS;
@@ -916,7 +913,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_equals)
+PHP_FUNCTION(intlcal_equals)
 {
 	zval			*other_object;
 	Calendar_object	*other_co;
@@ -941,7 +938,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	RETURN_BOOL((int)result);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
+PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -955,7 +952,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 	RETURN_LONG(co->ucal->getRepeatedWallTimeOption());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
+PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -969,7 +966,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
 	RETURN_LONG(co->ucal->getSkippedWallTimeOption());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
+PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 {
 	zend_long	option;
 	CALENDAR_METHOD_INIT_VARS;
@@ -992,7 +989,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
+PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 {
 	zend_long	option;
 	CALENDAR_METHOD_INIT_VARS;
@@ -1016,7 +1013,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
+PHP_FUNCTION(intlcal_from_date_time)
 {
 	zend_object     *date_obj;
 	zend_string     *date_str;
@@ -1100,7 +1097,7 @@ error:
 	}
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
+PHP_FUNCTION(intlcal_to_date_time)
 {
 	zval retval;
 	CALENDAR_METHOD_INIT_VARS;
@@ -1175,7 +1172,7 @@ error:
 	zval_ptr_dtor(&retval);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
+PHP_FUNCTION(intlcal_get_error_code)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -1192,7 +1189,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 	RETURN_LONG((zend_long)CALENDAR_ERROR_CODE(co));
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_error_message)
+PHP_FUNCTION(intlcal_get_error_message)
 {
 	zend_string* message = NULL;
 	CALENDAR_METHOD_INIT_VARS;

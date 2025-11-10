@@ -20,17 +20,13 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "../php_intl.h"
-}
 #include <unicode/uidna.h>
 #include <unicode/ustring.h>
 
 #include "idn.h"
 
-extern "C" {
 #include "intl_error.h"
-}
 /* }}} */
 
 enum {
@@ -144,7 +140,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 
 /* {{{ Converts an Unicode domain to ASCII representation, as defined in the IDNA RFC */
-U_CFUNC PHP_FUNCTION(idn_to_ascii)
+PHP_FUNCTION(idn_to_ascii)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_ASCII);
 }
@@ -152,7 +148,7 @@ U_CFUNC PHP_FUNCTION(idn_to_ascii)
 
 
 /* {{{ Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
-U_CFUNC PHP_FUNCTION(idn_to_utf8)
+PHP_FUNCTION(idn_to_utf8)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_UTF8);
 }

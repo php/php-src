@@ -1,4 +1,3 @@
-extern "C" {
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
@@ -7,7 +6,6 @@ extern "C" {
 #include <unicode/utf8.h>
 
 #include "uchar_arginfo.h"
-}
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 

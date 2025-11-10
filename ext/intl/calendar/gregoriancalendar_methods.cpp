@@ -24,7 +24,6 @@
 #include <unicode/gregocal.h>
 #include <unicode/ustring.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_common.h"
 #define USE_TIMEZONE_POINTER 1
@@ -33,7 +32,6 @@ extern "C" {
 #include "calendar_class.h"
 #include <ext/date/php_date.h>
 #include "zend_exceptions.h"
-}
 
 using icu::GregorianCalendar;
 using icu::Locale;
@@ -207,13 +205,13 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 	co->ucal = gcal.release();
 }
 
-U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
+PHP_FUNCTION(intlgregcal_create_instance)
 {
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ false);
 }
 
-U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
+PHP_METHOD(IntlGregorianCalendar, __construct)
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);
@@ -226,7 +224,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 	INTL_G(error_level) = old_error_level;
 }
 
-U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
+PHP_METHOD(IntlGregorianCalendar, createFromDate)
 {
 	zend_long year, month, day;
 	UErrorCode status = U_ZERO_ERROR;
@@ -263,7 +261,7 @@ cleanup:
 	INTL_G(error_level) = old_error_level;
 }
 
-U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
+PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 {
 	zend_long year, month, day, hour, minute, second;
 	bool second_is_null = 1;
@@ -313,7 +311,7 @@ cleanup:
 	INTL_G(error_level) = old_error_level;
 }
 
-U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
+PHP_FUNCTION(intlgregcal_set_gregorian_change)
 {
 	double date;
 	CALENDAR_METHOD_INIT_VARS;
@@ -332,7 +330,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
+PHP_FUNCTION(intlgregcal_get_gregorian_change)
 {
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -347,7 +345,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 	RETURN_DOUBLE((double)fetch_greg(co)->getGregorianChange());
 }
 
-U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
+PHP_FUNCTION(intlgregcal_is_leap_year)
 {
 	zend_long year;
 	CALENDAR_METHOD_INIT_VARS;
