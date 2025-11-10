@@ -169,7 +169,6 @@ php_stream_filter_status_t userfilter_filter(
 			return PSFS_ERR_FATAL;
 		}
 	}
-	zend_string_release(stream_name);
 
 	EG(fake_scope) = old_scope;
 
@@ -213,21 +212,22 @@ php_stream_filter_status_t userfilter_filter(
 
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
-	 * from being destroyed properly */
-	zend_property_info *prop_info = zend_hash_str_find_ptr(&Z_OBJCE_P(obj)->properties_info, "stream", sizeof("stream")-1);
-	zval *stream_prop = zend_hash_str_find(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	 * from being destroyed properly.
+	 * Since the property accepted a resource assignment above, it must have
+	 * no type hint or be typed as mixed, so we can safely assign null.
+	 */
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = Z_OBJCE_P(obj);
 
-	if (stream_prop) {
-		if (prop_info) {
-			/* Declared property: set to UNDEF to make it uninitialized */
-			zval_ptr_dtor(stream_prop);
-			ZVAL_UNDEF(stream_prop);
-		} else {
-			/* Dynamic property: set to null */
-			zval_ptr_dtor(stream_prop);
-			ZVAL_NULL(stream_prop);
-		}
+	if (Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL)) {
+		zval null_zval;
+		ZVAL_NULL(&null_zval);
+		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &null_zval);
 	}
+
+	EG(fake_scope) = old_scope;
+
+	zend_string_release(stream_name);
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
