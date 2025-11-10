@@ -1558,35 +1558,6 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, 
 }
 /* }}}*/
 
-static inline char *phar_strnstr(const char *buf, size_t buf_len, const char *search, size_t search_len) /* {{{ */
-{
-	const char *c;
-	ptrdiff_t so_far = 0;
-
-	if (buf_len < search_len) {
-		return NULL;
-	}
-
-	c = buf - 1;
-
-	do {
-		if (!(c = memchr(c + 1, search[0], buf_len - search_len - so_far))) {
-			return (char *) NULL;
-		}
-
-		so_far = c - buf;
-
-		if (so_far >= (buf_len - search_len)) {
-			return (char *) NULL;
-		}
-
-		if (!memcmp(c, search, search_len)) {
-			return (char *) c;
-		}
-	} while (1);
-}
-/* }}} */
-
 /**
  * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
  * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
@@ -1598,7 +1569,8 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 	static const char zip_magic[] = "PK\x03\x04";
 	static const char gz_magic[] = "\x1f\x8b\x08";
 	static const char bz_magic[] = "BZh";
-	char *pos, test = '\0';
+	const char *pos;
+	char test = '\0';
 	int recursion_count = 3; // arbitrary limit to avoid too deep or even infinite recursion
 	const int window_size = 1024;
 	char buffer[1024 + sizeof(token)]; /* a 1024 byte window + the size of the halt_compiler token (moving window) */
@@ -1747,14 +1719,14 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 			}
 
 			if (got >= 512) {
-				if (phar_is_tar(pos, fname)) {
+				if (phar_is_tar((char *) pos, fname)) { /* TODO: fix const correctness */
 					php_stream_rewind(fp);
 					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error);
 				}
 			}
 		}
 
-		if (got > 0 && (pos = phar_strnstr(buffer, got + sizeof(token), token, sizeof(token)-1)) != NULL) {
+		if (got > 0 && (pos = php_memnistr(buffer, token, tokenlen, buffer + got + sizeof(token))) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
 			return phar_parse_pharfile(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, compression, error);
 		}
