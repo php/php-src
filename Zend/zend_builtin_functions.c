@@ -1684,16 +1684,15 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		zend_string *name;
 		zval *arg;
 
-		bool is_sensitive = false;
-		if (call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-			zend_attribute *attribute = zend_get_parameter_attribute_str(
-				call->func->common.attributes,
-				"sensitiveparameter",
-				sizeof("sensitiveparameter") - 1,
-				call->func->common.num_args
-			);
-			is_sensitive = attribute != NULL;
-		}
+		ZEND_ASSERT(call->func->common.fn_flags & ZEND_ACC_VARIADIC);
+
+		zend_attribute *attribute = zend_get_parameter_attribute_str(
+			call->func->common.attributes,
+			"sensitiveparameter",
+			sizeof("sensitiveparameter") - 1,
+			call->func->common.num_args
+		);
+		bool is_sensitive = attribute != NULL;
 
 		SEPARATE_ARRAY(arg_array);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
