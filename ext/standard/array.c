@@ -3040,18 +3040,18 @@ PHP_FUNCTION(range)
 			if (start_type == IS_STRING || end_type == IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be of type int when generating an array"
 					" of characters, inputs converted to 0");
-			}
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 			}
 			end_type = IS_LONG;
 			start_type = IS_LONG;
 			goto handle_numeric_inputs;
 		}
 
-		/* Generate array of characters */
-		unsigned char low = (unsigned char)Z_STRVAL_P(user_start)[0];
-		unsigned char high = (unsigned char)Z_STRVAL_P(user_end)[0];
+		/* Generate array of characters, as ints to make bounds checking possible in the loop condition */
+		int low = Z_STRVAL_P(user_start)[0];
+		int high = Z_STRVAL_P(user_end)[0];
 
 		/* Decreasing char range */
 		if (low > high) {
@@ -3062,12 +3062,9 @@ PHP_FUNCTION(range)
 			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= (unsigned int)step) {
+				for (; low >= high; low -= step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low - step) < 0) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { /* Increasing char range */
@@ -3080,12 +3077,9 @@ PHP_FUNCTION(range)
 			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += (unsigned int)step) {
+				for (; low <= high; low += step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low + step) > 255) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
