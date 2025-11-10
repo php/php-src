@@ -5309,7 +5309,7 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
 
             foreach ($funcInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
-                    "zend_add_function_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1)",
+                    "zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1)",
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility,
@@ -5320,7 +5320,7 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
             foreach ($funcInfo->args as $index => $arg) {
                 foreach ($arg->attributes as $key => $attribute) {
                     $code .= $attribute->generateCode(
-                        "zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index",
+                        "zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index",
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
                         $phpVersionIdMinimumCompatibility,
