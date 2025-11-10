@@ -19,3 +19,6 @@ cd ext/uri/uriparser
 
 # move renamed files
 mv src/UriConfig.h.in src/UriConfig.h
+
+# patch customized files
+git apply -v ../../../.github/scripts/download-bundled/uriparser.config.patch
