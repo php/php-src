@@ -26,6 +26,8 @@
 #include "zend_string.h"
 #include "zend_sort.h"
 
+BEGIN_EXTERN_C()
+
 typedef enum {
 	HASH_KEY_IS_STRING = 1,
 	HASH_KEY_IS_LONG,
@@ -1707,4 +1709,5 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	ht->nNumOfElements++;
 }
 
+END_EXTERN_C()
 #endif							/* ZEND_HASH_H */
