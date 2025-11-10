@@ -361,6 +361,7 @@ PHP_FUNCTION(headers_list)
 PHP_FUNCTION(http_response_code)
 {
 	zend_long response_code = 0;
+	char *s;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -384,7 +385,12 @@ PHP_FUNCTION(http_response_code)
 
 		if (SG(sapi_headers).http_status_line) {
 			php_error_docref(NULL, E_WARNING, "Calling http_response_code() after header('HTTP/...') has no effect");
-			// If it is decided that this should have effect in the future, replace warning with
+			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
+				SG(sapi_headers).http_response_code = atoi((s + 1));
+				RETURN_LONG(SG(sapi_headers).http_response_code);
+			}
+			// If it is decided that this should have effect in the future,
+			// remove the warning and RETURN_LONG and uncomment below
 			// efree(SG(sapi_headers).http_status_line);
 			// SG(sapi_headers).http_status_line = NULL;
 		}
@@ -399,6 +405,12 @@ PHP_FUNCTION(http_response_code)
 		}
 
 		RETURN_TRUE;
+	}
+
+	if (SG(sapi_headers).http_status_line &&
+		(s = strchr(SG(sapi_headers).http_status_line, ' '))
+	) {
+		SG(sapi_headers).http_response_code = atoi((s + 1));
 	}
 
 	if (!SG(sapi_headers).http_response_code) {

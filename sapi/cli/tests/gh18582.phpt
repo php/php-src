@@ -12,9 +12,9 @@ php_cli_server_start(<<<'PHP'
 http_response_code(401);
 header('HTTP/1.1 404 Not Found');
 $is_404 = http_response_code(403);
-$should_be_404_but_is_403 = http_response_code();
+$should_be_404_not_403 = http_response_code();
 echo $is_404 . PHP_EOL;
-echo $should_be_404_but_is_403 . PHP_EOL;
+echo $should_be_404_not_403 . PHP_EOL;
 PHP);
 
 $host = PHP_CLI_SERVER_HOSTNAME;
@@ -37,4 +37,4 @@ Content-type: text/html; charset=UTF-8
 <br />
 <b>Warning</b>:  http_response_code(): Calling http_response_code() after header('HTTP/...') has no effect in <b>%s</b> on line <b>3</b><br />
 404
-403
+404
