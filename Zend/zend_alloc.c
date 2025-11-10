@@ -241,17 +241,6 @@ struct _zend_mm_observer {
 	zend_mm_observer *next;
 };
 
-#define HANDLE_NO_DEBUG_OBSERVERS(observer_function, ...) \
-    if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) { \
-        zend_mm_observer *current = heap->observers; \
-        while (current != NULL) { \
-            if (current->observer_function != NULL) { \
-                current->observer_function(__VA_ARGS__); \
-            } \
-            current = current->next; \
-        } \
-    }
-
 #define HANDLE_OBSERVERS(observer_function, ...) \
     if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) { \
         zend_mm_observer *current = heap->observers; \
@@ -295,21 +284,6 @@ struct _zend_mm_observer {
  *               2 for 5-8, 3 for 9-16 etc) see zend_alloc_sizes.h
  */
 
-
-struct _zend_mm_observer {
-	void (*malloc)(size_t, void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	void (*free)(void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	void (*realloc)(void *, size_t, void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	zend_mm_observer *next;
-};
-zend_mm_observer *zend_mm_observers = NULL;
-
-typedef struct _zend_mm_heap_observer zend_mm_heap_observer;
-struct _zend_mm_heap_observer {
-	zend_mm_observer *observer;
-	bool enabled;
-	zend_mm_heap_observer *next;
-};
 
 struct _zend_mm_heap {
 #if ZEND_MM_CUSTOM
@@ -2137,7 +2111,6 @@ static zend_mm_heap *zend_mm_init(void)
 #if ZEND_MM_CUSTOM
 	heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
 	heap->observers = NULL;
-	zend_mm_observers_startup(heap);
 #endif
 #if ZEND_MM_STORAGE
 	heap->storage = NULL;
@@ -2168,7 +2141,15 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 		}
 		return 0;
 	}
-	HANDLE_NO_DEBUG_OBSERVERS(gc, collected)
+	if (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) {
+		zend_mm_observer *current = heap->observers;
+		while (current != NULL) {
+			if (current->gc != NULL) {
+				current->gc(collected);
+			}
+			current = current->next;
+		}
+	}
 #endif
 
 	for (i = 0; i < ZEND_MM_BINS; i++) {
@@ -2488,6 +2469,19 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
 
+	// Call observer shutdown callbacks before cleaning up
+#if ZEND_MM_CUSTOM
+	if (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) {
+		zend_mm_observer *current = heap->observers;
+		while (current != NULL) {
+			if (current->shutdown != NULL) {
+				current->shutdown(full, silent);
+			}
+			current = current->next;
+		}
+	}
+#endif
+
 	if (full == false) {
 		zend_mm_observers_shutdown(heap);
 	}
@@ -2520,8 +2514,6 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		if (shutdown) {
 			shutdown(full, silent);
 		}
-
-		HANDLE_NO_DEBUG_OBSERVERS(shutdown, full, silent)
 
 		return;
 	}
@@ -3418,7 +3410,6 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
 			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
 		}
-		zend_mm_observers_startup(mm_heap);
 		return;
 	}
 #endif
@@ -3480,15 +3471,6 @@ ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 {
 #if ZEND_MM_CUSTOM
 	return (AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) != 0;
-#else
-	return false;
-#endif
-}
-
-ZEND_API bool zend_mm_is_observed(zend_mm_heap *new_heap)
-{
-#if ZEND_MM_CUSTOM
-	return (AG(mm_heap)->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) != 0;
 #else
 	return false;
 #endif
