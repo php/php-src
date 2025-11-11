@@ -1836,11 +1836,13 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		ZVAL_EMPTY_ARRAY(arg_array);
 	}
 
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+	if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)
+	 /* __call and __callStatic are non-variadic, potentially with
+	  * HAS_EXTRA_NAMED_PARAMS set. Don't add extra args, as they're already
+	  * contained in the 2nd param. */
+	 && (call->func->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		zend_string *name;
 		zval *arg;
-
-		ZEND_ASSERT(call->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 		bool is_sensitive = backtrace_is_arg_sensitive(call, call->func->common.num_args);
 
