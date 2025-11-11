@@ -1878,8 +1878,7 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			case XML_DOCUMENT_FRAG_NODE:
 			case XML_DOCUMENT_TYPE_NODE:
 			case XML_DTD_NODE:
-				RETURN_NULL();
-				break;
+				return;
 			default:
 				lookupp = nodep->parent;
 		}
@@ -1898,8 +1897,6 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			}
 		}
 	}
-
-	RETURN_NULL();
 }
 
 PHP_METHOD(DOMNode, lookupPrefix)
@@ -2065,16 +2062,14 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			prefix = NULL;
 		}
 		const char *ns_uri = dom_locate_a_namespace(nodep, prefix);
-		if (ns_uri == NULL) {
-			RETURN_NULL();
-		} else {
+		if (ns_uri != NULL) {
 			RETURN_STRING(ns_uri);
 		}
 	} else {
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 			if (nodep == NULL) {
-				RETURN_NULL();
+				return;
 			}
 		}
 
@@ -2083,8 +2078,6 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			RETURN_STRING((char *) nsptr->href);
 		}
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
@@ -2294,13 +2287,12 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
-	char *value;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = (char *) xmlGetNodePath(nodep);
+	char *value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
 		/* This is only possible when an invalid argument is passed (e.g. namespace declaration, but that's not the case for this call site),
 		 * or on allocation failure. So in other words, this only happens on allocation failure. */
@@ -2308,7 +2300,6 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);
 		xmlFree(value);

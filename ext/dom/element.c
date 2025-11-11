@@ -1210,19 +1210,17 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, getAttributeNodeNS)
 {
-	zval *id;
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
 	char *uri, *name;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(elemp, ZEND_THIS, xmlNodePtr, intern);
 
 	bool follow_spec = php_dom_follow_spec_intern(intern);
 	if (follow_spec && uri_len == 0) {
@@ -1239,16 +1237,11 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 				/* Keep parent alive, because we're a fake child. */
 				GC_ADDREF(&intern->std);
 				(void) php_dom_create_fake_namespace_decl(elemp, nsptr, return_value, intern);
-			} else {
-				RETURN_NULL();
 			}
-		} else {
-			RETURN_NULL();
 		}
 	} else {
 		DOM_RET_OBJ((xmlNodePtr) attrp, intern);
 	}
-
 }
 /* }}} end dom_element_get_attribute_node_ns */
 
