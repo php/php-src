@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
 
+- XML:
+  . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
+    special characters in attributes when passing data to callback). (ndossche)
+
 20 Nov 2025, PHP 8.3.28
 
 - Core:
