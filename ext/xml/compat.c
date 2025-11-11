@@ -45,6 +45,28 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 	}
 }
 
+static void start_element_emit_default(XML_Parser parser)
+{
+	if (parser->h_default) {
+		/* Grammar does not allow embedded '<' and '>' in elements, so we can seek to the start and end positions.
+		 * Since the parser in the current mode mode is non-progressive, it contains the entire input. */
+		const xmlChar *cur = parser->parser->input->cur;
+		const xmlChar *end = cur;
+		for (const xmlChar *base = parser->parser->input->base; cur > base && *cur != '<'; cur--);
+		if (*end == '/') {
+			/* BC:   Keep split between start & end element.
+			 * TODO: In the future this could be aligned with expat and only emit a start event, or vice versa.
+			 *       See gh20439_2.phpt */
+			xmlChar *tmp = BAD_CAST estrndup((const char *) cur, end - cur + 1);
+			tmp[end - cur] = '>';
+			parser->h_default(parser->user, tmp, end - cur + 1);
+			efree(tmp);
+		} else {
+			parser->h_default(parser->user, cur, end - cur + 1);
+		}
+	}
+}
+
 static void
 _start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
 {
@@ -52,29 +74,7 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 	xmlChar    *qualified_name = NULL;
 
 	if (parser->h_start_element == NULL) {
-		if (parser->h_default) {
-			int attno = 0;
-
-			qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
-			if (attributes) {
-				while (attributes[attno] != NULL) {
-					int att_len;
-					char *att_string, *att_name, *att_value;
-
-					att_name = (char *)attributes[attno++];
-					att_value = (char *)attributes[attno++];
-
-					att_len = spprintf(&att_string, 0, " %s=\"%s\"", att_name, att_value);
-
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					efree(att_string);
-				}
-
-			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
-		}
+		start_element_emit_default(parser);
 		return;
 	}
 
@@ -104,65 +104,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 	}
 
 	if (parser->h_start_element == NULL) {
-	 	if (parser->h_default) {
-
-			if (prefix) {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", prefix, xmlStrlen(prefix));
-				qualified_name = xmlStrncat(qualified_name, (xmlChar *)":", 1);
-				qualified_name = xmlStrncat(qualified_name, name, xmlStrlen(name));
-			} else {
-				qualified_name = xmlStrncatNew((xmlChar *)"<", name, xmlStrlen(name));
-			}
-
-			if (namespaces) {
-				int i, j;
-				for (i = 0,j = 0;j < nb_namespaces;j++) {
-					int ns_len;
-					char *ns_string, *ns_prefix, *ns_url;
-
-					ns_prefix = (char *) namespaces[i++];
-					ns_url = (char *) namespaces[i++];
-
-					if (ns_prefix) {
-						ns_len = spprintf(&ns_string, 0, " xmlns:%s=\"%s\"", ns_prefix, ns_url);
-					} else {
-						ns_len = spprintf(&ns_string, 0, " xmlns=\"%s\"", ns_url);
-					}
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)ns_string, ns_len);
-
-					efree(ns_string);
-				}
-			}
-
-			if (attributes) {
-				for (i = 0; i < nb_attributes; i += 1) {
-					int att_len;
-					char *att_string, *att_name, *att_value, *att_prefix, *att_valueend;
-
-					att_name = (char *) attributes[y++];
-					att_prefix = (char *)attributes[y++];
-					y++;
-					att_value = (char *)attributes[y++];
-					att_valueend = (char *)attributes[y++];
-
-					if (att_prefix) {
-						att_len = spprintf(&att_string, 0, " %s:%s=\"", att_prefix, att_name);
-					} else {
-						att_len = spprintf(&att_string, 0, " %s=\"", att_name);
-					}
-
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_string, att_len);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)att_value, att_valueend - att_value);
-					qualified_name = xmlStrncat(qualified_name, (xmlChar *)"\"", 1);
-
-					efree(att_string);
-				}
-
-			}
-			qualified_name = xmlStrncat(qualified_name, (xmlChar *)">", 1);
-			parser->h_default(parser->user, (const XML_Char *) qualified_name, xmlStrlen(qualified_name));
-			xmlFree(qualified_name);
-		}
+		start_element_emit_default(parser);
 		return;
 	}
 	_qualify_namespace(parser, name, URI, &qualified_name);
