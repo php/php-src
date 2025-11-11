@@ -6,6 +6,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
     (manuelm)
 
+- URI:
+  . Fixed bug GH-20431 (Uri\Rfc3986\Uri::setHost(null) turns empty path into /)
+    by updating to a newer uriparser snapshot. (timwolla)
+  . Fixed the distinction between an empty and a missing query/fragment
+    when using Uri\WhatWg\Url::getQuery() and Uri\WhatWg\Url::getFragment().
+    (kocsismate)
+
 06 Nov 2025, PHP 8.5.0RC4
 
 - Core:
