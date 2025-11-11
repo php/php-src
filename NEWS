@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-20722 (Null pointer dereference in DOM namespace node cloning
     via clone on malformed objects). (ndossche)
+  . Fixed bug GH-20444 (Dom\XMLDocument::C14N() seems broken compared
+    to DOMDocument::C14N()). (ndossche)
 
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
