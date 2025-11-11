@@ -37,9 +37,7 @@
  */
 
 #ifndef URI_SET_HOST_BASE_H
-#define URI_SET_HOST_BASE_H 1
-
-
+#  define URI_SET_HOST_BASE_H 1
 
 typedef enum UriHostTypeEnum {
     URI_HOST_TYPE_IP4,
@@ -47,7 +45,5 @@ typedef enum UriHostTypeEnum {
     URI_HOST_TYPE_IPFUTURE,
     URI_HOST_TYPE_REGNAME
 } UriHostType;
-
-
 
 #endif /* URI_SET_HOST_BASE_H */
