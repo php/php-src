@@ -347,6 +347,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 		zend_ini_entry *max_mem_limit_ini = zend_hash_str_find_ptr(EG(ini_directives), ZEND_STRL("max_memory_limit"));
 		entry->value = zend_string_init(ZSTR_VAL(max_mem_limit_ini->value), ZSTR_LEN(max_mem_limit_ini->value), true);
+		GC_MAKE_PERSISTENT_LOCAL(entry->value);
 		PG(memory_limit) = PG(max_memory_limit);
 
 		return SUCCESS;
