@@ -40,66 +40,52 @@
 #include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriSetHostIp4.c"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriSetHostIp4.c"
-#  undef URI_PASS_UNICODE
-# endif
+#  ifdef URI_ENABLE_ANSI
+#    define URI_PASS_ANSI 1
+#    include "UriSetHostIp4.c"
+#    undef URI_PASS_ANSI
+#  endif
+#  ifdef URI_ENABLE_UNICODE
+#    define URI_PASS_UNICODE 1
+#    include "UriSetHostIp4.c"
+#    undef URI_PASS_UNICODE
+#  endif
 #else
-# ifdef URI_PASS_ANSI
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  include <uriparser/UriDefsUnicode.h>
-#  include <wchar.h>
-# endif
+#  ifdef URI_PASS_ANSI
+#    include <uriparser/UriDefsAnsi.h>
+#  else
+#    include <uriparser/UriDefsUnicode.h>
+#    include <wchar.h>
+#  endif
 
+#  ifndef URI_DOXYGEN
+#    include <uriparser/Uri.h>
+#    include <uriparser/UriIp4.h>
+#    include "UriMemory.h"
+#    include "UriSetHostBase.h"
+#    include "UriSetHostCommon.h"
+#  endif
 
+UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first,
+                                      const URI_CHAR * afterLast) {
+    if ((first == NULL) || (afterLast == NULL)) {
+        return URI_FALSE;
+    }
 
-#ifndef URI_DOXYGEN
-# include <uriparser/Uri.h>
-# include <uriparser/UriIp4.h>
-# include "UriMemory.h"
-# include "UriSetHostBase.h"
-# include "UriSetHostCommon.h"
-#endif
-
-
-
-UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first, const URI_CHAR * afterLast) {
-	if ((first == NULL) || (afterLast == NULL)) {
-		return URI_FALSE;
-	}
-
-	{
-		unsigned char octetOutput[4];
-		return (URI_FUNC(ParseIpFourAddress)(octetOutput, first, afterLast) == URI_SUCCESS)
-				? URI_TRUE
-				: URI_FALSE;
-	}
+    unsigned char octetOutput[4];
+    return (URI_FUNC(ParseIpFourAddress)(octetOutput, first, afterLast) == URI_SUCCESS)
+               ? URI_TRUE
+               : URI_FALSE;
 }
 
-
-
-int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast,
-		UriMemoryManager * memory) {
-	return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_IP4, first, afterLast, memory);
+int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                           const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_IP4, first, afterLast, memory);
 }
 
-
-
-int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast) {
-	return URI_FUNC(SetHostIp4Mm)(uri, first, afterLast, NULL);
+int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                         const URI_CHAR * afterLast) {
+    return URI_FUNC(SetHostIp4Mm)(uri, first, afterLast, NULL);
 }
-
-
 
 #endif
