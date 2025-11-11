@@ -1719,7 +1719,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 			}
 
 			if (got >= 512) {
-				if (phar_is_tar((char *) pos, fname)) { /* TODO: fix const correctness */
+				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
 					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error);
 				}
