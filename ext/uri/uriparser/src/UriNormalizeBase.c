@@ -38,82 +38,80 @@
  */
 
 #ifndef URI_DOXYGEN
-# include "UriNormalizeBase.h"
+#  include "UriNormalizeBase.h"
 #endif
 
-
-
 UriBool uriIsUnreserved(int code) {
-	switch (code) {
-	case L'a': /* ALPHA */
-	case L'A':
-	case L'b':
-	case L'B':
-	case L'c':
-	case L'C':
-	case L'd':
-	case L'D':
-	case L'e':
-	case L'E':
-	case L'f':
-	case L'F':
-	case L'g':
-	case L'G':
-	case L'h':
-	case L'H':
-	case L'i':
-	case L'I':
-	case L'j':
-	case L'J':
-	case L'k':
-	case L'K':
-	case L'l':
-	case L'L':
-	case L'm':
-	case L'M':
-	case L'n':
-	case L'N':
-	case L'o':
-	case L'O':
-	case L'p':
-	case L'P':
-	case L'q':
-	case L'Q':
-	case L'r':
-	case L'R':
-	case L's':
-	case L'S':
-	case L't':
-	case L'T':
-	case L'u':
-	case L'U':
-	case L'v':
-	case L'V':
-	case L'w':
-	case L'W':
-	case L'x':
-	case L'X':
-	case L'y':
-	case L'Y':
-	case L'z':
-	case L'Z':
-	case L'0': /* DIGIT */
-	case L'1':
-	case L'2':
-	case L'3':
-	case L'4':
-	case L'5':
-	case L'6':
-	case L'7':
-	case L'8':
-	case L'9':
-	case L'-': /* "-" / "." / "_" / "~" */
-	case L'.':
-	case L'_':
-	case L'~':
-		return URI_TRUE;
+    switch (code) {
+    case L'a': /* ALPHA */
+    case L'A':
+    case L'b':
+    case L'B':
+    case L'c':
+    case L'C':
+    case L'd':
+    case L'D':
+    case L'e':
+    case L'E':
+    case L'f':
+    case L'F':
+    case L'g':
+    case L'G':
+    case L'h':
+    case L'H':
+    case L'i':
+    case L'I':
+    case L'j':
+    case L'J':
+    case L'k':
+    case L'K':
+    case L'l':
+    case L'L':
+    case L'm':
+    case L'M':
+    case L'n':
+    case L'N':
+    case L'o':
+    case L'O':
+    case L'p':
+    case L'P':
+    case L'q':
+    case L'Q':
+    case L'r':
+    case L'R':
+    case L's':
+    case L'S':
+    case L't':
+    case L'T':
+    case L'u':
+    case L'U':
+    case L'v':
+    case L'V':
+    case L'w':
+    case L'W':
+    case L'x':
+    case L'X':
+    case L'y':
+    case L'Y':
+    case L'z':
+    case L'Z':
+    case L'0': /* DIGIT */
+    case L'1':
+    case L'2':
+    case L'3':
+    case L'4':
+    case L'5':
+    case L'6':
+    case L'7':
+    case L'8':
+    case L'9':
+    case L'-': /* "-" / "." / "_" / "~" */
+    case L'.':
+    case L'_':
+    case L'~':
+        return URI_TRUE;
 
-	default:
-		return URI_FALSE;
-	}
+    default:
+        return URI_FALSE;
+    }
 }

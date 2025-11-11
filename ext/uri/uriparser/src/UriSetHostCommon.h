@@ -37,43 +37,38 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_SET_HOST_COMMON_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_SET_HOST_COMMON_H_UNICODE)) \
-	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+    || (defined(URI_PASS_UNICODE) && !defined(URI_SET_HOST_COMMON_H_UNICODE)) \
+    || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
-#include <uriparser/UriDefsConfig.h>
-#if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+#  include <uriparser/UriDefsConfig.h>
+#  if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriSetHostCommon.h"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriSetHostCommon.h"
-#  undef URI_PASS_UNICODE
-# endif
+#    ifdef URI_ENABLE_ANSI
+#      define URI_PASS_ANSI 1
+#      include "UriSetHostCommon.h"
+#      undef URI_PASS_ANSI
+#    endif
+#    ifdef URI_ENABLE_UNICODE
+#      define URI_PASS_UNICODE 1
+#      include "UriSetHostCommon.h"
+#      undef URI_PASS_UNICODE
+#    endif
 /* Only one pass for each encoding */
-#elif (defined(URI_PASS_ANSI) && !defined(URI_SET_HOST_COMMON_H_ANSI) \
-	&& defined(URI_ENABLE_ANSI)) || (defined(URI_PASS_UNICODE) \
-	&& !defined(URI_SET_HOST_COMMON_H_UNICODE) && defined(URI_ENABLE_UNICODE))
-# ifdef URI_PASS_ANSI
-#  define URI_SET_HOST_COMMON_H_ANSI 1
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  define URI_SET_HOST_COMMON_H_UNICODE 1
-#  include <uriparser/UriDefsUnicode.h>
-# endif
+#  elif (defined(URI_PASS_ANSI) && !defined(URI_SET_HOST_COMMON_H_ANSI) \
+         && defined(URI_ENABLE_ANSI)) \
+      || (defined(URI_PASS_UNICODE) && !defined(URI_SET_HOST_COMMON_H_UNICODE) \
+          && defined(URI_ENABLE_UNICODE))
+#    ifdef URI_PASS_ANSI
+#      define URI_SET_HOST_COMMON_H_ANSI 1
+#      include <uriparser/UriDefsAnsi.h>
+#    else
+#      define URI_SET_HOST_COMMON_H_UNICODE 1
+#      include <uriparser/UriDefsUnicode.h>
+#    endif
 
+int URI_FUNC(InternalSetHostMm)(URI_TYPE(Uri) * uri, UriHostType hostType,
+                                const URI_CHAR * first, const URI_CHAR * afterLast,
+                                UriMemoryManager * memory);
 
-
-int URI_FUNC(InternalSetHostMm)(URI_TYPE(Uri) * uri,
-		UriHostType hostType,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast,
-		UriMemoryManager * memory);
-
-
-
-#endif
+#  endif
 #endif
