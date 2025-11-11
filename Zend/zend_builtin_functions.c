@@ -1715,6 +1715,18 @@ ZEND_FUNCTION(get_defined_constants)
 }
 /* }}} */
 
+static bool backtrace_is_arg_sensitive(const zend_execute_data *call, uint32_t offset)
+{
+	zend_attribute *attribute = zend_get_parameter_attribute_str(
+		call->func->common.attributes,
+		"sensitiveparameter",
+		sizeof("sensitiveparameter") - 1,
+		offset
+	);
+
+	return attribute != NULL;
+}
+
 static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
@@ -1738,14 +1750,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						zend_string *arg_name = call->func->op_array.vars[i];
 						zval original_arg;
 						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
-						zend_attribute *attribute = zend_get_parameter_attribute_str(
-							call->func->common.attributes,
-							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
-							i
-						);
-
-						bool is_sensitive = attribute != NULL;
+						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
 
 						if (arg) {
 							ZVAL_DEREF(arg);
@@ -1770,13 +1775,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				} else {
 					while (i < first_extra_arg) {
 						zval original_arg;
-						zend_attribute *attribute = zend_get_parameter_attribute_str(
-							call->func->common.attributes,
-							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
-							i
-						);
-						bool is_sensitive = attribute != NULL;
+						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
 
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							zval *arg = p;
@@ -1809,13 +1808,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				bool is_sensitive = 0;
 
 				if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-					zend_attribute *attribute = zend_get_parameter_attribute_str(
-						call->func->common.attributes,
-						"sensitiveparameter",
-						sizeof("sensitiveparameter") - 1,
-						MIN(i, call->func->common.num_args)
-					);
-					is_sensitive = attribute != NULL;
+					is_sensitive = backtrace_is_arg_sensitive(call, MIN(i, call->func->common.num_args));
 				}
 
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
@@ -1852,13 +1845,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 		ZEND_ASSERT(call->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		zend_attribute *attribute = zend_get_parameter_attribute_str(
-			call->func->common.attributes,
-			"sensitiveparameter",
-			sizeof("sensitiveparameter") - 1,
-			call->func->common.num_args
-		);
-		bool is_sensitive = attribute != NULL;
+		bool is_sensitive = backtrace_is_arg_sensitive(call, call->func->common.num_args);
 
 		SEPARATE_ARRAY(arg_array);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
