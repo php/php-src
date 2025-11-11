@@ -60,7 +60,6 @@ static void
 start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
 {
 	XML_Parser  parser = (XML_Parser) user;
-	xmlChar    *qualified_name = NULL;
 
 	if (parser->h_start_element == NULL) {
 		start_element_emit_default(parser);
