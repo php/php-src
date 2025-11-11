@@ -463,10 +463,8 @@ PHPAPI zend_result php_output_start_internal(const char *name, size_t name_len, 
 PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, size_t chunk_size, int flags)
 {
 	zend_string *handler_name = NULL;
-	char *error = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t alias = NULL;
-	php_output_handler_user_func_t *user = NULL;
 
 	switch (Z_TYPE_P(output_handler)) {
 		case IS_NULL:
@@ -478,22 +476,37 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				break;
 			}
 			ZEND_FALLTHROUGH;
-		default:
-			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
-			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
-				handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
-				ZVAL_COPY(&user->zoh, output_handler);
-				handler->func.user = user;
-			} else {
-				efree(user);
-			}
-			if (error) {
+		default: {
+			char *error = NULL;
+			php_output_handler_user_func_t *user = ecalloc(1, sizeof(php_output_handler_user_func_t));
+
+			if (UNEXPECTED(FAILURE == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error))) {
+				ZEND_ASSERT(error);
+
 				php_error_docref("ref.outcontrol", E_WARNING, "%s", error);
 				efree(error);
-			}
-			if (handler_name) {
 				zend_string_release_ex(handler_name, 0);
+				efree(user);
+				return NULL;
 			}
+
+			/* Handle fake closures of global functions that might reference internal functions that are aliased output handlers */
+			if (UNEXPECTED(user->fcc.function_handler->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+				alias = php_output_handler_alias(ZSTR_VAL(user->fcc.function_handler->common.function_name), ZSTR_LEN(user->fcc.function_handler->common.function_name));
+				if (alias) {
+					zend_string_release_ex(handler_name, 0);
+					handler = alias(ZSTR_VAL(user->fcc.function_handler->common.function_name), ZSTR_LEN(user->fcc.function_handler->common.function_name), chunk_size, flags);
+					efree(user);
+					break;
+				}
+			}
+
+			handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
+			ZVAL_COPY(&user->zoh, output_handler);
+			handler->func.user = user;
+
+			zend_string_release_ex(handler_name, 0);
+		}
 	}
 
 	return handler;
