@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
     (manuelm)
+  . Address bug GH-20384 (Confirm if ob_gzhandler is impacted by ob_start
+    handler changes) by reverting GH-18932 (Deprecate returning non-string
+    values from a user output handler). (DanielEScherzer)
 
 - URI:
   . Fixed bug GH-20431 (Uri\Rfc3986\Uri::setHost(null) turns empty path into /)
