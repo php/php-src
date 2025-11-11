@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
     (manuelm)
 
+- DOM:
+  . Fix memory leak when edge case is hit when registering xpath callback.
+    (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
