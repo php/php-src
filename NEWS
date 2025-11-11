@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
 
+- XML:
+  . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
+    special characters in attributes when passing data to callback). (ndossche)
+
 06 Nov 2025, PHP 8.5.0RC4
 
 - Core:
