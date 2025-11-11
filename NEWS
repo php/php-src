@@ -9,9 +9,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
     (manuelm)
 
-- Standard:
-  . Fix memory leak in array_diff() with custom type checks. (ndossche)
-
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
@@ -19,6 +16,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
     __halt_compiler() when reading stub). (ndossche, TimWolla)
+
+- Standard:
+  . Fix memory leak in array_diff() with custom type checks. (ndossche)
 
 06 Nov 2025, PHP 8.5.0RC4
 
