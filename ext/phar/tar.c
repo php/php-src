@@ -87,10 +87,10 @@ static zend_result phar_tar_octal(char *buf, uint32_t val, size_t len) /* {{{ */
 }
 /* }}} */
 
-static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_checksum(const char *buf, size_t len) /* {{{ */
 {
 	uint32_t sum = 0;
-	char *end = buf + len;
+	const char *end = buf + len;
 
 	while (buf != end) {
 		sum += (unsigned char)*buf;
@@ -100,7 +100,7 @@ static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
 }
 /* }}} */
 
-bool phar_is_tar(char *buf, char *fname) /* {{{ */
+bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
 	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
