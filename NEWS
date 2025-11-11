@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fix crashes when trying to instantiate uninstantiable classes via date
     static constructors. (ndossche)
 
+- DOM:
+  . Fix memory leak when edge case is hit when registering xpath callback.
+    (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
