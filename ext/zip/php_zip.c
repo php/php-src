@@ -2398,7 +2398,7 @@ PHP_METHOD(ZipArchive, setCompressionName)
 	}
 
 	if (comp_method < -1 || comp_method > INT_MAX) {
-		zend_argument_value_error(2, "must be between 0 and %d", INT_MAX);
+		zend_argument_value_error(2, "must be between -1 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -3050,7 +3050,7 @@ PHP_METHOD(ZipArchive, isEncryptionMethodSupported)
 		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
 	}
-	RETVAL_BOOL(zip_encryption_method_supported((zip_uint16_t)method, enc));
+	RETURN_BOOL(zip_encryption_method_supported((zip_uint16_t)method, enc));
 }
 /* }}} */
 #endif

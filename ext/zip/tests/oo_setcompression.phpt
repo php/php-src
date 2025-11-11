@@ -81,8 +81,8 @@ unlink($tmpfile);
 bool(true)
 bool(true)
 bool(true)
-ZipArchive::setCompressionName(): Argument #2 ($method) must be between 0 and %d
-ZipArchive::setCompressionName(): Argument #2 ($method) must be between 0 and %d
+ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
+ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
 ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 bool(true)
