@@ -340,6 +340,7 @@ static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucke
 	}
 	
 check_enums:
+	;
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
 	 * that would be observable via comparison operators. */
 	zval *rhs = &s->val;
