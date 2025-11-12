@@ -304,16 +304,42 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 
 static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	/* Enable transitive comparison mode for this comparison tree.
-	 * Save the previous state to handle reentrancy (e.g., usort with callback that calls sort). */
+	int result;
+
+	if (EXPECTED(Z_TYPE(f->val) == IS_LONG && Z_TYPE(s->val) == IS_LONG)) {
+		zend_long l1 = Z_LVAL(f->val);
+		zend_long l2 = Z_LVAL(s->val);
+		return ZEND_THREEWAY_COMPARE(l1, l2);
+	}
+	
+	if (Z_TYPE(f->val) == IS_STRING && Z_TYPE(s->val) == IS_STRING) {
+		bool old_mode = EG(transitive_compare_mode);
+		if (EXPECTED(!old_mode)) {
+			EG(transitive_compare_mode) = true;
+			result = zendi_smart_strcmp(Z_STR(f->val), Z_STR(s->val));
+			EG(transitive_compare_mode) = false;
+		} else {
+			result = zendi_smart_strcmp(Z_STR(f->val), Z_STR(s->val));
+		}
+		goto check_enums;
+	}
+	
+	if (Z_TYPE(f->val) == IS_DOUBLE && Z_TYPE(s->val) == IS_DOUBLE) {
+		double d1 = Z_DVAL(f->val);
+		double d2 = Z_DVAL(s->val);
+		return ZEND_THREEWAY_COMPARE(d1, d2);
+	}
+
 	bool old_transitive_mode = EG(transitive_compare_mode);
-	EG(transitive_compare_mode) = true;
-
-	int result = zend_compare(&f->val, &s->val);
-
-	/* Restore previous state */
-	EG(transitive_compare_mode) = old_transitive_mode;
-
+	if (EXPECTED(!old_transitive_mode)) {
+		EG(transitive_compare_mode) = true;
+		result = zend_compare(&f->val, &s->val);
+		EG(transitive_compare_mode) = false;
+	} else {
+		result = zend_compare(&f->val, &s->val);
+	}
+	
+check_enums:
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
 	 * that would be observable via comparison operators. */
 	zval *rhs = &s->val;

@@ -2264,7 +2264,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
 	if (type == IS_LONG) {
-		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
+		return ZEND_THREEWAY_COMPARE(lval, str_lval);
 	}
 
 	if (type == IS_DOUBLE) {
@@ -3454,22 +3454,23 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 
 	/* When in transitive comparison mode (used by SORT_REGULAR), enforce transitivity
 	 * by consistently ordering numeric vs non-numeric strings. */
-	bool num1 = ret1 != 0;
-	bool num2 = ret2 != 0;
-	if (UNEXPECTED(EG(transitive_compare_mode)) && (num1 ^ num2)) {
-		/* One is numeric, one is not.
-		 * Special case: empty strings are non-numeric but sort BEFORE numeric strings.
-		 * Order: empty < numeric < non-numeric (matches PHP 8+ comparison semantics) */
-		bool is_empty1 = (s1->len == 0);
-		bool is_empty2 = (s2->len == 0);
-		
-		if (is_empty1 || is_empty2) {
-			/* If one is empty, empty comes first */
-			return is_empty1 ? -1 : 1;
+	if (UNEXPECTED(EG(transitive_compare_mode))) {
+		int type_mismatch = (!!ret1) ^ (!!ret2);
+		if (UNEXPECTED(type_mismatch)) {
+			/* One is numeric, one is not.
+			 * Special case: empty strings are non-numeric but sort BEFORE numeric strings.
+			 * Order: empty < numeric < non-numeric (matches PHP 8+ comparison semantics) */
+			bool is_empty1 = (s1->len == 0);
+			bool is_empty2 = (s2->len == 0);
+			
+			if (is_empty1 || is_empty2) {
+				/* If one is empty, empty comes first */
+				return is_empty1 ? -1 : 1;
+			}
+			
+			/* Neither is empty: numeric < non-numeric */
+			return ret1 ? -1 : 1;
 		}
-		
-		/* Neither is empty: numeric < non-numeric */
-		return ret1 ? -1 : 1;
 	}
 
 	if (ret1 && ret2) {
@@ -3501,10 +3502,9 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 				 * so a numeric comparison would be inaccurate */
 				goto string_cmp;
 			}
-			dval1 = dval1 - dval2;
-			return ZEND_NORMALIZE_BOOL(dval1);
+			return ZEND_THREEWAY_COMPARE(dval1, dval2);
 		} else { /* they both have to be long's */
-			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+			return ZEND_THREEWAY_COMPARE(lval1, lval2);
 		}
 	} else {
 		int strcmp_ret;
