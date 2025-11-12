@@ -925,7 +925,7 @@ static void register_gd_symbols(int module_number)
 #endif
 
 
-	zend_attribute *attribute_Deprecated_func_imagedestroy_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "imagedestroy", sizeof("imagedestroy") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_imagedestroy_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "imagedestroy", sizeof("imagedestroy") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_imagedestroy_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_imagedestroy_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_imagedestroy_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);

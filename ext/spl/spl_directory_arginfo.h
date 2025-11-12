@@ -481,7 +481,7 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 
-	zend_attribute *attribute_Deprecated_func__bad_state_ex_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "_bad_state_ex", sizeof("_bad_state_ex") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	zend_attribute *attribute_Deprecated_func__bad_state_ex_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "_bad_state_ex", sizeof("_bad_state_ex") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	ZVAL_STR(&attribute_Deprecated_func__bad_state_ex_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func__bad_state_ex_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 

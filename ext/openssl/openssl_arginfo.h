@@ -646,108 +646,108 @@ static void register_openssl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("OPENSSL_ENCODING_PEM", ENCODING_PEM, CONST_PERSISTENT);
 
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_x509_check_private_key", sizeof("openssl_x509_check_private_key") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_x509_check_private_key", sizeof("openssl_x509_check_private_key") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_attribute *attribute_Deprecated_func_openssl_x509_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_x509_free", sizeof("openssl_x509_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_openssl_x509_free_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_x509_free", sizeof("openssl_x509_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_x509_free_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_openssl_x509_free_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_openssl_x509_free_0_arg1_str = zend_string_init("as OpenSSLCertificate objects are freed automatically", strlen("as OpenSSLCertificate objects are freed automatically"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_x509_free_0->args[1].value, attribute_Deprecated_func_openssl_x509_free_0_arg1_str);
 	attribute_Deprecated_func_openssl_x509_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_read", sizeof("openssl_pkcs12_read") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_read", sizeof("openssl_pkcs12_read") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_csr_sign", sizeof("openssl_csr_sign") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_csr_sign", sizeof("openssl_csr_sign") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_csr_new", sizeof("openssl_csr_new") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_csr_new", sizeof("openssl_csr_new") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_attribute *attribute_Deprecated_func_openssl_pkey_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_free", sizeof("openssl_pkey_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_openssl_pkey_free_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_free", sizeof("openssl_pkey_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_pkey_free_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_openssl_pkey_free_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_openssl_pkey_free_0_arg1_str = zend_string_init("as OpenSSLAsymmetricKey objects are freed automatically", strlen("as OpenSSLAsymmetricKey objects are freed automatically"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_pkey_free_0->args[1].value, attribute_Deprecated_func_openssl_pkey_free_0_arg1_str);
 	attribute_Deprecated_func_openssl_pkey_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_openssl_free_key_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_free_key", sizeof("openssl_free_key") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_openssl_free_key_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_free_key", sizeof("openssl_free_key") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_free_key_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_openssl_free_key_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_openssl_free_key_0->args[1].value, attribute_Deprecated_func_openssl_pkey_free_0_arg1_str);
 	attribute_Deprecated_func_openssl_free_key_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pbkdf2", sizeof("openssl_pbkdf2") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pbkdf2", sizeof("openssl_pbkdf2") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_sign", sizeof("openssl_pkcs7_sign") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_sign", sizeof("openssl_pkcs7_sign") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_sign", sizeof("openssl_cms_sign") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_cms_sign", sizeof("openssl_cms_sign") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_public_encrypt", sizeof("openssl_public_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_public_encrypt", sizeof("openssl_public_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_public_decrypt", sizeof("openssl_public_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_public_decrypt", sizeof("openssl_public_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_sign", sizeof("openssl_sign") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_sign", sizeof("openssl_sign") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_seal", sizeof("openssl_seal") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_seal", sizeof("openssl_seal") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_decrypt", sizeof("openssl_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_decrypt", sizeof("openssl_decrypt") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_dh_compute_key", sizeof("openssl_dh_compute_key") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_dh_compute_key", sizeof("openssl_dh_compute_key") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_derive", sizeof("openssl_pkey_derive") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_derive", sizeof("openssl_pkey_derive") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_spki_new", sizeof("openssl_spki_new") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_spki_new", sizeof("openssl_spki_new") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #if defined(HAVE_OPENSSL_ARGON2)
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_hash", sizeof("openssl_password_hash") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_password_hash", sizeof("openssl_password_hash") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_verify", sizeof("openssl_password_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "openssl_password_verify", sizeof("openssl_password_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 }
 
