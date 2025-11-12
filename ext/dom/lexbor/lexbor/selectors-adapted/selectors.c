@@ -52,7 +52,7 @@ static bool lxb_selectors_str_cmp_loright(const char *lhs, const char *rhs)
 /* `name` is lowercase */
 static zend_always_inline bool lxb_selectors_cmp_html_name_lit(const xmlNode *node, const char *name)
 {
-	return lxb_selectors_str_cmp_loright((const char *) node->name, name);
+	return strcmp((const char *) node->name, name) == 0;
 }
 
 static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, const xmlNode *b)
@@ -61,7 +61,6 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, co
 	return a->ns == b->ns || (a->ns != NULL && b->ns != NULL && xmlStrEqual(a->ns->href, b->ns->href));
 }
 
-/* From https://html.spec.whatwg.org/#case-sensitivity-of-selectors */
 static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xmlNode *node, const lxb_selectors_adapted_id *id)
 {
 	ZEND_ASSERT(node->doc != NULL);
