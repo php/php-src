@@ -709,39 +709,39 @@ static void register_ldap_symbols(int module_number)
 
 #if defined(HAVE_ORALDAP)
 
-	zend_attribute *attribute_Deprecated_func_ldap_connect_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_ldap_connect_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_ldap_connect_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_ldap_connect_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[1].value, attribute_Deprecated_func_ldap_connect_0_arg1_str);
 	attribute_Deprecated_func_ldap_connect_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
 
-	zend_attribute *attribute_Deprecated_func_ldap_connect_wallet_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_ldap_connect_wallet_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_ldap_connect_wallet_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[1].value, attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str);
 	attribute_Deprecated_func_ldap_connect_wallet_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind_ext", sizeof("ldap_bind_ext") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_bind_ext", sizeof("ldap_bind_ext") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #if defined(HAVE_LDAP_SASL)
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_sasl_bind", sizeof("ldap_sasl_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_sasl_bind", sizeof("ldap_sasl_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_LDAP_PASSWD)
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ORALDAP)
 
