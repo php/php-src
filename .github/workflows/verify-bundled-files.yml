@@ -28,7 +28,6 @@ jobs:
         uses: dorny/paths-filter@v3
         id: changes
         with:
-          base: master
           filters: |
             'boost-context':
               - '.github/scripts/download-bundled/boost-context.*'
