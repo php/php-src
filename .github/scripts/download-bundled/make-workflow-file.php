@@ -86,8 +86,11 @@ class Generator
             name: Verify Bundled Files
 
             on:
-              push: ~
-              pull_request: ~
+              push:
+                paths: &paths
+                  %paths%
+              pull_request:
+                paths: *paths
               schedule:
                 - cron: "0 1 * * *"
               workflow_dispatch: ~
@@ -113,6 +116,20 @@ class Generator
                   %steps%
 
             EOD;
+
+        $paths = [
+            '.github/scripts/download-bundled/**',
+        ];
+        foreach ($this->bundles as $bundle) {
+            foreach ($this->makeDornyPathsFilterFilters($bundle) as $p) {
+                if (str_starts_with($p, '.github/scripts/download-bundled/')) {
+                    continue;
+                }
+
+                $paths[] = $p;
+            }
+        }
+        $content = str_replace('%paths%', $this->indentString($this->encodeYml($paths), 3, false), $content);
 
         $filters = [];
         foreach ($this->bundles as $bundle) {

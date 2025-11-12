@@ -3,8 +3,10 @@ name: Verify Bundled Files
 on:
   push:
     paths: &paths
-      - '.github/scripts/download-bundled/pcre2.sh'
+      - '.github/scripts/download-bundled/**'
+      - 'Zend/asm/**'
       - 'ext/pcre/pcre2lib/**'
+      - 'ext/uri/uriparser/**'
   pull_request:
     paths: *paths
   schedule:
