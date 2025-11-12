@@ -33,6 +33,13 @@
 
 #ifdef HAVE_JIT
 
+#if defined(HAVE_PKEY_MPROTECT) && defined(PKEY_DISABLE_WRITE)
+# define ZEND_JIT_USE_PKEYS
+# ifndef PKEY_DISABLE_EXECUTE
+#  define PKEY_DISABLE_EXECUTE 0
+# endif
+#endif
+
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_inference.h"
@@ -87,6 +94,10 @@ static void *dasm_end = NULL;
 static void **dasm_ptr = NULL;
 
 static size_t dasm_size = 0;
+
+#ifdef ZEND_JIT_USE_PKEYS
+static int pkey = 0; /* Memory Protection Key */
+#endif
 
 static zend_long jit_bisect_pos = 0;
 
@@ -3519,6 +3530,21 @@ void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+# ifdef ZEND_JIT_USE_PKEYS
+		if (pkey) {
+#  ifdef ZTS
+			int restrictions = 0;
+#  else
+			int restrictions = PKEY_DISABLE_EXECUTE;
+#  endif
+			if (pkey_set(pkey, restrictions) != 0) {
+				fprintf(stderr, "pkey_set() failed [%d] %s\n", errno, strerror(errno));
+			} else {
+				return;
+			}
+		}
+# endif
+
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
@@ -3554,6 +3580,16 @@ void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+# ifdef ZEND_JIT_USE_PKEYS
+		if (pkey) {
+			if (pkey_set(pkey, PKEY_DISABLE_WRITE) != 0) {
+				fprintf(stderr, "pkey_set() failed [%d] %s\n", errno, strerror(errno));
+			} else {
+				return;
+			}
+		}
+# endif
+
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 		if (zend_write_protect) {
 			pthread_jit_write_protect_np(1);
@@ -3774,34 +3810,45 @@ int zend_jit_check_support(void)
 	return SUCCESS;
 }
 
-void zend_jit_startup(void *buf, size_t size, bool reattached)
+static void zend_jit_startup_dasm_prot(void)
 {
-	zend_jit_halt_op = zend_get_halt_op();
-	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
-
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	zend_write_protect = pthread_jit_write_protect_supported_np();
-#endif
-
-	dasm_buf = buf;
-	dasm_size = size;
-	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
-
 #ifdef HAVE_MPROTECT
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+# ifdef ZEND_JIT_USE_PKEYS
+	pkey = pkey_alloc(0, PKEY_DISABLE_WRITE);
+	if (pkey < 0) {
+		pkey = 0;
+	}
+# endif
+# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	if (zend_write_protect) {
 		pthread_jit_write_protect_np(1);
 	}
-#endif
+# endif
+
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
-	} else {
-		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		return;
+	}
+
+# if ZEND_JIT_USE_PKEYS
+	if (pkey) {
+		if (pkey_mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC, pkey) != 0) {
+			fprintf(stderr, "pkey_mprotect() failed [%d] %s\n", errno, strerror(errno));
+			pkey = 0;
+		} else {
+			/* Fallback to mprotect(PROT_READ | PROT_EXEC) */
+			return;
 		}
 	}
+
+# endif
+
+	if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
+		fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+	}
+
 #elif defined(_WIN32)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		DWORD old;
@@ -3823,6 +3870,22 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		}
 	}
 #endif
+}
+
+void zend_jit_startup(void *buf, size_t size, bool reattached)
+{
+	zend_jit_halt_op = zend_get_halt_op();
+	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
+
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	zend_write_protect = pthread_jit_write_protect_supported_np();
+#endif
+
+	dasm_buf = buf;
+	dasm_size = size;
+	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
+
+	zend_jit_startup_dasm_prot();
 
 	if (!reattached) {
 		zend_jit_unprotect();
