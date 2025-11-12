@@ -2737,12 +2737,12 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 
 #if ZEND_MM_CUSTOM
 # define ZEND_MM_CUSTOM_ALLOCATOR(size) do { \
-		if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) { \
+		if (UNEXPECTED(AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED)) { \
 			return AG(mm_heap)->custom_heap._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 		} \
 	} while (0)
 # define ZEND_MM_CUSTOM_DEALLOCATOR(ptr) do { \
-		if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) { \
+		if (UNEXPECTED(AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED)) { \
 			AG(mm_heap)->custom_heap._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 			return; \
 		} \
