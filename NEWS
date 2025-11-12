@@ -1,13 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0
+?? ??? ????, PHP 8.5.1
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
   . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
     passing to variadic parameter). (ndossche)
-  . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
-    (manuelm)
 
 - DOM:
   . Fix memory leak when edge case is hit when registering xpath callback.
@@ -27,6 +25,22 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
     special characters in attributes when passing data to callback). (ndossche)
+
+13 Nov 2025, PHP 8.5.0RC5
+
+- Core:
+  . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
+    (manuelm)
+  . Address bug GH-20384 (Confirm if ob_gzhandler is impacted by ob_start
+    handler changes) by reverting GH-18932 (Deprecate returning non-string
+    values from a user output handler). (DanielEScherzer)
+
+- URI:
+  . Fixed bug GH-20431 (Uri\Rfc3986\Uri::setHost(null) turns empty path into /)
+    by updating to a newer uriparser snapshot. (timwolla)
+  . Fixed the distinction between an empty and a missing query/fragment
+    when using Uri\WhatWg\Url::getQuery() and Uri\WhatWg\Url::getFragment().
+    (kocsismate)
 
 06 Nov 2025, PHP 8.5.0RC4
 
