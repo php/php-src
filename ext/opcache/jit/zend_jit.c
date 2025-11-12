@@ -3774,10 +3774,14 @@ int zend_jit_check_support(void)
 	return SUCCESS;
 }
 
-void zend_jit_startup(void *buf, size_t size, bool reattached)
+void zend_jit_startup(void)
+{
+	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
+}
+
+void zend_jit_post_startup(void *buf, size_t size, bool reattached)
 {
 	zend_jit_halt_op = zend_get_halt_op();
-	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	zend_write_protect = pthread_jit_write_protect_supported_np();

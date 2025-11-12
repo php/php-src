@@ -28,15 +28,15 @@ static int finalized = 0;
 
 ZEND_API zend_result zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
 {
-	if (finalized == 0) {
-		PHP_MD5Update(&context, module_name, strlen(module_name));
-		PHP_MD5Update(&context, hook_name, strlen(hook_name));
-		if (size) {
-			PHP_MD5Update(&context, data, size);
-		}
-		return SUCCESS;
+	ZEND_ASSERT(finalized == 0 && "zend_add_system_entropy() must not be called after zend_finalize_system_id()");
+
+	PHP_MD5Update(&context, module_name, strlen(module_name));
+	PHP_MD5Update(&context, hook_name, strlen(hook_name));
+	if (size) {
+		PHP_MD5Update(&context, data, size);
 	}
-	return FAILURE;
+
+	return SUCCESS;
 }
 
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
