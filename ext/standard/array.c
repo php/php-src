@@ -3040,18 +3040,18 @@ PHP_FUNCTION(range)
 			if (start_type == IS_STRING || end_type == IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be of type int when generating an array"
 					" of characters, inputs converted to 0");
-			}
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 			}
 			end_type = IS_LONG;
 			start_type = IS_LONG;
 			goto handle_numeric_inputs;
 		}
 
-		/* Generate array of characters */
-		unsigned char low = (unsigned char)Z_STRVAL_P(user_start)[0];
-		unsigned char high = (unsigned char)Z_STRVAL_P(user_end)[0];
+		/* Generate array of characters, as zero-extended ints to make bounds checking possible in the loop condition */
+		int low = (unsigned char) Z_STRVAL_P(user_start)[0];
+		int high = (unsigned char) Z_STRVAL_P(user_end)[0];
 
 		/* Decreasing char range */
 		if (low > high) {
@@ -3062,12 +3062,9 @@ PHP_FUNCTION(range)
 			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= (unsigned int)step) {
+				for (; low >= high; low -= step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low - step) < 0) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { /* Increasing char range */
@@ -3080,12 +3077,9 @@ PHP_FUNCTION(range)
 			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += (unsigned int)step) {
+				for (; low <= high; low += step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low + step) > 255) {
-						break;
-					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
@@ -3743,18 +3737,34 @@ PHP_FUNCTION(array_unshift)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_hash_init(&new_hash, zend_hash_num_elements(Z_ARRVAL_P(stack)) + argc, NULL, ZVAL_PTR_DTOR, 0);
-	for (uint32_t i = 0; i < argc; i++) {
-		Z_TRY_ADDREF(args[i]);
-		zend_hash_next_index_insert_new(&new_hash, &args[i]);
-	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
-		if (key) {
-			zend_hash_add_new(&new_hash, key, value);
-		} else {
-			zend_hash_next_index_insert_new(&new_hash, value);
+	if (HT_IS_PACKED(Z_ARRVAL_P(stack))) {
+		zend_hash_real_init_packed(&new_hash);
+
+		ZEND_HASH_FILL_PACKED(&new_hash) {
+			for (uint32_t i = 0; i < argc; i++) {
+				Z_TRY_ADDREF(args[i]);
+				ZEND_HASH_FILL_ADD(&args[i]);
+			}
+
+			ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(stack), value) {
+				ZEND_HASH_FILL_ADD(value);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+	} else {
+		for (uint32_t i = 0; i < argc; i++) {
+			Z_TRY_ADDREF(args[i]);
+			zend_hash_next_index_insert_new(&new_hash, &args[i]);
 		}
-	} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+			if (key) {
+				zend_hash_add_new(&new_hash, key, value);
+			} else {
+				zend_hash_next_index_insert_new(&new_hash, value);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	if (UNEXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
@@ -3853,7 +3863,6 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
-		/* This properly handles both packed and unpacked arrays. */
 		return ht->arData + offset;
 	}
 	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
@@ -3880,7 +3889,6 @@ static inline zval* find_packed_val_at_offset(HashTable* ht, zend_long offset)
 	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
-		/* This properly handles both packed and unpacked arrays. */
 		return ht->arPacked + offset;
 	}
 	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
@@ -4296,22 +4304,20 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		if (ret) {
 			if (HT_IS_PACKED(Z_ARRVAL_P(ret))) {
 				if (HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(ret))) {
-					ZVAL_COPY(return_value, ret);
-					return;
+					RETURN_COPY(ret);
 				}
 			} else {
-				bool copy = 1;
+				bool copy = true;
 				zend_string *string_key;
 
-				ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(ret), string_key) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY(Z_ARRVAL_P(ret), string_key) {
 					if (!string_key) {
-						copy = 0;
+						copy = false;
 						break;
 					}
 				} ZEND_HASH_FOREACH_END();
 				if (copy) {
-					ZVAL_COPY(return_value, ret);
-					return;
+					RETURN_COPY(ret);
 				}
 			}
 		}
@@ -4326,7 +4332,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		if (HT_IS_WITHOUT_HOLES(src) && zend_may_modify_arg_in_place(arg)) {
 			dest = src;
 			in_place = true;
-			ZVAL_ARR(return_value, dest);
+			RETVAL_ARR(dest);
 		} else {
 			array_init_size(return_value, count);
 			dest = Z_ARRVAL_P(return_value);
@@ -5895,6 +5901,7 @@ PHP_FUNCTION(array_diff)
 
 		for (i = 1; i < argc; i++) {
 			if (Z_TYPE(args[i]) != IS_ARRAY) {
+				zend_tmp_string_release(tmp_search_str);
 				zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
 				RETURN_THROWS();
 			}
@@ -6758,11 +6765,11 @@ PHP_FUNCTION(array_all)
 PHP_FUNCTION(array_map)
 {
 	zval *arrays = NULL;
-	int n_arrays = 0;
+	uint32_t n_arrays = 0;
 	zval result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	int i;
+	uint32_t i;
 	uint32_t k, maxlen = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
@@ -6804,8 +6811,7 @@ PHP_FUNCTION(array_map)
 						ZEND_IGNORE_VALUE(ret);
 						if (UNEXPECTED(Z_ISUNDEF(result))) {
 							ZEND_HASH_FILL_FINISH();
-							zend_array_destroy(output);
-							RETURN_NULL();
+							RETURN_THROWS();
 						}
 					} else {
 						ZVAL_UNDEF(&result);
@@ -6828,8 +6834,7 @@ PHP_FUNCTION(array_map)
 				ZEND_ASSERT(ret == SUCCESS);
 				ZEND_IGNORE_VALUE(ret);
 				if (UNEXPECTED(Z_ISUNDEF(result))) {
-					zend_array_destroy(output);
-					RETURN_NULL();
+					RETURN_THROWS();
 				}
 				if (str_key) {
 					_zend_hash_append(output, str_key, &result);
@@ -6839,12 +6844,9 @@ PHP_FUNCTION(array_map)
 			} ZEND_HASH_FOREACH_END();
 		}
 	} else {
-		uint32_t *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
-
 		for (i = 0; i < n_arrays; i++) {
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 				zend_argument_type_error(i + 2, "must be of type array, %s given", zend_zval_value_name(&arrays[i]));
-				efree(array_pos);
 				RETURN_THROWS();
 			}
 			if (zend_hash_num_elements(Z_ARRVAL(arrays[i])) > maxlen) {
@@ -6855,6 +6857,7 @@ PHP_FUNCTION(array_map)
 		array_init_size(return_value, maxlen);
 
 		if (!ZEND_FCI_INITIALIZED(fci)) {
+			uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
 			zval zv;
 
 			/* We iterate through all the arrays at once. */
@@ -6898,23 +6901,34 @@ PHP_FUNCTION(array_map)
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
 			}
+
+			efree(array_pos);
 		} else {
 			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
+
+			/* Remember next starting point in the array, initialize those as zeros. */
+			for (i = 0; i < n_arrays; i++) {
+				Z_EXTRA(params[i]) = 0;
+			}
+
+			fci.retval = &result;
+			fci.param_count = n_arrays;
+			fci.params = params;
 
 			/* We iterate through all the arrays at once. */
 			for (k = 0; k < maxlen; k++) {
 				for (i = 0; i < n_arrays; i++) {
 					/* If this array still has elements, add the current one to the
 					 * parameter list, otherwise use null value. */
-					uint32_t pos = array_pos[i];
+					uint32_t pos = Z_EXTRA(params[i]);
 					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
 						while (1) {
 							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
 								ZVAL_NULL(&params[i]);
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								array_pos[i] = pos + 1;
+								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
+								Z_EXTRA(params[i]) = pos + 1;
 								break;
 							}
 							pos++;
@@ -6925,8 +6939,8 @@ PHP_FUNCTION(array_map)
 								ZVAL_NULL(&params[i]);
 								break;
 							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
-								array_pos[i] = pos + 1;
+								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
+								Z_EXTRA(params[i]) = pos + 1;
 								break;
 							}
 							pos++;
@@ -6934,26 +6948,13 @@ PHP_FUNCTION(array_map)
 					}
 				}
 
-				fci.retval = &result;
-				fci.param_count = n_arrays;
-				fci.params = params;
-
 				zend_result ret = zend_call_function(&fci, &fci_cache);
 				ZEND_ASSERT(ret == SUCCESS);
 				ZEND_IGNORE_VALUE(ret);
 
 				if (Z_TYPE(result) == IS_UNDEF) {
-					efree(array_pos);
-					zend_array_destroy(Z_ARR_P(return_value));
-					for (i = 0; i < n_arrays; i++) {
-						zval_ptr_dtor(&params[i]);
-					}
 					efree(params);
-					RETURN_NULL();
-				} else {
-					for (i = 0; i < n_arrays; i++) {
-						zval_ptr_dtor(&params[i]);
-					}
+					RETURN_THROWS();
 				}
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
@@ -6961,7 +6962,6 @@ PHP_FUNCTION(array_map)
 
 			efree(params);
 		}
-		efree(array_pos);
 	}
 }
 /* }}} */
@@ -7037,8 +7037,7 @@ PHP_FUNCTION(array_chunk)
 
 	if (size > num_in) {
 		if (num_in == 0) {
-			RETVAL_EMPTY_ARRAY();
-			return;
+			RETURN_EMPTY_ARRAY();
 		}
 		size = num_in;
 	}
@@ -7046,12 +7045,11 @@ PHP_FUNCTION(array_chunk)
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	ZVAL_UNDEF(&chunk);
-
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, str_key, entry) {
 		/* If new chunk, create and initialize it. */
-		if (Z_TYPE(chunk) == IS_UNDEF) {
+		if (current == 0) {
 			array_init_size(&chunk, (uint32_t)size);
+			add_next_index_zval(return_value, &chunk);
 		}
 
 		/* Add entry to the chunk, preserving keys if necessary. */
@@ -7066,19 +7064,10 @@ PHP_FUNCTION(array_chunk)
 		}
 		zval_add_ref(entry);
 
-		/* If reached the chunk size, add it to the result array, and reset the
-		 * pointer. */
 		if (++current == size) {
-			add_next_index_zval(return_value, &chunk);
-			ZVAL_UNDEF(&chunk);
 			current = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	/* Add the final chunk if there is one. */
-	if (Z_TYPE(chunk) != IS_UNDEF) {
-		add_next_index_zval(return_value, &chunk);
-	}
 }
 /* }}} */
 

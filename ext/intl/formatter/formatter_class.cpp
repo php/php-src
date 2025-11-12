@@ -15,15 +15,19 @@
 #include <unicode/unum.h>
 
 #include "formatter_class.h"
+extern "C" {
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
+}
 
 #include <zend_exceptions.h>
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_interfaces.h"
 
+extern "C" {
 #include "formatter_arginfo.h"
+}
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;
@@ -33,7 +37,7 @@ static zend_object_handlers NumberFormatter_handlers;
  */
 
 /* {{{ NumberFormatter_objects_free */
-void NumberFormatter_object_free( zend_object *object )
+U_CFUNC void NumberFormatter_object_free( zend_object *object )
 {
 	NumberFormatter_object* nfo = php_intl_number_format_fetch_object(object);
 
@@ -44,11 +48,11 @@ void NumberFormatter_object_free( zend_object *object )
 /* }}} */
 
 /* {{{ NumberFormatter_object_create */
-zend_object *NumberFormatter_object_create(zend_class_entry *ce)
+U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
 
-	intern = zend_object_alloc(sizeof(NumberFormatter_object), ce);
+	intern = reinterpret_cast<NumberFormatter_object *>(zend_object_alloc(sizeof(NumberFormatter_object), ce));
 	formatter_data_init( &intern->nf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -58,7 +62,7 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ NumberFormatter_object_clone */
-zend_object *NumberFormatter_object_clone(zend_object *object)
+U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 {
 	NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
 	zend_object            *new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
@@ -88,7 +92,7 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
 /* {{{ formatter_register_class
  * Initialize 'NumberFormatter' class
  */
-void formatter_register_class( void )
+U_CFUNC void formatter_register_class( void )
 {
 	/* Create and register 'NumberFormatter' class. */
 	NumberFormatter_ce_ptr = register_class_NumberFormatter();

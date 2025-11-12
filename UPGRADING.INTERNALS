@@ -43,6 +43,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     pointer.
   . The zend_get_call_trampoline_func() API now takes the __call or
     __callStatic zend_function* instead of a CE and a boolean argument.
+  . The zend_set_hash_symbol() API has been removed.
+  . Added zend_hash_str_lookup().
   . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
     removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
     instead.

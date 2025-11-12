@@ -1413,14 +1413,10 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 static inline void sxe_add_namespace_name_raw(zval *return_value, const char *prefix, const char *href)
 {
-	zend_string *key = zend_string_init(prefix, strlen(prefix), 0);
-	zval zv;
-
-	if (!zend_hash_exists(Z_ARRVAL_P(return_value), key)) {
-		ZVAL_STRING(&zv, href);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
+	zval *zv = zend_hash_str_lookup(Z_ARRVAL_P(return_value), prefix, strlen(prefix));
+	if (Z_ISNULL_P(zv)) {
+		ZVAL_STRING(zv, href);
 	}
-	zend_string_release_ex(key, 0);
 }
 
 static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{{ */

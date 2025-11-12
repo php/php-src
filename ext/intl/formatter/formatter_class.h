@@ -23,10 +23,10 @@ extern "C" {
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
+#include "formatter_data.h"
 #ifdef __cplusplus
 }
 #endif
-#include "formatter_data.h"
 
 typedef struct {
 	formatter_data  nf_data;

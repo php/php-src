@@ -308,7 +308,6 @@ PHP_FUNCTION(iptcparse)
 	unsigned char *buffer, recnum, dataset;
 	char *str, key[16];
 	size_t str_len;
-	zval values, *element;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(str, str_len)
@@ -357,10 +356,9 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
-			array_init(&values);
-
-			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
+		zval *element = zend_hash_str_lookup(Z_ARRVAL_P(return_value), key, strlen(key));
+		if (Z_ISNULL_P(element)) {
+			array_init(element);
 		}
 
 		add_next_index_stringl(element, (char *) buffer+inx, len);

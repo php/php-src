@@ -125,4 +125,8 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard:
   . Improved performance of array_fill_keys().
+  . Improved performance of array_map() with multiple arrays passed.
+  . Improved performance of array_unshift().
   . Improved performance of array_walk().
+  . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
+  . Improved performance of str_split().

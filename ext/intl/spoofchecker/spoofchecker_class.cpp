@@ -13,9 +13,11 @@
  */
 
 #include "spoofchecker_class.h"
+extern "C" {
 #include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
+}
 
 #include <unicode/uspoof.h>
 
@@ -27,7 +29,7 @@ static zend_object_handlers Spoofchecker_handlers;
  */
 
 /* {{{ Spoofchecker_objects_free */
-void Spoofchecker_objects_free(zend_object *object)
+U_CFUNC void Spoofchecker_objects_free(zend_object *object)
 {
 	Spoofchecker_object* co = php_intl_spoofchecker_fetch_object(object);
 
@@ -38,11 +40,11 @@ void Spoofchecker_objects_free(zend_object *object)
 /* }}} */
 
 /* {{{ Spoofchecker_object_create */
-zend_object *Spoofchecker_object_create(zend_class_entry *ce)
+U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
 
-	intern = zend_object_alloc(sizeof(Spoofchecker_object), ce);
+	intern = reinterpret_cast<Spoofchecker_object *>(zend_object_alloc(sizeof(Spoofchecker_object), ce));
 	intl_error_init(SPOOFCHECKER_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
@@ -87,7 +89,7 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 /* {{{ spoofchecker_register_Spoofchecker_class
  * Initialize 'Spoofchecker' class
  */
-void spoofchecker_register_Spoofchecker_class(void)
+U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
 {
 	/* Create and register 'Spoofchecker' class. */
 	Spoofchecker_ce_ptr = register_class_Spoofchecker();
@@ -106,7 +108,7 @@ void spoofchecker_register_Spoofchecker_class(void)
  * Initialize internals of Spoofchecker_object.
  * Must be called before any other call to 'spoofchecker_object_...' functions.
  */
-void spoofchecker_object_init(Spoofchecker_object* co)
+U_CFUNC void spoofchecker_object_init(Spoofchecker_object* co)
 {
 	if (!co) {
 		return;
@@ -119,7 +121,7 @@ void spoofchecker_object_init(Spoofchecker_object* co)
 /* {{{ void spoofchecker_object_destroy( Spoofchecker_object* co )
  * Clean up mem allocted by internals of Spoofchecker_object
  */
-void spoofchecker_object_destroy(Spoofchecker_object* co)
+U_CFUNC void spoofchecker_object_destroy(Spoofchecker_object* co)
 {
 	if (!co) {
 		return;

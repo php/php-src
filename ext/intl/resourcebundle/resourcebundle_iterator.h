@@ -29,6 +29,12 @@ typedef struct {
 	zend_long             i;
 } ResourceBundle_iterator;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref );
+#ifdef __cplusplus
+}
+#endif
 
 #endif // #ifndef RESOURCEBUNDLE_ITERATOR_H

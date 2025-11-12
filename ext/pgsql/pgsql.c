@@ -1977,8 +1977,9 @@ PHP_FUNCTION(pg_fetch_result)
 }
 /* }}} */
 
-/* {{{ void php_pgsql_fetch_hash */
-static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_long row, bool row_is_null, zend_long result_type)
+/* Returns true when the return_value was populated with an array,
+ * otherwise when an error occurs false is returned, in which case the return_value is NOT initialized */
+static bool php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_long row, bool row_is_null, zend_long result_type)
 {
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
@@ -1987,23 +1988,26 @@ static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_lo
 
 	if (!row_is_null && row < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
-		RETURN_THROWS();
+		return false;
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
 		zend_argument_value_error(3, "must be one of PGSQL_ASSOC, PGSQL_NUM, or PGSQL_BOTH");
-		RETURN_THROWS();
+		return false;
 	}
 
 	pg_result = Z_PGSQL_RESULT_P(result);
-	CHECK_PGSQL_RESULT(pg_result);
+	if (UNEXPECTED(pg_result->result == NULL)) {
+		zend_throw_error(NULL, "PostgreSQL result has already been closed");
+		return false;
+	}
 	pgsql_result = pg_result->result;
 
 	if (!row_is_null) {
 		if (row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
 							row, Z_LVAL_P(result));
-			RETURN_FALSE;
+			return false;
 		}
 		pgsql_row = (int)row;
 		pg_result->row = pgsql_row;
@@ -2011,7 +2015,7 @@ static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_lo
 		/* If 2nd param is NULL, use internal row counter to access next row */
 		pgsql_row = pg_result->row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			RETURN_FALSE;
+			return false;
 		}
 		pg_result->row++;
 	}
@@ -2042,8 +2046,8 @@ static void php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_lo
 			}
 		}
 	}
+	return true;
 }
-/* }}} */
 
 /* {{{ Get a row as an enumerated array */
 PHP_FUNCTION(pg_fetch_row)
@@ -2060,7 +2064,10 @@ PHP_FUNCTION(pg_fetch_row)
 		Z_PARAM_LONG(result_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type);
+	if (UNEXPECTED(!php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type))) {
+		/* Either an exception is thrown, or we return false */
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -2077,7 +2084,10 @@ PHP_FUNCTION(pg_fetch_assoc)
 		Z_PARAM_LONG_OR_NULL(row, row_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_pgsql_fetch_hash(return_value, result, row, row_is_null, PGSQL_ASSOC);
+	if (UNEXPECTED(!php_pgsql_fetch_hash(return_value, result, row, row_is_null, PGSQL_ASSOC))) {
+		/* Either an exception is thrown, or we return false */
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -2096,7 +2106,10 @@ PHP_FUNCTION(pg_fetch_array)
 		Z_PARAM_LONG(result_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type);
+	if (UNEXPECTED(!php_pgsql_fetch_hash(return_value, result, row, row_is_null, result_type))) {
+		/* Either an exception is thrown, or we return false */
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -2129,10 +2142,11 @@ PHP_FUNCTION(pg_fetch_object)
 		RETURN_THROWS();
 	}
 
-	/* pg_fetch_object() allowed result_type used to be. 3rd parameter
-	   must be allowed for compatibility */
 	zval dataset;
-	php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC);
+	if (UNEXPECTED(!php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC))) {
+		/* Either an exception is thrown, or we return false */
+		RETURN_FALSE;
+	}
 
 	// TODO: Check CE is an instantiable class earlier?
 	zend_result obj_initialized = object_init_ex(return_value, ce);

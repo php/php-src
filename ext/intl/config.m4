@@ -8,18 +8,9 @@ if test "$PHP_INTL" != "no"; then
   PHP_SUBST([INTL_SHARED_LIBADD])
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION([intl], m4_normalize([
-      common/common_error.c
-      dateformat/dateformat_class.c
-      formatter/formatter_class.c
       intl_convert.c
       intl_error.c
       php_intl.c
-      resourcebundle/resourcebundle_class.c
-      resourcebundle/resourcebundle_iterator.c
-      resourcebundle/resourcebundle.c
-      spoofchecker/spoofchecker_class.c
-      spoofchecker/spoofchecker_create.c
-      spoofchecker/spoofchecker_main.c
     ]),
     [$ext_shared],,
     [$INTL_COMMON_FLAGS],
@@ -37,6 +28,8 @@ if test "$PHP_INTL" != "no"; then
     collator/collator_sort.cpp \
     common/common_enum.cpp \
     common/common_date.cpp \
+    common/common_error.cpp \
+    dateformat/dateformat_class.cpp \
     converter/converter.cpp \
     dateformat/dateformat.cpp \
     dateformat/dateformat_attr.cpp \
@@ -49,6 +42,7 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_parse.cpp \
     dateformat/datepatterngenerator_class.cpp \
     dateformat/datepatterngenerator_methods.cpp \
+    formatter/formatter_class.cpp \
     grapheme/grapheme_string.cpp \
     grapheme/grapheme_util.cpp \
     msgformat/msgformat_helpers.cpp \
@@ -84,6 +78,12 @@ if test "$PHP_INTL" != "no"; then
     locale/locale_class.cpp \
     locale/locale_methods.cpp \
     locale/locale.cpp \
+    resourcebundle/resourcebundle_class.cpp \
+    resourcebundle/resourcebundle_iterator.cpp \
+    resourcebundle/resourcebundle.cpp \
+    spoofchecker/spoofchecker_class.cpp \
+    spoofchecker/spoofchecker_create.cpp \
+    spoofchecker/spoofchecker_main.cpp \
     uchar/uchar.cpp"
 
   PHP_REQUIRE_CXX()
