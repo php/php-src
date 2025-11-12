@@ -127,7 +127,16 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 	} else if (f->key && s->key) {
-		return zendi_smart_strcmp(f->key, s->key);
+		/* Enable transitive comparison mode for consistent key sorting.
+		 * Save the previous state to handle reentrancy. */
+		bool old_transitive_mode = EG(transitive_compare_mode);
+		EG(transitive_compare_mode) = true;
+
+		int result = zendi_smart_strcmp(f->key, s->key);
+
+		/* Restore previous state */
+		EG(transitive_compare_mode) = old_transitive_mode;
+		return result;
 	}
 	if (f->key) {
 		ZVAL_STR(&first, f->key);
@@ -139,7 +148,17 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	} else {
 		ZVAL_LONG(&second, s->h);
 	}
-	return zend_compare(&first, &second);
+
+	/* Enable transitive comparison mode for mixed key types.
+	 * Save the previous state to handle reentrancy. */
+	bool old_transitive_mode = EG(transitive_compare_mode);
+	EG(transitive_compare_mode) = true;
+
+	int result = zend_compare(&first, &second);
+
+	/* Restore previous state */
+	EG(transitive_compare_mode) = old_transitive_mode;
+	return result;
 }
 /* }}} */
 
