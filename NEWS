@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fix memory leak when edge case is hit when registering xpath callback.
     (ndossche)
+  . Fixed bug GH-20395 (querySelector and querySelectorAll requires elements
+    in $selectors to be lowercase). (ndossche)
 
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
