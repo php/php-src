@@ -10,5 +10,12 @@ echo "done.";
 ?>
 --EXPECTREGEX--
 .*ZendMM Observer enabled.*
-.*done\..*
-.*ZendMM Observer disabled.*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+(malloc|freed|realloc).*
+.*shutdown in progress: full\(0\), silent\(1\).*
+.*done\..*ZendMM Observer disabled.*
