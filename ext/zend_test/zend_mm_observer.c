@@ -81,11 +81,15 @@ static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 				zend_mm_test_observer_gc,
 				zend_mm_test_observer_shutdown
 			);
+			printf("ZendMM Observer enabled\n");
+			fflush(stdout);
 		}
 	} else {
 		if (ZT_G(observer) != NULL) {
 			zend_mm_observer_unregister(zend_mm_get_heap(), ZT_G(observer));
 			ZT_G(observer) = NULL;
+			printf("ZendMM Observer disabled\n");
+			fflush(stdout);
 		}
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -106,7 +110,7 @@ void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
 
 void zend_test_mm_observer_rinit(void)
 {
-	if (ZT_G(zend_mm_observer_enabled)) {
+	if (ZT_G(zend_mm_observer_enabled) && ZT_G(observer) == NULL) {
 		ZT_G(observer) = zend_mm_observer_register(
 			zend_mm_get_heap(),
 			zend_mm_test_observer_malloc,
