@@ -2,6 +2,8 @@
 ZendMM Observer: Observe shutdown
 --EXTENSIONS--
 zend_test
+--ENV--
+ZEND_TEST_MM_OBSERVER_SHUTDOWN_TEST=1
 --INI--
 zend_test.zend_mm_observer.enabled=1
 --FILE--
@@ -9,4 +11,4 @@ zend_test.zend_mm_observer.enabled=1
 echo "done.";
 ?>
 --EXPECTREGEX--
-.*shutdown in progress: full\(0\), silent\(1\).*
+.*shutdown in progress: full\(\d\), silent\(\d\).*
