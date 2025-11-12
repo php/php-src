@@ -2137,18 +2137,18 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	if (heap->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
 		size_t (*gc)(void) = heap->custom_heap._gc;
 		if (gc) {
-			return gc();
+			collected = gc();
 		}
-		return 0;
-	}
-	if (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) {
-		zend_mm_observer *current = heap->observers;
-		while (current != NULL) {
-			if (current->gc != NULL) {
-				current->gc(collected);
+		if (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) {
+			zend_mm_observer *current = heap->observers;
+			while (current != NULL) {
+				if (current->gc != NULL) {
+					current->gc(collected);
+				}
+				current = current->next;
 			}
-			current = current->next;
 		}
+		return collected;
 	}
 #endif
 
@@ -2254,7 +2254,20 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 		}
 	} while (chunk != heap->main_chunk);
 
-	return collected * ZEND_MM_PAGE_SIZE;
+	size_t collected_bytes = collected * ZEND_MM_PAGE_SIZE;
+#if ZEND_MM_CUSTOM
+	if (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) {
+		zend_mm_observer *current = heap->observers;
+		while (current != NULL) {
+			if (current->gc != NULL) {
+				current->gc(collected_bytes);
+			}
+			current = current->next;
+		}
+	}
+#endif
+
+	return collected_bytes;
 }
 
 #if ZEND_DEBUG
