@@ -2126,7 +2126,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(),
-			"s|bba!a!", &file, &file_len, &exclusive,
+			"p|bba!a!", &file, &file_len, &exclusive,
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			RETURN_THROWS();
 		}
