@@ -111,7 +111,6 @@ class Generator
                     uses: dorny/paths-filter@v3
                     id: changes
                     with:
-                      base: master
                       filters: %filters%
 
                   %steps%
