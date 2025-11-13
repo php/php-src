@@ -57,6 +57,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- ext/xml:
+  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
+    as it was unused.
+
 ========================
 4. OpCode changes
 ========================
