@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
     __halt_compiler() when reading stub). (ndossche, TimWolla)
 
+- PHPDBG:
+  . Fixed ZPP type violation in phpdbg_get_executable() and phpdbg_end_oplog().
+    (Girgias)
+
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
 
