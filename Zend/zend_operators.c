@@ -2257,7 +2257,7 @@ ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zva
 }
 /* }}} */
 
-static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
+static int compare_long_to_string(zend_long lval, zend_string *str, bool transitive_mode) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
@@ -2274,7 +2274,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 	/* String is non-numeric. In transitive mode, enforce consistent ordering.
 	 * Empty string < numeric < non-numeric string.
 	 * Since str is non-numeric, check if it's empty. */
-	if (UNEXPECTED(EG(transitive_compare_mode))) {
+	if (UNEXPECTED(transitive_mode)) {
 		/* Empty string comes before everything */
 		if (ZSTR_LEN(str) == 0) {
 			return 1;  /* lval > empty string */
@@ -2291,7 +2291,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
+static int compare_double_to_string(double dval, zend_string *str, bool transitive_mode) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
@@ -2310,7 +2310,7 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 	/* String is non-numeric. In transitive mode, enforce consistent ordering.
 	 * Empty string < numeric < non-numeric string.
 	 * Since str is non-numeric, check if it's empty. */
-	if (UNEXPECTED(EG(transitive_compare_mode))) {
+	if (UNEXPECTED(transitive_mode)) {
 		/* Empty string comes before everything */
 		if (ZSTR_LEN(str) == 0) {
 			return 1;  /* dval > empty string */
@@ -2331,6 +2331,8 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
 	bool converted = false;
 	zval op1_copy, op2_copy;
+	
+	bool transitive_mode = UNEXPECTED(EG(transitive_compare_mode));
 
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
@@ -2375,24 +2377,24 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return Z_STRLEN_P(op1) == 0 ? 0 : 1;
 
 			case TYPE_PAIR(IS_LONG, IS_STRING):
-				return compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2));
+				return compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2), transitive_mode);
 
 			case TYPE_PAIR(IS_STRING, IS_LONG):
-				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1));
+				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1), transitive_mode);
 
 			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
 				if (zend_isnan(Z_DVAL_P(op1))) {
 					return 1;
 				}
 
-				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2));
+				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2), transitive_mode);
 
 			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
 				if (zend_isnan(Z_DVAL_P(op2))) {
 					return 1;
 				}
 
-				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
+				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1), transitive_mode);
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				return 1;
@@ -3449,26 +3451,31 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
+	/* Handle empty strings */
+	if (UNEXPECTED(s1->len == 0 || s2->len == 0)) {
+		if (UNEXPECTED(EG(transitive_compare_mode))) {
+			if (s1->len == 0 && s2->len == 0) return 0;
+			return s1->len == 0 ? -1 : 1;
+		}
+		goto string_cmp;
+	}
+
+	/* Skip numeric parsing if both strings start with letters */
+	unsigned char c1 = (unsigned char)s1->val[0];
+	unsigned char c2 = (unsigned char)s2->val[0];
+	
+	if (((c1 >= 'a' && c1 <= 'z') || (c1 >= 'A' && c1 <= 'Z')) &&
+	    ((c2 >= 'a' && c2 <= 'z') || (c2 >= 'A' && c2 <= 'Z'))) {
+		goto string_cmp;
+	}
+
 	ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL);
 	ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL);
 
-	/* When in transitive comparison mode (used by SORT_REGULAR), enforce transitivity
-	 * by consistently ordering numeric vs non-numeric strings. */
+	/* In transitive mode, enforce numeric < non-numeric ordering */
 	if (UNEXPECTED(EG(transitive_compare_mode))) {
 		int type_mismatch = (!!ret1) ^ (!!ret2);
 		if (UNEXPECTED(type_mismatch)) {
-			/* One is numeric, one is not.
-			 * Special case: empty strings are non-numeric but sort BEFORE numeric strings.
-			 * Order: empty < numeric < non-numeric (matches PHP 8+ comparison semantics) */
-			bool is_empty1 = (s1->len == 0);
-			bool is_empty2 = (s2->len == 0);
-			
-			if (is_empty1 || is_empty2) {
-				/* If one is empty, empty comes first */
-				return is_empty1 ? -1 : 1;
-			}
-			
-			/* Neither is empty: numeric < non-numeric */
 			return ret1 ? -1 : 1;
 		}
 	}
