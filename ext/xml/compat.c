@@ -652,11 +652,6 @@ XML_GetCurrentByteCount(XML_Parser parser)
 	return (int) XML_GetCurrentByteIndex(parser);
 }
 
-PHP_XML_API const XML_Char *XML_ExpatVersion(void)
-{
-	return (const XML_Char *) "1.0";
-}
-
 PHP_XML_API void
 XML_ParserFree(XML_Parser parser)
 {
