@@ -147,7 +147,7 @@ class Generator
                     '.github/scripts/download-bundled/' . $bundle->getNameForPath() . '.sh',
                     'echo "::endgroup::"',
                     'echo "::group::Verify files"',
-                    ...array_map(static fn ($v) => '.github/scripts/test-directory-unchanged.sh ' . escapeshellarg($v), $bundle->directories),
+                    ...array_map(static fn ($v) => '.github/scripts/test-directory-unchanged.sh \'' . $v . '\'', $bundle->directories),
                     'echo "::endgroup::"',
                 ]),
             ];
