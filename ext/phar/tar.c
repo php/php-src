@@ -1378,6 +1378,6 @@ nostub:
 			php_stream_close(newfile);
 		}
 	}
-	return EOF;
+	return 0;
 }
 /* }}} */
