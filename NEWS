@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
     (ndossche)
+  . Fix SplFileInfo::openFile() in write mode. (ndossche)
 
 - SPL:
   . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
