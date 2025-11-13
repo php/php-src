@@ -21,6 +21,6 @@
 
 #include "php.h"
 
-int php_converter_minit(INIT_FUNC_ARGS);
+U_CFUNC int php_converter_minit(INIT_FUNC_ARGS);
 
 #endif /* PHP_INTL_CONVERTER_H */

@@ -156,10 +156,12 @@ zend_module_entry intl_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_INTL
+BEGIN_EXTERN_C()
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
+	ZEND_TSRMLS_CACHE_DEFINE()
 #endif
-ZEND_GET_MODULE( intl )
+	ZEND_GET_MODULE( intl )
+END_EXTERN_C()
 #endif
 
 /* {{{ intl_init_globals */

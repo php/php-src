@@ -968,7 +968,7 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 /* }}} */
 
 /* {{{ php_converter_minit */
-int php_converter_minit(INIT_FUNC_ARGS) {
+U_CFUNC int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce = register_class_UConverter();
 	php_converter_ce->create_object = php_converter_create_object;
 	php_converter_ce->default_object_handlers = &php_converter_object_handlers;
