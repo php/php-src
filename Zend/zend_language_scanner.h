@@ -71,7 +71,7 @@ typedef struct _zend_heredoc_label {
 /* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
 typedef struct _zend_nest_location {
 	char text;
-	int  lineno;
+	uint32_t lineno;
 } zend_nest_location;
 
 BEGIN_EXTERN_C()
