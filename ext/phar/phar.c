@@ -418,7 +418,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 
 	phar = idata->phar;
 
-	if (idata->internal_file->fp_refcount < 2) {
+	if (idata->internal_file->fp_refcount < 2 && idata->internal_file->fileinfo_lock_count == 0) {
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
