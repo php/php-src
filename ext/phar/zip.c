@@ -1542,6 +1542,6 @@ nocentralerror:
 	if (closeoldfile) {
 		php_stream_close(oldfile);
 	}
-	return EOF;
+	return 0;
 }
 /* }}} */
