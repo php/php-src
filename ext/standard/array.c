@@ -1716,7 +1716,7 @@ static zend_string* php_prefix_varname(const zend_string *prefix, const zend_str
 	return zend_string_concat3(ZSTR_VAL(prefix), ZSTR_LEN(prefix), ZEND_STRL("_"), ZSTR_VAL(var_name), ZSTR_LEN(var_name));
 }
 
-static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_if_exists(const zend_array *arr, const zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1762,7 +1762,7 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 }
 /* }}} */
 
-static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_if_exists(const zend_array *arr, const zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1806,7 +1806,7 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 }
 /* }}} */
 
-static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_overwrite(const zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1858,7 +1858,7 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 }
 /* }}} */
 
-static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_overwrite(const zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1903,7 +1903,7 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_if_exists(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1960,7 +1960,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 }
 /* }}} */
 
-static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_if_exists(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2012,7 +2012,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_same(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2087,7 +2087,7 @@ prefix:;
 }
 /* }}} */
 
-static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_same(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2154,7 +2154,7 @@ prefix:;
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_all(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2200,7 +2200,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 }
 /* }}} */
 
-static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_all(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2246,7 +2246,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 }
 /* }}} */
 
-static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_invalid(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2302,7 +2302,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 }
 /* }}} */
 
-static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_invalid(const zend_array *arr, zend_array *symbol_table, const zend_string *prefix) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2357,7 +2357,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 }
 /* }}} */
 
-static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_skip(const zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2405,7 +2405,7 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 }
 /* }}} */
 
-static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_skip(const zend_array *arr, zend_array *symbol_table) /* {{{ */
 {
 	zend_long count = 0;
 	zend_string *var_name;
