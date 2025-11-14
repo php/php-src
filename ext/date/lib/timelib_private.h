@@ -135,6 +135,7 @@
 #ifndef TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW
 # define TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW 0
 #endif
+
 struct _ttinfo
 {
 	int32_t      offset;
