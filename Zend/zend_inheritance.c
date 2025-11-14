@@ -2128,7 +2128,9 @@ static bool do_inherit_constant_check(
 	}
 
 	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE)) {
-		ZEND_CLASS_CONST_FLAGS(child_constant) &= ~ZEND_ACC_OVERRIDE;
+		if (child_constant->ce == ce) {
+			ZEND_CLASS_CONST_FLAGS(child_constant) &= ~ZEND_ACC_OVERRIDE;
+		}
 	}
 
 	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
