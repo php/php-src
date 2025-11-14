@@ -1675,9 +1675,8 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static zend_always_inline int php_valid_var_name(const char *var_name, size_t var_name_len) /* {{{ */
+static zend_always_inline bool php_valid_var_name(const zend_string *var_name) /* {{{ */
 {
-#if 1
 	/* first 256 bits for first character, and second 256 bits for the next */
 	static const uint32_t charset[8] = {
 	     /*  31      0   63     32   95     64   127    96 */
@@ -1687,48 +1686,28 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 	     /*  31      0   63     32   95     64   127    96 */
 			0x00000000, 0x03ff0000, 0x87fffffe, 0x07fffffe,
 			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-#endif
-	size_t i;
-	uint32_t ch;
 
-	if (UNEXPECTED(!var_name_len)) {
-		return 0;
+	if (UNEXPECTED(!ZSTR_LEN(var_name))) {
+		return false;
 	}
 
 	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
-	ch = (uint32_t)((unsigned char *)var_name)[0];
-#if 1
+	uint32_t ch = (uint32_t)((unsigned char *)ZSTR_VAL(var_name))[0];
 	if (UNEXPECTED(!ZEND_BIT_TEST(charset, ch))) {
-#else
-	if (var_name[0] != '_' &&
-		(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
-		(ch < 97  /* a    */ || /* z    */ ch > 122) &&
-		(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
-	) {
-#endif
-		return 0;
+		return false;
 	}
 
 	/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
-	if (var_name_len > 1) {
-		i = 1;
+	if (ZSTR_LEN(var_name) > 1) {
+		size_t i = 1;
 		do {
-			ch = (uint32_t)((unsigned char *)var_name)[i];
-#if 1
+			ch = (uint32_t)((unsigned char *)ZSTR_VAL(var_name))[i];
 			if (UNEXPECTED(!ZEND_BIT_TEST(charset2, ch))) {
-#else
-			if (var_name[i] != '_' &&
-				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&
-				(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
-				(ch < 97  /* a    */ || /* z    */ ch > 122) &&
-				(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
-			) {
-#endif
-				return 0;
+				return false;
 			}
-		} while (++i < var_name_len);
+		} while (++i < ZSTR_LEN(var_name));
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -1768,7 +1747,7 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 					continue;
 				}
 			}
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(var_name)) {
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "GLOBALS")) {
@@ -1814,7 +1793,7 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 					continue;
 				}
 			}
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(var_name)) {
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "GLOBALS")) {
@@ -1850,7 +1829,7 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 		if (!var_name) {
 			continue;
 		}
-		if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+		if (!php_valid_var_name(var_name)) {
 			continue;
 		}
 		if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -1902,7 +1881,7 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 		if (!var_name) {
 			continue;
 		}
-		if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+		if (!php_valid_var_name(var_name)) {
 			continue;
 		}
 		if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -1963,7 +1942,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 				}
 			}
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (php_valid_var_name(Z_STR(final_name))) {
 				if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 					zend_throw_error(NULL, "Cannot re-assign $this");
 					return -1;
@@ -2017,7 +1996,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 				}
 			}
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (php_valid_var_name(Z_STR(final_name))) {
 				if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 					zend_throw_error(NULL, "Cannot re-assign $this");
 					return -1;
@@ -2080,7 +2059,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 			}
 prefix:
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (php_valid_var_name(Z_STR(final_name))) {
 				if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 					zend_throw_error(NULL, "Cannot re-assign $this");
 					return -1;
@@ -2104,7 +2083,7 @@ prefix:
 			}
 			zval_ptr_dtor_str(&final_name);
 		} else {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(var_name)) {
 				continue;
 			}
 			if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -2152,7 +2131,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 			}
 prefix:
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (php_valid_var_name(Z_STR(final_name))) {
 				if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 					zend_throw_error(NULL, "Cannot re-assign $this");
 					return -1;
@@ -2176,7 +2155,7 @@ prefix:
 			}
 			zval_ptr_dtor_str(&final_name);
 		} else {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(var_name)) {
 				continue;
 			}
 			if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -2211,7 +2190,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), true);
 			zend_string_release_ex(str, 0);
 		}
-		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+		if (php_valid_var_name(Z_STR(final_name))) {
 			if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 				zend_throw_error(NULL, "Cannot re-assign $this");
 				return -1;
@@ -2258,7 +2237,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), true);
 			zend_string_release_ex(str, 0);
 		}
-		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+		if (php_valid_var_name(Z_STR(final_name))) {
 			if (zend_string_equals(Z_STR(final_name), ZSTR_KNOWN(ZEND_STR_THIS))) {
 				zend_throw_error(NULL, "Cannot re-assign $this");
 				return -1;
@@ -2296,10 +2275,10 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 
 	ZEND_HASH_FOREACH_KEY_VAL(arr, num_key, var_name, entry) {
 		if (var_name) {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))
+			if (!php_valid_var_name(var_name)
 			 || zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+				if (!php_valid_var_name(Z_STR(final_name))) {
 					zval_ptr_dtor_str(&final_name);
 					continue;
 				}
@@ -2310,7 +2289,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), true);
 			zend_string_release_ex(str, 0);
-			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (!php_valid_var_name(Z_STR(final_name))) {
 				zval_ptr_dtor_str(&final_name);
 				continue;
 			}
@@ -2351,10 +2330,10 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 
 	ZEND_HASH_FOREACH_KEY_VAL(arr, num_key, var_name, entry) {
 		if (var_name) {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))
+			if (!php_valid_var_name(var_name)
 			 || zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), true);
-				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+				if (!php_valid_var_name(Z_STR(final_name))) {
 					zval_ptr_dtor_str(&final_name);
 					continue;
 				}
@@ -2365,7 +2344,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), true);
 			zend_string_release_ex(str, 0);
-			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			if (!php_valid_var_name(Z_STR(final_name))) {
 				zval_ptr_dtor_str(&final_name);
 				continue;
 			}
@@ -2410,7 +2389,7 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 		if (!var_name) {
 			continue;
 		}
-		if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+		if (!php_valid_var_name(var_name)) {
 			continue;
 		}
 		if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -2458,7 +2437,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 		if (!var_name) {
 			continue;
 		}
-		if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+		if (!php_valid_var_name(var_name)) {
 			continue;
 		}
 		if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
@@ -2519,7 +2498,7 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
+		if (ZSTR_LEN(prefix) && !php_valid_var_name(prefix)) {
 			zend_argument_value_error(3, "must be a valid identifier");
 			RETURN_THROWS();
 		}
