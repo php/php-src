@@ -27,3 +27,6 @@ rm win_dirent.h
 rm -r .git
 git restore parse_date.c
 git restore parse_iso_intervals.c
+
+# patch customized files
+git apply -v ../../../.github/scripts/download-bundled/timelib.parse_date.patch
