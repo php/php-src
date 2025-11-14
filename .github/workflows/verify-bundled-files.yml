@@ -5,6 +5,7 @@ on:
     paths: &paths
       - '.github/scripts/download-bundled/**'
       - 'Zend/asm/**'
+      - 'ext/date/lib/**'
       - 'ext/pcre/pcre2lib/**'
       - 'ext/uri/uriparser/**'
   pull_request:
@@ -34,6 +35,9 @@ jobs:
             'boost-context':
               - '.github/scripts/download-bundled/boost-context.*'
               - 'Zend/asm/**'
+            timelib:
+              - '.github/scripts/download-bundled/timelib.*'
+              - 'ext/date/lib/**'
             pcre2:
               - '.github/scripts/download-bundled/pcre2.*'
               - 'ext/pcre/pcre2lib/**'
@@ -49,6 +53,15 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh 'Zend/asm'
+          echo "::endgroup::"
+      - name: timelib
+        if: ${{ !cancelled() && (steps.changes.outputs.timelib == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/timelib.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/date/lib'
           echo "::endgroup::"
       - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
