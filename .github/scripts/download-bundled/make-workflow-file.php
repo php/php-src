@@ -8,6 +8,7 @@ namespace Phpsrc\Ci\DownloadBundled;
 $bundles = [
     new Bundle('boost.context', ['Zend/asm']),
     new Bundle('timelib', ['ext/date/lib']),
+    new Bundle('Unicode Character Database', ['ext/mbstring']),
     new Bundle('PCRE2', ['ext/pcre/pcre2lib']),
     new Bundle('uriparser', ['ext/uri/uriparser']),
 ];
