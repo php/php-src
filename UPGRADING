@@ -52,7 +52,7 @@ PHP 8.5 UPGRADE NOTES
   . The disable_classes INI setting has been removed as it causes various
     engine assumptions to be broken.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#remove_disable_classes_ini_setting
-  . Destructing non-array values (other than NULL) using [] or list() now
+  . Destructuring non-array values (other than NULL) using [] or list() now
     emits a warning.
     RFC: https://wiki.php.net/rfc/warnings-php-8-5#destructuring_non-array_values
   . A warning is now emitted when casting floats (or strings that look like
