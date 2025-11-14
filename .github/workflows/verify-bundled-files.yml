@@ -6,7 +6,6 @@ on:
       - '.github/scripts/download-bundled/**'
       - 'Zend/asm/**'
       - 'ext/date/lib/**'
-      - 'ext/mbstring/**'
       - 'ext/opcache/jit/ir/**'
       - 'ext/pcre/pcre2lib/**'
       - 'ext/uri/uriparser/**'
@@ -39,9 +38,6 @@ jobs:
             timelib:
               - '.github/scripts/download-bundled/timelib.*'
               - 'ext/date/lib/**'
-            'unicode-character-database':
-              - '.github/scripts/download-bundled/unicode-character-database.*'
-              - 'ext/mbstring/**'
             ir:
               - '.github/scripts/download-bundled/ir.*'
               - 'ext/opcache/jit/ir/**'
@@ -69,15 +65,6 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh 'ext/date/lib'
-          echo "::endgroup::"
-      - name: 'Unicode Character Database'
-        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
-        run: |
-          echo "::group::Download"
-          .github/scripts/download-bundled/unicode-character-database.sh
-          echo "::endgroup::"
-          echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh 'ext/mbstring'
           echo "::endgroup::"
       - name: IR
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
