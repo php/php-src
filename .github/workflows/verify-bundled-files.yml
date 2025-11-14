@@ -7,6 +7,7 @@ on:
       - 'Zend/asm/**'
       - 'ext/date/lib/**'
       - 'ext/mbstring/**'
+      - 'ext/opcache/jit/ir/**'
       - 'ext/pcre/pcre2lib/**'
       - 'ext/uri/uriparser/**'
   pull_request:
@@ -41,6 +42,9 @@ jobs:
             'unicode-character-database':
               - '.github/scripts/download-bundled/unicode-character-database.*'
               - 'ext/mbstring/**'
+            ir:
+              - '.github/scripts/download-bundled/ir.*'
+              - 'ext/opcache/jit/ir/**'
             pcre2:
               - '.github/scripts/download-bundled/pcre2.*'
               - 'ext/pcre/pcre2lib/**'
@@ -74,6 +78,15 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh 'ext/mbstring'
+          echo "::endgroup::"
+      - name: IR
+        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/ir.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/opcache/jit/ir'
           echo "::endgroup::"
       - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
