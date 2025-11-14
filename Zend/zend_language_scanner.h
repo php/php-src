@@ -20,6 +20,7 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
+/* The zend_php_scanner_event enum is declared in zend_globals and we don't want everything to include zend_language_scanner.h */
 #include "zend_globals.h"
 
 typedef struct _zend_lex_state {
