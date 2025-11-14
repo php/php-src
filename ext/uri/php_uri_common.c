@@ -96,7 +96,7 @@ void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_pro
 	zend_string *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR(value)
+		Z_PARAM_STR(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
@@ -110,7 +110,7 @@ void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php
 	zend_string *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR_OR_NULL(value)
+		Z_PARAM_STR_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
