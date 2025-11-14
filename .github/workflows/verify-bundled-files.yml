@@ -5,6 +5,7 @@ on:
     paths: &paths
       - '.github/scripts/download-bundled/**'
       - 'Zend/asm/**'
+      - 'Zend/zend_simd.h'
       - 'ext/date/lib/**'
       - 'ext/mbstring/**'
       - 'ext/pcre/pcre2lib/**'
@@ -36,6 +37,9 @@ jobs:
             'boost-context':
               - '.github/scripts/download-bundled/boost-context.*'
               - 'Zend/asm/**'
+            xsse:
+              - '.github/scripts/download-bundled/xsse.*'
+              - 'Zend/zend_simd.h'
             timelib:
               - '.github/scripts/download-bundled/timelib.*'
               - 'ext/date/lib/**'
@@ -57,6 +61,15 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh 'Zend/asm'
+          echo "::endgroup::"
+      - name: XSSE
+        if: ${{ !cancelled() && (steps.changes.outputs.xsse == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/xsse.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'Zend/zend_simd.h'
           echo "::endgroup::"
       - name: timelib
         if: ${{ !cancelled() && (steps.changes.outputs.timelib == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}

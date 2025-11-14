@@ -7,6 +7,7 @@ namespace Phpsrc\Ci\DownloadBundled;
 
 $bundles = [
     new Bundle('boost.context', ['Zend/asm']),
+    new Bundle('XSSE', ['Zend/zend_simd.h']),
     new Bundle('timelib', ['ext/date/lib']),
     new Bundle('Unicode Character Database', ['ext/mbstring']),
     new Bundle('PCRE2', ['ext/pcre/pcre2lib']),
@@ -165,7 +166,7 @@ class Generator
     {
         return [
             '.github/scripts/download-bundled/' . $bundle->getNameForPath() . '.*',
-            ...array_map(static fn ($v) => $v . '/**', $bundle->directories),
+            ...array_map(fn ($v) => is_file($this->getRepoDirectory() . '/' . $v) ? $v : $v . '/**', $bundle->directories),
         ];
     }
 
