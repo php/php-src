@@ -108,6 +108,7 @@ class Generator
                     uses: actions/checkout@v5
 
                   - name: Detect changed files
+                    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
                     uses: dorny/paths-filter@v3
                     id: changes
                     with:
