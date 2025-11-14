@@ -644,14 +644,6 @@ XML_GetCurrentByteIndex(XML_Parser parser)
 			(parser->parser->input->cur - parser->parser->input->base);
 }
 
-PHP_XML_API int
-XML_GetCurrentByteCount(XML_Parser parser)
-{
-	/* TODO: this is identical to ByteIndex; it should probably
-	 * be different */
-	return (int) XML_GetCurrentByteIndex(parser);
-}
-
 PHP_XML_API void
 XML_ParserFree(XML_Parser parser)
 {
