@@ -142,7 +142,7 @@ class Generator
         foreach ($this->bundles as $bundle) {
             $steps[] = [
                 'name' => $bundle->name,
-                'if' => '${{ !cancelled() && (steps.changes.outputs.pcre2 == \'true\' || github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\') }}',
+                'if' => '${{ !cancelled() && (steps.changes.outputs.' . $bundle->getNameForPath() . ' == \'true\' || github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\') }}',
                 'run' => implode("\n", [
                     'echo "::group::Download"',
                     '.github/scripts/download-bundled/' . $bundle->getNameForPath() . '.sh',

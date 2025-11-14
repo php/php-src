@@ -41,7 +41,7 @@ jobs:
               - 'ext/uri/uriparser/**'
 
       - name: 'boost.context'
-        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ !cancelled() && (steps.changes.outputs.boost-context == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
         run: |
           echo "::group::Download"
           .github/scripts/download-bundled/boost-context.sh
@@ -59,7 +59,7 @@ jobs:
           .github/scripts/test-directory-unchanged.sh 'ext/pcre/pcre2lib'
           echo "::endgroup::"
       - name: uriparser
-        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ !cancelled() && (steps.changes.outputs.uriparser == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
         run: |
           echo "::group::Download"
           .github/scripts/download-bundled/uriparser.sh
