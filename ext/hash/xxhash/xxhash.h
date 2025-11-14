@@ -225,7 +225,7 @@ extern "C" {
  *     #define XXH_INLINE_ALL
  *     #include "xxhash.h"
  * @endcode
- * Do not compile and link xxhash.o as a separate object, as it is not useful.
+ * Do not TEST and link xxhash.o as a separate object, as it is not useful.
  */
 #  define XXH_INLINE_ALL
 #  undef XXH_INLINE_ALL
