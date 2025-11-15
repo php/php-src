@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - MbString:
   . Fixed bug GH-20491 (SLES15 compile error with mbstring oniguruma).
     (ndossche)
+  . Fixed bug GH-20492 (mbstring compile warning due to non-strings).
+    (ndossche)
 
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
