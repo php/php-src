@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
 
+- Fibers:
+  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
+    small value). (David Carlier)
+
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
