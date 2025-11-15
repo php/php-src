@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Sync all boost.context files with release 1.86.0. (mvorisek)
   . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
     passing to variadic parameter). (ndossche)
+  . Fixed bug GH-20286 (use-after-destroy during userland stream_close()).
+    (ndossche, David Carlier)
 
 - Bz2:
   . Fix assertion failures resulting in crashes with stream filter
