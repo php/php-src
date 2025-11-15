@@ -1527,6 +1527,6 @@ nocentralerror:
 	if (must_close_old_file) {
 		php_stream_close(oldfile);
 	}
-	return EOF;
+	return 0;
 }
 /* }}} */

@@ -1178,7 +1178,7 @@ nostub:
 
 		/* on error in the hash iterator above, error is set */
 		php_stream_close(newfile);
-		return;
+		return EOF;
 	}
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
@@ -1343,6 +1343,6 @@ nostub:
 			php_stream_close(newfile);
 		}
 	}
-	return EOF;
+	return 0;
 }
 /* }}} */

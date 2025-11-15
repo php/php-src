@@ -3185,7 +3185,7 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		return EOF;
 	}
 
-	return EOF;
+	return 0;
 
 cleanup:
 	if (shared_cfp != NULL) {
