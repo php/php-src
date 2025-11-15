@@ -68,7 +68,7 @@ typedef struct _ze_zip_read_rsrc {
 /* Extends zend object */
 typedef struct _ze_zip_object {
 	struct zip *za;
-	char **buffers;
+	zend_string **buffers;
 	HashTable *prop_handler;
 	char *filename;
 	int filename_len;

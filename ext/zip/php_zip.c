@@ -1014,7 +1014,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 
 	if (intern->buffers_cnt>0) {
 		for (i=0; i<intern->buffers_cnt; i++) {
-			efree(intern->buffers[i]);
+			zend_string_release(intern->buffers[i]);
 		}
 		efree(intern->buffers);
 	}
@@ -1868,17 +1868,16 @@ PHP_METHOD(ZipArchive, addFromString)
 
 	ze_obj = Z_ZIP_P(self);
 	if (ze_obj->buffers_cnt) {
-		ze_obj->buffers = (char **)safe_erealloc(ze_obj->buffers, sizeof(char *), (ze_obj->buffers_cnt+1), 0);
+		ze_obj->buffers = safe_erealloc(ze_obj->buffers, sizeof(*ze_obj->buffers), (ze_obj->buffers_cnt + 1), 0);
 		pos = ze_obj->buffers_cnt++;
 	} else {
-		ze_obj->buffers = (char **)emalloc(sizeof(char *));
+		ze_obj->buffers = emalloc(sizeof(*ze_obj->buffers));
 		ze_obj->buffers_cnt++;
 		pos = 0;
 	}
-	ze_obj->buffers[pos] = (char *)safe_emalloc(ZSTR_LEN(buffer), 1, 1);
-	memcpy(ze_obj->buffers[pos], ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1);
+	ze_obj->buffers[pos] = zend_string_copy(buffer);
 
-	zs = zip_source_buffer(intern, ze_obj->buffers[pos], ZSTR_LEN(buffer), 0);
+	zs = zip_source_buffer(intern, ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0);
 
 	if (zs == NULL) {
 		RETURN_FALSE;

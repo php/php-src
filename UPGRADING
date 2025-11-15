@@ -130,3 +130,6 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
+
+- Zip:
+  . Avoid string copies in ZipArchive::addFromString().
