@@ -239,10 +239,28 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
+		// taken from zend_get_fiber_stack_size()
+		static size_t page_size = 0;
+		if (!page_size) {
+			page_size = zend_get_page_size();
+			if (!page_size || (page_size & (page_size - 1))) {
+				page_size = 4096;
+			}
+		}
+		const zend_long minimum_fiber_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size
+#ifdef __SANITIZE_ADDRESS__
+		// necessary correction due to ASAN redzones
+		* 6
+#endif
+		;
 		zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 		if (tmp < 0) {
 			zend_error(E_WARNING, "fiber.stack_size must be a positive number");
 			return FAILURE;
+		}
+		if (UNEXPECTED(tmp < minimum_fiber_stack_size)) {
+			php_error_docref(NULL, E_WARNING, "fiber.stack_size must be equal or greater than " ZEND_LONG_FMT, minimum_fiber_stack_size);
+			tmp = minimum_fiber_stack_size;
 		}
 		EG(fiber_stack_size) = tmp;
 	} else {
