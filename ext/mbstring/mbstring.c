@@ -5578,19 +5578,16 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 
 static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
-	zend_long idx;
 	zend_string *key;
 	zval *entry;
 	bool valid = true;
-
-	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return false;
 	}
 	GC_TRY_PROTECT_RECURSION(vars);
-	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(vars, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
 			if (!mb_check_str_encoding(key, encoding)) {
