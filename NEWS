@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
     __halt_compiler() when reading stub). (ndossche, TimWolla)
+  . Fix broken return value of fflush() for phar file entries. (ndossche)
 
 - PHPDBG:
   . Fixed ZPP type violation in phpdbg_get_executable() and phpdbg_end_oplog().
