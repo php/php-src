@@ -2,6 +2,10 @@
 GH-20286 use after destroy on userland stream_close
 --CREDITS--
 vi3tL0u1s
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip Aborts with STATUS_BAD_FUNCTION_TABLE on Windows');
+?>
 --FILE--
 <?php
 class lib {
