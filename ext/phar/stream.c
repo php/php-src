@@ -424,11 +424,9 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 
 	zend_off_t temp_signed = (zend_off_t) temp;
 	if (temp_signed > data->zero + (zend_off_t) entry->uncompressed_filesize) {
-		*newoffset = -1; /* FIXME: this will invalidate the ZEND_ASSERT(stream->position >= 0); assertion in streams.c */
 		return -1;
 	}
 	if (temp_signed < data->zero) {
-		*newoffset = -1; /* FIXME: this will invalidate the ZEND_ASSERT(stream->position >= 0); assertion in streams.c */
 		return -1;
 	}
 	res = php_stream_seek(data->fp, temp_signed, SEEK_SET);
