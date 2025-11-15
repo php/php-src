@@ -95,7 +95,7 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 
 	if (attributes != NULL) {
 		xmlChar    *qualified_name_attr = NULL;
-		attrs = safe_emalloc((nb_attributes  * 2) + 1, sizeof(int *), 0);
+		attrs = safe_emalloc(nb_attributes, 2 * sizeof(int *), sizeof(int *));
 
 		for (i = 0; i < nb_attributes; i += 1) {
 
