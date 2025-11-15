@@ -14,6 +14,10 @@ PHP                                                                        NEWS
     in $selectors to be lowercase). (ndossche)
   . Fix missing NUL byte check on C14NFile(). (ndossche)
 
+- Fibers:
+  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
+    small value). (David Carlier)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
