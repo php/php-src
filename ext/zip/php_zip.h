@@ -71,8 +71,8 @@ typedef struct _ze_zip_object {
 	zend_string **buffers;
 	HashTable *prop_handler;
 	char *filename;
-	int filename_len;
-	int buffers_cnt;
+	unsigned int filename_len;
+	uint32_t buffers_cnt;
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;
