@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fix some deprecations on newer libxml versions regarding input
     buffer/parser handling. (ndossche)
 
+- MbString:
+  . Fixed bug GH-20491 (SLES15 compile error with mbstring oniguruma).
+    (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
