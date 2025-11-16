@@ -1501,7 +1501,16 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		offset += (zend_long)ZSTR_LEN(s);
 	}
 
-	if ((size_t)offset >= ZSTR_LEN(s)) {
+	if (ZEND_LONG_GTE_SIZE_T(offset, ZSTR_LEN(s))) {
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+		if (UNEXPECTED(offset >= (zend_long) ZSTR_MAX_LEN)) {
+			zend_throw_error(NULL, "String size overflow");
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
+#endif
 		/* Extend string if needed */
 		zend_long old_len = ZSTR_LEN(s);
 		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
