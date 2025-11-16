@@ -1,4 +1,4 @@
-PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/"
+PHP_LEXBOR_CFLAGS="-I@ext_srcdir@"
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
@@ -189,7 +189,6 @@ PHP_ADD_BUILD_DIR([
   $ext_builddir/$LEXBOR_DIR/core
   $ext_builddir/$LEXBOR_DIR/css/selectors
   $ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer
-  $ext_builddir/$LEXBOR_DIR/css/tokenizer
   $ext_builddir/$LEXBOR_DIR/dom/interfaces
   $ext_builddir/$LEXBOR_DIR/encoding
   $ext_builddir/$LEXBOR_DIR/html
@@ -205,6 +204,36 @@ PHP_ADD_BUILD_DIR([
 ])
 PHP_ADD_INCLUDE([$ext_srcdir])
 PHP_INSTALL_HEADERS([ext/lexbor], m4_normalize([
+  lexbor/core/
+  lexbor/css/
+  lexbor/css/at_rule/
+  lexbor/css/property/
+  lexbor/css/selectors/
+  lexbor/css/syntax/
+  lexbor/css/syntax/tokenizer/
+  lexbor/css/unit/
+  lexbor/css/value/
+  lexbor/dom/
+  lexbor/dom/interfaces/
+  lexbor/encoding/
+  lexbor/html/
+  lexbor/html/interfaces/
+  lexbor/html/tokenizer/
+  lexbor/html/tree/
+  lexbor/html/tree/insertion_mode/
+  lexbor/ns/
+  lexbor/ports/
+  lexbor/ports/posix/
+  lexbor/ports/posix/lexbor/
+  lexbor/ports/posix/lexbor/core/
+  lexbor/ports/windows_nt/
+  lexbor/ports/windows_nt/lexbor/
+  lexbor/ports/windows_nt/lexbor/core/
+  lexbor/punycode/
+  lexbor/selectors/
+  lexbor/tag/
+  lexbor/unicode/
+  lexbor/url/
   php_lexbor.h
 ]))
 

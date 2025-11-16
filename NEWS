@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Sync all boost.context files with release 1.86.0. (mvorisek)
   . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
     passing to variadic parameter). (ndossche)
+  . Fixed installation interface for using ext/lexbor and ext/uri headers.
+    (Peter Kokot)
 
 - DOM:
   . Fix memory leak when edge case is hit when registering xpath callback.
