@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key
-    needing to be present beforehand. (nielsdos)
+    needing to be present beforehand. (ndossche)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
@@ -25,9 +25,9 @@ PHP                                                                        NEWS
     preloading). (Arnaud, welcomycozyhom)
 
 - Phar:
-  . Support reference values in Phar::mungServer(). (nielsdos)
+  . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
-    ignored. (nielsdos)
+    ignored. (ndossche)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
