@@ -19,6 +19,7 @@
 
 #include "phar_internal.h"
 #include "ext/standard/php_string.h" /* For php_stristr() */
+#include "zend_time.h"
 
 static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
 {
@@ -973,7 +974,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, ze
 	char *buf, *signature, sigbuf[8];
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = zend_time_real_get();
 	entry.is_modified = 1;
 	entry.is_crc_checked = 1;
 	entry.is_tar = 1;

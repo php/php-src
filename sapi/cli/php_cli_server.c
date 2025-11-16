@@ -93,6 +93,7 @@
 
 #include "ext/standard/file.h" /* for php_set_sock_blocking() :-( */
 #include "zend_smart_str.h"
+#include "zend_time.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
 #include "ext/date/php_date.h" /* for php_format_date() */
@@ -265,12 +266,11 @@ static bool php_cli_server_get_system_time(char *buf) {
 }
 #else
 static bool php_cli_server_get_system_time(char *buf) {
-	struct timeval tv;
+	time_t sec;
 	struct tm tm;
 
-	gettimeofday(&tv, NULL);
-
-	if (!php_localtime_r(&tv.tv_sec, &tm)) {
+	sec = zend_time_real_get();
+	if (!php_localtime_r(&sec, &tm)) {
 		return false;
 	}
 	return php_asctime_r(&tm, buf) != NULL;
@@ -359,7 +359,6 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, bool persistent, sapi_headers_struct *sapi_headers) /* {{{ */
 {
 	zval *val;
-	struct timeval tv = {0};
 	bool append_date_header = true;
 
 	if (sapi_headers != NULL) {
@@ -382,8 +381,13 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 		smart_str_appends_ex(buffer, "\r\n", persistent);
 	}
 
-	if (append_date_header && !gettimeofday(&tv, NULL)) {
-		zend_string *dt = php_format_date("D, d M Y H:i:s", sizeof("D, d M Y H:i:s") - 1, tv.tv_sec, 0);
+	if (append_date_header) {
+		zend_string *dt = php_format_date(
+			"D, d M Y H:i:s",
+			sizeof("D, d M Y H:i:s") - 1,
+			zend_time_real_get(),
+			0
+		);
 		smart_str_appends_ex(buffer, "Date: ", persistent);
 		smart_str_append_ex(buffer, dt, persistent);
 		smart_str_appends_ex(buffer, " GMT\r\n", persistent);

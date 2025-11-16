@@ -37,13 +37,13 @@
 #include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
+#include "zend_time.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
-#include "win32/time.h"
 #include "win32/ioutil.h"
 #endif
 
@@ -59,7 +59,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #include <stdio.h>
 
 #ifndef PHP_WIN32
@@ -1186,7 +1185,7 @@ PHP_FUNCTION(time_nanosleep)
 PHP_FUNCTION(time_sleep_until)
 {
 	double target_secs;
-	struct timeval tm;
+	struct timespec ts;
 	struct timespec php_req, php_rem;
 	uint64_t current_ns, target_ns, diff_ns;
 	const uint64_t ns_per_sec = 1000000000;
@@ -1196,17 +1195,15 @@ PHP_FUNCTION(time_sleep_until)
 		Z_PARAM_DOUBLE(target_secs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
-		RETURN_FALSE;
-	}
-
 	if (UNEXPECTED(!(target_secs >= 0 && target_secs <= top_target_sec))) {
 		zend_argument_value_error(1, "must be between 0 and %" PRIu64, (uint64_t)top_target_sec);
 		RETURN_THROWS();
 	}
 
+	zend_time_real_spec(&ts);
+
 	target_ns = (uint64_t) (target_secs * ns_per_sec);
-	current_ns = ((uint64_t) tm.tv_sec) * ns_per_sec + ((uint64_t) tm.tv_usec) * 1000;
+	current_ns = ((uint64_t) ts.tv_sec) * ns_per_sec + ((uint64_t) ts.tv_nsec);
 	if (target_ns < current_ns) {
 		php_error_docref(NULL, E_WARNING, "Argument #1 ($timestamp) must be greater than or equal to the current time");
 		RETURN_FALSE;

@@ -24,10 +24,10 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <time.h>
 
 #include "zend.h"
 #include "zend_virtual_cwd.h"
+#include "zend_time.h"
 
 #ifdef ZEND_WIN32
 #include <io.h>
@@ -577,7 +577,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		if (start && save && CWDG(realpath_cache_size_limit)) {
 			/* cache lookup for absolute path */
 			if (!*t) {
-				*t = time(0);
+				*t = zend_time_real_get();
 			}
 			if ((bucket = realpath_cache_find(path, len, *t)) != NULL) {
 				if (is_dir && !bucket->is_dir) {

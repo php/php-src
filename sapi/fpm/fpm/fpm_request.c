@@ -1,14 +1,12 @@
 	/* (c) 2007,2008 Andrei Nigmatulin */
-#ifdef HAVE_TIMES
-#include <sys/times.h>
-#endif
 
 #include "fpm_config.h"
+
+#include "zend_time.h"
 
 #include "fpm.h"
 #include "fpm_php.h"
 #include "fpm_str.h"
-#include "fpm_clock.h"
 #include "fpm_conf.h"
 #include "fpm_trace.h"
 #include "fpm_php_trace.h"
@@ -38,9 +36,6 @@ const char *fpm_request_get_stage_name(int stage) {
 void fpm_request_accepting(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	struct timeval now;
-
-	fpm_clock_get(&now);
 
 	fpm_scoreboard_update_begin(NULL);
 
@@ -51,7 +46,7 @@ void fpm_request_accepting(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_ACCEPTING;
-	proc->tv = now;
+	proc->last_activity_ns = zend_time_mono_fallback();
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
@@ -62,14 +57,14 @@ void fpm_request_reading_headers(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 
-	struct timeval now;
-	clock_t now_epoch;
+	uint64_t now_ns;
+	time_t now_epoch;
 #ifdef HAVE_TIMES
 	struct tms cpu;
 #endif
 
-	fpm_clock_get(&now);
-	now_epoch = time(NULL);
+	now_ns = zend_time_mono_fallback();
+	now_epoch = zend_time_real_get();
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
@@ -83,8 +78,8 @@ void fpm_request_reading_headers(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_READING_HEADERS;
-	proc->tv = now;
-	proc->accepted = now;
+	proc->last_activity_ns = now_ns;
+	proc->accepted_ns = now_ns;
 	proc->accepted_epoch = now_epoch;
 #ifdef HAVE_TIMES
 	proc->cpu_accepted = cpu;
@@ -111,9 +106,7 @@ void fpm_request_info(void)
 	char *query_string = fpm_php_query_string();
 	char *auth_user = fpm_php_auth_user();
 	size_t content_length = fpm_php_content_length();
-	struct timeval now;
-
-	fpm_clock_get(&now);
+	uint64_t now_ns = zend_time_mono_fallback();
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -122,7 +115,7 @@ void fpm_request_info(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_INFO;
-	proc->tv = now;
+	proc->last_activity_ns = now_ns;
 
 	if (request_uri) {
 		strlcpy(proc->request_uri, request_uri, sizeof(proc->request_uri));
@@ -154,9 +147,7 @@ void fpm_request_info(void)
 void fpm_request_executing(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	struct timeval now;
-
-	fpm_clock_get(&now);
+	uint64_t now_ns = zend_time_mono_fallback();
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -165,20 +156,18 @@ void fpm_request_executing(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_EXECUTING;
-	proc->tv = now;
+	proc->last_activity_ns = now_ns;
 	fpm_scoreboard_proc_release(proc);
 }
 
 void fpm_request_end(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	struct timeval now;
+	uint64_t now_ns = zend_time_mono_fallback();
 #ifdef HAVE_TIMES
 	struct tms cpu;
 #endif
 	size_t memory = zend_memory_peak_usage(1);
-
-	fpm_clock_get(&now);
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
@@ -189,10 +178,10 @@ void fpm_request_end(void)
 		return;
 	}
 	proc->request_stage = FPM_REQUEST_FINISHED;
-	proc->tv = now;
-	timersub(&now, &proc->accepted, &proc->duration);
+	proc->last_activity_ns = now_ns;
+	proc->duration_ns = now_ns - proc->accepted_ns;
 #ifdef HAVE_TIMES
-	timersub(&proc->tv, &proc->accepted, &proc->cpu_duration);
+	proc->cpu_duration_ns = now_ns - proc->accepted_ns;
 	proc->last_request_cpu.tms_utime = cpu.tms_utime - proc->cpu_accepted.tms_utime;
 	proc->last_request_cpu.tms_stime = cpu.tms_stime - proc->cpu_accepted.tms_stime;
 	proc->last_request_cpu.tms_cutime = cpu.tms_cutime - proc->cpu_accepted.tms_cutime;
@@ -208,9 +197,6 @@ void fpm_request_end(void)
 void fpm_request_finished(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
-	struct timeval now;
-
-	fpm_clock_get(&now);
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -219,13 +205,14 @@ void fpm_request_finished(void)
 	}
 
 	proc->request_stage = FPM_REQUEST_FINISHED;
-	proc->tv = now;
+	proc->last_activity_ns = zend_time_mono_fallback();
 	fpm_scoreboard_proc_release(proc);
 }
 
-void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
+void fpm_request_check_timed_out(struct fpm_child_s *child, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s proc, *proc_p;
+	uint64_t now_ns;
 
 	proc_p = fpm_scoreboard_proc_acquire(child->wp->scoreboard, child->scoreboard_i, 1);
 	if (!proc_p) {
@@ -236,47 +223,45 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 	proc = *proc_p;
 	fpm_scoreboard_proc_release(proc_p);
 
+	now_ns = zend_time_mono_fallback();
+
 #if HAVE_FPM_TRACE
-	if (child->slow_logged.tv_sec) {
-		if (child->slow_logged.tv_sec != proc.accepted.tv_sec || child->slow_logged.tv_usec != proc.accepted.tv_usec) {
-			child->slow_logged.tv_sec = 0;
-			child->slow_logged.tv_usec = 0;
-		}
+	if (child->slow_logged_ns && child->slow_logged_ns != proc.accepted_ns) {
+		child->slow_logged_ns = 0;
 	}
 #endif
 
 	if (proc.request_stage > FPM_REQUEST_ACCEPTING && ((proc.request_stage < FPM_REQUEST_END) || track_finished)) {
 		char purified_script_filename[sizeof(proc.script_filename)];
-		struct timeval tv;
-
-		timersub(now, &proc.accepted, &tv);
+		uint64_t elapsed_ns = now_ns - proc.accepted_ns;
+		long elapsed_sec = (long) (elapsed_ns / ZEND_NANO_IN_SEC);
 
 #if HAVE_FPM_TRACE
-		if (child->slow_logged.tv_sec == 0 && slowlog_timeout &&
-				proc.request_stage == FPM_REQUEST_EXECUTING && tv.tv_sec >= slowlog_timeout) {
+		if (child->slow_logged_ns == 0 && slowlog_timeout &&
+				proc.request_stage == FPM_REQUEST_EXECUTING && elapsed_sec >= slowlog_timeout) {
 
 			str_purify_filename(purified_script_filename, proc.script_filename, sizeof(proc.script_filename));
 
-			child->slow_logged = proc.accepted;
+			child->slow_logged_ns = proc.accepted_ns;
 			child->tracer = fpm_php_trace;
 
 			fpm_trace_signal(child->pid);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") executing too slow (%d.%06d sec), logging",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") executing too slow (%ld.%09ld sec), logging",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
 				(proc.query_string[0] ? "?" : ""), proc.query_string,
-				(int) tv.tv_sec, (int) tv.tv_usec);
+				elapsed_sec, (long) (elapsed_ns % ZEND_NANO_IN_SEC));
 		}
 		else
 #endif
-		if (terminate_timeout && tv.tv_sec >= terminate_timeout) {
+		if (terminate_timeout && elapsed_sec >= terminate_timeout) {
 			str_purify_filename(purified_script_filename, proc.script_filename, sizeof(proc.script_filename));
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") execution timed out (%d.%06d sec), terminating",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") execution timed out (%ld.%09ld sec), terminating",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
 				(proc.query_string[0] ? "?" : ""), proc.query_string,
-				(int) tv.tv_sec, (int) tv.tv_usec);
+				elapsed_sec, (long) (elapsed_ns % ZEND_NANO_IN_SEC));
 		}
 	}
 }
@@ -296,18 +281,18 @@ int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv) /* {{{ */
+int fpm_request_last_activity(struct fpm_child_s *child, uint64_t *last_activity_ns) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;
 
-	if (!tv) return -1;
+	if (!last_activity_ns) return -1;
 
 	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
 		return -1;
 	}
 
-	*tv = proc->tv;
+	*last_activity_ns = proc->last_activity_ns;
 
 	return 1;
 }

@@ -25,11 +25,11 @@
 #include "credits.h"
 #include "css.h"
 #include "SAPI.h"
-#include <time.h>
 #include "php_main.h"
 #include "zend_globals.h"		/* needs ELS */
 #include "zend_extensions.h"
 #include "zend_highlight.h"
+#include "zend_time.h"
 #ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
@@ -782,7 +782,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        time_t the_time;
 	        struct tm *ta, tmbuf;
 
-	        the_time = time(NULL);
+	        the_time = zend_time_real_get();
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
 			php_info_print("<a href=\"https://www.php.net/\"><img src=\"");

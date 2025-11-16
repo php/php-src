@@ -24,13 +24,9 @@
 #include "SAPI.h"
 #include "php_variables.h"
 #include "php_ini.h"
+#include "zend_time.h"
 #ifdef ZTS
 #include "TSRM.h"
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#elif defined(PHP_WIN32)
-#include "win32/time.h"
 #endif
 
 #include "rfc1867.h"
@@ -1104,12 +1100,9 @@ SAPI_API double sapi_get_request_time(void)
 
 	if (!sapi_module.get_request_time
 			|| sapi_module.get_request_time(&SG(global_request_time)) == FAILURE) {
-		struct timeval tp = {0};
-		if (!gettimeofday(&tp, NULL)) {
-			SG(global_request_time) = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-		} else {
-			SG(global_request_time) = (double)time(0);
-		}
+		struct timespec ts;
+		zend_time_real_spec(&ts);
+		SG(global_request_time) = (double)(ts.tv_sec + ts.tv_nsec / (double)ZEND_NANO_IN_SEC);
 	}
 	return SG(global_request_time);
 }

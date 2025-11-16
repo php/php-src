@@ -24,14 +24,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef PHP_WIN32
-#include "win32/time.h"
 #include "win32/signal.h"
 #include "win32/php_win32_globals.h"
 #include "win32/winutil.h"
 #include <process.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -79,6 +75,7 @@
 #include "zend_observer.h"
 #include "zend_system_id.h"
 #include "zend_smart_string.h"
+#include "zend_time.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -959,7 +956,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			size_t len;
 			zend_string *error_time_str;
 
-			time(&error_time);
+			error_time = zend_time_real_get();
 #ifdef ZTS
 			if (!php_during_module_startup()) {
 				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
@@ -1818,11 +1815,10 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 			break;
 		case ZMSG_LOG_SCRIPT_NAME: {
 				struct tm *ta, tmbuf;
-				time_t curtime;
+				time_t curtime = zend_time_real_get();
 				char *datetime_str, asctimebuf[52];
 				char memory_leak_buf[4096];
 
-				time(&curtime);
 				ta = php_localtime_r(&curtime, &tmbuf);
 				datetime_str = php_asctime_r(ta, asctimebuf);
 				if (datetime_str) {

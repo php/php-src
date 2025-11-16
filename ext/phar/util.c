@@ -22,6 +22,7 @@
 #include "ext/hash/php_hash.h" /* Needed for PHP_HASH_API in ext/hash/php_hash_sha.h */
 #include "ext/hash/php_hash_sha.h"
 #include "ext/standard/md5.h"
+#include "zend_time.h"
 
 #ifdef PHAR_HAVE_OPENSSL
 /* OpenSSL includes */
@@ -668,7 +669,7 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fnam
 
 	phar_add_virtual_dirs(phar, path, path_len);
 	etemp.is_modified = 1;
-	etemp.timestamp = time(0);
+	etemp.timestamp = zend_time_real_get();
 	etemp.is_crc_checked = 1;
 	etemp.phar = phar;
 	etemp.filename = zend_string_init(path, path_len, false);

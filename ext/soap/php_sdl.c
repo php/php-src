@@ -21,6 +21,7 @@
 #include "libxml/uri.h"
 
 #include "zend_virtual_cwd.h"
+#include "zend_time.h"
 #include "main/php_open_temporary_file.h"
 
 #include <sys/types.h>
@@ -3156,7 +3157,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	zval *tmp, orig_context, new_context;
 	smart_str headers = {0};
 	char* key = NULL;
-	time_t t = time(0);
+	time_t t = zend_time_real_get();
 	bool has_proxy_authorization = false;
 	bool has_authorization = false;
 
@@ -3185,7 +3186,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	}
 
 	if ((cache_wsdl & WSDL_CACHE_DISK) && (uri_len < MAXPATHLEN)) {
-		time_t t = time(0);
+		time_t t = zend_time_real_get();
 		char md5str[33];
 		PHP_MD5_CTX md5_context;
 		unsigned char digest[16];
