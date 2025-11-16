@@ -1,4 +1,3 @@
-PHP_LEXBOR_CFLAGS="-I@ext_srcdir@"
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
@@ -182,7 +181,7 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/url/url.c
   ]),
   [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $PHP_LEXBOR_CFLAGS])
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR([
   $ext_builddir/
