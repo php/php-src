@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright (c) The PHP Group                                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Jakub Zelenka <bukka@php.net>                               |
+   +----------------------------------------------------------------------+
+ */
+
 #ifndef PHP_STREAM_ERRORS_H
 #define PHP_STREAM_ERRORS_H
 
@@ -18,11 +34,76 @@ BEGIN_EXTERN_C()
 #define PHP_STREAM_ERROR_STORE_TERMINAL  3
 #define PHP_STREAM_ERROR_STORE_ALL       4
 
-/* Error code definition for registration */
-typedef struct {
-    int code;
-    const char *name;
-} php_stream_error_code_def;
+/* Stream Error Codes*/
+/* No error */
+#define STREAM_ERROR_CODE_NONE                          0
+/* Generic unspecified error */
+#define STREAM_ERROR_CODE_GENERIC                       1
+/* Stream I/O operations */
+#define STREAM_ERROR_CODE_READ_FAILED                   10
+#define STREAM_ERROR_CODE_WRITE_FAILED                  11
+#define STREAM_ERROR_CODE_SEEK_FAILED                   12
+#define STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED            13
+#define STREAM_ERROR_CODE_FLUSH_FAILED                  14
+#define STREAM_ERROR_CODE_TRUNCATE_FAILED               15
+#define STREAM_ERROR_CODE_NOT_WRITABLE                  16
+#define STREAM_ERROR_CODE_NOT_READABLE                  17
+/* File system operations */
+#define STREAM_ERROR_CODE_NOT_FOUND                     30
+#define STREAM_ERROR_CODE_PERMISSION_DENIED             31
+#define STREAM_ERROR_CODE_ALREADY_EXISTS                32
+#define STREAM_ERROR_CODE_INVALID_PATH                  33
+#define STREAM_ERROR_CODE_PATH_TOO_LONG                 34
+#define STREAM_ERROR_CODE_UNLINK_FAILED                 35
+#define STREAM_ERROR_CODE_RENAME_FAILED                 36
+#define STREAM_ERROR_CODE_MKDIR_FAILED                  37
+#define STREAM_ERROR_CODE_RMDIR_FAILED                  38
+#define STREAM_ERROR_CODE_STAT_FAILED                   39
+#define STREAM_ERROR_CODE_CHMOD_FAILED                  40
+#define STREAM_ERROR_CODE_CHOWN_FAILED                  41
+#define STREAM_ERROR_CODE_TOUCH_FAILED                  42
+#define STREAM_ERROR_CODE_INVALID_MODE                  43
+#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            44
+#define STREAM_ERROR_CODE_READONLY                      45
+#define STREAM_ERROR_CODE_RECURSION_DETECTED            46
+/* Wrapper/protocol operations */
+#define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND             60
+#define STREAM_ERROR_CODE_WRAPPER_DISABLED              61
+#define STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED          62
+#define STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED   63
+#define STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED 64
+#define STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED    65
+/* Filter operations */
+#define STREAM_ERROR_CODE_FILTER_NOT_FOUND              80
+#define STREAM_ERROR_CODE_FILTER_FAILED                 81
+/* Cast/conversion operations */
+#define STREAM_ERROR_CODE_CAST_FAILED                   90
+#define STREAM_ERROR_CODE_CAST_NOT_SUPPORTED            91
+#define STREAM_ERROR_CODE_MAKE_SEEKABLE_FAILED          92
+#define STREAM_ERROR_CODE_BUFFERED_DATA_LOST            93
+/* Network/socket operations */
+#define STREAM_ERROR_CODE_NETWORK_SEND_FAILED           100
+#define STREAM_ERROR_CODE_NETWORK_RECV_FAILED           101
+#define STREAM_ERROR_CODE_SSL_NOT_SUPPORTED             102
+#define STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG          103
+#define STREAM_ERROR_CODE_OOB_NOT_SUPPORTED             104
+#define STREAM_ERROR_CODE_PROTOCOL_ERROR                105
+#define STREAM_ERROR_CODE_INVALID_URL                   106
+#define STREAM_ERROR_CODE_INVALID_RESPONSE              107
+#define STREAM_ERROR_CODE_REDIRECT_LIMIT                108
+#define STREAM_ERROR_CODE_AUTH_FAILED                   109
+/* Encoding/decoding operations */
+#define STREAM_ERROR_CODE_ENCODING_FAILED               120
+#define STREAM_ERROR_CODE_INVALID_FORMAT                121
+/* Resource/allocation operations */
+#define STREAM_ERROR_CODE_ALLOCATION_FAILED             130
+#define STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED         131
+/* Locking operations */
+#define STREAM_ERROR_CODE_LOCK_FAILED                   140
+#define STREAM_ERROR_CODE_LOCK_NOT_SUPPORTED            141
+/* Userspace stream operations */
+#define STREAM_ERROR_CODE_USERSPACE_NOT_IMPLEMENTED     150
+#define STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN      151
 
 /* Stored error entry */
 typedef struct {
@@ -33,20 +114,6 @@ typedef struct {
     int severity;
     bool terminal;
 } php_stream_error_entry;
-
-/* Sentinel for error code array termination */
-#define PHP_STREAM_ERROR_CODE_END {0, NULL}
-
-/* Error code registration */
-PHPAPI void php_stream_wrapper_register_error_codes(
-    php_stream_wrapper *wrapper,
-    const php_stream_error_code_def *codes
-);
-
-PHPAPI const char *php_stream_wrapper_get_error_name(
-    php_stream_wrapper *wrapper,
-    int code
-);
 
 /* Main error reporting functions */
 PHPAPI void php_stream_wrapper_error(

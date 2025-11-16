@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright (c) The PHP Group                                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Jakub Zelenka <bukka@php.net>                               |
+   +----------------------------------------------------------------------+
+ */
+
 #include "php.h"
 #include "php_globals.h"
 #include "php_streams.h"
@@ -24,48 +40,6 @@ static void php_stream_error_list_dtor(zval *item)
 	zend_llist *list = (zend_llist *) Z_PTR_P(item);
 	zend_llist_destroy(list);
 	efree(list);
-}
-
-/* Error code registration */
-
-PHPAPI void php_stream_wrapper_register_error_codes(
-		php_stream_wrapper *wrapper, const php_stream_error_code_def *codes)
-{
-	if (!php_stream_wrapper_error_codes) {
-		php_stream_wrapper_error_codes = zend_new_array(8);
-	}
-
-	zval code_table_zv, *code_table;
-	code_table = zend_hash_index_find(php_stream_wrapper_error_codes, (zend_ulong) wrapper);
-
-	if (!code_table) {
-		code_table = &code_table_zv;
-		ZVAL_ARR(code_table, zend_new_array(8));
-		zend_hash_index_update(php_stream_wrapper_error_codes, (zend_ulong) wrapper, code_table);
-	}
-
-	for (const php_stream_error_code_def *def = codes; def->name != NULL; def++) {
-		zend_string *name = zend_string_init(def->name, strlen(def->name), 1);
-		zval zv;
-		ZVAL_STR(&zv, name);
-		zend_hash_index_update(code_table, def->code, &zv);
-	}
-}
-
-PHPAPI const char *php_stream_wrapper_get_error_name(php_stream_wrapper *wrapper, int code)
-{
-	if (!php_stream_wrapper_error_codes) {
-		return NULL;
-	}
-
-	zval *code_table = zend_hash_index_find(php_stream_wrapper_error_codes, (zend_ulong) wrapper);
-
-	if (!code_table) {
-		return NULL;
-	}
-
-	zval *error_name = zend_hash_index_find(Z_ARR_P(code_table), code);
-	return error_name ? Z_STRVAL_P(error_name) : NULL;
 }
 
 /* Context option helpers */
@@ -186,9 +160,21 @@ static void php_stream_process_error(php_stream_context *context, const char *wr
 	/* Call user error handler if set */
 	if (context) {
 		zval *handler = php_stream_context_get_option(context, "stream", "error_handler");
-		if (handler && Z_TYPE_P(handler) == IS_CALLABLE) {
+		if (handler) {
+			zend_fcall_info_cache fcc;
+			char *is_callable_error = NULL;
 			zval retval;
 			zval args[5];
+
+			if (!zend_is_callable_ex(handler, NULL, 0, NULL, &fcc, &is_callable_error)) {
+				if (is_callable_error) {
+					zend_type_error("stream error handler must be a valid callback, %s", is_callable_error);
+					efree(is_callable_error);
+				} else {
+					zend_type_error("stream error must be a valid callback");
+				}
+				return;
+			}
 
 			/* Arg 0: wrapper name */
 			ZVAL_STRING(&args[0], wrapper_name);
@@ -525,10 +511,12 @@ PHPAPI void php_stream_error(
 	zend_string_release(message);
 }
 
-/* StreamException class registration */
+/* StreamException class and error constants registration */
 
 PHP_MINIT_FUNCTION(stream_errors)
 {
+	register_stream_errors_symbols(module_number);
+
 	php_ce_stream_exception = register_class_StreamException(zend_ce_exception);
 
 	return SUCCESS;

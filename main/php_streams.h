@@ -645,10 +645,6 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
-
-/* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-
 typedef enum {
 	PHP_STREAM_UNCHANGED = 0, /* orig stream was seekable anyway */
 	PHP_STREAM_RELEASED = 1, /* newstream should be used; origstream is no longer valid */
