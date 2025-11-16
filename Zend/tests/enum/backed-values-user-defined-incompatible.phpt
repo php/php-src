@@ -1,18 +1,20 @@
 --TEST--
-Backed enums: user-defined values() incompatible with interface signature
+Backed enums: user-defined values() with different return type is allowed
 --FILE--
 <?php
 
 enum E: string {
     case A = 'a';
 
-    // Intentional incompatibility: interface requires array return type
+    // Interface has no return type, so any return type is allowed
     public static function values(): string {
-        return 'values';
+        return 'custom_values';
     }
 }
 
+var_dump(E::values());
+
 ?>
---EXPECTF--
-Fatal error: Declaration of E::values(): string must be compatible with BackedEnum::values(): array in %s on line %d
+--EXPECT--
+string(13) "custom_values"
 

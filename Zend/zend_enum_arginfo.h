@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d13bd28cc1600d35c8494a1e98be14390cb0027 */
+ * Stub hash: 6d8170f1222d9c6a5ed703458cb0c86333c8445a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UnitEnum_cases, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -12,7 +12,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BackedEnum_tryFrom, 0, 1, 
 	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_BackedEnum_values arginfo_class_UnitEnum_cases
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_BackedEnum_values, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 
 static const zend_function_entry class_UnitEnum_methods[] = {

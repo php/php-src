@@ -18,5 +18,5 @@ interface BackedEnum extends UnitEnum
      *
      * @return int[]|string[]
      */
-    public static function values(): array;
+    public static function values();
 }

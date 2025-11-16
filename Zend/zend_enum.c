@@ -503,7 +503,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 			values_function->doc_comment = NULL;
 			values_function->num_args = 0;
 			values_function->required_num_args = 0;
-			values_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_values + 1);
+			values_function->arg_info = (zend_internal_arg_info *) arginfo_class_BackedEnum_values;
 			zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
 		}
 	}
