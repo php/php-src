@@ -394,7 +394,8 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 			}
 			if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 				char errstr[256];
-				php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s",
+				php_stream_notice(stream, STREAM_ERROR_CODE_WRITE_FAILED,
+						"Write of %zu bytes failed with errno=%d %s",
 						count, errno, php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 		}
@@ -472,7 +473,8 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			} else {
 				if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 					char errstr[256];
-					php_error_docref(NULL, E_NOTICE, "Read of %zu bytes failed with errno=%d %s",
+					php_stream_notice(stream, STREAM_ERROR_CODE_READ_FAILED,
+							"Read of %zu bytes failed with errno=%d %s",
 							count, errno, php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 				}
 
@@ -621,7 +623,8 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 	assert(data != NULL);
 
 	if (!data->is_seekable) {
-		php_error_docref(NULL, E_WARNING, "Cannot seek on this stream");
+		php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+				STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED, "Cannot seek on this stream");
 		return -1;
 	}
 
@@ -1158,7 +1161,8 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 	char *persistent_id = NULL;
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
-		php_stream_wrapper_log_error(&php_plain_files_wrapper, options, "`%s' is not a valid mode for fopen", mode);
+		php_stream_wrapper_log_warn(&php_plain_files_wrapper, NULL, options,
+				STREAM_ERROR_CODE_INVALID_MODE, "`%s' is not a valid mode for fopen", mode);
 		return NULL;
 	}
 
@@ -1311,8 +1315,9 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, 
 	if (ret == -1) {
 		if (options & REPORT_ERRORS) {
 			char errstr[256];
-			php_error_docref1(NULL, url, E_WARNING, "%s",
-					php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+			php_stream_wrapper_warn_param(wrapper, context, options,
+					STREAM_ERROR_CODE_UNLINK_FAILED, url,
+					"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 		}
 		return 0;
 	}
@@ -1379,20 +1384,22 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 					 * access to the file in the meantime.
 					 */
 					if (VCWD_CHOWN(url_to, sb.st_uid, sb.st_gid)) {
-						php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s",
-								php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 						if (errno != EPERM) {
 							success = 0;
 						}
+						php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING,
+								!success, STREAM_ERROR_CODE_CHOWN_FAILED, url_from, url_to,
+								"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 					}
 
 					if (success) {
 						if (VCWD_CHMOD(url_to, sb.st_mode)) {
-							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s",
-									php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 							if (errno != EPERM) {
 								success = 0;
 							}
+							php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING,
+									!success, STREAM_ERROR_CODE_CHOWN_FAILED, url_from, url_to,
+									"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 						}
 					}
 #  endif
@@ -1400,12 +1407,14 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 						VCWD_UNLINK(url_from);
 					}
 				} else {
-					php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s",
-							php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+					php_stream_wrapper_warn_param2_nt(wrapper, context, options,
+							STREAM_ERROR_CODE_STAT_FAILED, url_from, url_to,
+							"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 				}
 			} else {
-				php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s",
-						php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+				php_stream_wrapper_warn_param2_nt(wrapper, context, options,
+						STREAM_ERROR_CODE_COPY_FAILED, url_from, url_to,
+						"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 #  if !defined(ZTS) && !defined(TSRM_WIN32)
 			umask(oldmask);
@@ -1418,8 +1427,9 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifdef PHP_WIN32
 		php_win32_docref2_from_error(GetLastError(), url_from, url_to);
 #else
-		php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s",
-				php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+		php_stream_wrapper_warn_param2(wrapper, context, options,
+				STREAM_ERROR_CODE_RENAME_FAILED, url_from, url_to,
+				"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 #endif
 		return 0;
 	}
@@ -1443,7 +1453,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 
 		int ret = VCWD_MKDIR(dir, (mode_t)mode);
 		if (ret < 0 && (options & REPORT_ERRORS)) {
-			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			php_stream_wrapper_warn(wrapper, context, options,
+					STREAM_ERROR_CODE_MKDIR_FAILED, "%s", strerror(errno));
 			return 0;
 		}
 
@@ -1452,7 +1463,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 
 	char buf[MAXPATHLEN];
 	if (!expand_filepath_with_mode(dir, buf, NULL, 0, CWD_EXPAND)) {
-		php_error_docref(NULL, E_WARNING, "Invalid path");
+		php_stream_wrapper_warn(wrapper, context, options,
+				STREAM_ERROR_CODE_INVALID_PATH, "Invalid path");
 		return 0;
 	}
 
@@ -1504,7 +1516,9 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		int ret = VCWD_MKDIR(buf, (mode_t) mode);
 		if (ret < 0 && errno != EEXIST) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+				php_stream_wrapper_warn(wrapper, context, options,
+						STREAM_ERROR_CODE_MKDIR_FAILED,
+						"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 			return 0;
 		}
@@ -1524,7 +1538,9 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 			/* issue a warning to client when the last directory was created failed */
 			if (ret < 0) {
 				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+					php_stream_wrapper_warn(wrapper, context, options,
+							STREAM_ERROR_CODE_MKDIR_FAILED,
+							"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 				}
 				return 0;
 			}
@@ -1546,13 +1562,17 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 	char errstr[256];
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url, strlen(url))) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", php_socket_strerror_s(ENOENT, errstr, sizeof(errstr)));
+		php_stream_wrapper_warn_param(wrapper, context, options,
+				STREAM_ERROR_CODE_NOT_FOUND, url,
+				"%s", php_socket_strerror_s(ENOENT, errstr, sizeof(errstr)));
 		return 0;
 	}
 #endif
 
 	if (VCWD_RMDIR(url) < 0) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+		php_stream_wrapper_warn_param(wrapper, context, options,
+				STREAM_ERROR_CODE_RMDIR_FAILED, url,
+				"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 		return 0;
 	}
 
@@ -1575,7 +1595,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url, strlen(url))) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", php_socket_strerror_s(ENOENT, errstr, sizeof(errstr)));
+		php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS,
+				STREAM_ERROR_CODE_NOT_FOUND, url,
+				"%s", php_socket_strerror_s(ENOENT, errstr, sizeof(errstr)));
 		return 0;
 	}
 #endif
@@ -1594,7 +1616,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			if (VCWD_ACCESS(url, F_OK) != 0) {
 				FILE *file = VCWD_FOPEN(url, "w");
 				if (file == NULL) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to create file %s because %s", url,
+					php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS,
+							STREAM_ERROR_CODE_PERMISSION_DENIED, url,
+							"Unable to create file %s because %s", url,
 							php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 					return 0;
 				}
@@ -1608,7 +1632,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 		case PHP_STREAM_META_OWNER:
 			if(option == PHP_STREAM_META_OWNER_NAME) {
 				if(php_get_uid_by_name((char *)value, &uid) != SUCCESS) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to find uid for %s", (char *)value);
+					php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS,
+							STREAM_ERROR_CODE_META_FAILED, url,
+							"Unable to find uid for %s", (char *)value);
 					return 0;
 				}
 			} else {
@@ -1620,7 +1646,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 		case PHP_STREAM_META_GROUP_NAME:
 			if(option == PHP_STREAM_META_GROUP_NAME) {
 				if(php_get_gid_by_name((char *)value, &gid) != SUCCESS) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to find gid for %s", (char *)value);
+					php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS,
+							STREAM_ERROR_CODE_META_FAILED, url,
+							"Unable to find gid for %s", (char *)value);
 					return 0;
 				}
 			} else {
@@ -1638,8 +1666,9 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			return 0;
 	}
 	if (ret == -1) {
-		php_error_docref1(NULL, url, E_WARNING, "Operation failed: %s",
-				php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+		php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS,
+				STREAM_ERROR_CODE_META_FAILED, url,
+				"Operation failed: %s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 		return 0;
 	}
 	php_clear_stat_cache(0, NULL, 0);
@@ -1732,7 +1761,9 @@ not_relative_path:
 		*(cwd+3) = '\0';
 
 		if (snprintf(trypath, MAXPATHLEN, "%s%s", cwd, filename) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
+			php_stream_wrapper_notice(NULL, NULL, REPORT_ERRORS,
+					STREAM_ERROR_CODE_PATH_TOO_LONG,
+					"%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 
 		efree(cwd);
@@ -1787,7 +1818,9 @@ not_relative_path:
 			goto stream_skip;
 		}
 		if (snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename) >= MAXPATHLEN) {
-			php_error_docref(NULL, E_NOTICE, "%s/%s path was truncated to %d", ptr, filename, MAXPATHLEN);
+			php_stream_wrapper_notice(NULL, NULL, REPORT_ERRORS,
+					STREAM_ERROR_CODE_PATH_TOO_LONG,
+					"%s/%s path was truncated to %d", ptr, filename, MAXPATHLEN);
 		}
 
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir_ex(trypath, 0)) {

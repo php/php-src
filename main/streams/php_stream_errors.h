@@ -63,13 +63,15 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_MKDIR_FAILED                  41
 #define STREAM_ERROR_CODE_RMDIR_FAILED                  42
 #define STREAM_ERROR_CODE_STAT_FAILED                   43
-#define STREAM_ERROR_CODE_CHMOD_FAILED                  44
-#define STREAM_ERROR_CODE_CHOWN_FAILED                  45
-#define STREAM_ERROR_CODE_TOUCH_FAILED                  46
-#define STREAM_ERROR_CODE_INVALID_MODE                  47
-#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            48
-#define STREAM_ERROR_CODE_READONLY                      49
-#define STREAM_ERROR_CODE_RECURSION_DETECTED            50
+#define STREAM_ERROR_CODE_META_FAILED                   44
+#define STREAM_ERROR_CODE_CHMOD_FAILED                  45
+#define STREAM_ERROR_CODE_CHOWN_FAILED                  46
+#define STREAM_ERROR_CODE_COPY_FAILED                   47
+#define STREAM_ERROR_CODE_TOUCH_FAILED                  48
+#define STREAM_ERROR_CODE_INVALID_MODE                  49
+#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            50
+#define STREAM_ERROR_CODE_READONLY                      51
+#define STREAM_ERROR_CODE_RECURSION_DETECTED            52
 /* Wrapper/protocol operations */
 #define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND             70
 #define STREAM_ERROR_CODE_WRAPPER_DISABLED              71
@@ -217,6 +219,15 @@ void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 
 #define php_stream_wrapper_warn_param(wrapper, context, options, code, param, ...) \
     php_stream_wrapper_error_param(wrapper, context, options, E_WARNING, true, code, param, __VA_ARGS__)
+
+#define php_stream_wrapper_warn_param_nt(wrapper, context, options, code, param, ...) \
+    php_stream_wrapper_error_param(wrapper, context, options, E_WARNING, false, code, param, __VA_ARGS__)
+
+#define php_stream_wrapper_warn_param2(wrapper, context, options, code, param1, param2, ...) \
+    php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING, true, code, param1, param2, __VA_ARGS__)
+
+#define php_stream_wrapper_warn_param2_nt(wrapper, context, options, code, param1, param2, ...) \
+    php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING, false, code, param1, param2, __VA_ARGS__)
 
 #define php_stream_warn(stream, code, ...) \
     php_stream_error(stream, E_WARNING, true, code, __VA_ARGS__)
