@@ -189,7 +189,6 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 	result[res_curs] = '\0';
 }
 /* }}} */
-
 /* {{{ php_stream_cast */
 PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
@@ -259,7 +258,7 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 			b) no memory
 			-> lets bail
 		*/
-		php_error_docref(NULL, E_ERROR, "fopencookie failed");
+		php_stream_fatal(stream, STREAM_ERROR_CODE_CAST_FAILED, "fopencookie failed");
 		return FAILURE;
 #endif
 
@@ -299,7 +298,8 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 
 	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		if (show_err) {
-			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
+			php_stream_warn(stream, STREAM_ERROR_CODE_CAST_NOT_SUPPORTED,
+				"Cannot cast a filtered stream on this system");
 		}
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
@@ -315,7 +315,8 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 			"select()able descriptor"
 		};
 
-		php_error_docref(NULL, E_WARNING, "Cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
+		php_stream_warn(stream, STREAM_ERROR_CODE_CAST_NOT_SUPPORTED,
+			"Cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
 	}
 
 	return FAILURE;
@@ -330,7 +331,9 @@ exit_success:
 		 * will be accessing the stream.  Emit a warning so that the end-user will
 		 * know that they should try something else */
 
-		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!", (zend_long)(stream->writepos - stream->readpos));
+		php_stream_warn_nt(stream, STREAM_ERROR_CODE_BUFFERED_DATA_LOST,
+			ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!",
+			(zend_long)(stream->writepos - stream->readpos));
 	}
 
 	if (castas == PHP_STREAM_AS_STDIO && ret) {
