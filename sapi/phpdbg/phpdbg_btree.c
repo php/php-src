@@ -250,7 +250,7 @@ void phpdbg_btree_branch_dump(phpdbg_btree_branch *branch, zend_ulong depth) {
 			phpdbg_btree_branch_dump(branch->branches[0], depth);
 			phpdbg_btree_branch_dump(branch->branches[1], depth);
 		} else {
-			fprintf(stderr, "%p: %p\n", (void *) branch->result.idx, branch->result.ptr);
+			fprintf(stderr, ZEND_LONG_FMT": %p\n", branch->result.idx, branch->result.ptr);
 		}
 	}
 }

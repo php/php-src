@@ -515,7 +515,7 @@ PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_o
 	opline_break.disabled = 0;
 	opline_break.hits = 0;
 	opline_break.id = brake->id;
-	opline_break.opline = brake->opline = (zend_ulong)(op_array->opcodes + brake->opline_num);
+	opline_break.opline = brake->opline = (zend_ulong)(uintptr_t)(op_array->opcodes + brake->opline_num);
 	opline_break.name = NULL;
 	opline_break.base = brake;
 	if (op_array->scope) {
@@ -805,21 +805,21 @@ PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len) 
 
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {{{ */
 {
-	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
+	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t)opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
 		PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_OPLINE);
-		new_break.opline = (zend_ulong) opline;
+		new_break.opline = (zend_ulong)(uintptr_t)opline;
 		new_break.base = NULL;
 
-		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t));
+		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t)opline, &new_break, sizeof(phpdbg_breakline_t));
 
 		phpdbg_notice("Breakpoint #%d added at #"ZEND_ULONG_FMT, new_break.id, new_break.opline);
 		PHPDBG_BREAK_MAPPING(new_break.id, &PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
 	} else {
-		phpdbg_error("Breakpoint exists for opline #"ZEND_ULONG_FMT, (zend_ulong) opline);
+		phpdbg_error("Breakpoint exists for opline #"ZEND_ULONG_FMT, (zend_ulong)(uintptr_t)opline);
 	}
 } /* }}} */
 
@@ -1002,7 +1002,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 {
 	phpdbg_breakline_t *brake;
 
-	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) && brake->base) {
+	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t)opline)) && brake->base) {
 		return (phpdbg_breakbase_t *)brake->base;
 	}
 
@@ -1082,7 +1082,7 @@ static inline bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_exec
 		} break;
 
 		case ADDR_PARAM: {
-			return ((zend_ulong)(phpdbg_opline_ptr_t)execute_data->opline == param->addr);
+			return ((zend_ulong)(uintptr_t)(phpdbg_opline_ptr_t)execute_data->opline == param->addr);
 		} break;
 
 		default: {
