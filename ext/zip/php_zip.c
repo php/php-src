@@ -928,17 +928,16 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 	if (hnd != NULL) {
 		zval tmp, *prop;
 
-		if (type == 2) {
+		if (type == ZEND_PROPERTY_EXISTS) {
 			retval = true;
 		} else if ((prop = php_zip_property_reader(obj, hnd, &tmp)) != NULL) {
-			if (type == 1) {
+			if (type == ZEND_PROPERTY_NOT_EMPTY) {
 				retval = zend_is_true(&tmp);
-			} else if (type == 0) {
+			} else if (type == ZEND_PROPERTY_ISSET) {
 				retval = (Z_TYPE(tmp) != IS_NULL);
 			}
+			zval_ptr_dtor(&tmp);
 		}
-
-		zval_ptr_dtor(&tmp);
 	} else {
 		retval = zend_std_has_property(object, name, type, cache_slot);
 	}
