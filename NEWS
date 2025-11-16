@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
     passing to variadic parameter). (ndossche)
 
+- Bz2:
+  . Fix assertion failures resulting in crashes with stream filter
+    object parameters. (ndossche)
+
 - Date:
   . Fix crashes when trying to instantiate uninstantiable classes via date
     static constructors. (ndossche)
@@ -44,6 +48,10 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fix crash in property existence test. (ndossche)
+
+- Zlib:
+  . Fix assertion failures resulting in crashes with stream filter
+    object parameters. (ndossche)
 
 20 Nov 2025, PHP 8.3.28
 
