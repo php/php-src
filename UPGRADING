@@ -209,6 +209,10 @@ PHP 8.6 UPGRADE NOTES
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the files argument if one
     or more of the entries is not a string.
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    when the "remove_all_path" option is not of type bool, or when the
+    "comp_method", "comp_flags", or "enc_method" options are not of type int
+    (numeric strings are coerced), instead of emitting a warning.
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option "level",
