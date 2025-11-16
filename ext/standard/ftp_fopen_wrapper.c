@@ -539,7 +539,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			php_stream_printf(stream, "REST " ZEND_LONG_FMT "\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC,
+				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_RESUMPTION_FAILED,
 					"Unable to resume from offset " ZEND_LONG_FMT, Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
