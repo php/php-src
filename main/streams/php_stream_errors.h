@@ -93,8 +93,10 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_PROTOCOL_ERROR                106
 #define STREAM_ERROR_CODE_INVALID_URL                   107
 #define STREAM_ERROR_CODE_INVALID_RESPONSE              108
-#define STREAM_ERROR_CODE_REDIRECT_LIMIT                109
-#define STREAM_ERROR_CODE_AUTH_FAILED                   110
+#define STREAM_ERROR_CODE_INVALID_HEADER                109
+#define STREAM_ERROR_CODE_INVALID_PARAM                 110
+#define STREAM_ERROR_CODE_REDIRECT_LIMIT                111
+#define STREAM_ERROR_CODE_AUTH_FAILED                   112
 /* Encoding/decoding/archiving operations */
 #define STREAM_ERROR_CODE_ARCHIVING_FAILED              120
 #define STREAM_ERROR_CODE_ENCODING_FAILED               121
