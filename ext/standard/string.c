@@ -458,8 +458,8 @@ PHP_FUNCTION(strcoll)
 	zend_string *s1, *s2;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(s1)
-		Z_PARAM_STR(s2)
+		Z_PARAM_PATH_STR(s1)
+		Z_PARAM_PATH_STR(s2)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(strcoll((const char *) ZSTR_VAL(s1),

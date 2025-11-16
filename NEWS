@@ -36,6 +36,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . strcoll() now throws a ValueError when passed a string containing NUL bytes
+    instead of silently cutting off the string after the first NUL byte.
+    (ndossche)
 
 - Streams:
   . Added so_reuseaddr streams context socket option that allows disabling

@@ -23,6 +23,10 @@ PHP 8.6 UPGRADE NOTES
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
 
+- Standard:
+  . strcoll() now throws a ValueError when passed a string containing NUL bytes
+    instead of silently cutting off the string after the first NUL byte.
+
 ========================================
 2. New Features
 ========================================
