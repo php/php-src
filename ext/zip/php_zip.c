@@ -977,9 +977,8 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 			} else if (type == 0) {
 				retval = (Z_TYPE(tmp) != IS_NULL);
 			}
+			zval_ptr_dtor(&tmp);
 		}
-
-		zval_ptr_dtor(&tmp);
 	} else {
 		retval = zend_std_has_property(object, name, type, cache_slot);
 	}

@@ -46,6 +46,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
     special characters in attributes when passing data to callback). (ndossche)
 
+- Zip:
+  . Fix crash in property existence test. (ndossche)
+
 20 Nov 2025, PHP 8.4.15
 
 - Core:
