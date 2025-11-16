@@ -150,7 +150,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex(file_basename, false);
 		return -1;
 	}
 
@@ -159,7 +159,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
 			zip_close(za);
-			zend_string_release_ex(file_basename, 0);
+			zend_string_release_ex(file_basename, false);
 			return -1;
 		}
 		zip_close(za);
@@ -183,7 +183,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	zend_string_release_ex(file_basename, 0);
+	zend_string_release_ex(file_basename, false);
 	return 0;
 }
 /* }}} */
@@ -312,7 +312,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex(file_basename, false);
 		return NULL;
 	}
 
@@ -344,14 +344,14 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			}
 
 			if (opened_path) {
-				*opened_path = zend_string_init(path, strlen(path), 0);
+				*opened_path = zend_string_init(path, path_len, false);
 			}
 		} else {
 			zip_close(za);
 		}
 	}
 
-	zend_string_release_ex(file_basename, 0);
+	zend_string_release_ex(file_basename, false);
 
 	if (!stream) {
 		return NULL;

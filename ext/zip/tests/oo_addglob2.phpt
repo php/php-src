@@ -33,10 +33,26 @@ if (!$zip->addGlob($dirname . 'foo.*', GLOB_BRACE, $options)) {
 $options = [
     'remove_all_path' => true,
     'comp_method' => ZipArchive::CM_STORE,
-    'comp_flags' => 5,
+    'comp_flags' => PHP_INT_MIN,
     'enc_method' => ZipArchive::EM_AES_256,
     'enc_password' => 'secret',
 ];
+
+try {
+	$zip->addGlob($dirname. 'bar.*', GLOB_BRACE, $options);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
+$options['comp_flags'] = 65536;
+
+try {
+	$zip->addGlob($dirname. 'bar.*', GLOB_BRACE, $options);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
+$options['comp_flags'] = 5;
 if (!$zip->addGlob($dirname . 'bar.*', GLOB_BRACE, $options)) {
         echo "failed 2\n";
 }
@@ -61,6 +77,10 @@ $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 rmdir_rf(__DIR__ . '/__tmp_oo_addglob2/');
 ?>
---EXPECT--
+--EXPECTF--
+
+Warning: ZipArchive::addGlob(): Option "comp_flags" must be between 0 and 65535 in %s on line %d
+
+Warning: ZipArchive::addGlob(): Option "comp_flags" must be between 0 and 65535 in %s on line %d
 0: foo.txt, comp=8, enc=0
 1: bar.txt, comp=0, enc=259
