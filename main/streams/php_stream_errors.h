@@ -170,16 +170,18 @@ PHPAPI void php_stream_error(
 /* Legacy wrapper error log - updated API */
 PHPAPI void php_stream_wrapper_log_error(
     const php_stream_wrapper *wrapper,
+    php_stream_context *context,
     int options,
     int severity,
     bool terminal,
     int code,
     const char *fmt,
     ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
+) ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
 
 PHPAPI void php_stream_wrapper_log_error_param(
     const php_stream_wrapper *wrapper,
+    php_stream_context *context,
     int options,
     int severity,
     bool terminal,
@@ -187,7 +189,7 @@ PHPAPI void php_stream_wrapper_log_error_param(
     const char *param,
     const char *fmt,
     ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
+) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
 PHPAPI void php_stream_display_wrapper_errors(
     php_stream_wrapper *wrapper,
@@ -226,14 +228,14 @@ void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
     php_stream_error(stream, E_ERROR, true, code, __VA_ARGS__)
 
 /* Legacy log variants */
-#define php_stream_wrapper_log_warn(wrapper, options, code, ...) \
-    php_stream_wrapper_log_error(wrapper, options, E_WARNING, true, code, __VA_ARGS__)
+#define php_stream_wrapper_log_warn(wrapper, context, options, code, ...) \
+    php_stream_wrapper_log_error(wrapper, context, options, E_WARNING, true, code, __VA_ARGS__)
 
-#define php_stream_wrapper_log_warn_nt(wrapper, options, code, ...) \
-    php_stream_wrapper_log_error(wrapper, options, E_WARNING, false, code, __VA_ARGS__)
+#define php_stream_wrapper_log_warn_nt(wrapper, context, options, code, ...) \
+    php_stream_wrapper_log_error(wrapper, context, options, E_WARNING, false, code, __VA_ARGS__)
 
-#define php_stream_wrapper_log_notice(wrapper, options, code, ...) \
-    php_stream_wrapper_log_error(wrapper, options, E_NOTICE, false, code, __VA_ARGS__)
+#define php_stream_wrapper_log_notice(wrapper, context, options, code, ...) \
+    php_stream_wrapper_log_error(wrapper, context, options, E_NOTICE, false, code, __VA_ARGS__)
 
 END_EXTERN_C()
 

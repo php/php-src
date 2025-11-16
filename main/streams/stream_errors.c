@@ -359,19 +359,15 @@ static void php_stream_wrapper_log_store_error(const php_stream_wrapper *wrapper
 	zend_llist_add_element(list, &entry);
 }
 
-static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrapper, int options,
-		int severity, bool terminal, int code, const char *param, va_list args)
+static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrapper, php_stream_context *context,
+		int options, int severity, bool terminal, int code, const char *param, const char *fmt, va_list args)
 {
 	zend_string *message = vstrpprintf(0, args, args);
 	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
 
 	if (options & REPORT_ERRORS) {
 		/* Report immediately using standard error functions */
-		if (param) {
-			php_error_docref1(NULL, param, severity, "%s", ZSTR_VAL(message));
-		} else {
-			php_error_docref(NULL, severity, "%s", ZSTR_VAL(message));
-		}
+		php_stream_wrapper_error_internal(wrapper, context, options, severity, terminal, code, param, fmt, args);
 		zend_string_release(message);
 	} else {
 		/* Store for later display in FG(wrapper_logged_errors) */
@@ -381,21 +377,21 @@ static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrap
 	}
 }
 
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options,
-		int severity, bool terminal, int code, const char *fmt, ...)
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, php_stream_context *context,
+		int options, int severity, bool terminal, int code, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	php_stream_wrapper_log_error_internal(wrapper, options, severity, terminal, code, NULL, args);
+	php_stream_wrapper_log_error_internal(wrapper, context, options, severity, terminal, code, NULL, fmt, args);
 	va_end(args);
 }
 
-PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper, int options,
-		int severity, bool terminal, int code, const char *param, const char *fmt, ...)
+PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper, php_stream_context *context,
+		int options, int severity, bool terminal, int code, const char *param, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	php_stream_wrapper_log_error_internal(wrapper, options, severity, terminal, code, param, args);
+	php_stream_wrapper_log_error_internal(wrapper, context, options, severity, terminal, code, param, fmt, args);
 	va_end(args);
 }
 
