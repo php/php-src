@@ -54,18 +54,20 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_ALREADY_EXISTS                32
 #define STREAM_ERROR_CODE_INVALID_PATH                  33
 #define STREAM_ERROR_CODE_PATH_TOO_LONG                 34
-#define STREAM_ERROR_CODE_UNLINK_FAILED                 35
-#define STREAM_ERROR_CODE_RENAME_FAILED                 36
-#define STREAM_ERROR_CODE_MKDIR_FAILED                  37
-#define STREAM_ERROR_CODE_RMDIR_FAILED                  38
-#define STREAM_ERROR_CODE_STAT_FAILED                   39
-#define STREAM_ERROR_CODE_CHMOD_FAILED                  40
-#define STREAM_ERROR_CODE_CHOWN_FAILED                  41
-#define STREAM_ERROR_CODE_TOUCH_FAILED                  42
-#define STREAM_ERROR_CODE_INVALID_MODE                  43
-#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            44
-#define STREAM_ERROR_CODE_READONLY                      45
-#define STREAM_ERROR_CODE_RECURSION_DETECTED            46
+#define STREAM_ERROR_CODE_OPEN_FAILED                   35
+#define STREAM_ERROR_CODE_CREATE_FAILED                 36
+#define STREAM_ERROR_CODE_UNLINK_FAILED                 37
+#define STREAM_ERROR_CODE_RENAME_FAILED                 38
+#define STREAM_ERROR_CODE_MKDIR_FAILED                  39
+#define STREAM_ERROR_CODE_RMDIR_FAILED                  40
+#define STREAM_ERROR_CODE_STAT_FAILED                   41
+#define STREAM_ERROR_CODE_CHMOD_FAILED                  42
+#define STREAM_ERROR_CODE_CHOWN_FAILED                  43
+#define STREAM_ERROR_CODE_TOUCH_FAILED                  44
+#define STREAM_ERROR_CODE_INVALID_MODE                  45
+#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            46
+#define STREAM_ERROR_CODE_READONLY                      47
+#define STREAM_ERROR_CODE_RECURSION_DETECTED            48
 /* Wrapper/protocol operations */
 #define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND             60
 #define STREAM_ERROR_CODE_WRAPPER_DISABLED              61
@@ -85,16 +87,18 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_NETWORK_SEND_FAILED           100
 #define STREAM_ERROR_CODE_NETWORK_RECV_FAILED           101
 #define STREAM_ERROR_CODE_SSL_NOT_SUPPORTED             102
-#define STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG          103
-#define STREAM_ERROR_CODE_OOB_NOT_SUPPORTED             104
-#define STREAM_ERROR_CODE_PROTOCOL_ERROR                105
-#define STREAM_ERROR_CODE_INVALID_URL                   106
-#define STREAM_ERROR_CODE_INVALID_RESPONSE              107
-#define STREAM_ERROR_CODE_REDIRECT_LIMIT                108
-#define STREAM_ERROR_CODE_AUTH_FAILED                   109
-/* Encoding/decoding operations */
-#define STREAM_ERROR_CODE_ENCODING_FAILED               120
-#define STREAM_ERROR_CODE_INVALID_FORMAT                121
+#define STREAM_ERROR_CODE_RESUMPTION_FAILED             103
+#define STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG          104
+#define STREAM_ERROR_CODE_OOB_NOT_SUPPORTED             105
+#define STREAM_ERROR_CODE_PROTOCOL_ERROR                106
+#define STREAM_ERROR_CODE_INVALID_URL                   107
+#define STREAM_ERROR_CODE_INVALID_RESPONSE              108
+#define STREAM_ERROR_CODE_REDIRECT_LIMIT                109
+#define STREAM_ERROR_CODE_AUTH_FAILED                   110
+/* Encoding/decoding/archiving operations */
+#define STREAM_ERROR_CODE_ARCHIVING_FAILED              120
+#define STREAM_ERROR_CODE_ENCODING_FAILED               121
+#define STREAM_ERROR_CODE_INVALID_FORMAT                122
 /* Resource/allocation operations */
 #define STREAM_ERROR_CODE_ALLOCATION_FAILED             130
 #define STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED         131

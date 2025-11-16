@@ -125,7 +125,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC, "%s", error);
+					php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_OPEN_FAILED, "%s", error);
 				}
 				efree(error);
 			}
@@ -136,7 +136,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 			if (error) {
 				spprintf(&error, 0, "Cannot open cached phar '%s' as writeable, copy on write failed", ZSTR_VAL(resource->host));
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC, "%s", error);
+					php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_OPEN_FAILED, "%s", error);
 				}
 				efree(error);
 			}
@@ -200,10 +200,10 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true, time(NULL)))) {
 			if (error) {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC, "%s", error);
+				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_CREATE_FAILED, "%s", error);
 				efree(error);
 			} else {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC,
+				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_CREATE_FAILED,
 					"phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, ZSTR_VAL(resource->host));
 			}
 			efree(internal_file);
@@ -265,7 +265,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				if (stream == NULL) {
 					stream = phar_open_archive_fp(phar);
 					if (UNEXPECTED(!stream)) {
-						php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC,
+						php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_OPEN_FAILED,
 							"phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
 						efree(internal_file);
 						php_url_free(resource);
@@ -325,7 +325,7 @@ idata_error:
 
 	/* check length, crc32 */
 	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(idata, idata->internal_file->crc32, &error, 2) != SUCCESS) {
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_GENERIC, "%s", error);
+		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_ARCHIVING_FAILED, "%s", error);
 		efree(error);
 		phar_entry_delref(idata);
 		efree(internal_file);
