@@ -1184,7 +1184,7 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 
 	ZEND_ASSERT(buf != NULL);
 	if (stream->ops->write == NULL) {
-		php_error_docref(NULL, E_NOTICE, "Stream is not writable");
+		php_stream_notice(stream, STREAM_ERROR_CODE_NOT_WRITABLE, "Stream is not writable");
 		return (ssize_t) -1;
 	}
 
@@ -1318,7 +1318,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		return 0;
 	}
 
-	php_error_docref(NULL, E_WARNING, "Stream does not support seeking");
+	php_stream_warn(stream, STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED,
+			"Stream does not support seeking");
 
 	return -1;
 }
@@ -1919,7 +1920,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			if (!localhost && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
 				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL, E_WARNING, "Remote host file access not supported, %s", path);
+					php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+							STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED,
+							"Remote host file access not supported, %s", path);
 				}
 				return NULL;
 			}
@@ -1958,7 +1961,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			}
 
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "file:// wrapper is disabled in the server configuration");
+				php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+					STREAM_ERROR_CODE_DISABLED,
+					"file:// wrapper is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -2056,7 +2061,8 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 			stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
 		}
 	} else if (wrapper) {
-		php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS, "not implemented");
+		php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+				STREAM_ERROR_CODE_NO_OPENER, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "Failed to open directory");
@@ -2126,7 +2132,13 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
 	if ((options & STREAM_USE_URL) && (!wrapper || !wrapper->is_url)) {
-		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
+		if (wrapper) {
+			php_stream_wrapper_warn(wrapper, context, options,
+					STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED,
+					"This function may only be used against URLs");
+		} else {
+			php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
+		}
 		if (resolved_path) {
 			zend_string_release_ex(resolved_path, 0);
 		}
@@ -2135,7 +2147,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 
 	if (wrapper) {
 		if (!wrapper->wops->stream_opener) {
-			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
+			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+					STREAM_ERROR_CODE_NO_OPENER,
 					"wrapper does not support stream open");
 		} else {
 			stream = wrapper->wops->stream_opener(wrapper,
@@ -2146,7 +2159,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		/* if the caller asked for a persistent stream but the wrapper did not
 		 * return one, force an error here */
 		if (stream && persistent && !stream->is_persistent) {
-			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
+			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+					STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED,
 					"wrapper does not support persistent streams");
 			php_stream_close(stream);
 			stream = NULL;
@@ -2198,8 +2212,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (options & REPORT_ERRORS) {
 					char *tmp = estrdup(path);
 					php_strip_url_passwd(tmp);
-					php_error_docref1(NULL, tmp, E_WARNING, "could not make seekable - %s",
-							tmp);
+					php_stream_wrapper_warn_param(wrapper, context, options,
+							STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED, tmp,
+							"could not make seekable - %s", tmp);
 					efree(tmp);
 
 					options &= ~REPORT_ERRORS;
