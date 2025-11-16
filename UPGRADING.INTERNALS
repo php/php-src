@@ -48,6 +48,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
     removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
     instead.
+  . Introduced a new time-retrieval API zend_time_*. Use this API instead of
+    time(), gettimeofday(), clock_gettime() and timespec_get().
 
 ========================
 2. Build system changes
@@ -62,6 +64,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     as it was unused.
   . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
     as it was unused and could return the wrong result.
+- ext/date
+  . Deprecated php_time(), Use zend_time_real_get() instead.
 
 ========================
 4. OpCode changes
