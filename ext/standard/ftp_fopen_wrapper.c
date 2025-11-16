@@ -189,7 +189,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 			/* get the response */
 			result = GET_FTP_RESULT(stream);
 			if (result != 334) {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+				php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
 					"Server doesn't support FTPS.");
 				goto connect_errexit;
 			} else {
@@ -209,7 +209,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		if (php_stream_xport_crypto_setup(stream,
 				STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0
 				|| php_stream_xport_crypto_enable(stream, 1) < 0) {
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
 				"Unable to activate SSL mode");
 			php_stream_close(stream);
 			stream = NULL;
@@ -241,7 +241,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	unsigned char *s = (unsigned char *) val, *e = (unsigned char *) s + val_len;	\
 	while (s < e) {	\
 		if (iscntrl(*s)) {	\
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_AUTH_FAILED, err_msg, val);	\
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_AUTH_FAILED, err_msg, val);	\
 			goto connect_errexit;	\
 		}	\
 		s++;	\
@@ -438,7 +438,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	}
 	if (strpbrk(mode, "wa+")) {
 		if (read_write) {
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_MODE_NOT_SUPPORTED,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_MODE_NOT_SUPPORTED,
 				"FTP does not support simultaneous read/write connections");
 			return NULL;
 		}
@@ -450,7 +450,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	}
 	if (!read_write) {
 		/* No mode specified? */
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_INVALID_MODE,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_MODE,
 			"Unknown file open mode");
 		return NULL;
 	}
@@ -462,7 +462,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			return php_stream_url_wrap_http(wrapper, path, mode, options, opened_path, context STREAMS_CC);
 		} else {
 			/* ftp proxy is read-only */
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_MODE_NOT_SUPPORTED,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_MODE_NOT_SUPPORTED,
 				"FTP proxy may only be used in read mode");
 			return NULL;
 		}
@@ -515,7 +515,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 					goto errexit;
 				}
 			} else {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_ALREADY_EXISTS,
+				php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_ALREADY_EXISTS,
 					"Remote file already exists and overwrite context option not specified");
 				errno = EEXIST;
 				goto errexit;
@@ -540,7 +540,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			php_stream_printf(stream, "REST " ZEND_LONG_FMT "\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_RESUMPTION_FAILED,
+				php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_RESUMPTION_FAILED,
 					"Unable to resume from offset " ZEND_LONG_FMT, Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
@@ -586,7 +586,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			php_stream_xport_crypto_enable(datastream, 1) < 0)) {
 
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
 			"Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
@@ -609,11 +609,11 @@ errexit:
 		php_stream_close(stream);
 	}
 	if (tmp_line[0] != '\0')
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
 			"FTP server reports %s", tmp_line);
 
 	if (error_message) {
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_NETWORK_SEND_FAILED,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_NETWORK_SEND_FAILED,
 			"Failed to set up data channel: %s", ZSTR_VAL(error_message));
 		zend_string_release(error_message);
 	}
@@ -759,7 +759,7 @@ static php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const ch
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			php_stream_xport_crypto_enable(datastream, 1) < 0)) {
 
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
 			"Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
@@ -784,7 +784,7 @@ opendir_errexit:
 		php_stream_close(stream);
 	}
 	if (tmp_line[0] != '\0') {
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
 			"FTP server reports %s", tmp_line);
 	}
 	return NULL;
