@@ -343,7 +343,8 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 					php_stream_bucket_unlink(bucket);
 					php_stream_bucket_delref(bucket);
 				}
-				php_error_docref(NULL, E_WARNING, "Filter failed to process pre-buffered data");
+				php_stream_warn(stream, STREAM_ERROR_CODE_FILTER_FAILED,
+						"Filter failed to process pre-buffered data");
 				return FAILURE;
 			case PSFS_FEED_ME:
 				/* We don't actually need data yet,
