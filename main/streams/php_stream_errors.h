@@ -102,7 +102,8 @@ BEGIN_EXTERN_C()
 /* Encoding/decoding/archiving operations */
 #define STREAM_ERROR_CODE_ARCHIVING_FAILED              130
 #define STREAM_ERROR_CODE_ENCODING_FAILED               131
-#define STREAM_ERROR_CODE_INVALID_FORMAT                132
+#define STREAM_ERROR_CODE_DECODING_FAILED               132
+#define STREAM_ERROR_CODE_INVALID_FORMAT                133
 /* Resource/allocation operations */
 #define STREAM_ERROR_CODE_ALLOCATION_FAILED             140
 #define STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED         141
