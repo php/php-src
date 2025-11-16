@@ -18,8 +18,8 @@ class ParamsDecompress {
 $fp = fopen('php://stdout', 'w');
 stream_filter_append($fp, 'bzip2.compress', STREAM_FILTER_WRITE, new ParamsCompress);
 stream_filter_append($fp, 'bzip2.decompress', STREAM_FILTER_WRITE, new ParamsDecompress);
-fwrite($fp, "Hallo wereld hopelijk niet kapot\n");
+fwrite($fp, "Hello world, hopefully not broken\n");
 
 ?>
 --EXPECT--
-Hallo wereld hopelijk niet kapot
+Hello world, hopefully not broken

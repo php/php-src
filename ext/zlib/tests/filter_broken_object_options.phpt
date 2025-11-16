@@ -14,8 +14,8 @@ class Params {
 $fp = fopen('php://stdout', 'w');
 stream_filter_append($fp, 'zlib.deflate', STREAM_FILTER_WRITE, new Params);
 stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_WRITE, new Params);
-fwrite($fp, "Hallo wereld hopelijk niet kapot\n");
+fwrite($fp, "Hello world, hopefully not broken\n");
 
 ?>
 --EXPECT--
-Hallo wereld hopelijk niet kapot
+Hello world, hopefully not broken
