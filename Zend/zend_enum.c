@@ -25,6 +25,10 @@
 #include "zend_extensions.h"
 #include "zend_observer.h"
 
+/* Arginfo for native values() implementation with return type */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enum_values_native, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
@@ -503,7 +507,8 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 			values_function->doc_comment = NULL;
 			values_function->num_args = 0;
 			values_function->required_num_args = 0;
-			values_function->arg_info = (zend_internal_arg_info *) arginfo_class_BackedEnum_values;
+			/* Use native arginfo with return type for the implementation */
+			values_function->arg_info = (zend_internal_arg_info *) (arginfo_enum_values_native + 1);
 			zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
 		}
 	}
@@ -535,7 +540,8 @@ static const zend_function_entry backed_enum_methods[] = {
     ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_BackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-    ZEND_NAMED_ME(values, zend_enum_values_func, arginfo_class_BackedEnum_values, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    /* Use native arginfo with return type for internal backed enums */
+    ZEND_NAMED_ME(values, zend_enum_values_func, arginfo_enum_values_native, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_FE_END
 };
 
