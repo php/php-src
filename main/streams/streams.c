@@ -2065,7 +2065,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 				STREAM_ERROR_CODE_NO_OPENER, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, context, path, STREAM_ERROR_CODE_OPEN_FAILED,
+		php_stream_display_wrapper_errors(wrapper, context, STREAM_ERROR_CODE_OPEN_FAILED, path,
 				"Failed to open directory");
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
@@ -2233,7 +2233,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, context, path, STREAM_ERROR_CODE_OPEN_FAILED,
+		php_stream_display_wrapper_errors(wrapper, context, STREAM_ERROR_CODE_OPEN_FAILED, path,
 				"Failed to open stream");
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
