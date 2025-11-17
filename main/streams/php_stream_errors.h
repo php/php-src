@@ -46,8 +46,11 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED            13
 #define STREAM_ERROR_CODE_FLUSH_FAILED                  14
 #define STREAM_ERROR_CODE_TRUNCATE_FAILED               15
-#define STREAM_ERROR_CODE_NOT_WRITABLE                  16
-#define STREAM_ERROR_CODE_NOT_READABLE                  17
+#define STREAM_ERROR_CODE_CONNECT_FAILED                16
+#define STREAM_ERROR_CODE_BIND_FAILED                   17
+#define STREAM_ERROR_CODE_LISTEN_FAILED                 18
+#define STREAM_ERROR_CODE_NOT_WRITABLE                  19
+#define STREAM_ERROR_CODE_NOT_READABLE                  20
 /* File system operations */
 #define STREAM_ERROR_CODE_DISABLED                      30
 #define STREAM_ERROR_CODE_NOT_FOUND                     31
