@@ -436,8 +436,8 @@ static zend_llist *php_stream_get_wrapper_errors_list(php_stream_wrapper *wrappe
 	}
 }
 
-void php_stream_display_wrapper_errors(
-		php_stream_wrapper *wrapper, const char *path, const char *caption)
+void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
+		php_stream_context *context, int code, const char *path, const char *caption)
 {
 	char *tmp;
 	char *msg;
@@ -471,7 +471,7 @@ void php_stream_display_wrapper_errors(
 
 			for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
 					err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				strcat(msg, ZSTR_VAL((*err_entry_p)->message));
+				l += ZSTR_LEN((*err_entry_p)->message);
 				if (i < count - 1) {
 					l += brlen;
 				}
@@ -499,7 +499,8 @@ void php_stream_display_wrapper_errors(
 	}
 
 	php_strip_url_passwd(tmp);
-	php_error_docref1(NULL, tmp, E_WARNING, "%s: %s", caption, msg);
+	php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS, code, tmp,
+			"%s: %s", caption, msg);
 	efree(tmp);
 	if (free_msg) {
 		efree(msg);
