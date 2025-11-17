@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024 Alexander Borisov
+ * Copyright (C) 2023-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -1106,9 +1106,9 @@ lxb_url_host_copy(const lxb_url_host_t *src, lxb_url_host_t *dst,
         }
     }
 
-    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
-        dst->type = src->type;
+    dst->type = src->type;
 
+    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
         if (src->type == LXB_URL_HOST_TYPE__UNDEF) {
             return LXB_STATUS_OK;
         }

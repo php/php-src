@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
+- Lexbor:
+  . Fixed bug GH-20501 (\Uri\WhatWg\Url lose host after calling
+    withPath() or withQuery()). (lexborisov)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
