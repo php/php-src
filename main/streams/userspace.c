@@ -590,7 +590,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	zval_ptr_dtor(&args[0]);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_WRITE " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 	}
 
@@ -611,7 +611,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > 0 && didwrite > count) {
-		php_stream_warn_nt(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+		php_stream_warn_nt(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 				"%s::" USERSTREAM_WRITE " wrote " ZEND_LONG_FMT " bytes more data than requested ("
 						ZEND_LONG_FMT " written, " ZEND_LONG_FMT " max)",
 				ZSTR_VAL(us->wrapper->ce->name),
@@ -644,7 +644,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	}
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_READ " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 		goto err;
 	}
@@ -661,7 +661,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	didread = Z_STRLEN(retval);
 	if (didread > 0) {
 		if (didread > count) {
-			php_stream_warn_nt(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+			php_stream_warn_nt(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 					"%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT
 							" bytes more data than requested (" ZEND_LONG_FMT " read, "
 							ZEND_LONG_FMT " max) - excess data will be lost",
@@ -682,7 +682,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 				ZSTR_VAL(us->wrapper->ce->name));
 		stream->eof = 1;
@@ -798,7 +798,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 		*newoffs = Z_LVAL(retval);
 		ret = 0;
 	} else if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_TELL " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 		ret = -1;
 	} else {
@@ -863,7 +863,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_STAT " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 		return -1;
 	}
@@ -891,8 +891,7 @@ static int user_stream_set_check_liveliness(php_stream *stream, const php_userst
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS,
-				STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 				ZSTR_VAL(us->wrapper->ce->name));
 		return PHP_STREAM_OPTION_RETURN_ERR;
@@ -903,8 +902,7 @@ static int user_stream_set_check_liveliness(php_stream *stream, const php_userst
 	if (EXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		return Z_TYPE(retval) == IS_TRUE ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 	} else {
-		php_stream_warn(stream, REPORT_ERRORS,
-				STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+		php_stream_warn(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 				"%s::" USERSTREAM_EOF " value must be of type bool, %s given",
 				ZSTR_VAL(us->wrapper->ce->name), zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
@@ -947,7 +945,7 @@ static int user_stream_set_locking(php_stream *stream, const php_userstream_data
 			/* lock support test (TODO: more check) */
 			return PHP_STREAM_OPTION_RETURN_OK;
 		}
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_LOCK " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
@@ -960,7 +958,7 @@ static int user_stream_set_locking(php_stream *stream, const php_userstream_data
 	}
 	// TODO: ext/standard/tests/file/userstreams_004.phpt returns null implicitly for function
 	// Should this warn or not? And should this be considered an error?
-	//php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+	//php_stream_warn(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 	//		"%s::" USERSTREAM_LOCK " value must be of type bool, %s given",
 	//		ZSTR_VAL(us->wrapper->ce->name), zend_zval_value_name(&retval));
 	zval_ptr_dtor(&retval);
@@ -996,7 +994,7 @@ static int user_stream_set_truncation(php_stream *stream, const php_userstream_d
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_TRUNCATE " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
@@ -1006,7 +1004,7 @@ static int user_stream_set_truncation(php_stream *stream, const php_userstream_d
 	if (EXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		return Z_TYPE(retval) == IS_TRUE ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 	} else {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+		php_stream_warn(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 				"%s::" USERSTREAM_TRUNCATE " value must be of type bool, %s given",
 				ZSTR_VAL(us->wrapper->ce->name), zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
@@ -1040,7 +1038,7 @@ static int user_stream_set_option(php_stream *stream, const php_userstream_data_
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 				"%s::" USERSTREAM_SET_OPTION " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
 		return PHP_STREAM_OPTION_RETURN_ERR;
@@ -1366,7 +1364,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+		php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 			"%s::" USERSTREAM_DIR_READ " is not implemented!",
 			ZSTR_VAL(us->wrapper->ce->name));
 		return -1;
@@ -1453,7 +1451,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		if (report_errors) {
-			php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
+			php_stream_warn(stream, STREAM_ERROR_CODE_NOT_IMPLEMENTED,
 					"%s::" USERSTREAM_CAST " is not implemented!",
 					ZSTR_VAL(us->wrapper->ce->name));
 		}
@@ -1468,7 +1466,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		php_stream_from_zval_no_verify(intstream, &retval);
 		if (!intstream) {
 			if (report_errors) {
-				php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+				php_stream_warn(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 						"%s::" USERSTREAM_CAST " must return a stream resource",
 						ZSTR_VAL(us->wrapper->ce->name));
 			}
@@ -1476,7 +1474,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		}
 		if (intstream == stream) {
 			if (report_errors) {
-				php_stream_warn(stream, REPORT_ERRORS, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
+				php_stream_warn(stream, STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN,
 						"%s::" USERSTREAM_CAST " must not return itself",
 						ZSTR_VAL(us->wrapper->ce->name));
 			}
