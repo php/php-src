@@ -644,11 +644,10 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	}
 
 	/* Allocate the Output buffer front-end. */
-	ret = xmlAllocOutputBuffer(encoder);
-	if (ret != NULL) {
-		ret->context = context;
-		ret->writecallback = php_libxml_streams_IO_write;
-		ret->closecallback = php_libxml_streams_IO_close;
+	ret = xmlOutputBufferCreateIO(php_libxml_streams_IO_write, php_libxml_streams_IO_close, context, encoder);
+	if (ret == NULL) {
+		php_libxml_streams_IO_close(context);
+		goto err;
 	}
 
 	return(ret);
@@ -820,6 +819,7 @@ is_string:
 				zend_string_release(callable_name);
 				zval_ptr_dtor(&callable);
 			} else {
+#if LIBXML_VERSION < 21400
 				/* TODO: allow storing the encoding in the stream context? */
 				xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
 				xmlParserInputBufferPtr pib = xmlAllocParserInputBuffer(enc);
@@ -838,6 +838,12 @@ is_string:
 						xmlFreeParserInputBuffer(pib);
 					}
 				}
+#else
+				/* make stream not being closed when the zval is freed */
+				GC_ADDREF(stream->res);
+				ret = xmlNewInputFromIO(NULL, php_libxml_streams_IO_read, php_libxml_streams_IO_close, stream, 0);
+				/* Note: if ret == NULL, the close operation will be executed, so don't DELREF stream->res upon failure! */
+#endif
 			}
 		} else if (Z_TYPE(retval) != IS_NULL) {
 			/* retval not string nor resource nor null; convert to string */
