@@ -1014,8 +1014,7 @@ try_again:
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-			smart_str name = {0};
-			int cookie_len;
+			size_t cookie_len;
 			zval zcookie;
 
 			if (sempos != NULL) {
@@ -1024,8 +1023,7 @@ try_again:
 				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
-			smart_str_appendl(&name, cookie, eqpos - cookie);
-			smart_str_0(&name);
+			zend_string *name = zend_string_init(cookie, eqpos - cookie, false);
 
 			array_init(&zcookie);
 			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
@@ -1063,8 +1061,8 @@ try_again:
 				GC_ADDREF(uri->host);
 			}
 
-			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);
-			smart_str_free(&name);
+			zend_symtable_update(Z_ARRVAL_P(cookies), name, &zcookie);
+			zend_string_release_ex(name, false);
 		}
 
 		cookie_itt = cookie_itt + cookie_len;
