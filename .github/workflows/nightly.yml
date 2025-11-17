@@ -41,9 +41,9 @@ on:
       skip_laravel:
         required: true
         type: boolean
-      skip_symfony:
+      symfony_version:
         required: true
-        type: boolean
+        type: string
       skip_wordpress:
         required: true
         type: boolean
@@ -590,9 +590,9 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: ${{ !cancelled() && !inputs.skip_symfony }}
+        if: ${{ !cancelled() && inputs.symfony_version != '' }}
         run: |
-          git clone https://github.com/symfony/symfony.git --depth=1
+          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ inputs.symfony_version }}"
           cd symfony
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -626,7 +626,8 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: ${{ !cancelled() && !inputs.skip_symfony }}
+        # composer create-project will automatically pick the right Symfony version for us.
+        if: ${{ !cancelled() && inputs.symfony_version != '' }}
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-req=php+
           cd symfony_demo
