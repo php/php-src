@@ -253,7 +253,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	char *error;
 	phar_archive_data *phar;
 
-	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, context, path, mode, options)) == NULL) {
 		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_URL,
 			"phar url \"%s\" is unknown", path);
 		return NULL;
@@ -376,7 +376,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url_from, "w", options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, context, url_from, "w", options)) == NULL) {
 		return 0;
 	}
 
@@ -520,7 +520,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url, "w", options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, context, url, "w", options)) == NULL) {
 		return 0;
 	}
 
