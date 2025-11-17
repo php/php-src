@@ -287,7 +287,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		size_t last_header_value_len = strlen(last_header_value);
 		if (last_header_value_len > HTTP_HEADER_MAX_LOCATION_SIZE) {
 			header_info->error = true;
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_INVALID_RESPONSE,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_RESPONSE,
 					"HTTP Location header size is over the limit of %d bytes",
 					HTTP_HEADER_MAX_LOCATION_SIZE);
 			zend_string_efree(last_header_line_str);
@@ -468,7 +468,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 #endif
 
 		if (d > timeoutmax) {
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_INVALID_PARAM,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_PARAM,
 				"timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
 			zend_string_release(transport_string);
 			php_uri_struct_free(resource);
@@ -499,7 +499,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	}
 
 	if (errstr) {
-		php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
+		php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
 			"%s", ZSTR_VAL(errstr));
 		zend_string_release_ex(errstr, 0);
 		errstr = NULL;
@@ -1107,7 +1107,7 @@ finish:
 			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
 			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_INVALID_URL,
+				php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_URL,
 					"Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;
@@ -1120,7 +1120,7 @@ finish:
 		s = (unsigned char*)ZSTR_VAL(val); e = s + ZSTR_LEN(val); \
 		while (s < e) { \
 			if (iscntrl(*s)) { \
-				php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_INVALID_URL, \
+				php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_INVALID_URL, \
 					"Invalid redirect URL! %s", new_path); \
 				efree(new_path); \
 				goto out; \
@@ -1147,7 +1147,7 @@ finish:
 				--redirect_max, new_flags, response_header STREAMS_CC);
 			efree(new_path);
 		} else {
-			php_stream_wrapper_log_warn(wrapper, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
+			php_stream_wrapper_log_warn(wrapper, context, options, STREAM_ERROR_CODE_PROTOCOL_ERROR,
 				"HTTP request failed! %s", tmp_line);
 		}
 	}
