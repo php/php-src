@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
     passing to variadic parameter). (ndossche)
 
+- Bz2:
+  . Fix assertion failures resulting in crashes with stream filter
+    object parameters. (ndossche)
+
 - DOM:
   . Fix memory leak when edge case is hit when registering xpath callback.
     (ndossche)
@@ -41,6 +45,10 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fix crash in property existence test. (ndossche)
+
+- Zlib:
+  . Fix assertion failures resulting in crashes with stream filter
+    object parameters. (ndossche)
 
 13 Nov 2025, PHP 8.5.0RC5
 
