@@ -166,12 +166,9 @@ PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper
 		const char *param, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
 PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
-        const char *path, const char *caption);
+        php_stream_context *context, int code, const char *path, const char *caption);
 
 PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
-
-void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption);
-void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 
 /* Convenience macros */
 #define php_stream_wrapper_warn(wrapper, context, options, code, ...) \
