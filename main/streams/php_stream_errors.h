@@ -128,9 +128,9 @@ BEGIN_EXTERN_C()
 typedef struct {
     zend_string *message;
     int code;
-    const char *wrapper_name;
-    const char *docref;
-    const char *param;
+    char *wrapper_name;
+    char *docref;
+    char *param;
     int severity;
     bool terminal;
 } php_stream_error_entry;

@@ -25,9 +25,6 @@
 /* StreamException class entry */
 static zend_class_entry *php_ce_stream_exception;
 
-/* Error code registry */
-static HashTable *php_stream_wrapper_error_codes = NULL;
-
 static void php_stream_error_entry_dtor(void *error)
 {
 	php_stream_error_entry *entry = *(php_stream_error_entry **) error;
@@ -217,7 +214,7 @@ static void php_stream_process_error(php_stream_context *context, const char *wr
 
 /* Helper to create error entry */
 static php_stream_error_entry *php_stream_create_error_entry(zend_string *message, int code,
-		const char *wrapper_name, const char *docref, const char *param, int severity,
+		const char *wrapper_name, const char *docref, char *param, int severity,
 		bool terminal)
 {
 	php_stream_error_entry *entry = emalloc(sizeof(php_stream_error_entry));
@@ -237,7 +234,7 @@ static php_stream_error_entry *php_stream_create_error_entry(zend_string *messag
 /* Common storage function*/
 static void php_stream_store_error_common(php_stream_context *context, php_stream *stream,
 		zend_string *message, const char *docref, int code,
-		const char *wrapper_name, const char *param, int severity, bool terminal)
+		const char *wrapper_name, char *param, int severity, bool terminal)
 {
 	int error_mode = php_stream_get_error_mode(context);
 	int store_mode = php_stream_get_error_store_mode(context, error_mode);
@@ -285,7 +282,7 @@ static void php_stream_store_error_common(php_stream_context *context, php_strea
 /* Wrapper error reporting - stores in FG(wrapper_stored_errors) */
 static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
-		int code, const char *param, const char *fmt, va_list args)
+		int code, char *param, const char *fmt, va_list args)
 {
 	zend_string *message = vstrpprintf(0, fmt, args);
 
@@ -302,7 +299,7 @@ static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name
 
 static void php_stream_wrapper_error_internal(php_stream_wrapper *wrapper,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
-		int code, const char *param, const char *fmt, va_list args)
+		int code, char *param, const char *fmt, va_list args)
 {
 	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
 
@@ -338,11 +335,9 @@ PHPAPI void php_stream_wrapper_error_param(php_stream_wrapper *wrapper, php_stre
 {
 	va_list args;
 	va_start(args, fmt);
-	if (param = NULL) {
-		param = estrdup(param);
-	}
+	char *param_copy = param ? estrdup(param): NULL;
 	php_stream_wrapper_error_internal(
-			wrapper, context, docref, options, severity, terminal, code, param, fmt, args);
+			wrapper, context, docref, options, severity, terminal, code, param_copy, fmt, args);
 	va_end(args);
 }
 
@@ -365,11 +360,9 @@ PHPAPI void php_stream_wrapper_error_param2(php_stream_wrapper *wrapper,
 static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 		const char *wrapper_name, const char *param, int severity, bool terminal)
 {
-	if (param != NULL) {
-		param = estrdup(param);
-	}
+	char *param_copy = param ? estrdup(param): NULL;
 	php_stream_error_entry *entry = php_stream_create_error_entry(
-			message, code, wrapper_name, NULL, param, severity, terminal);
+			message, code, wrapper_name, NULL, param_copy, severity, terminal);
 
 	if (!FG(wrapper_logged_errors)) {
 		ALLOC_HASHTABLE(FG(wrapper_logged_errors));
@@ -392,9 +385,9 @@ static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 
 static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrapper,
 		php_stream_context *context, int options, int severity, bool terminal, int code,
-		const char *param, const char *fmt, va_list args)
+		char *param, const char *fmt, va_list args)
 {
-	zend_string *message = vstrpprintf(0, args, args);
+	zend_string *message = vstrpprintf(0, fmt, args);
 	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
 
 	if (options & REPORT_ERRORS) {
@@ -427,8 +420,9 @@ PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper
 {
 	va_list args;
 	va_start(args, fmt);
+	char *param_copy = param ? estrdup(param): NULL;
 	php_stream_wrapper_log_error_internal(
-			wrapper, context, options, severity, terminal, code, param, fmt, args);
+			wrapper, context, options, severity, terminal, code, param_copy, fmt, args);
 	va_end(args);
 }
 
@@ -442,8 +436,7 @@ static zend_llist *php_stream_get_wrapper_errors_list(php_stream_wrapper *wrappe
 	}
 }
 
-/* {{{ wrapper error reporting */
-static void php_stream_display_wrapper_errors(
+void php_stream_display_wrapper_errors(
 		php_stream_wrapper *wrapper, const char *path, const char *caption)
 {
 	char *tmp;
