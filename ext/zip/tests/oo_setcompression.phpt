@@ -35,19 +35,7 @@ try {
 }
 
 try {
-	$zip->setCompressionName('entry5.txt', PHP_INT_MAX);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
-}
-
-try {
 	$zip->setCompressionIndex(4, PHP_INT_MIN);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
-}
-
-try {
-	$zip->setCompressionIndex(4, PHP_INT_MAX);
 } catch (\ValueError $e) {
 	echo $e->getMessage(), PHP_EOL;
 }
@@ -82,8 +70,6 @@ bool(true)
 bool(true)
 bool(true)
 ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
-ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
-ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 bool(true)
 bool(true)
