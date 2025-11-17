@@ -426,20 +426,19 @@ PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper
 	va_end(args);
 }
 
-static zend_llist *php_stream_get_wrapper_errors_list(php_stream_wrapper *wrapper)
+static zend_llist *php_stream_get_wrapper_errors_list(const char *wrapper_name)
 {
 	if (!FG(wrapper_logged_errors)) {
 		return NULL;
 	} else {
 		return (zend_llist *) zend_hash_str_find_ptr(
-				FG(wrapper_logged_errors), (const char *) &wrapper, sizeof(wrapper));
+				FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 	}
 }
 
 void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
 		php_stream_context *context, int code, const char *path, const char *caption)
 {
-	char *tmp;
 	char *msg;
 	char errstr[256];
 	int free_msg = 0;
@@ -449,9 +448,10 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
 		return;
 	}
 
-	tmp = estrdup(path);
+	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
+	char *tmp = estrdup(path);
 	if (wrapper) {
-		zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper);
+		zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
 		if (err_list) {
 			size_t l = 0;
 			int brlen;
