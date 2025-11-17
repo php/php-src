@@ -72,18 +72,20 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_COPY_FAILED                   47
 #define STREAM_ERROR_CODE_TOUCH_FAILED                  48
 #define STREAM_ERROR_CODE_INVALID_MODE                  49
-#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            50
-#define STREAM_ERROR_CODE_READONLY                      51
-#define STREAM_ERROR_CODE_RECURSION_DETECTED            52
+#define STREAM_ERROR_CODE_INVALID_META                  50
+#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED            51
+#define STREAM_ERROR_CODE_READONLY                      52
+#define STREAM_ERROR_CODE_RECURSION_DETECTED            53
 /* Wrapper/protocol operations */
-#define STREAM_ERROR_CODE_NO_OPENER                     70
-#define STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED      71
-#define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND             72
-#define STREAM_ERROR_CODE_WRAPPER_DISABLED              73
-#define STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED          74
-#define STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED   75
-#define STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED 76
-#define STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED    77
+#define STREAM_ERROR_CODE_NOT_IMPLEMENTED               70
+#define STREAM_ERROR_CODE_NO_OPENER                     71
+#define STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED      72
+#define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND             73
+#define STREAM_ERROR_CODE_WRAPPER_DISABLED              74
+#define STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED          75
+#define STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED   76
+#define STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED 77
+#define STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED    78
 /* Filter operations */
 #define STREAM_ERROR_CODE_FILTER_NOT_FOUND              90
 #define STREAM_ERROR_CODE_FILTER_FAILED                 91
@@ -120,12 +122,13 @@ BEGIN_EXTERN_C()
 /* Userspace stream operations */
 #define STREAM_ERROR_CODE_USERSPACE_NOT_IMPLEMENTED     160
 #define STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN      161
+#define STREAM_ERROR_CODE_USERSPACE_CALL_FAILED         162
 
 /* Stored error entry */
 typedef struct {
     zend_string *message;
     int code;
-    const char *wrapper_name; /* Points to wrapper->wops->label, no need to duplicate */
+    const char *wrapper_name;
     const char *docref;
     const char *param;
     int severity;
@@ -133,84 +136,37 @@ typedef struct {
 } php_stream_error_entry;
 
 /* Main error reporting functions */
-PHPAPI void php_stream_wrapper_error(
-    php_stream_wrapper *wrapper,
-    php_stream_context *context,
-    const char *docref,
-    int options,
-    int severity,
-    bool terminal,
-    int code,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
+PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,
+		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
+		int code, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
-PHPAPI void php_stream_wrapper_error_param(
-    php_stream_wrapper *wrapper,
-    php_stream_context *context,
-    const char *docref,
-    int options,
-    int severity,
-    bool terminal,
-    int code,
-    const char *param,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 9, 10);
+PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_context *context,
+		const char *docref, int options, int severity, bool terminal, int code, const char *fmt,
+		...) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
-PHPAPI void php_stream_wrapper_error_param2(
-    php_stream_wrapper *wrapper,
-    php_stream_context *context,
-    const char *docref,
-    int options,
-    int severity,
-    bool terminal,
-    int code,
-    const char *param1,
-    const char *param2,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 10, 11);
+PHPAPI void php_stream_wrapper_error_param(php_stream_wrapper *wrapper, php_stream_context *context,
+		const char *docref, int options, int severity, bool terminal, int code, const char *param,
+		const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 9, 10);
 
-PHPAPI void php_stream_error(
-    php_stream *stream,
-    const char *docref,
-    int severity,
-    bool terminal,
-    int code,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
+PHPAPI void php_stream_wrapper_error_param2(php_stream_wrapper *wrapper,
+		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
+		int code, const char *param1, const char *param2, const char *fmt, ...)
+        ZEND_ATTRIBUTE_FORMAT(printf, 10, 11);
+
+PHPAPI void php_stream_error(php_stream *stream, const char *docref, int severity, bool terminal,
+        int code, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
 
 /* Legacy wrapper error log - updated API */
-PHPAPI void php_stream_wrapper_log_error(
-    const php_stream_wrapper *wrapper,
-    php_stream_context *context,
-    int options,
-    int severity,
-    bool terminal,
-    int code,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
+		php_stream_context *context, int options, int severity, bool terminal, int code,
+		const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
 
-PHPAPI void php_stream_wrapper_log_error_param(
-    const php_stream_wrapper *wrapper,
-    php_stream_context *context,
-    int options,
-    int severity,
-    bool terminal,
-    int code,
-    const char *param,
-    const char *fmt,
-    ...
-) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
+PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper,
+		php_stream_context *context, int options, int severity, bool terminal, int code,
+		const char *param, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
-PHPAPI void php_stream_display_wrapper_errors(
-    php_stream_wrapper *wrapper,
-    const char *path,
-    const char *caption
-);
+PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
+        const char *path, const char *caption);
 
 PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 
@@ -220,6 +176,9 @@ void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 /* Convenience macros */
 #define php_stream_wrapper_warn(wrapper, context, options, code, ...) \
     php_stream_wrapper_error(wrapper, context, NULL, options, E_WARNING, true, code, __VA_ARGS__)
+
+#define php_stream_wrapper_warn_name(wrapper_name, context, options, code, ...) \
+    php_stream_wrapper_error_with_name(wrapper_name, context, NULL, options, E_WARNING, true, code, __VA_ARGS__)
 
 #define php_stream_wrapper_warn_nt(wrapper, context, options, code, ...) \
     php_stream_wrapper_error(wrapper, context, NULL, options, E_WARNING, false, code, __VA_ARGS__)
