@@ -323,7 +323,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 			zval *tmpzval;
 
 			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
-				(tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+				(tmpzval = zend_hash_str_find_ind(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
@@ -354,8 +354,10 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 			switch (Z_TYPE_P(filterparams)) {
 				case IS_ARRAY:
-				case IS_OBJECT:
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "memory", sizeof("memory") -1))) {
+				case IS_OBJECT: {
+					HashTable *ht = HASH_OF(filterparams);
+
+					if ((tmpzval = zend_hash_str_find_ind(ht, "memory", sizeof("memory") -1))) {
 						/* Memory Level (1 - 9) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
@@ -365,7 +367,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						}
 					}
 
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+					if ((tmpzval = zend_hash_str_find_ind(ht, "window", sizeof("window") - 1))) {
 						/* log-2 base of history window (9 - 15) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
@@ -375,13 +377,14 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						}
 					}
 
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "level", sizeof("level") - 1))) {
+					if ((tmpzval = zend_hash_str_find_ind(ht, "level", sizeof("level") - 1))) {
 						tmp = zval_get_long(tmpzval);
 
 						/* Pseudo pass through to catch level validating code */
 						goto factory_setlevel;
 					}
 					break;
+				}
 				case IS_STRING:
 				case IS_DOUBLE:
 				case IS_LONG:
