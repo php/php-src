@@ -1387,7 +1387,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 						if (errno != EPERM) {
 							success = 0;
 						}
-						php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING,
+						php_stream_wrapper_error_param2(wrapper, context, NULL, options, E_WARNING,
 								!success, STREAM_ERROR_CODE_CHOWN_FAILED, url_from, url_to,
 								"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 					}
@@ -1397,7 +1397,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 							if (errno != EPERM) {
 								success = 0;
 							}
-							php_stream_wrapper_error_param2(wrapper, context, options, E_WARNING,
+							php_stream_wrapper_error_param2(wrapper, context, NULL, options, E_WARNING,
 									!success, STREAM_ERROR_CODE_CHOWN_FAILED, url_from, url_to,
 									"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 						}
