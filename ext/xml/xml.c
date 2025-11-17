@@ -648,7 +648,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 			val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 			ZVAL_STR(&tmp, val);
-			zend_symtable_update(Z_ARRVAL(args[2]), att, &tmp);
+			zend_hash_update(Z_ARRVAL(args[2]), att, &tmp);
 
 			attributes += 2;
 
@@ -688,7 +688,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 				val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 				ZVAL_STR(&tmp, val);
-				zend_symtable_update(Z_ARRVAL(atr), att, &tmp);
+				zend_hash_update(Z_ARRVAL(atr), att, &tmp);
 
 				atcnt++;
 				attributes += 2;
