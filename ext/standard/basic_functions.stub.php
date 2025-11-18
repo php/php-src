@@ -3550,6 +3550,12 @@ function stream_resolve_include_path(string $filename): string|false {}
 function stream_get_wrappers(): array {}
 
 /**
+ * @param resource|string|null $subject
+ * @return array<int, array>
+ */
+function stream_get_errors($subject = null): array {}
+
+/**
  * @return array<int, string>
  * @refcount 1
  */
