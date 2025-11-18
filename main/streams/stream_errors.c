@@ -510,7 +510,8 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
 void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
 {
 	if (wrapper && FG(wrapper_logged_errors)) {
-		zend_hash_str_del(FG(wrapper_logged_errors), (const char *) &wrapper, sizeof(wrapper));
+		const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
+		zend_hash_str_del(FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 	}
 }
 
