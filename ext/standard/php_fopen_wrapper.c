@@ -396,8 +396,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 	} else {
 		/* invalid php://thingy */
 		php_stream_wrapper_warn(wrapper, context, options,
-			STREAM_ERROR_CODE_INVALID_URL,
-			"Invalid php:// URL specified");
+				STREAM_ERROR_CODE_INVALID_URL, "Invalid php:// URL specified");
 		return NULL;
 	}
 
