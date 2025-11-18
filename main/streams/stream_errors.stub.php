@@ -13,6 +13,48 @@ class StreamException extends Exception
 
 /**
  * @var int
+ * @cvalue PHP_STREAM_ERROR_MODE_ERROR
+ */
+const STREAM_ERROR_MODE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_MODE_EXCEPTION
+ */
+const STREAM_ERROR_MODE_EXCEPTION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_MODE_SILENT
+ */
+const STREAM_ERROR_MODE_SILENT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_STORE_AUTO
+ */
+const STREAM_ERROR_STORE_AUTO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_STORE_NONE
+ */
+const STREAM_ERROR_STORE_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_STORE_NON_TERM
+ */
+const STREAM_ERROR_STORE_NON_TERMINAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_STORE_TERMINAL
+ */
+const STREAM_ERROR_STORE_TERMINAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STREAM_ERROR_STORE_ALL
+ */
+const STREAM_ERROR_STORE_ALL = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue STREAM_ERROR_CODE_NONE
  */
 const STREAM_ERROR_CODE_NONE = UNKNOWN;
