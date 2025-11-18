@@ -1029,27 +1029,34 @@ lxb_url_path_append_wo_slash(lxb_url_t *url,
 static lxb_status_t
 lxb_url_path_append(lxb_url_t *url, const lxb_char_t *data, size_t length)
 {
-    size_t len;
-    lxb_char_t *p;
+    lxb_char_t *p, *begin;
     lexbor_str_t *str;
 
     str = &url->path.str;
 
     if (str->data == NULL) {
         p = lexbor_str_init(str, url->mraw, length + 1);
-        if (p == NULL) {
-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
-        }
+    }
+    else {
+        /* + 2 == begin '/' and end '\0' */
+        p = lexbor_str_check_size(str, url->mraw, length + 2);
     }
 
-    len = str->length;
-    str->length += 1;
+    if (p == NULL) {
+        return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
 
-    p = lexbor_str_append(&url->path.str, url->mraw, data, length);
+    begin = &str->data[str->length];
+    begin[0] = '/';
 
-    str->data[len] = '/';
+    if (length > 0) {
+        memcpy(&begin[1], data, sizeof(lxb_char_t) * length);
+    }
 
-    return (p != NULL) ? LXB_STATUS_OK : LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+    str->length += length + 1;
+    str->data[str->length] = '\0';
+
+    return LXB_STATUS_OK;
 }
 
 static lxb_status_t
