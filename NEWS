@@ -55,6 +55,7 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fix crash in property existence test. (ndossche)
+  . Don't truncate return value of zip_fread() with user sizes. (ndossche)
 
 - Zlib:
   . Fix assertion failures resulting in crashes with stream filter
