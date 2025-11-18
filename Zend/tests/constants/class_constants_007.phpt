@@ -1,5 +1,5 @@
 --TEST--
-Ownership of constant expression inherited from immutable class should be tranferred to class
+Ownership of constant expression inherited from immutable class should be transferred to class
 --FILE--
 <?php
 class A {
