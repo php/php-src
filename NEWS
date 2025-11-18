@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Lexbor:
   . Fixed bug GH-20501 (\Uri\WhatWg\Url lose host after calling
     withPath() or withQuery()). (lexborisov)
+  . Fixed bug GH-20502 (\Uri\WhatWg\Url crashes (SEGV) when parsing
+    malformed URL due to Lexbor memory corruption). (lexborisov)
 
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
