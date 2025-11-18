@@ -1222,7 +1222,7 @@ PHP_FUNCTION(rename)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context));
+	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, REPORT_ERRORS, context));
 }
 /* }}} */
 
