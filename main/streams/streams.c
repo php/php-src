@@ -377,6 +377,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			ZVAL_UNDEF(&stream->wrapperdata);
 		}
 
+		if (stream->error_list) {
+			zend_llist_destroy(stream->error_list);
+			pefree(stream->error_list, stream->is_persistent);
+		}
+
 		if (stream->readbuf) {
 			pefree(stream->readbuf, stream->is_persistent);
 			stream->readbuf = NULL;
