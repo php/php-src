@@ -133,6 +133,7 @@ typedef struct {
     char *param;
     int severity;
     bool terminal;
+    bool persistent;
 } php_stream_error_entry;
 
 /* Main error reporting functions */
