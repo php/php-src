@@ -719,7 +719,9 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 	MBSTRG(detect_order_list) = list;
 	MBSTRG(detect_order_list_size) = size;
 
-	php_mb_populate_current_detect_order_list();
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		php_mb_populate_current_detect_order_list();
+	}
 
 	return SUCCESS;
 }
