@@ -98,6 +98,13 @@ PHP 8.6 UPGRADE NOTES
     When used along with ZEND_JIT_DEBUG_TRACE_EXIT_INFO, the source of exit
     points is printed in exit info output, in debug builds.
 
+- Mbstring:
+  . The mbstring.detect_order INI directive now updates the internal detection
+    order when changed at runtime via ini_set(). Previously, runtime changes
+    using ini_set() did not take effect for mb_detect_order(). Setting the
+    directive to NULL or an empty string at runtime now leaves the previously
+    configured detection order unchanged.
+
 ========================================
 12. Windows Support
 ========================================
