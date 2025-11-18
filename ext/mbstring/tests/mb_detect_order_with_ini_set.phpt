@@ -17,6 +17,14 @@ ini_set('mbstring.detect_order', 'UTF-8');
 
 var_dump( mb_detect_order());
 
+ini_set('mbstring.detect_order', NULL);
+
+var_dump( mb_detect_order());
+
+ini_set('mbstring.detect_order', '');
+
+var_dump( mb_detect_order());
+
 ?>
 --EXPECT--
 array(4) {
@@ -41,3 +49,12 @@ array(1) {
   [0]=>
   string(5) "UTF-8"
 }
+array(1) {
+  [0]=>
+  string(5) "UTF-8"
+}
+array(1) {
+  [0]=>
+  string(5) "UTF-8"
+}
+
