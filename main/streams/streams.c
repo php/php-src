@@ -2185,6 +2185,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
 #endif
+		if (stream->ctx == NULL && context != NULL && !persistent) {
+			php_stream_context_set(stream, context);
+		}
 	}
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
