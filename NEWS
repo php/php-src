@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20502 (\Uri\WhatWg\Url crashes (SEGV) when parsing
     malformed URL due to Lexbor memory corruption). (lexborisov)
 
+- LibXML:
+  . Fix some deprecations on newer libxml versions regarding input
+    buffer/parser handling. (ndossche)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
