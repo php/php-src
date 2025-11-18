@@ -286,10 +286,8 @@ static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name
 {
 	zend_string *message = vstrpprintf(0, fmt, args);
 
-	if (options & REPORT_ERRORS) {
-		php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message),
-				param, severity, terminal);
-	}
+	php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message),
+			param, severity, terminal);
 
 	php_stream_store_error_common(
 			context, NULL, message, docref, code, wrapper_name, param, severity, terminal);
@@ -311,48 +309,56 @@ PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
 		int code, const char *fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
-	php_stream_wrapper_error_internal_with_name(
-			wrapper_name, context, docref, options, severity, terminal, code, NULL, fmt, args);
-	va_end(args);
+	if (options & REPORT_ERRORS) {
+		va_list args;
+		va_start(args, fmt);
+		php_stream_wrapper_error_internal_with_name(
+				wrapper_name, context, docref, options, severity, terminal, code, NULL, fmt, args);
+		va_end(args);
+	}
 }
 
 PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_context *context,
 		const char *docref, int options, int severity, bool terminal, int code, const char *fmt,
 		...)
 {
-	va_list args;
-	va_start(args, fmt);
-	php_stream_wrapper_error_internal(
-			wrapper, context, docref, options, severity, terminal, code, NULL, fmt, args);
-	va_end(args);
+	if (options & REPORT_ERRORS) {
+		va_list args;
+		va_start(args, fmt);
+		php_stream_wrapper_error_internal(
+				wrapper, context, docref, options, severity, terminal, code, NULL, fmt, args);
+		va_end(args);
+	}
 }
 
 PHPAPI void php_stream_wrapper_error_param(php_stream_wrapper *wrapper, php_stream_context *context,
 		const char *docref, int options, int severity, bool terminal, int code, const char *param,
 		const char *fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
-	char *param_copy = param ? estrdup(param): NULL;
-	php_stream_wrapper_error_internal(
-			wrapper, context, docref, options, severity, terminal, code, param_copy, fmt, args);
-	va_end(args);
+	if (options & REPORT_ERRORS) {
+		va_list args;
+		va_start(args, fmt);
+		char *param_copy = param ? estrdup(param): NULL;
+		php_stream_wrapper_error_internal(
+				wrapper, context, docref, options, severity, terminal, code, param_copy, fmt, args);
+		va_end(args);
+	}
 }
 
 PHPAPI void php_stream_wrapper_error_param2(php_stream_wrapper *wrapper,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
 		int code, const char *param1, const char *param2, const char *fmt, ...)
 {
-	char *combined_param;
-	spprintf(&combined_param, 0, "%s,%s", param1, param2);
+	if (options & REPORT_ERRORS) {
+		char *combined_param;
+		spprintf(&combined_param, 0, "%s,%s", param1, param2);
 
-	va_list args;
-	va_start(args, fmt);
-	php_stream_wrapper_error_internal(
-			wrapper, context, docref, options, severity, terminal, code, combined_param, fmt, args);
-	va_end(args);
+		va_list args;
+		va_start(args, fmt);
+		php_stream_wrapper_error_internal(
+				wrapper, context, docref, options, severity, terminal, code, combined_param, fmt, args);
+		va_end(args);
+	}
 }
 
 /* Wrapper error logging - stores in FG(wrapper_logged_errors) */
@@ -394,13 +400,12 @@ static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrap
 		/* Report immediately using standard error functions */
 		php_stream_wrapper_error_internal_with_name(
 				wrapper_name, context, NULL, options, severity, terminal, code, param, fmt, args);
-		zend_string_release(message);
 	} else {
 		/* Store for later display in FG(wrapper_logged_errors) */
 		php_stream_wrapper_log_store_error(
 				message, code, wrapper_name, param, severity, terminal);
-		zend_string_release(message);
 	}
+	zend_string_release(message);
 }
 
 PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
