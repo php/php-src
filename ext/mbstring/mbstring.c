@@ -5988,7 +5988,7 @@ static void php_mb_populate_current_detect_order_list(void)
 	}
 
 	if (MBSTRG(current_detect_order_list) != NULL) {
-		efree(ZEND_VOIDP(MBSTRG(current_detect_order_list)));
+		pefree(ZEND_VOIDP(MBSTRG(current_detect_order_list)), 1);
 	}
 
 	MBSTRG(current_detect_order_list) = entry;
