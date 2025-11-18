@@ -29,10 +29,12 @@ static void php_stream_error_entry_dtor(void *error)
 {
 	php_stream_error_entry *entry = *(php_stream_error_entry **) error;
 	zend_string_release(entry->message);
-	efree(entry->wrapper_name);
-	efree(entry->docref);
+	pefree(entry->wrapper_name, entry->persistent);
+	pefree(entry->docref, entry->persistent);
+	 // param is not currently supported for streams so cannot be persistent
+	ZEND_ASSERT(!entry->persistent || entry->param == NULL);
 	efree(entry->param);
-	efree(entry);
+	pefree(entry, entry->persistent);
 }
 
 static void php_stream_error_list_dtor(zval *item)
@@ -215,18 +217,23 @@ static void php_stream_process_error(php_stream_context *context, const char *wr
 /* Helper to create error entry */
 static php_stream_error_entry *php_stream_create_error_entry(zend_string *message, int code,
 		const char *wrapper_name, const char *docref, char *param, int severity,
-		bool terminal)
+		bool terminal, bool persistent)
 {
-	php_stream_error_entry *entry = emalloc(sizeof(php_stream_error_entry));
+	if (persistent) {
+		message = zend_string_dup(message, true);
+	} else {
+		zend_string_addref(message);
+	}
+
+	php_stream_error_entry *entry = pemalloc(sizeof(php_stream_error_entry), persistent);
 	entry->message = message;
 	entry->code = code;
-	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
-	entry->docref = docref ? estrdup(docref) : NULL;
+	entry->wrapper_name = wrapper_name ? pestrdup(wrapper_name, persistent) : NULL;
+	entry->docref = docref ? pestrdup(docref, persistent) : NULL;
 	entry->param = param;
 	entry->severity = severity;
 	entry->terminal = terminal;
-
-	zend_string_addref(message);
+	entry->persistent = persistent;
 
 	return entry;
 }
@@ -243,17 +250,16 @@ static void php_stream_store_error_common(php_stream_context *context, php_strea
 		efree(param);
 		return;
 	}
-	php_stream_error_entry *entry = php_stream_create_error_entry(
-			message, code, wrapper_name, docref, param, severity, terminal);
 
 	zend_llist *list;
-
+	bool persistent = false;
 	if (stream) {
+		persistent = stream->is_persistent;
 		/* Store in stream's error list */
 		if (!stream->error_list) {
-			stream->error_list = emalloc(sizeof(zend_llist));
+			stream->error_list = pemalloc(sizeof(zend_llist), persistent);
 			zend_llist_init(stream->error_list, sizeof(php_stream_error_entry *),
-					php_stream_error_entry_dtor, 0);
+					php_stream_error_entry_dtor, persistent);
 		}
 		list = stream->error_list;
 	} else {
@@ -275,6 +281,9 @@ static void php_stream_store_error_common(php_stream_context *context, php_strea
 					strlen(wrapper_name), &new_list, sizeof(new_list));
 		}
 	}
+
+	php_stream_error_entry *entry = php_stream_create_error_entry(
+			message, code, wrapper_name, docref, param, severity, terminal, persistent);
 
 	zend_llist_add_element(list, &entry);
 }
@@ -368,7 +377,7 @@ static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 {
 	char *param_copy = param ? estrdup(param): NULL;
 	php_stream_error_entry *entry = php_stream_create_error_entry(
-			message, code, wrapper_name, NULL, param_copy, severity, terminal);
+			message, code, wrapper_name, NULL, param_copy, severity, terminal, false);
 
 	if (!FG(wrapper_logged_errors)) {
 		ALLOC_HASHTABLE(FG(wrapper_logged_errors));
