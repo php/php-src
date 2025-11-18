@@ -2835,12 +2835,12 @@ PHP_METHOD(SoapClient, __setCookie)
 	zval *cookies = Z_CLIENT_COOKIES_P(ZEND_THIS);
 	SEPARATE_ARRAY(cookies);
 	if (val == NULL) {
-		zend_hash_del(Z_ARRVAL_P(cookies), name);
+		zend_symtable_del(Z_ARRVAL_P(cookies), name);
 	} else {
 		zval zcookie;
 		array_init(&zcookie);
 		add_index_str(&zcookie, 0, zend_string_copy(val));
-		zend_hash_update(Z_ARRVAL_P(cookies), name, &zcookie);
+		zend_symtable_update(Z_ARRVAL_P(cookies), name, &zcookie);
 	}
 }
 /* }}} */
