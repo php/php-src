@@ -125,7 +125,9 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_USERSPACE_CALL_FAILED         162
 
 /* Wrapper name for PHP errors */
-#define PHP_STREAM_ERROR_WRAPPER_NAME(_wrapper) (_wrapper ? _wrapper->wops->label : "unknown")
+#define PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME ":na"
+#define PHP_STREAM_ERROR_WRAPPER_NAME(_wrapper) \
+        (_wrapper ? _wrapper->wops->label : PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME)
 
 /* Stored error entry */
 typedef struct {
