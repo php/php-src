@@ -2151,6 +2151,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		return NULL;
 	}
 
+	/* wrapper name needs to be stored as wrapper can be removed in opener (user stream) */
+	char *wrapper_name = pestrdup(PHP_STREAM_ERROR_WRAPPER_NAME(wrapper), persistent);
 	if (wrapper) {
 		if (!wrapper->wops->stream_opener) {
 			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
@@ -2205,6 +2207,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (resolved_path) {
 					zend_string_release_ex(resolved_path, 0);
 				}
+				pefree(wrapper_name, persistent);
 				return stream;
 			case PHP_STREAM_RELEASED:
 				if (newstream->orig_path) {
@@ -2214,6 +2217,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (resolved_path) {
 					zend_string_release_ex(resolved_path, 0);
 				}
+				pefree(wrapper_name, persistent);
 				return newstream;
 			default:
 				php_stream_close(stream);
@@ -2241,14 +2245,15 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, context, STREAM_ERROR_CODE_OPEN_FAILED, path,
+		php_stream_display_wrapper_name_errors(wrapper_name, context, STREAM_ERROR_CODE_OPEN_FAILED, path,
 				"Failed to open stream");
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
 			*opened_path = NULL;
 		}
 	}
-	php_stream_tidy_wrapper_error_log(wrapper);
+	php_stream_tidy_wrapper_name_error_log(wrapper_name);
+	pefree(wrapper_name, persistent);
 	if (resolved_path) {
 		zend_string_release_ex(resolved_path, 0);
 	}

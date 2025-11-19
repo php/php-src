@@ -124,6 +124,9 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN      161
 #define STREAM_ERROR_CODE_USERSPACE_CALL_FAILED         162
 
+/* Wrapper name for PHP errors */
+#define PHP_STREAM_ERROR_WRAPPER_NAME(_wrapper) (_wrapper ? _wrapper->wops->label : "unknown")
+
 /* Stored error entry */
 typedef struct {
     zend_string *message;
@@ -166,8 +169,13 @@ PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper
 		php_stream_context *context, int options, int severity, bool terminal, int code,
 		const char *param, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
+PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
+        php_stream_context *context, int code, const char *path, const char *caption);
+
 PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
         php_stream_context *context, int code, const char *path, const char *caption);
+
+PHPAPI void php_stream_tidy_wrapper_name_error_log(const char *wrapper_name);
 
 PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 
