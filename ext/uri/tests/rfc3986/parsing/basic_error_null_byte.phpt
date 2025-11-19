@@ -5,10 +5,10 @@ Test Uri\Rfc3986\Uri parsing - basic - URI contains null byte
 
 try {
     new Uri\Rfc3986\Uri("https://exam\0ple.com");
-} catch (ValueError $e) {
+} catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-ValueError: Uri\Rfc3986\Uri::__construct(): Argument #1 ($uri) must not contain any null bytes
+Uri\InvalidUriException: The specified URI is malformed
