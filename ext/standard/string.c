@@ -88,11 +88,11 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 	for (i = j = 0; i < target_length; i++) {
 		unsigned char c = old[j++];
 		unsigned char l = c & ~0x20;
-		int is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
+		uint32_t is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
 		unsigned char d;
 
 		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
-		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
+		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(uint32_t) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
 			zend_string_efree(str);
@@ -100,8 +100,8 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		}
 		c = old[j++];
 		l = c & ~0x20;
-		is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
-		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
+		is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
+		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(uint32_t) - 1)) | is_letter)) {
 			d |= l - 0x10 - 0x27 * is_letter;
 		} else {
 			zend_string_efree(str);
