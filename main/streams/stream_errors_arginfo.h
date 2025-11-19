@@ -1,11 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97a63d009e4a3e951b0c3b213e9cb784d1af5634 */
+ * Stub hash: afc1e2ff4a74033102ca8b69ea55ab9ce30986da */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getParam, 0, 0, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getWrapperName, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_StreamException_getWrapperName arginfo_class_StreamException_getParam
 
 static ZEND_METHOD(StreamException, getParam);
 static ZEND_METHOD(StreamException, getWrapperName);
@@ -112,9 +111,9 @@ static zend_class_entry *register_class_StreamException(zend_class_entry *class_
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	zval property_wrapperName_default_value;
-	ZVAL_UNDEF(&property_wrapperName_default_value);
+	ZVAL_NULL(&property_wrapperName_default_value);
 	zend_string *property_wrapperName_name = zend_string_init("wrapperName", sizeof("wrapperName") - 1, true);
-	zend_declare_typed_property(class_entry, property_wrapperName_name, &property_wrapperName_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, property_wrapperName_name, &property_wrapperName_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property_wrapperName_name, true);
 
 	zval property_param_default_value;
