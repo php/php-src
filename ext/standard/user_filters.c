@@ -21,7 +21,6 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/user_filters_arginfo.h"
-#include "zend_exceptions.h"
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
@@ -153,17 +152,18 @@ php_stream_filter_status_t userfilter_filter(
 	EG(fake_scope) = Z_OBJCE_P(obj);
 
 	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
-	if (Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL)) {
+	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
+	if (stream_property_exists) {
 		zval stream_zval;
 		php_stream_to_zval(stream, &stream_zval);
 		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
 		/* If property update threw an exception, skip filter execution */
 		if (EG(exception)) {
+			EG(fake_scope) = old_scope;
 			if (buckets_in->head) {
 				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 			}
 			zend_string_release(stream_name);
-			EG(fake_scope) = old_scope;
 			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 			stream->flags |= orig_no_fclose;
 			return PSFS_ERR_FATAL;
@@ -216,16 +216,14 @@ php_stream_filter_status_t userfilter_filter(
 	 * Since the property accepted a resource assignment above, it must have
 	 * no type hint or be typed as mixed, so we can safely assign null.
 	 */
-	old_scope = EG(fake_scope);
-	EG(fake_scope) = Z_OBJCE_P(obj);
+	if (stream_property_exists) {
+		old_scope = EG(fake_scope);
+		EG(fake_scope) = Z_OBJCE_P(obj);
 
-	if (Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL)) {
-		zval null_zval;
-		ZVAL_NULL(&null_zval);
-		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &null_zval);
+		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
+
+		EG(fake_scope) = old_scope;
 	}
-
-	EG(fake_scope) = old_scope;
 
 	zend_string_release(stream_name);
 
