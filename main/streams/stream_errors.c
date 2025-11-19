@@ -289,17 +289,25 @@ static void php_stream_store_error_common(php_stream_context *context, php_strea
 }
 
 /* Wrapper error reporting - stores in FG(wrapper_stored_errors) */
+static void php_stream_wrapper_error_internal_with_name_and_message(const char *wrapper_name,
+		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
+		int code, char *param, zend_string *message)
+{
+	php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message), param,
+			severity, terminal);
+
+	php_stream_store_error_common(
+			context, NULL, message, docref, code, wrapper_name, param, severity, terminal);
+}
+
 static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
 		int code, char *param, const char *fmt, va_list args)
 {
 	zend_string *message = vstrpprintf(0, fmt, args);
 
-	php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message), param,
-			severity, terminal);
-
-	php_stream_store_error_common(
-			context, NULL, message, docref, code, wrapper_name, param, severity, terminal);
+	php_stream_wrapper_error_internal_with_name_and_message(
+			wrapper_name, context, docref, options, severity, terminal, code, param, message);
 
 	zend_string_release(message);
 }
@@ -420,8 +428,8 @@ static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrap
 
 	if (options & REPORT_ERRORS) {
 		/* Report immediately using standard error functions */
-		php_stream_wrapper_error_internal_with_name(
-				wrapper_name, context, NULL, options, severity, terminal, code, param, fmt, args);
+		php_stream_wrapper_error_internal_with_name_and_message(
+				wrapper_name, context, NULL, options, severity, terminal, code, param, message);
 	} else {
 		/* Store for later display in FG(wrapper_logged_errors) */
 		php_stream_wrapper_log_store_error(message, code, wrapper_name, param, severity, terminal);
@@ -533,7 +541,7 @@ PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
 {
 	if (wrapper) {
 		const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
-		php_stream_display_wrapper_errors(wrapper_name, context, code, path, caption);
+		php_stream_display_wrapper_name_errors(wrapper_name, context, code, path, caption);
 	}
 }
 
