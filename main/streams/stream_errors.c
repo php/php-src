@@ -483,48 +483,52 @@ PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 	}
 
 	char *tmp = estrdup(path);
-	zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
-	if (err_list) {
-		size_t l = 0;
-		int brlen;
-		int i;
-		int count = (int) zend_llist_count(err_list);
-		const char *br;
-		php_stream_error_entry **err_entry_p;
-		zend_llist_position pos;
+	if (strcmp(wrapper_name, PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME)) {
+		zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
+		if (err_list) {
+			size_t l = 0;
+			int brlen;
+			int i;
+			int count = (int) zend_llist_count(err_list);
+			const char *br;
+			php_stream_error_entry **err_entry_p;
+			zend_llist_position pos;
 
-		if (PG(html_errors)) {
-			brlen = 7;
-			br = "<br />\n";
+			if (PG(html_errors)) {
+				brlen = 7;
+				br = "<br />\n";
+			} else {
+				brlen = 1;
+				br = "\n";
+			}
+
+			for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
+					err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+				l += ZSTR_LEN((*err_entry_p)->message);
+				if (i < count - 1) {
+					l += brlen;
+				}
+			}
+			msg = emalloc(l + 1);
+			msg[0] = '\0';
+			for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
+					err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+				strcat(msg, ZSTR_VAL((*err_entry_p)->message));
+				if (i < count - 1) {
+					strcat(msg, br);
+				}
+			}
+
+			free_msg = 1;
 		} else {
-			brlen = 1;
-			br = "\n";
-		}
-
-		for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
-				err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-			l += ZSTR_LEN((*err_entry_p)->message);
-			if (i < count - 1) {
-				l += brlen;
+			if (!strcmp(wrapper_name, php_plain_files_wrapper.wops->label)) {
+				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
+			} else {
+				msg = "operation failed";
 			}
 		}
-		msg = emalloc(l + 1);
-		msg[0] = '\0';
-		for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
-				err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-			strcat(msg, ZSTR_VAL((*err_entry_p)->message));
-			if (i < count - 1) {
-				strcat(msg, br);
-			}
-		}
-
-		free_msg = 1;
 	} else {
-		if (!strcmp(wrapper_name, php_plain_files_wrapper.wops->label)) {
-			msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
-		} else {
-			msg = "operation failed";
-		}
+		msg = "no suitable wrapper could be found";
 	}
 
 	php_strip_url_passwd(tmp);
