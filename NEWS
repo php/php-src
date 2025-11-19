@@ -61,6 +61,10 @@ PHP                                                                        NEWS
   . Fix assertion failures resulting in crashes with stream filter
     object parameters. (ndossche)
 
+- URI:
+  . Fixed bug GH-20366 (ext/uri incorrectly throws ValueError when encountering
+    null byte). (kocsismate)
+
 20 Nov 2025, PHP 8.5.0
 
 - Core:
