@@ -25,6 +25,10 @@
 #include "zend_multiply.h"
 #include "zend_portability.h"
 
+#ifdef HAVE_ZEND_RUST
+# include "rust/zend_rust.h"
+#endif
+
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
@@ -1084,6 +1088,27 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
+#ifdef HAVE_ZEND_RUST
+	BaseConvertResult rust_result = php_rust_base_convert(
+		ZSTR_VAL(number),
+		ZSTR_LEN(number),
+		(int)frombase,
+		(int)tobase
+	);
+
+	if (rust_result.output == NULL) {
+		zend_error_noreturn(E_ERROR, "base_convert: internal error");
+	}
+
+	if (rust_result.had_invalid_chars) {
+		zend_error(E_DEPRECATED,
+			"Invalid characters passed for attempted conversion, these have been ignored");
+	}
+
+	result = zend_string_init(rust_result.output, rust_result.length, 0);
+	free(rust_result.output);
+	RETVAL_STR(result);
+#else
 	_php_math_basetozval(number, (int)frombase, &temp);
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	if (!result) {
@@ -1091,6 +1116,7 @@ PHP_FUNCTION(base_convert)
 	}
 
 	RETVAL_STR(result);
+#endif
 }
 /* }}} */
 

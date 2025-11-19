@@ -20,6 +20,10 @@
 #include "php.h"
 #include "base64.h"
 
+#ifdef HAVE_ZEND_RUST
+# include "rust/zend_rust.h"
+#endif
+
 /* {{{ base64 tables */
 static const char base64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -1238,8 +1242,19 @@ PHP_FUNCTION(base64_encode)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+#ifdef HAVE_ZEND_RUST
+	size_t output_len;
+	char *encoded = php_rust_base64_encode((unsigned char*)str, str_len, &output_len, 0);
+	if (UNEXPECTED(encoded == NULL)) {
+		zend_error_noreturn(E_ERROR, "base64_encode: memory allocation failed");
+	}
+	result = zend_string_init(encoded, output_len, 0);
+	free(encoded);
+	RETURN_STR(result);
+#else
 	result = php_base64_encode((unsigned char*)str, str_len);
 	RETURN_STR(result);
+#endif
 }
 /* }}} */
 
@@ -1257,11 +1272,22 @@ PHP_FUNCTION(base64_decode)
 		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
 
+#ifdef HAVE_ZEND_RUST
+	size_t output_len;
+	char *decoded = php_rust_base64_decode((unsigned char*)str, str_len, &output_len, strict ? 1 : 0);
+	if (decoded == NULL) {
+		RETURN_FALSE;
+	}
+	result = zend_string_init(decoded, output_len, 0);
+	free(decoded);
+	RETURN_STR(result);
+#else
 	result = php_base64_decode_ex((unsigned char*)str, str_len, strict);
 	if (result != NULL) {
 		RETURN_STR(result);
 	} else {
 		RETURN_FALSE;
 	}
+#endif
 }
 /* }}} */

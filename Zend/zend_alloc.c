@@ -83,6 +83,10 @@ typedef int pid_t;
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#ifdef HAVE_ZEND_RUST
+# include "rust/zend_rust.h"
+#endif
 #ifdef __SANITIZE_ADDRESS__
 # include <sanitizer/asan_interface.h>
 #endif
@@ -2880,6 +2884,16 @@ static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void);
 
 ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
+#ifdef HAVE_ZEND_RUST
+	char *p = zend_rust_strndup(s, length);
+	if (UNEXPECTED(p == NULL)) {
+		if (length + 1 == 0) {
+			zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (1 * %zu + 1)", length);
+		}
+		zend_out_of_memory();
+	}
+	return p;
+#else
 	char *p;
 
 	if (UNEXPECTED(length + 1 == 0)) {
@@ -2894,6 +2908,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 	}
 	p[length] = 0;
 	return p;
+#endif
 }
 
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
@@ -3540,11 +3555,19 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 
 ZEND_API void * __zend_malloc(size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef HAVE_ZEND_RUST
+	void *tmp = zend_rust_malloc(len);
+	if (EXPECTED(tmp || !len)) {
+		return tmp;
+	}
+	zend_out_of_memory();
+#else
 	void *tmp = malloc(len);
 	if (EXPECTED(tmp || !len)) {
 		return tmp;
 	}
 	zend_out_of_memory();
+#endif
 }
 
 ZEND_API void * __zend_calloc(size_t nmemb, size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -3559,16 +3582,28 @@ ZEND_API void * __zend_calloc(size_t nmemb, size_t len ZEND_FILE_LINE_DC ZEND_FI
 
 ZEND_API void * __zend_realloc(void *p, size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef HAVE_ZEND_RUST
+	p = zend_rust_realloc(p, len);
+	if (EXPECTED(p || !len)) {
+		return p;
+	}
+	zend_out_of_memory();
+#else
 	p = realloc(p, len);
 	if (EXPECTED(p || !len)) {
 		return p;
 	}
 	zend_out_of_memory();
+#endif
 }
 
 ZEND_API void __zend_free(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef HAVE_ZEND_RUST
+	zend_rust_free(p);
+#else
 	free(p);
+#endif
 	return;
 }
 

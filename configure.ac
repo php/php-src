@@ -1711,6 +1711,94 @@ PHP_ADD_SOURCES_X([/main],
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
   [PHP_BINARY_OBJS])
 
+dnl -------------------------------------------------------------------------
+dnl Zend Rust components configuration
+dnl -------------------------------------------------------------------------
+
+PHP_ARG_ENABLE([zend-rust],
+  [whether to enable Rust components in Zend],
+  [AS_HELP_STRING([--enable-zend-rust],
+    [Enable experimental Rust-based components])],
+  [no],
+  [no])
+
+if test "$PHP_ZEND_RUST" != "no"; then
+  AC_MSG_CHECKING([for Rust toolchain])
+
+  dnl Check for cargo
+  AC_CHECK_PROG([CARGO], [cargo], [cargo], [no])
+  if test "$CARGO" = "no"; then
+    AC_MSG_ERROR([cargo not found. Rust toolchain is required for --enable-zend-rust.
+
+Install Rust from https://rustup.rs/ or use your package manager.])
+  fi
+
+  dnl Check for rustc
+  AC_CHECK_PROG([RUSTC], [rustc], [rustc], [no])
+  if test "$RUSTC" = "no"; then
+    AC_MSG_ERROR([rustc not found. Rust toolchain is required for --enable-zend-rust.
+
+Install Rust from https://rustup.rs/ or use your package manager.])
+  fi
+
+  dnl Check Rust version
+  RUST_VERSION=$($RUSTC --version | cut -d' ' -f2)
+  AC_MSG_RESULT([$RUST_VERSION])
+
+  dnl Check for cbindgen (optional but recommended)
+  AC_CHECK_PROG([CBINDGEN], [cbindgen], [cbindgen], [no])
+  if test "$CBINDGEN" = "no"; then
+    AC_MSG_WARN([cbindgen not found. Install with: cargo install cbindgen])
+  fi
+
+  dnl Define the feature flag
+  AC_DEFINE([HAVE_ZEND_RUST], [1], [Define to 1 if Rust components are enabled])
+
+  dnl Set build variables
+  ZEND_RUST_DIR="$abs_srcdir/Zend/rust"
+  ZEND_RUST_TARGET_DIR="$ZEND_RUST_DIR/target"
+
+  dnl Get Rust version
+  RUSTC_VERSION=`$RUSTC --version | head -n1`
+  AC_MSG_CHECKING([rustc version])
+  AC_MSG_RESULT([$RUSTC_VERSION])
+  AC_DEFINE_UNQUOTED([ZEND_RUST_VERSION], ["$RUSTC_VERSION"], [Rust compiler version])
+
+  dnl Determine build profile (debug or release)
+  if test "$PHP_DEBUG" = "yes"; then
+    RUST_BUILD_PROFILE="debug"
+    RUST_BUILD_FLAGS=""
+  else
+    RUST_BUILD_PROFILE="release"
+    RUST_BUILD_FLAGS="--release"
+  fi
+
+  dnl Export variables for Makefile
+  AC_SUBST([CARGO])
+  AC_SUBST([RUSTC])
+  AC_SUBST([RUSTC_VERSION])
+  AC_SUBST([CBINDGEN])
+  AC_SUBST([ZEND_RUST_DIR])
+  AC_SUBST([ZEND_RUST_TARGET_DIR])
+  AC_SUBST([RUST_BUILD_PROFILE])
+  AC_SUBST([RUST_BUILD_FLAGS])
+
+  dnl Add Rust library to link path
+  ZEND_RUST_LIB_PATH="$ZEND_RUST_TARGET_DIR/$RUST_BUILD_PROFILE"
+
+  dnl Add library to linker flags
+  dnl Use full path to static library and add to ZEND_EXTRA_LIBS for CLI builds
+  ZEND_EXTRA_LIBS="$ZEND_EXTRA_LIBS $ZEND_RUST_LIB_PATH/libzend_rust.a"
+
+  dnl Add include path for generated headers
+  PHP_ADD_INCLUDE([$ZEND_RUST_DIR])
+
+  dnl Add Makefile fragment
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/rust/Makefile.frag])
+
+  AC_MSG_NOTICE([Zend Rust components enabled (profile: $RUST_BUILD_PROFILE)])
+fi
+
 PHP_ADD_SOURCES([Zend], m4_normalize([
     Optimizer/block_pass.c
     Optimizer/compact_literals.c

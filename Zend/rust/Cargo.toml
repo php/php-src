@@ -1,0 +1,20 @@
+[package]
+name = "zend_rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "zend_rust"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.70"
+cc = "1.0"
+
+[features]
+default = []
+zts = []  # Thread-safe build
+debug = []  # Debug build with extra checks
