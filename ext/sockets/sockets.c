@@ -2751,16 +2751,18 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 {
 	zend_string *service = NULL;
 	zend_string *hostname, *key;
-	zval *hint, *zhints = NULL;
+	zval *hint, *zhints = NULL, *error_code = NULL;
+	int ret = 0;
 
 	struct addrinfo hints, *result, *rp;
 	php_addrinfo *res;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(hostname)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(service)
 		Z_PARAM_ARRAY(zhints)
+		Z_PARAM_ZVAL_OR_NULL(error_code)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&hints, 0, sizeof(hints));
@@ -2848,7 +2850,10 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (getaddrinfo(ZSTR_VAL(hostname), service ? ZSTR_VAL(service) : NULL, &hints, &result) != 0) {
+	if ((ret = getaddrinfo(ZSTR_VAL(hostname), service ? ZSTR_VAL(service) : NULL, &hints, &result)) != 0) {
+		if (error_code) {
+			ZEND_TRY_ASSIGN_REF_LONG(error_code, ret);
+		}
 		RETURN_FALSE;
 	}
 
