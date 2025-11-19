@@ -4,11 +4,11 @@
 
 class StreamException extends Exception
 {
-    protected string $wrapperName;
+    protected ?string $wrapperName = null;
     protected ?string $param = null;
 
     public function getParam(): ?string {}
-    public function getWrapperName(): string {}
+    public function getWrapperName(): ?string {}
 }
 
 /**
