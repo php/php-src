@@ -526,6 +526,7 @@ static int php_libxml_streams_IO_close(void *context)
 	return php_stream_close((php_stream*)context);
 }
 
+/* TODO: This needs to be replaced by context-specific APIs in the future! */
 static xmlParserInputBufferPtr
 php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
@@ -560,13 +561,10 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	}
 
 	/* Allocate the Input buffer front-end. */
-	ret = xmlAllocParserInputBuffer(enc);
-	if (ret != NULL) {
-		ret->context = context;
-		ret->readcallback = php_libxml_streams_IO_read;
-		ret->closecallback = php_libxml_streams_IO_close;
-	} else
+	ret = xmlParserInputBufferCreateIO(php_libxml_streams_IO_read, php_libxml_streams_IO_close, context, enc);
+	if (ret == NULL) {
 		php_libxml_streams_IO_close(context);
+	}
 
 	return ret;
 }
