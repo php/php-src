@@ -5,10 +5,10 @@ Test Uri\WhatWg\Url parsing - basic - URL contains null byte
 
 try {
     new Uri\WhatWg\Url("https://exam\0ple.com");
-} catch (ValueError $e) {
+} catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-ValueError: Uri\WhatWg\Url::__construct(): Argument #1 ($uri) must not contain any null bytes
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (DomainInvalidCodePoint)

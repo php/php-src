@@ -377,7 +377,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 	zend_object *base_url_object = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH_STR(uri_str)
+		Z_PARAM_STR(uri_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, php_uri_ce_rfc3986_uri)
 	ZEND_PARSE_PARAMETERS_END();
@@ -490,7 +490,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 	zval *errors = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_PATH_STR(uri_str)
+		Z_PARAM_STR(uri_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, php_uri_ce_whatwg_url)
 		Z_PARAM_ZVAL(errors)
@@ -553,7 +553,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	zend_string *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR_OR_NULL(value)
+		Z_PARAM_STR_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
@@ -769,7 +769,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 	zend_string *uri_str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR(uri_str)
+		Z_PARAM_STR(uri_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU,
@@ -956,7 +956,7 @@ PHP_METHOD(Uri_WhatWg_Url, resolve)
 	zval *errors = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH_STR(uri_str)
+		Z_PARAM_STR(uri_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
