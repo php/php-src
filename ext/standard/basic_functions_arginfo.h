@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f6bf6cdd07080c01d3a0cb08d71409d05b1084f9 */
+ * Stub hash: e5708214c093e9a4ee017b62a55f6b040448b445 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -942,6 +942,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_substr_replace, 0, 3, MAY_BE_STR
 ZEND_END_ARG_INFO()
 
 #define arginfo_quotemeta arginfo_base64_encode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_extend, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ord, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, character, IS_STRING, 0)
@@ -2551,6 +2556,7 @@ ZEND_FUNCTION(chunk_split);
 ZEND_FUNCTION(substr);
 ZEND_FUNCTION(substr_replace);
 ZEND_FUNCTION(quotemeta);
+ZEND_FUNCTION(str_extend);
 ZEND_FUNCTION(ord);
 ZEND_FUNCTION(chr);
 ZEND_FUNCTION(ucfirst);
@@ -3152,6 +3158,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("substr", zif_substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr, NULL)
 	ZEND_RAW_FENTRY("substr_replace", zif_substr_replace, arginfo_substr_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("quotemeta", zif_quotemeta, arginfo_quotemeta, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_extend", zif_str_extend, arginfo_str_extend, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("ord", zif_ord, arginfo_ord, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("chr", zif_chr, arginfo_chr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("ucfirst", zif_ucfirst, arginfo_ucfirst, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

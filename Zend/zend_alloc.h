@@ -71,6 +71,7 @@ ZEND_API void   ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_
 ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
 ZEND_API void*  ZEND_FASTCALL _erealloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void*  ZEND_FASTCALL _erealloc2(void *ptr, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
+ZEND_API void*  ZEND_FASTCALL _erealloc3(void *ptr, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void*  ZEND_FASTCALL _safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset);
 ZEND_API ZEND_ATTRIBUTE_MALLOC char*  ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -158,6 +159,7 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 #define ecalloc(nmemb, size)				_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define erealloc(ptr, size)					_erealloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define erealloc2(ptr, size, copy_size)		_erealloc2((ptr), (size), (copy_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define erealloc3(ptr, size, copy_size)		_erealloc3((ptr), (size), (copy_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define safe_erealloc(ptr, nmemb, size, offset)	_safe_erealloc((ptr), (nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define erealloc_recoverable(ptr, size)		_erealloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define erealloc2_recoverable(ptr, size, copy_size) _erealloc2((ptr), (size), (copy_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -200,6 +202,7 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 #define pecalloc(nmemb, size, persistent) ((persistent)?__zend_calloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):ecalloc((nmemb), (size)))
 #define perealloc(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):erealloc((ptr), (size)))
 #define perealloc2(ptr, size, copy_size, persistent) ((persistent)?__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):erealloc2((ptr), (size), (copy_size)))
+#define perealloc3(ptr, size, copy_size, persistent) ((persistent)?__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):erealloc3((ptr), (size), (copy_size)))
 #define safe_perealloc(ptr, nmemb, size, offset, persistent)	((persistent)?_safe_realloc((ptr), (nmemb), (size), (offset)):safe_erealloc((ptr), (nmemb), (size), (offset)))
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define perealloc2_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable((ptr), (size), (copy_size)))
