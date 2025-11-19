@@ -31,7 +31,7 @@ static void php_stream_error_entry_dtor(void *error)
 	zend_string_release(entry->message);
 	pefree(entry->wrapper_name, entry->persistent);
 	pefree(entry->docref, entry->persistent);
-	 // param is not currently supported for streams so cannot be persistent
+	// param is not currently supported for streams so cannot be persistent
 	ZEND_ASSERT(!entry->persistent || entry->param == NULL);
 	efree(entry->param);
 	pefree(entry, entry->persistent);
@@ -216,8 +216,8 @@ static void php_stream_process_error(php_stream_context *context, const char *wr
 
 /* Helper to create error entry */
 static php_stream_error_entry *php_stream_create_error_entry(zend_string *message, int code,
-		const char *wrapper_name, const char *docref, char *param, int severity,
-		bool terminal, bool persistent)
+		const char *wrapper_name, const char *docref, char *param, int severity, bool terminal,
+		bool persistent)
 {
 	if (persistent) {
 		message = zend_string_dup(message, true);
@@ -240,8 +240,8 @@ static php_stream_error_entry *php_stream_create_error_entry(zend_string *messag
 
 /* Common storage function*/
 static void php_stream_store_error_common(php_stream_context *context, php_stream *stream,
-		zend_string *message, const char *docref, int code,
-		const char *wrapper_name, char *param, int severity, bool terminal)
+		zend_string *message, const char *docref, int code, const char *wrapper_name, char *param,
+		int severity, bool terminal)
 {
 	int error_mode = php_stream_get_error_mode(context);
 	int store_mode = php_stream_get_error_store_mode(context, error_mode);
@@ -295,8 +295,8 @@ static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name
 {
 	zend_string *message = vstrpprintf(0, fmt, args);
 
-	php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message),
-			param, severity, terminal);
+	php_stream_process_error(context, wrapper_name, NULL, docref, code, ZSTR_VAL(message), param,
+			severity, terminal);
 
 	php_stream_store_error_common(
 			context, NULL, message, docref, code, wrapper_name, param, severity, terminal);
@@ -304,14 +304,27 @@ static void php_stream_wrapper_error_internal_with_name(const char *wrapper_name
 	zend_string_release(message);
 }
 
+static void php_stream_wrapper_error_internal_with_name_variadic(const char *wrapper_name,
+		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
+		int code, char *param, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	php_stream_wrapper_error_internal_with_name(
+			wrapper_name, context, docref, options, severity, terminal, code, param, fmt, args);
+
+	va_end(args);
+}
+
 static void php_stream_wrapper_error_internal(php_stream_wrapper *wrapper,
 		php_stream_context *context, const char *docref, int options, int severity, bool terminal,
 		int code, char *param, const char *fmt, va_list args)
 {
-	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
+	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
 
-	php_stream_wrapper_error_internal_with_name(wrapper_name, context, docref, options, severity,
-			terminal, code, param, fmt, args);
+	php_stream_wrapper_error_internal_with_name(
+			wrapper_name, context, docref, options, severity, terminal, code, param, fmt, args);
 }
 
 PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,
@@ -347,7 +360,7 @@ PHPAPI void php_stream_wrapper_error_param(php_stream_wrapper *wrapper, php_stre
 	if (options & REPORT_ERRORS) {
 		va_list args;
 		va_start(args, fmt);
-		char *param_copy = param ? estrdup(param): NULL;
+		char *param_copy = param ? estrdup(param) : NULL;
 		php_stream_wrapper_error_internal(
 				wrapper, context, docref, options, severity, terminal, code, param_copy, fmt, args);
 		va_end(args);
@@ -364,8 +377,8 @@ PHPAPI void php_stream_wrapper_error_param2(php_stream_wrapper *wrapper,
 
 		va_list args;
 		va_start(args, fmt);
-		php_stream_wrapper_error_internal(
-				wrapper, context, docref, options, severity, terminal, code, combined_param, fmt, args);
+		php_stream_wrapper_error_internal(wrapper, context, docref, options, severity, terminal,
+				code, combined_param, fmt, args);
 		va_end(args);
 	}
 }
@@ -375,7 +388,7 @@ PHPAPI void php_stream_wrapper_error_param2(php_stream_wrapper *wrapper,
 static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 		const char *wrapper_name, const char *param, int severity, bool terminal)
 {
-	char *param_copy = param ? estrdup(param): NULL;
+	char *param_copy = param ? estrdup(param) : NULL;
 	php_stream_error_entry *entry = php_stream_create_error_entry(
 			message, code, wrapper_name, NULL, param_copy, severity, terminal, false);
 
@@ -384,8 +397,8 @@ static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 		zend_hash_init(FG(wrapper_logged_errors), 8, NULL, php_stream_error_list_dtor, 0);
 	}
 
-	zend_llist *list = zend_hash_str_find_ptr(
-			FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
+	zend_llist *list
+			= zend_hash_str_find_ptr(FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 
 	if (!list) {
 		zend_llist new_list;
@@ -403,7 +416,7 @@ static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrap
 		char *param, const char *fmt, va_list args)
 {
 	zend_string *message = vstrpprintf(0, fmt, args);
-	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
+	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
 
 	if (options & REPORT_ERRORS) {
 		/* Report immediately using standard error functions */
@@ -411,8 +424,7 @@ static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrap
 				wrapper_name, context, NULL, options, severity, terminal, code, param, fmt, args);
 	} else {
 		/* Store for later display in FG(wrapper_logged_errors) */
-		php_stream_wrapper_log_store_error(
-				message, code, wrapper_name, param, severity, terminal);
+		php_stream_wrapper_log_store_error(message, code, wrapper_name, param, severity, terminal);
 	}
 	zend_string_release(message);
 }
@@ -434,7 +446,7 @@ PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper
 {
 	va_list args;
 	va_start(args, fmt);
-	char *param_copy = param ? estrdup(param): NULL;
+	char *param_copy = param ? estrdup(param) : NULL;
 	php_stream_wrapper_log_error_internal(
 			wrapper, context, options, severity, terminal, code, param_copy, fmt, args);
 	va_end(args);
@@ -450,7 +462,7 @@ static zend_llist *php_stream_get_wrapper_errors_list(const char *wrapper_name)
 	}
 }
 
-void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
+PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 		php_stream_context *context, int code, const char *path, const char *caption)
 {
 	char *msg;
@@ -462,70 +474,81 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
 		return;
 	}
 
-	const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
 	char *tmp = estrdup(path);
-	if (wrapper) {
-		zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
-		if (err_list) {
-			size_t l = 0;
-			int brlen;
-			int i;
-			int count = (int) zend_llist_count(err_list);
-			const char *br;
-			php_stream_error_entry **err_entry_p;
-			zend_llist_position pos;
+	zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
+	if (err_list) {
+		size_t l = 0;
+		int brlen;
+		int i;
+		int count = (int) zend_llist_count(err_list);
+		const char *br;
+		php_stream_error_entry **err_entry_p;
+		zend_llist_position pos;
 
-			if (PG(html_errors)) {
-				brlen = 7;
-				br = "<br />\n";
-			} else {
-				brlen = 1;
-				br = "\n";
-			}
-
-			for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
-					err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				l += ZSTR_LEN((*err_entry_p)->message);
-				if (i < count - 1) {
-					l += brlen;
-				}
-			}
-			msg = emalloc(l + 1);
-			msg[0] = '\0';
-			for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
-					err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				strcat(msg, ZSTR_VAL((*err_entry_p)->message));
-				if (i < count - 1) {
-					strcat(msg, br);
-				}
-			}
-
-			free_msg = 1;
+		if (PG(html_errors)) {
+			brlen = 7;
+			br = "<br />\n";
 		} else {
-			if (wrapper == &php_plain_files_wrapper) {
-				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
-			} else {
-				msg = "operation failed";
+			brlen = 1;
+			br = "\n";
+		}
+
+		for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
+				err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+			l += ZSTR_LEN((*err_entry_p)->message);
+			if (i < count - 1) {
+				l += brlen;
 			}
 		}
+		msg = emalloc(l + 1);
+		msg[0] = '\0';
+		for (err_entry_p = zend_llist_get_first_ex(err_list, &pos), i = 0; err_entry_p;
+				err_entry_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+			strcat(msg, ZSTR_VAL((*err_entry_p)->message));
+			if (i < count - 1) {
+				strcat(msg, br);
+			}
+		}
+
+		free_msg = 1;
 	} else {
-		msg = "no suitable wrapper could be found";
+		if (!strcmp(wrapper_name, php_plain_files_wrapper.wops->label)) {
+			msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
+		} else {
+			msg = "operation failed";
+		}
 	}
 
 	php_strip_url_passwd(tmp);
-	php_stream_wrapper_warn_param(wrapper, context, REPORT_ERRORS, code, tmp,
-			"%s: %s", caption, msg);
-	efree(tmp);
+	php_stream_wrapper_error_internal_with_name_variadic(wrapper_name, context, NULL, REPORT_ERRORS,
+			E_WARNING, true, code, tmp, "%s: %s", caption, msg);
+
 	if (free_msg) {
 		efree(msg);
 	}
 }
 
-void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
+PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
+		php_stream_context *context, int code, const char *path, const char *caption)
 {
-	if (wrapper && FG(wrapper_logged_errors)) {
-		const char *wrapper_name = wrapper ? wrapper->wops->label : "unknown";
+	if (wrapper) {
+		const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
+		php_stream_display_wrapper_errors(wrapper_name, context, code, path, caption);
+	}
+}
+
+PHPAPI void php_stream_tidy_wrapper_name_error_log(const char *wrapper_name)
+{
+	if (FG(wrapper_logged_errors)) {
 		zend_hash_str_del(FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
+	}
+}
+
+PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
+{
+	if (wrapper) {
+		const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
+		php_stream_tidy_wrapper_name_error_log(wrapper_name);
 	}
 }
 
@@ -549,8 +572,8 @@ PHPAPI void php_stream_error(php_stream *stream, const char *docref, int severit
 			severity, terminal);
 
 	/* Store error */
-	php_stream_store_error_common(context, stream, message, docref, code, wrapper_name, NULL,
-			severity, terminal);
+	php_stream_store_error_common(
+			context, stream, message, docref, code, wrapper_name, NULL, severity, terminal);
 
 	zend_string_release(message);
 }
