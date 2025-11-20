@@ -21,6 +21,18 @@ echo clamp('2025-08-01', '2025-08-15', '2025-09-15'), "\n";
 echo clamp('2025-08-20', '2025-08-15', '2025-09-15'), "\n";
 echo clamp(new \DateTimeImmutable('2025-08-01'), new \DateTimeImmutable('2025-08-15'), new \DateTimeImmutable('2025-09-15'))->format('Y-m-d'), "\n";
 echo clamp(new \DateTimeImmutable('2025-08-20'), new \DateTimeImmutable('2025-08-15'), new \DateTimeImmutable('2025-09-15'))->format('Y-m-d'), "\n";
+var_dump(clamp(null, -1, 1));
+var_dump(clamp(null, 1, 3));
+var_dump(clamp(null, -3, -1));
+var_dump(clamp(-9999, null, 10));
+var_dump(clamp(12, null, 10));
+
+$a = new \InvalidArgumentException('a');
+$b = new \RuntimeException('b');
+$c = new \LogicException('c');
+echo clamp($a, $b, $c)::class, "\n";
+echo clamp($b, $a, $c)::class, "\n";
+echo clamp($c, $a, $b)::class, "\n";
 
 try {
     var_dump(clamp(4, NAN, 6));
@@ -39,6 +51,20 @@ try {
 } catch (ValueError $error) {
     echo $error->getMessage(), "\n";
 }
+
+
+try {
+    var_dump(clamp(-9999, 5, null));
+} catch (ValueError $error) {
+    echo $error->getMessage(), "\n";
+}
+
+try {
+    var_dump(clamp(12, -5, null));
+} catch (ValueError $error) {
+    echo $error->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 int(2)
@@ -56,6 +82,16 @@ string(1) "d"
 2025-08-20
 2025-08-15
 2025-08-20
+int(-1)
+int(1)
+int(-3)
+int(-9999)
+int(10)
+InvalidArgumentException
+RuntimeException
+LogicException
 clamp(): Argument #2 ($min) cannot be NAN
 clamp(): Argument #3 ($max) cannot be NAN
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)

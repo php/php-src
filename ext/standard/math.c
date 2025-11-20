@@ -410,7 +410,7 @@ PHP_FUNCTION(clamp)
 		RETURN_THROWS();
 	}
 
-	if (zend_compare(zmin, zmax) > 0) {
+	if (zend_compare(zmax, zmin) == -1) {
 		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
 		RETURN_THROWS();
 	}
@@ -445,7 +445,7 @@ ZEND_FRAMELESS_FUNCTION(clamp, 3)
 		RETURN_THROWS();
 	}
 
-	if (zend_compare(zmin, zmax) > 0) {
+	if (zend_compare(zmax, zmin) == -1) {
 		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
 		RETURN_THROWS();
 	}
