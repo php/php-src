@@ -131,7 +131,7 @@ inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static void xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
-static int xml_xmlcharlen(const XML_Char *);
+static size_t xml_xmlcharlen(const XML_Char *);
 static void xml_add_to_info(xml_parser *parser, zend_string *name);
 inline static zend_string *xml_decode_tag(xml_parser *parser, const XML_Char *tag);
 
@@ -536,15 +536,9 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 /* }}} */
 
 /* {{{ xml_xmlcharlen() */
-static int xml_xmlcharlen(const XML_Char *s)
+static size_t xml_xmlcharlen(const XML_Char *s)
 {
-	int len = 0;
-
-	while (*s) {
-		len++;
-		s++;
-	}
-	return len;
+	return strlen((const char *) s);
 }
 /* }}} */
 
