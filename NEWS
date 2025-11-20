@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
 
+- Soap:
+  . Soap::__setCookie() when cookie name is a digit is now not stored and represented
+    as a string anymore but a int. (David Carlier)
+
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
