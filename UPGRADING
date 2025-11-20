@@ -49,6 +49,7 @@ PHP 8.6 UPGRADE NOTES
   . Added stream socket context options so_keepalive, tcp_keepidle,
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
+  . Allowed casting casting filtered streams as file descriptor for select.
 
 ========================================
 3. Changes in SAPI modules

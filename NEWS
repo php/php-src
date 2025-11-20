@@ -79,6 +79,7 @@ PHP                                                                        NEWS
     address resuse.
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
+  . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
