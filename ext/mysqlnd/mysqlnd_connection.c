@@ -553,15 +553,25 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 			port = 3306;
 		}
 
-		/* ipv6 addresses are in the format [address]:port */
 		if (hostname.s[0] != '[' && mysqlnd_fast_is_ipv6_address(hostname.s)) {
+			/* IPv6 without square brackets so without port */
 			transport.l = mnd_sprintf(&transport.s, 0, "tcp://[%s]:%u", hostname.s, port);
 		} else {
+			char *p;
+
+			/* IPv6 addresses are in the format [address]:port */
+			if (hostname.s[0] == '[') { /* IPv6 */
+				p = strchr(hostname.s, ']');
+				if (p && p[1] != ':') {
+					p = NULL;
+				}
+			} else { /* IPv4 or name */
+				p = strchr(hostname.s, ':');
+			}
 			/* Could already contain a port number, in which case we should not add an extra port.
 			 * See GH-8978. In a port doubling scenario, the first port would be used so we do the same to keep BC. */
-			if (strchr(hostname.s, ':') && !mysqlnd_fast_is_ipv6_address(hostname.s)) {
+			if (p) {
 				/* TODO: Ideally we should be able to get rid of this workaround in the future. */
-				/* TODO: IPv6 address enclosed in square brackets is not handled, ex [::1]:3306 */
 				transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s", hostname.s);
 			} else {
 				transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
