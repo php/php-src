@@ -297,7 +297,7 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 		}
 	}
 
-	if (php_stream_is_filtered(stream)) {
+	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		if (show_err) {
 			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
 		}
