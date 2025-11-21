@@ -1377,8 +1377,9 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter, bool is_start_seeking)
 {
 	while (filter) {
-		if ((filter->seekable == PHP_STREAM_FILTER_SEEKABLE_START && is_start_seeking &&
-				filter->feops->seek(stream, filter, 0, SEEK_SET))) {
+		if (((filter->seekable == PHP_STREAM_FILTER_SEEKABLE_START && is_start_seeking) ||
+				filter->seekable == PHP_STREAM_FILTER_SEEKABLE_CHECK) &&
+				filter->fops->seek(stream, filter, 0, SEEK_SET)) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
 			return FAILURE;
 		}
