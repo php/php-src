@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 576229f7a0c4afd2f8902db6ce87daa51256965e */
+ * Stub hash: 02e8231e06f69efb10e575b3f3265daf1988589a */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -148,6 +148,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionMethod_isPrivate arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionMethod_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionMethod_isNamespacePrivate arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionMethod_isAbstract arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -419,9 +421,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
 
+#define arginfo_class_ReflectionProperty_isNamespacePrivate arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionProperty_isPrivateSet arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_isProtectedSet arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionProperty_isNamespacePrivateSet arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_isStatic arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -777,6 +783,7 @@ ZEND_METHOD(ReflectionMethod, __toString);
 ZEND_METHOD(ReflectionMethod, isPublic);
 ZEND_METHOD(ReflectionMethod, isPrivate);
 ZEND_METHOD(ReflectionMethod, isProtected);
+ZEND_METHOD(ReflectionMethod, isNamespacePrivate);
 ZEND_METHOD(ReflectionMethod, isAbstract);
 ZEND_METHOD(ReflectionMethod, isFinal);
 ZEND_METHOD(ReflectionMethod, isConstructor);
@@ -867,8 +874,10 @@ ZEND_METHOD(ReflectionProperty, isInitialized);
 ZEND_METHOD(ReflectionProperty, isPublic);
 ZEND_METHOD(ReflectionProperty, isPrivate);
 ZEND_METHOD(ReflectionProperty, isProtected);
+ZEND_METHOD(ReflectionProperty, isNamespacePrivate);
 ZEND_METHOD(ReflectionProperty, isPrivateSet);
 ZEND_METHOD(ReflectionProperty, isProtectedSet);
+ZEND_METHOD(ReflectionProperty, isNamespacePrivateSet);
 ZEND_METHOD(ReflectionProperty, isStatic);
 ZEND_METHOD(ReflectionProperty, isReadOnly);
 ZEND_METHOD(ReflectionProperty, isDefault);
@@ -1065,6 +1074,7 @@ static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, isPublic, arginfo_class_ReflectionMethod_isPublic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isPrivate, arginfo_class_ReflectionMethod_isPrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isProtected, arginfo_class_ReflectionMethod_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isNamespacePrivate, arginfo_class_ReflectionMethod_isNamespacePrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isAbstract, arginfo_class_ReflectionMethod_isAbstract, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isFinal, arginfo_class_ReflectionMethod_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isConstructor, arginfo_class_ReflectionMethod_isConstructor, ZEND_ACC_PUBLIC)
@@ -1170,8 +1180,10 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, isPublic, arginfo_class_ReflectionProperty_isPublic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPrivate, arginfo_class_ReflectionProperty_isPrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isProtected, arginfo_class_ReflectionProperty_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isNamespacePrivate, arginfo_class_ReflectionProperty_isNamespacePrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPrivateSet, arginfo_class_ReflectionProperty_isPrivateSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isProtectedSet, arginfo_class_ReflectionProperty_isProtectedSet, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isNamespacePrivateSet, arginfo_class_ReflectionProperty_isNamespacePrivateSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isStatic, arginfo_class_ReflectionProperty_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isReadOnly, arginfo_class_ReflectionProperty_isReadOnly, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isDefault, arginfo_class_ReflectionProperty_isDefault, ZEND_ACC_PUBLIC)

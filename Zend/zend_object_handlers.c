@@ -309,9 +309,20 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(co
 }
 /* }}} */
 
+static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(void);
+
 static ZEND_COLD zend_never_inline void zend_bad_property_access(const zend_property_info *property_info, const zend_class_entry *ce, const zend_string *member) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	if (property_info->flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+		const zend_class_entry *scope = get_fake_or_executed_scope();
+		zend_throw_error(NULL, "Cannot access %s property %s::$%s from scope %s",
+			zend_visibility_string(property_info->flags),
+			ZSTR_VAL(ce->name),
+			ZSTR_VAL(member),
+			scope ? ZSTR_VAL(scope->name) : "{main}");
+	} else {
+		zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	}
 }
 /* }}} */
 
@@ -368,8 +379,14 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 	uintptr_t offset;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
-		*info_ptr = CACHED_PTR_EX(cache_slot + 2);
-		return (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+		const zend_property_info *cached_prop_info = CACHED_PTR_EX(cache_slot + 2);
+		/* Disable caching for namespace_private properties since visibility depends on caller's namespace */
+		if (UNEXPECTED(cached_prop_info && (cached_prop_info->flags & ZEND_ACC_NAMESPACE_PRIVATE))) {
+			/* Fall through to do the visibility check */
+		} else {
+			*info_ptr = cached_prop_info;
+			return (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+		}
 	}
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
@@ -391,7 +408,8 @@ dynamic:
 	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
-	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+
+	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = get_fake_or_executed_scope();
 
 		if (property_info->ce != scope) {
@@ -410,22 +428,39 @@ dynamic:
 					goto found;
 				}
 			}
-			if (flags & ZEND_ACC_PRIVATE) {
-				if (property_info->ce != ce) {
-					goto dynamic;
-				} else {
+			/* Check private/protected, but not namespace_private (handled separately below) */
+			if (!(flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+				if (flags & ZEND_ACC_PRIVATE) {
+					if (property_info->ce != ce) {
+						goto dynamic;
+					} else {
 wrong:
-					/* Information was available, but we were denied access.  Error out. */
-					if (!silent) {
-						zend_bad_property_access(property_info, ce, member);
+						/* Information was available, but we were denied access.  Error out. */
+						if (!silent) {
+							zend_bad_property_access(property_info, ce, member);
+						}
+						return ZEND_WRONG_PROPERTY_OFFSET;
 					}
-					return ZEND_WRONG_PROPERTY_OFFSET;
+				} else {
+					ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+					if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+						goto wrong;
+					}
 				}
-			} else {
-				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
-					goto wrong;
-				}
+			}
+		}
+
+		/* Check namespace visibility (must be outside scope check) */
+		if (flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				goto wrong;
 			}
 		}
 	}
@@ -491,7 +526,7 @@ dynamic:
 	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
-	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
@@ -505,22 +540,39 @@ dynamic:
 					goto found;
 				}
 			}
-			if (flags & ZEND_ACC_PRIVATE) {
-				if (property_info->ce != ce) {
-					goto dynamic;
-				} else {
+			/* Check private/protected, but not namespace_private (handled separately below) */
+			if (!(flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+				if (flags & ZEND_ACC_PRIVATE) {
+					if (property_info->ce != ce) {
+						goto dynamic;
+					} else {
 wrong:
-					/* Information was available, but we were denied access.  Error out. */
-					if (!silent) {
-						zend_bad_property_access(property_info, ce, member);
+						/* Information was available, but we were denied access.  Error out. */
+						if (!silent) {
+							zend_bad_property_access(property_info, ce, member);
+						}
+						return ZEND_WRONG_PROPERTY_INFO;
 					}
-					return ZEND_WRONG_PROPERTY_INFO;
+				} else {
+					ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
+					if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+						goto wrong;
+					}
 				}
-			} else {
-				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
-					goto wrong;
-				}
+			}
+		}
+
+		/* Check namespace visibility (must be outside scope check) */
+		if (flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				goto wrong;
 			}
 		}
 	}
@@ -593,6 +645,22 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 	if (prop_info->ce == scope) {
 		return true;
 	}
+
+	/* Check namespace_private(set) visibility */
+	if (prop_info->flags & ZEND_ACC_NAMESPACE_PRIVATE_SET) {
+		zend_string *property_namespace = zend_get_class_namespace(prop_info->ce);
+		zend_string *caller_namespace = zend_get_caller_namespace();
+
+		bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+		zend_string_release(property_namespace);
+		zend_string_release(caller_namespace);
+
+		if (namespace_match) {
+			return true;
+		}
+		return false;
+	}
+
 	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
 		&& is_protected_compatible_scope(prop_info->prototype->ce, scope));
 }
@@ -1871,7 +1939,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	fbc = Z_FUNC_P(func);
 
 	/* Check access level */
-	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED|ZEND_ACC_NAMESPACE_PRIVATE)) {
 		const zend_class_entry *scope = zend_get_executed_scope();
 
 		if (fbc->common.scope != scope) {
@@ -1885,8 +1953,30 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					goto exit;
 				}
 			}
-			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+			/* Check private/protected, but not namespace_private (handled separately below) */
+			if (!(fbc->op_array.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
+				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+					if (zobj->ce->__call) {
+						fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
+					} else {
+						zend_bad_method_call(fbc, method_name, scope);
+						fbc = NULL;
+					}
+				}
+			}
+		}
+
+		/* Check namespace visibility */
+		if (fbc && UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {
@@ -1945,6 +2035,25 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 			const zend_class_entry *scope = zend_get_executed_scope();
 			ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(fbc, scope)) {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
+					zend_bad_method_call(fbc, function_name, scope);
+				}
+				fbc = fallback_fbc;
+			}
+		}
+
+		/* Check namespace visibility */
+		if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(fbc->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				const zend_class_entry *scope = zend_get_executed_scope();
 				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
 				if (!fallback_fbc) {
 					zend_bad_method_call(fbc, function_name, scope);
@@ -2031,6 +2140,28 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 				return NULL;
 			}
 		}
+
+		/* Check namespace visibility */
+		if (UNEXPECTED(property_info->flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *property_namespace = zend_get_class_namespace(property_info->ce);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(property_namespace, caller_namespace);
+			zend_string_release(property_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				if (type != BP_VAR_IS) {
+					const zend_class_entry *scope = get_fake_or_executed_scope();
+					zend_throw_error(NULL, "Cannot access %s property %s::$%s from scope %s",
+						zend_visibility_string(property_info->flags),
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(property_name),
+						scope ? ZSTR_VAL(scope->name) : "{main}");
+				}
+				return NULL;
+			}
+		}
 	}
 
 	if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
@@ -2108,6 +2239,23 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 			const zend_class_entry *scope = get_fake_or_executed_scope();
 			ZEND_ASSERT(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(constructor, scope)) {
+				zend_bad_constructor_call(constructor, scope);
+				zend_object_store_ctor_failed(zobj);
+				constructor = NULL;
+			}
+		}
+
+		/* Check namespace visibility */
+		if (constructor && UNEXPECTED(constructor->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+			zend_string *method_namespace = zend_get_class_namespace(constructor->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace();
+
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				const zend_class_entry *scope = get_fake_or_executed_scope();
 				zend_bad_constructor_call(constructor, scope);
 				zend_object_store_ctor_failed(zobj);
 				constructor = NULL;

@@ -193,6 +193,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isNamespacePrivate(): bool {}
+
     /** @tentative-return-type */
     public function isAbstract(): bool {}
 
@@ -513,9 +515,13 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isNamespacePrivate(): bool {}
+
     public function isPrivateSet(): bool {}
 
     public function isProtectedSet(): bool {}
+
+    public function isNamespacePrivateSet(): bool {}
 
     /** @tentative-return-type */
     public function isStatic(): bool {}

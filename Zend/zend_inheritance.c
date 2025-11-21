@@ -126,6 +126,9 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (EXPECTED(func->op_array.function_name)) {
 			zend_string_addref(func->op_array.function_name);
 		}
+		if (func->op_array.namespace_name) {
+			zend_string_addref(func->op_array.namespace_name);
+		}
 		return func;
 	}
 }
@@ -204,6 +207,8 @@ const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
+	} else if (fn_flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+		return "private(namespace)";
 	} else if (fn_flags & ZEND_ACC_PRIVATE) {
 		return "private";
 	} else {
@@ -215,7 +220,9 @@ const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 
 static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PRIVATE_SET) {
+	if (fn_flags & ZEND_ACC_NAMESPACE_PRIVATE_SET) {
+		return "private(namespace)(set)";
+	} else if (fn_flags & ZEND_ACC_PRIVATE_SET) {
 		return "private(set)";
 	} else if (fn_flags & ZEND_ACC_PROTECTED_SET) {
 		return "protected(set)";
@@ -1151,9 +1158,12 @@ static inheritance_status do_inheritance_check_on_method(
 			SEPARATE_METHOD();
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
-		/* The parent method is private and not an abstract so we don't need to check any inheritance rules */
+		/* The parent method is private and not abstract so we don't need to check any inheritance rules */
 		return INHERITANCE_SUCCESS;
 	}
+
+	/* private(namespace) methods behave like protected for inheritance - they require compatible signatures */
+	/* But they don't prevent child classes from having a method with the same name */
 
 	if ((flags & ZEND_INHERITANCE_CHECK_PROTO) && UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
 		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
@@ -1219,14 +1229,36 @@ static inheritance_status do_inheritance_check_on_method(
 	}
 
 	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-	if ((flags & ZEND_INHERITANCE_CHECK_VISIBILITY)
-			&& (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
-			return INHERITANCE_ERROR;
+	if (flags & ZEND_INHERITANCE_CHECK_VISIBILITY) {
+		uint32_t parent_vis = parent_flags & ZEND_ACC_PPP_MASK;
+		uint32_t child_vis = child_flags & ZEND_ACC_PPP_MASK;
+		bool visibility_error = false;
+
+		/* Check for incompatible visibility changes.
+		 * Two partial orders exist:
+		 * - Inheritance axis: public ⊇ protected ⊇ private
+		 * - Namespace axis: public ⊇ private(namespace) ⊇ private
+		 * protected and private(namespace) are incomparable (on different axes)
+		 */
+		if (parent_vis == ZEND_ACC_NAMESPACE_PRIVATE && child_vis == ZEND_ACC_PROTECTED) {
+			/* Cannot transition from namespace axis to inheritance axis */
+			visibility_error = true;
+		} else if (parent_vis == ZEND_ACC_PROTECTED && child_vis == ZEND_ACC_NAMESPACE_PRIVATE) {
+			/* Cannot transition from inheritance axis to namespace axis */
+			visibility_error = true;
+		} else if (child_vis > parent_vis) {
+			/* Standard restriction check (within same axis) */
+			visibility_error = true;
 		}
-		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-			"Access level to %s::%s() must be %s (as in class %s)%s",
-			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+
+		if (visibility_error) {
+			if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
+				return INHERITANCE_ERROR;
+			}
+			zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
+				"Access level to %s::%s() must be %s (as in class %s)%s",
+				ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+		}
 	}
 
 	if (flags & ZEND_INHERITANCE_CHECK_PROTO) {
@@ -1451,14 +1483,14 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		zend_property_info *child_info = Z_PTR_P(child);
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_CHANGED)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		}
 		if (parent_info->flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final property %s::$%s",
 				ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key));
 		}
-		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
+		if (!(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE))) {
 			if (!(parent_info->ce->ce_flags & ZEND_ACC_INTERFACE)) {
 				child_info->prototype = parent_info->prototype;
 			}

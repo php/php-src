@@ -925,6 +925,11 @@ ZEND_API bool zend_is_countable(const zval *countable);
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
 		zval *default_value_zval, const zend_internal_arg_info *arg_info);
 
+/* Namespace extraction helpers for private(namespace) visibility */
+ZEND_API zend_string* zend_extract_namespace(const zend_string *name);
+ZEND_API zend_string* zend_get_class_namespace(const zend_class_entry *ce);
+ZEND_API zend_string* zend_get_caller_namespace(void);
+
 END_EXTERN_C()
 
 #if ZEND_DEBUG

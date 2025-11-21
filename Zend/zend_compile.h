@@ -216,10 +216,17 @@ typedef struct _zend_oparray_context {
 /* Common flags                                           |     |     |     */
 /* ============                                           |     |     |     */
 /*                                                        |     |     |     */
-/* Visibility flags (public < protected < private)        |     |     |     */
+/* Visibility flags                                       |     |     |     */
+/* Two partial orders (not linear):                       |     |     |     */
+/* - Inheritance axis: public ⊇ protected ⊇ private       |     |     |     */
+/* - Namespace axis: public ⊇ private(namespace) ⊇ private|     |     |     */
+/* protected and private(namespace) are incomparable      |     |     |     */
 #define ZEND_ACC_PUBLIC                  (1 <<  0) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PROTECTED               (1 <<  1) /*     |  X  |  X  |  X  */
 #define ZEND_ACC_PRIVATE                 (1 <<  2) /*     |  X  |  X  |  X  */
+/*                                                        |     |     |     */
+/* Namespace-scoped visibility                            |     |     |     */
+#define ZEND_ACC_NAMESPACE_PRIVATE       (1 << 15) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */
@@ -274,6 +281,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PUBLIC_SET              (1 << 10) /*     |     |  X  |     */
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
+#define ZEND_ACC_NAMESPACE_PRIVATE_SET   (1 << 13) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
@@ -359,7 +367,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_VARIADIC                (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array has finally blocks (user only)                |     |     |     */
-#define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 15) /*     |  X  |     |     */
+#define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 30) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_CLASS_DELAYED opcodes                     |     |     |     */
@@ -418,8 +426,8 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
 
-#define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
-#define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
+#define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE | ZEND_ACC_NAMESPACE_PRIVATE)
+#define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET | ZEND_ACC_NAMESPACE_PRIVATE_SET)
 
 static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t visibility)
 {
@@ -430,6 +438,8 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 			return ZEND_ACC_PROTECTED_SET;
 		case ZEND_ACC_PRIVATE:
 			return ZEND_ACC_PRIVATE_SET;
+		case ZEND_ACC_NAMESPACE_PRIVATE:
+			return ZEND_ACC_NAMESPACE_PRIVATE_SET;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
@@ -560,6 +570,7 @@ struct _zend_op_array {
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
+	zend_string *namespace_name;
 
 	uint32_t last_literal;
 	uint32_t num_dynamic_func_defs;
