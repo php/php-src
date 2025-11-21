@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
+ * Stub hash: 13dd6358dc6a0df41d9a0efda35f4d7f47428828 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -140,7 +140,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_PIDFD_OPEN)
+#if defined(HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setns, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nstype, IS_LONG, 0, "CLONE_NEWNET")
@@ -217,7 +217,7 @@ ZEND_FUNCTION(pcntl_rfork);
 #if defined(HAVE_FORKX)
 ZEND_FUNCTION(pcntl_forkx);
 #endif
-#if defined(HAVE_PIDFD_OPEN)
+#if defined(HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN)
 ZEND_FUNCTION(pcntl_setns);
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
@@ -279,7 +279,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_FORKX)
 	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
 #endif
-#if defined(HAVE_PIDFD_OPEN)
+#if defined(HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN)
 	ZEND_FE(pcntl_setns, arginfo_pcntl_setns)
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
