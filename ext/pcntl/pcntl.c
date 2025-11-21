@@ -40,6 +40,11 @@
 #include <sys/resource.h>
 #endif
 
+#if defined(HAVE_EXECVEAT)
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+
 #ifdef HAVE_WAITID
 #if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
 #define HAVE_POSIX_IDTYPES 1
@@ -658,6 +663,40 @@ PHP_FUNCTION(pcntl_wstopsig)
 }
 /* }}} */
 
+#ifdef HAVE_EXECVEAT
+static zend_always_inline zend_result php_execve(const char *path, char **argv, char **envp) {
+	int fd = open(path, O_RDONLY | O_CLOEXEC);
+	if (fd < 0) {
+		return FAILURE;
+	}
+#ifdef AT_EXECVE_CHECK
+	// Linux >= 6.14 allows to check if `path` is allowed 
+	// for execution per kernel security policy (w/o actually running it)
+	if (execveat(fd, "", argv, envp, AT_EMPTY_PATH | AT_EXECVE_CHECK) < 0) {
+		close(fd);
+		return FAILURE;
+	}
+#endif
+	if (execveat(fd, "", argv, envp, AT_EMPTY_PATH) < 0) {
+		close(fd);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_always_inline zend_result php_execv(const char *path, char **argv) {
+	return php_execve(path, argv, 0);
+}
+#else
+static zend_always_inline zend_result php_execve(const char *path, char **argv, char **envp) {
+	return execve(path, argv, envp) == 0 ? SUCCESS : FAILURE;
+}
+
+static zend_always_inline zend_result php_execv(const char *path, char **argv) {
+	return execv(path, argv) == 0 ? SUCCESS : FAILURE;
+}
+#endif
+
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
@@ -757,7 +796,7 @@ PHP_FUNCTION(pcntl_exec)
 		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
 
-		if (execve(path, argv, envp) == -1) {
+		if (php_execve(path, argv, envp) == FAILURE) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
@@ -768,7 +807,7 @@ cleanup_env_vars:
 		efree(envp);
 	} else {
 
-		if (execv(path, argv) == -1) {
+		if (php_execv(path, argv) == FAILURE) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
