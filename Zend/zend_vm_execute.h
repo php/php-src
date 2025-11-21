@@ -2523,14 +2523,13 @@ send_again:
 			const zend_object_iterator_funcs *funcs = iter->funcs;
 			if (funcs->rewind) {
 				funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					goto after_loop;
+				}
 			}
 
 			for (; funcs->valid(iter) == SUCCESS; ++arg_num) {
 				zval *arg, *top;
-
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					break;
-				}
 
 				arg = funcs->get_current_data(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2619,6 +2618,7 @@ send_again:
 				funcs->move_forward(iter);
 			}
 
+after_loop:
 			zend_iterator_dtor(iter);
 		}
 	} else if (EXPECTED(Z_ISREF_P(args))) {
