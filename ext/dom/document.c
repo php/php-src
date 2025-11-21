@@ -1608,15 +1608,14 @@ PHP_METHOD(DOMDocument, saveXML)
 		if (options & XML_SAVE_NO_DECL) {
 			converted_options |= XML_SAVE_NO_DECL;
 		}
+		if (options & LIBXML_SAVE_NOEMPTYTAG) {
+			converted_options |= XML_SAVE_NO_EMPTY;
+		}
 		if (format) {
 			converted_options |= XML_SAVE_FORMAT;
 		}
-		/* Save libxml2 global, override its vaule, and restore after saving. */
-		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
-		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
 		/* Encoding is handled from the encoding property set on the document */
 		xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, converted_options);
-		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 		if (UNEXPECTED(!ctxt)) {
 			xmlBufferFree(buf);
 			php_error_docref(NULL, E_WARNING, "Could not create save context");
