@@ -41,4 +41,5 @@ if test "$PHP_GMP" != "no"; then
   PHP_SUBST([GMP_SHARED_LIBADD])
   AC_DEFINE([HAVE_GMP], [1],
     [Define to 1 if the PHP extension 'gmp' is available.])
+  AC_CHECK_FUNCS([__gmpz_prevprime])
 fi
