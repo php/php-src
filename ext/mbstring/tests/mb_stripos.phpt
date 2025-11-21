@@ -16,7 +16,7 @@ $slen = mb_strlen($euc_jp, 'EUC-JP');
 echo "String len: $slen\n";
 
 // EUC-JP - With encoding parameter
-mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
+ini_set('internal_encoding', 'UTF-8');
 
 echo  "== POSITIVE OFFSET ==\n";
 
@@ -73,7 +73,7 @@ $r = mb_stripos($euc_jp, "\n",     0, 'EUC-JP');
 // EUC-JP - No encoding parameter
 echo "== NO ENCODING PARAMETER ==\n";
 
-mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
+ini_set('internal_encoding', 'EUC-JP');
 
 print  mb_stripos($euc_jp, "\xC6\xFC\xCB\xDC\xB8\xEC", 0) . "\n";
 print  mb_stripos($euc_jp, '0', 0) . "\n";
@@ -88,7 +88,7 @@ $r = mb_stripos($euc_jp, "\n", 0);
 // EUC-JP - No offset and encoding parameter
 echo "== NO OFFSET AND ENCODING PARAMETER ==\n";
 
-mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
+ini_set('internal_encoding', 'EUC-JP');
 
 print  mb_stripos($euc_jp, "\xC6\xFC\xCB\xDC\xB8\xEC") . "\n";
 print  mb_stripos($euc_jp, '0') . "\n";
