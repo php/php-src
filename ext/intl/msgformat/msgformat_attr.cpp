@@ -16,17 +16,15 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
-}
 
 #include <unicode/ustring.h>
 
 /* {{{ Get formatter pattern. */
-U_CFUNC PHP_FUNCTION( msgfmt_get_pattern )
+PHP_FUNCTION( msgfmt_get_pattern )
 {
 	MSG_FORMAT_METHOD_INIT_VARS;
 
@@ -48,7 +46,7 @@ U_CFUNC PHP_FUNCTION( msgfmt_get_pattern )
 /* }}} */
 
 /* {{{ Set formatter pattern. */
-U_CFUNC PHP_FUNCTION( msgfmt_set_pattern )
+PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
 	size_t      value_len = 0;
@@ -107,7 +105,7 @@ U_CFUNC PHP_FUNCTION( msgfmt_set_pattern )
 /* }}} */
 
 /* {{{ Get formatter locale. */
-U_CFUNC PHP_FUNCTION( msgfmt_get_locale )
+PHP_FUNCTION( msgfmt_get_locale )
 {
 	char *loc;
 	MSG_FORMAT_METHOD_INIT_VARS;

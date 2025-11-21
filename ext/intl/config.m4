@@ -7,17 +7,12 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU([INTL_SHARED_LIBADD])
   PHP_SUBST([INTL_SHARED_LIBADD])
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_NEW_EXTENSION([intl], m4_normalize([
-      intl_convert.c
-      intl_error.c
-      php_intl.c
-    ]),
+  PHP_NEW_EXTENSION([intl], [],
     [$ext_shared],,
     [$INTL_COMMON_FLAGS],
     [cxx])
 
-  PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
-    collator/collator_attr.cpp \
+  PHP_INTL_CXX_SOURCES="collator/collator_attr.cpp \
     collator/collator_class.cpp \
     collator/collator_compare.cpp \
     collator/collator_convert.cpp \
@@ -45,6 +40,9 @@ if test "$PHP_INTL" != "no"; then
     formatter/formatter_class.cpp \
     grapheme/grapheme_string.cpp \
     grapheme/grapheme_util.cpp \
+    intl_convert.cpp \
+    intl_error.cpp \
+    php_intl.cpp \
     msgformat/msgformat_helpers.cpp \
     rangeformatter/rangeformatter_class.cpp \
     timezone/timezone_class.cpp \

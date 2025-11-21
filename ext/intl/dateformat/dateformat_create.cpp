@@ -19,7 +19,6 @@
 #include <unicode/calendar.h>
 #include <unicode/datefmt.h>
 
-extern "C" {
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 #include <unicode/uloc.h>
@@ -32,7 +31,6 @@ extern "C" {
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #include "../intl_convert.h"
-}
 
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
@@ -204,7 +202,7 @@ error:
 /* }}} */
 
 /* {{{ Create formatter. */
-U_CFUNC PHP_FUNCTION( datefmt_create )
+PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
     if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -215,7 +213,7 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
 /* }}} */
 
 /* {{{ IntlDateFormatter object constructor. */
-U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
+PHP_METHOD( IntlDateFormatter, __construct )
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);
