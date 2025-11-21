@@ -53,4 +53,4 @@ object(JsonException)#1 (7) {
 }
 string(4) "null"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
