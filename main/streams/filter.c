@@ -216,7 +216,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	const php_stream_filter_factory *factory = NULL;
@@ -260,8 +260,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc_ex(const php_stream_filter_ops *fops,
-		const php_stream_filter_extra_ops *feops, void *abstract, uint8_t persistent, uint16_t flags STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
+		void *abstract, bool persistent, uint32_t flags STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -269,22 +269,7 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc_ex(const php_stream_filter_op
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
-	filter->feops = feops;
 	filter->seekable = flags & PHP_STREAM_FILTER_SEEKABLE_MASK;
-	Z_PTR(filter->abstract) = abstract;
-	filter->is_persistent = persistent;
-
-	return filter;
-}
-
-PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
-{
-	php_stream_filter *filter;
-
-	filter = (php_stream_filter*) pemalloc_rel_orig(sizeof(php_stream_filter), persistent);
-	memset(filter, 0, sizeof(php_stream_filter));
-
-	filter->fops = fops;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
 
