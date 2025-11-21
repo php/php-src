@@ -16,7 +16,6 @@ PHP_INSTALL_HEADERS([ext/uri], m4_normalize([
   uri_parser_php_parse_url.h
 ]))
 
-
 AC_DEFINE([URI_ENABLE_ANSI], [1], [Define to 1 for enabling ANSI support of uriparser.])
 AC_DEFINE([URI_NO_UNICODE], [1], [Define to 1 for disabling unicode support of uriparser.])
 
@@ -31,7 +30,7 @@ if test "$PHP_EXTERNAL_URIPARSER" = "no"; then
   $URIPARSER_DIR/src/UriSetHostIp6.c $URIPARSER_DIR/src/UriSetHostIpFuture.c $URIPARSER_DIR/src/UriSetHostRegName.c \
   $URIPARSER_DIR/src/UriSetPath.c $URIPARSER_DIR/src/UriSetPort.c $URIPARSER_DIR/src/UriSetQuery.c \
   $URIPARSER_DIR/src/UriSetScheme.c $URIPARSER_DIR/src/UriSetUserInfo.c $URIPARSER_DIR/src/UriShorten.c $URIPARSER_DIR/src/UriVersion.c"
-  URI_CFLAGS="-DURI_STATIC_BUILD"
+  URI_CFLAGS="-DURI_STATIC_BUILD -I@ext_srcdir@/$URIPARSER_DIR/include"
 else
   PKG_CHECK_MODULES([LIBURIPARSER], [liburiparser >= 0.9.10])
   PHP_EVAL_LIBLINE([$LIBURIPARSER_LIBS], [URI_SHARED_LIBADD])
@@ -43,5 +42,4 @@ PHP_ADD_EXTENSION_DEP(uri, lexbor)
 
 if test "$PHP_EXTERNAL_URIPARSER" = "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/$URIPARSER_DIR/src $ext_builddir/$URIPARSER_DIR/include)
-  PHP_ADD_INCLUDE([$ext_srcdir/$URIPARSER_DIR/include])
 fi
