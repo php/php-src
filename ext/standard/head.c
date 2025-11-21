@@ -77,7 +77,7 @@ PHPAPI bool php_header(void)
 }
 
 #define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", or \"\\014\""
-PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
+PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, zend_long expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
 	zend_string *samesite, bool partitioned, bool url_encode)
 {
@@ -110,7 +110,8 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			get_active_function_name());
 		return FAILURE;
 	}
-#ifdef ZEND_ENABLE_ZVAL_LONG64
+
+#if SIZEOF_ZEND_LONG >= 8
 	if (expires >= 253402300800) {
 		zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
 			get_active_function_name());
