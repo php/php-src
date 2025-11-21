@@ -33,6 +33,7 @@ ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
 ZEND_API zend_class_entry *zend_ce_nodiscard;
 ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
+ZEND_API zend_class_entry *zend_ce_no_serialize;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -606,6 +607,9 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
+
+	zend_ce_no_serialize = register_class_NoSerialize();
+	attr = zend_mark_internal_attribute(zend_ce_no_serialize);
 }
 
 void zend_attributes_shutdown(void)
