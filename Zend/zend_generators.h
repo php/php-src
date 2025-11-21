@@ -56,8 +56,6 @@ struct _zend_generator_node {
 };
 
 struct _zend_generator {
-	zend_object std;
-
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
@@ -94,6 +92,8 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;
+
+	zend_object std;
 };
 
 static const uint8_t ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
@@ -135,6 +135,11 @@ static zend_always_inline zend_generator *zend_generator_get_current(zend_genera
 }
 
 HashTable *zend_generator_frame_gc(zend_get_gc_buffer *gc_buffer, zend_generator *generator);
+
+static zend_always_inline zend_generator *zend_generator_from_obj(zend_object *obj)
+{
+	return (zend_generator *) ((char *) obj - XtOffsetOf(zend_generator, std));
+}
 
 END_EXTERN_C()
 

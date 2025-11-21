@@ -240,7 +240,7 @@ static inline bool check_node_running_in_fiber(zend_generator *generator) {
 
 static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*) object;
+	zend_generator *generator = zend_generator_from_obj(object);
 	zend_generator *current_generator = zend_generator_get_current(generator);
 	zend_execute_data *ex = generator->execute_data;
 	uint32_t op_num, try_catch_offset;
@@ -368,7 +368,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 static void zend_generator_free_storage(zend_object *object) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*) object;
+	zend_generator *generator = zend_generator_from_obj(object);
 
 	zend_generator_close(generator, false);
 
@@ -423,7 +423,7 @@ HashTable *zend_generator_frame_gc(zend_get_gc_buffer *gc_buffer, zend_generator
 
 static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)object;
+	zend_generator *generator = zend_generator_from_obj(object);
 	zend_execute_data *execute_data = generator->execute_data;
 
 	if (!execute_data) {
@@ -463,8 +463,9 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 
 static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ */
 {
-	zend_generator *generator = emalloc(sizeof(zend_generator));
-	memset(generator, 0, sizeof(zend_generator));
+	size_t block_len = sizeof(zend_generator) + zend_object_properties_size(class_type);
+	zend_generator *generator = emalloc(block_len);
+	memset(generator, 0, block_len);
 
 	/* The key will be incremented on first use, so it'll start at 0 */
 	generator->largest_used_integer_key = -1;
@@ -478,7 +479,7 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	generator->node.ptr.root = NULL;
 
 	zend_object_std_init(&generator->std, class_type);
-	return (zend_object*)generator;
+	return &generator->std;
 }
 /* }}} */
 
@@ -494,7 +495,7 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 {
 	if (!ptr->func && Z_TYPE(ptr->This) == IS_OBJECT) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
-			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
+			zend_generator *generator = zend_generator_from_obj(Z_OBJ(ptr->This));
 			zend_execute_data *prev = ptr->prev_execute_data;
 			ZEND_ASSERT(generator->node.parent && "Placeholder only used with delegation");
 			while (generator->node.parent->node.parent) {
@@ -918,7 +919,7 @@ ZEND_METHOD(Generator, rewind)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_rewind(generator);
 }
@@ -931,7 +932,7 @@ ZEND_METHOD(Generator, valid)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -948,7 +949,7 @@ ZEND_METHOD(Generator, current)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -966,7 +967,7 @@ ZEND_METHOD(Generator, key)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -984,7 +985,7 @@ ZEND_METHOD(Generator, next)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1002,7 +1003,7 @@ ZEND_METHOD(Generator, send)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1038,7 +1039,7 @@ ZEND_METHOD(Generator, throw)
 
 	Z_TRY_ADDREF_P(exception);
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1070,7 +1071,7 @@ ZEND_METHOD(Generator, getReturn)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	zend_generator_ensure_initialized(generator);
 	if (UNEXPECTED(EG(exception))) {
@@ -1094,7 +1095,7 @@ ZEND_METHOD(Generator, __debugInfo)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+	generator = zend_generator_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	array_init(return_value);
 
@@ -1127,7 +1128,7 @@ static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ 
 
 static zend_result zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(iterator->data));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1139,7 +1140,7 @@ static zend_result zend_generator_iterator_valid(zend_object_iterator *iterator)
 
 static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data), *root;
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(iterator->data)), *root;
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1151,7 +1152,7 @@ static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator) /*
 
 static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval *key) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data), *root;
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(iterator->data)), *root;
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1169,7 +1170,7 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 
 static void zend_generator_iterator_move_forward(zend_object_iterator *iterator) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(iterator->data));
 
 	zend_generator_ensure_initialized(generator);
 
@@ -1179,7 +1180,7 @@ static void zend_generator_iterator_move_forward(zend_object_iterator *iterator)
 
 static void zend_generator_iterator_rewind(zend_object_iterator *iterator) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ(iterator->data));
 
 	zend_generator_rewind(generator);
 }
@@ -1208,7 +1209,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 static zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator;
-	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);
+	zend_generator *generator = zend_generator_from_obj(Z_OBJ_P(object));
 
 	if (!generator->execute_data) {
 		zend_throw_exception(NULL, "Cannot traverse an already closed generator", 0);
@@ -1239,6 +1240,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_generator->default_object_handlers = &zend_generator_handlers;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_generator_handlers.offset = XtOffsetOf(zend_generator, std);
 	zend_generator_handlers.free_obj = zend_generator_free_storage;
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
 	zend_generator_handlers.get_gc = zend_generator_get_gc;
