@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a89f03303f8a7d254509ae2bc46a36bb79a3c900 */
+ * Stub hash: 4fe0369b727f35576db0e8c99a348d11b8f507b8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
@@ -20,7 +20,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PhpToken___construct, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PhpToken_is, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, kind)
+	ZEND_ARG_TYPE_MASK(0, kind, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PhpToken_isIgnorable, 0, 0, _IS_BOOL, 0)

@@ -24,8 +24,7 @@ class PhpToken implements Stringable
 
     final public function __construct(int $id, string $text, int $line = -1, int $pos = -1) {}
 
-    /** @param int|string|array $kind */
-    public function is($kind): bool {}
+    public function is(int|string|array $kind): bool {}
 
     public function isIgnorable(): bool {}
 
