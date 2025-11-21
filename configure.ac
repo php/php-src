@@ -536,6 +536,7 @@ dnl Checks for library functions.
 dnl ----------------------------------------------------------------------------
 
 AC_CHECK_FUNCS(m4_normalize([
+  accept4
   alphasort
   asctime_r
   asprintf
