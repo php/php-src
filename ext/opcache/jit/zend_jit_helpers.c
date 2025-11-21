@@ -2300,7 +2300,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_w_slow(zend_object *zobj)
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS);
 	ZEND_ASSERT(cache_slot);
 
-	retval = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_W, cache_slot);
+	retval = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_W, cache_slot, NULL);
 	if (NULL == retval) {
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_W, cache_slot, result);
 		if (retval == result) {
@@ -2919,8 +2919,9 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 {
 	zval *zptr;
 	zend_property_info *prop_info;
+	zend_refcounted *container;
 
-	if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+	if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, &container)) != NULL)) {
 		if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 //???			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 //???				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -2928,6 +2929,8 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 		} else {
 //???			zval *orig_zptr = zptr;
 			zend_reference *ref;
+
+			GC_ADDREF(container);
 
 			do {
 				if (UNEXPECTED(Z_ISREF_P(zptr))) {
@@ -2955,6 +2958,8 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 //???			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 //???				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 //???			}
+
+			GC_DTOR(container);
 		}
 	} else {
 		_zend_jit_assign_op_overloaded_property(zobj, name, cache_slot, value, binary_op);
@@ -3133,7 +3138,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 {
 	zval *prop;
 
-	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 		if (UNEXPECTED(Z_ISERROR_P(prop))) {
 			if (UNEXPECTED(result)) {
 				ZVAL_NULL(result);
@@ -3203,7 +3208,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 {
 	zval *prop;
 
-	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 		if (UNEXPECTED(Z_ISERROR_P(prop))) {
 			if (UNEXPECTED(result)) {
 				ZVAL_NULL(result);
@@ -3273,7 +3278,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 {
 	zval *prop;
 
-	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 		if (UNEXPECTED(Z_ISERROR_P(prop))) {
 			ZVAL_NULL(result);
 		} else {
@@ -3334,7 +3339,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 {
 	zval *prop;
 
-	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+	if (EXPECTED((prop = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot, NULL)) != NULL)) {
 		if (UNEXPECTED(Z_ISERROR_P(prop))) {
 			ZVAL_NULL(result);
 		} else {
