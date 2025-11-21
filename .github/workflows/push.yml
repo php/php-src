@@ -107,11 +107,18 @@ jobs:
           - debug: false
             zts: false
             asan: false
+            arch: X64
           - debug: true
             zts: true
             asan: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-24.04
+            arch: X64
+          - debug: true
+            zts: true
+            asan: false
+            arch: ARM64
+
+    name: "LINUX_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
+    runs-on: ubuntu-24.04${{ matrix.arch == 'ARM64' && '-arm' || '' }}
     timeout-minutes: 50
     steps:
       - name: git checkout
@@ -127,7 +134,7 @@ jobs:
           dpkg -l
           echo "::endgroup::"
       - name: Create MSSQL container
-        if: ${{ !matrix.asan }}
+        if: ${{ !matrix.asan && matrix.arch != 'ARM64' }}
         uses: ./.github/actions/setup-mssql
       - name: Setup Caddy server
         uses: ./.github/actions/setup-caddy
@@ -154,7 +161,7 @@ jobs:
       - name: make install
         uses: ./.github/actions/install-linux
       - name: Setup
-        if: ${{ !matrix.asan }}
+        if: ${{ !matrix.asan && matrix.arch != 'ARM64' }}
         uses: ./.github/actions/setup-x64
       - name: Test
         if: matrix.asan == false
