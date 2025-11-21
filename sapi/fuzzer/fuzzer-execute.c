@@ -31,6 +31,14 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
-	fuzzer_init_php_for_execute(NULL);
+	char ini_buf[512];
+	snprintf(ini_buf, sizeof(ini_buf),
+		"opcache.enable=0\n");
+
+	/* Hint: If opcache is ever enabled, opcache.validate_timestamps=0 needs to
+	 * be set. Otherwise, obtaining the timestamp will fail and the script will
+	 * not be cached. */
+
+	fuzzer_init_php_for_execute(ini_buf);
 	return 0;
 }
