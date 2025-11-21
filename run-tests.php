@@ -1209,7 +1209,7 @@ function system_with_timeout(
         $timeout *= 3;
     }
 
-    while (true) {
+    do {
         /* hide errors from interrupted syscalls */
         $r = $pipes;
         $w = null;
@@ -1225,24 +1225,20 @@ function system_with_timeout(
             /* timed out */
             $data .= "\n ** ERROR: process timed out **\n";
             proc_terminate($proc, 9);
-            return $data;
+            break;
         }
 
         if ($n > 0) {
-            if ($captureStdOut) {
+            if ($captureStdOut && in_array($pipes[1], $r)) {
                 $line = fread($pipes[1], 8192);
-            } elseif ($captureStdErr) {
+            } elseif ($captureStdErr && in_array($pipes[2], $r)) {
                 $line = fread($pipes[2], 8192);
             } else {
                 $line = '';
             }
-            if (strlen($line) == 0) {
-                /* EOF */
-                break;
-            }
             $data .= $line;
         }
-    }
+    } while (!feof($pipes[1]) || !feof($pipes[2]));
 
     $stat = proc_get_status($proc);
 

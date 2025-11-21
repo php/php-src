@@ -22,6 +22,4 @@ var_dump(("ab8283f948419b2d24d22f44a80b17d3" === md5(snmpget($hostname, $communi
 
 ?>
 --EXPECTF--
-MIB search path: %s
-Cannot find module (noneXistent): At line %d in (%s)
 bool(true)
