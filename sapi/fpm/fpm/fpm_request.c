@@ -54,8 +54,8 @@ void fpm_request_accepting(void)
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 
-	/* idle++, active-- */
-	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	/* idle++ */
+	fpm_scoreboard_update_commit(1, 0, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 
 void fpm_request_reading_headers(void)
@@ -218,6 +218,12 @@ void fpm_request_finished(void)
 	proc->request_stage = FPM_REQUEST_FINISHED;
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
+}
+
+void fpm_request_shutdown(void)
+{
+	/* active-- */
+	fpm_scoreboard_update(0, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 
 void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */

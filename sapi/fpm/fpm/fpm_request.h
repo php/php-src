@@ -15,6 +15,8 @@ void fpm_request_executing(void);
 void fpm_request_end(void);
 /* request processed: cleaning current request */
 void fpm_request_finished(void);
+/* request post shutdown: decrement active */
+void fpm_request_shutdown(void);
 
 struct fpm_child_s;
 struct timeval;
