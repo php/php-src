@@ -392,26 +392,17 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 	abort();
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
-	const char *format,
-	size_t limit,
-#if ZEND_DEBUG
-	const char *filename,
-	uint32_t lineno,
-#endif
-	size_t size)
+static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap, char* format, ...)
 {
+	va_list args;
 
 	heap->overflow = 1;
 	zend_try {
-		zend_error_noreturn(E_ERROR,
-			format,
-			limit,
-#if ZEND_DEBUG
-			filename,
-			lineno,
-#endif
-			size);
+		va_start(args, format);
+		zend_string *message = zend_vstrpprintf(0, format, args);
+		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
+		zend_string_release(message);
+		va_end(args);
 	} zend_catch {
 	}  zend_end_try();
 	heap->overflow = 0;
@@ -1039,11 +1030,26 @@ get_chunk:
 					if (zend_mm_gc(heap)) {
 						goto get_chunk;
 					} else if (heap->overflow == 0) {
-#if ZEND_DEBUG
-						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
-#else
-						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, ZEND_MM_PAGE_SIZE * pages_count);
-#endif
+						zend_mm_safe_error(
+							heap,
+							"Allowed memory size of %zu bytes exhausted by %zu bytes"
+# if ZEND_DEBUG
+							" at %s:%d"
+# endif
+							". Allocated %zu bytes and need to allocate %zu bytes to satisfy a request for %zu bytes",
+
+							heap->limit, (ZEND_MM_CHUNK_SIZE - (heap->limit - heap->real_size)),
+# if ZEND_DEBUG
+							__zend_filename, __zend_lineno,
+# endif
+							heap->real_size, ZEND_MM_CHUNK_SIZE,
+# if ZEND_DEBUG
+							size
+# else
+							ZEND_MM_PAGE_SIZE * pages_count
+# endif
+						);
+
 						return NULL;
 					}
 				}
@@ -1058,9 +1064,9 @@ get_chunk:
 #if !ZEND_MM_LIMIT
 						zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-						zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+						zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, ZEND_MM_CHUNK_SIZE);
 #else
-						zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) (tried to allocate %zu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
+						zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) (tried to allocate %zu bytes)", heap->real_size, ZEND_MM_CHUNK_SIZE);
 #endif
 						return NULL;
 					}
@@ -1639,11 +1645,20 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 				if (zend_mm_gc(heap) && new_size - old_size <= heap->limit - heap->real_size) {
 					/* pass */
 				} else if (heap->overflow == 0) {
-#if ZEND_DEBUG
-					zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
-#else
-					zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
-#endif
+					zend_mm_safe_error(
+						heap,
+						"Allowed memory size of %zu bytes exhausted by %zu bytes"
+# if ZEND_DEBUG
+						" at %s:%d"
+# endif
+						". Allocated %zu bytes and need to allocate %zu bytes to satisfy a reallocation from %zu to %zu bytes",
+
+						heap->limit, ((new_size - old_size) - (heap->limit - heap->real_size)),
+# if ZEND_DEBUG
+						__zend_filename, __zend_lineno,
+# endif
+						heap->real_size, (new_size - old_size), old_size, new_size
+					);
 					return NULL;
 				}
 			}
@@ -1936,11 +1951,20 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
 			/* pass */
 		} else if (heap->overflow == 0) {
-#if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
-#else
-			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
-#endif
+			zend_mm_safe_error(
+				heap,
+				"Allowed memory size of %zu bytes exhausted by %zu bytes"
+# if ZEND_DEBUG
+				" at %s:%d"
+# endif
+				". Allocated %zu bytes and need to allocate %zu bytes",
+
+				heap->limit, (new_size - (heap->limit - heap->real_size)),
+# if ZEND_DEBUG
+				__zend_filename, __zend_lineno,
+# endif
+				heap->real_size, new_size
+			);
 			return NULL;
 		}
 	}
@@ -1955,9 +1979,9 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #if !ZEND_MM_LIMIT
 			zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-			zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, new_size);
 #else
-			zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) (tried to allocate %zu bytes)", heap->real_size, size);
+			zend_mm_safe_error(heap, "Out of memory (allocated %zu bytes) (tried to allocate %zu bytes)", heap->real_size, new_size);
 #endif
 			return NULL;
 		}
@@ -2997,15 +3021,20 @@ static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *pt
 static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t add_size) {
 #if ZEND_MM_STAT
 	if (add_size > heap->limit - heap->size && !heap->overflow) {
-#if ZEND_DEBUG
-		zend_mm_safe_error(heap,
-			"Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
-			heap->limit, "file", 0, add_size);
-#else
-		zend_mm_safe_error(heap,
-			"Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)",
-			heap->limit, add_size);
-#endif
+		zend_mm_safe_error(
+			heap,
+			"Allowed memory size of %zu bytes exhausted by %zu bytes"
+# if ZEND_DEBUG
+			" at %s:%d"
+# endif
+			". Allocated %zu bytes and need to allocate %zu bytes",
+
+			heap->limit, (add_size - (heap->limit - heap->real_size)),
+# if ZEND_DEBUG
+			"file", 0,
+# endif
+			heap->real_size, add_size
+		);
 	}
 #endif
 }
