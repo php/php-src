@@ -42,8 +42,8 @@
 #  define PACKAGE_VERSION "@PROJECT_VERSION@"
 
 /*
-#define HAVE_WPRINTF
-#define HAVE_REALLOCARRAY
+#cmakedefine HAVE_WPRINTF
+#cmakedefine HAVE_REALLOCARRAY
 */
 
 #endif /* !defined(URI_CONFIG_H) */
