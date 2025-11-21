@@ -18,4 +18,8 @@ print_r($c);
 
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): print_r(Object(C))
+#1 {main}
+  thrown in %s on line %d

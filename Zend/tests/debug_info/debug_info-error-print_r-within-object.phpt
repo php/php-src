@@ -20,4 +20,8 @@ $o->bar = 'bar';
 print_r($o);
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): print_r(Object(stdClass))
+#1 {main}
+  thrown in %s on line %d

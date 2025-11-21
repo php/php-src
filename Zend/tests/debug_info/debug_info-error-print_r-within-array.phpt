@@ -21,4 +21,8 @@ $a = [
 print_r($a);
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): print_r(Array)
+#1 {main}
+  thrown in %s on line %d

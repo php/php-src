@@ -21,9 +21,8 @@ $a = [
 debug_zval_dump($a);
 ?>
 --EXPECTF--
-array(3) packed refcount(2){
-  [0]=>
-  string(3) "foo" interned
-  [1]=>
-  
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): debug_zval_dump(Array)
+#1 {main}
+  thrown in %s on line %d

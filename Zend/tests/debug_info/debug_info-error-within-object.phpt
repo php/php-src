@@ -20,9 +20,8 @@ $o->bar = 'bar';
 var_dump($o);
 ?>
 --EXPECTF--
-object(stdClass)#1 (3) {
-  ["foo"]=>
-  string(3) "foo"
-  ["c"]=>
-  
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): var_dump(Object(stdClass))
+#1 {main}
+  thrown in %s on line %d

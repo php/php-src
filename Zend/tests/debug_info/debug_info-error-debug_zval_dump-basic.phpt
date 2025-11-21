@@ -18,4 +18,8 @@ debug_zval_dump($c);
 
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): debug_zval_dump(Object(C))
+#1 {main}
+  thrown in %s on line %d

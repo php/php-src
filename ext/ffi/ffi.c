@@ -2068,7 +2068,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 
 	switch (type->kind) {
 		case ZEND_FFI_TYPE_VOID:
-			return NULL;
+			return (HashTable*)&zend_empty_array;
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
@@ -2090,7 +2090,6 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
 			*is_temp = 1;
 			return ht;
-			break;
 		case ZEND_FFI_TYPE_POINTER:
 			if (*(void**)ptr == NULL) {
 				ZVAL_NULL(&tmp);
@@ -2145,12 +2144,10 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			// TODO: function name ???
 			*is_temp = 1;
 			return ht;
-			break;
 		default:
 			ZEND_UNREACHABLE();
-			break;
+			return NULL;
 	}
-	return NULL;
 }
 /* }}} */
 
@@ -2299,7 +2296,7 @@ static int zend_ffi_ctype_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
-	return NULL;
+	return (HashTable*)&zend_empty_array;;
 }
 /* }}} */
 

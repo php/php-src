@@ -21,9 +21,8 @@ $a = [
 var_dump($a);
 ?>
 --EXPECTF--
-array(3) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): var_dump(Array)
+#1 {main}
+  thrown in %s on line %d

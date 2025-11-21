@@ -20,9 +20,8 @@ $o->bar = 'bar';
 debug_zval_dump($o);
 ?>
 --EXPECTF--
-object(stdClass)#1 (3) refcount(2){
-  ["foo"]=>
-  string(3) "foo" interned
-  ["c"]=>
-  
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
+Stack trace:
+#0 %s(%d): debug_zval_dump(Object(stdClass))
+#1 {main}
+  thrown in %s on line %d

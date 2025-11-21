@@ -204,6 +204,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, size_t name_length)
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
+					ZEND_ASSERT(str != NULL && "shouldn't be possible to have a debug handler triggering an exception");
 					php_info_print("<pre>");
 					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
