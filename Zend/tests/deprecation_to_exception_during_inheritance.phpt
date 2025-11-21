@@ -17,7 +17,7 @@ $class = new class extends DateTime {
 
 ?>
 --EXPECTF--
-Fatal error: During inheritance of DateTime: Uncaught Exception: Return type of DateTime@anonymous::getTimezone() should either be compatible with DateTime::getTimezone(): DateTimeZone|false, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s:%d
+Fatal error: During inheritance of DateTime: Uncaught Exception: Return type of class@anonymous::getTimezone() should either be compatible with DateTime::getTimezone(): DateTimeZone|false, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(8192, 'Return type of ...', '%s', 8)
 #1 {main} in %s on line %d
