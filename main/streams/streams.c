@@ -1354,7 +1354,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 		switch(whence) {
 			case SEEK_CUR:
-				ZEND_ASSERT(stream->position >= 0);
+				if (UNEXPECTED(stream->position == -1)) {
+					goto fail;
+				}
 				if (UNEXPECTED(offset > ZEND_LONG_MAX - stream->position)) {
 					offset = ZEND_LONG_MAX;
 				} else {
@@ -1393,6 +1395,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		return 0;
 	}
 
+fail:
 	php_error_docref(NULL, E_WARNING, "Stream does not support seeking");
 
 	return -1;
