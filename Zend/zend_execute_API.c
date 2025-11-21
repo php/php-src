@@ -1077,6 +1077,14 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params)
 {
+	if (UNEXPECTED(!EG(active))) {
+#if ZEND_DEBUG
+		ZEND_UNREACHABLE();
+#endif
+		ZVAL_UNDEF(retval);
+		return FAILURE;
+	}
+
 	zend_fcall_info fci;
 	fci.size = sizeof(zend_fcall_info);
 	fci.object = object;
