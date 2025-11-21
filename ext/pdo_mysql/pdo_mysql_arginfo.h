@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d2c0327499693f1ca2825a9ad42ad769f44a24a */
+ * Stub hash: 5cd7d3159172321ee2cead3bf42124274707d1a9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Mysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -138,6 +138,14 @@ static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_
 	zend_string *const_ATTR_LOCAL_INFILE_DIRECTORY_name = zend_string_init_interned("ATTR_LOCAL_INFILE_DIRECTORY", sizeof("ATTR_LOCAL_INFILE_DIRECTORY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_LOCAL_INFILE_DIRECTORY_name, &const_ATTR_LOCAL_INFILE_DIRECTORY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ATTR_LOCAL_INFILE_DIRECTORY_name, true);
+#endif
+#if defined(PDO_USE_MYSQLND)
+
+	zval const_ATTR_SEND_CLEAR_PASSWORD_value;
+	ZVAL_LONG(&const_ATTR_SEND_CLEAR_PASSWORD_value, PDO_MYSQL_ATTR_SEND_CLEAR_PASSWORD);
+	zend_string *const_ATTR_SEND_CLEAR_PASSWORD_name = zend_string_init_interned("ATTR_SEND_CLEAR_PASSWORD", sizeof("ATTR_SEND_CLEAR_PASSWORD") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_SEND_CLEAR_PASSWORD_name, &const_ATTR_SEND_CLEAR_PASSWORD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_SEND_CLEAR_PASSWORD_name);
 #endif
 
 	return class_entry;
