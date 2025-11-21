@@ -97,6 +97,9 @@ static const struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
 	{ "process.max",                 &fpm_conf_set_integer,         GO(process_max) },
 	{ "process.priority",            &fpm_conf_set_integer,         GO(process_priority) },
+#if HAVE_FPM_CPUAFFINITY
+	{ "process.cpu_list",            &fpm_conf_set_string,          GO(process_cpu_list) },
+#endif
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
@@ -129,6 +132,9 @@ static const struct ini_value_parser_s ini_fpm_pool_options[] = {
 #endif
 	{ "process.priority",          &fpm_conf_set_integer,     WPO(process_priority) },
 	{ "process.dumpable",          &fpm_conf_set_boolean,     WPO(process_dumpable) },
+#if HAVE_FPM_CPUAFFINITY
+	{ "process.cpu_list",          &fpm_conf_set_string,      WPO(process_cpu_list) },
+#endif
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
 	{ "pm.max_children",           &fpm_conf_set_integer,     WPO(pm_max_children) },
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
@@ -634,6 +640,9 @@ static void *fpm_worker_pool_config_alloc(void)
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
 	wp->config->process_dumpable = 0;
+#if HAVE_FPM_CPUAFFINITY
+	wp->config->process_cpu_list = NULL;
+#endif
 	wp->config->clear_env = 1;
 	wp->config->decorate_workers_output = 1;
 #ifdef SO_SETFIB
@@ -1730,6 +1739,9 @@ static void fpm_conf_dump(void)
 	} else {
 		zlog(ZLOG_NOTICE, "\tprocess.priority = %d", fpm_global_config.process_priority);
 	}
+#if HAVE_FPM_CPUAFFINITY
+	zlog(ZLOG_NOTICE, "\tprocess.cpu_list = %s",            STR2STR(fpm_global_config.process_cpu_list));
+#endif
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
@@ -1769,6 +1781,9 @@ static void fpm_conf_dump(void)
 			zlog(ZLOG_NOTICE, "\tprocess.priority = %d", wp->config->process_priority);
 		}
 		zlog(ZLOG_NOTICE, "\tprocess.dumpable = %s",           BOOL2STR(wp->config->process_dumpable));
+#if HAVE_FPM_CPUAFFINITY
+		zlog(ZLOG_NOTICE, "\tprocess.cpu_list = %s",           STR2STR(wp->config->process_cpu_list));
+#endif
 		zlog(ZLOG_NOTICE, "\tpm = %s",                         PM2STR(wp->config->pm));
 		zlog(ZLOG_NOTICE, "\tpm.max_children = %d",            wp->config->pm_max_children);
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);

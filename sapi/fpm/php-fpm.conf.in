@@ -124,6 +124,19 @@
 ; Default value: 10
 ;systemd_interval = 10
 
+; Bind the master process to a cpu set.
+; The value can be one cpu id, a range or a list thereof.
+;
+; Default Value: not set
+; Valid syntaxes are:
+;       process.cpu_list = "cpu id"                 - bind master process to cpu id
+;       process.cpu_list = "[min cpu id]-[max cpu id]"  
+                                                    - bind master process from min cpu id
+                                                      to max cpu id
+;       process.cpu_list = "[[min cpu id]-[max cpu id],[min cpu id-max cpu id],...]"
+                                                    - bind master process to cpu id ranges
+                                                      separated by a comma
+
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
