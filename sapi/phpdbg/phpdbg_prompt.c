@@ -591,7 +591,7 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 		 || opline->opcode == ZEND_YIELD
 		 || opline->opcode == ZEND_YIELD_FROM
 		) {
-			zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
+			zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) opline, (void *) opline);
 		}
 	} while (++opline < op_array->opcodes + op_array->last);
 
@@ -633,7 +633,7 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
-				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
+				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) opline, (void *) opline);
 		}
 	} while (++opline < op_array->opcodes + op_array->last);
 }
@@ -647,7 +647,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 	} else {
 		PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
@@ -664,7 +664,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 		phpdbg_notice("Already at the end of the function");
 		return SUCCESS;
