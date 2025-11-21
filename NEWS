@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20492 (mbstring compile warning due to non-strings).
     (ndossche)
 
+- MySQLnd:
+  . Fixed bug GH-20528 (Regression breaks mysql connexion using an IPv6 address
+    enclosed in square brackets). (Remi)
+
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
