@@ -2293,6 +2293,11 @@ PHP_FUNCTION(imagegammacorrect)
 
 	gamma = input / output;
 
+	if (UNEXPECTED(!zend_finite(gamma))) {
+		zend_value_error("An input divided by an output must be finite");
+		RETURN_THROWS();
+	}
+
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (gdImageTrueColor(im))	{
