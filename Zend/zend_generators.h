@@ -105,6 +105,14 @@ static const uint8_t ZEND_GENERATOR_IN_FIBER          = 0x10;
 void zend_register_generator_ce(void);
 ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
+static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
+{
+	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
+		zend_generator_resume(generator);
+		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
+	}
+}
+/* }}} */
 
 ZEND_API void zend_generator_restore_call_stack(zend_generator *generator);
 ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data);
