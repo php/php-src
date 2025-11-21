@@ -107,6 +107,8 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # ifdef MAP_ALIGNED_SUPER
 #    define MAP_HUGETLB MAP_ALIGNED_SUPER
 # endif
+#else
+static zend_long minlgsz = -1;
 #endif
 
 #ifndef REAL_PAGE_SIZE
@@ -522,7 +524,18 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 static void *zend_mm_mmap(size_t size)
 {
 #ifdef _WIN32
-	void *ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+	void *ptr;
+#ifdef _WIN64
+	// For now enabling only for 64 bits, seems more costly than benefitial otherwise
+	// ZEND_MM_CHUNK_SIZE being the minimum large page size too.
+	if (zend_mm_use_huge_pages && minlgsz == ZEND_MM_CHUNK_SIZE && size == ZEND_MM_CHUNK_SIZE) {
+		ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES, PAGE_READWRITE);
+		if (ptr != NULL) {
+			return ptr;
+		}
+	}
+#endif
+	ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 	if (ptr == NULL) {
 #if ZEND_MM_ERROR
@@ -3335,6 +3348,35 @@ ZEND_API void start_memory_manager(void)
 #  elif defined(_SC_PAGE_SIZE)
 	REAL_PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
 #  endif
+#else
+	HANDLE token;
+	DWORD err;
+	BOOL r;
+	TOKEN_PRIVILEGES priv = {0};
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
+		stderr_last_error("Can't access process token");
+		return;
+	}
+	
+	if (!LookupPrivilegeValueA(NULL, "SeLockMemoryPrivilege", &priv.Privileges[0].Luid)) {
+		CloseHandle(token);
+		stderr_last_error("Can't access privilege lookup");
+		return;
+	}
+	
+	priv.PrivilegeCount = 1;
+	priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	
+	r = AdjustTokenPrivileges(token, FALSE, &priv, sizeof(priv), NULL, 0);
+	err = GetLastError();
+	
+	if (!r || err != ERROR_SUCCESS) {
+		CloseHandle(token);
+		return;
+	}
+	
+	CloseHandle(token);
+	minlgsz = (zend_long)GetLargePageMinimum();
 #endif
 #ifdef ZTS
 	ts_allocate_fast_id(&alloc_globals_id, &alloc_globals_offset, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
