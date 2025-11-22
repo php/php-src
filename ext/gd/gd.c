@@ -2286,17 +2286,22 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_THROWS();
 	}
 
+	if (!zend_finite(input)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	if (output <= 0.0) {
 		zend_argument_value_error(3, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
-	gamma = input / output;
-
-	if (UNEXPECTED(!zend_finite(gamma))) {
-		zend_value_error("An input divided by an output must be finite");
+	if (!zend_finite(output)) {
+		zend_argument_value_error(3, "must be finite");
 		RETURN_THROWS();
 	}
+
+	gamma = input / output;
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 

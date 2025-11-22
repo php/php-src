@@ -6,17 +6,31 @@ gd
 <?php
 $im = imagecreate(64, 32);
 
-try {
-	imagegammacorrect($im, NAN, 1.0);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
-}
-try {
-	imagegammacorrect($im, -NAN, 1.0);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+$gammas = [
+	[NAN, 1.0],
+	[-NAN, 1.0],
+	[INF, 1.0],
+	[-INF, 1.0],
+	[1.0, NAN],
+	[1.0, -NAN],
+	[1.0, INF],
+	[1.0, -INF],
+];
+
+foreach ($gammas as $gamma) {
+	try {
+		imagegammacorrect($im, $gamma[0], $gamma[1]);
+	} catch (\ValueError $e) {
+		echo $e->getMessage(), PHP_EOL;
+	}
 }
 ?>
 --EXPECT--
-An input divided by an output must be finite
-An input divided by an output must be finite
+imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+imagegammacorrect(): Argument #2 ($input_gamma) must be greater than 0
+imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+imagegammacorrect(): Argument #3 ($output_gamma) must be greater than 0
