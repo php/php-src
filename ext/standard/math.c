@@ -389,31 +389,38 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
-#define PHP_CLAMP(zvalue, zmin, zmax) { \
-	if (EXPECTED(Z_TYPE_P(zmin) == IS_DOUBLE) && UNEXPECTED(zend_isnan(Z_DVAL_P(zmin)))) { \
-		zend_argument_value_error(2, "cannot be NAN"); \
-		RETURN_THROWS(); \
-	} \
- \
-	if (EXPECTED(Z_TYPE_P(zmax) == IS_DOUBLE) && UNEXPECTED(zend_isnan(Z_DVAL_P(zmax)))) { \
-		zend_argument_value_error(3, "cannot be NAN"); \
-		RETURN_THROWS(); \
-	} \
- \
-	if (zend_compare(zmax, zmin) == -1) { \
-		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)"); \
-		RETURN_THROWS(); \
-	} \
- \
-	if (zend_compare(zmax, zvalue) == -1) { \
-		RETURN_COPY(zmax); \
-	} \
- \
-	if (zend_compare(zvalue, zmin) == -1) { \
-		RETURN_COPY(zmin); \
-	} \
- \
-	RETURN_COPY(zvalue); \
+/* Return the given value if in range of min and max */
+static void _clamp(zval *return_value, zval *value, zval *min, zval *max)
+{
+	if (EXPECTED(Z_TYPE_P(min) == IS_DOUBLE) && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
+		zend_argument_value_error(2, "cannot be NAN");
+		RETURN_THROWS();
+		return;
+	}
+
+	if (EXPECTED(Z_TYPE_P(max) == IS_DOUBLE) && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
+		zend_argument_value_error(3, "cannot be NAN");
+		RETURN_THROWS();
+		return;
+	}
+
+	if (zend_compare(max, min) == -1) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+		return;
+	}
+
+	if (zend_compare(max, value) == -1) {
+		RETURN_COPY(max);
+		return;
+	}
+
+	if (zend_compare(value, min) == -1) {
+		RETURN_COPY(min);
+		return;
+	}
+
+	RETURN_COPY(value);
 }
 
 /* {{{ Return the given value if in range of min and max */
@@ -427,7 +434,7 @@ PHP_FUNCTION(clamp)
 		Z_PARAM_ZVAL(zmax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PHP_CLAMP(zvalue, zmin, zmax);
+	_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 
@@ -439,7 +446,7 @@ ZEND_FRAMELESS_FUNCTION(clamp, 3)
 	Z_FLF_PARAM_ZVAL(2, zmin);
 	Z_FLF_PARAM_ZVAL(3, zmax);
 
-	PHP_CLAMP(zvalue, zmin, zmax);
+	_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 
