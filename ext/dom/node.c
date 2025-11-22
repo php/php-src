@@ -469,7 +469,8 @@ zend_result dom_node_owner_document_read(dom_object *obj, zval *retval)
 
 	xmlDocPtr docp = nodep->doc;
 	if (!docp) {
-		return FAILURE;
+		ZVAL_NULL(retval);
+		return SUCCESS;
 	}
 
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);

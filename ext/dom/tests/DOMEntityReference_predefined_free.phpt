@@ -8,7 +8,7 @@ $ref = new DOMEntityReference("amp");
 var_dump($ref);
 ?>
 --EXPECTF--
-object(DOMEntityReference)#1 (17) {
+object(DOMEntityReference)#1 (18) {
   ["nodeName"]=>
   string(3) "amp"
   ["nodeValue"]=>
@@ -33,6 +33,8 @@ object(DOMEntityReference)#1 (17) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["namespaceURI"]=>
   NULL
   ["prefix"]=>
