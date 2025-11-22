@@ -36,10 +36,10 @@ var_dump($a);
 var_dump('Hello world' is $a);
 var_dump($a);
 
-var_dump(new Box(42) is Box & { value: $a });
+var_dump(new Box(42) is Box(value: $a));
 var_dump($a);
 
-var_dump(new NotBox(43) is Box & { value: $a });
+var_dump(new NotBox(43) is Box(value: $a));
 var_dump($a);
 
 var_dump(43 is $a & int);
@@ -48,10 +48,10 @@ var_dump($a);
 var_dump([] is $a & string);
 var_dump($a);
 
-var_dump(new Many() is { $a, $b, $c, $d });
+var_dump(new Many() is Many(:$a, :$b, :$c, :$d));
 var_dump($a, $b, $c, $d, isset($e));
 
-var_dump(new Many() is { $a, $b, $c, $d, $e, $f, $g, $h, $i, $j });
+var_dump(new Many() is Many(:$a, :$b, :$c, :$d, :$e, :$f, :$g, :$h, :$i, :$j));
 var_dump($a, $b, $c, $d, $e, $f, $g, $h, $i, $j);
 
 ?>

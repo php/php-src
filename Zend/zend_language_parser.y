@@ -1446,7 +1446,7 @@ scalar_pattern:
 ;
 
 object_pattern:
-		'{' object_pattern_element_list '}' { $$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN, $2); }
+		class_name '(' object_pattern_element_list ')' { $$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN, $3, $1); }
 ;
 
 object_pattern_element_list:
@@ -1462,9 +1462,9 @@ non_empty_object_pattern_element_list:
 
 object_pattern_element:
 		T_STRING ':' pattern { $$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN_ELEMENT, $1, $3); }
-	|	binding_pattern {
-			zend_string *name = zend_string_copy(zend_ast_get_str($1->child[0]));
-			$$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN_ELEMENT, zend_ast_create_zval_from_str(name), $1);
+	|	':' binding_pattern {
+			zend_string *name = zend_string_copy(zend_ast_get_str($2->child[0]));
+			$$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN_ELEMENT, zend_ast_create_zval_from_str(name), $2);
 		}
 ;
 

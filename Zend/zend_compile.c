@@ -6914,13 +6914,13 @@ static void zend_pm_compile_container(
 	zend_ast_list *element_list = zend_ast_get_list(ast->child[0]);
 
 	/* Make sure the value is actually of the right type. */
-	zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
-	zend_op *is_array_op = zend_emit_op(NULL, ZEND_TYPE_CHECK, &expr_copy_node, NULL);
-	SET_NODE(is_array_op->result, result);
-	is_array_op->extended_value = is_array ? MAY_BE_ARRAY : MAY_BE_OBJECT;
-	zend_pm_emit_jmpz_ex(result, false_label);
-
 	if (is_array) {
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+		zend_op *is_array_op = zend_emit_op(NULL, ZEND_TYPE_CHECK, &expr_copy_node, NULL);
+		SET_NODE(is_array_op->result, result);
+		is_array_op->extended_value = is_array ? MAY_BE_ARRAY : MAY_BE_OBJECT;
+		zend_pm_emit_jmpz_ex(result, false_label);
+
 		/* Make sure the array has the right size. */
 		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
 		znode count_node;
@@ -6934,6 +6934,19 @@ static void zend_pm_compile_container(
 			(ast->attr & ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE) ? ZEND_IS_SMALLER_OR_EQUAL : ZEND_IS_EQUAL,
 			&count_target_node, &count_node);
 		SET_NODE(count_ok_op->result, result);
+		zend_pm_emit_jmpz_ex(result, false_label);
+	} else {
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+
+		znode class_node;
+		zend_compile_class_ref(&class_node, ast->child[1], ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION | ZEND_FETCH_CLASS_SILENT);
+
+		zend_op *opline = zend_emit_op_tmp(NULL, ZEND_INSTANCEOF, &expr_copy_node, NULL);
+		SET_NODE(opline->result, result);
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(Z_STR(class_node.u.constant));
+		opline->extended_value = zend_alloc_cache_slot();
+
 		zend_pm_emit_jmpz_ex(result, false_label);
 	}
 
