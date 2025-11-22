@@ -23,13 +23,13 @@ int(4)
 string(12) "Syntax error"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(44) "Syntax error, at character 0 near content: -"
 bool(false)
 int(4)
 string(12) "Syntax error"
 bool(false)
 int(1)
-string(28) "Maximum stack depth exceeded"
+string(90) "Maximum stack depth exceeded, at character 0 near content: {"key1":"value1", "key2":"value"
 bool(true)
 int(0)
 string(8) "No error"
@@ -44,7 +44,7 @@ int(0)
 string(8) "No error"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(44) "Syntax error, at character 0 near content: -"
 bool(true)
 int(0)
 string(8) "No error"

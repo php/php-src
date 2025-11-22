@@ -25,6 +25,7 @@
 #include "php_json.h"
 #include "php_json_encoder.h"
 #include "php_json_parser.h"
+#include "php_json_scanner.h"
 #include "json_arginfo.h"
 #include <zend_exceptions.h>
 
@@ -34,6 +35,46 @@ PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
+
+json_error_info_type json_error_info_data = {
+	NULL,	// Parsed token
+	0,		// Error code
+	0,		// Character count
+	0		// Total number of characters to parse
+};
+
+void update_json_error_info_data(php_json_parser *parser) {
+    json_error_info_data.errcode = parser->scanner.errcode;
+    json_error_info_data.character_count = parser->scanner.character_count;
+    json_error_info_data.character_max_count = parser->scanner.character_max_count;
+
+    if (json_error_info_data.token) {
+        efree(json_error_info_data.token);
+    }
+
+    char token[32];
+    snprintf(
+        token,
+        sizeof(token),
+        "%s",
+        parser->scanner.token
+    );
+
+    json_error_info_data.token = (php_json_ctype*) emalloc(strlen(token) + 1);
+    memcpy(json_error_info_data.token, token, strlen(token) + 1);
+}
+
+void reset_json_error_info(json_error_info_type* data)
+{
+	if (data->token) {
+		efree(data->token);
+	}
+
+	data->token = NULL;
+	data->errcode = 0;
+	data->character_count = 0;
+	data->character_max_count = 0;
+}
 
 static int php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
@@ -73,6 +114,14 @@ static PHP_RINIT_FUNCTION(json)
 	return SUCCESS;
 }
 
+static PHP_RSHUTDOWN_FUNCTION(json)
+{
+	if (json_error_info_data.token) {
+		efree(json_error_info_data.token);
+	}
+	return SUCCESS;
+}
+
 /* {{{ json_module_entry */
 zend_module_entry json_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -81,7 +130,7 @@ zend_module_entry json_module_entry = {
 	PHP_MINIT(json),
 	NULL,
 	PHP_RINIT(json),
-	NULL,
+	PHP_RSHUTDOWN(json),
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
 	PHP_MODULE_GLOBALS(json),
@@ -185,12 +234,16 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		update_json_error_info_data(&parser);
+		
 		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
 			JSON_G(error_code) = error_code;
 		} else {
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
 		}
+
 		RETVAL_NULL();
+
 		return FAILURE;
 	}
 
@@ -209,6 +262,7 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
+		update_json_error_info_data(&parser);
 		return false;
 	}
 
@@ -231,6 +285,8 @@ PHP_FUNCTION(json_encode)
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)
 	ZEND_PARSE_PARAMETERS_END();
+
+	reset_json_error_info(&json_error_info_data);
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
@@ -271,6 +327,8 @@ PHP_FUNCTION(json_decode)
 		Z_PARAM_LONG(depth)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
+
+	reset_json_error_info(&json_error_info_data);
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
 		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
@@ -323,11 +381,12 @@ PHP_FUNCTION(json_validate)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-
 	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
 		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
 		RETURN_THROWS();
 	}
+
+	reset_json_error_info(&json_error_info_data);
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
@@ -350,7 +409,7 @@ PHP_FUNCTION(json_validate)
 }
 /* }}} */
 
-/* {{{ Returns the error code of the last json_encode() or json_decode() call. */
+/* {{{ Returns the error code of the last json_validate(), json_encode() or json_decode() call. */
 PHP_FUNCTION(json_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -359,11 +418,27 @@ PHP_FUNCTION(json_last_error)
 }
 /* }}} */
 
-/* {{{ Returns the error string of the last json_encode() or json_decode() call. */
+/* {{{ Returns the error string of the last json_validate(), json_encode() or json_decode() call. */
 PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	const char* msg = php_json_get_error_msg(JSON_G(error_code));
+
+	if (JSON_G(error_code) == PHP_JSON_ERROR_NONE || !json_error_info_data.token || strlen((const char*)json_error_info_data.token) == 0) {
+		RETURN_STRING(msg);
+	}
+
+	char msg2[128];
+	snprintf(
+		msg2,
+		sizeof(msg2),
+		"%s, at character %zu near content: %s",
+		msg,
+		json_error_info_data.character_count,
+		json_error_info_data.token
+	);
+
+	RETURN_STRING(msg2);
 }
 /* }}} */
