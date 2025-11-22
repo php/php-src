@@ -9800,7 +9800,7 @@ ZEND_VM_HANDLER(204, ZEND_FRAMELESS_ICALL_0, UNUSED, UNUSED, SPEC(OBSERVER))
 #endif
 	{
 		zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
-		function(EX_VAR(opline->result.var));
+		function(result);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
