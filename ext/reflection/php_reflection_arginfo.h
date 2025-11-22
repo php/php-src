@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 576229f7a0c4afd2f8902db6ce87daa51256965e */
+ * Stub hash: fd645a0b0db39d94ca25b39ffe64d7f05bad6bea */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1497,7 +1497,7 @@ static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class
 	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_setaccessible_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect", strlen("as it has no effect"), 1);
+	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect since PHP 8.1", strlen("as it has no effect since PHP 8.1"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[1].value, attribute_Deprecated_func_setaccessible_0_arg1_str);
 	attribute_Deprecated_func_setaccessible_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -1662,7 +1662,7 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_setaccessible_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect", strlen("as it has no effect"), 1);
+	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect since PHP 8.1", strlen("as it has no effect since PHP 8.1"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[1].value, attribute_Deprecated_func_setaccessible_0_arg1_str);
 	attribute_Deprecated_func_setaccessible_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
