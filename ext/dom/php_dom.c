@@ -523,7 +523,9 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 		ZEND_ASSERT(string_key != NULL);
 
 		if (entry->read_func(obj, &value) == FAILURE) {
-			continue;
+			zend_array_release(debug_info);
+			debug_info = NULL;
+			goto exit;
 		}
 
 		if (Z_TYPE(value) == IS_OBJECT) {
@@ -535,6 +537,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 		zend_hash_update(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
+exit:
 	zend_string_release_ex(object_str, false);
 
 	DOM_G(suppress_warnings) = false;

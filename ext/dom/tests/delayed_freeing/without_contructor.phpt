@@ -31,8 +31,6 @@ try {
 
 ?>
 --EXPECT--
-object(DOMNode)#2 (0) {
-}
 Invalid State Error
 Couldn't fetch DOMNode
 Couldn't fetch DOMNode
