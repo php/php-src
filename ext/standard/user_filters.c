@@ -234,8 +234,86 @@ static php_stream_filter_status_t userfilter_filter(
 	return ret;
 }
 
+static zend_result userfilter_seek(
+			php_stream *stream,
+			php_stream_filter *thisfilter,
+			zend_off_t offset,
+			int whence
+			)
+{
+	zval *obj = &thisfilter->abstract;
+	zval func_name;
+	zval retval;
+	zval args[2];
+	int call_result;
+
+	/* the userfilter object probably doesn't exist anymore */
+	if (CG(unclean_shutdown)) {
+		return FAILURE;
+	}
+
+	/* Check if the seek method exists */
+	zend_string *method_name = ZSTR_INIT_LITERAL("seek", 0);
+	if (!zend_hash_exists(&Z_OBJCE_P(obj)->function_table, method_name)) {
+		zend_string_release(method_name);
+		/* Method doesn't exist - consider this a successful seek for BC */
+		return SUCCESS;
+	}
+	zend_string_release(method_name);
+
+	/* Make sure the stream is not closed while the filter callback executes. */
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
+	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	if (stream_prop) {
+		/* Give the userfilter class a hook back to the stream */
+		zval_ptr_dtor(stream_prop);
+		php_stream_to_zval(stream, stream_prop);
+		Z_ADDREF_P(stream_prop);
+	}
+
+	ZVAL_STRINGL(&func_name, "seek", sizeof("seek")-1);
+
+	/* Setup calling arguments */
+	ZVAL_LONG(&args[0], offset);
+	ZVAL_LONG(&args[1], whence);
+
+	call_result = call_user_function(NULL,
+			obj,
+			&func_name,
+			&retval,
+			2, args);
+
+	zval_ptr_dtor(&func_name);
+
+	zend_result ret = FAILURE;
+	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		ret = zend_is_true(&retval) ? SUCCESS : FAILURE;
+		zval_ptr_dtor(&retval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Failed to call seek function");
+	}
+
+	/* filter resources are cleaned up by the stream destructor,
+	 * keeping a reference to the stream resource here would prevent it
+	 * from being destroyed properly */
+	if (stream_prop) {
+		convert_to_null(stream_prop);
+	}
+
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[0]);
+
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
+
+	return ret;
+}
+
 static const php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
+	userfilter_seek,
 	userfilter_dtor,
 	"user-filter"
 };
@@ -304,7 +382,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
+	filter = php_stream_filter_alloc(&userfilter_ops, NULL, false,
+			PHP_STREAM_FILTER_SEEKABLE_CHECK);
 
 	/* filtername */
 	add_property_string(&obj, "filtername", filtername);
