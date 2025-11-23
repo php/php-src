@@ -214,21 +214,34 @@ void zend_init_rsrc_plist(void)
 
 void zend_close_rsrc_list(HashTable *ht)
 {
-	/* Reload ht->arData on each iteration, as it may be reallocated. */
 	uint32_t i = ht->nNumUsed;
+	uint32_t num = ht->nNumUsed;
 
 retry:
 	zend_try {
 		while (i-- > 0) {
+			/* Reload ht->arData on each iteration, as it may be reallocated. */
 			zval *p = ZEND_HASH_ELEMENT(ht, i);
 			if (Z_TYPE_P(p) != IS_UNDEF) {
 				zend_resource *res = Z_PTR_P(p);
 				if (res->type >= 0) {
 					zend_resource_dtor(res);
+
+					if (UNEXPECTED(ht->nNumUsed != num)) {
+						/* New resources were added, reloop from the start.
+						 * We need to keep the top->down order to avoid freeing resources
+						 * in use by the newly created resources. */
+						i = num = ht->nNumUsed;
+					}
 				}
 			}
 		}
 	} zend_catch {
+		if (UNEXPECTED(ht->nNumUsed != num)) {
+			/* See above */
+			i = num = ht->nNumUsed;
+		}
+
 		/* If we have bailed, we probably executed user code (e.g. user stream
 		 * API). Keep closing resources so they don't leak. User handlers must be
 		 * called now so they aren't called in zend_deactivate() on

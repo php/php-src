@@ -254,6 +254,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 static zend_result call_method_if_exists(
 		zval *object, zval *method_name, zval *retval, uint32_t param_count, zval *params)
 {
+	ZEND_ASSERT(EG(active));
 	return zend_call_method_if_exists(
 		Z_OBJ_P(object), Z_STR_P(method_name), retval, param_count, params);
 }
