@@ -1491,18 +1491,21 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			errors_size = emalloc(sizeof(size_t) + (2 * sizeof(zend_error_info *)));
 			// can be seen as "waste" but to have a round even number from start
 			*errors_size = 2;
+			zend_error_info **a = (zend_error_info **)(errors_size + 1);
+			memset(a, 0, *errors_size * sizeof(zend_error_info *));
 		} else {
 			errors_size = (size_t *)(EG(errors) - 1);
 			if (EG(num_errors) == *errors_size) {
 				size_t tmp = *errors_size << 1;
 				// not sure we can get high number of errors so safe `might be` over cautious here
 				errors_size = safe_erealloc(errors_size, sizeof(size_t) + (tmp * sizeof(zend_error_info *)), 1, 0);
+				zend_error_info **a = (zend_error_info **)(errors_size + 1);
+				memset(a + *errors_size, 0, (tmp - *errors_size) * sizeof(zend_error_info *));
 				*errors_size = tmp;
 			}
 		}
 		EG(errors) = (zend_error_info **)(errors_size + 1);
 		EG(errors)[EG(num_errors)-1] = info;
-		memset(EG(errors)[EG(num_errors)], 0, sizeof(zend_error_info));
 
 		/* Do not process non-fatal recorded error */
 		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
