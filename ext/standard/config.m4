@@ -432,6 +432,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     pageinfo.c
     password.c
     php_fopen_wrapper.c
+    poll.c
     proc_open.c
     quot_print.c
     scanf.c
