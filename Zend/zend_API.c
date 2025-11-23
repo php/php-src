@@ -592,9 +592,6 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 				return 0;
 			}
 		}
-		if (UNEXPECTED(EG(exception))) {
-			return 0;
-		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int", arg_num)) {
 			return 0;
@@ -640,9 +637,6 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *
 			} else {
 				return 0;
 			}
-		}
-		if (UNEXPECTED(EG(exception))) {
-			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("float", arg_num)) {
