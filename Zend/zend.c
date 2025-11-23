@@ -1491,16 +1491,12 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			errors_size = emalloc(sizeof(size_t) + (2 * sizeof(zend_error_info *)));
 			// can be seen as "waste" but to have a round even number from start
 			*errors_size = 2;
-			zend_error_info **a = (zend_error_info **)(errors_size + 1);
-			memset(a, 0, *errors_size * sizeof(zend_error_info *));
 		} else {
 			errors_size = (size_t *)(EG(errors) - 1);
 			if (EG(num_errors) == *errors_size) {
 				size_t tmp = *errors_size << 1;
 				// not sure we can get high number of errors so safe `might be` over cautious here
 				errors_size = safe_erealloc(errors_size, sizeof(size_t) + (tmp * sizeof(zend_error_info *)), 1, 0);
-				zend_error_info **a = (zend_error_info **)(errors_size + 1);
-				memset(a + *errors_size, 0, (tmp - *errors_size) * sizeof(zend_error_info *));
 				*errors_size = tmp;
 			}
 		}
@@ -1817,9 +1813,7 @@ ZEND_API void zend_free_recorded_errors(void)
 		return;
 	}
 
-	size_t *errors_size = (size_t *)(EG(errors) - 1);
-
-	for (size_t i = 0; i < *errors_size; i++) {
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
 		if (!EG(errors)[i]) {
 			break;
 		}
@@ -1828,7 +1822,7 @@ ZEND_API void zend_free_recorded_errors(void)
 		zend_string_release(info->message);
 		efree_size(info, sizeof(zend_error_info));
 	}
-	efree(EG(errors));
+	efree(((size_t *)EG(errors)) - 1);
 	EG(errors) = NULL;
 	EG(num_errors) = 0;
 }
