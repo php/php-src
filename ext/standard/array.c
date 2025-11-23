@@ -3730,7 +3730,7 @@ PHP_FUNCTION(array_splice)
 
 /* {{{ find_bucket_at_offset(HashTable* ht, zend_long offset)
    Finds the bucket at the given valid offset */
-static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
+static inline Bucket* find_bucket_at_offset(const HashTable* ht, zend_long offset)
 {
 	zend_long pos;
 	Bucket *bucket;
@@ -3756,7 +3756,7 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 
 /* {{{ find_bucket_at_offset(HashTable* ht, zend_long offset)
    Finds the bucket at the given valid offset */
-static inline zval* find_packed_val_at_offset(HashTable* ht, zend_long offset)
+static inline zval* find_packed_val_at_offset(const HashTable* ht, zend_long offset)
 {
 	zend_long pos;
 	zval *zv;
@@ -3908,7 +3908,7 @@ PHP_FUNCTION(array_slice)
 }
 /* }}} */
 
-PHPAPI bool php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI bool php_array_merge_recursive(HashTable *dest, const HashTable *src) /* {{{ */
 {
 	zval *src_entry, *dest_entry;
 	zend_string *string_key;
@@ -3984,7 +3984,7 @@ PHPAPI bool php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI int php_array_merge(HashTable *dest, const HashTable *src) /* {{{ */
 {
 	zval *src_entry;
 	zend_string *string_key;
@@ -4019,7 +4019,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 }
 /* }}} */
 
-PHPAPI bool php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI bool php_array_replace_recursive(HashTable *dest, const HashTable *src) /* {{{ */
 {
 	zval *src_entry, *dest_entry, *src_zval, *dest_zval;
 	zend_string *string_key;
@@ -4497,7 +4497,7 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
-static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, void **cache_slot, zval *rv) /* {{{ */
+static inline zval *array_column_fetch_prop(const zval *data, zend_string *name_str, zend_long name_long, void **cache_slot, zval *rv) /* {{{ */
 {
 	zval *prop = NULL;
 
