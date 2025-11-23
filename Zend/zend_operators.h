@@ -1068,6 +1068,149 @@ zend_memnistr(const char *haystack, const char *needle, size_t needle_len, const
 	return NULL;
 }
 
+static zend_always_inline int zend_compare_non_numeric_strings(zend_string *s1, zend_string *s2)
+{
+	size_t min_len = ZSTR_LEN(s1) < ZSTR_LEN(s2) ? ZSTR_LEN(s1) : ZSTR_LEN(s2);
+	int cmp = memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), min_len);
+	if (cmp != 0) {
+		return cmp < 0 ? -1 : 1;
+	}
+	return ZEND_THREEWAY_COMPARE(ZSTR_LEN(s1), ZSTR_LEN(s2));
+}
+
+static zend_always_inline int zend_compare_long_to_string_ex(zend_long lval, zend_string *str, bool transitive)
+{
+	zend_long str_lval;
+	double str_dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		return ZEND_THREEWAY_COMPARE(lval, str_lval);
+	}
+
+	if (type == IS_DOUBLE) {
+		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
+	}
+
+	if (transitive) {
+		if (ZSTR_LEN(str) == 0) {
+			return 1;
+		}
+		return -1;
+	}
+
+	zend_string *lval_as_str = zend_long_to_str(lval);
+	int cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(lval_as_str), ZSTR_LEN(lval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(lval_as_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+
+static zend_always_inline int zend_compare_double_to_string_ex(double dval, zend_string *str, bool transitive)
+{
+	zend_long str_lval;
+	double str_dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	ZEND_ASSERT(!zend_isnan(dval));
+
+	if (type == IS_LONG) {
+		str_dval = (double) str_lval;
+		return ZEND_THREEWAY_COMPARE(dval, str_dval);
+	}
+
+	if (type == IS_DOUBLE) {
+		return ZEND_THREEWAY_COMPARE(dval, str_dval);
+	}
+
+	if (transitive) {
+		if (ZSTR_LEN(str) == 0) {
+			return 1;
+		}
+		return -1;
+	}
+
+	zend_string *dval_as_str = zend_double_to_str(dval);
+	int cmp_result = zend_binary_strcmp(
+		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(dval_as_str);
+	return ZEND_NORMALIZE_BOOL(cmp_result);
+}
+
+static zend_always_inline int zendi_smart_strcmp_ex(zend_string *s1, zend_string *s2, bool transitive)
+{
+	uint8_t ret1, ret2;
+	int oflow1, oflow2;
+	zend_long lval1 = 0, lval2 = 0;
+	double dval1 = 0.0, dval2 = 0.0;
+
+	if (UNEXPECTED(ZSTR_LEN(s1) == 0 || ZSTR_LEN(s2) == 0)) {
+		if (transitive) {
+			if (ZSTR_LEN(s1) == 0 && ZSTR_LEN(s2) == 0) {
+				return 0;
+			}
+			return ZSTR_LEN(s1) == 0 ? -1 : 1;
+		}
+	}
+
+	ret1 = is_numeric_string_ex(ZSTR_VAL(s1), ZSTR_LEN(s1), &lval1, &dval1, false, &oflow1, NULL);
+	ret2 = is_numeric_string_ex(ZSTR_VAL(s2), ZSTR_LEN(s2), &lval2, &dval2, false, &oflow2, NULL);
+
+	if (ret1 && ret2) {
+#if ZEND_ULONG_MAX == 0xFFFFFFFF
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
+			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
+			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
+#else
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
+#endif
+			/* both values are integers overflowed to the same side, and the
+			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
+		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
+			if (ret1 != IS_DOUBLE) {
+				if (oflow2) {
+					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
+					return -1 * oflow2;
+				}
+				dval1 = (double) lval1;
+			} else if (ret2 != IS_DOUBLE) {
+				if (oflow1) {
+					return oflow1;
+				}
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				goto string_cmp;
+			}
+			dval1 = dval1 - dval2;
+			return ZEND_NORMALIZE_BOOL(dval1);
+		} else { /* they both have to be long's */
+			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+		}
+	} else if (ret1) {
+		if (transitive) {
+			return -1;
+		}
+		goto string_cmp;
+	} else if (ret2) {
+		if (transitive) {
+			return 1;
+		}
+		goto string_cmp;
+	}
+
+	int strcmp_ret;
+string_cmp:
+	if (transitive) {
+		return zend_compare_non_numeric_strings(s1, s2);
+	}
+
+	strcmp_ret = zend_binary_strcmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2));
+	return ZEND_NORMALIZE_BOOL(strcmp_ret);
+}
 
 END_EXTERN_C()
 

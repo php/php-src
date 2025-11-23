@@ -2259,47 +2259,13 @@ ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zva
 
 static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 {
-	zend_long str_lval;
-	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
-
-	if (type == IS_LONG) {
-		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
-	}
-
-	if (type == IS_DOUBLE) {
-		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
-	}
-
-	zend_string *lval_as_str = zend_long_to_str(lval);
-	int cmp_result = zend_binary_strcmp(
-		ZSTR_VAL(lval_as_str), ZSTR_LEN(lval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
-	zend_string_release(lval_as_str);
-	return ZEND_NORMALIZE_BOOL(cmp_result);
+	return zend_compare_long_to_string_ex(lval, str, false);
 }
 /* }}} */
 
 static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 {
-	zend_long str_lval;
-	double str_dval;
-	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
-
-	ZEND_ASSERT(!zend_isnan(dval));
-
-	if (type == IS_LONG) {
-		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
-	}
-
-	if (type == IS_DOUBLE) {
-		return ZEND_THREEWAY_COMPARE(dval, str_dval);
-	}
-
-	zend_string *dval_as_str = zend_double_to_str(dval);
-	int cmp_result = zend_binary_strcmp(
-		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
-	zend_string_release(dval_as_str);
-	return ZEND_NORMALIZE_BOOL(cmp_result);
+	return zend_compare_double_to_string_ex(dval, str, false);
 }
 /* }}} */
 
@@ -3420,52 +3386,7 @@ string_cmp:
 
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
-	uint8_t ret1, ret2;
-	int oflow1, oflow2;
-	zend_long lval1 = 0, lval2 = 0;
-	double dval1 = 0.0, dval2 = 0.0;
-
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
-#if ZEND_ULONG_MAX == 0xFFFFFFFF
-		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
-			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
-			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
-#else
-		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
-#endif
-			/* both values are integers overflowed to the same side, and the
-			 * double comparison may have resulted in crucial accuracy lost */
-			goto string_cmp;
-		}
-		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
-			if (ret1 != IS_DOUBLE) {
-				if (oflow2) {
-					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
-					return -1 * oflow2;
-				}
-				dval1 = (double) lval1;
-			} else if (ret2 != IS_DOUBLE) {
-				if (oflow1) {
-					return oflow1;
-				}
-				dval2 = (double) lval2;
-			} else if (dval1 == dval2 && !zend_finite(dval1)) {
-				/* Both values overflowed and have the same sign,
-				 * so a numeric comparison would be inaccurate */
-				goto string_cmp;
-			}
-			dval1 = dval1 - dval2;
-			return ZEND_NORMALIZE_BOOL(dval1);
-		} else { /* they both have to be long's */
-			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
-		}
-	} else {
-		int strcmp_ret;
-string_cmp:
-		strcmp_ret = zend_binary_strcmp(s1->val, s1->len, s2->val, s2->len);
-		return ZEND_NORMALIZE_BOOL(strcmp_ret);
-	}
+	return zendi_smart_strcmp_ex(s1, s2, false);
 }
 /* }}} */
 

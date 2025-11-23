@@ -104,13 +104,17 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 	return stable_sort_fallback((a), (b)); \
 } while (0)
 
+#define PHP_ARRAY_TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
+
+static int php_array_compare_transitive(zval *op1, zval *op2);
+
 /* Generate inlined unstable and stable variants, and non-inlined reversed variants. */
-#define DEFINE_SORT_VARIANTS(name) \
+#define DEFINE_SORT_VARIANTS_USING(name, impl) \
 	static zend_never_inline int php_array_##name##_unstable(Bucket *a, Bucket *b) { \
-		return php_array_##name##_unstable_i(a, b); \
+		return (impl)(a, b); \
 	} \
 	static zend_never_inline int php_array_##name(Bucket *a, Bucket *b) { \
-		RETURN_STABLE_SORT(a, b, php_array_##name##_unstable_i(a, b)); \
+		RETURN_STABLE_SORT(a, b, (impl)(a, b)); \
 	} \
 	static zend_never_inline int php_array_reverse_##name##_unstable(Bucket *a, Bucket *b) { \
 		return php_array_##name##_unstable(a, b) * -1; \
@@ -119,7 +123,33 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 		RETURN_STABLE_SORT(a, b, php_array_reverse_##name##_unstable(a, b)); \
 	} \
 
-static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+#define DEFINE_SORT_VARIANTS(name) \
+	DEFINE_SORT_VARIANTS_USING(name, php_array_##name##_unstable_i)
+
+static zend_always_inline bool php_array_is_enum_zval(zval *zv)
+{
+	return Z_TYPE_P(zv) == IS_OBJECT && (Z_OBJCE_P(zv)->ce_flags & ZEND_ACC_ENUM);
+}
+
+static zend_always_inline int php_array_compare_enum_zvals(zval *lhs, zval *rhs)
+{
+	const bool lhs_enum = php_array_is_enum_zval(lhs);
+	const bool rhs_enum = php_array_is_enum_zval(rhs);
+
+	if (lhs_enum && rhs_enum) {
+		if (Z_OBJ_P(lhs) == Z_OBJ_P(rhs)) {
+			return 0;
+		}
+
+		uintptr_t lhs_ptr = (uintptr_t) Z_OBJ_P(lhs);
+		uintptr_t rhs_ptr = (uintptr_t) Z_OBJ_P(rhs);
+		return lhs_ptr < rhs_ptr ? -1 : 1;
+	}
+
+	return lhs_enum ? 1 : -1;
+}
+
+static zend_always_inline int php_array_key_compare_impl(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval first;
 	zval second;
@@ -127,6 +157,10 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 	} else if (f->key && s->key) {
+		if ((unsigned char)f->key->val[0] > '9'
+		 && (unsigned char)s->key->val[0] > '9') {
+			return zend_compare_non_numeric_strings(f->key, s->key);
+		}
 		return zendi_smart_strcmp(f->key, s->key);
 	}
 	if (f->key) {
@@ -283,7 +317,7 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_impl(Bucket *f, Bucket *s) /* {{{ */
 {
 	int result = zend_compare(&f->val, &s->val);
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
@@ -359,18 +393,307 @@ static int php_array_data_compare_string_locale_unstable_i(Bucket *f, Bucket *s)
 }
 /* }}} */
 
-DEFINE_SORT_VARIANTS(key_compare);
+DEFINE_SORT_VARIANTS_USING(key_compare, php_array_key_compare_impl);
 DEFINE_SORT_VARIANTS(key_compare_numeric);
 DEFINE_SORT_VARIANTS(key_compare_string_case);
 DEFINE_SORT_VARIANTS(key_compare_string);
 DEFINE_SORT_VARIANTS(key_compare_string_locale);
-DEFINE_SORT_VARIANTS(data_compare);
+DEFINE_SORT_VARIANTS_USING(data_compare, php_array_data_compare_impl);
 DEFINE_SORT_VARIANTS(data_compare_numeric);
 DEFINE_SORT_VARIANTS(data_compare_string_case);
 DEFINE_SORT_VARIANTS(data_compare_string);
 DEFINE_SORT_VARIANTS(data_compare_string_locale);
 DEFINE_SORT_VARIANTS(natural_compare);
 DEFINE_SORT_VARIANTS(natural_case_compare);
+
+static int php_array_hash_compare_transitive(zval *zv1, zval *zv2) /* {{{ */
+{
+	return php_array_compare_transitive(zv1, zv2);
+}
+/* }}} */
+
+static int php_array_compare_transitive_symbol_tables(HashTable *ht1, HashTable *ht2) /* {{{ */
+{
+	if (ht1 == ht2) {
+		return 0;
+	}
+
+	GC_TRY_ADDREF(ht1);
+	GC_TRY_ADDREF(ht2);
+
+	int ret = zend_hash_compare(ht1, ht2, (compare_func_t) php_array_hash_compare_transitive, 0);
+
+	GC_TRY_DTOR_NO_REF(ht1);
+	GC_TRY_DTOR_NO_REF(ht2);
+
+	return ret;
+}
+/* }}} */
+
+static int php_array_compare_transitive_arrays(zval *a1, zval *a2) /* {{{ */
+{
+	return php_array_compare_transitive_symbol_tables(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
+}
+/* }}} */
+
+/* Mirrors zend_std_compare_objects(), but recurses via php_array_compare_transitive()
+ * so nested properties obey SORT_REGULAR's transitive ordering. */
+static int php_array_compare_transitive_objects(zval *o1, zval *o2) /* {{{ */
+{
+	if (Z_TYPE_P(o1) != IS_OBJECT || Z_TYPE_P(o2) != IS_OBJECT) {
+		return zend_compare(o1, o2);
+	}
+
+	if (Z_OBJ_HT_P(o1)->compare && Z_OBJ_HT_P(o1)->compare != zend_std_compare_objects) {
+		return Z_OBJ_HT_P(o1)->compare(o1, o2);
+	}
+
+	zend_object *zobj1 = Z_OBJ_P(o1);
+	zend_object *zobj2 = Z_OBJ_P(o2);
+
+	if (zobj1 == zobj2) {
+		return 0; /* the same object */
+	}
+	if (zobj1->ce != zobj2->ce) {
+		return ZEND_UNCOMPARABLE; /* different classes */
+	}
+
+	if (!zobj1->properties && !zobj2->properties
+			&& !zend_object_is_lazy(zobj1) && !zend_object_is_lazy(zobj2)) {
+		zend_property_info *info;
+		int i;
+
+		if (!zobj1->ce->default_properties_count) {
+			return 0;
+		}
+
+		/* It's enough to protect only one of the objects.
+		 * The second one may be referenced from the first and this may cause
+		 * false recursion detection.
+		 */
+		/* use bitwise OR to make only one conditional jump */
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1))) {
+			zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+			return ZEND_UNCOMPARABLE;
+		}
+		Z_PROTECT_RECURSION_P(o1);
+
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+		int ret;
+
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			zval *p1, *p2;
+
+			info = zobj1->ce->properties_info_table[i];
+
+			if (!info) {
+				continue;
+			}
+
+			p1 = OBJ_PROP(zobj1, info->offset);
+			p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (Z_TYPE_P(p1) != IS_UNDEF) {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
+					ret = php_array_compare_transitive(p1, p2);
+					if (ret != 0) {
+						Z_UNPROTECT_RECURSION_P(o1);
+						goto done;
+					}
+				} else {
+					Z_UNPROTECT_RECURSION_P(o1);
+					ret = 1;
+					goto done;
+				}
+			} else {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
+					Z_UNPROTECT_RECURSION_P(o1);
+					ret = 1;
+					goto done;
+				}
+			}
+		}
+
+		Z_UNPROTECT_RECURSION_P(o1);
+		ret = 0;
+
+done:
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
+	} else {
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+
+		int ret = php_array_compare_transitive_symbol_tables(
+				zend_std_get_properties_ex(zobj1),
+				zend_std_get_properties_ex(zobj2));
+
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
+	}
+}
+/* }}} */
+
+/* pared-down version of zend_compare() required for SORT_REGULAR transitivity */
+static int php_array_compare_transitive(zval *op1, zval *op2)
+{
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	if (UNEXPECTED(php_array_is_enum_zval(op1) || php_array_is_enum_zval(op2))) {
+		return php_array_compare_enum_zvals(op1, op2);
+	}
+
+	switch (PHP_ARRAY_TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_LONG):
+			return Z_LVAL_P(op1) > Z_LVAL_P(op2) ? 1 : (Z_LVAL_P(op1) < Z_LVAL_P(op2) ? -1 : 0);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_LONG):
+			return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), (double) Z_LVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_DOUBLE):
+			return ZEND_THREEWAY_COMPARE((double) Z_LVAL_P(op1), Z_DVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+			return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_ARRAY, IS_ARRAY):
+			return php_array_compare_transitive_arrays(op1, op2);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_NULL):
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_FALSE):
+		case PHP_ARRAY_TYPE_PAIR(IS_FALSE, IS_NULL):
+		case PHP_ARRAY_TYPE_PAIR(IS_FALSE, IS_FALSE):
+		case PHP_ARRAY_TYPE_PAIR(IS_TRUE, IS_TRUE):
+			return 0;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_TRUE):
+			return -1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_TRUE, IS_NULL):
+			return 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_STRING):
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				return 0;
+			}
+			return zendi_smart_strcmp_ex(Z_STR_P(op1), Z_STR_P(op2), true);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_STRING):
+			return Z_STRLEN_P(op2) == 0 ? 0 : -1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_NULL):
+			return Z_STRLEN_P(op1) == 0 ? 0 : 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_STRING):
+			return zend_compare_long_to_string_ex(Z_LVAL_P(op1), Z_STR_P(op2), true);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_LONG):
+			return -zend_compare_long_to_string_ex(Z_LVAL_P(op2), Z_STR_P(op1), true);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_STRING):
+			if (zend_isnan(Z_DVAL_P(op1))) {
+				return 1;
+			}
+
+			return zend_compare_double_to_string_ex(Z_DVAL_P(op1), Z_STR_P(op2), true);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_DOUBLE):
+			if (zend_isnan(Z_DVAL_P(op2))) {
+				return 1;
+			}
+
+			return -zend_compare_double_to_string_ex(Z_DVAL_P(op2), Z_STR_P(op1), true);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_OBJECT, IS_NULL):
+			return 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_OBJECT):
+			return -1;
+
+		default:
+			if (Z_TYPE_P(op1) == IS_OBJECT
+			 || Z_TYPE_P(op2) == IS_OBJECT) {
+				return php_array_compare_transitive_objects(op1, op2);
+			}
+
+			return zend_compare(op1, op2);
+	}
+}
+static int php_array_compare_regular(zval *op1, zval *op2)
+{
+	return php_array_compare_transitive(op1, op2);
+}
+
+static zend_always_inline int php_array_key_compare_regular_unstable_i(Bucket *f, Bucket *s)
+{
+	zval first;
+	zval second;
+
+	if (f->key == NULL && s->key == NULL) {
+		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
+	} else if (f->key && s->key) {
+		if ((unsigned char)f->key->val[0] > '9'
+		 && (unsigned char)s->key->val[0] > '9') {
+			return zend_compare_non_numeric_strings(f->key, s->key);
+		}
+		return zendi_smart_strcmp_ex(f->key, s->key, true);
+	}
+	if (f->key) {
+		ZVAL_STR(&first, f->key);
+	} else {
+		ZVAL_LONG(&first, f->h);
+	}
+	if (s->key) {
+		ZVAL_STR(&second, s->key);
+	} else {
+		ZVAL_LONG(&second, s->h);
+	}
+	return php_array_compare_regular(&first, &second);
+}
+
+static zend_always_inline int php_array_data_compare_regular_unstable_i(Bucket *f, Bucket *s)
+{
+	zval *op1 = &f->val;
+	zval *op2 = &s->val;
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG && Z_TYPE_P(op2) == IS_LONG)) {
+		return ZEND_THREEWAY_COMPARE(Z_LVAL_P(op1), Z_LVAL_P(op2));
+	}
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE && Z_TYPE_P(op2) == IS_DOUBLE)) {
+		return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
+	}
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING)) {
+		zend_string *str1 = Z_STR_P(op1);
+		zend_string *str2 = Z_STR_P(op2);
+
+		if ((unsigned char)str1->val[0] > '9'
+		 && (unsigned char)str2->val[0] > '9') {
+			return zend_compare_non_numeric_strings(str1, str2);
+		}
+
+		return zendi_smart_strcmp_ex(str1, str2, true);
+	}
+
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	if (UNEXPECTED(php_array_is_enum_zval(op1) || php_array_is_enum_zval(op2))) {
+		return php_array_compare_enum_zvals(op1, op2);
+	}
+
+	return php_array_compare_regular(op1, op2);
+}
+
+DEFINE_SORT_VARIANTS(key_compare_regular);
+DEFINE_SORT_VARIANTS(data_compare_regular);
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type)
 {
@@ -556,6 +879,19 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 }
 /* }}} */
 
+static void php_array_sort_regular(HashTable *array, bool sort_keys, bool reverse, bool renumber)
+{
+	bucket_compare_func_t cmp;
+
+	if (sort_keys) {
+		cmp = reverse ? php_array_reverse_key_compare_regular : php_array_key_compare_regular;
+	} else {
+		cmp = reverse ? php_array_reverse_data_compare_regular : php_array_data_compare_regular;
+	}
+
+	zend_array_sort(array, cmp, renumber);
+}
+
 PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 {
 	zend_long cnt = 0;
@@ -681,10 +1017,17 @@ PHP_FUNCTION(natcasesort)
 
 typedef bucket_compare_func_t(*get_compare_function)(zend_long);
 
-static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compare_function get_cmp, bool renumber) {
+static zend_always_inline void php_array_apply_sort(HashTable *array, zend_long sort_type, get_compare_function get_cmp, bool renumber)
+{
+	bucket_compare_func_t cmp = get_cmp(sort_type);
+	zend_array_sort(array, cmp, renumber);
+}
+
+/* {{{ Sort an array and maintain index association */
+PHP_FUNCTION(asort)
+{
 	HashTable *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
@@ -692,52 +1035,123 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compar
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cmp = get_cmp(sort_type);
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, false, false, false);
+		RETURN_TRUE;
+	}
 
-	zend_array_sort(array, cmp, renumber);
-
+	php_array_apply_sort(array, sort_type, php_get_data_compare_func, false);
 	RETURN_TRUE;
-}
-
-/* {{{ Sort an array and maintain index association */
-PHP_FUNCTION(asort)
-{
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, false);
 }
 /* }}} */
 
 /* {{{ Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, false);
+	HashTable *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, false, true, false);
+		RETURN_TRUE;
+	}
+
+	php_array_apply_sort(array, sort_type, php_get_data_reverse_compare_func, false);
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ Sort an array */
 PHP_FUNCTION(sort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, true);
+	HashTable *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, false, false, true);
+		RETURN_TRUE;
+	}
+
+	php_array_apply_sort(array, sort_type, php_get_data_compare_func, true);
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, true);
+	HashTable *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, false, true, true);
+		RETURN_TRUE;
+	}
+
+	php_array_apply_sort(array, sort_type, php_get_data_reverse_compare_func, true);
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_reverse_compare_func, false);
+	HashTable *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, true, true, false);
+		RETURN_TRUE;
+	}
+
+	php_array_apply_sort(array, sort_type, php_get_key_reverse_compare_func, false);
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ Sort an array by key */
 PHP_FUNCTION(ksort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_compare_func, false);
+	HashTable *array;
+	zend_long sort_type = PHP_SORT_REGULAR;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR) {
+		php_array_sort_regular(array, true, false, false);
+		RETURN_TRUE;
+	}
+
+	php_array_apply_sort(array, sort_type, php_get_key_compare_func, false);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -4897,7 +5311,11 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
-	cmp = php_get_data_compare_func_unstable(sort_type, false);
+	if (UNEXPECTED((sort_type & ~PHP_SORT_FLAG_CASE) == PHP_SORT_REGULAR)) {
+		cmp = php_array_data_compare_regular_unstable;
+	} else {
+		cmp = php_get_data_compare_func_unstable(sort_type, false);
+	}
 
 	bool in_place = zend_may_modify_arg_in_place(array);
 	if (in_place) {
