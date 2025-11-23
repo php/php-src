@@ -718,6 +718,11 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 	}
 	MBSTRG(detect_order_list) = list;
 	MBSTRG(detect_order_list_size) = size;
+
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		php_mb_populate_current_detect_order_list();
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -5981,6 +5986,11 @@ static void php_mb_populate_current_detect_order_list(void)
 			entry[i] = mbfl_no2encoding(src[i]);
 		}
 	}
+
+	if (MBSTRG(current_detect_order_list) != NULL) {
+		efree(ZEND_VOIDP(MBSTRG(current_detect_order_list)));
+	}
+
 	MBSTRG(current_detect_order_list) = entry;
 	MBSTRG(current_detect_order_list_size) = nentries;
 }
