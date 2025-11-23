@@ -1503,6 +1503,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		}
 		EG(errors) = (zend_error_info **)(errors_size + 1);
 		EG(errors)[EG(num_errors)-1] = info;
+		memset(EG(errors)[EG(num_errors)], 0, sizeof(zend_error_info));
 
 		/* Do not process non-fatal recorded error */
 		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
@@ -1814,7 +1815,12 @@ ZEND_API void zend_free_recorded_errors(void)
 		return;
 	}
 
-	for (uint32_t i = 0; i < EG(num_errors); i++) {
+	size_t *errors_size = (size_t *)(EG(errors) - 1);
+
+	for (size_t i = 0; i < *errors_size; i++) {
+		if (!EG(errors)[i]) {
+			break;
+		}
 		zend_error_info *info = EG(errors)[i];
 		zend_string_release(info->filename);
 		zend_string_release(info->message);
