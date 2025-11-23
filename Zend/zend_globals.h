@@ -74,12 +74,19 @@ typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
+typedef struct _zend_error_info zend_error_info;
 
 typedef enum {
 	ZEND_MEMOIZE_NONE,
 	ZEND_MEMOIZE_COMPILE,
 	ZEND_MEMOIZE_FETCH,
 } zend_memoize_mode;
+
+struct zend_err_buf {
+	uint32_t size;
+	uint32_t capacity;
+	zend_error_info *buf[1];
+};
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -298,8 +305,6 @@ struct _zend_executor_globals {
 	 * and their processing is delayed until zend_emit_recorded_errors()
 	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
-	uint32_t num_errors;
-	zend_error_info **errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
@@ -322,6 +327,7 @@ struct _zend_executor_globals {
 	HashTable callable_convert_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
+	struct zend_err_buf *errors;
 };
 
 #define EG_FLAGS_INITIAL				(0)
