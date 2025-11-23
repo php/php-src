@@ -1494,7 +1494,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		} else {
 			errors_size = (size_t *)(EG(errors) - 1);
 			if (EG(num_errors) == *errors_size) {
-				size_t tmp = *errors_size * 1.5;
+				size_t tmp = *errors_size + (*errors_size >> 1);
 				// not sure we can get high number of errors so safe `might be` over cautious here
 				errors_size = safe_erealloc(errors_size, sizeof(size_t) + (tmp * sizeof(zend_error_info *)), 1, 0);
 				*errors_size = tmp;
