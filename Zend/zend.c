@@ -1494,7 +1494,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		} else {
 			errors_size = (size_t *)(EG(errors) - 1);
 			if (EG(num_errors) == *errors_size) {
-				size_t tmp = *errors_size << 1;
+				size_t tmp = *errors_size * 1.5;
 				// not sure we can get high number of errors so safe `might be` over cautious here
 				errors_size = safe_erealloc(errors_size, sizeof(size_t) + (tmp * sizeof(zend_error_info *)), 1, 0);
 				*errors_size = tmp;
@@ -1814,9 +1814,6 @@ ZEND_API void zend_free_recorded_errors(void)
 	}
 
 	for (uint32_t i = 0; i < EG(num_errors); i++) {
-		if (!EG(errors)[i]) {
-			break;
-		}
 		zend_error_info *info = EG(errors)[i];
 		zend_string_release(info->filename);
 		zend_string_release(info->message);
