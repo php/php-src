@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     passing to variadic parameter). (ndossche)
   . Fixed bug GH-20546 (preserve_none attribute configure check on macOs
     issue). (David Carlier/cho-m)
+  . Fixed bug GH-20286 (use-after-destroy during userland stream_close()).
+    (ndossche, David Carlier)
 
 - Bz2:
   . Fix assertion failures resulting in crashes with stream filter
