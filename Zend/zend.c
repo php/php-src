@@ -1483,9 +1483,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		info->filename = zend_string_copy(error_filename);
 		info->message = zend_string_copy(message);
 
-		/* This is very inefficient for a large number of errors.
-		 * Use pow2 realloc if it becomes a problem. */
 		EG(num_errors)++;
+		// pondering if uint32_t is more appropriate but would need to align the allocation size then
 		size_t *errors_size;
 
 		if (EG(num_errors) == 1) {
