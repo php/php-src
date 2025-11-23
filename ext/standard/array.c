@@ -3819,7 +3819,7 @@ PHP_FUNCTION(array_slice)
 	/* ..and the length */
 	if (length < 0) {
 		length = num_in - offset + length;
-	} else if (((zend_ulong) offset + (zend_ulong) length) > (unsigned) num_in) {
+	} else if (((zend_ulong) offset + (zend_ulong) length) > num_in) {
 		length = num_in - offset;
 	}
 
