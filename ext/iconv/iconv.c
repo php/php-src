@@ -2286,7 +2286,6 @@ PHP_FUNCTION(iconv_get_encoding)
 
 }
 /* }}} */
-
 /* {{{ iconv stream filter */
 typedef struct _php_iconv_stream_filter {
 	iconv_t cd;
@@ -2554,6 +2553,32 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 }
 /* }}} */
 
+/* {{{ php_iconv_stream_filter_seek */
+static zend_result php_iconv_stream_filter_seek(
+		php_stream *stream,
+		php_stream_filter *filter,
+		zend_off_t offset,
+		int whence)
+{
+	php_iconv_stream_filter *self = (php_iconv_stream_filter *)Z_PTR(filter->abstract);
+
+	/* Reset stub buffer */
+	self->stub_len = 0;
+
+	/* Reset iconv conversion state by closing and reopening the converter */
+	iconv_close(self->cd);
+
+	if ((iconv_t)-1 == (self->cd = iconv_open(self->to_charset, self->from_charset))) {
+		php_error_docref(NULL, E_WARNING,
+				"iconv stream filter (\"%s\"=>\"%s\"): failed to reset conversion state",
+				self->from_charset, self->to_charset);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ php_iconv_stream_filter_cleanup */
 static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 {
@@ -2564,6 +2589,7 @@ static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 
 static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 	php_iconv_stream_filter_do_filter,
+	php_iconv_stream_filter_seek,
 	php_iconv_stream_filter_cleanup,
 	"convert.iconv.*"
 };
@@ -2601,7 +2627,8 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent);
+	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent,
+			PHP_STREAM_FILTER_SEEKABLE_START);
 }
 /* }}} */
 
