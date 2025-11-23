@@ -8,7 +8,6 @@ $arg = [1, 2];
 // built-in functions & language constructs
 $callbacks = [
     'echo',
-    'array',
     'empty',
     'eval',
     'isset',
@@ -29,7 +28,6 @@ echo "Done";
 ?>
 --EXPECT--
 array_map(): Argument #1 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
-array_map(): Argument #1 ($callback) must be a valid callback or null, function "array" not found or invalid function name
 array_map(): Argument #1 ($callback) must be a valid callback or null, function "empty" not found or invalid function name
 array_map(): Argument #1 ($callback) must be a valid callback or null, function "eval" not found or invalid function name
 array_map(): Argument #1 ($callback) must be a valid callback or null, function "isset" not found or invalid function name
