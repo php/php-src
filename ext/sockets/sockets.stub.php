@@ -2116,6 +2116,15 @@ const EAI_SERVICE = UNKNOWN;
  * @cvalue EAI_ADDRFAMILY
  */
 const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#ifdef EAI_FAMILY
+/**
+ * @var int
+ * @cvalue EAI_FAMILY
+ */
+const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#endif
 #endif
 #ifdef EAI_SYSTEM
 /**

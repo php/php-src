@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 99c4ea1a5aeff00b47e45ef654cdd12252d64d44 */
+ * Stub hash: 5f0359c5053b27cce379dfe47f1714175304f5b7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1074,6 +1074,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(EAI_ADDRFAMILY)
 	REGISTER_LONG_CONSTANT("EAI_ADDRFAMILY", EAI_ADDRFAMILY, CONST_PERSISTENT);
+#endif
+#if !(defined(EAI_ADDRFAMILY)) && defined(EAI_FAMILY)
+	REGISTER_LONG_CONSTANT("EAI_ADDRFAMILY", EAI_FAMILY, CONST_PERSISTENT);
 #endif
 #if defined(EAI_SYSTEM)
 	REGISTER_LONG_CONSTANT("EAI_SYSTEM", EAI_SYSTEM, CONST_PERSISTENT);
