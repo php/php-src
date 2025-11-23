@@ -1974,8 +1974,8 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 
 	if (persistent_script) {
 		if (ZCG(accel_directives).record_warnings) {
-			persistent_script->num_warnings = EG(num_errors);
-			persistent_script->warnings = EG(errors);
+			persistent_script->num_warnings = EG(errors->size);
+			persistent_script->warnings = EG(errors->buf);
 		}
 
 		from_memory = false;
@@ -2199,8 +2199,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		from_shared_memory = false;
 		if (persistent_script) {
 			if (ZCG(accel_directives).record_warnings) {
-				persistent_script->num_warnings = EG(num_errors);
-				persistent_script->warnings = EG(errors);
+				persistent_script->num_warnings = EG(errors->size);
+				persistent_script->warnings = EG(errors->buf);
 			}
 
 			/* See GH-17246: we disable GC so that user code cannot be executed during the optimizer run. */
@@ -2428,7 +2428,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 	ZCG(current_persistent_script) = &dummy;
 	zend_persist_class_entry_calc(ce);
-	zend_persist_warnings_calc(EG(num_errors), EG(errors));
+	zend_persist_warnings_calc(EG(errors->size), EG(errors->buf));
 	size = dummy.size;
 
 	zend_shared_alloc_clear_xlat_table();
@@ -2498,8 +2498,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	JIT_G(on) = jit_on_old;
 #endif
 
-	entry->num_warnings = EG(num_errors);
-	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
+	entry->num_warnings = EG(errors->size);
+	entry->warnings = zend_persist_warnings(EG(errors->size), EG(errors->buf));
 	entry->next = proto->inheritance_cache;
 	proto->inheritance_cache = entry;
 
@@ -4133,9 +4133,9 @@ static void preload_link(void)
 				/* Remember the last error. */
 				zend_error_cb = orig_error_cb;
 				EG(record_errors) = false;
-				ZEND_ASSERT(EG(num_errors) > 0);
-				zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
-				EG(num_errors)--;
+				ZEND_ASSERT(EG(errors->size) > 0);
+				zend_hash_update_ptr(&errors, key, EG(errors->buf)[EG(errors->size)-1]);
+				EG(errors->size)--;
 			} zend_end_try();
 			CG(in_compilation) = false;
 			CG(compiled_filename) = NULL;
