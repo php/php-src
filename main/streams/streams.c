@@ -1374,12 +1374,13 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 	return true;
 }
 
-static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter, bool is_start_seeking)
+static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
+		bool is_start_seeking, zend_off_t offset, int whence)
 {
 	while (filter) {
 		if (((filter->seekable == PHP_STREAM_FILTER_SEEKABLE_START && is_start_seeking) ||
 				filter->seekable == PHP_STREAM_FILTER_SEEKABLE_CHECK) &&
-				filter->fops->seek(stream, filter, 0, SEEK_SET)) {
+				filter->fops->seek(stream, filter, offset, whence)) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
 			return FAILURE;
 		}
@@ -1388,10 +1389,17 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 	return SUCCESS;
 }
 
-static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking)
+static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking,
+		zend_off_t offset, int whence)
 {
-	return php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking) == SUCCESS &&
-			php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking) == SUCCESS;
+	if (php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking, offset, whence) == FAILURE) {
+		return FAILURE;
+	}
+	if (php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking, offset, whence) == FAILURE) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 
@@ -1429,8 +1437,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position += offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
-					php_stream_filters_seek_all(stream, is_start_seeking);
-					return 0;
+					return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? 0 : -1;
 				}
 				break;
 			case SEEK_SET:
@@ -1440,8 +1447,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position = offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
-					php_stream_filters_seek_all(stream, is_start_seeking);
-					return 0;
+					return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? 0 : -1;
 				}
 				break;
 		}
@@ -1476,9 +1482,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 			/* invalidate the buffer contents */
 			stream->readpos = stream->writepos = 0;
 
-			php_stream_filters_seek_all(stream, is_start_seeking);
-
-			return ret;
+			return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? ret : -1;
 		}
 		/* else the stream has decided that it can't support seeking after all;
 		 * fall through to attempt emulation */
