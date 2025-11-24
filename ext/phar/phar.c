@@ -24,7 +24,6 @@
 #include "func_interceptors.h"
 #include "ext/standard/crc32.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_string.h" /* For php_stristr() */
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
@@ -2536,7 +2535,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	}
 
 	if (user_stub) {
-		char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), strlen(halt_stub));
+		const char *pos = php_memnistr(ZSTR_VAL(user_stub), halt_stub, strlen(halt_stub), ZSTR_VAL(user_stub)+ZSTR_LEN(user_stub));
 
 		if (pos == NULL) {
 			if (must_close_old_file) {
