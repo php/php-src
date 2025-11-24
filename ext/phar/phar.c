@@ -52,8 +52,9 @@ static int phar_set_writeable_bit(zval *zv, void *argument) /* {{{ */
 ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	bool old, ini;
+	bool modifying_readonly_ini = ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1;
 
-	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+	if (modifying_readonly_ini) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
@@ -63,7 +64,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
-		if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+		if (modifying_readonly_ini) {
 			PHAR_G(readonly_orig) = ini;
 		} else {
 			PHAR_G(require_hash_orig) = ini;
@@ -72,7 +73,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+	if (modifying_readonly_ini) {
 		PHAR_G(readonly) = ini;
 		if (PHAR_G(request_init) && HT_IS_INITIALIZED(&PHAR_G(phar_fname_map))) {
 			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
