@@ -143,6 +143,41 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	return exit_status;
 }
 
+static zend_result php_zlib_inflate_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	php_zlib_filter_data *data;
+	int status;
+
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
+
+	if (!data->finished) {
+		/* Stream is active, just reset it */
+		status = inflateReset(&(data->strm));
+		if (status != Z_OK) {
+			php_error_docref(NULL, E_WARNING, "zlib.inflate: failed to reset inflation state");
+			return FAILURE;
+		}
+	}
+
+	/* Reset our own state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->finished = false;
+
+	return SUCCESS;
+}
+
 static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -158,6 +193,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
+	php_zlib_inflate_seek,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
 };
@@ -259,6 +295,39 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	return exit_status;
 }
 
+static zend_result php_zlib_deflate_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	php_zlib_filter_data *data;
+	int status;
+
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
+
+	/* Reset zlib deflation state */
+	status = deflateReset(&(data->strm));
+	if (status != Z_OK) {
+		php_error_docref(NULL, E_WARNING, "zlib.deflate: failed to reset deflation state");
+		return FAILURE;
+	}
+
+	/* Reset our own state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->finished = true;
+
+	return SUCCESS;
+}
+
 static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -272,6 +341,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
+	php_zlib_deflate_seek,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
 };
@@ -315,6 +385,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	}
 
 	data->strm.data_type = Z_ASCII;
+	data->persistent = persistent;
 
 	if (strcasecmp(filtername, "zlib.inflate") == 0) {
 		int windowBits = -MAX_WBITS;
@@ -401,6 +472,7 @@ factory_setlevel:
 					php_error_docref(NULL, E_WARNING, "Invalid filter parameter, ignored");
 			}
 		}
+
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
 		data->finished = true;
 		fops = &php_zlib_deflate_ops;
@@ -416,7 +488,7 @@ factory_setlevel:
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PHP_STREAM_FILTER_SEEKABLE_START);
 }
 
 const php_stream_filter_factory php_zlib_filter_factory = {
