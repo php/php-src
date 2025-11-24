@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
 
+- PDO_PGSQL:
+  . Clear session-local state disconnect-equivalent processing.
+    (KentarouTakeda)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
