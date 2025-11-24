@@ -3789,7 +3789,7 @@ PHP_FUNCTION(array_slice)
 	zend_long length = 0;         /* How many elements to get */
 	bool length_is_null = 1; /* Whether an explicit length has been omitted */
 	bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
-	uint32_t num_in;              /* Number of elements in the input array */
+	int num_in;              /* Number of elements in the input array */
 	zend_string *string_key;
 	zend_ulong num_key;
 
@@ -3819,7 +3819,7 @@ PHP_FUNCTION(array_slice)
 	/* ..and the length */
 	if (length < 0) {
 		length = num_in - offset + length;
-	} else if (((zend_ulong) offset + (zend_ulong) length) > num_in) {
+	} else if (((zend_ulong) offset + (zend_ulong) length) > (uint32_t) num_in) {
 		length = num_in - offset;
 	}
 
