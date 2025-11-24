@@ -48,6 +48,16 @@ PHP_METHOD(php_user_filter, filter)
 	RETURN_LONG(PSFS_ERR_FATAL);
 }
 
+PHP_METHOD(php_user_filter, seek)
+{
+	zend_long offset, whence;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &whence) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_TRUE;
+}
+
 PHP_METHOD(php_user_filter, onCreate)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
