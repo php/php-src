@@ -28,6 +28,7 @@ typedef struct _php_zlib_filter_data {
 	size_t outbuf_len;
 	int persistent;
 	bool finished; /* for zlib.deflate: signals that no flush is pending */
+	int windowBits;
 } php_zlib_filter_data;
 
 /* }}} */
@@ -159,7 +160,14 @@ static zend_result php_zlib_inflate_seek(
 
 	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
 
-	if (!data->finished) {
+	if (data->finished) {
+		/* Stream was ended, need to reinitialize */
+		status = inflateInit2(&(data->strm), data->windowBits);
+		if (status != Z_OK) {
+			php_error_docref(NULL, E_WARNING, "zlib.inflate: failed to reinitialize inflation state");
+			return FAILURE;
+		}
+	} else {
 		/* Stream is active, just reset it */
 		status = inflateReset(&(data->strm));
 		if (status != Z_OK) {
@@ -405,6 +413,9 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 			}
 		}
 
+		/* Save configuration for reset */
+		data->windowBits = windowBits;
+
 		/* RFC 1951 Inflate */
 		data->finished = false;
 		status = inflateInit2(&(data->strm), windowBits);
@@ -472,6 +483,9 @@ factory_setlevel:
 					php_error_docref(NULL, E_WARNING, "Invalid filter parameter, ignored");
 			}
 		}
+
+		/* Save configuration for reset */
+		data->windowBits = windowBits;
 
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
 		data->finished = true;
