@@ -2595,7 +2595,7 @@ static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 };
 
 /* {{{ php_iconv_stream_filter_create */
-static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, uint8_t persistent)
+static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, bool persistent)
 {
 	php_iconv_stream_filter *inst;
 	const char *from_charset = NULL, *to_charset = NULL;

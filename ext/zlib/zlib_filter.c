@@ -350,7 +350,7 @@ static const php_stream_filter_ops php_zlib_deflate_ops = {
 
 /* {{{ zlib.* common factory */
 
-static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
