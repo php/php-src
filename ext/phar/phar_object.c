@@ -1586,7 +1586,9 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, true))) {
+	// TODO: Get timestamp from puser data?
+	time_t timestamp = time(NULL);
+	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, timestamp, &error, true))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 
@@ -1744,7 +1746,9 @@ PHP_METHOD(Phar, buildFromDirectory)
 		}
 
 		phar_obj->archive->ufp = pass.fp;
-		phar_flush(phar_obj->archive, &error);
+		// TODO: Set to &pass; struct?
+		time_t now = time(NULL);
+		phar_flush(phar_obj->archive, now, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -1809,7 +1813,9 @@ PHP_METHOD(Phar, buildFromIterator)
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass)) {
 		phar_obj->archive->ufp = pass.fp;
-		phar_flush(phar_obj->archive, &error);
+		// TODO: Set to &pass; struct?
+		time_t now = time(NULL);
+		phar_flush(phar_obj->archive, now, &error);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
@@ -2116,7 +2122,8 @@ its_ok:
 		goto err_oldpath;
 	}
 
-	phar_flush_ex(phar, NULL, true, &error);
+	time_t now = time(NULL);
+	phar_flush_ex(phar, NULL, true, now, &error);
 
 	if (error) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), newpath, phar->fname_len);
@@ -2574,7 +2581,8 @@ PHP_METHOD(Phar, delete)
 		RETURN_THROWS();
 	}
 
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
@@ -2683,7 +2691,8 @@ PHP_METHOD(Phar, setAlias)
 	}
 
 	phar_obj->archive->is_temporary_alias = 0;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		efree(phar_obj->archive->alias);
@@ -2757,7 +2766,8 @@ PHP_METHOD(Phar, stopBuffering)
 	}
 
 	phar_obj->archive->donotflush = 0;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -2796,6 +2806,7 @@ PHP_METHOD(Phar, setStub)
 		RETURN_THROWS();
 	}
 
+	time_t now = time(NULL);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "r|l", &zstub, &len) == SUCCESS) {
 		zend_string *method_name = get_active_function_or_method_name();
 		zend_error(E_DEPRECATED, "Calling %s(resource $stub, int $length) is deprecated", ZSTR_VAL(method_name));
@@ -2822,7 +2833,7 @@ PHP_METHOD(Phar, setStub)
 				RETURN_THROWS();
 			}
 
-			phar_flush_ex(phar_obj->archive, stub_file_content, /* is_default_stub */ false, &error);
+			phar_flush_ex(phar_obj->archive, stub_file_content, /* is_default_stub */ false, now, &error);
 			zend_string_release_ex(stub_file_content, false);
 
 			if (error) {
@@ -2839,7 +2850,7 @@ PHP_METHOD(Phar, setStub)
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
-		phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ false, &error);
+		phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ false, now, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -2920,7 +2931,9 @@ PHP_METHOD(Phar, setDefaultStub)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ true, &error);
+
+	time_t now = time(NULL);
+	phar_flush_ex(phar_obj->archive, stub, /* is_default_stub */ true, now, &error);
 
 	if (created_stub) {
 		zend_string_free(stub);
@@ -2976,7 +2989,8 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			PHAR_G(openssl_privatekey) = key;
 			PHAR_G(openssl_privatekey_len) = key_len;
 
-			phar_flush(phar_obj->archive, &error);
+			time_t now = time(NULL);
+			phar_flush(phar_obj->archive, now, &error);
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
@@ -3283,7 +3297,8 @@ PHP_METHOD(Phar, compressFiles)
 	}
 	pharobj_set_compression(&phar_obj->archive->manifest, flags);
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
@@ -3324,7 +3339,8 @@ PHP_METHOD(Phar, decompressFiles)
 	}
 
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
@@ -3418,7 +3434,8 @@ PHP_METHOD(Phar, copy)
 
 	zend_hash_add_mem(&oldentry->phar->manifest, newentry.filename, &newentry, sizeof(phar_entry_info));
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3546,7 +3563,8 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true))) {
+	time_t now = time(NULL);
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, now, &error, true))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
 			efree(error);
@@ -3594,7 +3612,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 			*pphar = data->phar;
 		}
 		phar_entry_delref(data);
-		phar_flush(*pphar, &error);
+		phar_flush(*pphar, now, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3613,12 +3631,12 @@ finish: ;
 /* }}} */
 
 /* {{{ create a directory within the phar archive */
-static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
+static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name, time_t timestamp)
 {
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, timestamp, &error, true))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", ZSTR_VAL(dir_name), error);
 			efree(error);
@@ -3637,7 +3655,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 			*pphar = data->phar;
 		}
 		phar_entry_delref(data);
-		phar_flush(*pphar, &error);
+		phar_flush(*pphar, timestamp, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3721,7 +3739,8 @@ PHP_METHOD(Phar, offsetUnset)
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
 			/* we need to "flush" the stream to save the newly deleted file on disk */
-			phar_flush(phar_obj->archive, &error);
+			time_t now = time(NULL);
+			phar_flush(phar_obj->archive, now, &error);
 
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -3748,7 +3767,8 @@ PHP_METHOD(Phar, addEmptyDir)
 		RETURN_THROWS();
 	}
 
-	phar_mkdir(&phar_obj->archive, dir_name);
+	time_t now = time(NULL);
+	phar_mkdir(&phar_obj->archive, dir_name, now);
 }
 /* }}} */
 
@@ -3987,7 +4007,8 @@ PHP_METHOD(Phar, setMetadata)
 	}
 
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4016,7 +4037,8 @@ PHP_METHOD(Phar, delMetadata)
 
 	phar_metadata_tracker_free(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent);
 	phar_obj->archive->is_modified = 1;
-	phar_flush(phar_obj->archive, &error);
+	time_t now = time(NULL);
+	phar_flush(phar_obj->archive, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4582,7 +4604,8 @@ PHP_METHOD(PharFileInfo, chmod)
 
 	BG(CurrentLStatFile) = NULL;
 	BG(CurrentStatFile) = NULL;
-	phar_flush(entry_obj->entry->phar, &error);
+	time_t now = time(NULL);
+	phar_flush(entry_obj->entry->phar, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4663,7 +4686,8 @@ PHP_METHOD(PharFileInfo, setMetadata)
 
 	entry_obj->entry->is_modified = 1;
 	entry_obj->entry->phar->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, &error);
+	time_t now = time(NULL);
+	phar_flush(entry_obj->entry->phar, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4708,7 +4732,8 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		entry_obj->entry->is_modified = 1;
 		entry_obj->entry->phar->is_modified = 1;
 
-		phar_flush(entry_obj->entry->phar, &error);
+		time_t now = time(NULL);
+		phar_flush(entry_obj->entry->phar, now, &error);
 
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4886,7 +4911,8 @@ PHP_METHOD(PharFileInfo, compress)
 
 	entry_obj->entry->phar->is_modified = 1;
 	entry_obj->entry->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, &error);
+	time_t now = time(NULL);
+	phar_flush(entry_obj->entry->phar, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -4976,7 +5002,8 @@ PHP_METHOD(PharFileInfo, decompress)
 	entry_obj->entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry_obj->entry->phar->is_modified = 1;
 	entry_obj->entry->is_modified = 1;
-	phar_flush(entry_obj->entry->phar, &error);
+	time_t now = time(NULL);
+	phar_flush(entry_obj->entry->phar, now, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);

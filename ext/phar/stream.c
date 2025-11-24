@@ -188,10 +188,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 
 	phar_request_initialize();
 
+	// TODO: get from context?
+	time_t now = time(NULL);
 	/* strip leading "/" */
 	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
+	size_t internal_file_len = ZSTR_LEN(resource->path) - 1;
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, internal_file_len, mode, 0, now, &error, true))) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options, "%s", error);
 				efree(error);
@@ -469,8 +472,9 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	if (data->internal_file->is_modified) {
-		data->internal_file->timestamp = time(0);
-		ret = phar_flush(data->phar, &error);
+		time_t now = time(NULL);
+		data->internal_file->timestamp = now;
+		ret = phar_flush(data->phar, now, &error);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS, "%s", error);
 			efree(error);
@@ -717,7 +721,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	}
 	php_url_free(resource);
 	efree(internal_file);
-	phar_entry_remove(idata, &error);
+
+	// TODO: Get from stream context?
+	time_t now = time(NULL);
+	phar_entry_remove(idata, now, &error);
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options, "%s", error);
 		efree(error);
@@ -938,7 +945,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 
 	if (is_modified) {
-		phar_flush(phar, &error);
+		// TODO: Get from stream context?
+		time_t now = time(NULL);
+		phar_flush(phar, now, &error);
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);

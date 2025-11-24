@@ -152,14 +152,12 @@ static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ */
+static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate, time_t timestamp) /* {{{ */
 {
 	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
-	time_t now;
 
-	now = time(NULL);
-	tm = php_localtime_r(&now, &tmbuf);
+	tm = php_localtime_r(&timestamp, &tmbuf);
 
 	tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
 	tm->tm_mon = ((ddate>>5)&15) - 1;
@@ -226,7 +224,7 @@ static char *phar_find_eocd(const char *s, size_t n)
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, time_t timestamp, char **error) /* {{{ */
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
@@ -391,7 +389,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 		entry.uncompressed_filesize = PHAR_GET_32(zipentry.uncompsize);
 		entry.crc32 = PHAR_GET_32(zipentry.crc32);
 		/* do not PHAR_GET_16 either on the next line */
-		entry.timestamp = phar_zip_d2u_time(zipentry.timestamp, zipentry.datestamp);
+		entry.timestamp = phar_zip_d2u_time(zipentry.timestamp, zipentry.datestamp, timestamp);
 		entry.flags = PHAR_ENT_PERM_DEF_FILE;
 		entry.header_offset = PHAR_GET_32(zipentry.offset);
 
@@ -1224,7 +1222,7 @@ static zend_result phar_zip_applysignature(phar_archive_data *phar, struct _phar
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5) int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, time_t timestamp, char **error) /* {{{ */
 {
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
 	static const char halt_stub[] = "__HALT_COMPILER();";
@@ -1236,7 +1234,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 	uint32_t cdir_size, cdir_offset;
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = timestamp;
 	entry.is_modified = 1;
 	entry.is_zip = true;
 	entry.phar = phar;
