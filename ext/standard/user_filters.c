@@ -329,7 +329,7 @@ static const php_stream_filter_ops userfilter_ops = {
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
-		zval *filterparams, uint8_t persistent)
+		zval *filterparams, bool persistent)
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;

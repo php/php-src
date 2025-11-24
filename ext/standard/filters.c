@@ -63,7 +63,7 @@ static const php_stream_filter_ops strfilter_rot13_ops = {
 	"string.rot13"
 };
 
-static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent,
 			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
@@ -148,13 +148,13 @@ static const php_stream_filter_ops strfilter_tolower_ops = {
 	"string.tolower"
 };
 
-static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent,
 			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
 }
 
-static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent,
 			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
@@ -1636,7 +1636,7 @@ static const php_stream_filter_ops strfilter_convert_ops = {
 	"convert.*"
 };
 
-static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	php_convert_filter *inst;
 
@@ -1751,7 +1751,7 @@ static const php_stream_filter_ops consumed_filter_ops = {
 	"consumed"
 };
 
-static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_consumed_filter_data *data;
@@ -1983,7 +1983,7 @@ static const php_stream_filter_ops chunked_filter_ops = {
 	"dechunk"
 };
 
-static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
