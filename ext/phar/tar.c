@@ -969,7 +969,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	char halt_stub[] = "__HALT_COMPILER();";
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = source_date_epoch_time(NULL);
 	entry.is_modified = 1;
 	entry.is_crc_checked = 1;
 	entry.is_tar = 1;

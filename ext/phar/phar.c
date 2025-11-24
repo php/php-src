@@ -2975,7 +2975,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			4: metadata-len
 			+: metadata
 		*/
-		mytime = time(NULL);
+		mytime = source_date_epoch_time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
 		phar_set_32(entry_buffer+4, mytime);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
