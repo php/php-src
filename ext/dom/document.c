@@ -1596,6 +1596,7 @@ PHP_METHOD(DOMDocument, save)
 
 	/* encoding handled by property on doc */
 
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	bool format = doc_props->formatoutput;
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
@@ -1606,6 +1607,7 @@ PHP_METHOD(DOMDocument, save)
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
 		xmlSaveNoEmptyTags = saveempty;
 	}
+	ZEND_DIAGNOSTIC_IGNORED_END
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
@@ -1634,6 +1636,7 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	bool format = doc_props->formatoutput;
 
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	zend_string *res;
 	if (nodep != NULL) {
 		/* Dump contents of Node */
@@ -1664,6 +1667,7 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		res = intern->document->handlers->dump_doc_to_str(docp, converted_options, (const char *) docp->encoding);
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 	}
+	ZEND_DIAGNOSTIC_IGNORED_END
 
 	if (!res) {
 		php_error_docref(NULL, E_WARNING, "Could not save document");
