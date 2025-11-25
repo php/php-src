@@ -58,6 +58,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
+  . Fixed bug GH-20583 (Stack overflow in http_build_query
+    via deep structures). (ndossche)
 
 - Tidy:
   . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
