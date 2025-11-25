@@ -6676,12 +6676,17 @@ static void zend_pm_context_free(zend_pm_context *context)
 static uint32_t zend_pm_label_create(zend_pm_context *context)
 {
 	uint32_t dummy = 0;
+	/* Use negative offset into labels array to be stored in
+	 * zend_op.opN.opline_num. In two's complement, this counts downward from
+	 * UINT_MAX, which avoids conflicts with the existing, ordinary opline
+	 * offsets. */
 	return -zend_stack_push(&context->labels, &dummy);
 }
 
 static void zend_pm_label_set_next(zend_pm_context *context, uint32_t label_offset)
 {
 	uint32_t *labels = zend_stack_base(&context->labels);
+	/* See above. */
 	labels[-label_offset] = get_next_op_number();
 }
 
