@@ -3221,6 +3221,11 @@ static int accel_startup(zend_extension *extension)
 	orig_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = accel_post_startup;
 
+#ifdef HAVE_JIT
+	if (JIT_G(enabled)) {
+		zend_jit_startup();
+	}
+#endif
 	/* Prevent unloading */
 	extension->handle = 0;
 
@@ -3327,7 +3332,7 @@ static zend_result accel_post_startup(void)
 			} else if (!ZSMMG(reserved)) {
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
 			} else {
-				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
+				zend_jit_post_startup(ZSMMG(reserved), jit_size, reattached);
 				zend_jit_startup_ok = true;
 			}
 		}
