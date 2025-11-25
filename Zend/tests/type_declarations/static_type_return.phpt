@@ -60,7 +60,7 @@ $test = function($x): static {
 try {
     var_dump($test(new stdClass));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 $test = $test->bindTo($a);
@@ -86,6 +86,6 @@ object(A)#%d (0) {
 }
 A::test4(): Return value must be of type B|array, A returned
 
-Cannot access "static" when no class scope is active
+Error: Cannot access "static" when no class scope is active
 object(A)#%d (0) {
 }
