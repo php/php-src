@@ -5206,7 +5206,7 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 			if (len == 1 && *retval == 'C') {
 				/* C locale is represented as NULL. */
 				BG(ctype_string) = NULL;
-			} else if (zend_string_equals_cstr(loc, ZSTR_VAL(ret_str), ZSTR_LEN(ret_str))) {
+			} else if (zend_string_equals(loc, ret_str)) {
 				BG(ctype_string) = zend_string_copy(loc);
 			} else {
 				BG(ctype_string) = zend_string_copy(ret_str);
