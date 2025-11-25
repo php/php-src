@@ -169,10 +169,10 @@ slightly different steps. We'll call attention where the steps differ.
 4. Using your local-only release branch, bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac`, and possibly
    `NEWS`.
-  
+
    The date for NEWS should be the date of the announcement (Thursday),
    *not* the date of the tagging (Tuesday).
-  
+
    For examples, see [Update versions for PHP 8.1.0beta3][] (for a pre-GA
    example) or [Update versions for PHP 8.1.6RC1][] along with
    [Update NEWS for PHP 8.1.6RC1][] (for a post-GA example).
@@ -506,8 +506,8 @@ slightly different steps. We'll call attention where the steps differ.
    You can send a PR to [toot-together](https://github.com/derickr/toot-together/)
    with highlights from the NEWS file yourself, if you want.
 
-   * [Annonce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
-   * [Annonce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
+   * [Announce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
+   * [Announce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
 
    We post to [@php@fosstodon.org](https://fosstodon.org/@php).
 
