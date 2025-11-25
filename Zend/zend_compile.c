@@ -6641,14 +6641,14 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	zend_compile_expr(result, fcall_ast);
 }
 
-typedef struct {
+typedef struct _zend_pm_context {
 	bool inside_or_pattern;
 	zend_stack labels;
 	uint32_t num_bindings;
 	zend_stack bindings;
 } zend_pm_context;
 
-typedef struct {
+typedef struct _zend_pm_binding {
 	uint32_t cv;
 	znode value;
 } zend_pm_binding;
