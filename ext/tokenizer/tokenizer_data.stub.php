@@ -754,16 +754,6 @@ const T_POW_EQUAL = UNKNOWN;
 const T_PIPE = UNKNOWN;
 /**
  * @var int
- * @cvalue T_RANGE_EXCLUSIVE_END
- */
-const T_RANGE_EXCLUSIVE_END = UNKNOWN;
-/**
- * @var int
- * @cvalue T_RANGE_INCLUSIVE_END
- */
-const T_RANGE_INCLUSIVE_END = UNKNOWN;
-/**
- * @var int
  * @cvalue T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
  */
 const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG = UNKNOWN;
