@@ -1,0 +1,11 @@
+FROM debian:bookworm
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+      "build-essential" "autoconf" "bison" "re2c" "pkg-config" "zlib1g-dev" "libsqlite3-dev" "libpq-dev" "locales" \
+      "valgrind" "llvm" "clang" "gdb" "git" "ssh" \
+ && locale-gen "en_US.UTF-8"
+
+ENV LANGUAGE ""
+ENV LANG "en_US.UTF-8"
+ENV LC_ALL "C"
