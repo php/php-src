@@ -6894,9 +6894,6 @@ static void zend_pm_compile_binding(zend_ast *ast, znode *result, znode *expr_no
 
 	zend_stack_push(&context->bindings, &binding);
 
-	// FIXME: This can be elided most of the time. It may not for:
-	// - $a is $b
-	// - $a is 42|$b
 	znode true_node;
 	true_node.op_type = IS_CONST;
 	ZVAL_TRUE(&true_node.u.constant);
