@@ -1,0 +1,50 @@
+From c1533ea2ebf4e712383616312dc4b260aa3b3d95 Mon Sep 17 00:00:00 2001
+From: dome <domenic.pinto.1982@gmail.com>
+Date: Sun, 1 Jun 2025 13:19:43 +0200
+Subject: [PATCH] Add last_query_error property to mysqli for query error
+ tracking
+
+---
+ ext/mysqli/mysqli.c        | 3 +++
+ ext/mysqli/mysqli_nonapi.c | 4 ++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/ext/mysqli/mysqli.c b/ext/mysqli/mysqli.c
+index a8a75eff70..0d063e624e 100644
+--- a/ext/mysqli/mysqli.c
++++ b/ext/mysqli/mysqli.c
+@@ -535,6 +535,9 @@ PHP_MINIT_FUNCTION(mysqli)
+ 
+ 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
+ 
++	/* Declare 'last_query_error' property to store last failed query */
++	zend_declare_property_null(mysqli_link_class_entry, "last_query_error", sizeof("last_query_error")-1, ZEND_ACC_PUBLIC);
++
+ 	return SUCCESS;
+ }
+ /* }}} */
+diff --git a/ext/mysqli/mysqli_nonapi.c b/ext/mysqli/mysqli_nonapi.c
+index e0e14eeccb..4e210a32ea 100644
+--- a/ext/mysqli/mysqli_nonapi.c
++++ b/ext/mysqli/mysqli_nonapi.c
+@@ -603,6 +603,8 @@ PHP_FUNCTION(mysqli_query)
+ 	if (resultmode & MYSQLI_ASYNC) {
+ 		if (mysqli_async_query(mysql->mysql, query, query_len)) {
+ 			MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
++			/* Save failed query string to 'last_query_error' */
++			zend_update_property_string(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), "last_query_error", sizeof("last_query_error")-1, query);
+ 			RETURN_FALSE;
+ 		}
+ 		mysql->async_result_fetch_type = resultmode & ~MYSQLI_ASYNC;
+@@ -611,6 +613,8 @@ PHP_FUNCTION(mysqli_query)
+ 
+ 	if (mysql_real_query(mysql->mysql, query, query_len)) {
+ 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
++		/* Save failed query string to 'last_query_error' */
++		zend_update_property_string(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), "last_query_error", sizeof("last_query_error")-1, query);
+ 		RETURN_FALSE;
+ 	}
+ 
+-- 
+2.43.0
+
