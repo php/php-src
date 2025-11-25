@@ -52,6 +52,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
+  . Fixed bug GH-20582 (Heap Buffer Overflow in iptcembed). (ndossche)
 
 18 Dec 2025, PHP 8.3.29
 
