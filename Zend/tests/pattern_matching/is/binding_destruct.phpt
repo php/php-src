@@ -15,7 +15,7 @@ $bar = 'bar';
 try {
     42 is $foo & $bar;
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($foo);
@@ -23,6 +23,6 @@ var_dump($bar);
 
 ?>
 --EXPECT--
-Here
+Exception: Here
 int(42)
 string(3) "bar"

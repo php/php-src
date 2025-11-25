@@ -21,12 +21,12 @@ var_dump('b' is Foo::A);
 try {
     var_dump('a' is Foo::B);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump('a' is Foo::C);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 Foo::test();
 var_dump(Bar::A is Bar::A);
@@ -36,8 +36,8 @@ var_dump('foo' is Bar::A);
 --EXPECT--
 bool(true)
 bool(false)
-Cannot access private constant Foo::B
-Undefined constant Foo::C
+Error: Cannot access private constant Foo::B
+Error: Undefined constant Foo::C
 bool(true)
 bool(false)
 bool(true)
