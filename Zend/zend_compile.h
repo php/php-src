@@ -1153,9 +1153,6 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define IS_CONSTANT_CLASS                    0x400 /* __CLASS__ in trait */
 #define IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE 0x800
 
-/* Array pattern contains ... */
-#define ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE 1
-
 static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
 	arg_num--;
@@ -1227,7 +1224,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 /* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
 #define ZEND_PARENTHESIZED_ARROW_FUNC 1
 
-#define ZEND_PARENTHESIZED_PATTERN 1
+#define ZEND_PARENTHESIZED_PATTERN (1<<0)
+/* Array pattern contains ... */
+#define ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE (1<<1)
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
