@@ -1973,6 +1973,8 @@ fastcgi_request_done:
 
 			fpm_stdio_flush_child();
 
+			fpm_request_shutdown();
+
 			requests++;
 			if (UNEXPECTED(max_requests && (requests == max_requests))) {
 				fcgi_request_set_keep(request, 0);
