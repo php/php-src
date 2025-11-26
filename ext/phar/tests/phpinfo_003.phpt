@@ -31,7 +31,6 @@ bzip2 compression => disabled (install ext/bz2)
 OpenSSL support => disabled (install ext/openssl)
 
 
-Phar based on pear/PHP_Archive, original concept by Davey Shafik.
 Phar fully realized by Gregory Beaver and Marcus Boerger.
 Portions of tar implementation Copyright (c) %d-%d Tim Kientzle.
 Directive => Local Value => Master Value
