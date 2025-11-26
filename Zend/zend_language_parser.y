@@ -240,7 +240,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
-%token T_PIPE         "'|>'"
+%token T_PIPE            "'|>'"
+%token T_RANGE_EXCLUSIVE "'..<'"
+%token T_RANGE_INCLUSIVE "'..='"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -294,6 +296,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> object_pattern object_pattern_element_list non_empty_object_pattern_element_list
 %type <ast> object_pattern_element binding_pattern
 %type <ast> array_pattern array_pattern_element_list array_pattern_element
+%type <ast> range_pattern range_pattern_element
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -1428,6 +1431,7 @@ atomic_pattern:
 compound_pattern:
 		or_pattern { $$ = $1; }
 	|	and_pattern { $$ = $1; }
+	|	range_pattern { $$ = $1; }
 ;
 
 type_pattern:
@@ -1475,6 +1479,17 @@ or_pattern:
 and_pattern:
 		pattern T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG pattern { $$ = zend_ast_merge_lists(ZEND_AST_AND_PATTERN, $1, $3); }
 	|	pattern T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG pattern { $$ = zend_ast_merge_lists(ZEND_AST_AND_PATTERN, $1, $3); }
+;
+
+range_pattern:
+		range_pattern_element T_RANGE_EXCLUSIVE range_pattern_element { $$ = zend_ast_create(ZEND_AST_RANGE_EXCLUSIVE, $1, $3); }
+	|	range_pattern_element T_RANGE_INCLUSIVE range_pattern_element { $$ = zend_ast_create(ZEND_AST_RANGE_INCLUSIVE, $1, $3); }
+;
+
+range_pattern_element:
+		%empty { $$ = NULL; }
+	|	T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
 ;
 
 binding_pattern:

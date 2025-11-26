@@ -6992,6 +6992,48 @@ static void zend_pm_compile_container(
 	}
 }
 
+static void zend_pm_compile_range(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context, bool is_inclusive)
+{
+	zend_ast *lo_ast = ast->child[0];
+	zend_ast *hi_ast = ast->child[1];
+	bool consume_branch = consume_expr && lo_ast && hi_ast;
+	uint32_t false_label = consume_branch ? zend_pm_label_create(context) : false_opnum;
+
+	if (lo_ast) {
+		znode expr_node_copy;
+		zend_pm_copy_tmp(&expr_node_copy, expr_node, consume_expr && !consume_branch);
+
+		znode lo_node;
+		lo_node.op_type = IS_CONST;
+		ZVAL_COPY(&lo_node.u.constant, zend_ast_get_zval(lo_ast));
+
+		zend_op *opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &lo_node, &expr_node_copy);
+		SET_NODE(opline->result, result);
+
+		zend_pm_emit_jmpz_ex(result, false_label);
+	}
+	if (hi_ast) {
+		znode expr_node_copy;
+		zend_pm_copy_tmp(&expr_node_copy, expr_node, consume_expr && !consume_branch);
+
+		znode hi_node;
+		hi_node.op_type = IS_CONST;
+		ZVAL_COPY(&hi_node.u.constant, zend_ast_get_zval(hi_ast));
+
+		zend_op *opline = zend_emit_op_tmp(NULL,
+			is_inclusive ? ZEND_IS_SMALLER_OR_EQUAL : ZEND_IS_SMALLER,
+			&expr_node_copy, &hi_node);
+		SET_NODE(opline->result, result);
+
+		zend_pm_emit_jmpz_ex(result, false_label);
+	}
+	if (consume_branch) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+}
+
 static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
 {
 	bool create_label = false_opnum == (uint32_t)-1;
@@ -7020,6 +7062,12 @@ static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node,
 			break;
 		case ZEND_AST_OBJECT_PATTERN:
 			zend_pm_compile_container(ast, result, expr_node, consume_expr, false_opnum, context, false);
+			break;
+		case ZEND_AST_RANGE_EXCLUSIVE:
+			zend_pm_compile_range(ast, result, expr_node, consume_expr, false_opnum, context, false);
+			break;
+		case ZEND_AST_RANGE_INCLUSIVE:
+			zend_pm_compile_range(ast, result, expr_node, consume_expr, false_opnum, context, true);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
