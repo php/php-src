@@ -2257,6 +2257,8 @@ ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zva
 }
 /* }}} */
 
+/* Note: php_array_compare_long_to_string_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
@@ -2279,6 +2281,8 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
+/* Note: php_array_compare_double_to_string_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
@@ -2303,6 +2307,8 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
+/* Note: php_array_compare_transitive() in ext/standard/array.c mirrors this
+ * function for SORT_REGULAR. Changes here may need to be reflected there. */
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
 	bool converted = false;
@@ -3418,6 +3424,8 @@ string_cmp:
 }
 /* }}} */
 
+/* Note: php_array_smart_strcmp_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
 	uint8_t ret1, ret2;
@@ -3475,6 +3483,8 @@ static int hash_zval_compare_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
+/* Note: php_array_compare_symbol_tables_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2) /* {{{ */
 {
 	if (ht1 == ht2) {
@@ -3493,6 +3503,8 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 }
 /* }}} */
 
+/* Note: php_array_compare_arrays_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2) /* {{{ */
 {
 	return zend_compare_symbol_tables(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
