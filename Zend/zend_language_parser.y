@@ -1412,6 +1412,8 @@ pattern:
 
 atomic_pattern:
 		scalar_pattern { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $1); }
+	|	'^' T_VARIABLE { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, zend_ast_create(ZEND_AST_VAR, $2)); }
+	|	'^' constant { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $2); }
 	|	type_pattern { $$ = $1; }
 	|	object_pattern { $$ = $1; }
 	|	array_pattern { $$ = $1; }
