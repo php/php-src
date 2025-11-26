@@ -258,7 +258,6 @@ struct _phar_archive_data {
 	/* hash of mounted directory paths */
 	HashTable                mounted_dirs;
 	uint32_t                 flags;
-	uint32_t                 min_timestamp;
 	uint32_t                 max_timestamp;
 	int                      refcount;
 	php_stream               *fp;
