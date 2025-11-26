@@ -14,7 +14,13 @@ foreach ($classNames as $className) {
 --EXPECT--
 AssertionError
 Directory
+PollBackend
+PollContext
+PollException
+PollHandle
+PollWatcher
 RoundingMode
 StreamBucket
+StreamPollHandle
 __PHP_Incomplete_Class
 php_user_filter
