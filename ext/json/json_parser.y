@@ -35,6 +35,7 @@ int json_yydebug = 1;
 #define PHP_JSON_DEPTH_INC \
 	if (parser->max_depth && parser->depth >= parser->max_depth) { \
 		parser->scanner.errcode = PHP_JSON_ERROR_DEPTH; \
+		parser->scanner.errpos = (size_t)((parser->scanner.str_start - parser->scanner.input_start) - parser->scanner.str_esc - parser->scanner.utf8_invalid_count); \
 		YYERROR; \
 	} \
 	++parser->depth
@@ -108,6 +109,7 @@ object_end:
 	|	']'
 			{
 				parser->scanner.errcode = PHP_JSON_ERROR_STATE_MISMATCH;
+				parser->scanner.errpos = (size_t)((parser->scanner.str_start - parser->scanner.input_start) - parser->scanner.str_esc - parser->scanner.utf8_invalid_count); \
 				YYERROR;
 			}
 ;
@@ -164,6 +166,7 @@ array_end:
 	|	'}'
 			{
 				parser->scanner.errcode = PHP_JSON_ERROR_STATE_MISMATCH;
+				parser->scanner.errpos = (size_t)((parser->scanner.str_start - parser->scanner.input_start) - parser->scanner.str_esc - parser->scanner.utf8_invalid_count); \
 				YYERROR;
 			}
 ;
@@ -242,6 +245,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	} else {
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
+			parser->scanner.errpos = (size_t)((parser->scanner.str_start - parser->scanner.input_start) - parser->scanner.str_esc - parser->scanner.utf8_invalid_count); \
 			zend_string_release_ex(key, 0);
 			zval_ptr_dtor_nogc(zvalue);
 			zval_ptr_dtor_nogc(object);
@@ -300,12 +304,18 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+		parser->scanner.errpos = (size_t)((parser->scanner.str_start - parser->scanner.input_start) - parser->scanner.str_esc - parser->scanner.utf8_invalid_count);
 	}
 }
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
 {
 	return parser->scanner.errcode;
+}
+
+PHP_JSON_API size_t php_json_parser_error_pos(const php_json_parser *parser)
+{
+	return parser->scanner.errpos;
 }
 
 static const php_json_parser_methods default_parser_methods =

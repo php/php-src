@@ -70,6 +70,7 @@ static PHP_GINIT_FUNCTION(json)
 static PHP_RINIT_FUNCTION(json)
 {
 	JSON_G(error_code) = 0;
+	JSON_G(error_pos) = 0;
 	return SUCCESS;
 }
 
@@ -133,6 +134,7 @@ PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int optio
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
+	JSON_G(error_pos) = encoder.error_pos;
 
 	return return_code;
 }
@@ -177,6 +179,29 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
+
+char *php_json_get_error_msg_wrapper(php_json_error_code error_code) /* {{{ */
+{
+	char *final_message;
+	const char *error_message = php_json_get_error_msg(error_code);
+
+	switch(error_code) {
+		case PHP_JSON_ERROR_SYNTAX:
+		case PHP_JSON_ERROR_UTF8:
+		case PHP_JSON_ERROR_CTRL_CHAR:
+		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
+		case PHP_JSON_ERROR_INVALID_PROPERTY_NAME:
+		case PHP_JSON_ERROR_UTF16:			
+			spprintf(&final_message, 0, "%s near character %zu", error_message, JSON_G(error_pos));
+			break;
+		default:
+			final_message = estrdup(error_message);
+	}
+
+	return final_message;
+}
+/* }}} */
+
 PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
@@ -185,11 +210,15 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		size_t error_pos = php_json_parser_error_pos(&parser);
+
 		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
 			JSON_G(error_code) = error_code;
+			JSON_G(error_pos) = error_pos;
 		} else {
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
 		}
+		
 		RETVAL_NULL();
 		return FAILURE;
 	}
@@ -208,7 +237,9 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		size_t error_pos = php_json_parser_error_pos(&parser);
 		JSON_G(error_code) = error_code;
+		JSON_G(error_pos) = error_pos;
 		return false;
 	}
 
@@ -238,6 +269,7 @@ PHP_FUNCTION(json_encode)
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		JSON_G(error_code) = encoder.error_code;
+		JSON_G(error_pos) = encoder.error_pos;
 		if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 			smart_str_free(&buf);
 			RETURN_FALSE;
@@ -364,6 +396,8 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	char *msg = php_json_get_error_msg_wrapper(JSON_G(error_code));
+	RETVAL_STRING(msg);
+	efree(msg);
 }
 /* }}} */
