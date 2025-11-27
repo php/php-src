@@ -110,13 +110,13 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	zval *retval = NULL;
 
 	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 	if (hnd == NULL) {
-		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 	} else if (cache_slot) {
 		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
@@ -528,7 +528,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-	
+
 #ifdef LIBXML_SCHEMAS_ENABLED
 	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
 	if (intern->ptr) {
@@ -1087,7 +1087,7 @@ PHP_METHOD(XMLReader, setSchema)
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-	
+
 #ifdef LIBXML_SCHEMAS_ENABLED
 	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
 	if (intern && intern->ptr) {
