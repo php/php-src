@@ -35,9 +35,9 @@ New value: aa
 prompt> [Breaking on watchpoint $a]
 Old value inaccessible or destroyed
 New value (reference): aa
->00006: $a[1] = "b";
+>00005: $c = &$a;
+ 00006: $a[1] = "b";
  00007: 
- 00008: exit;
 prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab

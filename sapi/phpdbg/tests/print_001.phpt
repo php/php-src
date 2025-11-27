@@ -44,9 +44,9 @@ prompt> [Context %s (9 ops)]
 $_main:
      ; (lines=9, args=0, vars=0, tmps=%d)
      ; %s:1-21
-L0018 0000 V0 = NEW 0 string("Foo\\Bar")
+L0018 0000 T0 = NEW 0 string("Foo\\Bar")
 L0018 0001 DO_FCALL
-L0018 0002 INIT_METHOD_CALL 1 V0 string("Foo")
+L0018 0002 INIT_METHOD_CALL 1 T0 string("Foo")
 L0018 0003 SEND_VAL_EX string("test \"quotes\"") 1
 L0018 0004 DO_FCALL
 L0019 0005 INIT_FCALL %d %d string("foo")

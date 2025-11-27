@@ -58,15 +58,15 @@ MyClass::new:
      ; (after optimizer)
      ; %s
 0000 CV0($bar) = RECV 1
-0001 V2 = NEW 1 string("Random\\Engine\\Xoshiro256StarStar")
+0001 T2 = NEW 1 string("Random\\Engine\\Xoshiro256StarStar")
 0002 SEND_VAL int(123) 1
 0003 DO_FCALL
-0004 CV1($engine) = QM_ASSIGN V2
-0005 V2 = NEW 2 (self) (exception)
+0004 CV1($engine) = QM_ASSIGN T2
+0005 T2 = NEW 2 (self) (exception)
 0006 SEND_VAR CV1($engine) 1
 0007 SEND_VAR CV0($bar) 2
 0008 DO_FCALL
-0009 RETURN V2
+0009 RETURN T2
 LIVE RANGES:
      2: 0002 - 0004 (new)
      2: 0006 - 0009 (new)

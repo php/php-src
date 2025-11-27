@@ -5947,3 +5947,35 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 	}
 	return ret;
 }
+
+ZEND_API void zend_return_unwrap_ref(zend_execute_data *execute_data, zval *return_value)
+{
+	if (!return_value || !Z_ISREF_P(return_value)) {
+		return;
+	}
+
+	zend_execute_data *prev_ex = EX(prev_execute_data);
+	if (!prev_ex || !prev_ex->func || !ZEND_USER_CODE(prev_ex->func->type)) {
+		return;
+	}
+
+	const zend_op *do_opline = prev_ex->opline;
+	if (do_opline->result_type != IS_TMP_VAR) {
+		return;
+	}
+
+	if (do_opline->opcode != ZEND_DO_FCALL
+	 && do_opline->opcode != ZEND_DO_FCALL_BY_NAME
+	 && do_opline->opcode != ZEND_DO_ICALL
+	 && do_opline->opcode != ZEND_DO_UCALL) {
+		return;
+	}
+
+	zend_reference *ref = Z_REF_P(return_value);
+	ZVAL_COPY_VALUE(return_value, &ref->val);
+	if (GC_DELREF(ref) == 0) {
+		efree_size(ref, sizeof(zend_reference));
+	} else {
+		Z_TRY_ADDREF_P(return_value);
+	}
+}
