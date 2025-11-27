@@ -289,14 +289,19 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 	zval tmp;
 	zval trace;
 	zend_string *filename;
+	int options = 0;
 
 	zend_object *object = zend_objects_new(class_type);
 	object_properties_init(object, class_type);
 
 	if (EG(current_execute_data)) {
-		zend_fetch_debug_backtrace(&trace,
-			0,
-			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
+		if (EG(exception_ignore_args)) {
+			options |= DEBUG_BACKTRACE_IGNORE_ARGS;
+		}
+		if (EG(exception_provide_object)) {
+			options |= DEBUG_BACKTRACE_PROVIDE_OBJECT;
+		}
+		zend_fetch_debug_backtrace(&trace, 0, options, 0);
 	} else {
 		ZVAL_EMPTY_ARRAY(&trace);
 	}
