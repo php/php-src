@@ -632,6 +632,8 @@ static zend_always_inline void *zend_get_bad_ptr(void)
 	return NULL;
 }
 
+ZEND_API void zend_return_unwrap_ref(zend_execute_data *call, zval *return_value);
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
