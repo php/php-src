@@ -240,7 +240,7 @@ PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool per
 	return algo->state_size > 0 ? pecalloc(1, algo->state_size, persistent) : NULL;
 }
 
-PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status)
+PHPAPI void *php_random_status_copy(const php_random_algo *algo, const void *old_status, void *new_status)
 {
 	return memcpy(new_status, old_status, algo->state_size);
 }
@@ -354,12 +354,12 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 
 /* {{{ php_random_hex2bin_le */
 /* stolen from standard/string.c */
-PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
+PHPAPI bool php_random_hex2bin_le(const zend_string *hexstr, void *dest)
 {
 	size_t len = hexstr->len >> 1;
-	unsigned char *str = (unsigned char *) hexstr->val, c, l, d;
+	const unsigned char *str = (unsigned char *) ZSTR_VAL(hexstr);
 	unsigned char *ptr = (unsigned char *) dest;
-	int is_letter, i = 0;
+	uint32_t i = 0;
 
 #ifdef WORDS_BIGENDIAN
 	/* force little endian */
@@ -368,9 +368,10 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 #else
 	for (size_t j = 0; j < len; j++) {
 #endif
-		c = str[i++];
-		l = c & ~0x20;
-		is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
+		unsigned char c = str[i++];
+		unsigned char l = c & ~0x20;
+		uint32_t is_letter = ((uint32_t) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(uint32_t) - 1);
+		unsigned char d;
 
 		/* basically (c >= '0' && c <= '9') || (l >= 'A' && l <= 'F') */
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(uint32_t) - 1)) | is_letter)) {
@@ -461,7 +462,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	php_random_status_state_mt19937 *s = php_random_default_status();
+	const php_random_status_state_mt19937 *s = php_random_default_status();
 
 	if (s->mode == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
@@ -523,9 +524,8 @@ PHP_FUNCTION(mt_srand)
 PHP_FUNCTION(mt_rand)
 {
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
 
-	if (argc == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		/* genrand_int31 in mt19937ar.c performs a right shift */
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
@@ -561,9 +561,8 @@ PHP_FUNCTION(mt_getrandmax)
 PHP_FUNCTION(rand)
 {
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
 
-	if (argc == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		/* genrand_int31 in mt19937ar.c performs a right shift */
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
@@ -632,7 +631,7 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
-static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
+static inline void fallback_seed_add(PHP_SHA1_CTX *c, const void *p, size_t l){
 	/* Wrapper around PHP_SHA1Update allowing to pass
 	 * arbitrary pointers without (unsigned char*) casts
 	 * everywhere.
