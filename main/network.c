@@ -315,16 +315,23 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
 	}
 }
 
-static inline void php_network_set_limit_time(struct timeval *limit_time,
+static inline zend_result php_network_set_limit_time(struct timeval *limit_time,
 		struct timeval *timeout)
 {
 	gettimeofday(limit_time, NULL);
+	const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
+
+	if (limit_time->tv_sec > (timeoutmax - timeout->tv_sec)) {
+		return FAILURE;
+	}
+
 	limit_time->tv_sec += timeout->tv_sec;
 	limit_time->tv_usec += timeout->tv_usec;
 	if (limit_time->tv_usec >= 1000000) {
 		limit_time->tv_usec -= 1000000;
 		limit_time->tv_sec++;
 	}
+	return SUCCESS;
 }
 #endif
 
@@ -391,7 +398,11 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
 #if HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
+		if (UNEXPECTED(php_network_set_limit_time(&limit_time, &working_timeout) == FAILURE)) {
+			error = ERANGE;
+			ret = -1;
+			goto ok;
+		}
 #endif
 	}
 
@@ -849,7 +860,11 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
 #if HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
+		if (UNEXPECTED(php_network_set_limit_time(&limit_time, &working_timeout) == FAILURE)) {
+			php_network_freeaddresses(psal);
+			zend_value_error("timeout value overflow");
+			return -1;
+		}
 #endif
 	}
 
