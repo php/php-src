@@ -1350,8 +1350,6 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 	/* Expects an instance of SplFileInfo if it is an object, which is verified in phar_build(). */
 	if (Z_TYPE_P(file_info) == IS_OBJECT && Z_OBJCE_P(file_info)->type == ZEND_USER_CLASS) {
 		zval rv;
-		/* Phars only have a single timestamp.
-		 * Use modification time to be consistent with the zip and tar file format. */
 		zend_call_method_with_0_params(Z_OBJ_P(file_info), Z_OBJCE_P(file_info), NULL, "getMTime", &rv);
 
 		if (UNEXPECTED(Z_TYPE(rv) != IS_LONG)) {

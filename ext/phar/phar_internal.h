@@ -196,6 +196,7 @@ typedef struct _phar_metadata_tracker {
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
 	uint32_t                 uncompressed_filesize;
+	/* modification time */
 	uint32_t                 timestamp;
 	uint32_t                 compressed_filesize;
 	uint32_t                 crc32;
