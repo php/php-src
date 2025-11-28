@@ -2141,12 +2141,6 @@ ZEND_METHOD(ReflectionFunction, invoke)
 
 	zend_call_known_fcc(&fcc, &retval, num_args, params, named_params);
 
-	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
-		RETURN_THROWS();
-	}
-
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
 	}
@@ -2179,12 +2173,6 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	}
 
 	zend_call_known_fcc(&fcc, &retval, /* num_params */ 0, /* params */ NULL, params);
-
-	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
-		RETURN_THROWS();
-	}
 
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
@@ -3495,12 +3483,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
 	callback = _copy_function(mptr);
 	zend_call_known_function(callback, (object ? Z_OBJ_P(object) : NULL), intern->ce, &retval, argc, params, named_params);
-
-	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Invocation of method %s::%s() failed", ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		RETURN_THROWS();
-	}
 
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
