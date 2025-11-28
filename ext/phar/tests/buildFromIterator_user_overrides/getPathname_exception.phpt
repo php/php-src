@@ -6,8 +6,8 @@ phar
 phar.readonly=0
 phar.require_hash=0
 --CREDITS--
-Arne Blankerts 
-Niels Dossche
+Arne Blankerts
+N. Dossche
 --FILE--
 <?php
 

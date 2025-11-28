@@ -10,8 +10,8 @@ if (PHP_INT_SIZE != 8) die("skip: 64-bit only");
 phar.readonly=0
 phar.require_hash=0
 --CREDITS--
-Arne Blankerts 
-Niels Dossche
+Arne Blankerts
+N. Dossche
 --FILE--
 <?php
 
