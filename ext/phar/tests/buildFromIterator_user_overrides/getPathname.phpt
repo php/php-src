@@ -1,5 +1,5 @@
 --TEST--
-buildFromIterator with user overrides 004 - getPathname()
+buildFromIterator with user overrides - getPathname()
 --EXTENSIONS--
 phar
 --INI--

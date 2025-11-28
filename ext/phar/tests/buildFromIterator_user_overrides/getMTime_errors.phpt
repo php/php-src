@@ -1,5 +1,5 @@
 --TEST--
-buildFromIterator with user overrides 002 - errors in getMTime()
+buildFromIterator with user overrides - errors in getMTime()
 --EXTENSIONS--
 phar
 --SKIPIF--
@@ -77,6 +77,9 @@ for ($i = 0; $i < 3; $i++) {
 <?php
 $workdir = __DIR__.'/002';
 @unlink($workdir . '/content/hello.txt');
+@unlink($workdir . '/test2.phar');
+@unlink($workdir . '/test1.phar');
+@unlink($workdir . '/test0.phar');
 @rmdir($workdir . '/content');
 @rmdir($workdir);
 ?>

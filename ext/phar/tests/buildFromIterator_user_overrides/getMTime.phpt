@@ -1,5 +1,5 @@
 --TEST--
-buildFromIterator with user overrides 001 - getMTime()
+buildFromIterator with user overrides - getMTime()
 --EXTENSIONS--
 phar
 --INI--
