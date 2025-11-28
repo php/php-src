@@ -2144,7 +2144,7 @@ ZEND_METHOD(ReflectionFunction, invoke)
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
 	}
-	ZVAL_COPY_VALUE(return_value, &retval);
+	RETURN_COPY_VALUE(&retval);
 }
 /* }}} */
 
@@ -2177,7 +2177,7 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
 	}
-	ZVAL_COPY_VALUE(return_value, &retval);
+	RETURN_COPY_VALUE(&retval);
 }
 /* }}} */
 
@@ -3487,7 +3487,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	if (Z_ISREF(retval)) {
 		zend_unwrap_reference(&retval);
 	}
-	ZVAL_COPY_VALUE(return_value, &retval);
+	RETURN_COPY_VALUE(&retval);
 }
 /* }}} */
 
