@@ -1465,10 +1465,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 					phar_call_method_with_unwrap(Z_OBJ_P(value), "getPathname", &rv);
 
 					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
-						if (!EG(exception)) {
-							/* TODO: get rid of this once the return type is no longer tentative */
-							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "getPathname() must return a string");
-						}
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "getPathname() must return a string");
 						return ZEND_HASH_APPLY_STOP;
 					}
 					tmp_dir_str = Z_STR(rv);

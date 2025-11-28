@@ -41,6 +41,9 @@ try {
     );
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
+    if ($previous = $e->getPrevious()) {
+        echo "Previous: ", $previous->getMessage(), "\n";
+    }
 }
 $phar->stopBuffering();
 
@@ -56,4 +59,5 @@ $workdir = __DIR__.'/003';
 [ Found: %shello.txt ]
 [getPathname]
 string(%d) "%shello.txt"
-exception in getPathname()
+getPathname() must return a string
+Previous: exception in getPathname()
