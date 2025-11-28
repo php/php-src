@@ -1344,7 +1344,6 @@ struct _phar_t {
 /* This is the same as phar_get_or_create_entry_data(), but allows overriding metadata via SplFileInfo. */
 static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, char **error, zval *file_info)
 {
-	bool override_timestamp = false;
 	uint32_t timestamp;
 
 	/* Expects an instance of SplFileInfo if it is an object, which is verified in phar_build(). */
@@ -1365,16 +1364,12 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 			return NULL;
 		}
 
-		override_timestamp = true;
 		timestamp = Z_LVAL(rv);
+	} else {
+		timestamp = time(NULL);
 	}
 
-	phar_entry_data *data = phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, 1);
-	if (data && override_timestamp) {
-		data->internal_file->timestamp = timestamp;
-	}
-
-	return data;
+	return phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, 1, timestamp);
 }
 
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3602,7 +3597,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true, time(NULL)))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
 			efree(error);
@@ -3674,7 +3669,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true, time(NULL)))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", ZSTR_VAL(dir_name), error);
 			efree(error);

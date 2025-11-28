@@ -191,7 +191,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	/* strip leading "/" */
 	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true, time(NULL)))) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options, "%s", error);
 				efree(error);
