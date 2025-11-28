@@ -14,12 +14,14 @@ N. Dossche
 class MyGlobIterator extends GlobIterator {
     #[\ReturnTypeWillChange]
     public function getPathname(): int {
+        echo "[getPathname]\n";
         return 1;
     }
 }
 
 class MyIterator extends RecursiveDirectoryIterator {
     public function current(): SplFileInfo {
+        echo "[ Found: " . parent::current()->getPathname() . " ]\n";
         return new MyGlobIterator(parent::current()->getPath() . '/*');
     }
 }
@@ -50,5 +52,7 @@ $workdir = __DIR__.'/006';
 @rmdir($workdir . '/content');
 @rmdir($workdir);
 ?>
---EXPECT--
+--EXPECTF--
+[ Found: %scontent/hello.txt ]
+[getPathname]
 getPathname() must return a string

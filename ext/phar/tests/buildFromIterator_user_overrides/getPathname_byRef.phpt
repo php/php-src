@@ -13,6 +13,7 @@ N. Dossche
 
 class MyGlobIterator extends GlobIterator {
     public function &getPathname(): string {
+        echo "[getPathname]\n";
         static $data = parent::getPathname();
         return $data;
     }
@@ -20,6 +21,7 @@ class MyGlobIterator extends GlobIterator {
 
 class MyIterator extends RecursiveDirectoryIterator {
     public function current(): SplFileInfo {
+        echo "[ Found: " . parent::current()->getPathname() . " ]\n";
         return new MyGlobIterator(parent::current()->getPath() . '/*');
     }
 }
@@ -51,4 +53,6 @@ $workdir = __DIR__.'/005';
 @rmdir($workdir);
 ?>
 --EXPECTF--
+[ Found: %scontent/hello.txt ]
+[getPathname]
 bool(true)

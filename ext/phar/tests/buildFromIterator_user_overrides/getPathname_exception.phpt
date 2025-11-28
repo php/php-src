@@ -13,6 +13,7 @@ N. Dossche
 
 class MyGlobIterator extends GlobIterator {
     public function getPathname(): string {
+        echo "[getPathname]\n";
         var_dump(parent::getPathname());
         throw new Error('exception in getPathname()');
     }
@@ -53,5 +54,6 @@ $workdir = __DIR__.'/003';
 ?>
 --EXPECTF--
 [ Found: %shello.txt ]
+[getPathname]
 string(%d) "%shello.txt"
 exception in getPathname()

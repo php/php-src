@@ -13,6 +13,7 @@ N. Dossche
 
 class MyGlobIterator extends GlobIterator {
     public function getPathname(): string {
+        echo "[getPathname]\n";
         var_dump(parent::getPathname());
         // For testing: always return hello2 such that it will be the only file
         return str_replace("hello1.txt", "hello2.txt", parent::getPathname());
@@ -57,8 +58,10 @@ $workdir = __DIR__.'/004';
 ?>
 --EXPECTF--
 [ Found: %shello%d.txt ]
+[getPathname]
 string(%d) "%shello1.txt"
 [ Found: %shello%d.txt ]
+[getPathname]
 string(%d) "%shello1.txt"
 bool(false)
 bool(true)

@@ -112,6 +112,6 @@ Entry content/hello.txt cannot be created: getMTime() must return an int
 Entry content/hello.txt cannot be created: getMTime() must return an int
 Previous: Throwing an exception inside getMTime()
 --- Iteration 3 ---
-[ Found: /run/media/niels/MoreData/php-src-multitasking/ext/phar/tests/buildFromIterator_user_overrides/002/content/hello.txt ]
+[ Found: %scontent/hello.txt ]
 [MTime]
 Entry content/hello.txt cannot be created: getMTime() must return an int
