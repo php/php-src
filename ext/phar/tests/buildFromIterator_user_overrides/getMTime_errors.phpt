@@ -36,6 +36,14 @@ class MySplFileInfo3 extends SplFileInfo {
     }
 }
 
+class MySplFileInfo4 extends SplFileInfo {
+    #[\ReturnTypeWillChange]
+    public function getMTime(): string {
+        echo "[MTime]\n";
+        return "wrong type";
+    }
+}
+
 class MyIterator extends RecursiveDirectoryIterator {
     public function current(): SplFileInfo {
         static $counter = 0;
@@ -47,6 +55,8 @@ class MyIterator extends RecursiveDirectoryIterator {
             return new MySplFileInfo2(parent::current()->getPathname());
         } else if ($counter === 3) {
             return new MySplFileInfo3(parent::current()->getPathname());
+        } else if ($counter === 4) {
+            return new MySplFileInfo4(parent::current()->getPathname());
         }
     }
 }
@@ -55,7 +65,7 @@ $workdir = __DIR__.'/002';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
-for ($i = 0; $i < 3; $i++) {
+for ($i = 0; $i < 4; $i++) {
     echo "--- Iteration $i ---\n";
     try {
         $phar = new \Phar($workdir . "/test$i.phar");
@@ -80,6 +90,7 @@ for ($i = 0; $i < 3; $i++) {
 <?php
 $workdir = __DIR__.'/002';
 @unlink($workdir . '/content/hello.txt');
+@unlink($workdir . '/test3.phar');
 @unlink($workdir . '/test2.phar');
 @unlink($workdir . '/test1.phar');
 @unlink($workdir . '/test0.phar');
@@ -94,9 +105,13 @@ Entry content%chello.txt cannot be created: timestamp is limited to 32-bit
 --- Iteration 1 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content%chello.txt cannot be created: getMTime() failed
+Entry content/hello.txt cannot be created: getMTime() must return an int
 --- Iteration 2 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: getMTime() failed
+Entry content/hello.txt cannot be created: getMTime() must return an int
 Previous: Throwing an exception inside getMTime()
+--- Iteration 3 ---
+[ Found: /run/media/niels/MoreData/php-src-multitasking/ext/phar/tests/buildFromIterator_user_overrides/002/content/hello.txt ]
+[MTime]
+Entry content/hello.txt cannot be created: getMTime() must return an int

@@ -1351,10 +1351,13 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 		zval rv;
 		zend_call_method_with_0_params(Z_OBJ_P(file_info), Z_OBJCE_P(file_info), NULL, "getMTime", &rv);
 
+		if (Z_ISREF(rv)) {
+			zend_unwrap_reference(&rv);
+		}
+
 		if (UNEXPECTED(Z_TYPE(rv) != IS_LONG)) {
-			/* Either an exception happened, or the function returned false to indicate failure. */
-			ZEND_ASSERT(Z_TYPE(rv) == IS_UNDEF || Z_TYPE(rv) == IS_FALSE);
-			*error = estrdup("getMTime() failed");
+			/* Either it's a tentative type failure, an exception happened, or the function returned false to indicate failure. */
+			*error = estrdup("getMTime() must return an int");
 			return NULL;
 		}
 

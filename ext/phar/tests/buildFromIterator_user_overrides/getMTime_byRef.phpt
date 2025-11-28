@@ -1,5 +1,5 @@
 --TEST--
-buildFromIterator with user overrides - getMTime()
+buildFromIterator with user overrides - getMTime() by ref
 --EXTENSIONS--
 phar
 --INI--
@@ -12,21 +12,10 @@ N. Dossche
 <?php
 
 class MySplFileInfo extends SplFileInfo {
-    public function getMTime(): int|false {
+    public function &getMTime(): int|false {
+        static $data = 123;
         echo "[MTime]\n";
-        return 123;
-    }
-
-    public function getCTime(): int {
-        // This should not get called
-        echo "[CTime]\n";
-        return 0;
-    }
-
-    public function getATime(): int {
-        // This should not get called
-        echo "[ATime]\n";
-        return 0;
+        return $data;
     }
 }
 
@@ -37,7 +26,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/001';
+$workdir = __DIR__.'/007';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
@@ -61,7 +50,7 @@ var_dump($result['content/hello.txt']->getCTime());
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/001';
+$workdir = __DIR__.'/007';
 @unlink($workdir . '/test.phar');
 @unlink($workdir . '/content/hello.txt');
 @rmdir($workdir . '/content');
