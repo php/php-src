@@ -69,6 +69,9 @@ for ($i = 0; $i < 3; $i++) {
         $phar->stopBuffering();
     } catch (Throwable $e) {
         echo $e->getMessage(), "\n";
+        if ($previous = $e->getPrevious()) {
+            echo "Previous: ", $previous->getMessage(), "\n";
+        }
     }
 }
 
@@ -95,4 +98,5 @@ Entry content%chello.txt cannot be created: getMTime() failed
 --- Iteration 2 ---
 [ Found: %shello.txt ]
 [MTime]
-Throwing an exception inside getMTime()
+Entry content/hello.txt cannot be created: getMTime() failed
+Previous: Throwing an exception inside getMTime()
