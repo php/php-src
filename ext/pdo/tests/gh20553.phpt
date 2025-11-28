@@ -6,6 +6,9 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
+if (str_starts_with(getenv('PDOTEST_DSN'), "firebird")) {
+	die("skip firebird doesn't support non-standard SQL without FROM syntax");
+}
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
@@ -31,15 +34,7 @@ class dumpy {
 class dummy extends dumpy {
 }
 
-$sql = "SELECT 'dummy' pdo_fetch_class_type_class, 'bar' foo, 'dfg' abc;";
-$sql = "SELECT pdo_fetch_class_type_class, foo, abc FROM (VALUES ('dummy', 'bar' , 'dfg'))";
-$sql = "VALUES ('dummy', 'bar' , 'dfg') t(pdo_fetch_class_type_class, foo, abc)";
-/* SQL Compliant SELECT without FROM:
- * - https://modern-sql.com/use-case/select-without-from
- * - https://modern-sql.com/feature/values
- * - https://modern-sql.com/feature/table-column-aliases
- */
-$sql = "WITH dummy_table (pdo_fetch_class_type_class, foo, abc) AS (VALUES ('dummy', 'bar' , 'dfg')) SELECT * FROM dummy_table";
+$sql = "SELECT 'dummy' pdo_fetch_class_type_class, 'bar' foo, 'dfg' abc";
 
 $fetchModes = [
 	'PDO::FETCH_CLASS'
