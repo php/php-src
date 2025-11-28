@@ -1622,8 +1622,6 @@ after_open_fp:
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
-		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
-			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 		if (php_stream_stat(fp, &ssb) != -1) {
 			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;
 		} else {
