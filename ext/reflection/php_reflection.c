@@ -6657,18 +6657,17 @@ ZEND_METHOD(ReflectionExtension, __construct)
 	zval *object;
 	reflection_object *intern;
 	zend_module_entry *module;
-	char *name_str;
-	size_t name_len;
+	zend_string *name_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
-	if ((module = zend_hash_str_find_ptr_lc(&module_registry, name_str, name_len)) == NULL) {
+	if ((module = zend_hash_find_ptr_lc(&module_registry, name_str)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Extension \"%s\" does not exist", name_str);
+			"Extension \"%s\" does not exist", ZSTR_VAL(name_str));
 		RETURN_THROWS();
 	}
 	zval *prop_name = reflection_prop_name(object);
