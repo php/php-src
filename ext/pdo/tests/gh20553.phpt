@@ -32,6 +32,14 @@ class dummy extends dumpy {
 }
 
 $sql = "SELECT 'dummy' pdo_fetch_class_type_class, 'bar' foo, 'dfg' abc;";
+$sql = "SELECT pdo_fetch_class_type_class, foo, abc FROM (VALUES ('dummy', 'bar' , 'dfg'))";
+$sql = "VALUES ('dummy', 'bar' , 'dfg') t(pdo_fetch_class_type_class, foo, abc)";
+/* SQL Compliant SELECT without FROM:
+ * - https://modern-sql.com/use-case/select-without-from
+ * - https://modern-sql.com/feature/values
+ * - https://modern-sql.com/feature/table-column-aliases
+ */
+$sql = "WITH dummy_table (pdo_fetch_class_type_class, foo, abc) AS (VALUES ('dummy', 'bar' , 'dfg')) SELECT * FROM dummy_table";
 
 $fetchModes = [
 	'PDO::FETCH_CLASS'
