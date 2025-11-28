@@ -20,12 +20,10 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
-extern "C" {
 #include "converter.h"
 #include "php_intl.h"
 #include "../intl_error.h"
 #include "../intl_common.h"
-}
 #include "converter_arginfo.h"
 
 typedef struct _php_converter_object {

@@ -98,7 +98,7 @@ static void register_fileinfo_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FILEINFO_EXTENSION", MAGIC_EXTENSION, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_finfo_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "finfo_close", sizeof("finfo_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_finfo_close_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "finfo_close", sizeof("finfo_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_finfo_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_finfo_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_finfo_close_0_arg1_str = zend_string_init("as finfo objects are freed automatically", strlen("as finfo objects are freed automatically"), 1);

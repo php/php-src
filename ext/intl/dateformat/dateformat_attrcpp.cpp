@@ -18,16 +18,14 @@
 #include <unicode/calendar.h>
 #include <unicode/datefmt.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "dateformat_class.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
-}
 
-#include "../intl_convertcpp.h"
+#include "../intl_convert.h"
 #include "dateformat_helpers.h"
 
 static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
@@ -35,7 +33,7 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
 }
 
 /* {{{ Get formatter timezone_id. */
-U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
+PHP_FUNCTION(datefmt_get_timezone_id)
 {
 	zend_string *u8str;
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -56,7 +54,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 }
 
 /* {{{ Get formatter timezone. */
-U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
+PHP_FUNCTION(datefmt_get_timezone)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -79,7 +77,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 }
 
 /* {{{ Set formatter's timezone. */
-U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
+PHP_FUNCTION(datefmt_set_timezone)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
@@ -104,7 +102,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_METHOD(IntlDateFormatter, setTimeZone)
+PHP_METHOD(IntlDateFormatter, setTimeZone)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
@@ -130,7 +128,7 @@ U_CFUNC PHP_METHOD(IntlDateFormatter, setTimeZone)
 }
 
 /* {{{ Get formatter calendar type. */
-U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
+PHP_FUNCTION(datefmt_get_calendar)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -151,7 +149,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 /* }}} */
 
 /* {{{ Get formatter calendar. */
-U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
+PHP_FUNCTION(datefmt_get_calendar_object)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -179,7 +177,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 /* }}} */
 
 /* {{{ Set formatter's calendar. */
-U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
+PHP_FUNCTION(datefmt_set_calendar)
 {
 	zend_object *calendar_obj = NULL;
 	zend_long calendar_long = 0;
