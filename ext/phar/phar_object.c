@@ -1341,6 +1341,14 @@ struct _phar_t {
 	int count;
 };
 
+static zend_always_inline void phar_call_method_with_unwrap(zend_object *obj, const char *name, zval *rv)
+{
+	zend_call_method_with_0_params(obj, obj->ce, NULL, name, rv);
+	if (Z_ISREF_P(rv)) {
+		zend_unwrap_reference(rv);
+	}
+}
+
 /* This is the same as phar_get_or_create_entry_data(), but allows overriding metadata via SplFileInfo. */
 static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, char **error, zval *file_info)
 {
@@ -1349,11 +1357,7 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 	/* Expects an instance of SplFileInfo if it is an object, which is verified in phar_build(). */
 	if (Z_TYPE_P(file_info) == IS_OBJECT && Z_OBJCE_P(file_info)->type == ZEND_USER_CLASS) {
 		zval rv;
-		zend_call_method_with_0_params(Z_OBJ_P(file_info), Z_OBJCE_P(file_info), NULL, "getMTime", &rv);
-
-		if (Z_ISREF(rv)) {
-			zend_unwrap_reference(&rv);
-		}
+		phar_call_method_with_unwrap(Z_OBJ_P(file_info), "getMTime", &rv);
 
 		if (UNEXPECTED(Z_TYPE(rv) != IS_LONG)) {
 			/* Either it's a tentative type failure, an exception happened, or the function returned false to indicate failure. */
@@ -1458,10 +1462,8 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				 * The purpose here is to grab the path name of the file to add. */
 				if (Z_OBJCE_P(value)->type == ZEND_USER_CLASS) {
 					zval rv;
-					zend_call_method_with_0_params(Z_OBJ_P(value), Z_OBJCE_P(value), NULL, "getPathname", &rv);
-					if (Z_ISREF(rv)) {
-						zend_unwrap_reference(&rv);
-					}
+					phar_call_method_with_unwrap(Z_OBJ_P(value), "getPathname", &rv);
+
 					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
 						if (!EG(exception)) {
 							/* TODO: get rid of this once the return type is no longer tentative */
