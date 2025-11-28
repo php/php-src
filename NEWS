@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-20511 (imagegammacorrect out of range input/output values).
     (David Carlier)
+  . Fixed bug GH-20602 (imagescale overflow with large height values).
+    (David Carlier)
 
 - LibXML:
   . Fix some deprecations on newer libxml versions regarding input
