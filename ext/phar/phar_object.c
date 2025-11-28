@@ -1376,7 +1376,7 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 		timestamp = time(NULL);
 	}
 
-	return phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, 1, timestamp);
+	return phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, true, timestamp);
 }
 
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
