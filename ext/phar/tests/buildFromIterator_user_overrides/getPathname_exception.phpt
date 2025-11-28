@@ -1,5 +1,5 @@
 --TEST--
-buildFromIterator with user overrides - errors in getPathname()
+buildFromIterator with user overrides - exception in getPathname()
 --EXTENSIONS--
 phar
 --INI--

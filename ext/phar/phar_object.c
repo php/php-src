@@ -1461,8 +1461,14 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				if (Z_OBJCE_P(value)->type == ZEND_USER_CLASS) {
 					zval rv;
 					zend_call_method_with_0_params(Z_OBJ_P(value), Z_OBJCE_P(value), NULL, "getPathname", &rv);
+					if (Z_ISREF(rv)) {
+						zend_unwrap_reference(&rv);
+					}
 					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
-						ZEND_ASSERT(EG(exception));
+						if (!EG(exception)) {
+							/* TODO: get rid of this once the return type is no longer tentative */
+							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "getPathname() must return a string");
+						}
 						return ZEND_HASH_APPLY_STOP;
 					}
 					tmp_dir_str = Z_STR(rv);
@@ -1490,7 +1496,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				if (tmp_dir_str) {
 					if (php_stream_stat_path(ZSTR_VAL(tmp_dir_str), &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
 						/* ignore directories */
-						zend_string_release(tmp_dir_str);
+						zend_string_release_ex(tmp_dir_str, /* persistent */ false);
 						return ZEND_HASH_APPLY_KEEP;
 					}
 
