@@ -1360,7 +1360,7 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 		}
 
 		/* Sanity check bounds. See GH-14141. */
-		if (Z_LVAL(rv) > UINT32_MAX) {
+		if (ZEND_LONG_UINT_OVFL(Z_LVAL(rv))) {
 			*error = estrdup("timestamp is limited to 32-bit");
 			return NULL;
 		}
@@ -1636,7 +1636,7 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, true))) {
+	if (!(data = phar_build_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, &error, value))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 
