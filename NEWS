@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.30
 
+- GD:
+  . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
+
 
 18 Dec 2025, PHP 8.3.29
 
