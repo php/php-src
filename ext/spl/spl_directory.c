@@ -480,9 +480,8 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 	RETVAL_OBJ(&intern->std);
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
-		ZVAL_STR_COPY(&arg1, file_path);
+		ZVAL_STR(&arg1, file_path);
 		zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
-		zval_ptr_dtor(&arg1);
 	} else {
 		spl_filesystem_info_set_filename(intern, file_path);
 	}
@@ -520,9 +519,8 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			}
 
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
-				ZVAL_STR_COPY(&arg1, source->file_name);
+				ZVAL_STR(&arg1, source->file_name);
 				zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
-				zval_ptr_dtor(&arg1);
 			} else {
 				intern->file_name = zend_string_copy(source->file_name);
 				intern->path = spl_filesystem_object_get_path(source);
@@ -549,11 +547,9 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			}
 
 			if (ce->constructor->common.scope != spl_ce_SplFileObject) {
-				ZVAL_STR_COPY(&arg1, source->file_name);
-				ZVAL_STR_COPY(&arg2, open_mode);
+				ZVAL_STR(&arg1, source->file_name);
+				ZVAL_STR(&arg2, open_mode);
 				zend_call_method_with_2_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1, &arg2);
-				zval_ptr_dtor(&arg1);
-				zval_ptr_dtor(&arg2);
 			} else {
 				intern->file_name = source->file_name;
 				intern->path = spl_filesystem_object_get_path(source);
