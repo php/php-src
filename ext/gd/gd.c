@@ -2803,6 +2803,11 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		case 2:
 			for (i = 0; (i < l); i++) {
 				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				if (x > (INT_MAX - font->w)) {
+					efree(str);
+					zend_argument_value_error(3, "is too large");
+					RETURN_THROWS();
+				}
 				x += font->w;
 			}
 			break;
@@ -2810,6 +2815,11 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
 				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				if (y < (INT_MIN + font->w)) {
+					efree(str);
+					zend_argument_value_error(4, "is too large");
+					RETURN_THROWS();
+				}
 				y -= font->w;
 			}
 			break;
