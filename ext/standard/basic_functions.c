@@ -2106,14 +2106,14 @@ PHP_FUNCTION(ignore_user_abort)
 {
 	bool arg = 0;
 	bool arg_is_null = 1;
-	int old_setting;
+	bool old_setting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL_OR_NULL(arg, arg_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_setting = (unsigned short)PG(ignore_user_abort);
+	old_setting = PG(ignore_user_abort);
 
 	if (!arg_is_null) {
 		zend_string *key = ZSTR_INIT_LITERAL("ignore_user_abort", 0);
@@ -2121,7 +2121,7 @@ PHP_FUNCTION(ignore_user_abort)
 		zend_string_release_ex(key, 0);
 	}
 
-	RETURN_LONG(old_setting);
+	RETURN_BOOL(old_setting);
 }
 /* }}} */
 
