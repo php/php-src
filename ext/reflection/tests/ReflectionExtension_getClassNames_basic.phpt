@@ -16,5 +16,6 @@ AssertionError
 Directory
 RoundingMode
 StreamBucket
+StreamException
 __PHP_Incomplete_Class
 php_user_filter
