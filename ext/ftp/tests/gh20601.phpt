@@ -15,5 +15,5 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECT--
-timeout value overflow
+--EXPECTF--
+ftp_connect(): Argument #3 ($timeout) must be less than %d
