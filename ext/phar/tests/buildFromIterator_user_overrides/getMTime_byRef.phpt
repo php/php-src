@@ -26,7 +26,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/007';
+$workdir = __DIR__.'/getMTime_byRef';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
@@ -50,7 +50,7 @@ var_dump($result['content/hello.txt']->getCTime());
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/007';
+$workdir = __DIR__.'/getMTime_byRef';
 @unlink($workdir . '/test.phar');
 @unlink($workdir . '/content/hello.txt');
 @rmdir($workdir . '/content');

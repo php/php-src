@@ -61,7 +61,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/002';
+$workdir = __DIR__.'/getMTime_errors';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
@@ -88,7 +88,7 @@ for ($i = 0; $i < 4; $i++) {
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/002';
+$workdir = __DIR__.'/getMTime_errors';
 @unlink($workdir . '/content/hello.txt');
 @unlink($workdir . '/test3.phar');
 @unlink($workdir . '/test2.phar');
@@ -105,13 +105,13 @@ Entry content%chello.txt cannot be created: timestamp is limited to 32-bit
 --- Iteration 1 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: getMTime() must return an int
+Entry content%chello.txt cannot be created: getMTime() must return an int
 --- Iteration 2 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: getMTime() must return an int
+Entry content%chello.txt cannot be created: getMTime() must return an int
 Previous: Throwing an exception inside getMTime()
 --- Iteration 3 ---
-[ Found: %scontent/hello.txt ]
+[ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: getMTime() must return an int
+Entry content%chello.txt cannot be created: getMTime() must return an int

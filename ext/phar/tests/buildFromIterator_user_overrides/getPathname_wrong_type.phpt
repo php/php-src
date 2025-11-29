@@ -26,7 +26,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/006';
+$workdir = __DIR__.'/getPathname_wrong_type';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
@@ -47,12 +47,12 @@ $phar->stopBuffering();
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/006';
+$workdir = __DIR__.'/getPathname_wrong_type';
 @unlink($workdir . '/content/hello.txt');
 @rmdir($workdir . '/content');
 @rmdir($workdir);
 ?>
 --EXPECTF--
-[ Found: %scontent/hello.txt ]
+[ Found: %scontent%chello.txt ]
 [getPathname]
 getPathname() must return a string

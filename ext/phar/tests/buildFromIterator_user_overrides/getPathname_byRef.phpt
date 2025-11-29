@@ -26,7 +26,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/005';
+$workdir = __DIR__.'/getPathname_byRef';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world 1.");
 
@@ -46,13 +46,13 @@ var_dump(isset($result['content/hello.txt']));
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/005';
+$workdir = __DIR__.'/getPathname_byRef';
 @unlink($workdir . '/test.phar');
 @unlink($workdir . '/content/hello.txt');
 @rmdir($workdir . '/content');
 @rmdir($workdir);
 ?>
 --EXPECTF--
-[ Found: %scontent/hello.txt ]
+[ Found: %scontent%chello.txt ]
 [getPathname]
 bool(true)

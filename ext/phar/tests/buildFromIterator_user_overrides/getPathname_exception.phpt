@@ -26,7 +26,7 @@ class MyIterator extends RecursiveDirectoryIterator {
     }
 }
 
-$workdir = __DIR__.'/003';
+$workdir = __DIR__.'/getPathname_exception';
 mkdir($workdir . '/content', recursive: true);
 file_put_contents($workdir . '/content/hello.txt', "Hello world.");
 
@@ -50,7 +50,7 @@ $phar->stopBuffering();
 ?>
 --CLEAN--
 <?php
-$workdir = __DIR__.'/003';
+$workdir = __DIR__.'/getPathname_exception';
 @unlink($workdir . '/content/hello.txt');
 @rmdir($workdir . '/content');
 @rmdir($workdir);
