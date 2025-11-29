@@ -2088,7 +2088,7 @@ PHP_FUNCTION(connection_aborted)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG(PG(connection_status) & PHP_CONNECTION_ABORTED);
+	RETURN_BOOL(PG(connection_status) & PHP_CONNECTION_ABORTED);
 }
 /* }}} */
 

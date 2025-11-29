@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8161b33b701550d81c763d86f1500267bec60c5b */
+ * Stub hash: 14871e360fae7faeac48129f049cbf2d3ef34ca5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -533,7 +533,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_connection_aborted arginfo_ob_get_level
+#define arginfo_connection_aborted arginfo_ob_flush
 
 #define arginfo_connection_status arginfo_ob_get_level
 
