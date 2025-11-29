@@ -1149,15 +1149,9 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
 
-		if (offset == halt_offset + manifest_len + 4) {
-			mydata->min_timestamp = entry.timestamp;
+		if (offset == halt_offset + manifest_len + 4
+		 || mydata->max_timestamp < entry.timestamp) {
 			mydata->max_timestamp = entry.timestamp;
-		} else {
-			if (mydata->min_timestamp > entry.timestamp) {
-				mydata->min_timestamp = entry.timestamp;
-			} else if (mydata->max_timestamp < entry.timestamp) {
-				mydata->max_timestamp = entry.timestamp;
-			}
 		}
 
 		PHAR_GET_32(buffer, entry.compressed_filesize);
