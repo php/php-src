@@ -1158,8 +1158,8 @@ PHP_FUNCTION(time_nanosleep)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-	if (tv_nsec < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (tv_nsec < 0 || tv_nsec > 999999999) {
+		zend_argument_value_error(2, "must be between 0 and 999999999");
 		RETURN_THROWS();
 	}
 
@@ -1173,10 +1173,8 @@ PHP_FUNCTION(time_nanosleep)
 		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
-	} else if (errno == EINVAL) {
-		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
-		RETURN_THROWS();
 	}
+	ZEND_ASSERT(errno != EINVAL);
 
 	RETURN_FALSE;
 }
