@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
+- FTP:
+  . Fixed bug GH-20601 (ftp_connect overflow on timeout). (David Carlier)
+
 - GD:
   . Fixed bug GH-20511 (imagegammacorrect out of range input/output values).
     (David Carlier)
