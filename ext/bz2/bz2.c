@@ -455,11 +455,18 @@ PHP_FUNCTION(bzcompress)
 		RETURN_THROWS();
 	}
 
+	size_t chunk_len = source_len + (0.01 * source_len) + 600;
+
+	if (chunk_len < source_len || chunk_len > UINT_MAX) {
+		zend_argument_value_error(1, "must be less than or equal to %lu", UINT_MAX);
+		RETURN_THROWS();
+	}
+
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
 	   + .01 x length of data + 600 which is the largest size the results of the compression
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net
 	   for pointing this out).  */
-	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
+	dest_len = (unsigned int) chunk_len;
 
 	/* Allocate the destination buffer */
 	dest = zend_string_alloc(dest_len, 0);
