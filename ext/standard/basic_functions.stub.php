@@ -2040,7 +2040,7 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-function register_tick_function(callable $callback, mixed ...$args): bool {}
+function register_tick_function(callable $callback, mixed ...$args): true {}
 
 function unregister_tick_function(callable $callback): void {}
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 14871e360fae7faeac48129f049cbf2d3ef34ca5 */
+ * Stub hash: 9938a9fd71c396655530d0c6d664d8b48ae1171b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -567,7 +567,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobynumber, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
