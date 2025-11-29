@@ -2039,7 +2039,7 @@ function get_include_path(): string|false {}
 /** @refcount 1 */
 function print_r(mixed $value, bool $return = false): string|true {}
 
-function connection_aborted(): int {}
+function connection_aborted(): bool {}
 
 function connection_status(): int {}
 

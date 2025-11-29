@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: e2f5310f7044efd270e3c3452a093c95bf244be2
+ * Stub hash: 5ccf5208c22244d77b47ac0f2363bf67eccb0e95
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -544,7 +544,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_connection_aborted arginfo_ob_get_level
+#define arginfo_connection_aborted arginfo_ob_flush
 
 #define arginfo_connection_status arginfo_ob_get_level
 
