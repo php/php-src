@@ -1593,11 +1593,7 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 		RETURN_THROWS();
 	}
 
-	if (php_url_scanner_reset_vars() == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(php_url_scanner_reset_vars() == SUCCESS);
 }
 /* }}} */
 
@@ -1611,10 +1607,6 @@ PHP_FUNCTION(output_add_rewrite_var)
 		RETURN_THROWS();
 	}
 
-	if (php_url_scanner_add_var(name, name_len, value, value_len, 1) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(php_url_scanner_add_var(name, name_len, value, value_len, 1) == SUCCESS);
 }
 /* }}} */
