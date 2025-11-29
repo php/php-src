@@ -355,13 +355,6 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
-
-				/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
-				while (brig_out.head) {
-					bucket = brig_out.head;
-					php_stream_bucket_unlink(bucket);
-					php_stream_bucket_delref(bucket);
-				}
 				break;
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
