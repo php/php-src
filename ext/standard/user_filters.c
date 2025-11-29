@@ -199,6 +199,16 @@ php_stream_filter_status_t userfilter_filter(
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 	}
 
+	/* Filter could've broken contract and added buckets anyway. */
+	if (ret == PSFS_FEED_ME && buckets_out->head) {
+		php_stream_bucket *bucket;
+		do {
+			bucket = buckets_out->head;
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		} while (buckets_out->head);
+	}
+
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
