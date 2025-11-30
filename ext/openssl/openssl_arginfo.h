@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8233a8abc8ab7145d905d0fa51478edfe1e55a06 */
+ * Stub hash: 2288e86f8604335de4876d464b97b8ba52da30d5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -406,6 +406,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_oid_lookup, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, txt, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -473,6 +477,7 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_FUNCTION(openssl_oid_lookup);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -545,6 +550,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE(openssl_oid_lookup, arginfo_openssl_oid_lookup)
 	ZEND_FE_END
 };
 
