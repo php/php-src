@@ -24,9 +24,5 @@ try {
 
 ?>
 --EXPECT--
-object(Demo)#1 (1) {
-  ["registerNodeNamespaces"]=>
-  bool(true)
-}
 Invalid State Error
 Invalid State Error
