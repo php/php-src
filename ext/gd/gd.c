@@ -2763,7 +2763,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *C;
 	size_t C_len;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i, l = 0;
+	int ch = 0, col, i, l = 0;
+	unsigned int x, y;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
 	zend_long font_int = 0;
@@ -2795,21 +2796,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, ch, col);
+			gdImageChar(im, font, (int)x, (int)y, ch, col);
 			break;
 		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
 		case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				gdImageChar(im, font, (int)x, (int)y, (int) ((unsigned char) str[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				gdImageCharUp(im, font, (int)x, (int)y, (int) str[i], col);
 				y -= font->w;
 			}
 			break;
