@@ -784,6 +784,9 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
 		zend_string_addref(closure->func.op_array.function_name);
+		if (closure->func.op_array.namespace_name) {
+			zend_string_addref(closure->func.op_array.namespace_name);
+		}
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
 		}

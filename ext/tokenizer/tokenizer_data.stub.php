@@ -354,6 +354,16 @@ const T_PROTECTED_SET = UNKNOWN;
 const T_PUBLIC_SET = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_PRIVATE_NAMESPACE
+ */
+const T_PRIVATE_NAMESPACE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PRIVATE_NAMESPACE_SET
+ */
+const T_PRIVATE_NAMESPACE_SET = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_READONLY
  */
 const T_READONLY = UNKNOWN;

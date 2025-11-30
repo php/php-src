@@ -3764,6 +3764,8 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
+static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_execute_data *ex);
+
 static zend_always_inline bool zend_is_callable_check_func(const zval *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
@@ -3921,6 +3923,25 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 				goto get_function_via_handler;
 			}
 		}
+
+		/* Check namespace visibility - only do early check if __call/__callstatic exists */
+		if (fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE) &&
+		    (fcc->calling_scope &&
+		     ((fcc->object && fcc->calling_scope->__call) ||
+		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
+			zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
+			zend_string *caller_namespace = zend_get_caller_namespace_ex(frame);
+
+			bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+			zend_string_release(method_namespace);
+			zend_string_release(caller_namespace);
+
+			if (!namespace_match) {
+				retval = false;
+				fcc->function_handler = NULL;
+				goto get_function_via_handler;
+			}
+		}
 	} else {
 get_function_via_handler:
 		if (fcc->object && fcc->calling_scope == ce_org) {
@@ -3975,10 +3996,31 @@ get_function_via_handler:
 				}
 			}
 			if (retval
-			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
 				scope = get_scope(frame);
 				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
 				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+					if (error) {
+						if (*error) {
+							efree(*error);
+						}
+						zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+					}
+					retval = false;
+				}
+			}
+
+			/* Check namespace visibility */
+			if (retval && fcc->function_handler && UNEXPECTED(fcc->function_handler->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE)) {
+				zend_string *method_namespace = zend_get_class_namespace(fcc->function_handler->common.scope);
+				zend_string *caller_namespace = zend_get_caller_namespace_ex(frame);
+
+				bool namespace_match = zend_string_equals(method_namespace, caller_namespace);
+				zend_string_release(method_namespace);
+				zend_string_release(caller_namespace);
+
+				if (!namespace_match) {
 					if (error) {
 						if (*error) {
 							efree(*error);
@@ -4443,9 +4485,33 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 				"Property with asymmetric visibility %s::$%s must have type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
-		uint32_t get_visibility = zend_visibility_to_set_visibility(access_type & ZEND_ACC_PPP_MASK);
+		/* Validate asymmetric visibility hierarchy.
+		 *
+		 * Visibility modifiers form two partial orders
+		 * - Inheritance axis: public ⊇ protected ⊇ private
+		 * - Namespace axis: public ⊇ private(namespace) ⊇ private
+		 *
+		 * protected and private(namespace) are incomparable (neither is a subset of the other).
+		 *
+		 * For asymmetric properties, the set visibility must satisfy: C[set] ⊇ C[base]
+		 * This means the set of callers who can write must be a subset of those who can read.
+		 */
+		uint32_t get_visibility = access_type & ZEND_ACC_PPP_MASK;
 		uint32_t set_visibility = access_type & ZEND_ACC_PPP_SET_MASK;
-		if (get_visibility > set_visibility) {
+
+		/* Check for incompatible combinations (protected and private(namespace) on different axes). */
+		if ((get_visibility == ZEND_ACC_PROTECTED && set_visibility == ZEND_ACC_NAMESPACE_PRIVATE_SET) ||
+		    (get_visibility == ZEND_ACC_NAMESPACE_PRIVATE && set_visibility == ZEND_ACC_PROTECTED_SET)) {
+			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"Property %s::$%s has incompatible visibility modifiers: "
+				"protected and private(namespace) operate on different axes (inheritance vs namespace) "
+				"and cannot be combined in asymmetric visibility",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+
+		/* Check hierarchy using numeric comparison within each axis. */
+		uint32_t get_visibility_as_set = zend_visibility_to_set_visibility(get_visibility);
+		if (get_visibility_as_set > set_visibility) {
 			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 				"Visibility of property %s::$%s must not be weaker than set visibility",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
@@ -4453,7 +4519,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		/* Remove equivalent set visibility. */
 		if (((access_type & (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET)) == (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET))
 		 || ((access_type & (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET)) == (ZEND_ACC_PROTECTED|ZEND_ACC_PROTECTED_SET))
-		 || ((access_type & (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET)) == (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET))) {
+		 || ((access_type & (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET)) == (ZEND_ACC_PRIVATE|ZEND_ACC_PRIVATE_SET))
+		 || ((access_type & (ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE_SET)) == (ZEND_ACC_NAMESPACE_PRIVATE|ZEND_ACC_NAMESPACE_PRIVATE_SET))) {
 			access_type &= ~ZEND_ACC_PPP_SET_MASK;
 		}
 		/* private(set) properties are implicitly final. */
@@ -4536,6 +4603,11 @@ skip_property_storage:
 		property_info->name = zend_string_copy(name);
 	} else if (access_type & ZEND_ACC_PRIVATE) {
 		property_info->name = zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
+	} else if (access_type & ZEND_ACC_NAMESPACE_PRIVATE) {
+		/* Mangle with namespace name to prevent external access while allowing same-namespace access */
+		zend_string *namespace = zend_get_class_namespace(ce);
+		property_info->name = zend_mangle_property_name(ZSTR_VAL(namespace), ZSTR_LEN(namespace), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
+		zend_string_release(namespace);
 	} else {
 		ZEND_ASSERT(access_type & ZEND_ACC_PROTECTED);
 		property_info->name = zend_mangle_property_name("*", 1, ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
@@ -5292,4 +5364,72 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 	fprintf(stderr, "Evaluating %s via AST\n", default_value);
 #endif
 	return get_default_via_ast(default_value_zval, default_value);
+}
+
+/* Namespace extraction helpers for private(namespace) visibility */
+
+/* Extract namespace from a fully-qualified name
+ * Examples:
+ *   "Foo\\Bar\\ClassName" -> "Foo\\Bar"
+ *   "ClassName" -> "" (empty string for global namespace)
+ */
+ZEND_API zend_string* zend_extract_namespace(const zend_string *name)
+{
+	const char *class_name = ZSTR_VAL(name);
+	const char *last_separator = zend_memrchr(class_name, '\\', ZSTR_LEN(name));
+
+	if (last_separator == NULL) {
+		/* No namespace separator found: global namespace */
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	/* Extract namespace part (everything before the last backslash) */
+	size_t namespace_len = last_separator - class_name;
+	return zend_string_init(class_name, namespace_len, 0);
+}
+
+/* Get namespace from a class entry */
+ZEND_API zend_string* zend_get_class_namespace(const zend_class_entry *ce)
+{
+	return zend_extract_namespace(ce->name);
+}
+
+/* Get the namespace of the currently executing code */
+static zend_always_inline zend_string* zend_get_caller_namespace_ex(const zend_execute_data *ex)
+{
+	if (!ex || !ex->func) {
+		/* No execution context - global namespace */
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	/* Case 1: Called from a method: use the class namespace
+	 * For trait methods, scope is the class that uses the trait,
+	 * not the trait itself. This is the desired behavior. */
+	if (ex->func->common.scope) {
+		return zend_get_class_namespace(ex->func->common.scope);
+	}
+
+	/* Case 2: Called from a user function, eval code, or top-level code */
+	if (ex->func->type == ZEND_USER_FUNCTION || ex->func->type == ZEND_EVAL_CODE) {
+		zend_op_array *op_array = &ex->func->op_array;
+
+		/* Use the namespace_name field we added to op_array */
+		if (op_array->namespace_name) {
+			/* Increment refcount since caller will release it */
+			return zend_string_copy(op_array->namespace_name);
+		}
+
+		/* Fallback: Extract namespace from function name */
+		if (op_array->function_name) {
+			return zend_extract_namespace(op_array->function_name);
+		}
+	}
+
+	/* Case 3: Internal function or global namespace */
+	return ZSTR_EMPTY_ALLOC();
+}
+
+ZEND_API zend_string* zend_get_caller_namespace(void)
+{
+	return zend_get_caller_namespace_ex(EG(current_execute_data));
 }

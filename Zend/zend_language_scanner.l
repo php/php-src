@@ -620,6 +620,16 @@ static zend_op_array *zend_compile(int type)
 		zend_file_context_begin(&original_file_context);
 		zend_oparray_context_begin(&original_oparray_context, op_array);
 		zend_compile_top_stmt(CG(ast));
+
+		/* Capture namespace for top-level code visibility checking.
+		 * For files with non-bracketed namespace declarations, this will be the file's namespace.
+		 * For files with multiple bracketed namespace blocks, this may be NULL or the last namespace.
+		 * Note: This is a best-effort approach - perfect namespace tracking for multiple
+		 * bracketed namespaces in one file would require runtime tracking. */
+		if (CG(file_context).current_namespace) {
+			op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
+		}
+
 		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
@@ -1366,6 +1376,11 @@ uint32_t start_line = CG(zend_lineno);
 
 	ZVAL_UNDEF(zendlval);
 restart:
+	/* Clean up any previous token value before scanning next token */
+	if (Z_TYPE_P(zendlval) == IS_STRING) {
+		zval_ptr_dtor_str(zendlval);
+		ZVAL_UNDEF(zendlval);
+	}
 	SCNG(yy_text) = YYCURSOR;
 
 /*!re2c
@@ -1793,6 +1808,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"private(set)" {
 	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_SET);
+}
+
+<ST_IN_SCRIPTING>"private(namespace)" {
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_NAMESPACE);
+}
+
+<ST_IN_SCRIPTING>"private(namespace)(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_NAMESPACE_SET);
 }
 
 <ST_IN_SCRIPTING>"public" {

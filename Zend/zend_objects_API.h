@@ -139,6 +139,11 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 
 static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
 {
+	/* Skip namespace-private check here - it's handled separately via namespace visibility checks */
+	if (fn->common.fn_flags & ZEND_ACC_NAMESPACE_PRIVATE) {
+		return true;
+	}
+
 	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
 		&& fn->common.scope != scope
 		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)

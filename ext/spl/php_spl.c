@@ -433,6 +433,9 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 			func = emalloc(sizeof(zend_op_array));
 			memcpy(func, alfi->func_ptr, sizeof(zend_op_array));
 			zend_string_addref(func->op_array.function_name);
+			if (func->op_array.namespace_name) {
+				zend_string_addref(func->op_array.namespace_name);
+			}
 		}
 
 		zval param;
@@ -543,6 +546,7 @@ PHP_FUNCTION(spl_autoload_register)
 
 			memcpy(copy, alfi->func_ptr, sizeof(zend_op_array));
 			alfi->func_ptr->common.function_name = NULL;
+			alfi->func_ptr->op_array.namespace_name = NULL;
 			alfi->func_ptr = copy;
 		}
 	} else {

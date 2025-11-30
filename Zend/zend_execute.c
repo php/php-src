@@ -943,6 +943,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modifi
 	const char *visibility;
 	if (prop_info->flags & ZEND_ACC_PRIVATE_SET) {
 		visibility = "private(set)";
+	} else if (prop_info->flags & ZEND_ACC_NAMESPACE_PRIVATE_SET) {
+		visibility = "private(namespace)(set)";
 	} else {
 		ZEND_ASSERT(prop_info->flags & ZEND_ACC_PROTECTED_SET);
 		if (prop_info->flags & ZEND_ACC_READONLY) {

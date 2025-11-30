@@ -873,6 +873,10 @@ static const char *zend_modifier_token_to_string(uint32_t token)
 			return "protected(set)";
 		case T_PRIVATE_SET:
 			return "private(set)";
+		case T_PRIVATE_NAMESPACE:
+			return "private(namespace)";
+		case T_PRIVATE_NAMESPACE_SET:
+			return "private(namespace)(set)";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -927,6 +931,16 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 				return ZEND_ACC_PRIVATE_SET;
 			}
 			break;
+	case T_PRIVATE_NAMESPACE:
+		if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
+			return ZEND_ACC_NAMESPACE_PRIVATE;
+		}
+		break;
+	case T_PRIVATE_NAMESPACE_SET:
+		if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+			return ZEND_ACC_NAMESPACE_PRIVATE_SET;
+		}
+		break;
 	}
 
 	char *member;
@@ -1023,6 +1037,7 @@ uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
+	/* Prevent combining visibility modifiers (public, protected, private, private(namespace)) */
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Multiple access type modifiers are not allowed", 0);
@@ -1259,6 +1274,9 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->common.function_name) {
 		zend_string_addref(function->common.function_name);
 	}
+	if (function->type == ZEND_USER_FUNCTION && function->op_array.namespace_name) {
+		zend_string_addref(function->op_array.namespace_name);
+	}
 }
 /* }}} */
 
@@ -1295,6 +1313,9 @@ ZEND_API zend_result do_bind_function(zend_function *func, const zval *lcname) /
 	}
 	if (func->common.function_name) {
 		zend_string_addref(func->common.function_name);
+	}
+	if (func->type == ZEND_USER_FUNCTION && func->op_array.namespace_name) {
+		zend_string_addref(func->op_array.namespace_name);
 	}
 	zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
 	return SUCCESS;
@@ -8561,6 +8582,12 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
+	}
+
+	/* Only set namespace_name for standalone functions, not for methods.
+	 * Methods get their namespace from the class name at runtime via zend_get_caller_namespace(). */
+	if (CG(file_context).current_namespace && !CG(active_class_entry)) {
+		op_array->namespace_name = zend_string_copy(CG(file_context).current_namespace);
 	}
 
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);

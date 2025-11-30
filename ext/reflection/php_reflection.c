@@ -3534,6 +3534,13 @@ ZEND_METHOD(ReflectionMethod, isProtected)
 }
 /* }}} */
 
+/* {{{ Returns whether this method is namespace-private */
+ZEND_METHOD(ReflectionMethod, isNamespacePrivate)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_NAMESPACE_PRIVATE);
+}
+/* }}} */
+
 /* {{{ Returns whether this function is deprecated */
 ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated)
 {
@@ -5809,6 +5816,13 @@ ZEND_METHOD(ReflectionProperty, isProtected)
 }
 /* }}} */
 
+/* {{{ Returns whether this property is namespace-private */
+ZEND_METHOD(ReflectionProperty, isNamespacePrivate)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_NAMESPACE_PRIVATE);
+}
+/* }}} */
+
 ZEND_METHOD(ReflectionProperty, isPrivateSet)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE_SET);
@@ -5817,6 +5831,11 @@ ZEND_METHOD(ReflectionProperty, isPrivateSet)
 ZEND_METHOD(ReflectionProperty, isProtectedSet)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROTECTED_SET);
+}
+
+ZEND_METHOD(ReflectionProperty, isNamespacePrivateSet)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_NAMESPACE_PRIVATE_SET);
 }
 
 /* {{{ Returns whether this property is static */
