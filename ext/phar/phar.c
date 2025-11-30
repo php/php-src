@@ -414,7 +414,7 @@ void phar_entry_delref(phar_entry_data *idata) /* {{{ */
 /**
  * Removes an entry, either by actually removing it or by marking it.
  */
-ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, time_t timestamp, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
 
@@ -433,7 +433,7 @@ ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **err
 	}
 
 	if (!phar->donotflush) {
-		phar_flush(phar, error);
+		phar_flush(phar, timestamp, error);
 	}
 }
 /* }}} */
@@ -1709,7 +1709,8 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 
 			if (!memcmp(pos, zip_magic, 4)) {
 				php_stream_seek(fp, 0, SEEK_END);
-				return phar_parse_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error);
+				time_t now = time(NULL);
+				return phar_parse_zipfile(fp, fname, fname_len, alias, alias_len, pphar, now, error);
 			}
 
 			if (got >= 512) {
@@ -2453,8 +2454,8 @@ zend_string *phar_create_default_stub(const zend_string *php_index_str, const ze
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *phar, char **error) {
-	return phar_flush_ex(phar, NULL, false, error);
+ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *phar, time_t timestamp, char **error) {
+	return phar_flush_ex(phar, NULL, false, timestamp, error);
 }
 
 /**
@@ -2462,7 +2463,7 @@ ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *phar, char **error) {
  *
  * if user_stub is NULL the default or existing stub should be used
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5) int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, time_t timestamp, char **error) /* {{{ */
 {
 	static const char halt_stub[] = "__HALT_COMPILER();";
 
@@ -2476,7 +2477,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
-	uint32_t manifest_len, mytime, new_manifest_count;
+	uint32_t manifest_len, new_manifest_count;
 	uint32_t newcrc32;
 	php_stream *file, *oldfile, *newfile;
 	php_stream_filter *filter;
@@ -2501,11 +2502,11 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	zend_hash_clean(&phar->virtual_dirs);
 
 	if (phar->is_zip) {
-		return phar_zip_flush(phar, user_stub, is_default_stub, error);
+		return phar_zip_flush(phar, user_stub, is_default_stub, timestamp, error);
 	}
 
 	if (phar->is_tar) {
-		return phar_tar_flush(phar, user_stub, is_default_stub, error);
+		return phar_tar_flush(phar, user_stub, is_default_stub, timestamp, error);
 	}
 
 	if (PHAR_G(readonly)) {
@@ -2865,9 +2866,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			4: metadata-len
 			+: metadata
 		*/
-		mytime = time(NULL);
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
-		phar_set_32(entry_buffer+4, mytime);
+		phar_set_32(entry_buffer+4, timestamp);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);

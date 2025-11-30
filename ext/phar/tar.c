@@ -960,7 +960,7 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argumen
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5) int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, time_t timestamp, char **error) /* {{{ */
 {
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
 	static const char halt_stub[] = "__HALT_COMPILER();";
@@ -973,7 +973,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, ze
 	char *buf, *signature, sigbuf[8];
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = timestamp;
 	entry.is_modified = 1;
 	entry.is_crc_checked = 1;
 	entry.is_tar = 1;
