@@ -97,8 +97,6 @@ OK
 -- Iteration 3 --
 OK
 -- Iteration 4 --
-
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation3-win32.php on line %d
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 5 --
