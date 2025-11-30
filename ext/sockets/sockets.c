@@ -2731,6 +2731,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	size_t service_len = 0;
 	zend_string *hostname, *key;
 	zval *hint, *zhints = NULL;
+	int ret = 0;
 
 	struct addrinfo hints, *result, *rp;
 	php_addrinfo *res;
@@ -2825,8 +2826,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (getaddrinfo(ZSTR_VAL(hostname), service, &hints, &result) != 0) {
-		RETURN_FALSE;
+	if ((ret = getaddrinfo(ZSTR_VAL(hostname), service, &hints, &result)) != 0) {
+		RETURN_LONG(ret);
 	}
 
 	array_init(return_value);
