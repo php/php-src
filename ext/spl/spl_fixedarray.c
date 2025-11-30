@@ -645,7 +645,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		intern->array.size = 0;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, elem) {
 			if (key == NULL) {
-				ZVAL_COPY(&intern->array.elements[intern->array.size], elem);
+				ZVAL_COPY_DEREF(&intern->array.elements[intern->array.size], elem);
 				intern->array.size++;
 			} else {
 				Z_TRY_ADDREF_P(elem);
@@ -826,7 +826,7 @@ PHP_METHOD(SplFixedArray, offsetGet)
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
 
 	if (value) {
-		RETURN_COPY_DEREF(value);
+		RETURN_COPY(value);
 	} else {
 		RETURN_NULL();
 	}

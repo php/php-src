@@ -65,6 +65,10 @@ PHP                                                                        NEWS
   . Fixed ZPP type violation in phpdbg_get_executable() and phpdbg_end_oplog().
     (Girgias)
 
+- SPL:
+  . Fixed bug GH-20614 (SplFixedArray incorrectly handles references
+    in deserialization). (ndossche)
+
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
   . Fixed bug GH-20583 (Stack overflow in http_build_query
