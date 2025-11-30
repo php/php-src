@@ -1519,6 +1519,10 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_MATCH);
 }
 
+<ST_IN_SCRIPTING>"is" {
+	RETURN_TOKEN_WITH_IDENT(T_IS);
+}
+
 <ST_IN_SCRIPTING>"endswitch" {
 	RETURN_TOKEN_WITH_IDENT(T_ENDSWITCH);
 }
@@ -1617,6 +1621,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"..." {
 	RETURN_TOKEN(T_ELLIPSIS);
+}
+
+<ST_IN_SCRIPTING>"..<" {
+	RETURN_TOKEN(T_RANGE_EXCLUSIVE);
+}
+
+<ST_IN_SCRIPTING>"..=" {
+	RETURN_TOKEN(T_RANGE_INCLUSIVE);
 }
 
 <ST_IN_SCRIPTING>"??" {
@@ -2101,6 +2113,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
+lnum_handler:;
 	size_t len = yyleng;
 	char *end, *lnum = yytext;
 	bool is_octal = lnum[0] == '0';
@@ -2234,6 +2247,12 @@ string:
 	const char *end;
 	size_t len = yyleng;
 	char *dnum = yytext;
+
+	if (dnum[len - 1] == '.' && dnum[len] == '.' && (dnum[len + 1] == '<' || dnum[len + 1] == '=')) {
+		yyless(1);
+		goto lnum_handler;
+	}
+
 	bool contains_underscores = (memchr(dnum, '_', len) != NULL);
 
 	if (contains_underscores) {

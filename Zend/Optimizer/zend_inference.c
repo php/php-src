@@ -4042,6 +4042,29 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_FETCH_GLOBALS:
 			UPDATE_SSA_TYPE(MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			break;
+		case ZEND_HAS_TYPE: {
+			t1 &= MAY_BE_ANY;
+			if (t1 & MAY_BE_UNDEF) {
+				t1 |= MAY_BE_NULL;
+			}
+
+			zend_type *type = Z_PTR_P(CRT_CONSTANT(opline->op2));
+			uint32_t expected = ZEND_TYPE_PURE_MASK(*type);
+			if (ZEND_TYPE_HAS_NAME(*type)) {
+				// FIXME: Implement
+				UPDATE_SSA_TYPE(MAY_BE_BOOL, ssa_op->result_def);
+				break;
+			}
+
+			if (!(t1 & ~expected)) {
+				UPDATE_SSA_TYPE(MAY_BE_TRUE, ssa_op->result_def);
+			} else if (!(expected & ~t1)) {
+				UPDATE_SSA_TYPE(MAY_BE_FALSE, ssa_op->result_def);
+			} else {
+				UPDATE_SSA_TYPE(MAY_BE_BOOL, ssa_op->result_def);
+			}
+			break;
+		}
 		default:
 #ifdef ZEND_DEBUG_TYPE_INFERENCE
 			if (ssa_op->result_def >= 0) {
@@ -5033,6 +5056,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_COPY_TMP:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
+		case ZEND_HAS_TYPE:
 			return 0;
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
