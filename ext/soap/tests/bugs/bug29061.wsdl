@@ -4,8 +4,7 @@ schemas.xmlsoap.org/wsdl/http/"
 xmlns:xs="http://www.w3.org/2001/XMLSchema"
 xmlns:soapenc="http://schemas.xmlsoap.org/soap/e
 ncoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-xmlns:y="http://new.webservice.namespace" targetNamespace="http
-://new.webservice.namespace">
+xmlns:y="http://new.webservice.namespace" targetNamespace="http://new.webservice.namespace">
 <types>
 <xs:schema/>
 </types>
