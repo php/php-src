@@ -1,0 +1,6 @@
+name: Verify directories are not too big
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: bash "${GITHUB_WORKSPACE}/.github/actions/verify-directory-sizes/script.sh"
