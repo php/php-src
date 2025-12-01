@@ -217,12 +217,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * no type hint or be typed as mixed, so we can safely assign null.
 	 */
 	if (stream_property_exists) {
-		old_scope = EG(fake_scope);
-		EG(fake_scope) = Z_OBJCE_P(obj);
-
 		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
-
-		EG(fake_scope) = old_scope;
 	}
 
 	zend_string_release(stream_name);
