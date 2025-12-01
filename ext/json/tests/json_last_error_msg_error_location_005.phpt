@@ -69,12 +69,12 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 Error with UTF-16 in key:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,24"
+string(71) "Control character error, possibly incorrectly encoded near location 1,9"
 
 Error with multiple UTF-16 keys:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,42"
+string(72) "Control character error, possibly incorrectly encoded near location 1,22"
 
 Error with BMP characters:
 bool(false)
@@ -89,12 +89,12 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 Error in array with UTF-16:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,22"
+string(72) "Control character error, possibly incorrectly encoded near location 1,12"
 
 Error in nested structure with UTF-16:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,28"
+string(72) "Control character error, possibly incorrectly encoded near location 1,18"
 
 Error with UTF-16 and control chars:
 bool(false)

@@ -83,37 +83,37 @@ Testing error locations with various UTF-8 multi-byte character widths
 Error with 2-byte UTF-8 (Latin Extended):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,11"
+string(72) "Control character error, possibly incorrectly encoded near location 1,10"
 
 Error with 2-byte UTF-8 (Greek):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,22"
+string(72) "Control character error, possibly incorrectly encoded near location 1,14"
 
 Error with 2-byte UTF-8 (Cyrillic):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,18"
+string(72) "Control character error, possibly incorrectly encoded near location 1,12"
 
 Error with 3-byte UTF-8 (Chinese):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(71) "Control character error, possibly incorrectly encoded near location 1,8"
 
 Error with 3-byte UTF-8 (Japanese Hiragana):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,18"
+string(72) "Control character error, possibly incorrectly encoded near location 1,10"
 
 Error with 3-byte UTF-8 (Japanese Katakana):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,18"
+string(72) "Control character error, possibly incorrectly encoded near location 1,10"
 
 Error with 3-byte UTF-8 (Korean):
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(71) "Control character error, possibly incorrectly encoded near location 1,8"
 
 Error with 4-byte UTF-8 (Emoji faces):
 bool(false)
@@ -148,35 +148,35 @@ string(71) "Control character error, possibly incorrectly encoded near location 
 Error with UTF-8 key at start:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,10"
+string(71) "Control character error, possibly incorrectly encoded near location 1,7"
 
 Error with multiple UTF-8 keys:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,51"
+string(72) "Control character error, possibly incorrectly encoded near location 1,35"
 
 Error in array with mixed UTF-8:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,30"
+string(72) "Control character error, possibly incorrectly encoded near location 1,25"
 
 Error in nested structure with various UTF-8:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,34"
+string(72) "Control character error, possibly incorrectly encoded near location 1,22"
 
 Error with combining diacritical marks:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,11"
+string(72) "Control character error, possibly incorrectly encoded near location 1,10"
 
 Error with Hebrew:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,14"
+string(72) "Control character error, possibly incorrectly encoded near location 1,10"
 
 Error with Arabic with diacritics:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,16"
+string(72) "Control character error, possibly incorrectly encoded near location 1,11"
 

@@ -54,22 +54,22 @@ Testing error locations with Unicode UTF-8 characters
 Error after Japanese characters:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,24"
+string(72) "Control character error, possibly incorrectly encoded near location 1,12"
 
 Error after Russian characters:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(71) "Control character error, possibly incorrectly encoded near location 1,9"
 
 Error after Chinese characters:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(71) "Control character error, possibly incorrectly encoded near location 1,8"
 
 Error after Arabic characters:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(71) "Control character error, possibly incorrectly encoded near location 1,9"
 
 Error after Emoji:
 bool(false)
@@ -79,7 +79,7 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 Error in mixed ASCII and UTF-8:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,32"
+string(72) "Control character error, possibly incorrectly encoded near location 1,27"
 
 Error with UTF-8 escaped sequences:
 bool(false)
@@ -89,15 +89,15 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 Error in object with multiple UTF-8 keys:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,32"
+string(72) "Control character error, possibly incorrectly encoded near location 1,22"
 
 Error in array with UTF-8 strings:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,30"
+string(72) "Control character error, possibly incorrectly encoded near location 1,18"
 
 Error in nested object with UTF-8:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,23"
+string(72) "Control character error, possibly incorrectly encoded near location 1,15"
 

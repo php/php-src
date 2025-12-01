@@ -101,7 +101,7 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 Error in deep UTF-8 structure:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,22"
+string(72) "Control character error, possibly incorrectly encoded near location 1,16"
 
 Valid deep structure within limit:
 bool(true)
