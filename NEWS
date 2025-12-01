@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
+  . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
+    suggests missing constants). (DanielEScherzer)
 
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
