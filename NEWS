@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20602 (imagescale overflow with large height values).
     (David Carlier)
 
+- Intl:
+  . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
+    suggests missing constants). (DanielEScherzer)
+
 - LibXML:
   . Fix some deprecations on newer libxml versions regarding input
     buffer/parser handling. (ndossche)
