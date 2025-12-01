@@ -47,13 +47,13 @@ A::aProtected
 A::aProtectedStatic
 A::aProtectedStatic
 
-Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in %s on line %d
 
-Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in %s on line %d
 
-Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in %s on line %d
 
-Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in %s on line %d
 A::aPrivate
 A::aPrivate
 A::aPrivateStatic
