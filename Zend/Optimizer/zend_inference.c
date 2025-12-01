@@ -2130,7 +2130,7 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 }
 
 
-ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool write, bool insert)
+ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool write, bool insert, bool is)
 {
 	uint32_t tmp = 0;
 
@@ -2149,7 +2149,7 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool wri
 		if (insert) {
 			tmp |= MAY_BE_NULL;
 		} else {
-			tmp |= MAY_BE_NULL | ((t1 & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
+			tmp |= (is ? MAY_BE_UNDEF : MAY_BE_NULL) | ((t1 & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
 			if (tmp & MAY_BE_ARRAY) {
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 			}
@@ -2760,7 +2760,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			        tmp |= MAY_BE_REF;
 				}
 				orig = t1;
-				t1 = zend_array_element_type(t1, opline->op1_type, 1, 0);
+				t1 = zend_array_element_type(t1, opline->op1_type, 1, 0, false);
 				t2 = OP1_DATA_INFO();
 			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 				prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
@@ -3741,12 +3741,13 @@ static zend_always_inline zend_result _zend_update_type_info(
 				opline->op1_type,
 				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
 					&& opline->opcode != ZEND_FETCH_LIST_R,
-				opline->op2_type == IS_UNUSED);
+				opline->op2_type == IS_UNUSED,
+				opline->opcode == ZEND_FETCH_DIM_IS);
 			if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG && (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE))) {
 				tmp |= MAY_BE_NULL;
 			}
 			if (opline->opcode == ZEND_FETCH_DIM_IS && (t1 & MAY_BE_STRING)) {
-				tmp |= MAY_BE_NULL;
+				tmp |= MAY_BE_UNDEF;
 			}
 			if ((tmp & (MAY_BE_RC1|MAY_BE_RCN)) == MAY_BE_RCN && opline->result_type == IS_TMP_VAR) {
 				/* refcount may be indirectly decremented. Make an exception if the result is used in the next instruction */

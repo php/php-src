@@ -13419,7 +13419,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 				return 0;
 			}
 		} else {
-			uint32_t var_info = zend_array_element_type(op1_info, opline->op1_type, 0, 0);
+			uint32_t var_info = zend_array_element_type(op1_info, opline->op1_type, 0, 0, false);
 			zend_jit_addr var_addr;
 			ir_ref ref;
 			ir_refs *found_inputs, *found_values;
@@ -13565,7 +13565,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 	}
 
 	if (op1_info & MAY_BE_ARRAY) {
-		uint32_t var_def_info = zend_array_element_type(op1_def_info, opline->op1_type, 1, 0);
+		uint32_t var_def_info = zend_array_element_type(op1_def_info, opline->op1_type, 1, 0, false);
 
 		if (opline->op2_type == IS_UNUSED) {
 			var_info = MAY_BE_NULL;
@@ -13593,7 +13593,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 			ir_refs_init(found_inputs, 8);
 			ir_refs_init(found_values, 8);
 
-			var_info = zend_array_element_type(op1_info, opline->op1_type, 0, 0);
+			var_info = zend_array_element_type(op1_info, opline->op1_type, 0, 0, false);
 			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
 				var_info |= MAY_BE_REF;
 			}
