@@ -1014,6 +1014,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *str_serial;
 	char *hex_serial;
 	char buf[256];
+	char *crit_name = NULL;
+	int crit_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
@@ -1116,17 +1118,32 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	array_init(&subitem);
 
-
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
 		int nid;
 		extension = X509_get_ext(cert, i);
 		nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
 		if (nid != NID_undef) {
-			extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+			extname = (char *)OBJ_nid2sn(nid);
 		} else {
 			OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
 			extname = buf;
 		}
+		if (X509_EXTENSION_get_critical(extension)) {
+			int new_len = strlen(extname) + 10;
+			if (new_len > crit_len) {
+				if (crit_name) {
+					efree(crit_name);
+				}
+				crit_len = new_len;
+				crit_name = emalloc(crit_len);
+			}
+			if (crit_name) {
+				strcpy(crit_name, extname);
+				strcat(crit_name, ":critical");
+				add_assoc_bool(&subitem, crit_name, 1);
+			}
+		}
+
 		bio_out = BIO_new(BIO_s_mem());
 		if (bio_out == NULL) {
 			php_openssl_store_errors();
@@ -1150,6 +1167,9 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
+	if (crit_name) {
+		efree(crit_name);
+	}
 	if (cert_str) {
 		X509_free(cert);
 	}
@@ -1159,6 +1179,9 @@ err_subitem:
 	zval_ptr_dtor(&subitem);
 err:
 	zend_array_destroy(Z_ARR_P(return_value));
+	if (crit_name) {
+		efree(crit_name);
+	}
 	if (cert_str) {
 		X509_free(cert);
 	}
