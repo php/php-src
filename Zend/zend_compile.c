@@ -7034,6 +7034,49 @@ static void zend_pm_compile_range(zend_ast *ast, znode *result, znode *expr_node
 	}
 }
 
+static void zend_pm_compile_comparison(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	zend_op *opline;
+
+	uint32_t false_label = consume_expr ? zend_pm_label_create(context) : false_opnum;
+
+	opline = zend_emit_op_tmp(NULL, ZEND_IS_NUMERIC, expr_node, NULL);
+	SET_NODE(opline->result, result);
+	zend_pm_emit_jmpz_ex(result, false_label);
+
+	znode expr_node_copy;
+	zend_pm_copy_tmp(&expr_node_copy, expr_node, false);
+
+	zend_ast *const_ast = ast->child[0];
+	znode const_node;
+	const_node.op_type = IS_CONST;
+	ZVAL_COPY(&const_node.u.constant, zend_ast_get_zval(const_ast));
+
+	switch (ast->attr) {
+		case ZEND_COMPARISON_PATTERN_SMALLER:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER, &expr_node_copy, &const_node);
+			break;
+		case ZEND_COMPARISON_PATTERN_SMALLER_OR_EQUAL:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &expr_node_copy, &const_node);
+			break;
+		case ZEND_COMPARISON_PATTERN_GREATER:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER, &const_node, &expr_node_copy);
+			break;
+		case ZEND_COMPARISON_PATTERN_GREATER_OR_EQUAL:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &const_node, &expr_node_copy);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	SET_NODE(opline->result, result);
+	zend_pm_emit_jmpz_ex(result, false_label);
+
+	if (consume_expr) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+}
+
 static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
 {
 	bool create_label = false_opnum == (uint32_t)-1;
@@ -7068,6 +7111,9 @@ static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node,
 			break;
 		case ZEND_AST_RANGE_INCLUSIVE:
 			zend_pm_compile_range(ast, result, expr_node, consume_expr, false_opnum, context, true);
+			break;
+		case ZEND_AST_COMPARISON_PATTERN:
+			zend_pm_compile_comparison(ast, result, expr_node, consume_expr, false_opnum, context);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}

@@ -296,11 +296,12 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> object_pattern object_pattern_element_list non_empty_object_pattern_element_list
 %type <ast> object_pattern_element binding_pattern
 %type <ast> array_pattern array_pattern_element_list array_pattern_element
-%type <ast> range_pattern range_pattern_element
+%type <ast> range_pattern range_pattern_element comparison_pattern comparison_pattern_element
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
 %type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
+%type <num> comparison_pattern_op
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -1422,6 +1423,7 @@ atomic_pattern:
 	|	array_pattern { $$ = $1; }
 	|	binding_pattern { $$ = $1; }
 	|	class_const_pattern { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $1); }
+	|	comparison_pattern { $$ = $1; }
 	|	'(' pattern ')' {
 			$$ = $2;
 			$$->attr = ZEND_PARENTHESIZED_PATTERN;
@@ -1490,6 +1492,22 @@ range_pattern_element:
 		%empty { $$ = NULL; }
 	|	T_LNUMBER { $$ = $1; }
 	|	T_DNUMBER { $$ = $1; }
+;
+
+comparison_pattern_op:
+		'<' { $<num>$ = ZEND_COMPARISON_PATTERN_SMALLER; }
+	|	T_IS_SMALLER_OR_EQUAL { $<num>$ = ZEND_COMPARISON_PATTERN_SMALLER_OR_EQUAL; }
+	|	'>' { $<num>$ = ZEND_COMPARISON_PATTERN_GREATER; }
+	|	T_IS_GREATER_OR_EQUAL { $<num>$ = ZEND_COMPARISON_PATTERN_GREATER_OR_EQUAL; }
+;
+
+comparison_pattern_element:
+		T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
+;
+
+comparison_pattern:
+	comparison_pattern_op comparison_pattern_element { $$ = zend_ast_create_ex(ZEND_AST_COMPARISON_PATTERN, $1, $2); }
 ;
 
 binding_pattern:

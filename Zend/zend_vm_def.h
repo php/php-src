@@ -9979,6 +9979,33 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(212, ZEND_IS_NUMERIC, ANY, UNUSED)
+{
+	USE_OPLINE
+
+	zval *op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zval *result = EX_VAR(opline->result.var);
+
+ZEND_VM_C_LABEL(try_again):
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+		case IS_DOUBLE:
+			ZVAL_TRUE(result);
+			break;
+		case IS_STRING:
+			ZVAL_BOOL(result, is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), NULL, NULL, 0));
+			break;
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			ZEND_VM_C_GOTO(try_again);
+		default:
+			ZVAL_FALSE(result);
+			break;
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE
