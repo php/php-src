@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
+- Mbstring:
+  . ini_set() with mbstring.detect_order changes the order of mb_detect_order
+    as intended, since mbstring.detect_order is an INI_ALL setting. (tobee94)
+
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
