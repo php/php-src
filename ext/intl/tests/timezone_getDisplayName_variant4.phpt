@@ -23,12 +23,12 @@ var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT_COMMONLY_USED))
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_GENERIC_LOCATION));
 
 ?>
---EXPECT--
-string(3) "GMT"
+--EXPECTF--
+string(%d) "%r(GMT|GMT\+0)%r"
 string(30) "Western European Standard Time"
 string(13) "Portugal Time"
 string(21) "Western European Time"
 string(5) "+0000"
-string(3) "GMT"
-string(3) "GMT"
+string(%d) "%r(GMT|GMT\+00:00)%r"
+string(%d) "%r(GMT|GMT\+0)%r"
 string(13) "Portugal Time"

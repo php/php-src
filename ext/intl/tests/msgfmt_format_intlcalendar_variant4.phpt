@@ -29,5 +29,5 @@ echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
 */
 
 ?>
---EXPECT--
-quinta-feira, 17 de maio de 2012 5:35:36 da tarde ptlis
+--EXPECTF--
+quinta-feira, 17 de maio de 2012 5:35:36 %r(da tarde|p.m.)%r ptlis
