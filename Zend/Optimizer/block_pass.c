@@ -290,6 +290,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								++(*opt_count);
 								break;
 							case ZEND_QM_ASSIGN:
+								if (src < op_array->opcodes + block->start) {
+									break;
+								}
 								src->result_type = IS_UNUSED;
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
