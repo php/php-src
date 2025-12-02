@@ -1097,7 +1097,10 @@ static int dom_xml_serialize_element_node(
 	/* 14. If ns is the HTML namespace, and the node's list of children is empty, and the node's localName matches
 	 *     any one of the following void elements: ... */
 	if (element->children == NULL) {
-		if (xmlSaveNoEmptyTags) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
+		int saveNoEmptyTags = xmlSaveNoEmptyTags;
+		ZEND_DIAGNOSTIC_IGNORED_END
+		if (saveNoEmptyTags) {
 			/* Do nothing, use the <x></x> closing style. */
 		} else if (php_dom_ns_is_fast(element, php_dom_ns_is_html_magic_token)) {
 			size_t name_length = strlen((const char *) element->name);
