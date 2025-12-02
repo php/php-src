@@ -181,12 +181,12 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
-static zend_string *php_json_get_error_msg_with_location(php_json_error_code error_code, int line, int column) /* {{{ */
+static zend_string *php_json_get_error_msg_with_location(php_json_error_code error_code, size_t line, size_t column) /* {{{ */
 {
 	const char *base_msg = php_json_get_error_msg(error_code);
 	
 	if (line > 0 && column > 0) {
-		return zend_strpprintf(0, "%s near location %d,%d", base_msg, line, column);
+		return zend_strpprintf(0, "%s near location %u,%u", base_msg, line, column);
 	}
 	
 	return zend_string_init(base_msg, strlen(base_msg), 0);
@@ -201,8 +201,8 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
-		int error_line = php_json_parser_error_line(&parser);
-		int error_column = php_json_parser_error_column(&parser);
+		size_t error_line = php_json_parser_error_line(&parser);
+		size_t error_column = php_json_parser_error_column(&parser);
 
 		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
 			JSON_G(error_code) = error_code;
@@ -231,8 +231,8 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
-		int error_line = php_json_parser_error_line(&parser);
-		int error_column = php_json_parser_error_column(&parser);
+		size_t error_line = php_json_parser_error_line(&parser);
+		size_t error_column = php_json_parser_error_column(&parser);
 
 		JSON_G(error_code) = error_code;
 		JSON_G(error_line) = error_line;

@@ -51,10 +51,10 @@ typedef struct _php_json_parser_methods {
 } php_json_parser_methods;
 
  typedef struct _php_json_parser_location {
-	int first_line;
-	int first_column;
-	int last_line;
-	int last_column;
+	size_t first_line;
+	size_t first_column;
+	size_t last_line;
+	size_t last_column;
 } php_json_parser_location;
 
 struct _php_json_parser {
@@ -85,9 +85,9 @@ PHP_JSON_API void php_json_parser_init(
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
 
-PHP_JSON_API int php_json_parser_error_line(const php_json_parser *parser);
+PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser);
 
-PHP_JSON_API int php_json_parser_error_column(const php_json_parser *parser);
+PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser);
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 

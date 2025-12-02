@@ -270,22 +270,22 @@ std:
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>UTF16_1          {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //6
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 5;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_2          {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //6
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 4;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_3          {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //6
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 3;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_4          {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //12
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 8;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
@@ -329,15 +329,15 @@ std:
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF8_2           {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //2
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF8_3           {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //3
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF8_4           {
-		PHP_JSON_TOKEN_LOCATION(last_column) += 1; //4
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>ANY              {

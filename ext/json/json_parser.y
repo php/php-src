@@ -318,12 +318,12 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 	return parser->scanner.errcode;
 }
 
-PHP_JSON_API int php_json_parser_error_line(const php_json_parser *parser)
+PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser)
 {
 	return parser->scanner.errloc.first_line;
 }
 
-PHP_JSON_API int php_json_parser_error_column(const php_json_parser *parser)
+PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser)
 {
 	return parser->scanner.errloc.first_column;
 }
