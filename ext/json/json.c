@@ -186,7 +186,7 @@ static zend_string *php_json_get_error_msg_with_location(php_json_error_code err
 	const char *base_msg = php_json_get_error_msg(error_code);
 	
 	if (line > 0 && column > 0) {
-		return zend_strpprintf(0, "%s near location %u,%u", base_msg, line, column);
+		return zend_strpprintf(0, "%s near location %zu,%zu", base_msg, line, column);
 	}
 	
 	return zend_string_init(base_msg, strlen(base_msg), 0);
