@@ -191,7 +191,7 @@ static zend_never_inline void zend_accel_function_hash_copy_notify(HashTable *ta
 
 static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, const HashTable *source, bool call_observers)
 {
-	const Bucket *p, *end;
+	Bucket *p, *end;
 	const zval *t;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
