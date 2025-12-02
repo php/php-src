@@ -799,6 +799,7 @@ static void zend_do_free(znode *op1) /* {{{ */
 				case ZEND_DO_FCALL_BY_NAME:
 				case ZEND_YIELD:
 				case ZEND_YIELD_FROM:
+				case ZEND_INCLUDE_OR_EVAL:
 					SET_UNUSED(opline->result);
 					return;
 			}
