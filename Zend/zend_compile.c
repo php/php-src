@@ -4370,7 +4370,6 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 		bool is_fully_qualified;
 		zend_string *name = zend_resolve_function_name(orig_name, args->child[1]->child[0]->attr, &is_fully_qualified);
 
-#if 0
 		zend_ast_list *list = zend_ast_get_list(args->child[1]->child[1]);
 		if (zend_string_equals_literal_ci(name, "array_slice")
 	     && !zend_args_contain_unpack_or_named(list)
@@ -4393,7 +4392,6 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 				return SUCCESS;
 			}
 		}
-#endif
 		zend_string_release_ex(name, 0);
 	}
 	zend_compile_expr(&arg_node, args->child[1]);
