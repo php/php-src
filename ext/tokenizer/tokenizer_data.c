@@ -78,6 +78,8 @@ char *get_token_type_name(int token_type)
 		case T_FUNCTION: return "T_FUNCTION";
 		case T_FN: return "T_FN";
 		case T_CONST: return "T_CONST";
+		case T_TYPE: return "T_TYPE";
+		case T_TYPES: return "T_TYPES";
 		case T_RETURN: return "T_RETURN";
 		case T_TRY: return "T_TRY";
 		case T_CATCH: return "T_CATCH";

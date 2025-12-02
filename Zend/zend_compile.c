@@ -384,6 +384,12 @@ static void zend_reset_import_tables(void) /* {{{ */
 		FC(imports_const) = NULL;
 	}
 
+	if (FC(imports_type)) {
+		zend_hash_destroy(FC(imports_type));
+		efree(FC(imports_type));
+		FC(imports_type) = NULL;
+	}
+
 	zend_hash_clean(&FC(seen_symbols));
 }
 /* }}} */
@@ -404,6 +410,7 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(imports) = NULL;
 	FC(imports_function) = NULL;
 	FC(imports_const) = NULL;
+	FC(imports_type) = NULL;
 	FC(current_namespace) = NULL;
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
@@ -1222,6 +1229,14 @@ static void label_ptr_dtor(zval *zv) /* {{{ */
 
 static void str_dtor(zval *zv)  /* {{{ */ {
 	zend_string_release_ex(Z_STR_P(zv), 0);
+}
+/* }}} */
+
+static void ast_ref_dtor(zval *zv)  /* {{{ */ {
+	/* The AST was created via zend_ast_copy, so we need to destroy the ref */
+	zend_ast *ast = Z_PTR_P(zv);
+	zend_ast_ref *ref = (zend_ast_ref *)((char *)ast - sizeof(zend_ast_ref));
+	zend_ast_ref_destroy(ref);
 }
 /* }}} */
 
@@ -7170,6 +7185,9 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
+/* Forward declaration for type alias support */
+static zend_type zend_compile_typename(zend_ast *ast);
+
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
@@ -7201,6 +7219,17 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
+			/* Check for type alias (only for unqualified names) */
+			if (ast->attr == ZEND_NAME_NOT_FQ && FC(imports_type)) {
+				zend_string *lookup_name = zend_string_tolower(type_name);
+				zend_ast *alias_ast = zend_hash_find_ptr(FC(imports_type), lookup_name);
+				zend_string_release_ex(lookup_name, 0);
+				if (alias_ast) {
+					/* Recursively compile the aliased type */
+					return zend_compile_typename(alias_ast);
+				}
+			}
+
 			const char *correct_name;
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			zend_string *class_name = type_name;
@@ -9745,6 +9774,145 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_use_type_alias(zend_ast *ast) /* {{{ */
+{
+	zend_ast *type_ast = ast->child[0];
+	zend_ast *alias_ast = ast->child[1];
+	zend_string *alias_name = zend_ast_get_str(alias_ast);
+	zend_string *lookup_name = zend_string_tolower(alias_name);
+
+	/* Initialize imports_type hash table if needed */
+	if (!FC(imports_type)) {
+		FC(imports_type) = emalloc(sizeof(HashTable));
+		zend_hash_init(FC(imports_type), 8, NULL, ast_ref_dtor, 0);
+	}
+
+	/* Check if alias is already in use */
+	if (zend_hash_exists(FC(imports_type), lookup_name)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use type alias %s because the name is already in use",
+			ZSTR_VAL(alias_name));
+	}
+
+	/* Copy the type AST to heap so it can be properly freed */
+	zend_ast_ref *ast_ref = zend_ast_copy(type_ast);
+	zend_ast *copied_type_ast = GC_AST(ast_ref);
+
+	/* Store the copied type AST in the hash table */
+	zend_hash_add_ptr(FC(imports_type), lookup_name, copied_type_ast);
+
+	zend_string_release_ex(lookup_name, 0);
+}
+/* }}} */
+
+static void zend_compile_include_types(zend_ast *ast) /* {{{ */
+{
+	zend_ast *filename_ast = ast->child[0];
+	zval *filename_zv = zend_ast_get_zval(filename_ast);
+	zend_string *filename = Z_STR_P(filename_zv);
+
+	/* Resolve the path relative to current file */
+	zend_string *resolved_path = zend_resolve_path(filename);
+	if (!resolved_path) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"include types: Failed to resolve path '%s'", ZSTR_VAL(filename));
+	}
+
+	/* Open and read the file */
+	zend_file_handle file_handle;
+	zend_stream_init_filename_ex(&file_handle, resolved_path);
+	if (zend_stream_open(&file_handle) == FAILURE) {
+		zend_string_release_ex(resolved_path, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"include types: Failed to open '%s'", ZSTR_VAL(filename));
+	}
+
+	/* Get file contents */
+	char *buf;
+	size_t len;
+	if (zend_stream_fixup(&file_handle, &buf, &len) == FAILURE) {
+		zend_destroy_file_handle(&file_handle);
+		zend_string_release_ex(resolved_path, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"include types: Failed to read '%s'", ZSTR_VAL(filename));
+	}
+
+	/* Compile to AST */
+	zend_string *code = zend_string_init(buf, len, 0);
+	zend_arena *ast_arena = NULL;
+	zend_ast *types_ast = zend_compile_string_to_ast(code, &ast_arena, resolved_path);
+	zend_string_release_ex(code, 0);
+	zend_destroy_file_handle(&file_handle);
+
+	if (!types_ast) {
+		zend_string_release_ex(resolved_path, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"include types: Failed to parse '%s'", ZSTR_VAL(filename));
+	}
+
+	/* Validate and process the AST - must only contain type aliases */
+	if (types_ast->kind != ZEND_AST_STMT_LIST) {
+		zend_ast_destroy(types_ast);
+		zend_arena_destroy(ast_arena);
+		zend_string_release_ex(resolved_path, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"include types: Invalid types file '%s'", ZSTR_VAL(filename));
+	}
+
+	zend_ast_list *list = zend_ast_get_list(types_ast);
+	for (uint32_t i = 0; i < list->children; i++) {
+		zend_ast *stmt = list->child[i];
+		if (stmt == NULL) {
+			continue;
+		}
+		if (stmt->kind != ZEND_AST_TYPE_ALIAS) {
+			zend_ast_destroy(types_ast);
+			zend_arena_destroy(ast_arena);
+			zend_string_release_ex(resolved_path, 0);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"include types: Types file '%s' must only contain type aliases (use type ... as ...;)",
+				ZSTR_VAL(filename));
+		}
+
+		/* Process the type alias - copy AST to current arena */
+		zend_ast *type_ast = stmt->child[0];
+		zend_ast *alias_ast = stmt->child[1];
+		zend_string *alias_name = zend_ast_get_str(alias_ast);
+		zend_string *lookup_name = zend_string_tolower(alias_name);
+
+		/* Initialize imports_type hash table if needed */
+		if (!FC(imports_type)) {
+			FC(imports_type) = emalloc(sizeof(HashTable));
+			zend_hash_init(FC(imports_type), 8, NULL, ast_ref_dtor, 0);
+		}
+
+		/* Check if alias is already in use */
+		if (zend_hash_exists(FC(imports_type), lookup_name)) {
+			zend_string_release_ex(lookup_name, 0);
+			zend_ast_destroy(types_ast);
+			zend_arena_destroy(ast_arena);
+			zend_string_release_ex(resolved_path, 0);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"include types: Cannot use type alias %s because the name is already in use",
+				ZSTR_VAL(alias_name));
+		}
+
+		/* Copy the type AST to heap so it survives arena destruction */
+		zend_ast_ref *ast_ref = zend_ast_copy(type_ast);
+		zend_ast *copied_type_ast = GC_AST(ast_ref);
+
+		/* Store the copied type AST (the ref keeps it alive) */
+		zend_hash_add_ptr(FC(imports_type), lookup_name, copied_type_ast);
+		zend_string_release_ex(lookup_name, 0);
+	}
+
+	/* Clean up the types file AST - but the copied ASTs remain in current arena */
+	zend_ast_destroy(types_ast);
+	zend_arena_destroy(ast_arena);
+	zend_string_release_ex(resolved_path, 0);
+}
+/* }}} */
+
 static void zend_compile_group_use(const zend_ast *ast) /* {{{ */
 {
 	uint32_t i;
@@ -11872,6 +12040,12 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE:
 			zend_compile_use(ast);
+			break;
+		case ZEND_AST_TYPE_ALIAS:
+			zend_compile_use_type_alias(ast);
+			break;
+		case ZEND_AST_INCLUDE_TYPES:
+			zend_compile_include_types(ast);
 			break;
 		case ZEND_AST_CONST_DECL:
 			zend_compile_const_decl(ast);
