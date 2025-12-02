@@ -90,42 +90,42 @@ Testing error locations with various whitespace patterns
 Error after multiple spaces:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,7"
+string(30) "Syntax error near location 1:7"
 
 Error after tabs:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,5"
+string(30) "Syntax error near location 1:5"
 
 Error after mixed whitespace:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,7"
+string(30) "Syntax error near location 1:7"
 
 Error on second line:
 bool(false)
 int(4)
-string(30) "Syntax error near location 2,2"
+string(30) "Syntax error near location 2:2"
 
 Error with CRLF line endings:
 bool(false)
 int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 2,8"
+string(71) "Control character error, possibly incorrectly encoded near location 2:8"
 
 Error after blank lines:
 bool(false)
 int(4)
-string(30) "Syntax error near location 4,2"
+string(30) "Syntax error near location 4:2"
 
 Error in string with spaces:
 bool(false)
 int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 1,9"
+string(71) "Control character error, possibly incorrectly encoded near location 1:9"
 
 Error with whitespace around colon:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,12"
+string(72) "Control character error, possibly incorrectly encoded near location 1:12"
 
 Error with whitespace around comma:
 bool(true)
@@ -135,30 +135,30 @@ string(8) "No error"
 Error in pretty printed JSON:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 4,11"
+string(72) "Control character error, possibly incorrectly encoded near location 4:11"
 
 Error in heavily indented JSON:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 5,26"
+string(72) "Control character error, possibly incorrectly encoded near location 5:26"
 
 Error with mixed tabs and spaces:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 3,12"
+string(72) "Control character error, possibly incorrectly encoded near location 3:12"
 
 Error after whitespace-only line:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 3,12"
+string(72) "Control character error, possibly incorrectly encoded near location 3:12"
 
 Error in compact JSON:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,22"
+string(72) "Control character error, possibly incorrectly encoded near location 1:22"
 
 Error with regular spaces:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,10"
+string(72) "Control character error, possibly incorrectly encoded near location 1:10"
 

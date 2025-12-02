@@ -53,20 +53,20 @@ Testing error locations in multi-line JSON
 Error on line 2, column 13:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 2,13"
+string(72) "Control character error, possibly incorrectly encoded near location 2:13"
 
 Error on line 3, column 12:
 bool(false)
 int(4)
-string(31) "Syntax error near location 3,12"
+string(31) "Syntax error near location 3:12"
 
 Error on line 5, column 26:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 5,26"
+string(72) "Control character error, possibly incorrectly encoded near location 5:26"
 
 Error on line 7, column 1:
 bool(false)
 int(4)
-string(30) "Syntax error near location 7,1"
+string(30) "Syntax error near location 7:1"
 

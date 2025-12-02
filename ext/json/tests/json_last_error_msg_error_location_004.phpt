@@ -54,7 +54,7 @@ Testing error locations in deeply nested structures
 Error in deeply nested object:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,31"
+string(72) "Control character error, possibly incorrectly encoded near location 1:31"
 
 Error in deeply nested array:
 bool(true)
@@ -74,20 +74,20 @@ string(8) "No error"
 Error in middle of deep nesting:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,21"
+string(31) "Syntax error near location 1:21"
 
 Error in complex structure:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,93"
+string(72) "Control character error, possibly incorrectly encoded near location 1:93"
 
 Error in array of objects:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,68"
+string(72) "Control character error, possibly incorrectly encoded near location 1:68"
 
 Error in object with array values:
 bool(false)
 int(2)
-string(61) "State mismatch (invalid or malformed JSON) near location 1,82"
+string(61) "State mismatch (invalid or malformed JSON) near location 1:82"
 

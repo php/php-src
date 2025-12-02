@@ -79,100 +79,100 @@ Testing error locations with different error types
 State mismatch - expected value:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 State mismatch - expected key:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,2"
+string(30) "Syntax error near location 1:2"
 
 State mismatch - trailing comma in object:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,17"
+string(31) "Syntax error near location 1:17"
 
 State mismatch - trailing comma in array:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,10"
+string(31) "Syntax error near location 1:10"
 
 Invalid number format - leading zero:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,10"
+string(31) "Syntax error near location 1:10"
 
 Invalid number format - multiple decimals:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,12"
+string(31) "Syntax error near location 1:12"
 
 Invalid number format - incomplete exponent:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,10"
+string(31) "Syntax error near location 1:10"
 
 Invalid number format - double sign:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Unclosed string:
 bool(false)
 int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 1,9"
+string(71) "Control character error, possibly incorrectly encoded near location 1:9"
 
 Invalid escape sequence:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Incomplete unicode escape:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Invalid unicode escape:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Invalid true keyword:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Invalid false keyword:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Invalid null keyword:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 
 Mismatched brackets - ] instead of }:
 bool(false)
 int(2)
-string(61) "State mismatch (invalid or malformed JSON) near location 1,14"
+string(61) "State mismatch (invalid or malformed JSON) near location 1:14"
 
 Mismatched brackets - } instead of ]:
 bool(false)
 int(2)
-string(60) "State mismatch (invalid or malformed JSON) near location 1,7"
+string(60) "State mismatch (invalid or malformed JSON) near location 1:7"
 
 Extra closing bracket:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,15"
+string(31) "Syntax error near location 1:15"
 
 Missing comma between elements:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,4"
+string(30) "Syntax error near location 1:4"
 
 Missing comma between object properties:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,9"
+string(30) "Syntax error near location 1:9"
 

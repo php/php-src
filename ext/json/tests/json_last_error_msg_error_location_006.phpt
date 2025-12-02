@@ -8,11 +8,11 @@ require_once("json_validate_requires.inc");
 echo "Testing error location edge cases\n\n";
 
 // Error at very start
-echo "Error at position 1,1:\n";
+echo "Error at position 1:1:\n";
 json_validate_trycatchdump('');
 
-// Error at position 1,1 with single character
-echo "\nError at position 1,1 with invalid char:\n";
+// Error at position 1:1 with single character
+echo "\nError at position 1:1 with invalid char:\n";
 json_validate_trycatchdump('x');
 
 // Error after whitespace
@@ -75,78 +75,78 @@ json_validate_trycatchdump("{\n\t\"key\": \n\t\"value\n}");
 --EXPECT--
 Testing error location edge cases
 
-Error at position 1,1:
+Error at position 1:1:
 bool(false)
 int(4)
 string(12) "Syntax error"
 
-Error at position 1,1 with invalid char:
+Error at position 1:1 with invalid char:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,1"
+string(30) "Syntax error near location 1:1"
 
 Error after leading whitespace:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,5"
+string(30) "Syntax error near location 1:5"
 
 Error with tabs and spaces:
 bool(false)
 int(4)
-string(30) "Syntax error near location 2,3"
+string(30) "Syntax error near location 2:3"
 
 Error after multiple newlines:
 bool(false)
 int(4)
-string(30) "Syntax error near location 4,2"
+string(30) "Syntax error near location 4:2"
 
 Error at end of long string:
 bool(false)
 int(4)
-string(33) "Syntax error near location 1,1011"
+string(33) "Syntax error near location 1:1011"
 
 Error with very long key:
 bool(false)
 int(3)
-string(73) "Control character error, possibly incorrectly encoded near location 1,506"
+string(73) "Control character error, possibly incorrectly encoded near location 1:506"
 
 Error after empty object:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,3"
+string(30) "Syntax error near location 1:3"
 
 Error after empty array:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,3"
+string(30) "Syntax error near location 1:3"
 
 Error with multiple root values:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,3"
+string(30) "Syntax error near location 1:3"
 
 Error after valid number:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,4"
+string(30) "Syntax error near location 1:4"
 
 Error after valid boolean:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,5"
+string(30) "Syntax error near location 1:5"
 
 Error after valid null:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,5"
+string(30) "Syntax error near location 1:5"
 
 Error after valid string:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1,7"
+string(30) "Syntax error near location 1:7"
 
 Error with mixed whitespace:
 bool(false)
 int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 3,2"
+string(71) "Control character error, possibly incorrectly encoded near location 3:2"
 

@@ -61,47 +61,47 @@ Testing error locations with depth-related issues
 Max depth error at specific location:
 bool(false)
 int(1)
-string(47) "Maximum stack depth exceeded near location 1,21"
+string(47) "Maximum stack depth exceeded near location 1:21"
 
 Max depth error in array:
 bool(false)
 int(1)
-string(46) "Maximum stack depth exceeded near location 1,5"
+string(46) "Maximum stack depth exceeded near location 1:5"
 
 Max depth error with mixed structures:
 bool(false)
 int(1)
-string(46) "Maximum stack depth exceeded near location 1,7"
+string(46) "Maximum stack depth exceeded near location 1:7"
 
 Syntax error at deep nesting level:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,31"
+string(72) "Control character error, possibly incorrectly encoded near location 1:31"
 
 Syntax error in deep array:
 bool(false)
 int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 1,6"
+string(71) "Control character error, possibly incorrectly encoded near location 1:6"
 
 Error after valid deep structure:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,48"
+string(72) "Control character error, possibly incorrectly encoded near location 1:48"
 
 Error in middle of nested structure:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1,29"
+string(31) "Syntax error near location 1:29"
 
 Error in array with nested objects:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,30"
+string(72) "Control character error, possibly incorrectly encoded near location 1:30"
 
 Error in deep UTF-8 structure:
 bool(false)
 int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1,16"
+string(72) "Control character error, possibly incorrectly encoded near location 1:16"
 
 Valid deep structure within limit:
 bool(true)

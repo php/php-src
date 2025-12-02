@@ -13,7 +13,7 @@ try {
 --EXPECTF--
 object(JsonException)#1 (7) {
   ["message":protected]=>
-  string(30) "Syntax error near location 1,2"
+  string(30) "Syntax error near location 1:2"
   ["string":"Exception":private]=>
   string(0) ""
   ["code":protected]=>

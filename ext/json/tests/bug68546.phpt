@@ -16,5 +16,5 @@ NULL
 bool(true)
 NULL
 bool(true)
-string(55) "The decoded property name is invalid near location 1,27"
+string(55) "The decoded property name is invalid near location 1:27"
 Done
