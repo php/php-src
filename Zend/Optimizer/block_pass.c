@@ -299,8 +299,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								++(*opt_count);
 								if (src->op1_type & (IS_VAR|IS_TMP_VAR)) {
 									src->opcode = ZEND_FREE;
-								} else {
+								} else if (src->op1_type == IS_CONST) {
 									MAKE_NOP(src);
+								} else if (src->op1_type == IS_CV) {
+									src->opcode = ZEND_CHECK_VAR;
+									SET_UNUSED(src->result);
 								}
 								break;
 							default:
