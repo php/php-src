@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.2
 
+- EXIF:
+  . Fixed bug GH-20631 (Integer underflow in exif HEIF parsing
+    when pos.size < 2). (Oblivionsage)
 
 18 Dec 2025, PHP 8.5.1
 
