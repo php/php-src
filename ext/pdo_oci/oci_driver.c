@@ -123,7 +123,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 		if (einfo->errcode) {
 			switch (einfo->errcode) {
 				case 1013:	/* user requested cancel of current operation */
-					zend_bailout();
+					zend_bailout_without_gc_protect();
 					break;
 
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
