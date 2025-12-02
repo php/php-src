@@ -38,7 +38,7 @@ static zend_object_handlers attributes_object_handlers_sensitive_parameter_value
 
 static HashTable internal_attributes;
 
-uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
+uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
@@ -70,7 +70,7 @@ uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_ent
 	return ZEND_ATTRIBUTE_TARGET_ALL;
 }
 
-static void validate_allow_dynamic_properties(
+static zend_string *validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	ZEND_ASSERT(scope != NULL);

@@ -7656,7 +7656,7 @@ static void zend_compile_attributes(
 			if (args) {
 				ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
 
-				bool uses_named_args = 0;
+				bool uses_named_args = false;
 				for (j = 0; j < args->children; j++) {
 					zend_ast **arg_ast_ptr = &args->child[j];
 					zend_ast *arg_ast = *arg_ast_ptr;
@@ -7669,7 +7669,7 @@ static void zend_compile_attributes(
 					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
 						attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
 						arg_ast_ptr = &arg_ast->child[1];
-						uses_named_args = 1;
+						uses_named_args = true;
 
 						for (uint32_t k = 0; k < j; k++) {
 							if (attr->args[k].name &&

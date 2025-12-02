@@ -214,7 +214,7 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, co
 				 * value. */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
-				zend_class_entry *ce1;
+				const zend_class_entry *ce1;
 				Z_CE_FROM_ZVAL(ce1, p->val);
 				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
 					CG(in_compilation) = 1;
@@ -354,8 +354,8 @@ static void zend_accel_do_delayed_early_binding(
 	CG(compiled_filename) = persistent_script->script.filename;
 	CG(in_compilation) = 1;
 	for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
-		zend_early_binding *early_binding = &persistent_script->early_bindings[i];
-		zval *ce_or_alias = zend_hash_find_ex(EG(class_table), early_binding->lcname, 1);
+		const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
+		const zval *ce_or_alias = zend_hash_find_ex(EG(class_table), early_binding->lcname, 1);
 		if (!ce_or_alias) {
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
 			zend_class_entry *ce = NULL;
