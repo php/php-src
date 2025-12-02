@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_attributes.stub.php instead.
- * Stub hash: e2ac00f21b9f75f8345f5018f04ea84a080291a1 */
+ * Stub hash: bae42fcb945360f90a1e2762c6c22177f25efb9e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
