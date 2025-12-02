@@ -101,7 +101,7 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref);
 static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
-static void zend_compile_assign(znode *result, zend_ast *ast);
+static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt);
 
 #ifdef ZEND_CHECK_STACK_LIMIT
 zend_never_inline static void zend_stack_limit_error(void)
@@ -3406,8 +3406,7 @@ static void zend_compile_list_assign(
 	}
 
 	if (result) {
-		if ((type == BP_VAR_R || type == BP_VAR_IS)  && expr_node->op_type == IS_VAR) {
-			// FIXME: [&$a] = ...; currently emits ZEND_DEREF, avoidable?
+		if ((type == BP_VAR_R || type == BP_VAR_IS) && expr_node->op_type == IS_VAR) {
 			zend_emit_op_tmp(result, ZEND_DEREF, expr_node, NULL);
 		} else {
 			*result = *expr_node;
@@ -3482,7 +3481,7 @@ static void zend_compile_expr_with_potential_assign_to_self(
 	}
 }
 
-static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
+static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
 	zend_ast *expr_ast = ast->child[1];
@@ -3572,7 +3571,10 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 				}
 			}
 
-			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr, BP_VAR_R);
+			zend_compile_list_assign(!stmt ? result : NULL, var_ast, &expr_node, var_ast->attr, BP_VAR_R);
+			if (stmt) {
+				result->op_type = IS_UNUSED;
+			}
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -11958,6 +11960,12 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_CAST_VOID:
 			zend_compile_void_cast(NULL, ast);
 			break;
+		case ZEND_AST_ASSIGN: {
+			znode result;
+			zend_compile_assign(&result, ast, true);
+			zend_do_free(&result);
+			return;
+		}
 		case ZEND_AST_ASSIGN_REF:
 			zend_compile_assign_ref(NULL, ast, BP_VAR_R);
 			return;
@@ -12007,7 +12015,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_var(result, ast, BP_VAR_R, false);
 			return;
 		case ZEND_AST_ASSIGN:
-			zend_compile_assign(result, ast);
+			zend_compile_assign(result, ast, false);
 			return;
 		case ZEND_AST_ASSIGN_REF:
 			zend_compile_assign_ref(result, ast, BP_VAR_R);
