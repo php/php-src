@@ -827,9 +827,12 @@ is_string:
 				} else {
 					/* make stream not being closed when the zval is freed */
 					GC_ADDREF(stream->res);
+
+					ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 					pib->context = stream;
 					pib->readcallback = php_libxml_streams_IO_read;
 					pib->closecallback = php_libxml_streams_IO_close;
+					ZEND_DIAGNOSTIC_IGNORED_END
 
 					ret = xmlNewIOInputStream(context, pib, enc);
 					if (ret == NULL) {

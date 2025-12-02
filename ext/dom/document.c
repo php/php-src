@@ -1541,12 +1541,16 @@ PHP_METHOD(DOMDocument, save)
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	format = doc_props->formatoutput;
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		saveempty = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = 1;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	}
 	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = saveempty;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	}
 	if (bytes == -1) {
 		RETURN_FALSE;
@@ -1593,10 +1597,14 @@ PHP_METHOD(DOMDocument, saveXML)
 			RETURN_FALSE;
 		}
 		/* Save libxml2 global, override its vaule, and restore after saving. */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		xmlNodeDump(buf, docp, node, 0, format);
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	} else {
 		buf = xmlBufferCreate();
 		if (!buf) {
@@ -1612,11 +1620,15 @@ PHP_METHOD(DOMDocument, saveXML)
 			converted_options |= XML_SAVE_FORMAT;
 		}
 		/* Save libxml2 global, override its vaule, and restore after saving. */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		/* Encoding is handled from the encoding property set on the document */
 		xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, converted_options);
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		if (UNEXPECTED(!ctxt)) {
 			xmlBufferFree(buf);
 			php_error_docref(NULL, E_WARNING, "Could not create save context");
