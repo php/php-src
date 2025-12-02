@@ -44,13 +44,12 @@ LIVE RANGES:
      1: 0003 - 0009 (loop)
 
 test:
-     ; (lines=5, args=0, vars=0, tmps=0)
+     ; (lines=4, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_032.php:2-9
 0000 GENERATOR_CREATE
-0001 YIELD_FROM array(...)
-0002 YIELD null
-0003 YIELD_FROM array(...)
-0004 GENERATOR_RETURN null
+0001 YIELD null
+0002 YIELD_FROM array(...)
+0003 GENERATOR_RETURN null
 NULL
 3
