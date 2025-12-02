@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.1
+04 Dec 2025, PHP 8.5.1RC1
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
