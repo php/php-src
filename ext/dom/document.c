@@ -1597,12 +1597,16 @@ PHP_METHOD(DOMDocument, save)
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	bool format = doc_props->formatoutput;
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		saveempty = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = 1;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	}
 	zend_long bytes = intern->document->handlers->dump_doc_to_file(file, docp, format, (const char *) docp->encoding);
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = saveempty;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	}
 	if (bytes == -1) {
 		RETURN_FALSE;
@@ -1643,10 +1647,14 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 
 		/* Save libxml2 global, override its value, and restore after saving (don't move me or risk breaking the state
 		 * w.r.t. the implicit return in DOM_GET_OBJ). */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		res = intern->document->handlers->dump_node_to_str(docp, node, format, (const char *) docp->encoding);
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	} else {
 		int converted_options = XML_SAVE_AS_XML;
 		if (options & XML_SAVE_NO_DECL) {
@@ -1657,10 +1665,14 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		}
 
 		/* Save libxml2 global, override its value, and restore after saving. */
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
+		ZEND_DIAGNOSTIC_IGNORED_END
 		res = intern->document->handlers->dump_doc_to_str(docp, converted_options, (const char *) docp->encoding);
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
+		ZEND_DIAGNOSTIC_IGNORED_END
 	}
 
 	if (!res) {
