@@ -4387,7 +4387,11 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 				zend_compile_expr(&len_node, list->child[2]);
 				opline = zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, &len_node);
 				opline->extended_value = Z_LVAL_P(zv);
-				zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+				opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+				if (type == BP_VAR_R || type == BP_VAR_IS) {
+					opline->result_type = IS_TMP_VAR;
+					result->op_type = IS_TMP_VAR;
+				}
 				zend_string_release_ex(name, 0);
 				return SUCCESS;
 			}
