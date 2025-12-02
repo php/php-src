@@ -753,6 +753,36 @@ static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 }
 /* }}} */
 
+bool zend_op_may_elide_result(uint8_t opcode)
+{
+	switch (opcode) {
+		case ZEND_ASSIGN:
+		case ZEND_ASSIGN_DIM:
+		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_OP:
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_PRE_INC_OBJ:
+		case ZEND_PRE_DEC_OBJ:
+		case ZEND_PRE_INC:
+		case ZEND_PRE_DEC:
+		case ZEND_DO_FCALL:
+		case ZEND_DO_ICALL:
+		case ZEND_DO_UCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_YIELD:
+		case ZEND_YIELD_FROM:
+		case ZEND_INCLUDE_OR_EVAL:
+			return true;
+		default:
+			return false;
+	}
+}
+
 static void zend_do_free(znode *op1) /* {{{ */
 {
 	if (op1->op_type == IS_TMP_VAR) {
@@ -779,29 +809,12 @@ static void zend_do_free(znode *op1) /* {{{ */
 					opline->opcode -= 2;
 					SET_UNUSED(opline->result);
 					return;
-				case ZEND_ASSIGN:
-				case ZEND_ASSIGN_DIM:
-				case ZEND_ASSIGN_OBJ:
-				case ZEND_ASSIGN_STATIC_PROP:
-				case ZEND_ASSIGN_OP:
-				case ZEND_ASSIGN_DIM_OP:
-				case ZEND_ASSIGN_OBJ_OP:
-				case ZEND_ASSIGN_STATIC_PROP_OP:
-				case ZEND_PRE_INC_STATIC_PROP:
-				case ZEND_PRE_DEC_STATIC_PROP:
-				case ZEND_PRE_INC_OBJ:
-				case ZEND_PRE_DEC_OBJ:
-				case ZEND_PRE_INC:
-				case ZEND_PRE_DEC:
-				case ZEND_DO_FCALL:
-				case ZEND_DO_ICALL:
-				case ZEND_DO_UCALL:
-				case ZEND_DO_FCALL_BY_NAME:
-				case ZEND_YIELD:
-				case ZEND_YIELD_FROM:
-				case ZEND_INCLUDE_OR_EVAL:
-					SET_UNUSED(opline->result);
-					return;
+				default:
+					if (zend_op_may_elide_result(opline->opcode)) {
+						SET_UNUSED(opline->result);
+						return;
+					}
+					break;
 			}
 		}
 

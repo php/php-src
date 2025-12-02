@@ -289,20 +289,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								MAKE_NOP(opline);
 								++(*opt_count);
 								break;
-							case ZEND_ASSIGN:
-							case ZEND_ASSIGN_DIM:
-							case ZEND_ASSIGN_OBJ:
-							case ZEND_ASSIGN_STATIC_PROP:
-							case ZEND_ASSIGN_OP:
-							case ZEND_ASSIGN_DIM_OP:
-							case ZEND_ASSIGN_OBJ_OP:
-							case ZEND_ASSIGN_STATIC_PROP_OP:
-							case ZEND_PRE_INC:
-							case ZEND_PRE_DEC:
-							case ZEND_PRE_INC_OBJ:
-							case ZEND_PRE_DEC_OBJ:
-							case ZEND_PRE_INC_STATIC_PROP:
-							case ZEND_PRE_DEC_STATIC_PROP:
+							default:
+								if (!zend_op_may_elide_result(src->opcode)) {
+									break;
+								}
 								if (src < op_array->opcodes + block->start) {
 									break;
 								}
@@ -310,8 +300,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
 								++(*opt_count);
-								break;
-							default:
 								break;
 						}
 					}
