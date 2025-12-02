@@ -4613,7 +4613,9 @@ static void accel_reset_arena_info(zend_persistent_script *script)
 	ZEND_HASH_MAP_FOREACH_PTR(&script->script.function_table, op_array) {
 		zend_accel_clear_call_graph_ptrs(op_array);
 	} ZEND_HASH_FOREACH_END();
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_VAL(&script->script.class_table, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->scope == ce
 			 && op_array->type == ZEND_USER_FUNCTION
