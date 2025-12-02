@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Fixed bug GH-18120 (Honor FILE_SKIP_EMPTY_LINES even when
+    FILE_IGNORE_NEW_LINES is not set). (alexandre-daubois)
 
 - Streams:
   . Added so_reuseaddr streams context socket option that allows disabling

@@ -1,5 +1,5 @@
 --TEST--
-Test file() function with FILE_SKIP_EMPTY_LINES flag
+GH-18120 (Honor FILE_SKIP_EMPTY_LINES even when FILE_IGNORE_NEW_LINES is not set)
 --FILE--
 <?php
 $test_file = __DIR__ . "/file_skip_empty_lines.tmp";
@@ -28,8 +28,24 @@ var_dump($lines);
 $lines = file($test_file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
 var_dump($lines);
 
-unlink($test_file);
+file_put_contents($test_file, "\r");
+$lines = file($test_file, FILE_SKIP_EMPTY_LINES);
+var_dump($lines);
+
+file_put_contents($test_file, "\r\r");
+$lines = file($test_file, FILE_SKIP_EMPTY_LINES);
+var_dump($lines);
+
+file_put_contents($test_file, "\n");
+$lines = file($test_file, FILE_SKIP_EMPTY_LINES);
+var_dump($lines);
+
+file_put_contents($test_file, "\r\n");
+$lines = file($test_file, FILE_SKIP_EMPTY_LINES);
+var_dump($lines);
 ?>
+--CLEAN--
+<?php unlink(__DIR__ . "/file_skip_empty_lines.tmp"); ?>
 --EXPECT--
 array(3) {
   [0]=>
@@ -84,14 +100,11 @@ array(6) {
   string(6) "Third
 "
 }
-array(3) {
+array(2) {
   [0]=>
   string(7) "First
 "
   [1]=>
-  string(2) "
-"
-  [2]=>
   string(8) "Second
 "
 }
@@ -100,4 +113,12 @@ array(2) {
   string(5) "First"
   [1]=>
   string(6) "Second"
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
 }
