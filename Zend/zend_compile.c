@@ -9774,12 +9774,71 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* Helper function to check if an alias name appears in a type AST (self-referential check) */
+static bool zend_type_ast_contains_name(zend_ast *ast, zend_string *name) /* {{{ */
+{
+	if (ast == NULL) {
+		return false;
+	}
+
+	switch (ast->kind) {
+		case ZEND_AST_TYPE:
+			/* Built-in types like int, string - never match alias names */
+			return false;
+
+		case ZEND_AST_CLASS_NAME:
+		case ZEND_AST_ZVAL: {
+			/* Check if this name matches the alias name */
+			zend_string *type_name = zend_ast_get_str(ast);
+			if (zend_string_equals_ci(type_name, name)) {
+				return true;
+			}
+			return false;
+		}
+
+		case ZEND_AST_TYPE_UNION:
+		case ZEND_AST_TYPE_INTERSECTION: {
+			/* Recursively check children */
+			zend_ast_list *list = zend_ast_get_list(ast);
+			for (uint32_t i = 0; i < list->children; i++) {
+				if (zend_type_ast_contains_name(list->child[i], name)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		default:
+			if (ast->kind < (1 << ZEND_AST_NUM_CHILDREN_SHIFT) && ast->child[0]) {
+				return zend_type_ast_contains_name(ast->child[0], name);
+			}
+			return false;
+	}
+}
+/* }}} */
+
 static void zend_compile_use_type_alias(zend_ast *ast) /* {{{ */
 {
 	zend_ast *type_ast = ast->child[0];
 	zend_ast *alias_ast = ast->child[1];
 	zend_string *alias_name = zend_ast_get_str(alias_ast);
 	zend_string *lookup_name = zend_string_tolower(alias_name);
+
+	/* Check if alias name is a reserved type name */
+	if (zend_is_reserved_class_name(alias_name)) {
+		zend_string_release_ex(lookup_name, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use '%s' as type alias name as it is reserved",
+			ZSTR_VAL(alias_name));
+	}
+
+	/* Check for self-referential alias */
+	if (zend_type_ast_contains_name(type_ast, alias_name)) {
+		zend_string_release_ex(lookup_name, 0);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type alias '%s' cannot reference itself",
+			ZSTR_VAL(alias_name));
+	}
 
 	/* Initialize imports_type hash table if needed */
 	if (!FC(imports_type)) {
@@ -9789,8 +9848,9 @@ static void zend_compile_use_type_alias(zend_ast *ast) /* {{{ */
 
 	/* Check if alias is already in use */
 	if (zend_hash_exists(FC(imports_type), lookup_name)) {
+		zend_string_release_ex(lookup_name, 0);
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use type alias %s because the name is already in use",
+			"Cannot use type alias '%s' because the name is already in use",
 			ZSTR_VAL(alias_name));
 	}
 
