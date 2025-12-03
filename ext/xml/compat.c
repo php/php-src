@@ -711,23 +711,8 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 PHP_XML_API int
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
-	/* We have to temporarily disable the encoder to satisfy the note from the manual:
-	 * "This function returns byte index according to UTF-8 encoded text disregarding if input is in another encoding."
-	 * Although that should probably be corrected at one point? (TODO) */
-	xmlCharEncodingHandlerPtr encoder = NULL;
-	xmlParserInputPtr input = parser->parser->input;
-	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
-	if (input->buf) {
-		encoder = input->buf->encoder;
-		input->buf->encoder = NULL;
-	}
-	long result = xmlByteConsumed(parser->parser);
-	if (encoder) {
-		input->buf->encoder = encoder;
-	}
-	ZEND_DIAGNOSTIC_IGNORED_END
-	/* TODO: at one point this should return long probably to make sure that files greater than 2 GiB are handled correctly. */
-	return (int) result;
+	return parser->parser->input->consumed +
+			(parser->parser->input->cur - parser->parser->input->base);
 }
 
 PHP_XML_API int
