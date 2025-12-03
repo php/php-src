@@ -716,6 +716,7 @@ XML_GetCurrentByteIndex(XML_Parser parser)
 	 * Although that should probably be corrected at one point? (TODO) */
 	xmlCharEncodingHandlerPtr encoder = NULL;
 	xmlParserInputPtr input = parser->parser->input;
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	if (input->buf) {
 		encoder = input->buf->encoder;
 		input->buf->encoder = NULL;
@@ -724,6 +725,7 @@ XML_GetCurrentByteIndex(XML_Parser parser)
 	if (encoder) {
 		input->buf->encoder = encoder;
 	}
+	ZEND_DIAGNOSTIC_IGNORED_END
 	/* TODO: at one point this should return long probably to make sure that files greater than 2 GiB are handled correctly. */
 	return (int) result;
 }
