@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.16
+04 Dec 2025, PHP 8.4.16
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
