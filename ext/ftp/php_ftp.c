@@ -147,7 +147,7 @@ PHP_FUNCTION(ftp_connect)
 		RETURN_THROWS();
 	}
 
-	const zend_long timeoutmax = (zend_long)((double) PHP_TIMEOUT_ULL_MAX / 1000000.0);
+	const uint64_t timeoutmax = (uint64_t)((double) PHP_TIMEOUT_ULL_MAX / 1000000.0);
 
 	if (timeout_sec <= 0) {
 		zend_argument_value_error(3, "must be greater than 0");
@@ -155,7 +155,7 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	if (timeout_sec >= timeoutmax) {
-		zend_argument_value_error(3, "must be less than " ZEND_LONG_FMT, timeoutmax);
+		zend_argument_value_error(3, "must be less than " ZEND_ULONG_FMT, timeoutmax);
 		RETURN_THROWS();
 	}
 
