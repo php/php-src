@@ -237,72 +237,89 @@ PHP_MINFO_FUNCTION(curl)
 
 	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
-	php_info_print_table_row(2, "cURL support",    "enabled");
-	php_info_print_table_row(2, "cURL Information", d->version);
+	php_info_print_table_row(2, "cURL support", "enabled");
+	php_info_print_table_row(2, "cURL version", d->version);
 	snprintf(str, sizeof(str), "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
+	php_info_print_table_row(2, "Host", d->host);
 
-	/* To update on each new cURL release using src/main.c in cURL sources */
-	/* make sure to sync this list with curl_version as well */
-	if (d->features) {
-		struct feat {
-			const char *name;
-			int bitmask;
-		};
+	// Features
+#if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0	CURLVERSION_ELEVENTH */
+		n = 0;
+		p = (char **) d->feature_names;
+		while (*p != NULL) {
+				n += snprintf(str + n, sizeof(str) - n, "%s%s", *p, *(p + 1) != NULL ? ", " : "");
+				p++;
+		}
+		php_info_print_table_row(2, "Features", str);
+#else
+		/* To update on each new cURL release using src/main.c in cURL sources */
+		/* make sure to sync this list with curl_version as well */
+		if (d->features) {
+			struct feat {
+				const char *name;
+				int bitmask;
+			};
 
-		unsigned int i;
+			unsigned int i;
 
-		static const struct feat feats[] = {
-			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
-			{"CharConv", CURL_VERSION_CONV},
-			{"Debug", CURL_VERSION_DEBUG},
-			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
-			{"IDN", CURL_VERSION_IDN},
-			{"IPv6", CURL_VERSION_IPV6},
-			{"krb4", CURL_VERSION_KERBEROS4},
-			{"Largefile", CURL_VERSION_LARGEFILE},
-			{"libz", CURL_VERSION_LIBZ},
-			{"NTLM", CURL_VERSION_NTLM},
-			{"NTLMWB", CURL_VERSION_NTLM_WB},
-			{"SPNEGO", CURL_VERSION_SPNEGO},
-			{"SSL",  CURL_VERSION_SSL},
-			{"SSPI",  CURL_VERSION_SSPI},
-			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
-			{"HTTP2", CURL_VERSION_HTTP2},
-			{"GSSAPI", CURL_VERSION_GSSAPI},
-			{"KERBEROS5", CURL_VERSION_KERBEROS5},
-			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
-			{"PSL", CURL_VERSION_PSL},
-			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
-			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
-			{"BROTLI", CURL_VERSION_BROTLI},
-#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
-			{"ALTSVC", CURL_VERSION_ALTSVC},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
-			{"HTTP3", CURL_VERSION_HTTP3},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
-			{"UNICODE", CURL_VERSION_UNICODE},
-			{"ZSTD", CURL_VERSION_ZSTD},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
-			{"HSTS", CURL_VERSION_HSTS},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
-			{"GSASL", CURL_VERSION_GSASL},
-#endif
-			{NULL, 0}
-		};
+			static const struct feat feats[] = {
+				{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+				{"CharConv", CURL_VERSION_CONV},
+				{"Debug", CURL_VERSION_DEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
+				{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+				{"IDN", CURL_VERSION_IDN},
+				{"IPv6", CURL_VERSION_IPV6},
+				{"krb4", CURL_VERSION_KERBEROS4},
+				{"Largefile", CURL_VERSION_LARGEFILE},
+				{"libz", CURL_VERSION_LIBZ},
+				{"NTLM", CURL_VERSION_NTLM},
+				{"NTLMWB", CURL_VERSION_NTLM_WB},
+				{"SPNEGO", CURL_VERSION_SPNEGO},
+				{"SSL",  CURL_VERSION_SSL},
+				{"SSPI",  CURL_VERSION_SSPI},
+				{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+				{"HTTP2", CURL_VERSION_HTTP2},
+				{"GSSAPI", CURL_VERSION_GSSAPI},
+				{"KERBEROS5", CURL_VERSION_KERBEROS5},
+				{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
+				{"PSL", CURL_VERSION_PSL},
+				{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
+				{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+				{"BROTLI", CURL_VERSION_BROTLI},
+	#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+				{"ALTSVC", CURL_VERSION_ALTSVC},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+				{"HTTP3", CURL_VERSION_HTTP3},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+				{"UNICODE", CURL_VERSION_UNICODE},
+				{"ZSTD", CURL_VERSION_ZSTD},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+				{"HSTS", CURL_VERSION_HSTS},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+				{"GSASL", CURL_VERSION_GSASL},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+				{"ThreadSafe", CURL_VERSION_THREADSAFE},
+	#endif
+				{NULL, 0}
+			};
 
-		php_info_print_table_row(1, "Features");
-		for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
-			if (feats[i].name) {
-				php_info_print_table_row(2, feats[i].name, d->features & feats[i].bitmask ? "Yes" : "No");
+			php_info_print_table_row(1, "Features");
+			for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
+				if (feats[i].name) {
+					php_info_print_table_row(2, feats[i].name, d->features & feats[i].bitmask ? "Yes" : "No");
+				}
 			}
 		}
-	}
+#endif
 
+	// Protocols
 	n = 0;
 	p = (char **) d->protocols;
 	while (*p != NULL) {
@@ -311,35 +328,78 @@ PHP_MINFO_FUNCTION(curl)
 	}
 	php_info_print_table_row(2, "Protocols", str);
 
-	php_info_print_table_row(2, "Host", d->host);
-
+	// SSL
 	if (d->ssl_version) {
 		php_info_print_table_row(2, "SSL Version", d->ssl_version);
 	}
+	n = 0;
+	int i;
+	const curl_ssl_backend **list;
+	curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
+	for(i = 0; list[i]; i++) {
+		n += snprintf(str + n, sizeof(str) - n, "%s%s", list[i]->name, list[i+1] != NULL ? ", " : "");
+	}
+	php_info_print_table_row(2, "SSL backends", str);
 
+	// Feature versions
 	if (d->libz_version) {
-		php_info_print_table_row(2, "ZLib Version", d->libz_version);
+		php_info_print_table_row(2, "Zlib Version", d->libz_version);
 	}
-
-#if defined(CURLVERSION_SECOND) && CURLVERSION_NOW >= CURLVERSION_SECOND
+#if LIBCURL_VERSION_NUM >= 0x070B01 /* Available since 7.11.1	CURLVERSION_SECOND */
 	if (d->ares) {
-		php_info_print_table_row(2, "ZLib Version", d->ares);
+		php_info_print_table_row(2, "c-ares Version", d->ares);
 	}
 #endif
-
-#if defined(CURLVERSION_THIRD) && CURLVERSION_NOW >= CURLVERSION_THIRD
+#if LIBCURL_VERSION_NUM >= 0x070C00 /* Available since 7.12.0	CURLVERSION_THIRD */
 	if (d->libidn) {
-		php_info_print_table_row(2, "libIDN Version", d->libidn);
+		php_info_print_table_row(2, "Libidn Version", d->libidn);
 	}
 #endif
-
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
 	if (d->iconv_ver_num) {
-		php_info_print_table_row(2, "IconV Version", d->iconv_ver_num);
+		php_info_print_table_row(2, "Iconv Version", d->iconv_ver_num);
 	}
-
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
 	if (d->libssh_version) {
-		php_info_print_table_row(2, "libSSH Version", d->libssh_version);
+		php_info_print_table_row(2, "Libssh Version", d->libssh_version);
 	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0	CURLVERSION_FIFTH */
+	if (d->brotli_version) {
+		php_info_print_table_row(2, "Brotli Version", d->brotli_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->nghttp2_version) {
+		php_info_print_table_row(2, "Nghttp2 Version", d->nghttp2_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->quic_version) {
+		php_info_print_table_row(2, "QUIC Version", d->quic_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0	CURLVERSION_EIGHTH */
+	if (d->zstd_version) {
+		php_info_print_table_row(2, "Zstd Version", d->zstd_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0	CURLVERSION_NINTH */
+	if ( d->hyper_version) {
+		php_info_print_table_row(2, "Hyper Version", d->hyper_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0	CURLVERSION_TENTH */
+	if (d->gsasl_version) {
+		php_info_print_table_row(2, "GNU SASL Version", d->gsasl_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0	CURLVERSION_TWELFTH */
+	if (d->rtmp_version) {
+		php_info_print_table_row(2, "RTMP Version", d->rtmp_version);
+	}
+#endif
 
 	php_info_print_table_end();
 
@@ -685,8 +745,8 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-    	return rval;
-    }
+		return rval;
+	}
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_prereqfunction() called\n");
@@ -881,42 +941,42 @@ static int curl_debug(CURL *handle, curl_infotype type, char *data, size_t size,
 {
 	php_curl *ch = (php_curl *)clientp;
 
-    #if PHP_CURL_DEBUG
-    	fprintf(stderr, "curl_debug() called\n");
-    	fprintf(stderr, "type = %d, data = %s\n", type, data);
-    #endif
+	#if PHP_CURL_DEBUG
+		fprintf(stderr, "curl_debug() called\n");
+		fprintf(stderr, "type = %d, data = %s\n", type, data);
+	#endif
 
 	// Implicitly store the headers for compatibility with CURLINFO_HEADER_OUT
 	// used as a Curl option. Previously, setting CURLINFO_HEADER_OUT set curl_debug
 	// as the CURLOPT_DEBUGFUNCTION and stored the debug data when type is set to
 	// CURLINFO_HEADER_OUT. For backward compatibility, we now store the headers
 	// but also call the user-callback function if available.
-    if (type == CURLINFO_HEADER_OUT) {
-    	if (ch->header.str) {
-    		zend_string_release_ex(ch->header.str, 0);
-    	}
-    	ch->header.str = zend_string_init(data, size, 0);
-    }
+	if (type == CURLINFO_HEADER_OUT) {
+		if (ch->header.str) {
+			zend_string_release_ex(ch->header.str, 0);
+		}
+		ch->header.str = zend_string_init(data, size, 0);
+	}
 
-    if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-       	return 0;
-    }
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
+	   	return 0;
+	}
 
-    zval args[3];
+	zval args[3];
 
-    GC_ADDREF(&ch->std);
-    ZVAL_OBJ(&args[0], &ch->std);
-    ZVAL_LONG(&args[1], type);
-    ZVAL_STRINGL(&args[2], data, size);
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], type);
+	ZVAL_STRINGL(&args[2], data, size);
 
-    ch->in_callback = true;
-    zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
-    ch->in_callback = false;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-    zval_ptr_dtor(&args[0]);
-    zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[2]);
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
@@ -964,104 +1024,173 @@ PHP_FUNCTION(curl_version)
 
 	array_init(return_value);
 
+	CAAS("version", d->version);
 	CAAL("version_number", d->version_num);
 	CAAL("age", d->age);
+	CAAS("host", d->host);
 	CAAL("features", d->features);
 	/* Add an array of features */
-	{
-		struct feat {
-			const char *name;
-			int bitmask;
-		};
-
-		unsigned int i;
-		zval feature_list;
-		array_init(&feature_list);
-
-		/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
-		static const struct feat feats[] = {
-			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
-			{"CharConv", CURL_VERSION_CONV},
-			{"Debug", CURL_VERSION_DEBUG},
-			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
-			{"IDN", CURL_VERSION_IDN},
-			{"IPv6", CURL_VERSION_IPV6},
-			{"krb4", CURL_VERSION_KERBEROS4},
-			{"Largefile", CURL_VERSION_LARGEFILE},
-			{"libz", CURL_VERSION_LIBZ},
-			{"NTLM", CURL_VERSION_NTLM},
-			{"NTLMWB", CURL_VERSION_NTLM_WB},
-			{"SPNEGO", CURL_VERSION_SPNEGO},
-			{"SSL",  CURL_VERSION_SSL},
-			{"SSPI",  CURL_VERSION_SSPI},
-			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
-			{"HTTP2", CURL_VERSION_HTTP2},
-			{"GSSAPI", CURL_VERSION_GSSAPI},
-			{"KERBEROS5", CURL_VERSION_KERBEROS5},
-			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
-			{"PSL", CURL_VERSION_PSL},
-			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
-			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
-			{"BROTLI", CURL_VERSION_BROTLI},
-#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
-			{"ALTSVC", CURL_VERSION_ALTSVC},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
-			{"HTTP3", CURL_VERSION_HTTP3},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
-			{"UNICODE", CURL_VERSION_UNICODE},
-			{"ZSTD", CURL_VERSION_ZSTD},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
-			{"HSTS", CURL_VERSION_HSTS},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
-			{"GSASL", CURL_VERSION_GSASL},
-#endif
-		};
-
-		for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
-			if (feats[i].name) {
-				add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+	zval feature_list;
+	array_init(&feature_list);
+#if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0	CURLVERSION_ELEVENTH */
+		{
+			char **p = (char **) d->feature_names;
+			while (*p != NULL) {
+				add_assoc_bool(&feature_list, *p, true);
+				p++;
 			}
 		}
+#else
+		{
+			struct feat {
+				const char *name;
+				int bitmask;
+			};
 
-		CAAZ("feature_list", &feature_list);
-	}
-	CAAL("ssl_version_number", d->ssl_version_num);
-	CAAS("version", d->version);
-	CAAS("host", d->host);
-	CAAS("ssl_version", d->ssl_version);
-	CAAS("libz_version", d->libz_version);
+			unsigned int i;
+
+			/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
+			static const struct feat feats[] = {
+				{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+				{"CharConv", CURL_VERSION_CONV},
+				{"Debug", CURL_VERSION_DEBUG},
+				{"MemoryDebug", CURL_VERSION_CURLDEBUG},
+				{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+				{"IDN", CURL_VERSION_IDN},
+				{"IPv6", CURL_VERSION_IPV6},
+				{"krb4", CURL_VERSION_KERBEROS4},
+				{"Largefile", CURL_VERSION_LARGEFILE},
+				{"libz", CURL_VERSION_LIBZ},
+				{"NTLM", CURL_VERSION_NTLM},
+				{"NTLMWB", CURL_VERSION_NTLM_WB},
+				{"SPNEGO", CURL_VERSION_SPNEGO},
+				{"SSL",  CURL_VERSION_SSL},
+				{"SSPI",  CURL_VERSION_SSPI},
+				{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+				{"HTTP2", CURL_VERSION_HTTP2},
+				{"GSSAPI", CURL_VERSION_GSSAPI},
+				{"KERBEROS5", CURL_VERSION_KERBEROS5},
+				{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
+				{"PSL", CURL_VERSION_PSL},
+				{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
+				{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+				{"BROTLI", CURL_VERSION_BROTLI},
+	#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+				{"ALTSVC", CURL_VERSION_ALTSVC},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+				{"HTTP3", CURL_VERSION_HTTP3},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+				{"UNICODE", CURL_VERSION_UNICODE},
+				{"ZSTD", CURL_VERSION_ZSTD},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+				{"HSTS", CURL_VERSION_HSTS},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+				{"GSASL", CURL_VERSION_GSASL},
+	#endif
+	#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+				{"ThreadSafe", CURL_VERSION_THREADSAFE},
+	#endif
+			};
+
+			for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
+				if (feats[i].name) {
+					add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+				}
+			}
+		}
+#endif
+	CAAZ("feature_list", &feature_list);
+
 	/* Add an array of protocols */
 	{
 		char **p = (char **) d->protocols;
 		zval protocol_list;
-
 		array_init(&protocol_list);
-
 		while (*p != NULL) {
 			add_next_index_string(&protocol_list, *p);
 			p++;
 		}
 		CAAZ("protocols", &protocol_list);
 	}
-	if (d->age >= 1) {
-		CAAS("ares", d->ares);
-		CAAL("ares_num", d->ares_num);
+	/* Add an array of ssl backends */
+	{
+		zval ssl_backends;
+		array_init(&ssl_backends);
+		int i;
+		const curl_ssl_backend **list;
+		curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
+		for(i = 0; list[i]; i++) 
+			add_next_index_string (&ssl_backends, list[i]->name);
+		CAAZ("ssl_backends", &ssl_backends);
 	}
-	if (d->age >= 2) {
-		CAAS("libidn", d->libidn);
+	zval features_version;
+	array_init(&features_version);
+	if (d->ssl_version) {
+		add_assoc_string (&features_version, "ssl", d->ssl_version);
 	}
-	if (d->age >= 3) {
-		CAAL("iconv_ver_num", d->iconv_ver_num);
-		CAAS("libssh_version", d->libssh_version);
+	if (d->libz_version) {
+		add_assoc_string (&features_version, "libz", d->libz_version);
 	}
-	if (d->age >= 4) {
-		CAAL("brotli_ver_num", d->brotli_ver_num);
-		CAAS("brotli_version", d->brotli_version);
+#if LIBCURL_VERSION_NUM >= 0x070B01 /* Available since 7.11.1	CURLVERSION_SECOND */
+	if (d->ares) {
+		add_assoc_string (&features_version, "ares", d->ares);
 	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070C00 /* Available since 7.12.0	CURLVERSION_THIRD */
+	if (d->libidn) {
+		add_assoc_string (&features_version, "libidn", d->libidn);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->iconv_ver_num) {
+		add_assoc_long (&features_version, "iconv", d->iconv_ver_num);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1	CURLVERSION_FOURTH */
+	if (d->libssh_version) {
+		add_assoc_string (&features_version, "libssh", d->libssh_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0	CURLVERSION_FIFTH */
+	if (d->brotli_version) {
+		add_assoc_string (&features_version, "brotli", d->brotli_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->nghttp2_version) {
+		add_assoc_string (&features_version, "nghttp2", d->nghttp2_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0	CURLVERSION_SIXTH */
+	if (d->quic_version) {
+		add_assoc_string (&features_version, "quic", d->quic_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0	CURLVERSION_EIGHTH */
+	if (d->zstd_version) {
+		add_assoc_string (&features_version, "zstd", d->zstd_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0	CURLVERSION_NINTH */
+	if (d->hyper_version) {
+		add_assoc_string (&features_version, "hyper", d->hyper_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0	CURLVERSION_TENTH */
+	if (d->gsasl_version) {
+		add_assoc_string (&features_version, "gsasl", d->gsasl_version);
+	}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0	CURLVERSION_TWELFTH */
+	if (d->rtmp_version) {
+		add_assoc_string (&features_version, "rtmp", d->rtmp_version);
+	}
+#endif
+	CAAZ("features_version", &features_version);
 }
 /* }}} */
 
@@ -2222,9 +2351,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLINFO_HEADER_OUT:
 			if (ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-                zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
-                return FAILURE;
-            }
+				zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
+				return FAILURE;
+			}
 
 			if (zend_is_true(zvalue)) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
