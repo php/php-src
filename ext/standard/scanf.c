@@ -328,9 +328,7 @@ static int ValidateFormat(char *format, uint32_t numVars, uint32_t *totalSubs)
 		nassign = safe_emalloc(sizeof(uint32_t), numVars, 0);
 		nspace = numVars;
 	}
-	for (i = 0; i < nspace; i++) {
-		nassign[i] = 0;
-	}
+	memset(nassign, 0, sizeof(uint32_t)*numVars);
 
 	while (*format != '\0') {
 		ch = format++;
