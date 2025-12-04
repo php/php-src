@@ -114,7 +114,7 @@ typedef zend_long (*int_string_formater)(const char*, char**, int);
 static char *BuildCharSet(CharSet *cset, char *format);
 static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
-static inline void scan_set_error_return(int numVars, zval *return_value);
+static inline void scan_set_error_return(bool assignToVariables, zval *return_value);
 
 
 /* {{{ BuildCharSet
@@ -313,6 +313,7 @@ static int ValidateFormat(char *format, int numVars, int *totalSubs)
 	int *nassign = staticAssign;
 	int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
 
+	bool assignToVariables = numVars;
 	/*
 	 * Initialize an array that records the number of times a variable
 	 * is assigned to by the format string.  We use this to detect if
@@ -361,9 +362,9 @@ static int ValidateFormat(char *format, int numVars, int *totalSubs)
 			if (gotSequential) {
 				goto mixedXPG;
 			}
-			if ((value < 1) || (numVars && (value > numVars))) {
+			if ((value < 1) || (assignToVariables && (value > numVars))) {
 				goto badIndex;
-			} else if (numVars == 0) {
+			} else if (!assignToVariables) {
 				/*
 				 * In the case where no vars are specified, the user can
 				 * specify %9999$ legally, so we have to consider special
@@ -410,7 +411,7 @@ xpgCheckDone:
 			ch = format++;
 		}
 
-		if (!(flags & SCAN_SUPPRESS) && numVars && (objIndex >= numVars)) {
+		if (!(flags & SCAN_SUPPRESS) && assignToVariables && (objIndex >= numVars)) {
 			goto badIndex;
 		}
 
@@ -513,7 +514,7 @@ badSet:
 	/*
 	 * Verify that all of the variable were assigned exactly once.
 	 */
-	if (numVars == 0) {
+	if (!assignToVariables) {
 		if (xpgSize) {
 			numVars = xpgSize;
 		} else {
@@ -595,11 +596,13 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		numVars = 0;
 	}
 
+	bool assignToVariables = numVars;
+
 	/*
 	 * Check for errors in the format string.
 	 */
 	if (ValidateFormat(format, numVars, &totalVars) != SCAN_SUCCESS) {
-		scan_set_error_return( numVars, return_value );
+		scan_set_error_return( assignToVariables, return_value );
 		return SCAN_ERROR_INVALID_FORMAT;
 	}
 
@@ -608,7 +611,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	/*
 	 * If any variables are passed, make sure they are all passed by reference
 	 */
-	if (numVars) {
+	if (assignToVariables) {
 		for (i = 0; i < argCount; i++){
 			ZEND_ASSERT(Z_ISREF(args[i]) && "Parameter must be passed by reference");
 		}
@@ -618,7 +621,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 * Allocate space for the result objects. Only happens when no variables
 	 * are specified
 	 */
-	if (!numVars) {
+	if (!assignToVariables) {
 		zval tmp;
 
 		/* allocate an array for return */
@@ -720,9 +723,9 @@ literal:
 		switch (*ch) {
 			case 'n':
 				if (!(flags & SCAN_SUPPRESS)) {
-					if (numVars && objIndex >= argCount) {
+					if (assignToVariables && objIndex >= argCount) {
 						break;
-					} else if (numVars) {
+					} else if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_LONG(current, (zend_long) (string - baseString));
 					} else {
@@ -838,9 +841,9 @@ literal:
 					}
 				}
 				if (!(flags & SCAN_SUPPRESS)) {
-					if (numVars && objIndex >= argCount) {
+					if (assignToVariables && objIndex >= argCount) {
 						break;
-					} else if (numVars) {
+					} else if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
 					} else {
@@ -878,9 +881,9 @@ literal:
 					goto done;
 				}
 				if (!(flags & SCAN_SUPPRESS)) {
-					if (numVars && objIndex >= argCount) {
+					if (assignToVariables && objIndex >= argCount) {
 						break;
-					} else if (numVars) {
+					} else if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
 					} else {
@@ -897,7 +900,7 @@ literal:
 				sch = *string;
 				string++;
 				if (!(flags & SCAN_SUPPRESS)) {
-					if (numVars) {
+					if (assignToVariables) {
 						char __buf[2];
 						__buf[0] = sch;
 						__buf[1] = '\0';
@@ -1030,9 +1033,9 @@ addToInt:
 					value = (zend_long) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
 						snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, value); /* INTL: ISO digit */
-						if (numVars && objIndex >= argCount) {
+						if (assignToVariables && objIndex >= argCount) {
 							break;
-						} else if (numVars) {
+						} else if (assignToVariables) {
 							 /* change passed value type to string */
 							current = args + objIndex++;
 							ZEND_TRY_ASSIGN_REF_STRING(current, buf);
@@ -1040,9 +1043,9 @@ addToInt:
 							add_index_string(return_value, objIndex++, buf);
 						}
 					} else {
-						if (numVars && objIndex >= argCount) {
+						if (assignToVariables && objIndex >= argCount) {
 							break;
-						} else if (numVars) {
+						} else if (assignToVariables) {
 							current = args + objIndex++;
 							ZEND_TRY_ASSIGN_REF_LONG(current, value);
 						} else {
@@ -1144,9 +1147,9 @@ addToFloat:
 					double dvalue;
 					*end = '\0';
 					dvalue = zend_strtod(buf, NULL);
-					if (numVars && objIndex >= argCount) {
+					if (assignToVariables && objIndex >= argCount) {
 						break;
-					} else if (numVars) {
+					} else if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_DOUBLE(current, dvalue);
 					} else {
@@ -1162,9 +1165,9 @@ done:
 	result = SCAN_SUCCESS;
 
 	if (underflow && (0==nconversions)) {
-		scan_set_error_return( numVars, return_value );
+		scan_set_error_return( assignToVariables, return_value );
 		result = SCAN_ERROR_EOF;
-	} else if (numVars) {
+	} else if (assignToVariables) {
 		zval_ptr_dtor(return_value );
 		ZVAL_LONG(return_value, nconversions);
 	} else if (nconversions < totalVars) {
@@ -1175,9 +1178,9 @@ done:
 /* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
+static inline void scan_set_error_return(bool assignToVariables, zval *return_value) /* {{{ */
 {
-	if (numVars) {
+	if (assignToVariables) {
 		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
