@@ -60,7 +60,7 @@ Testing 'int' type:
 int(1)
 
 *** Trying string(1) "1"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
 
 *** Trying float(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
@@ -69,13 +69,13 @@ int(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, empty string given, called in %s on line %d
 
 *** Trying int(2147483647)
 int(2147483647)
