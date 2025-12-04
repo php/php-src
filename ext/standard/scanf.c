@@ -304,16 +304,19 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
+static int ValidateFormat(char *format, uint32_t numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
-	int value, i, flags;
+	int flags;
 	bool gotXpg = false;
 	bool gotSequential = false;
 	char *end, *ch = NULL;
-	int staticAssign[STATIC_LIST_SIZE];
-	int *nassign = staticAssign;
-	int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
+	uint32_t staticAssign[STATIC_LIST_SIZE];
+	uint32_t *nassign = staticAssign;
+	uint32_t objIndex = 0;
+	uint32_t xpgSize = 0;
+	uint32_t nspace = STATIC_LIST_SIZE;
+	zend_ulong value;
 
 	bool assignToVariables = numVars;
 	/*
@@ -322,14 +325,12 @@ static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 	 * a variable is multiply assigned or left unassigned.
 	 */
 	if (numVars > nspace) {
-		nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
+		nassign = safe_emalloc(sizeof(uint32_t), numVars, 0);
 		nspace = numVars;
 	}
 	for (i = 0; i < nspace; i++) {
 		nassign[i] = 0;
 	}
-
-	xpgSize = objIndex = 0;
 
 	while (*format != '\0') {
 		ch = format++;
@@ -490,7 +491,7 @@ badSet:
 				 * make sure that we grow to a large enough size.  xpgSize is
 				 * guaranteed to be at least one larger than objIndex.
 				 */
-				value = nspace;
+				uint32_t value = nspace;
 				if (xpgSize) {
 					nspace = xpgSize;
 				} else {
@@ -498,13 +499,13 @@ badSet:
 				}
 				if (nassign == staticAssign) {
 					nassign = (void *)safe_emalloc(nspace, sizeof(int), 0);
-					for (i = 0; i < STATIC_LIST_SIZE; ++i) {
+					for (uint32_t i = 0; i < STATIC_LIST_SIZE; ++i) {
 						nassign[i] = staticAssign[i];
 					}
 				} else {
 					nassign = (void *)erealloc((void *)nassign, nspace * sizeof(int));
 				}
-				for (i = value; i < nspace; i++) {
+				for (uint32_t i = value; i < nspace; i++) {
 					nassign[i] = 0;
 				}
 			}
@@ -526,7 +527,7 @@ badSet:
 
 	*totalSubs = numVars;
 
-	for (i = 0; i < numVars; i++) {
+	for (uint32_t i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
 			zend_value_error("%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
 			goto error;
