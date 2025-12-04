@@ -776,9 +776,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 
 ZEND_METHOD(WeakMap, count)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_long count;
 	zend_weakmap_count_elements(Z_OBJ_P(ZEND_THIS), &count);
@@ -787,9 +785,7 @@ ZEND_METHOD(WeakMap, count)
 
 ZEND_METHOD(WeakMap, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
