@@ -34,7 +34,7 @@ float(-1.2)
 --- testing: '0' - '-7.7' ---
 float(7.7)
 --- testing: '0' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '0' - '123abc' ---
 int(-123)
 --- testing: '0' - '123e5' ---
@@ -50,7 +50,7 @@ int(-123)
 --- testing: '0' - '3.4a' ---
 float(-3.4)
 --- testing: '0' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '65' - '0' ---
 int(65)
 --- testing: '65' - '65' ---
@@ -62,7 +62,7 @@ float(63.8)
 --- testing: '65' - '-7.7' ---
 float(72.7)
 --- testing: '65' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '65' - '123abc' ---
 int(-58)
 --- testing: '65' - '123e5' ---
@@ -78,7 +78,7 @@ int(-58)
 --- testing: '65' - '3.4a' ---
 float(61.6)
 --- testing: '65' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '-44' - '0' ---
 int(-44)
 --- testing: '-44' - '65' ---
@@ -90,7 +90,7 @@ float(-45.2)
 --- testing: '-44' - '-7.7' ---
 float(-36.3)
 --- testing: '-44' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '-44' - '123abc' ---
 int(-167)
 --- testing: '-44' - '123e5' ---
@@ -106,7 +106,7 @@ int(-167)
 --- testing: '-44' - '3.4a' ---
 float(-47.4)
 --- testing: '-44' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '1.2' - '0' ---
 float(1.2)
 --- testing: '1.2' - '65' ---
@@ -118,7 +118,7 @@ float(0)
 --- testing: '1.2' - '-7.7' ---
 float(8.9)
 --- testing: '1.2' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '1.2' - '123abc' ---
 float(-121.8)
 --- testing: '1.2' - '123e5' ---
@@ -134,7 +134,7 @@ float(-121.8)
 --- testing: '1.2' - '3.4a' ---
 float(-2.2)
 --- testing: '1.2' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '-7.7' - '0' ---
 float(-7.7)
 --- testing: '-7.7' - '65' ---
@@ -146,7 +146,7 @@ float(-8.9)
 --- testing: '-7.7' - '-7.7' ---
 float(0)
 --- testing: '-7.7' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '-7.7' - '123abc' ---
 float(-130.7)
 --- testing: '-7.7' - '123e5' ---
@@ -162,23 +162,23 @@ float(-130.7)
 --- testing: '-7.7' - '3.4a' ---
 float(-11.1)
 --- testing: '-7.7' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: 'abc' - '0' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - '65' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - '-44' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - '1.2' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - '-7.7' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - 'abc' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'abc' - '123abc' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'abc' - '123e5' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'abc' - '123e5xyz' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'abc' - ' 123abc' ---
@@ -230,7 +230,7 @@ float(12299998.8)
 --- testing: '123e5' - '-7.7' ---
 float(12300007.7)
 --- testing: '123e5' - 'abc' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '123e5' - '123abc' ---
 float(12299877)
 --- testing: '123e5' - '123e5' ---
@@ -246,7 +246,7 @@ float(12299877)
 --- testing: '123e5' - '3.4a' ---
 float(12299996.6)
 --- testing: '123e5' - 'a5.9' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: string - non-numeric-string
 --- testing: '123e5xyz' - '0' ---
 float(12300000)
 --- testing: '123e5xyz' - '65' ---
@@ -388,21 +388,21 @@ float(0)
 --- testing: '3.4a' - 'a5.9' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'a5.9' - '0' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - '65' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - '-44' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - '1.2' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - '-7.7' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - 'abc' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'a5.9' - '123abc' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'a5.9' - '123e5' ---
-Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - string
 --- testing: 'a5.9' - '123e5xyz' ---
 Unsupported operand types: non-numeric-string - non-numeric-string
 --- testing: 'a5.9' - ' 123abc' ---

@@ -163,7 +163,8 @@ ZEND_API const char *zend_zval_numeric_string_value_name(const zval *arg)
 		zend_long lval;
         double dval;
 
-        if (is_numeric_string_ex(Z_STRVAL_P(val), Z_STRLEN_P(val),&lval, &dval, 0, NULL)) 
+		bool trailing_data = false;
+        if (is_numeric_string_ex(Z_STRVAL_P(val), Z_STRLEN_P(val),&lval, &dval, 0, NULL, &trailing_data)) 
 		{
             return "string";
         }

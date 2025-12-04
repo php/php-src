@@ -21,4 +21,4 @@ try {
 ?>
 --EXPECTF--
 int(42)
-test(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
+test(): Argument #1 ($i) must be of type int, string given, called in %s on line %d

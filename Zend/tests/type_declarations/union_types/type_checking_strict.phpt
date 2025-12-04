@@ -66,8 +66,8 @@ Type int|float:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, empty-string given
@@ -82,8 +82,8 @@ Type int|float|false:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, empty-string given
@@ -98,8 +98,8 @@ Type int|float|bool:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, empty-string given
@@ -114,8 +114,8 @@ Type int|bool:
 42               => 42
 42.0             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, float given
 INF              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, float given
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, empty-string given
@@ -162,8 +162,8 @@ Type float|array:
 42               => 42.0
 42.0             => 42.0
 INF              => INF
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, empty-string given
@@ -194,8 +194,8 @@ Type bool|array:
 42               => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, int given
 42.0             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, float given
 INF              => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, float given
-"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, non-numeric-string given
-"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, non-numeric-string given
+"42"             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, string given
+"42.0"           => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, string given
 "42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, non-numeric-string given
 "x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, non-numeric-string given
 ""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, empty-string given

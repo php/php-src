@@ -29,6 +29,6 @@ try {
 ?>
 --EXPECTF--
 test(): Argument #1 ($v) must be of type true, int given, called in %s on line %d
-test(): Argument #1 ($v) must be of type true, non-numeric-string given, called in %s on line %d
+test(): Argument #1 ($v) must be of type true, string given, called in %s on line %d
 test(): Argument #1 ($v) must be of type true, array given, called in %s on line %d
 test(): Argument #1 ($v) must be of type true, stdClass given, called in %s on line %d

@@ -60,7 +60,7 @@ int(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying string value
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying true value
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, bool given, called in %s on line %d
@@ -89,7 +89,7 @@ float(1)
 float(1)
 
 *** Trying string value
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying true value
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, bool given, called in %s on line %d
@@ -147,7 +147,7 @@ Testing 'bool' type:
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
 
 *** Trying string value
-*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric-string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, string given, called in %s on line %d
 
 *** Trying true value
 bool(true)

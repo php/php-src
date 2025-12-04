@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECTF--
-takesInt(): Argument #1 ($x) must be of type int, non-numeric-string given, called in %s on line %d
+takesInt(): Argument #1 ($x) must be of type int, string given, called in %s on line %d

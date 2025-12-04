@@ -23,7 +23,7 @@ object(MyAttribute)#1 (1) {
   int(42)
 }
 
-Fatal error: Uncaught TypeError: MyAttribute::__construct(): Argument #1 ($value) must be of type int, non-numeric-string given, called in %s030_strict_types.inc on line 4 and defined in %s030_strict_types.php:5
+Fatal error: Uncaught TypeError: MyAttribute::__construct(): Argument #1 ($value) must be of type int, string given, called in %s030_strict_types.inc on line 4 and defined in %s030_strict_types.php:5
 Stack trace:
 #0 %s030_strict_types.inc(4): MyAttribute->__construct('42')
 #1 %s(%d): ReflectionAttribute->newInstance()
