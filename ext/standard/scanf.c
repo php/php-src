@@ -567,13 +567,12 @@ error:
  * 		format		format string
  *		argCount	total number of elements in the args array
  *		args		arguments passed in from user function (f|s)scanf
- * 		varStart	offset (in args) of 1st variable passed in to (f|s)scanf
  *		return_value set with the results of the scan
  */
 
 PHPAPI int php_sscanf_internal( char *string, char *format,
 				uint32_t argCount, zval *args,
-				int varStart, zval *return_value)
+				zval *return_value)
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
@@ -591,11 +590,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	char buf[64];	/* Temporary buffer to hold scanned number
 					 * strings before they are passed to strtoul() */
 
-	/* do some sanity checking */
-	if ((varStart > argCount) || (varStart < 0)){
-		varStart = SCAN_MAX_ARGS + 1;
-	}
-	numVars = argCount - varStart;
+	numVars = argCount;
 	if (numVars < 0) {
 		numVars = 0;
 	}
@@ -608,13 +603,13 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		return SCAN_ERROR_INVALID_FORMAT;
 	}
 
-	objIndex = numVars ? varStart : 0;
+	objIndex = 0;
 
 	/*
 	 * If any variables are passed, make sure they are all passed by reference
 	 */
 	if (numVars) {
-		for (i = varStart;i < argCount;i++){
+		for (i = 0; i < argCount; i++){
 			ZEND_ASSERT(Z_ISREF(args[i]) && "Parameter must be passed by reference");
 		}
 	}
@@ -636,7 +631,6 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				return FAILURE;
 			}
 		}
-		varStart = 0; /* Array index starts from 0 */
 	}
 
 	baseString = string;

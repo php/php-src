@@ -34,7 +34,7 @@
  * e.g. fscanf
  */
 PHPAPI int php_sscanf_internal(char *string,char *format,uint32_t argCount,zval *args,
-				int varStart, zval *return_value);
+				zval *return_value);
 
 
 #endif /* SCANF_H */

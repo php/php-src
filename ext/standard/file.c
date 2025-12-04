@@ -956,7 +956,7 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	php_sscanf_internal(buf, format, argc, args, 0, return_value);
+	php_sscanf_internal(buf, format, argc, args, return_value);
 
 	efree(buf);
 }

@@ -5870,7 +5870,7 @@ PHP_FUNCTION(sscanf)
 		Z_PARAM_VARIADIC('*', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_sscanf_internal(str, format, num_args, args, 0, return_value);
+	php_sscanf_internal(str, format, num_args, args, return_value);
 
 }
 /* }}} */
