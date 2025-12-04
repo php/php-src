@@ -3850,7 +3850,7 @@ static uint32_t zend_compile_args(
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
 		if (zend_is_call(arg) || is_globals_fetch(arg)) {
-			uint32_t type = is_globals_fetch(arg) || (fbc && !ARG_MUST_BE_SENT_BY_REF(fbc, arg_num) && !ARG_MAY_BE_SENT_BY_REF(fbc, arg_num))
+			uint32_t type = is_globals_fetch(arg) || (fbc && !ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num))
 				? BP_VAR_R : BP_VAR_FUNC_ARG;
 			zend_compile_var(&arg_node, arg, type, false);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
