@@ -1,0 +1,12 @@
+diff --git a/ext/date/lib/parse_date.re b/ext/date/lib/parse_date.re
+index 2f05f03..893ce16 100644
+--- a/ext/date/lib/parse_date.re
++++ b/ext/date/lib/parse_date.re
+@@ -1281,7 +1281,6 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
+ 		DEBUG_OUTPUT("firstdayof | lastdayof");
+ 		TIMELIB_INIT;
+ 		TIMELIB_HAVE_RELATIVE();
+-		TIMELIB_UNHAVE_TIME(); // Don't merge into PHP
+ 
+ 		/* skip "last day of" or "first day of" */
+ 		if (*ptr == 'l' || *ptr == 'L') {
