@@ -159,10 +159,10 @@ ZEND_API const char *zend_zval_namaric_string_value_name(const zval *arg)
 
     if (Z_TYPE_P(val) == IS_STRING) {
         if (Z_STRLEN_P(val) == 0) {
-            return "empty string";
+            return "empty-string";
         }
 
-        return "non-numeric string";
+        return "non-numeric-string";
     }
 
     return zend_zval_type_name(val);
