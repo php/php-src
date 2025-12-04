@@ -666,7 +666,58 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 				as = name->d.uniformResourceIdentifier;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
-				break;
+				break; 
+			case GEN_DIRNAME:
+				X509_NAME *dirn = name->d.dirn;
+				char *oneline;
+
+				BIO_puts(bio,"DirName:");
+
+				if (dirn != NULL && (oneline = X509_NAME_oneline(dirn, NULL, 0)) != NULL)
+				{
+					char *comma = strchr(oneline, ',');
+					if (comma != NULL)
+					{
+						BIO_puts(bio,oneline);
+					}
+					else
+					{
+						char *p = oneline;
+						char *seg_start = oneline;
+
+						while (*p != '\0') {
+                			if (*p == ',') {
+                			    if (p > seg_start) {
+                			        size_t len = (size_t)(p - seg_start);
+                			        while (len > 0) {
+                			            int chunk = (len > INT_MAX) ? INT_MAX : (int)len;
+                			            BIO_write(bio, seg_start, chunk);
+                			            seg_start += chunk;
+                			            len      -= (size_t)chunk;
+                			        }
+                			    }
+							
+                			    BIO_write(bio, "\\,", 2);
+                			    seg_start = p + 1;
+                			}
+                			p++;
+						}
+
+						if (p > seg_start)
+						{
+							size_t len = (size_t)(p - seg_start);
+                			while (len > 0) {
+                			    int chunk = (len > INT_MAX) ? INT_MAX : (int)len;
+                			    BIO_write(bio, seg_start, chunk);
+                			    seg_start += chunk;
+                			    len      -= (size_t)chunk;
+                			}
+						}
+					}
+					OPENSSL_free(oneline);
+				}
+				break; 
+
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
 				 * GEN_EDIPARTY, GEN_DIRNAME, GEN_IPADD and GEN_RID
