@@ -3323,12 +3323,12 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?<type>[{(]|(\.\.\.)?\$\w+).*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*([{(]|(\.\.\.)?\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
-            preg_match('/^\s*(?<type>[\w\|\\\\\[\]<>, ]+)/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
 
-        if (!isset($matches["type"])) {
+        if (!isset($matches[1])) {
             throw new Exception("@$this->name doesn't contain a type or has an invalid format \"$value\"");
         }
 
