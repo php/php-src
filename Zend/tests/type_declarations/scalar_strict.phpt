@@ -60,7 +60,7 @@ Testing 'int' type:
 int(1)
 
 *** Trying string(1) "1"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
 
 *** Trying float(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
@@ -69,13 +69,13 @@ int(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, empty string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, empty-string given, called in %s on line %d
 
 *** Trying int(2147483647)
 int(2147483647)
@@ -113,7 +113,7 @@ Testing 'float' type:
 float(1)
 
 *** Trying string(1) "1"
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
 
 *** Trying float(1)
 float(1)
@@ -122,13 +122,13 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, empty string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, empty-string given, called in %s on line %d
 
 *** Trying int(2147483647)
 float(2147483647)
@@ -219,7 +219,7 @@ Testing 'bool' type:
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, int given, called in %s on line %d
 
 *** Trying string(1) "1"
-*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric-string given, called in %s on line %d
 
 *** Trying float(1)
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
@@ -228,13 +228,13 @@ Testing 'bool' type:
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric-string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, non-numeric-string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, empty string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, empty-string given, called in %s on line %d
 
 *** Trying int(2147483647)
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, int given, called in %s on line %d
