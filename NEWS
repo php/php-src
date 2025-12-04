@@ -82,6 +82,10 @@ PHP                                                                        NEWS
     via deep structures). (ndossche)
   . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
 
+- Streams:
+  . Fixed bug GH-20370 (User stream filters could violate typed property
+    constraints). (alexandre-daubois)
+
 - Tidy:
   . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
 
