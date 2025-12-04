@@ -32,7 +32,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(18)
-Unsupported operand types: string & int
+Unsupported operand types: non-numeric string & int
 
 Warning: A non-numeric value encountered in %s on line %d
 int(33)

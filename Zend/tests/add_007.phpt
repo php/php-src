@@ -19,9 +19,9 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Unsupported operand types: array + string
+Exception: Unsupported operand types: array + non-numeric string
 
-Fatal error: Uncaught TypeError: Unsupported operand types: array + string in %s:%d
+Fatal error: Uncaught TypeError: Unsupported operand types: array + non-numeric string in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

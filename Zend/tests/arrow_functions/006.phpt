@@ -32,7 +32,7 @@ try {
 --EXPECTF--
 int(2)
 int(10)
-{closure:%s:%d}(): Argument #1 ($x) must be of type int, string given, called in %s on line %d
+{closure:%s:%d}(): Argument #1 ($x) must be of type int, non-numeric string given, called in %s on line %d
 array(3) {
   [0]=>
   int(20)
@@ -41,4 +41,4 @@ array(3) {
   [2]=>
   int(30)
 }
-{closure:%s:%d}(): Argument #2 must be of type ?int, string given, called in %s on line %d
+{closure:%s:%d}(): Argument #2 must be of type ?int, non-numeric string given, called in %s on line %d

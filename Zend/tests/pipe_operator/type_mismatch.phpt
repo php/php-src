@@ -17,4 +17,4 @@ catch (Throwable $e) {
 
 ?>
 --EXPECTF--
-TypeError: _test(): Argument #1 ($a) must be of type int, string given, called in %s on line %d
+TypeError: _test(): Argument #1 ($a) must be of type int, non-numeric string given, called in %s on line %d

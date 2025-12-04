@@ -30,7 +30,7 @@ float(-1.2)
 --- testing: '-7.7' ---
 float(7.7)
 --- testing: 'abc' ---
-Unsupported operand types: string * int
+Unsupported operand types: non-numeric string * int
 --- testing: '123abc' ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -58,4 +58,4 @@ int(-123)
 Warning: A non-numeric value encountered in %s on line %d
 float(-3.4)
 --- testing: 'a5.9' ---
-Unsupported operand types: string * int
+Unsupported operand types: non-numeric string * int

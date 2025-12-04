@@ -45,13 +45,13 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Unsupported operand types: int + string
+Unsupported operand types: int + non-numeric string
 
 Warning: A non-numeric value encountered in %s on line %d
 int(951858)
 int(48550510)
 float(75661.68)
-Unsupported operand types: string + int
+Unsupported operand types: non-numeric string + int
 
 Warning: A non-numeric value encountered in %s on line %d
 int(951858)
