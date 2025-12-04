@@ -572,7 +572,7 @@ error:
  */
 
 PHPAPI int php_sscanf_internal( char *string, char *format,
-				int argCount, zval *args,
+				uint32_t argCount, zval *args,
 				int varStart, zval *return_value)
 {
 	int  numVars, nconversions, totalVars = -1;

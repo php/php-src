@@ -34,7 +34,7 @@
  * e.g. fscanf
  */
 PHPAPI int ValidateFormat(char *format, int numVars, int *totalVars);
-PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval *args,
+PHPAPI int php_sscanf_internal(char *string,char *format,uint32_t argCount,zval *args,
 				int varStart, zval *return_value);
 
 
