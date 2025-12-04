@@ -176,6 +176,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
     condition for Win32/Win64. (Jakub Zelenka)
+  . Fixed bug GH-20370 (User stream filters could violate typed property
+    constraints). (alexandre-daubois)
 
 - Tidy:
   . Fixed GH-19021 (improved tidyOptGetCategory detection).
