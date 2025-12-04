@@ -80,9 +80,9 @@ float(0.125)
 int(0)
 int(1)
 int(0)
-Unsupported operand types: empty string ** int
+Unsupported operand types: empty-string ** int
 Unsupported operand types: array ** int
-Unsupported operand types: non-numeric string ** int
+Unsupported operand types: non-numeric-string ** int
 float(166.375)
 int(8)
 float(0.000250047)
