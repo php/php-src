@@ -5971,11 +5971,5 @@ ZEND_API void zend_return_unwrap_ref(zend_execute_data *execute_data, zval *retu
 		return;
 	}
 
-	zend_reference *ref = Z_REF_P(return_value);
-	ZVAL_COPY_VALUE(return_value, &ref->val);
-	if (GC_DELREF(ref) == 0) {
-		efree_size(ref, sizeof(zend_reference));
-	} else {
-		Z_TRY_ADDREF_P(return_value);
-	}
+	zend_unwrap_reference(return_value);
 }
