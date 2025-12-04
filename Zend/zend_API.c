@@ -153,9 +153,7 @@ ZEND_API const char *zend_zval_numeric_string_value_name(const zval *arg)
 {
     const zval *val = arg;
 
-    if (Z_TYPE_P(val) == IS_REFERENCE) {
-        val = Z_REFVAL_P(val);
-    }
+    ZVAL_DEREF(val);
 
     if (Z_TYPE_P(val) == IS_STRING) {
         if (Z_STRLEN_P(val) == 0) {
