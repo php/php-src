@@ -149,7 +149,7 @@ static php_stream_filter_status_t userfilter_filter(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	/* Give the userfilter class a hook back to the stream */
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = Z_OBJCE_P(obj);
 
 	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
