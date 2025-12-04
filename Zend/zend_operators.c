@@ -1122,7 +1122,7 @@ static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const cha
 	}
 
 	zend_type_error("Unsupported operand types: %s %s %s",
-		zend_zval_namaric_string_value_name(op1), operator, zend_zval_namaric_string_value_name(op2));
+		zend_zval_numeric_string_value_name(op1), operator, zend_zval_numeric_string_value_name(op2));
 }
 /* }}} */
 

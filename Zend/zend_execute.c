@@ -719,7 +719,7 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 	ZEND_ASSERT(zf->common.type == ZEND_USER_FUNCTION
 		&& "Arginfo verification is not performed for internal functions");
 	
-	given_msg = zend_zval_namaric_string_value_name(value);
+	given_msg = zend_zval_numeric_string_value_name(value);
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_argument_type_error(arg_num, "must be of type %s, %s given, called in %s on line %d",
