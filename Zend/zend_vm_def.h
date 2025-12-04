@@ -2054,13 +2054,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, C
 		if (OP1_TYPE & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_DIM_R);
@@ -2432,13 +2426,7 @@ ZEND_VM_COLD_CONST_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THI
 		if (OP1_TYPE == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_OBJ_R);
@@ -4680,7 +4668,6 @@ ZEND_VM_COLD_CONST_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY, SRC, 
 	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
 	ZEND_OBSERVER_FREE_RETVAL();
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
@@ -7279,9 +7266,10 @@ ZEND_VM_HOT_HANDLER(78, ZEND_FE_FETCH_R, TMP, ANY, JMP_ADDR)
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
-		ZVAL_DEREF(value);
-		value_type = Z_TYPE_INFO_P(value);
-
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			value = Z_REFVAL_P(value);
+			value_type = Z_TYPE_INFO_P(value);
+		}
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
 

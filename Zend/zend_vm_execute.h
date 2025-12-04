@@ -4912,7 +4912,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -4982,7 +4981,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 	zend_observer_fcall_end(execute_data, return_value);
 	if (return_value == &observer_retval) { zval_ptr_dtor_nogc(&observer_retval); };
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -6825,13 +6823,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -7155,13 +7147,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -9580,13 +9566,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -9908,13 +9888,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -10997,13 +10971,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -12196,13 +12164,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -12526,13 +12488,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -17218,7 +17174,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_RETURN_BY_REF
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -17802,9 +17757,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
-		ZVAL_DEREF(value);
-		value_type = Z_TYPE_INFO_P(value);
-
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			value = Z_REFVAL_P(value);
+			value_type = Z_TYPE_INFO_P(value);
+		}
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
 
@@ -18810,13 +18766,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -18839,13 +18789,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -20404,13 +20348,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -20433,13 +20371,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -21486,13 +21418,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -22272,13 +22198,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -22301,13 +22221,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -23501,7 +23415,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_RETURN_BY_REF
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -24314,13 +24227,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -24399,13 +24306,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -27036,13 +26937,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -27118,13 +27013,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -28960,13 +28849,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -30872,13 +30755,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -30957,13 +30834,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -33518,13 +33389,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -35621,13 +35486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -38193,13 +38052,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -39976,7 +39829,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_RETURN_BY_REF
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -42184,13 +42036,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -42575,13 +42421,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -46028,13 +45868,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -46409,13 +46243,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -48742,13 +48570,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -51152,13 +50974,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_DIM_FUN
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -51538,13 +51354,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_OBJ_FUN
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -57669,7 +57479,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RETUR
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_LEAVE_HELPER(zend_leave_helper_SPEC_TAILCALL);
@@ -57739,7 +57548,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RETUR
 	zend_observer_fcall_end(execute_data, return_value);
 	if (return_value == &observer_retval) { zval_ptr_dtor_nogc(&observer_retval); };
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_LEAVE_HELPER(zend_leave_helper_SPEC_TAILCALL);
@@ -59582,13 +59390,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -59912,13 +59714,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -62337,13 +62133,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -62665,13 +62455,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -63652,13 +63436,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -64851,13 +64629,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CONST & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -65181,13 +64953,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH
 		if (IS_CONST == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -69873,7 +69639,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RETURN_BY_REF_SPEC
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_LEAVE_HELPER(zend_leave_helper_SPEC_TAILCALL);
@@ -70457,9 +70222,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FET
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
-		ZVAL_DEREF(value);
-		value_type = Z_TYPE_INFO_P(value);
-
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			value = Z_REFVAL_P(value);
+			value_type = Z_TYPE_INFO_P(value);
+		}
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
 
@@ -71465,13 +71231,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -71494,13 +71254,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -73059,13 +72813,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -73088,13 +72836,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -74041,13 +73783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -74827,13 +74563,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_TMP_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -74856,13 +74586,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_TMP_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -76056,7 +75780,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RETURN_BY_REF_SPEC
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_LEAVE_HELPER(zend_leave_helper_SPEC_TAILCALL);
@@ -76869,13 +76592,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -76954,13 +76671,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -79591,13 +79302,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -79673,13 +79378,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -81515,13 +81214,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -83427,13 +83120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_VAR & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -83512,13 +83199,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_VAR == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -86073,13 +85754,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -88176,13 +87851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -90748,13 +90417,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_UNUSED == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -92531,7 +92194,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RETURN_BY_REF_SPEC
 
 
 
-	// FIXME: Don't create the ref in the first place?
 	zend_return_unwrap_ref(execute_data, return_value);
 
 	ZEND_VM_DISPATCH_TO_LEAVE_HELPER(zend_leave_helper_SPEC_TAILCALL);
@@ -94739,13 +94401,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -95130,13 +94786,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -98583,13 +98233,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -98964,13 +98608,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -101195,13 +100833,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -103605,13 +103237,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_DIM_FUNC_ARG
 		if (IS_CV & IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -103991,13 +103617,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_OBJ_FUNC_ARG
 		if (IS_CV == IS_VAR) {
 			zval *op1 = EX_VAR(opline->op1.var);
 			if (Z_TYPE_P(op1) == IS_REFERENCE) {
-				zend_reference *ref = Z_REF_P(op1);
-				ZVAL_COPY_VALUE(op1, &ref->val);
-				if (GC_DELREF(ref) == 0) {
-					efree_size(ref, sizeof(zend_reference));
-				} else {
-					Z_TRY_ADDREF_P(op1);
-				}
+				zend_unwrap_reference(op1);
 			}
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CV_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));

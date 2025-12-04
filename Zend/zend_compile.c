@@ -2600,8 +2600,7 @@ static void zend_emit_jmp_null(znode *obj_node, uint32_t bp_type)
 	zend_stack_push(&CG(short_circuiting_opnums), &jmp_null_opnum);
 }
 
-static inline bool zend_is_variable(const zend_ast *ast);
-static inline bool zend_is_call(const zend_ast *ast);
+static inline bool zend_is_variable_or_call(const zend_ast *ast);
 
 static void zend_compile_memoized_expr(znode *result, zend_ast *expr, uint32_t type) /* {{{ */
 {
@@ -2611,8 +2610,8 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr, uint32_t t
 
 		/* Go through normal compilation */
 		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
-		if (zend_is_variable(expr) || zend_is_call(expr)) {
-			zend_compile_var(result, expr, type, false);
+		if (zend_is_variable_or_call(expr)) {
+			zend_compile_var(result, expr, type, /* by_ref */ false);
 		} else {
 			zend_compile_expr(result, expr);
 		}
@@ -3852,7 +3851,7 @@ static uint32_t zend_compile_args(
 		if (zend_is_call(arg) || is_globals_fetch(arg)) {
 			uint32_t type = is_globals_fetch(arg) || (fbc && !ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num))
 				? BP_VAR_R : BP_VAR_FUNC_ARG;
-			zend_compile_var(&arg_node, arg, type, false);
+			zend_compile_var(&arg_node, arg, type, /* by_ref */ false);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
 				/* Function call was converted into builtin instruction */
 				if (!fbc || ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
@@ -4053,7 +4052,6 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 		false
 	);
 	opline = zend_emit_op(result, call_op, NULL, NULL);
-
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (init_opcode != ZEND_NEW && opline->result_type == IS_VAR) {
 			opline->result_type = IS_TMP_VAR;
@@ -4061,7 +4059,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 		}
 	}
 	if (may_have_extra_named_args) {
-		opline->extended_value |= ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
+		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
 	opline->lineno = lineno;
 	zend_do_extended_fcall_end();
@@ -4404,11 +4402,11 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
 	zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
-	opline->extended_value |= ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		opline->result_type = IS_TMP_VAR;
 		result->op_type = IS_TMP_VAR;
 	}
+	opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 
 	return SUCCESS;
 }
@@ -5870,8 +5868,7 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
-		// FIXME: Shouldn't apply to nullsafe calls and pipes.
-	} else if (by_ref && (zend_is_variable(expr_ast) || zend_is_call(expr_ast))) {
+	} else if (by_ref && zend_is_variable_or_call(expr_ast)) {
 		zend_assert_not_short_circuited(expr_ast);
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 	} else {
@@ -6710,7 +6707,7 @@ static void zend_compile_pipe(znode *result, zend_ast *ast, uint32_t type)
 
 	zend_do_extended_stmt(&operand_result);
 
-	zend_compile_var(result, fcall_ast, type, false);
+	zend_compile_var(result, fcall_ast, type, /* by_ref */ false);
 }
 
 static void zend_compile_match(znode *result, zend_ast *ast)
@@ -10907,7 +10904,7 @@ static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	if (value_ast) {
-		if (returns_by_ref && (zend_is_variable(value_ast) || zend_is_call(value_ast))) {
+		if (returns_by_ref && zend_is_variable_or_call(value_ast)) {
 			zend_assert_not_short_circuited(value_ast);
 			zend_compile_var(&value_node, value_ast, BP_VAR_W, true);
 		} else {
@@ -11966,7 +11963,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_ASSIGN: {
 			znode result;
-			zend_compile_assign(&result, ast, true);
+			zend_compile_assign(&result, ast, /* stmt */ true);
 			zend_do_free(&result);
 			return;
 		}
@@ -12019,7 +12016,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_var(result, ast, BP_VAR_R, false);
 			return;
 		case ZEND_AST_ASSIGN:
-			zend_compile_assign(result, ast, false);
+			zend_compile_assign(result, ast, /* stmt */ false);
 			return;
 		case ZEND_AST_ASSIGN_REF:
 			zend_compile_assign_ref(result, ast, BP_VAR_R);
