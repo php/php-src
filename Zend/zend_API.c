@@ -149,6 +149,26 @@ ZEND_API const char *zend_zval_value_name(const zval *arg)
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
+ZEND_API const char *zend_zval_namaric_string_value_name(const zval *arg)
+{
+    const zval *val = arg;
+
+    if (Z_TYPE_P(val) == IS_REFERENCE) {
+        val = Z_REFVAL_P(val);
+    }
+
+    if (Z_TYPE_P(val) == IS_STRING) {
+        if (Z_STRLEN_P(val) == 0) {
+            return "empty string";
+        }
+
+        return "non-numeric string";
+    }
+
+    return zend_zval_type_name(val);
+}
+
+
 ZEND_API const char *zend_zval_type_name(const zval *arg)
 {
 	ZVAL_DEREF(arg);
@@ -163,6 +183,8 @@ ZEND_API const char *zend_zval_type_name(const zval *arg)
 
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
+
+
 
 /* This API exists *only* for use in gettype().
  * For anything else, you likely want zend_zval_type_name(). */
