@@ -3407,7 +3407,8 @@ static void zend_compile_list_assign(
 
 	if (result) {
 		if ((type == BP_VAR_R || type == BP_VAR_IS) && expr_node->op_type == IS_VAR) {
-			zend_emit_op_tmp(result, ZEND_DEREF, expr_node, NULL);
+			/* Deref. */
+			zend_emit_op_tmp(result, ZEND_QM_ASSIGN, expr_node, NULL);
 		} else {
 			*result = *expr_node;
 		}
@@ -3650,8 +3651,9 @@ static void zend_compile_assign_ref(znode *result, zend_ast *ast, uint32_t type)
 	}
 
 	if (result && (type == BP_VAR_R || type == BP_VAR_IS)) {
+		/* Deref. */
 		znode tmp_result = *result;
-		zend_emit_op_tmp(result, ZEND_DEREF, &tmp_result, NULL);
+		zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &tmp_result, NULL);
 	}
 }
 /* }}} */
@@ -10729,7 +10731,7 @@ static void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&false_node, false_ast);
 
-	opline_qm_assign2 = zend_emit_op(NULL, ZEND_QM_ASSIGN, &false_node, NULL);
+	opline_qm_assign2 = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &false_node, NULL);
 	SET_NODE(opline_qm_assign2->result, result);
 
 	zend_update_jump_target_to_next(opnum_jmp);

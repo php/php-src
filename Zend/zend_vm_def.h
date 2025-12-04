@@ -10006,27 +10006,6 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(211, ZEND_DEREF, VAR, UNUSED)
-{
-	USE_OPLINE
-
-	zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-
-	if (Z_TYPE_P(value) == IS_REFERENCE) {
-		zend_reference *ref = Z_REF_P(value);
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &ref->val);
-		if (GC_DELREF(ref) == 0) {
-			efree_size(ref, sizeof(zend_reference));
-		} else {
-			Z_TRY_ADDREF_P(EX_VAR(opline->result.var));
-		}
-	} else {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE

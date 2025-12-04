@@ -5033,7 +5033,6 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_COPY_TMP:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
-		case ZEND_DEREF:
 			return 0;
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
