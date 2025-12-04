@@ -578,7 +578,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
 	zend_long value;
-	int  objIndex;
+	zend_ulong  objIndex;
 	char *end, *baseString;
 	zval *current;
 	char op   = 0;
@@ -695,11 +695,11 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &end, 10);
+			zend_ulong assignment_index = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
-				objIndex = varStart + value - 1;
+				objIndex = assignment_index - 1;
 			}
 		}
 
