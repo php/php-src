@@ -304,7 +304,7 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
+static int ValidateFormat(char *format, int numVars, int *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
 	int gotXpg, gotSequential, value, i, flags;
