@@ -5862,7 +5862,7 @@ PHP_FUNCTION(sscanf)
 	zval *args = NULL;
 	char *str, *format;
 	size_t str_len, format_len;
-	int result, num_args = 0;
+	int num_args = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_STRING(str, str_len)
@@ -5870,12 +5870,8 @@ PHP_FUNCTION(sscanf)
 		Z_PARAM_VARIADIC('*', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_sscanf_internal(str, format, num_args, args, 0, return_value);
+	php_sscanf_internal(str, format, num_args, args, 0, return_value);
 
-	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		zend_wrong_param_count();
-		RETURN_THROWS();
-	}
 }
 /* }}} */
 

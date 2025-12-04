@@ -928,7 +928,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 /* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result, argc = 0;
+	int argc = 0;
 	size_t format_len;
 	zval *args = NULL;
 	zval *file_handle;
@@ -956,14 +956,9 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	result = php_sscanf_internal(buf, format, argc, args, 0, return_value);
+	php_sscanf_internal(buf, format, argc, args, 0, return_value);
 
 	efree(buf);
-
-	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		zend_wrong_param_count();
-		RETURN_THROWS();
-	}
 }
 /* }}} */
 
