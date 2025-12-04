@@ -2976,7 +2976,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, i, l = 0;
+	int ch = 0, col, i;
 	unsigned int x, y;
 	size_t l = 0;
 	unsigned char *str = NULL;
