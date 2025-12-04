@@ -13,7 +13,7 @@ var_dump(int_val());
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: int_val(): Argument #1 ($a) must be of type int, non-numeric string given, called in %s:%d
+Fatal error: Uncaught TypeError: int_val(): Argument #1 ($a) must be of type int, non-numeric-string given, called in %s:%d
 Stack trace:
 #0 %s(%d): int_val()
 #1 {main}

@@ -47,11 +47,11 @@ try {
 
 ?>
 --EXPECT--
-Unsupported operand types: array + non-numeric string
-Unsupported operand types: array - non-numeric string
-Unsupported operand types: array * non-numeric string
-Unsupported operand types: array / non-numeric string
-Unsupported operand types: array ** non-numeric string
-Unsupported operand types: array % non-numeric string
-Unsupported operand types: array << non-numeric string
-Unsupported operand types: array >> non-numeric string
+Unsupported operand types: array + non-numeric-string
+Unsupported operand types: array - non-numeric-string
+Unsupported operand types: array * non-numeric-string
+Unsupported operand types: array / non-numeric-string
+Unsupported operand types: array ** non-numeric-string
+Unsupported operand types: array % non-numeric-string
+Unsupported operand types: array << non-numeric-string
+Unsupported operand types: array >> non-numeric-string

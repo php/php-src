@@ -129,19 +129,19 @@ BINARY OP:
 No error for [] + []
 Unsupported operand types: array + stdClass
 Unsupported operand types: array + resource
-Unsupported operand types: array + non-numeric string
+Unsupported operand types: array + non-numeric-string
 Unsupported operand types: stdClass + array
 Unsupported operand types: stdClass + stdClass
 Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + non-numeric string
+Unsupported operand types: stdClass + non-numeric-string
 Unsupported operand types: resource + array
 Unsupported operand types: resource + stdClass
 Unsupported operand types: resource + resource
-Unsupported operand types: resource + non-numeric string
-Unsupported operand types: non-numeric string + array
-Unsupported operand types: non-numeric string + stdClass
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: resource + non-numeric-string
+Unsupported operand types: non-numeric-string + array
+Unsupported operand types: non-numeric-string + stdClass
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: non-numeric-string + non-numeric-string
 Unsupported operand types: array + null
 Unsupported operand types: null + array
 Unsupported operand types: array + bool
@@ -152,11 +152,11 @@ Unsupported operand types: array + int
 Unsupported operand types: int + array
 Unsupported operand types: array + float
 Unsupported operand types: float + array
-Unsupported operand types: array + non-numeric string
-Unsupported operand types: non-numeric string + array
-Unsupported operand types: array + non-numeric string
+Unsupported operand types: array + non-numeric-string
+Unsupported operand types: non-numeric-string + array
+Unsupported operand types: array + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + array
+Unsupported operand types: non-numeric-string + array
 Unsupported operand types: stdClass + null
 Unsupported operand types: null + stdClass
 Unsupported operand types: stdClass + bool
@@ -167,11 +167,11 @@ Unsupported operand types: stdClass + int
 Unsupported operand types: int + stdClass
 Unsupported operand types: stdClass + float
 Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + non-numeric string
-Unsupported operand types: non-numeric string + stdClass
-Unsupported operand types: stdClass + non-numeric string
+Unsupported operand types: stdClass + non-numeric-string
+Unsupported operand types: non-numeric-string + stdClass
+Unsupported operand types: stdClass + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + stdClass
+Unsupported operand types: non-numeric-string + stdClass
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
 Unsupported operand types: resource + bool
@@ -182,42 +182,42 @@ Unsupported operand types: resource + int
 Unsupported operand types: int + resource
 Unsupported operand types: resource + float
 Unsupported operand types: float + resource
-Unsupported operand types: resource + non-numeric string
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: resource + non-numeric string
+Unsupported operand types: resource + non-numeric-string
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: resource + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: non-numeric string + null
-Unsupported operand types: null + non-numeric string
-Unsupported operand types: non-numeric string + bool
-Unsupported operand types: bool + non-numeric string
-Unsupported operand types: non-numeric string + bool
-Unsupported operand types: bool + non-numeric string
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: int + non-numeric string
-Unsupported operand types: non-numeric string + float
-Unsupported operand types: float + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: non-numeric-string + null
+Unsupported operand types: null + non-numeric-string
+Unsupported operand types: non-numeric-string + bool
+Unsupported operand types: bool + non-numeric-string
+Unsupported operand types: non-numeric-string + bool
+Unsupported operand types: bool + non-numeric-string
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: int + non-numeric-string
+Unsupported operand types: non-numeric-string + float
+Unsupported operand types: float + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: non-numeric-string + non-numeric-string
 Unsupported operand types: array - array
 Unsupported operand types: array - stdClass
 Unsupported operand types: array - resource
-Unsupported operand types: array - non-numeric string
+Unsupported operand types: array - non-numeric-string
 Unsupported operand types: stdClass - array
 Unsupported operand types: stdClass - stdClass
 Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - non-numeric string
+Unsupported operand types: stdClass - non-numeric-string
 Unsupported operand types: resource - array
 Unsupported operand types: resource - stdClass
 Unsupported operand types: resource - resource
-Unsupported operand types: resource - non-numeric string
-Unsupported operand types: non-numeric string - array
-Unsupported operand types: non-numeric string - stdClass
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: resource - non-numeric-string
+Unsupported operand types: non-numeric-string - array
+Unsupported operand types: non-numeric-string - stdClass
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: non-numeric-string - non-numeric-string
 Unsupported operand types: array - null
 Unsupported operand types: null - array
 Unsupported operand types: array - bool
@@ -228,11 +228,11 @@ Unsupported operand types: array - int
 Unsupported operand types: int - array
 Unsupported operand types: array - float
 Unsupported operand types: float - array
-Unsupported operand types: array - non-numeric string
-Unsupported operand types: non-numeric string - array
-Unsupported operand types: array - non-numeric string
+Unsupported operand types: array - non-numeric-string
+Unsupported operand types: non-numeric-string - array
+Unsupported operand types: array - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - array
+Unsupported operand types: non-numeric-string - array
 Unsupported operand types: stdClass - null
 Unsupported operand types: null - stdClass
 Unsupported operand types: stdClass - bool
@@ -243,11 +243,11 @@ Unsupported operand types: stdClass - int
 Unsupported operand types: int - stdClass
 Unsupported operand types: stdClass - float
 Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - non-numeric string
-Unsupported operand types: non-numeric string - stdClass
-Unsupported operand types: stdClass - non-numeric string
+Unsupported operand types: stdClass - non-numeric-string
+Unsupported operand types: non-numeric-string - stdClass
+Unsupported operand types: stdClass - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - stdClass
+Unsupported operand types: non-numeric-string - stdClass
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
 Unsupported operand types: resource - bool
@@ -258,42 +258,42 @@ Unsupported operand types: resource - int
 Unsupported operand types: int - resource
 Unsupported operand types: resource - float
 Unsupported operand types: float - resource
-Unsupported operand types: resource - non-numeric string
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: resource - non-numeric string
+Unsupported operand types: resource - non-numeric-string
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: resource - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: non-numeric string - null
-Unsupported operand types: null - non-numeric string
-Unsupported operand types: non-numeric string - bool
-Unsupported operand types: bool - non-numeric string
-Unsupported operand types: non-numeric string - bool
-Unsupported operand types: bool - non-numeric string
-Unsupported operand types: non-numeric string - int
-Unsupported operand types: int - non-numeric string
-Unsupported operand types: non-numeric string - float
-Unsupported operand types: float - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: non-numeric-string - null
+Unsupported operand types: null - non-numeric-string
+Unsupported operand types: non-numeric-string - bool
+Unsupported operand types: bool - non-numeric-string
+Unsupported operand types: non-numeric-string - bool
+Unsupported operand types: bool - non-numeric-string
+Unsupported operand types: non-numeric-string - int
+Unsupported operand types: int - non-numeric-string
+Unsupported operand types: non-numeric-string - float
+Unsupported operand types: float - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: non-numeric-string - non-numeric-string
 Unsupported operand types: array * array
 Unsupported operand types: stdClass * array
 Unsupported operand types: resource * array
-Unsupported operand types: array * non-numeric string
+Unsupported operand types: array * non-numeric-string
 Unsupported operand types: stdClass * array
 Unsupported operand types: stdClass * stdClass
 Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * non-numeric string
+Unsupported operand types: stdClass * non-numeric-string
 Unsupported operand types: resource * array
 Unsupported operand types: stdClass * resource
 Unsupported operand types: resource * resource
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: non-numeric string * array
-Unsupported operand types: stdClass * non-numeric string
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: non-numeric-string * array
+Unsupported operand types: stdClass * non-numeric-string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
 Unsupported operand types: array * null
 Unsupported operand types: null * array
 Unsupported operand types: array * bool
@@ -304,11 +304,11 @@ Unsupported operand types: array * int
 Unsupported operand types: int * array
 Unsupported operand types: array * float
 Unsupported operand types: float * array
-Unsupported operand types: array * non-numeric string
-Unsupported operand types: non-numeric string * array
-Unsupported operand types: array * non-numeric string
+Unsupported operand types: array * non-numeric-string
+Unsupported operand types: non-numeric-string * array
+Unsupported operand types: array * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * array
+Unsupported operand types: non-numeric-string * array
 Unsupported operand types: stdClass * null
 Unsupported operand types: stdClass * null
 Unsupported operand types: stdClass * bool
@@ -319,10 +319,10 @@ Unsupported operand types: stdClass * int
 Unsupported operand types: stdClass * int
 Unsupported operand types: stdClass * float
 Unsupported operand types: stdClass * float
-Unsupported operand types: stdClass * non-numeric string
-Unsupported operand types: stdClass * non-numeric string
-Unsupported operand types: stdClass * non-numeric string
-Unsupported operand types: stdClass * non-numeric string
+Unsupported operand types: stdClass * non-numeric-string
+Unsupported operand types: stdClass * non-numeric-string
+Unsupported operand types: stdClass * non-numeric-string
+Unsupported operand types: stdClass * non-numeric-string
 Unsupported operand types: resource * null
 Unsupported operand types: resource * null
 Unsupported operand types: resource * bool
@@ -333,41 +333,41 @@ Unsupported operand types: resource * int
 Unsupported operand types: resource * int
 Unsupported operand types: resource * float
 Unsupported operand types: resource * float
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: non-numeric string * null
-Unsupported operand types: null * non-numeric string
-Unsupported operand types: non-numeric string * bool
-Unsupported operand types: bool * non-numeric string
-Unsupported operand types: non-numeric string * bool
-Unsupported operand types: bool * non-numeric string
-Unsupported operand types: non-numeric string * int
-Unsupported operand types: int * non-numeric string
-Unsupported operand types: non-numeric string * float
-Unsupported operand types: float * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: non-numeric-string * null
+Unsupported operand types: null * non-numeric-string
+Unsupported operand types: non-numeric-string * bool
+Unsupported operand types: bool * non-numeric-string
+Unsupported operand types: non-numeric-string * bool
+Unsupported operand types: bool * non-numeric-string
+Unsupported operand types: non-numeric-string * int
+Unsupported operand types: int * non-numeric-string
+Unsupported operand types: non-numeric-string * float
+Unsupported operand types: float * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: non-numeric-string * non-numeric-string
 Unsupported operand types: array / array
 Unsupported operand types: array / stdClass
 Unsupported operand types: array / resource
-Unsupported operand types: array / non-numeric string
+Unsupported operand types: array / non-numeric-string
 Unsupported operand types: stdClass / array
 Unsupported operand types: stdClass / stdClass
 Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / non-numeric string
+Unsupported operand types: stdClass / non-numeric-string
 Unsupported operand types: resource / array
 Unsupported operand types: resource / stdClass
 Unsupported operand types: resource / resource
-Unsupported operand types: resource / non-numeric string
-Unsupported operand types: non-numeric string / array
-Unsupported operand types: non-numeric string / stdClass
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: resource / non-numeric-string
+Unsupported operand types: non-numeric-string / array
+Unsupported operand types: non-numeric-string / stdClass
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: non-numeric-string / non-numeric-string
 Unsupported operand types: array / null
 Unsupported operand types: null / array
 Unsupported operand types: array / bool
@@ -378,11 +378,11 @@ Unsupported operand types: array / int
 Unsupported operand types: int / array
 Unsupported operand types: array / float
 Unsupported operand types: float / array
-Unsupported operand types: array / non-numeric string
-Unsupported operand types: non-numeric string / array
-Unsupported operand types: array / non-numeric string
+Unsupported operand types: array / non-numeric-string
+Unsupported operand types: non-numeric-string / array
+Unsupported operand types: array / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / array
+Unsupported operand types: non-numeric-string / array
 Unsupported operand types: stdClass / null
 Unsupported operand types: null / stdClass
 Unsupported operand types: stdClass / bool
@@ -393,11 +393,11 @@ Unsupported operand types: stdClass / int
 Unsupported operand types: int / stdClass
 Unsupported operand types: stdClass / float
 Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / non-numeric string
-Unsupported operand types: non-numeric string / stdClass
-Unsupported operand types: stdClass / non-numeric string
+Unsupported operand types: stdClass / non-numeric-string
+Unsupported operand types: non-numeric-string / stdClass
+Unsupported operand types: stdClass / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / stdClass
+Unsupported operand types: non-numeric-string / stdClass
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
 Unsupported operand types: resource / bool
@@ -408,42 +408,42 @@ Unsupported operand types: resource / int
 Unsupported operand types: int / resource
 Unsupported operand types: resource / float
 Unsupported operand types: float / resource
-Unsupported operand types: resource / non-numeric string
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: resource / non-numeric string
+Unsupported operand types: resource / non-numeric-string
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: resource / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: non-numeric string / null
-Unsupported operand types: null / non-numeric string
-Unsupported operand types: non-numeric string / bool
-Unsupported operand types: bool / non-numeric string
-Unsupported operand types: non-numeric string / bool
-Unsupported operand types: bool / non-numeric string
-Unsupported operand types: non-numeric string / int
-Unsupported operand types: int / non-numeric string
-Unsupported operand types: non-numeric string / float
-Unsupported operand types: float / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: non-numeric-string / null
+Unsupported operand types: null / non-numeric-string
+Unsupported operand types: non-numeric-string / bool
+Unsupported operand types: bool / non-numeric-string
+Unsupported operand types: non-numeric-string / bool
+Unsupported operand types: bool / non-numeric-string
+Unsupported operand types: non-numeric-string / int
+Unsupported operand types: int / non-numeric-string
+Unsupported operand types: non-numeric-string / float
+Unsupported operand types: float / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: non-numeric-string / non-numeric-string
 Unsupported operand types: array % array
 Unsupported operand types: array % stdClass
 Unsupported operand types: array % resource
-Unsupported operand types: array % non-numeric string
+Unsupported operand types: array % non-numeric-string
 Unsupported operand types: stdClass % array
 Unsupported operand types: stdClass % stdClass
 Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % non-numeric string
+Unsupported operand types: stdClass % non-numeric-string
 Unsupported operand types: resource % array
 Unsupported operand types: resource % stdClass
 Unsupported operand types: resource % resource
-Unsupported operand types: resource % non-numeric string
-Unsupported operand types: non-numeric string % array
-Unsupported operand types: non-numeric string % stdClass
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: resource % non-numeric-string
+Unsupported operand types: non-numeric-string % array
+Unsupported operand types: non-numeric-string % stdClass
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: non-numeric-string % non-numeric-string
 Unsupported operand types: array % null
 Unsupported operand types: null % array
 Unsupported operand types: array % bool
@@ -455,11 +455,11 @@ Unsupported operand types: int % array
 Unsupported operand types: array % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % array
-Unsupported operand types: array % non-numeric string
-Unsupported operand types: non-numeric string % array
-Unsupported operand types: array % non-numeric string
+Unsupported operand types: array % non-numeric-string
+Unsupported operand types: non-numeric-string % array
+Unsupported operand types: array % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % array
+Unsupported operand types: non-numeric-string % array
 Unsupported operand types: stdClass % null
 Unsupported operand types: null % stdClass
 Unsupported operand types: stdClass % bool
@@ -471,11 +471,11 @@ Unsupported operand types: int % stdClass
 Unsupported operand types: stdClass % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % non-numeric string
-Unsupported operand types: non-numeric string % stdClass
-Unsupported operand types: stdClass % non-numeric string
+Unsupported operand types: stdClass % non-numeric-string
+Unsupported operand types: non-numeric-string % stdClass
+Unsupported operand types: stdClass % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % stdClass
+Unsupported operand types: non-numeric-string % stdClass
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
 Unsupported operand types: resource % bool
@@ -487,43 +487,43 @@ Unsupported operand types: int % resource
 Unsupported operand types: resource % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % resource
-Unsupported operand types: resource % non-numeric string
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: resource % non-numeric string
+Unsupported operand types: resource % non-numeric-string
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: resource % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: non-numeric string % null
-Unsupported operand types: null % non-numeric string
-Unsupported operand types: non-numeric string % bool
-Unsupported operand types: bool % non-numeric string
-Unsupported operand types: non-numeric string % bool
-Unsupported operand types: bool % non-numeric string
-Unsupported operand types: non-numeric string % int
-Unsupported operand types: int % non-numeric string
-Unsupported operand types: non-numeric string % float
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: non-numeric-string % null
+Unsupported operand types: null % non-numeric-string
+Unsupported operand types: non-numeric-string % bool
+Unsupported operand types: bool % non-numeric-string
+Unsupported operand types: non-numeric-string % bool
+Unsupported operand types: bool % non-numeric-string
+Unsupported operand types: non-numeric-string % int
+Unsupported operand types: int % non-numeric-string
+Unsupported operand types: non-numeric-string % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: float % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: non-numeric-string % non-numeric-string
 Unsupported operand types: array ** array
 Unsupported operand types: array ** stdClass
 Unsupported operand types: array ** resource
-Unsupported operand types: array ** non-numeric string
+Unsupported operand types: array ** non-numeric-string
 Unsupported operand types: stdClass ** array
 Unsupported operand types: stdClass ** stdClass
 Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** non-numeric string
+Unsupported operand types: stdClass ** non-numeric-string
 Unsupported operand types: resource ** array
 Unsupported operand types: resource ** stdClass
 Unsupported operand types: resource ** resource
-Unsupported operand types: resource ** non-numeric string
-Unsupported operand types: non-numeric string ** array
-Unsupported operand types: non-numeric string ** stdClass
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: resource ** non-numeric-string
+Unsupported operand types: non-numeric-string ** array
+Unsupported operand types: non-numeric-string ** stdClass
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Unsupported operand types: array ** null
 Unsupported operand types: null ** array
 Unsupported operand types: array ** bool
@@ -534,11 +534,11 @@ Unsupported operand types: array ** int
 Unsupported operand types: int ** array
 Unsupported operand types: array ** float
 Unsupported operand types: float ** array
-Unsupported operand types: array ** non-numeric string
-Unsupported operand types: non-numeric string ** array
-Unsupported operand types: array ** non-numeric string
+Unsupported operand types: array ** non-numeric-string
+Unsupported operand types: non-numeric-string ** array
+Unsupported operand types: array ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** array
+Unsupported operand types: non-numeric-string ** array
 Unsupported operand types: stdClass ** null
 Unsupported operand types: null ** stdClass
 Unsupported operand types: stdClass ** bool
@@ -549,11 +549,11 @@ Unsupported operand types: stdClass ** int
 Unsupported operand types: int ** stdClass
 Unsupported operand types: stdClass ** float
 Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** non-numeric string
-Unsupported operand types: non-numeric string ** stdClass
-Unsupported operand types: stdClass ** non-numeric string
+Unsupported operand types: stdClass ** non-numeric-string
+Unsupported operand types: non-numeric-string ** stdClass
+Unsupported operand types: stdClass ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** stdClass
+Unsupported operand types: non-numeric-string ** stdClass
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
 Unsupported operand types: resource ** bool
@@ -564,42 +564,42 @@ Unsupported operand types: resource ** int
 Unsupported operand types: int ** resource
 Unsupported operand types: resource ** float
 Unsupported operand types: float ** resource
-Unsupported operand types: resource ** non-numeric string
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: resource ** non-numeric string
+Unsupported operand types: resource ** non-numeric-string
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: resource ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: non-numeric string ** null
-Unsupported operand types: null ** non-numeric string
-Unsupported operand types: non-numeric string ** bool
-Unsupported operand types: bool ** non-numeric string
-Unsupported operand types: non-numeric string ** bool
-Unsupported operand types: bool ** non-numeric string
-Unsupported operand types: non-numeric string ** int
-Unsupported operand types: int ** non-numeric string
-Unsupported operand types: non-numeric string ** float
-Unsupported operand types: float ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: non-numeric-string ** null
+Unsupported operand types: null ** non-numeric-string
+Unsupported operand types: non-numeric-string ** bool
+Unsupported operand types: bool ** non-numeric-string
+Unsupported operand types: non-numeric-string ** bool
+Unsupported operand types: bool ** non-numeric-string
+Unsupported operand types: non-numeric-string ** int
+Unsupported operand types: int ** non-numeric-string
+Unsupported operand types: non-numeric-string ** float
+Unsupported operand types: float ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Unsupported operand types: array << array
 Unsupported operand types: array << stdClass
 Unsupported operand types: array << resource
-Unsupported operand types: array << non-numeric string
+Unsupported operand types: array << non-numeric-string
 Unsupported operand types: stdClass << array
 Unsupported operand types: stdClass << stdClass
 Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << non-numeric string
+Unsupported operand types: stdClass << non-numeric-string
 Unsupported operand types: resource << array
 Unsupported operand types: resource << stdClass
 Unsupported operand types: resource << resource
-Unsupported operand types: resource << non-numeric string
-Unsupported operand types: non-numeric string << array
-Unsupported operand types: non-numeric string << stdClass
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: resource << non-numeric-string
+Unsupported operand types: non-numeric-string << array
+Unsupported operand types: non-numeric-string << stdClass
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: non-numeric-string << non-numeric-string
 Unsupported operand types: array << null
 Unsupported operand types: null << array
 Unsupported operand types: array << bool
@@ -611,11 +611,11 @@ Unsupported operand types: int << array
 Unsupported operand types: array << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << array
-Unsupported operand types: array << non-numeric string
-Unsupported operand types: non-numeric string << array
-Unsupported operand types: array << non-numeric string
+Unsupported operand types: array << non-numeric-string
+Unsupported operand types: non-numeric-string << array
+Unsupported operand types: array << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << array
+Unsupported operand types: non-numeric-string << array
 Unsupported operand types: stdClass << null
 Unsupported operand types: null << stdClass
 Unsupported operand types: stdClass << bool
@@ -627,11 +627,11 @@ Unsupported operand types: int << stdClass
 Unsupported operand types: stdClass << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << non-numeric string
-Unsupported operand types: non-numeric string << stdClass
-Unsupported operand types: stdClass << non-numeric string
+Unsupported operand types: stdClass << non-numeric-string
+Unsupported operand types: non-numeric-string << stdClass
+Unsupported operand types: stdClass << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << stdClass
+Unsupported operand types: non-numeric-string << stdClass
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
 Unsupported operand types: resource << bool
@@ -643,43 +643,43 @@ Unsupported operand types: int << resource
 Unsupported operand types: resource << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << resource
-Unsupported operand types: resource << non-numeric string
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: resource << non-numeric string
+Unsupported operand types: resource << non-numeric-string
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: resource << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: non-numeric string << null
-Unsupported operand types: null << non-numeric string
-Unsupported operand types: non-numeric string << bool
-Unsupported operand types: bool << non-numeric string
-Unsupported operand types: non-numeric string << bool
-Unsupported operand types: bool << non-numeric string
-Unsupported operand types: non-numeric string << int
-Unsupported operand types: int << non-numeric string
-Unsupported operand types: non-numeric string << float
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: non-numeric-string << null
+Unsupported operand types: null << non-numeric-string
+Unsupported operand types: non-numeric-string << bool
+Unsupported operand types: bool << non-numeric-string
+Unsupported operand types: non-numeric-string << bool
+Unsupported operand types: bool << non-numeric-string
+Unsupported operand types: non-numeric-string << int
+Unsupported operand types: int << non-numeric-string
+Unsupported operand types: non-numeric-string << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: float << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: non-numeric-string << non-numeric-string
 Unsupported operand types: array >> array
 Unsupported operand types: array >> stdClass
 Unsupported operand types: array >> resource
-Unsupported operand types: array >> non-numeric string
+Unsupported operand types: array >> non-numeric-string
 Unsupported operand types: stdClass >> array
 Unsupported operand types: stdClass >> stdClass
 Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> non-numeric string
+Unsupported operand types: stdClass >> non-numeric-string
 Unsupported operand types: resource >> array
 Unsupported operand types: resource >> stdClass
 Unsupported operand types: resource >> resource
-Unsupported operand types: resource >> non-numeric string
-Unsupported operand types: non-numeric string >> array
-Unsupported operand types: non-numeric string >> stdClass
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: resource >> non-numeric-string
+Unsupported operand types: non-numeric-string >> array
+Unsupported operand types: non-numeric-string >> stdClass
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Unsupported operand types: array >> null
 Unsupported operand types: null >> array
 Unsupported operand types: array >> bool
@@ -691,11 +691,11 @@ Unsupported operand types: int >> array
 Unsupported operand types: array >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> array
-Unsupported operand types: array >> non-numeric string
-Unsupported operand types: non-numeric string >> array
-Unsupported operand types: array >> non-numeric string
+Unsupported operand types: array >> non-numeric-string
+Unsupported operand types: non-numeric-string >> array
+Unsupported operand types: array >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> array
+Unsupported operand types: non-numeric-string >> array
 Unsupported operand types: stdClass >> null
 Unsupported operand types: null >> stdClass
 Unsupported operand types: stdClass >> bool
@@ -707,11 +707,11 @@ Unsupported operand types: int >> stdClass
 Unsupported operand types: stdClass >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> non-numeric string
-Unsupported operand types: non-numeric string >> stdClass
-Unsupported operand types: stdClass >> non-numeric string
+Unsupported operand types: stdClass >> non-numeric-string
+Unsupported operand types: non-numeric-string >> stdClass
+Unsupported operand types: stdClass >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> stdClass
+Unsupported operand types: non-numeric-string >> stdClass
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
 Unsupported operand types: resource >> bool
@@ -723,42 +723,42 @@ Unsupported operand types: int >> resource
 Unsupported operand types: resource >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> resource
-Unsupported operand types: resource >> non-numeric string
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: resource >> non-numeric string
+Unsupported operand types: resource >> non-numeric-string
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: resource >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: non-numeric string >> null
-Unsupported operand types: null >> non-numeric string
-Unsupported operand types: non-numeric string >> bool
-Unsupported operand types: bool >> non-numeric string
-Unsupported operand types: non-numeric string >> bool
-Unsupported operand types: bool >> non-numeric string
-Unsupported operand types: non-numeric string >> int
-Unsupported operand types: int >> non-numeric string
-Unsupported operand types: non-numeric string >> float
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: non-numeric-string >> null
+Unsupported operand types: null >> non-numeric-string
+Unsupported operand types: non-numeric-string >> bool
+Unsupported operand types: bool >> non-numeric-string
+Unsupported operand types: non-numeric-string >> bool
+Unsupported operand types: bool >> non-numeric-string
+Unsupported operand types: non-numeric-string >> int
+Unsupported operand types: int >> non-numeric-string
+Unsupported operand types: non-numeric-string >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: float >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Unsupported operand types: array & array
 Unsupported operand types: stdClass & array
 Unsupported operand types: resource & array
-Unsupported operand types: array & non-numeric string
+Unsupported operand types: array & non-numeric-string
 Unsupported operand types: stdClass & array
 Unsupported operand types: stdClass & stdClass
 Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & non-numeric string
+Unsupported operand types: stdClass & non-numeric-string
 Unsupported operand types: resource & array
 Unsupported operand types: stdClass & resource
 Unsupported operand types: resource & resource
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: non-numeric string & array
-Unsupported operand types: stdClass & non-numeric string
-Unsupported operand types: resource & non-numeric string
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: non-numeric-string & array
+Unsupported operand types: stdClass & non-numeric-string
+Unsupported operand types: resource & non-numeric-string
 No error for "foo" & "foo"
 Unsupported operand types: array & null
 Unsupported operand types: null & array
@@ -771,11 +771,11 @@ Unsupported operand types: int & array
 Unsupported operand types: array & float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & array
-Unsupported operand types: array & non-numeric string
-Unsupported operand types: non-numeric string & array
-Unsupported operand types: array & non-numeric string
+Unsupported operand types: array & non-numeric-string
+Unsupported operand types: non-numeric-string & array
+Unsupported operand types: array & non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string & array
+Unsupported operand types: non-numeric-string & array
 Unsupported operand types: stdClass & null
 Unsupported operand types: stdClass & null
 Unsupported operand types: stdClass & bool
@@ -786,10 +786,10 @@ Unsupported operand types: stdClass & int
 Unsupported operand types: stdClass & int
 Unsupported operand types: stdClass & float
 Unsupported operand types: stdClass & float
-Unsupported operand types: stdClass & non-numeric string
-Unsupported operand types: stdClass & non-numeric string
-Unsupported operand types: stdClass & non-numeric string
-Unsupported operand types: stdClass & non-numeric string
+Unsupported operand types: stdClass & non-numeric-string
+Unsupported operand types: stdClass & non-numeric-string
+Unsupported operand types: stdClass & non-numeric-string
+Unsupported operand types: stdClass & non-numeric-string
 Unsupported operand types: resource & null
 Unsupported operand types: resource & null
 Unsupported operand types: resource & bool
@@ -800,21 +800,21 @@ Unsupported operand types: resource & int
 Unsupported operand types: resource & int
 Unsupported operand types: resource & float
 Unsupported operand types: resource & float
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: non-numeric string & null
-Unsupported operand types: null & non-numeric string
-Unsupported operand types: non-numeric string & bool
-Unsupported operand types: bool & non-numeric string
-Unsupported operand types: non-numeric string & bool
-Unsupported operand types: bool & non-numeric string
-Unsupported operand types: non-numeric string & int
-Unsupported operand types: int & non-numeric string
-Unsupported operand types: non-numeric string & float
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: non-numeric-string & null
+Unsupported operand types: null & non-numeric-string
+Unsupported operand types: non-numeric-string & bool
+Unsupported operand types: bool & non-numeric-string
+Unsupported operand types: non-numeric-string & bool
+Unsupported operand types: bool & non-numeric-string
+Unsupported operand types: non-numeric-string & int
+Unsupported operand types: int & non-numeric-string
+Unsupported operand types: non-numeric-string & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & non-numeric string
+Unsupported operand types: float & non-numeric-string
 No error for "foo" & "123"
 No error for "123" & "foo"
 No error for "foo" & "123foo"
@@ -822,18 +822,18 @@ No error for "123foo" & "foo"
 Unsupported operand types: array | array
 Unsupported operand types: stdClass | array
 Unsupported operand types: resource | array
-Unsupported operand types: array | non-numeric string
+Unsupported operand types: array | non-numeric-string
 Unsupported operand types: stdClass | array
 Unsupported operand types: stdClass | stdClass
 Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | non-numeric string
+Unsupported operand types: stdClass | non-numeric-string
 Unsupported operand types: resource | array
 Unsupported operand types: stdClass | resource
 Unsupported operand types: resource | resource
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: non-numeric string | array
-Unsupported operand types: stdClass | non-numeric string
-Unsupported operand types: resource | non-numeric string
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: non-numeric-string | array
+Unsupported operand types: stdClass | non-numeric-string
+Unsupported operand types: resource | non-numeric-string
 No error for "foo" | "foo"
 Unsupported operand types: array | null
 Unsupported operand types: null | array
@@ -846,11 +846,11 @@ Unsupported operand types: int | array
 Unsupported operand types: array | float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | array
-Unsupported operand types: array | non-numeric string
-Unsupported operand types: non-numeric string | array
-Unsupported operand types: array | non-numeric string
+Unsupported operand types: array | non-numeric-string
+Unsupported operand types: non-numeric-string | array
+Unsupported operand types: array | non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string | array
+Unsupported operand types: non-numeric-string | array
 Unsupported operand types: stdClass | null
 Unsupported operand types: stdClass | null
 Unsupported operand types: stdClass | bool
@@ -861,10 +861,10 @@ Unsupported operand types: stdClass | int
 Unsupported operand types: stdClass | int
 Unsupported operand types: stdClass | float
 Unsupported operand types: stdClass | float
-Unsupported operand types: stdClass | non-numeric string
-Unsupported operand types: stdClass | non-numeric string
-Unsupported operand types: stdClass | non-numeric string
-Unsupported operand types: stdClass | non-numeric string
+Unsupported operand types: stdClass | non-numeric-string
+Unsupported operand types: stdClass | non-numeric-string
+Unsupported operand types: stdClass | non-numeric-string
+Unsupported operand types: stdClass | non-numeric-string
 Unsupported operand types: resource | null
 Unsupported operand types: resource | null
 Unsupported operand types: resource | bool
@@ -875,21 +875,21 @@ Unsupported operand types: resource | int
 Unsupported operand types: resource | int
 Unsupported operand types: resource | float
 Unsupported operand types: resource | float
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: non-numeric string | null
-Unsupported operand types: null | non-numeric string
-Unsupported operand types: non-numeric string | bool
-Unsupported operand types: bool | non-numeric string
-Unsupported operand types: non-numeric string | bool
-Unsupported operand types: bool | non-numeric string
-Unsupported operand types: non-numeric string | int
-Unsupported operand types: int | non-numeric string
-Unsupported operand types: non-numeric string | float
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: non-numeric-string | null
+Unsupported operand types: null | non-numeric-string
+Unsupported operand types: non-numeric-string | bool
+Unsupported operand types: bool | non-numeric-string
+Unsupported operand types: non-numeric-string | bool
+Unsupported operand types: bool | non-numeric-string
+Unsupported operand types: non-numeric-string | int
+Unsupported operand types: int | non-numeric-string
+Unsupported operand types: non-numeric-string | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | non-numeric string
+Unsupported operand types: float | non-numeric-string
 No error for "foo" | "123"
 No error for "123" | "foo"
 No error for "foo" | "123foo"
@@ -897,18 +897,18 @@ No error for "123foo" | "foo"
 Unsupported operand types: array ^ array
 Unsupported operand types: stdClass ^ array
 Unsupported operand types: resource ^ array
-Unsupported operand types: array ^ non-numeric string
+Unsupported operand types: array ^ non-numeric-string
 Unsupported operand types: stdClass ^ array
 Unsupported operand types: stdClass ^ stdClass
 Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ non-numeric string
+Unsupported operand types: stdClass ^ non-numeric-string
 Unsupported operand types: resource ^ array
 Unsupported operand types: stdClass ^ resource
 Unsupported operand types: resource ^ resource
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: non-numeric string ^ array
-Unsupported operand types: stdClass ^ non-numeric string
-Unsupported operand types: resource ^ non-numeric string
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ array
+Unsupported operand types: stdClass ^ non-numeric-string
+Unsupported operand types: resource ^ non-numeric-string
 No error for "foo" ^ "foo"
 Unsupported operand types: array ^ null
 Unsupported operand types: null ^ array
@@ -921,11 +921,11 @@ Unsupported operand types: int ^ array
 Unsupported operand types: array ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ array
-Unsupported operand types: array ^ non-numeric string
-Unsupported operand types: non-numeric string ^ array
-Unsupported operand types: array ^ non-numeric string
+Unsupported operand types: array ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ array
+Unsupported operand types: array ^ non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ^ array
+Unsupported operand types: non-numeric-string ^ array
 Unsupported operand types: stdClass ^ null
 Unsupported operand types: stdClass ^ null
 Unsupported operand types: stdClass ^ bool
@@ -936,10 +936,10 @@ Unsupported operand types: stdClass ^ int
 Unsupported operand types: stdClass ^ int
 Unsupported operand types: stdClass ^ float
 Unsupported operand types: stdClass ^ float
-Unsupported operand types: stdClass ^ non-numeric string
-Unsupported operand types: stdClass ^ non-numeric string
-Unsupported operand types: stdClass ^ non-numeric string
-Unsupported operand types: stdClass ^ non-numeric string
+Unsupported operand types: stdClass ^ non-numeric-string
+Unsupported operand types: stdClass ^ non-numeric-string
+Unsupported operand types: stdClass ^ non-numeric-string
+Unsupported operand types: stdClass ^ non-numeric-string
 Unsupported operand types: resource ^ null
 Unsupported operand types: resource ^ null
 Unsupported operand types: resource ^ bool
@@ -950,21 +950,21 @@ Unsupported operand types: resource ^ int
 Unsupported operand types: resource ^ int
 Unsupported operand types: resource ^ float
 Unsupported operand types: resource ^ float
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: non-numeric string ^ null
-Unsupported operand types: null ^ non-numeric string
-Unsupported operand types: non-numeric string ^ bool
-Unsupported operand types: bool ^ non-numeric string
-Unsupported operand types: non-numeric string ^ bool
-Unsupported operand types: bool ^ non-numeric string
-Unsupported operand types: non-numeric string ^ int
-Unsupported operand types: int ^ non-numeric string
-Unsupported operand types: non-numeric string ^ float
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ null
+Unsupported operand types: null ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ bool
+Unsupported operand types: bool ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ bool
+Unsupported operand types: bool ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ int
+Unsupported operand types: int ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ non-numeric string
+Unsupported operand types: float ^ non-numeric-string
 No error for "foo" ^ "123"
 No error for "123" ^ "foo"
 No error for "foo" ^ "123foo"
@@ -1141,19 +1141,19 @@ ASSIGN OP:
 No error for [] += []
 Unsupported operand types: array + stdClass
 Unsupported operand types: array + resource
-Unsupported operand types: array + non-numeric string
+Unsupported operand types: array + non-numeric-string
 Unsupported operand types: stdClass + array
 Unsupported operand types: stdClass + stdClass
 Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + non-numeric string
+Unsupported operand types: stdClass + non-numeric-string
 Unsupported operand types: resource + array
 Unsupported operand types: resource + stdClass
 Unsupported operand types: resource + resource
-Unsupported operand types: resource + non-numeric string
-Unsupported operand types: non-numeric string + array
-Unsupported operand types: non-numeric string + stdClass
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: resource + non-numeric-string
+Unsupported operand types: non-numeric-string + array
+Unsupported operand types: non-numeric-string + stdClass
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: non-numeric-string + non-numeric-string
 Unsupported operand types: array + null
 Unsupported operand types: null + array
 Unsupported operand types: array + bool
@@ -1164,11 +1164,11 @@ Unsupported operand types: array + int
 Unsupported operand types: int + array
 Unsupported operand types: array + float
 Unsupported operand types: float + array
-Unsupported operand types: array + non-numeric string
-Unsupported operand types: non-numeric string + array
-Unsupported operand types: array + non-numeric string
+Unsupported operand types: array + non-numeric-string
+Unsupported operand types: non-numeric-string + array
+Unsupported operand types: array + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + array
+Unsupported operand types: non-numeric-string + array
 Unsupported operand types: stdClass + null
 Unsupported operand types: null + stdClass
 Unsupported operand types: stdClass + bool
@@ -1179,11 +1179,11 @@ Unsupported operand types: stdClass + int
 Unsupported operand types: int + stdClass
 Unsupported operand types: stdClass + float
 Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + non-numeric string
-Unsupported operand types: non-numeric string + stdClass
-Unsupported operand types: stdClass + non-numeric string
+Unsupported operand types: stdClass + non-numeric-string
+Unsupported operand types: non-numeric-string + stdClass
+Unsupported operand types: stdClass + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + stdClass
+Unsupported operand types: non-numeric-string + stdClass
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
 Unsupported operand types: resource + bool
@@ -1194,42 +1194,42 @@ Unsupported operand types: resource + int
 Unsupported operand types: int + resource
 Unsupported operand types: resource + float
 Unsupported operand types: float + resource
-Unsupported operand types: resource + non-numeric string
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: resource + non-numeric string
+Unsupported operand types: resource + non-numeric-string
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: resource + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + resource
-Unsupported operand types: non-numeric string + null
-Unsupported operand types: null + non-numeric string
-Unsupported operand types: non-numeric string + bool
-Unsupported operand types: bool + non-numeric string
-Unsupported operand types: non-numeric string + bool
-Unsupported operand types: bool + non-numeric string
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: int + non-numeric string
-Unsupported operand types: non-numeric string + float
-Unsupported operand types: float + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: non-numeric-string + resource
+Unsupported operand types: non-numeric-string + null
+Unsupported operand types: null + non-numeric-string
+Unsupported operand types: non-numeric-string + bool
+Unsupported operand types: bool + non-numeric-string
+Unsupported operand types: non-numeric-string + bool
+Unsupported operand types: bool + non-numeric-string
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: int + non-numeric-string
+Unsupported operand types: non-numeric-string + float
+Unsupported operand types: float + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
+Unsupported operand types: non-numeric-string + non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string + non-numeric string
+Unsupported operand types: non-numeric-string + non-numeric-string
 Unsupported operand types: array - array
 Unsupported operand types: array - stdClass
 Unsupported operand types: array - resource
-Unsupported operand types: array - non-numeric string
+Unsupported operand types: array - non-numeric-string
 Unsupported operand types: stdClass - array
 Unsupported operand types: stdClass - stdClass
 Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - non-numeric string
+Unsupported operand types: stdClass - non-numeric-string
 Unsupported operand types: resource - array
 Unsupported operand types: resource - stdClass
 Unsupported operand types: resource - resource
-Unsupported operand types: resource - non-numeric string
-Unsupported operand types: non-numeric string - array
-Unsupported operand types: non-numeric string - stdClass
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: resource - non-numeric-string
+Unsupported operand types: non-numeric-string - array
+Unsupported operand types: non-numeric-string - stdClass
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: non-numeric-string - non-numeric-string
 Unsupported operand types: array - null
 Unsupported operand types: null - array
 Unsupported operand types: array - bool
@@ -1240,11 +1240,11 @@ Unsupported operand types: array - int
 Unsupported operand types: int - array
 Unsupported operand types: array - float
 Unsupported operand types: float - array
-Unsupported operand types: array - non-numeric string
-Unsupported operand types: non-numeric string - array
-Unsupported operand types: array - non-numeric string
+Unsupported operand types: array - non-numeric-string
+Unsupported operand types: non-numeric-string - array
+Unsupported operand types: array - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - array
+Unsupported operand types: non-numeric-string - array
 Unsupported operand types: stdClass - null
 Unsupported operand types: null - stdClass
 Unsupported operand types: stdClass - bool
@@ -1255,11 +1255,11 @@ Unsupported operand types: stdClass - int
 Unsupported operand types: int - stdClass
 Unsupported operand types: stdClass - float
 Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - non-numeric string
-Unsupported operand types: non-numeric string - stdClass
-Unsupported operand types: stdClass - non-numeric string
+Unsupported operand types: stdClass - non-numeric-string
+Unsupported operand types: non-numeric-string - stdClass
+Unsupported operand types: stdClass - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - stdClass
+Unsupported operand types: non-numeric-string - stdClass
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
 Unsupported operand types: resource - bool
@@ -1270,42 +1270,42 @@ Unsupported operand types: resource - int
 Unsupported operand types: int - resource
 Unsupported operand types: resource - float
 Unsupported operand types: float - resource
-Unsupported operand types: resource - non-numeric string
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: resource - non-numeric string
+Unsupported operand types: resource - non-numeric-string
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: resource - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - resource
-Unsupported operand types: non-numeric string - null
-Unsupported operand types: null - non-numeric string
-Unsupported operand types: non-numeric string - bool
-Unsupported operand types: bool - non-numeric string
-Unsupported operand types: non-numeric string - bool
-Unsupported operand types: bool - non-numeric string
-Unsupported operand types: non-numeric string - int
-Unsupported operand types: int - non-numeric string
-Unsupported operand types: non-numeric string - float
-Unsupported operand types: float - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: non-numeric-string - resource
+Unsupported operand types: non-numeric-string - null
+Unsupported operand types: null - non-numeric-string
+Unsupported operand types: non-numeric-string - bool
+Unsupported operand types: bool - non-numeric-string
+Unsupported operand types: non-numeric-string - bool
+Unsupported operand types: bool - non-numeric-string
+Unsupported operand types: non-numeric-string - int
+Unsupported operand types: int - non-numeric-string
+Unsupported operand types: non-numeric-string - float
+Unsupported operand types: float - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
+Unsupported operand types: non-numeric-string - non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string - non-numeric string
+Unsupported operand types: non-numeric-string - non-numeric-string
 Unsupported operand types: array * array
 Unsupported operand types: array * stdClass
 Unsupported operand types: array * resource
-Unsupported operand types: array * non-numeric string
+Unsupported operand types: array * non-numeric-string
 Unsupported operand types: stdClass * array
 Unsupported operand types: stdClass * stdClass
 Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * non-numeric string
+Unsupported operand types: stdClass * non-numeric-string
 Unsupported operand types: resource * array
 Unsupported operand types: resource * stdClass
 Unsupported operand types: resource * resource
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: non-numeric string * array
-Unsupported operand types: non-numeric string * stdClass
-Unsupported operand types: non-numeric string * resource
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: non-numeric-string * array
+Unsupported operand types: non-numeric-string * stdClass
+Unsupported operand types: non-numeric-string * resource
+Unsupported operand types: non-numeric-string * non-numeric-string
 Unsupported operand types: array * null
 Unsupported operand types: null * array
 Unsupported operand types: array * bool
@@ -1316,11 +1316,11 @@ Unsupported operand types: array * int
 Unsupported operand types: int * array
 Unsupported operand types: array * float
 Unsupported operand types: float * array
-Unsupported operand types: array * non-numeric string
-Unsupported operand types: non-numeric string * array
-Unsupported operand types: array * non-numeric string
+Unsupported operand types: array * non-numeric-string
+Unsupported operand types: non-numeric-string * array
+Unsupported operand types: array * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * array
+Unsupported operand types: non-numeric-string * array
 Unsupported operand types: stdClass * null
 Unsupported operand types: null * stdClass
 Unsupported operand types: stdClass * bool
@@ -1331,11 +1331,11 @@ Unsupported operand types: stdClass * int
 Unsupported operand types: int * stdClass
 Unsupported operand types: stdClass * float
 Unsupported operand types: float * stdClass
-Unsupported operand types: stdClass * non-numeric string
-Unsupported operand types: non-numeric string * stdClass
-Unsupported operand types: stdClass * non-numeric string
+Unsupported operand types: stdClass * non-numeric-string
+Unsupported operand types: non-numeric-string * stdClass
+Unsupported operand types: stdClass * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * stdClass
+Unsupported operand types: non-numeric-string * stdClass
 Unsupported operand types: resource * null
 Unsupported operand types: null * resource
 Unsupported operand types: resource * bool
@@ -1346,42 +1346,42 @@ Unsupported operand types: resource * int
 Unsupported operand types: int * resource
 Unsupported operand types: resource * float
 Unsupported operand types: float * resource
-Unsupported operand types: resource * non-numeric string
-Unsupported operand types: non-numeric string * resource
-Unsupported operand types: resource * non-numeric string
+Unsupported operand types: resource * non-numeric-string
+Unsupported operand types: non-numeric-string * resource
+Unsupported operand types: resource * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * resource
-Unsupported operand types: non-numeric string * null
-Unsupported operand types: null * non-numeric string
-Unsupported operand types: non-numeric string * bool
-Unsupported operand types: bool * non-numeric string
-Unsupported operand types: non-numeric string * bool
-Unsupported operand types: bool * non-numeric string
-Unsupported operand types: non-numeric string * int
-Unsupported operand types: int * non-numeric string
-Unsupported operand types: non-numeric string * float
-Unsupported operand types: float * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: non-numeric-string * resource
+Unsupported operand types: non-numeric-string * null
+Unsupported operand types: null * non-numeric-string
+Unsupported operand types: non-numeric-string * bool
+Unsupported operand types: bool * non-numeric-string
+Unsupported operand types: non-numeric-string * bool
+Unsupported operand types: bool * non-numeric-string
+Unsupported operand types: non-numeric-string * int
+Unsupported operand types: int * non-numeric-string
+Unsupported operand types: non-numeric-string * float
+Unsupported operand types: float * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
+Unsupported operand types: non-numeric-string * non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string * non-numeric string
+Unsupported operand types: non-numeric-string * non-numeric-string
 Unsupported operand types: array / array
 Unsupported operand types: array / stdClass
 Unsupported operand types: array / resource
-Unsupported operand types: array / non-numeric string
+Unsupported operand types: array / non-numeric-string
 Unsupported operand types: stdClass / array
 Unsupported operand types: stdClass / stdClass
 Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / non-numeric string
+Unsupported operand types: stdClass / non-numeric-string
 Unsupported operand types: resource / array
 Unsupported operand types: resource / stdClass
 Unsupported operand types: resource / resource
-Unsupported operand types: resource / non-numeric string
-Unsupported operand types: non-numeric string / array
-Unsupported operand types: non-numeric string / stdClass
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: resource / non-numeric-string
+Unsupported operand types: non-numeric-string / array
+Unsupported operand types: non-numeric-string / stdClass
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: non-numeric-string / non-numeric-string
 Unsupported operand types: array / null
 Unsupported operand types: null / array
 Unsupported operand types: array / bool
@@ -1392,11 +1392,11 @@ Unsupported operand types: array / int
 Unsupported operand types: int / array
 Unsupported operand types: array / float
 Unsupported operand types: float / array
-Unsupported operand types: array / non-numeric string
-Unsupported operand types: non-numeric string / array
-Unsupported operand types: array / non-numeric string
+Unsupported operand types: array / non-numeric-string
+Unsupported operand types: non-numeric-string / array
+Unsupported operand types: array / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / array
+Unsupported operand types: non-numeric-string / array
 Unsupported operand types: stdClass / null
 Unsupported operand types: null / stdClass
 Unsupported operand types: stdClass / bool
@@ -1407,11 +1407,11 @@ Unsupported operand types: stdClass / int
 Unsupported operand types: int / stdClass
 Unsupported operand types: stdClass / float
 Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / non-numeric string
-Unsupported operand types: non-numeric string / stdClass
-Unsupported operand types: stdClass / non-numeric string
+Unsupported operand types: stdClass / non-numeric-string
+Unsupported operand types: non-numeric-string / stdClass
+Unsupported operand types: stdClass / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / stdClass
+Unsupported operand types: non-numeric-string / stdClass
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
 Unsupported operand types: resource / bool
@@ -1422,42 +1422,42 @@ Unsupported operand types: resource / int
 Unsupported operand types: int / resource
 Unsupported operand types: resource / float
 Unsupported operand types: float / resource
-Unsupported operand types: resource / non-numeric string
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: resource / non-numeric string
+Unsupported operand types: resource / non-numeric-string
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: resource / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / resource
-Unsupported operand types: non-numeric string / null
-Unsupported operand types: null / non-numeric string
-Unsupported operand types: non-numeric string / bool
-Unsupported operand types: bool / non-numeric string
-Unsupported operand types: non-numeric string / bool
-Unsupported operand types: bool / non-numeric string
-Unsupported operand types: non-numeric string / int
-Unsupported operand types: int / non-numeric string
-Unsupported operand types: non-numeric string / float
-Unsupported operand types: float / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: non-numeric-string / resource
+Unsupported operand types: non-numeric-string / null
+Unsupported operand types: null / non-numeric-string
+Unsupported operand types: non-numeric-string / bool
+Unsupported operand types: bool / non-numeric-string
+Unsupported operand types: non-numeric-string / bool
+Unsupported operand types: bool / non-numeric-string
+Unsupported operand types: non-numeric-string / int
+Unsupported operand types: int / non-numeric-string
+Unsupported operand types: non-numeric-string / float
+Unsupported operand types: float / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
+Unsupported operand types: non-numeric-string / non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string / non-numeric string
+Unsupported operand types: non-numeric-string / non-numeric-string
 Unsupported operand types: array % array
 Unsupported operand types: array % stdClass
 Unsupported operand types: array % resource
-Unsupported operand types: array % non-numeric string
+Unsupported operand types: array % non-numeric-string
 Unsupported operand types: stdClass % array
 Unsupported operand types: stdClass % stdClass
 Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % non-numeric string
+Unsupported operand types: stdClass % non-numeric-string
 Unsupported operand types: resource % array
 Unsupported operand types: resource % stdClass
 Unsupported operand types: resource % resource
-Unsupported operand types: resource % non-numeric string
-Unsupported operand types: non-numeric string % array
-Unsupported operand types: non-numeric string % stdClass
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: resource % non-numeric-string
+Unsupported operand types: non-numeric-string % array
+Unsupported operand types: non-numeric-string % stdClass
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: non-numeric-string % non-numeric-string
 Unsupported operand types: array % null
 Unsupported operand types: null % array
 Unsupported operand types: array % bool
@@ -1469,11 +1469,11 @@ Unsupported operand types: int % array
 Unsupported operand types: array % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % array
-Unsupported operand types: array % non-numeric string
-Unsupported operand types: non-numeric string % array
-Unsupported operand types: array % non-numeric string
+Unsupported operand types: array % non-numeric-string
+Unsupported operand types: non-numeric-string % array
+Unsupported operand types: array % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % array
+Unsupported operand types: non-numeric-string % array
 Unsupported operand types: stdClass % null
 Unsupported operand types: null % stdClass
 Unsupported operand types: stdClass % bool
@@ -1485,11 +1485,11 @@ Unsupported operand types: int % stdClass
 Unsupported operand types: stdClass % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % non-numeric string
-Unsupported operand types: non-numeric string % stdClass
-Unsupported operand types: stdClass % non-numeric string
+Unsupported operand types: stdClass % non-numeric-string
+Unsupported operand types: non-numeric-string % stdClass
+Unsupported operand types: stdClass % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % stdClass
+Unsupported operand types: non-numeric-string % stdClass
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
 Unsupported operand types: resource % bool
@@ -1501,43 +1501,43 @@ Unsupported operand types: int % resource
 Unsupported operand types: resource % float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % resource
-Unsupported operand types: resource % non-numeric string
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: resource % non-numeric string
+Unsupported operand types: resource % non-numeric-string
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: resource % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % resource
-Unsupported operand types: non-numeric string % null
-Unsupported operand types: null % non-numeric string
-Unsupported operand types: non-numeric string % bool
-Unsupported operand types: bool % non-numeric string
-Unsupported operand types: non-numeric string % bool
-Unsupported operand types: bool % non-numeric string
-Unsupported operand types: non-numeric string % int
-Unsupported operand types: int % non-numeric string
-Unsupported operand types: non-numeric string % float
+Unsupported operand types: non-numeric-string % resource
+Unsupported operand types: non-numeric-string % null
+Unsupported operand types: null % non-numeric-string
+Unsupported operand types: non-numeric-string % bool
+Unsupported operand types: bool % non-numeric-string
+Unsupported operand types: non-numeric-string % bool
+Unsupported operand types: bool % non-numeric-string
+Unsupported operand types: non-numeric-string % int
+Unsupported operand types: int % non-numeric-string
+Unsupported operand types: non-numeric-string % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: float % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
+Unsupported operand types: non-numeric-string % non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string % non-numeric string
+Unsupported operand types: non-numeric-string % non-numeric-string
 Unsupported operand types: array ** array
 Unsupported operand types: array ** stdClass
 Unsupported operand types: array ** resource
-Unsupported operand types: array ** non-numeric string
+Unsupported operand types: array ** non-numeric-string
 Unsupported operand types: stdClass ** array
 Unsupported operand types: stdClass ** stdClass
 Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** non-numeric string
+Unsupported operand types: stdClass ** non-numeric-string
 Unsupported operand types: resource ** array
 Unsupported operand types: resource ** stdClass
 Unsupported operand types: resource ** resource
-Unsupported operand types: resource ** non-numeric string
-Unsupported operand types: non-numeric string ** array
-Unsupported operand types: non-numeric string ** stdClass
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: resource ** non-numeric-string
+Unsupported operand types: non-numeric-string ** array
+Unsupported operand types: non-numeric-string ** stdClass
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Unsupported operand types: array ** null
 Unsupported operand types: null ** array
 Unsupported operand types: array ** bool
@@ -1548,11 +1548,11 @@ Unsupported operand types: array ** int
 Unsupported operand types: int ** array
 Unsupported operand types: array ** float
 Unsupported operand types: float ** array
-Unsupported operand types: array ** non-numeric string
-Unsupported operand types: non-numeric string ** array
-Unsupported operand types: array ** non-numeric string
+Unsupported operand types: array ** non-numeric-string
+Unsupported operand types: non-numeric-string ** array
+Unsupported operand types: array ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** array
+Unsupported operand types: non-numeric-string ** array
 Unsupported operand types: stdClass ** null
 Unsupported operand types: null ** stdClass
 Unsupported operand types: stdClass ** bool
@@ -1563,11 +1563,11 @@ Unsupported operand types: stdClass ** int
 Unsupported operand types: int ** stdClass
 Unsupported operand types: stdClass ** float
 Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** non-numeric string
-Unsupported operand types: non-numeric string ** stdClass
-Unsupported operand types: stdClass ** non-numeric string
+Unsupported operand types: stdClass ** non-numeric-string
+Unsupported operand types: non-numeric-string ** stdClass
+Unsupported operand types: stdClass ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** stdClass
+Unsupported operand types: non-numeric-string ** stdClass
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
 Unsupported operand types: resource ** bool
@@ -1578,42 +1578,42 @@ Unsupported operand types: resource ** int
 Unsupported operand types: int ** resource
 Unsupported operand types: resource ** float
 Unsupported operand types: float ** resource
-Unsupported operand types: resource ** non-numeric string
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: resource ** non-numeric string
+Unsupported operand types: resource ** non-numeric-string
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: resource ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** resource
-Unsupported operand types: non-numeric string ** null
-Unsupported operand types: null ** non-numeric string
-Unsupported operand types: non-numeric string ** bool
-Unsupported operand types: bool ** non-numeric string
-Unsupported operand types: non-numeric string ** bool
-Unsupported operand types: bool ** non-numeric string
-Unsupported operand types: non-numeric string ** int
-Unsupported operand types: int ** non-numeric string
-Unsupported operand types: non-numeric string ** float
-Unsupported operand types: float ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: non-numeric-string ** resource
+Unsupported operand types: non-numeric-string ** null
+Unsupported operand types: null ** non-numeric-string
+Unsupported operand types: non-numeric-string ** bool
+Unsupported operand types: bool ** non-numeric-string
+Unsupported operand types: non-numeric-string ** bool
+Unsupported operand types: bool ** non-numeric-string
+Unsupported operand types: non-numeric-string ** int
+Unsupported operand types: int ** non-numeric-string
+Unsupported operand types: non-numeric-string ** float
+Unsupported operand types: float ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ** non-numeric string
+Unsupported operand types: non-numeric-string ** non-numeric-string
 Unsupported operand types: array << array
 Unsupported operand types: array << stdClass
 Unsupported operand types: array << resource
-Unsupported operand types: array << non-numeric string
+Unsupported operand types: array << non-numeric-string
 Unsupported operand types: stdClass << array
 Unsupported operand types: stdClass << stdClass
 Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << non-numeric string
+Unsupported operand types: stdClass << non-numeric-string
 Unsupported operand types: resource << array
 Unsupported operand types: resource << stdClass
 Unsupported operand types: resource << resource
-Unsupported operand types: resource << non-numeric string
-Unsupported operand types: non-numeric string << array
-Unsupported operand types: non-numeric string << stdClass
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: resource << non-numeric-string
+Unsupported operand types: non-numeric-string << array
+Unsupported operand types: non-numeric-string << stdClass
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: non-numeric-string << non-numeric-string
 Unsupported operand types: array << null
 Unsupported operand types: null << array
 Unsupported operand types: array << bool
@@ -1625,11 +1625,11 @@ Unsupported operand types: int << array
 Unsupported operand types: array << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << array
-Unsupported operand types: array << non-numeric string
-Unsupported operand types: non-numeric string << array
-Unsupported operand types: array << non-numeric string
+Unsupported operand types: array << non-numeric-string
+Unsupported operand types: non-numeric-string << array
+Unsupported operand types: array << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << array
+Unsupported operand types: non-numeric-string << array
 Unsupported operand types: stdClass << null
 Unsupported operand types: null << stdClass
 Unsupported operand types: stdClass << bool
@@ -1641,11 +1641,11 @@ Unsupported operand types: int << stdClass
 Unsupported operand types: stdClass << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << non-numeric string
-Unsupported operand types: non-numeric string << stdClass
-Unsupported operand types: stdClass << non-numeric string
+Unsupported operand types: stdClass << non-numeric-string
+Unsupported operand types: non-numeric-string << stdClass
+Unsupported operand types: stdClass << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << stdClass
+Unsupported operand types: non-numeric-string << stdClass
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
 Unsupported operand types: resource << bool
@@ -1657,43 +1657,43 @@ Unsupported operand types: int << resource
 Unsupported operand types: resource << float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << resource
-Unsupported operand types: resource << non-numeric string
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: resource << non-numeric string
+Unsupported operand types: resource << non-numeric-string
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: resource << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << resource
-Unsupported operand types: non-numeric string << null
-Unsupported operand types: null << non-numeric string
-Unsupported operand types: non-numeric string << bool
-Unsupported operand types: bool << non-numeric string
-Unsupported operand types: non-numeric string << bool
-Unsupported operand types: bool << non-numeric string
-Unsupported operand types: non-numeric string << int
-Unsupported operand types: int << non-numeric string
-Unsupported operand types: non-numeric string << float
+Unsupported operand types: non-numeric-string << resource
+Unsupported operand types: non-numeric-string << null
+Unsupported operand types: null << non-numeric-string
+Unsupported operand types: non-numeric-string << bool
+Unsupported operand types: bool << non-numeric-string
+Unsupported operand types: non-numeric-string << bool
+Unsupported operand types: bool << non-numeric-string
+Unsupported operand types: non-numeric-string << int
+Unsupported operand types: int << non-numeric-string
+Unsupported operand types: non-numeric-string << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: float << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
+Unsupported operand types: non-numeric-string << non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string << non-numeric string
+Unsupported operand types: non-numeric-string << non-numeric-string
 Unsupported operand types: array >> array
 Unsupported operand types: array >> stdClass
 Unsupported operand types: array >> resource
-Unsupported operand types: array >> non-numeric string
+Unsupported operand types: array >> non-numeric-string
 Unsupported operand types: stdClass >> array
 Unsupported operand types: stdClass >> stdClass
 Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> non-numeric string
+Unsupported operand types: stdClass >> non-numeric-string
 Unsupported operand types: resource >> array
 Unsupported operand types: resource >> stdClass
 Unsupported operand types: resource >> resource
-Unsupported operand types: resource >> non-numeric string
-Unsupported operand types: non-numeric string >> array
-Unsupported operand types: non-numeric string >> stdClass
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: resource >> non-numeric-string
+Unsupported operand types: non-numeric-string >> array
+Unsupported operand types: non-numeric-string >> stdClass
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Unsupported operand types: array >> null
 Unsupported operand types: null >> array
 Unsupported operand types: array >> bool
@@ -1705,11 +1705,11 @@ Unsupported operand types: int >> array
 Unsupported operand types: array >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> array
-Unsupported operand types: array >> non-numeric string
-Unsupported operand types: non-numeric string >> array
-Unsupported operand types: array >> non-numeric string
+Unsupported operand types: array >> non-numeric-string
+Unsupported operand types: non-numeric-string >> array
+Unsupported operand types: array >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> array
+Unsupported operand types: non-numeric-string >> array
 Unsupported operand types: stdClass >> null
 Unsupported operand types: null >> stdClass
 Unsupported operand types: stdClass >> bool
@@ -1721,11 +1721,11 @@ Unsupported operand types: int >> stdClass
 Unsupported operand types: stdClass >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> non-numeric string
-Unsupported operand types: non-numeric string >> stdClass
-Unsupported operand types: stdClass >> non-numeric string
+Unsupported operand types: stdClass >> non-numeric-string
+Unsupported operand types: non-numeric-string >> stdClass
+Unsupported operand types: stdClass >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> stdClass
+Unsupported operand types: non-numeric-string >> stdClass
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
 Unsupported operand types: resource >> bool
@@ -1737,42 +1737,42 @@ Unsupported operand types: int >> resource
 Unsupported operand types: resource >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> resource
-Unsupported operand types: resource >> non-numeric string
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: resource >> non-numeric string
+Unsupported operand types: resource >> non-numeric-string
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: resource >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> resource
-Unsupported operand types: non-numeric string >> null
-Unsupported operand types: null >> non-numeric string
-Unsupported operand types: non-numeric string >> bool
-Unsupported operand types: bool >> non-numeric string
-Unsupported operand types: non-numeric string >> bool
-Unsupported operand types: bool >> non-numeric string
-Unsupported operand types: non-numeric string >> int
-Unsupported operand types: int >> non-numeric string
-Unsupported operand types: non-numeric string >> float
+Unsupported operand types: non-numeric-string >> resource
+Unsupported operand types: non-numeric-string >> null
+Unsupported operand types: null >> non-numeric-string
+Unsupported operand types: non-numeric-string >> bool
+Unsupported operand types: bool >> non-numeric-string
+Unsupported operand types: non-numeric-string >> bool
+Unsupported operand types: bool >> non-numeric-string
+Unsupported operand types: non-numeric-string >> int
+Unsupported operand types: int >> non-numeric-string
+Unsupported operand types: non-numeric-string >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: float >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string >> non-numeric string
+Unsupported operand types: non-numeric-string >> non-numeric-string
 Unsupported operand types: array & array
 Unsupported operand types: array & stdClass
 Unsupported operand types: array & resource
-Unsupported operand types: array & non-numeric string
+Unsupported operand types: array & non-numeric-string
 Unsupported operand types: stdClass & array
 Unsupported operand types: stdClass & stdClass
 Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & non-numeric string
+Unsupported operand types: stdClass & non-numeric-string
 Unsupported operand types: resource & array
 Unsupported operand types: resource & stdClass
 Unsupported operand types: resource & resource
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: non-numeric string & array
-Unsupported operand types: non-numeric string & stdClass
-Unsupported operand types: non-numeric string & resource
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: non-numeric-string & array
+Unsupported operand types: non-numeric-string & stdClass
+Unsupported operand types: non-numeric-string & resource
 No error for "foo" &= "foo"
 Unsupported operand types: array & null
 Unsupported operand types: null & array
@@ -1785,11 +1785,11 @@ Unsupported operand types: int & array
 Unsupported operand types: array & float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & array
-Unsupported operand types: array & non-numeric string
-Unsupported operand types: non-numeric string & array
-Unsupported operand types: array & non-numeric string
+Unsupported operand types: array & non-numeric-string
+Unsupported operand types: non-numeric-string & array
+Unsupported operand types: array & non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string & array
+Unsupported operand types: non-numeric-string & array
 Unsupported operand types: stdClass & null
 Unsupported operand types: null & stdClass
 Unsupported operand types: stdClass & bool
@@ -1801,11 +1801,11 @@ Unsupported operand types: int & stdClass
 Unsupported operand types: stdClass & float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & stdClass
-Unsupported operand types: stdClass & non-numeric string
-Unsupported operand types: non-numeric string & stdClass
-Unsupported operand types: stdClass & non-numeric string
+Unsupported operand types: stdClass & non-numeric-string
+Unsupported operand types: non-numeric-string & stdClass
+Unsupported operand types: stdClass & non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string & stdClass
+Unsupported operand types: non-numeric-string & stdClass
 Unsupported operand types: resource & null
 Unsupported operand types: null & resource
 Unsupported operand types: resource & bool
@@ -1817,22 +1817,22 @@ Unsupported operand types: int & resource
 Unsupported operand types: resource & float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & resource
-Unsupported operand types: resource & non-numeric string
-Unsupported operand types: non-numeric string & resource
-Unsupported operand types: resource & non-numeric string
+Unsupported operand types: resource & non-numeric-string
+Unsupported operand types: non-numeric-string & resource
+Unsupported operand types: resource & non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string & resource
-Unsupported operand types: non-numeric string & null
-Unsupported operand types: null & non-numeric string
-Unsupported operand types: non-numeric string & bool
-Unsupported operand types: bool & non-numeric string
-Unsupported operand types: non-numeric string & bool
-Unsupported operand types: bool & non-numeric string
-Unsupported operand types: non-numeric string & int
-Unsupported operand types: int & non-numeric string
-Unsupported operand types: non-numeric string & float
+Unsupported operand types: non-numeric-string & resource
+Unsupported operand types: non-numeric-string & null
+Unsupported operand types: null & non-numeric-string
+Unsupported operand types: non-numeric-string & bool
+Unsupported operand types: bool & non-numeric-string
+Unsupported operand types: non-numeric-string & bool
+Unsupported operand types: bool & non-numeric-string
+Unsupported operand types: non-numeric-string & int
+Unsupported operand types: int & non-numeric-string
+Unsupported operand types: non-numeric-string & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & non-numeric string
+Unsupported operand types: float & non-numeric-string
 No error for "foo" &= "123"
 No error for "123" &= "foo"
 No error for "foo" &= "123foo"
@@ -1840,18 +1840,18 @@ No error for "123foo" &= "foo"
 Unsupported operand types: array | array
 Unsupported operand types: array | stdClass
 Unsupported operand types: array | resource
-Unsupported operand types: array | non-numeric string
+Unsupported operand types: array | non-numeric-string
 Unsupported operand types: stdClass | array
 Unsupported operand types: stdClass | stdClass
 Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | non-numeric string
+Unsupported operand types: stdClass | non-numeric-string
 Unsupported operand types: resource | array
 Unsupported operand types: resource | stdClass
 Unsupported operand types: resource | resource
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: non-numeric string | array
-Unsupported operand types: non-numeric string | stdClass
-Unsupported operand types: non-numeric string | resource
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: non-numeric-string | array
+Unsupported operand types: non-numeric-string | stdClass
+Unsupported operand types: non-numeric-string | resource
 No error for "foo" |= "foo"
 Unsupported operand types: array | null
 Unsupported operand types: null | array
@@ -1864,11 +1864,11 @@ Unsupported operand types: int | array
 Unsupported operand types: array | float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | array
-Unsupported operand types: array | non-numeric string
-Unsupported operand types: non-numeric string | array
-Unsupported operand types: array | non-numeric string
+Unsupported operand types: array | non-numeric-string
+Unsupported operand types: non-numeric-string | array
+Unsupported operand types: array | non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string | array
+Unsupported operand types: non-numeric-string | array
 Unsupported operand types: stdClass | null
 Unsupported operand types: null | stdClass
 Unsupported operand types: stdClass | bool
@@ -1880,11 +1880,11 @@ Unsupported operand types: int | stdClass
 Unsupported operand types: stdClass | float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | stdClass
-Unsupported operand types: stdClass | non-numeric string
-Unsupported operand types: non-numeric string | stdClass
-Unsupported operand types: stdClass | non-numeric string
+Unsupported operand types: stdClass | non-numeric-string
+Unsupported operand types: non-numeric-string | stdClass
+Unsupported operand types: stdClass | non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string | stdClass
+Unsupported operand types: non-numeric-string | stdClass
 Unsupported operand types: resource | null
 Unsupported operand types: null | resource
 Unsupported operand types: resource | bool
@@ -1896,22 +1896,22 @@ Unsupported operand types: int | resource
 Unsupported operand types: resource | float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | resource
-Unsupported operand types: resource | non-numeric string
-Unsupported operand types: non-numeric string | resource
-Unsupported operand types: resource | non-numeric string
+Unsupported operand types: resource | non-numeric-string
+Unsupported operand types: non-numeric-string | resource
+Unsupported operand types: resource | non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string | resource
-Unsupported operand types: non-numeric string | null
-Unsupported operand types: null | non-numeric string
-Unsupported operand types: non-numeric string | bool
-Unsupported operand types: bool | non-numeric string
-Unsupported operand types: non-numeric string | bool
-Unsupported operand types: bool | non-numeric string
-Unsupported operand types: non-numeric string | int
-Unsupported operand types: int | non-numeric string
-Unsupported operand types: non-numeric string | float
+Unsupported operand types: non-numeric-string | resource
+Unsupported operand types: non-numeric-string | null
+Unsupported operand types: null | non-numeric-string
+Unsupported operand types: non-numeric-string | bool
+Unsupported operand types: bool | non-numeric-string
+Unsupported operand types: non-numeric-string | bool
+Unsupported operand types: bool | non-numeric-string
+Unsupported operand types: non-numeric-string | int
+Unsupported operand types: int | non-numeric-string
+Unsupported operand types: non-numeric-string | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | non-numeric string
+Unsupported operand types: float | non-numeric-string
 No error for "foo" |= "123"
 No error for "123" |= "foo"
 No error for "foo" |= "123foo"
@@ -1919,18 +1919,18 @@ No error for "123foo" |= "foo"
 Unsupported operand types: array ^ array
 Unsupported operand types: array ^ stdClass
 Unsupported operand types: array ^ resource
-Unsupported operand types: array ^ non-numeric string
+Unsupported operand types: array ^ non-numeric-string
 Unsupported operand types: stdClass ^ array
 Unsupported operand types: stdClass ^ stdClass
 Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ non-numeric string
+Unsupported operand types: stdClass ^ non-numeric-string
 Unsupported operand types: resource ^ array
 Unsupported operand types: resource ^ stdClass
 Unsupported operand types: resource ^ resource
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: non-numeric string ^ array
-Unsupported operand types: non-numeric string ^ stdClass
-Unsupported operand types: non-numeric string ^ resource
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ array
+Unsupported operand types: non-numeric-string ^ stdClass
+Unsupported operand types: non-numeric-string ^ resource
 No error for "foo" ^= "foo"
 Unsupported operand types: array ^ null
 Unsupported operand types: null ^ array
@@ -1943,11 +1943,11 @@ Unsupported operand types: int ^ array
 Unsupported operand types: array ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ array
-Unsupported operand types: array ^ non-numeric string
-Unsupported operand types: non-numeric string ^ array
-Unsupported operand types: array ^ non-numeric string
+Unsupported operand types: array ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ array
+Unsupported operand types: array ^ non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ^ array
+Unsupported operand types: non-numeric-string ^ array
 Unsupported operand types: stdClass ^ null
 Unsupported operand types: null ^ stdClass
 Unsupported operand types: stdClass ^ bool
@@ -1959,11 +1959,11 @@ Unsupported operand types: int ^ stdClass
 Unsupported operand types: stdClass ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ stdClass
-Unsupported operand types: stdClass ^ non-numeric string
-Unsupported operand types: non-numeric string ^ stdClass
-Unsupported operand types: stdClass ^ non-numeric string
+Unsupported operand types: stdClass ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ stdClass
+Unsupported operand types: stdClass ^ non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ^ stdClass
+Unsupported operand types: non-numeric-string ^ stdClass
 Unsupported operand types: resource ^ null
 Unsupported operand types: null ^ resource
 Unsupported operand types: resource ^ bool
@@ -1975,22 +1975,22 @@ Unsupported operand types: int ^ resource
 Unsupported operand types: resource ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ resource
-Unsupported operand types: resource ^ non-numeric string
-Unsupported operand types: non-numeric string ^ resource
-Unsupported operand types: resource ^ non-numeric string
+Unsupported operand types: resource ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ resource
+Unsupported operand types: resource ^ non-numeric-string
 Warning: A non-numeric value encountered
-Unsupported operand types: non-numeric string ^ resource
-Unsupported operand types: non-numeric string ^ null
-Unsupported operand types: null ^ non-numeric string
-Unsupported operand types: non-numeric string ^ bool
-Unsupported operand types: bool ^ non-numeric string
-Unsupported operand types: non-numeric string ^ bool
-Unsupported operand types: bool ^ non-numeric string
-Unsupported operand types: non-numeric string ^ int
-Unsupported operand types: int ^ non-numeric string
-Unsupported operand types: non-numeric string ^ float
+Unsupported operand types: non-numeric-string ^ resource
+Unsupported operand types: non-numeric-string ^ null
+Unsupported operand types: null ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ bool
+Unsupported operand types: bool ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ bool
+Unsupported operand types: bool ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ int
+Unsupported operand types: int ^ non-numeric-string
+Unsupported operand types: non-numeric-string ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ non-numeric string
+Unsupported operand types: float ^ non-numeric-string
 No error for "foo" ^= "123"
 No error for "123" ^= "foo"
 No error for "foo" ^= "123foo"

@@ -24,5 +24,5 @@ try {
 ?>
 --EXPECTF--
 test(): Argument #1 ($v) must be of type false, int given, called in %s on line %d
-test(): Argument #1 ($v) must be of type false, empty string given, called in %s on line %d
+test(): Argument #1 ($v) must be of type false, empty-string given, called in %s on line %d
 test(): Argument #1 ($v) must be of type false, array given, called in %s on line %d

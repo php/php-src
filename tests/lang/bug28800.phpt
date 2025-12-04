@@ -12,10 +12,10 @@ Bug #28800 (Incorrect string to number conversion for strings starting with 'inf
     }
 ?>
 --EXPECT--
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: non-numeric string + int
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: non-numeric-string + int
 

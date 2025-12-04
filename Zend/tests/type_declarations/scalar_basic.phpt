@@ -76,13 +76,13 @@ E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line 
 int(1)
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, non-numeric-string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, empty string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, empty-string given, called in %s on line %d
 
 *** Trying int(%d)
 int(%d)
@@ -129,13 +129,13 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, non-numeric-string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, empty string given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, empty-string given, called in %s on line %d
 
 *** Trying int(%d)
 float(%s)

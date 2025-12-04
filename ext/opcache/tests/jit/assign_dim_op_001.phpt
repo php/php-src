@@ -104,4 +104,4 @@ array(1) {
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Cannot access offset of type array on array
-Unsupported operand types: null % empty string
+Unsupported operand types: null % empty-string

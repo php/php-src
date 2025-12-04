@@ -29,4 +29,4 @@ try {
 }
 ?>
 --EXPECT--
-Unsupported operand types: non-numeric string * float
+Unsupported operand types: non-numeric-string * float

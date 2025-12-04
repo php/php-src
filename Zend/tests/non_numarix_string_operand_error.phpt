@@ -25,11 +25,11 @@ try { foo(""); } catch (TypeError $e) { echo msg($e), "\n"; }
 ===DONE===
 --EXPECT--
 int(2)
-Unsupported operand types: int + non-numeric string
-Unsupported operand types: int + empty string
-Unsupported operand types: non-numeric string + int
-Unsupported operand types: empty string + int
+Unsupported operand types: int + non-numeric-string
+Unsupported operand types: int + empty-string
+Unsupported operand types: non-numeric-string + int
+Unsupported operand types: empty-string + int
 1
-foo(): Argument #1 ($a) must be of type int, non-numeric string given
-foo(): Argument #1 ($a) must be of type int, empty string given
+foo(): Argument #1 ($a) must be of type int, non-numeric-string given
+foo(): Argument #1 ($a) must be of type int, empty-string given
 ===DONE===
