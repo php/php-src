@@ -23,7 +23,7 @@
                                 /* upper limit to keep resources in check and   */
                                 /* minimize the possibility of exploits         */
 
-#define SCAN_SUCCESS			SUCCESS
+#define SCAN_SUCCESS			0
 #define SCAN_ERROR_EOF			-1	/* indicates premature termination of scan 	*/
 									/* can be caused by bad parameters or format*/
 									/* string.									*/
