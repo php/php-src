@@ -74,6 +74,10 @@ PHP                                                                        NEWS
     via deep structures). (ndossche)
   . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
 
+- Streams:
+  . Fixed bug GH-20370 (User stream filters could violate typed property
+    constraints). (alexandre-daubois)
+
 - XML:
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
     special characters in attributes when passing data to callback). (ndossche)
