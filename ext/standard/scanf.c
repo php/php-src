@@ -304,7 +304,7 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(char *format, int numVars, int *totalSubs)
+static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
 	int gotXpg, gotSequential, value, i, flags;
@@ -521,9 +521,9 @@ badSet:
 			numVars = objIndex;
 		}
 	}
-	if (totalSubs) {
-		*totalSubs = numVars;
-	}
+
+	*totalSubs = numVars;
+
 	for (i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
 			zend_value_error("%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
@@ -575,7 +575,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
-	int  numVars, nconversions, totalVars = -1;
+	int  numVars, nconversions;
 	int  i, result;
 	zend_long value;
 	zend_ulong  objIndex;
@@ -601,6 +601,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	/*
 	 * Check for errors in the format string.
 	 */
+	uint32_t totalVars = 0;
 	if (ValidateFormat(format, numVars, &totalVars) != SCAN_SUCCESS) {
 		scan_set_error_return( assignToVariables, return_value );
 		return SCAN_ERROR_INVALID_FORMAT;
@@ -627,7 +628,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		/* allocate an array for return */
 		array_init(return_value);
 
-		for (i = 0; i < totalVars; i++) {
+		for (uint32_t i = 0; i < totalVars; i++) {
 			ZVAL_NULL(&tmp);
 			if (add_next_index_zval(return_value, &tmp) == FAILURE) {
 				scan_set_error_return(0, return_value);
