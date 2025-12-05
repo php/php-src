@@ -575,7 +575,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 				zval *return_value)
 {
 	int  numVars, nconversions;
-	int  i, result;
+	int  result;
 	zend_long value;
 	zend_ulong  objIndex;
 	char *end, *baseString;
@@ -612,7 +612,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 * If any variables are passed, make sure they are all passed by reference
 	 */
 	if (assignToVariables) {
-		for (i = 0; i < argCount; i++){
+		for (uint32_t i = 0; i < argCount; i++){
 			ZEND_ASSERT(Z_ISREF(args[i]) && "Parameter must be passed by reference");
 		}
 	}
