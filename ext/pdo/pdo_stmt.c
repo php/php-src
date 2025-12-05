@@ -771,9 +771,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
 					goto in_fetch_error;
 				}
-				ctor_arguments = stmt->fetch.cls.ctor_args;
 			}
 			ZEND_ASSERT(ce != NULL);
+
+			ctor_arguments = stmt->fetch.cls.ctor_args;
 			if (flags & PDO_FETCH_SERIALIZE) {
 				if (!ce->unserialize) {
 					/* As this option is deprecated we do not bother to mention the class name. */
