@@ -2079,7 +2079,11 @@ PHP_FUNCTION(print_r)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (do_return) {
-		RETURN_STR(zend_print_zval_r_to_str(var, 0));
+		zend_string *out = zend_print_zval_r_to_str(var, 0);
+		if (UNEXPECTED(out == NULL)) {
+			RETURN_THROWS();
+		}
+		RETURN_STR(out);
 	} else {
 		zend_print_zval_r(var, 0);
 		RETURN_TRUE;
