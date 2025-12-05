@@ -106,7 +106,7 @@ typedef zend_long (*int_string_formater)(const char*, char**, int);
 /*
  * Declarations for functions used only in this file.
  */
-static char *BuildCharSet(CharSet *cset, char *format);
+static const char * BuildCharSet(CharSet *cset, const char *format);
 static bool CharInSet(const CharSet *cset, char c);
 static void	ReleaseCharSet(CharSet *cset);
 static inline void scan_set_error_return(bool assignToVariables, zval *return_value);
@@ -129,7 +129,7 @@ static inline void scan_set_error_return(bool assignToVariables, zval *return_va
  *
  *----------------------------------------------------------------------
  */
-static char * BuildCharSet(CharSet *cset, char *format)
+static const char * BuildCharSet(CharSet *cset, const char *format)
 {
 	const char *ch;
 	int  nranges;
@@ -570,7 +570,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal( char *string, char *format,
+PHPAPI int php_sscanf_internal( char *string, const char *format,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
@@ -578,14 +578,16 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	int  result;
 	zend_long value;
 	zend_ulong  objIndex;
-	char *end, *baseString;
+	char *end;
+	const char *baseString;
 	zval *current;
 	char op   = 0;
 	int  base = 0;
 	int  underflow = 0;
 	size_t width;
 	int_string_formater fn = NULL;
-	char *ch, sch;
+	const char *ch;
+	char sch;
 	int  flags;
 	char buf[64];	/* Temporary buffer to hold scanned number
 					 * strings before they are passed to strtoul() */
@@ -704,7 +706,9 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = ZEND_STRTOUL(format-1, &format, 10);
+			char *end_ptr = NULL;
+			width = ZEND_STRTOUL(format-1, &end_ptr, 10);
+			format = end_ptr;
 			ch = format++;
 		} else {
 			width = 0;
