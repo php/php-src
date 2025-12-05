@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.17
 
+- Bz2:
+  . Fixed bug GH-20620 (bzcompress overflow on large source size).
+    (David Carlier)  
+
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
 
