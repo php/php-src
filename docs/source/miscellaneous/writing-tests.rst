@@ -132,7 +132,7 @@ below illustrates a minimal test.
    string(32) "# hello All, I sAid hi planet! #"
 
 As you can see the file is divided into several sections. The TEST section holds a one line title of
-the phpt test, this should be a simple description and shouldn't ever excede one line, if you need
+the phpt test, this should be a simple description and shouldn't ever exceed one line, if you need
 to write more explanation add comments in the body of the test case. The phpt files name is used
 when generating a .php file. The FILE section is used as the body of the .php file, so don't forget
 to open and close your php tags. The EXPECT section is the part used as a comparison to see if the
@@ -580,7 +580,7 @@ Example 1 (snippet):
 .. code:: text
 
    --DESCRIPTION--
-   This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several differnet filter sanitizers.
+   This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several different filter sanitizers.
 
 Example 1 (full): :ref:`sample001.phpt`
 
@@ -1310,7 +1310,7 @@ Example 1 (full): :ref:`sample017.phpt`
 ``--FLAKY--``
 -------------
 
-**Description:** This section identifies this test as one that occassionally fails. If the test
+**Description:** This section identifies this test as one that occasionally fails. If the test
 actually fails, it will be retried one more time, and that result will be reported. The section
 should include a brief description of why the test is flaky. Reasons for this include tests that
 rely on relatively precise timing, or temporary disc states. Available as of PHP 8.1.22 and 8.2.9,
@@ -1884,7 +1884,7 @@ sample001.phpt
    --DESCRIPTION--
    This test covers both valid and invalid usages of
    filter_input() with INPUT_GET and INPUT_POST data
-   and several differnt filter sanitizers.
+   and several different filter sanitizers.
    --CREDITS--
    Felipe Pena <felipe@php.net>
    --INI--
