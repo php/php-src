@@ -307,7 +307,9 @@ static void ReleaseCharSet(CharSet *cset)
 static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
-	int gotXpg, gotSequential, value, i, flags;
+	int value, i, flags;
+	bool gotXpg = false;
+	bool gotSequential = false;
 	char *end, *ch = NULL;
 	int staticAssign[STATIC_LIST_SIZE];
 	int *nassign = staticAssign;
@@ -327,7 +329,7 @@ static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 		nassign[i] = 0;
 	}
 
-	xpgSize = objIndex = gotXpg = gotSequential = 0;
+	xpgSize = objIndex = 0;
 
 	while (*format != '\0') {
 		ch = format++;
@@ -358,7 +360,7 @@ static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 			}
 			format = end+1;
 			ch     = format++;
-			gotXpg = 1;
+			gotXpg = true;
 			if (gotSequential) {
 				goto mixedXPG;
 			}
@@ -387,7 +389,7 @@ static int ValidateFormat(char *format, int numVars, uint32_t *totalSubs)
 		}
 
 notXpg:
-		gotSequential = 1;
+		gotSequential = true;
 		if (gotXpg) {
 mixedXPG:
 			zend_value_error("%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
