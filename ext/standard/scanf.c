@@ -107,7 +107,7 @@ typedef zend_long (*int_string_formater)(const char*, char**, int);
  * Declarations for functions used only in this file.
  */
 static char *BuildCharSet(CharSet *cset, char *format);
-static int	CharInSet(CharSet *cset, int ch);
+static bool CharInSet(const CharSet *cset, char c);
 static void	ReleaseCharSet(CharSet *cset);
 static inline void scan_set_error_return(bool assignToVariables, zval *return_value);
 
@@ -230,22 +230,22 @@ static char * BuildCharSet(CharSet *cset, char *format)
  *
  *----------------------------------------------------------------------
  */
-static int CharInSet(CharSet *cset, int c)
+static bool CharInSet(const CharSet *cset, char c)
 {
-	char ch = (char) c;
-	int i, match = 0;
+	int i;
+	bool match = false;
 
 	for (i = 0; i < cset->nchars; i++) {
-		if (cset->chars[i] == ch) {
-			match = 1;
+		if (cset->chars[i] == c) {
+			match = true;
 			break;
 		}
 	}
 	if (!match) {
 		for (i = 0; i < cset->nranges; i++) {
-			if ((cset->ranges[i].start <= ch)
-				&& (ch <= cset->ranges[i].end)) {
-				match = 1;
+			if ((cset->ranges[i].start <= c)
+				&& (c <= cset->ranges[i].end)) {
+				match = true;
 				break;
 			}
 		}
@@ -861,7 +861,7 @@ literal:
 				format = BuildCharSet(&cset, format);
 				while (*end != '\0') {
 					sch = *end;
-					if (!CharInSet(&cset, (int)sch)) {
+					if (!CharInSet(&cset, sch)) {
 						break;
 					}
 					end++;
