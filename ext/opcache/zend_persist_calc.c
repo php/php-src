@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #include "zend_attributes.h"
 #include "zend_constants.h"
+#include "zend_class_alias.h"
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
@@ -594,6 +595,14 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 	}
 }
 
+static void zend_persist_class_alias_entry_calc(const zend_class_alias *alias)
+{
+	// alias->ce is going to be a pointer to a class entry that will be
+	// persisted on its own, here we just need to add size for the alias
+	ADD_SIZE(sizeof(zend_class_alias));
+	zend_persist_class_entry_calc(alias->ce);
+}
+
 static void zend_accel_persist_class_table_calc(const HashTable *class_table)
 {
 	Bucket *p;
@@ -602,7 +611,12 @@ static void zend_accel_persist_class_table_calc(const HashTable *class_table)
 	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
-		zend_persist_class_entry_calc(Z_CE(p->val));
+		if (Z_TYPE(p->val) == IS_PTR) {
+			zend_persist_class_entry_calc(Z_CE(p->val));
+		} else {
+			ZEND_ASSERT(Z_TYPE(p->val) == IS_ALIAS_PTR);
+			zend_persist_class_alias_entry_calc(Z_CLASS_ALIAS(p->val));
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 

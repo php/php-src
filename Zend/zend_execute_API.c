@@ -22,6 +22,7 @@
 #include <signal.h>
 
 #include "zend.h"
+#include "zend_class_alias.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_API.h"
@@ -51,7 +52,7 @@
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
-ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zval *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -327,7 +328,12 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
+			// CHECK
+			// if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+			// 	continue;
+			// }
+			zend_class_entry *ce;
+			Z_CE_FROM_ZVAL_P(ce, zv);
 
 			if (ce->default_static_members_count) {
 				zend_cleanup_internal_class_data(ce);
@@ -1206,7 +1212,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
-		ce = (zend_class_entry*)Z_PTR_P(zv);
+		Z_CE_FROM_ZVAL_P(ce, zv);
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
@@ -1273,7 +1279,17 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 	zend_exception_save();
-	ce = zend_autoload(autoload_name, lc_name);
+	zval *ce_zval = zend_autoload(autoload_name, lc_name);
+	zend_class_alias *alias = NULL;
+	if (ce_zval) {
+		if (Z_TYPE_P(ce_zval) == IS_ALIAS_PTR) {
+			alias = Z_CLASS_ALIAS_P(ce_zval);
+			ce = alias->ce;
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(ce_zval) == IS_PTR);
+			ce = Z_PTR_P(ce_zval);
+		}
+	}
 	zend_exception_restore();
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;
