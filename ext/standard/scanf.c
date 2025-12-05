@@ -299,7 +299,7 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(const zend_string *zstr_format, uint32_t numVars, uint32_t *totalSubs)
+static int ValidateFormat(const zend_string *zstr_format, uint32_t format_arg_num, uint32_t numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
 	int flags;
@@ -571,7 +571,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_format,
+PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_format, uint32_t format_arg_num,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
@@ -602,7 +602,7 @@ PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_forma
 	 * Check for errors in the format string.
 	 */
 	uint32_t totalVars = 0;
-	if (ValidateFormat(zstr_format, numVars, &totalVars) != SCAN_SUCCESS) {
+	if (ValidateFormat(zstr_format, format_arg_num, numVars, &totalVars) != SCAN_SUCCESS) {
 		scan_set_error_return( assignToVariables, return_value );
 		return SCAN_ERROR_INVALID_FORMAT;
 	}
