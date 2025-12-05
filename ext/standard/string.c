@@ -5860,13 +5860,14 @@ PHP_FUNCTION(str_pad)
 PHP_FUNCTION(sscanf)
 {
 	zval *args = NULL;
-	char *str, *format;
-	size_t str_len, format_len;
+	char *str;
+	size_t str_len;
+	zend_string *format;
 	uint32_t num_args = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_STRING(str, str_len)
-		Z_PARAM_STRING(format, format_len)
+		Z_PARAM_STR(format)
 		Z_PARAM_VARIADIC('*', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 

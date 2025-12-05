@@ -33,7 +33,7 @@
  * The following are here solely for the benefit of the scanf type functions
  * e.g. fscanf
  */
-PHPAPI int php_sscanf_internal(const char *string, const char *format,uint32_t argCount,zval *args,
+PHPAPI int php_sscanf_internal(const char *string, const zend_string *format, uint32_t argCount, zval *args,
 				zval *return_value);
 
 

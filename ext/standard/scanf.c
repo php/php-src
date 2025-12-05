@@ -299,7 +299,7 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(const char *format, uint32_t numVars, uint32_t *totalSubs)
+static int ValidateFormat(const zend_string *zstr_format, uint32_t numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
 	int flags;
@@ -325,6 +325,7 @@ static int ValidateFormat(const char *format, uint32_t numVars, uint32_t *totalS
 	}
 	memset(nassign, 0, sizeof(uint32_t)*numVars);
 
+	const char *format = ZSTR_VAL(zstr_format);
 	while (*format != '\0') {
 		ch = format++;
 		flags = 0;
@@ -570,7 +571,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal(const char *string, const char *format,
+PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_format,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
@@ -601,7 +602,7 @@ PHPAPI int php_sscanf_internal(const char *string, const char *format,
 	 * Check for errors in the format string.
 	 */
 	uint32_t totalVars = 0;
-	if (ValidateFormat(format, numVars, &totalVars) != SCAN_SUCCESS) {
+	if (ValidateFormat(zstr_format, numVars, &totalVars) != SCAN_SUCCESS) {
 		scan_set_error_return( assignToVariables, return_value );
 		return SCAN_ERROR_INVALID_FORMAT;
 	}
@@ -646,6 +647,7 @@ PHPAPI int php_sscanf_internal(const char *string, const char *format,
 	nconversions = 0;
 	/* note ! - we need to limit the loop for objIndex to keep it in bounds */
 
+	const char *format = ZSTR_VAL(zstr_format);
 	while (*format != '\0') {
 		ch    = format++;
 		flags = 0;

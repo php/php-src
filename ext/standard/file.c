@@ -929,16 +929,16 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHP_FUNCTION(fscanf)
 {
 	uint32_t argc = 0;
-	size_t format_len;
 	zval *args = NULL;
 	zval *file_handle;
-	char *buf, *format;
+	char *buf;
+	zend_string *format;
 	size_t len;
 	void *what;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_RESOURCE(file_handle)
-		Z_PARAM_STRING(format, format_len)
+		Z_PARAM_STR(format)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
