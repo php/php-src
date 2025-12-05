@@ -219,13 +219,14 @@ void zend_weakrefs_notify(zend_object *object) {
 	/* Annoyingly we can't use the HT destructor here, because we need access to the key (which
 	 * is the object address), which is not provided to the dtor. */
 	const zend_ulong obj_key = zend_object_to_weakref_key(object);
-	void *tagged_ptr;
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
 #if ZEND_DEBUG
 	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
 #endif
-	while ((tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key))) {
+	while (tagged_ptr) {
 		zend_hash_index_del(&EG(weakrefs), obj_key);
 		zend_weakref_unref(object, tagged_ptr);
+		tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
 	}
 }
 
