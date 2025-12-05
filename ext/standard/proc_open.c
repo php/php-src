@@ -510,7 +510,7 @@ typedef struct _descriptorspec_item {
 } descriptorspec_item;
 
 static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
-	zend_string *str = zval_get_string(zv);
+	zend_string *str = zval_try_get_string(zv);
 	if (!str) {
 		return NULL;
 	}

@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Fix memory leak in ldap_set_options(). (ndossche)
 
+- Standard:
+  . Fix error check for proc_open() command. (ndossche)
+
 18 Dec 2025, PHP 8.3.29
 
 - Core:
