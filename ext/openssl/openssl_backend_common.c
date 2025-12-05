@@ -667,9 +667,29 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				break;
+			case GEN_DIRNAME:
+				BIO_puts(bio, "DirName:");
+				char *ptr = X509_NAME_oneline(name->d.dirn, 0, 0);
+				char *p = ptr;
+				char *q;
+				while (*p) {
+					q = strchr(p, ',');
+					if (q) {
+						*q = '\0';
+						BIO_puts(bio, p);
+						BIO_puts(bio, "\\,");
+						p = q+1;
+					} else {
+						BIO_puts(bio, p);
+						*p = '\0';
+					}
+				}
+				BIO_puts(bio, "\n");
+				OPENSSL_free(ptr);
+				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
-				 * GEN_EDIPARTY, GEN_DIRNAME, GEN_IPADD and GEN_RID
+				 * GEN_EDIPARTY, GEN_IPADD and GEN_RID
 				 */
 				GENERAL_NAME_print(bio, name);
 			}
