@@ -131,9 +131,9 @@ static inline void scan_set_error_return(bool assignToVariables, zval *return_va
  */
 static char * BuildCharSet(CharSet *cset, char *format)
 {
-	char *ch, start;
+	const char *ch;
 	int  nranges;
-	char *end;
+	const char *end;
 
 	memset(cset, 0, sizeof(CharSet));
 
@@ -170,7 +170,7 @@ static char * BuildCharSet(CharSet *cset, char *format)
 	 */
 	cset->nchars = cset->nranges = 0;
 	ch    = format++;
-	start = *ch;
+	char start = *ch;
 	if (*ch == ']' || *ch == '-') {
 		cset->chars[cset->nchars++] = *ch;
 		ch = format++;
@@ -299,13 +299,13 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(char *format, uint32_t numVars, uint32_t *totalSubs)
+static int ValidateFormat(const char *format, uint32_t numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
 	int flags;
 	bool gotXpg = false;
 	bool gotSequential = false;
-	char *end, *ch = NULL;
+	const char *ch = NULL;
 	uint32_t staticAssign[STATIC_LIST_SIZE];
 	uint32_t *nassign = staticAssign;
 	uint32_t objIndex = 0;
@@ -348,6 +348,7 @@ static int ValidateFormat(char *format, uint32_t numVars, uint32_t *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
+			char *end = NULL;
 			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
@@ -395,8 +396,10 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &format, 10);
+			char *end = NULL;
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			flags |= SCAN_WIDTH;
+			format = end;
 			ch = format++;
 		}
 
