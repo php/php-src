@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 /*
+    CHANGING THIS CODE TO CHECK FOR SELF HOSTED RUNNER ON GHA FOR PHP
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
