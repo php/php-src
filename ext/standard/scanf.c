@@ -570,7 +570,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal( char *string, const char *format,
+PHPAPI int php_sscanf_internal(const char *string, const char *format,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
@@ -578,7 +578,7 @@ PHPAPI int php_sscanf_internal( char *string, const char *format,
 	int  result;
 	zend_long value;
 	zend_ulong  objIndex;
-	char *end;
+	const char *end;
 	const char *baseString;
 	zval *current;
 	char op   = 0;
@@ -589,8 +589,6 @@ PHPAPI int php_sscanf_internal( char *string, const char *format,
 	const char *ch;
 	char sch;
 	int  flags;
-	char buf[64];	/* Temporary buffer to hold scanned number
-					 * strings before they are passed to strtoul() */
 
 	numVars = argCount;
 	if (numVars < 0) {
@@ -694,6 +692,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
+			char *end = NULL;
 			zend_ulong assignment_index = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
@@ -917,7 +916,10 @@ literal:
 				}
 				break;
 */
-			case 'i':
+			case 'i': {
+				/* Temporary buffer to hold scanned number */
+				char buf[64];
+				char *buf_end;
 				/*
 				 * Scan an unsigned or signed integer.
 				 */
@@ -929,7 +931,7 @@ literal:
 				}
 
 				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO;
-				for (end = buf; width > 0; width--) {
+				for (buf_end = buf; width > 0; width--) {
 					switch (*string) {
 						/*
 						 * The 0 digit has special meaning at the beginning of
@@ -967,7 +969,7 @@ literal:
 								base = 10;
 							}
 							if (base <= 8) {
-							   break;
+								break;
 							}
 							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
 							goto addToInt;
@@ -990,7 +992,7 @@ literal:
 							break;
 
 						case 'x': case 'X':
-							if ((flags & SCAN_XOK) && (end == buf+1)) {
+							if ((flags & SCAN_XOK) && (buf_end == buf+1)) {
 								base = 16;
 								flags &= ~SCAN_XOK;
 								goto addToInt;
@@ -1007,7 +1009,7 @@ addToInt:
 					/*
 					 * Add the character to the temporary buffer.
 					 */
-					*end++ = *string++;
+					*buf_end++ = *string++;
 					if (*string == '\0') {
 						break;
 					}
@@ -1022,8 +1024,8 @@ addToInt:
 						underflow = 1;
 					}
 					goto done;
-				} else if (end[-1] == 'x' || end[-1] == 'X') {
-					end--;
+				} else if (buf_end[-1] == 'x' || buf_end[-1] == 'X') {
+					buf_end--;
 					string--;
 				}
 
@@ -1033,14 +1035,14 @@ addToInt:
 				 * to a string since PHP only supports signed values.
 				 */
 				if (!(flags & SCAN_SUPPRESS)) {
-					*end = '\0';
+					*buf_end = '\0';
 					value = (zend_long) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
 						snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, value); /* INTL: ISO digit */
 						if (assignToVariables && objIndex >= argCount) {
 							break;
 						} else if (assignToVariables) {
-							 /* change passed value type to string */
+							/* change passed value type to string */
 							current = args + objIndex++;
 							ZEND_TRY_ASSIGN_REF_STRING(current, buf);
 						} else {
@@ -1058,8 +1060,12 @@ addToInt:
 					}
 				}
 				break;
+			}
 
-			case 'f':
+			case 'f': {
+				/* Temporary buffer to hold scanned number */
+				char buf[64];
+				char *buf_end;
 				/*
 				 * Scan a floating point number
 				 */
@@ -1068,7 +1074,7 @@ addToInt:
 					width = sizeof(buf) - 1;
 				}
 				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_PTOK | SCAN_EXPOK;
-				for (end = buf; width > 0; width--) {
+				for (buf_end = buf; width > 0; width--) {
 					switch (*string) {
 						case '0': case '1': case '2': case '3':
 						case '4': case '5': case '6': case '7':
@@ -1111,7 +1117,7 @@ addToFloat:
 					/*
 					 * Add the character to the temporary buffer.
 					 */
-					*end++ = *string++;
+					*buf_end++ = *string++;
 					if (*string == '\0') {
 						break;
 					}
@@ -1136,10 +1142,10 @@ addToFloat:
 					/*
 					 * We got a bad exponent ('e' and maybe a sign).
 					 */
-					end--;
+					buf_end--;
 					string--;
-					if (*end != 'e' && *end != 'E') {
-						end--;
+					if (*buf_end != 'e' && *buf_end != 'E') {
+						buf_end--;
 						string--;
 					}
 				}
@@ -1149,7 +1155,7 @@ addToFloat:
 				 */
 				if (!(flags & SCAN_SUPPRESS)) {
 					double dvalue;
-					*end = '\0';
+					*buf_end = '\0';
 					dvalue = zend_strtod(buf, NULL);
 					if (assignToVariables && objIndex >= argCount) {
 						break;
@@ -1161,6 +1167,7 @@ addToFloat:
 					}
 				}
 				break;
+			}
 		} /* switch (op) */
 		nconversions++;
 	} /*  while (*format != '\0') */
