@@ -119,6 +119,10 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 		RETURN_STABLE_SORT(a, b, php_array_reverse_##name##_unstable(a, b)); \
 	} \
 
+/* Forward declarations for transitive comparison helpers used by SORT_REGULAR */
+static zend_always_inline int php_array_smart_strcmp_transitive(zend_string *s1, zend_string *s2);
+static int php_array_compare_transitive(zval *op1, zval *op2);
+
 static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval first;
@@ -127,7 +131,7 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 	} else if (f->key && s->key) {
-		return zendi_smart_strcmp(f->key, s->key);
+		return php_array_smart_strcmp_transitive(f->key, s->key);
 	}
 	if (f->key) {
 		ZVAL_STR(&first, f->key);
@@ -139,7 +143,7 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	} else {
 		ZVAL_LONG(&second, s->h);
 	}
-	return zend_compare(&first, &second);
+	return php_array_compare_transitive(&first, &second);
 }
 /* }}} */
 
@@ -285,27 +289,7 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 
 static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	int result = zend_compare(&f->val, &s->val);
-	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
-	 * that would be observable via comparison operators. */
-	zval *rhs = &s->val;
-	ZVAL_DEREF(rhs);
-	if (UNEXPECTED(Z_TYPE_P(rhs) == IS_OBJECT)
-	 && result == ZEND_UNCOMPARABLE
-	 && (Z_OBJCE_P(rhs)->ce_flags & ZEND_ACC_ENUM)) {
-		zval *lhs = &f->val;
-		ZVAL_DEREF(lhs);
-		if (Z_TYPE_P(lhs) == IS_OBJECT && (Z_OBJCE_P(lhs)->ce_flags & ZEND_ACC_ENUM)) {
-			// Order doesn't matter, we just need to group the same enum values
-			uintptr_t lhs_uintptr = (uintptr_t)Z_OBJ_P(lhs);
-			uintptr_t rhs_uintptr = (uintptr_t)Z_OBJ_P(rhs);
-			return lhs_uintptr == rhs_uintptr ? 0 : (lhs_uintptr < rhs_uintptr ? -1 : 1);
-		} else {
-			// Shift enums to the end of the array
-			return -1;
-		}
-	}
-	return result;
+	return php_array_compare_transitive(&f->val, &s->val);
 }
 /* }}} */
 
@@ -371,6 +355,390 @@ DEFINE_SORT_VARIANTS(data_compare_string);
 DEFINE_SORT_VARIANTS(data_compare_string_locale);
 DEFINE_SORT_VARIANTS(natural_compare);
 DEFINE_SORT_VARIANTS(natural_case_compare);
+
+static zend_always_inline int php_array_compare_non_numeric_strings(zend_string *s1, zend_string *s2)
+{
+	size_t min_len = ZSTR_LEN(s1) < ZSTR_LEN(s2) ? ZSTR_LEN(s1) : ZSTR_LEN(s2);
+	int cmp = memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), min_len);
+	if (cmp != 0) {
+		return cmp < 0 ? -1 : 1;
+	}
+	return ZEND_THREEWAY_COMPARE(ZSTR_LEN(s1), ZSTR_LEN(s2));
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with compare_long_to_string() in Zend/zend_operators.c. */
+static zend_always_inline int php_array_compare_long_to_string_transitive(zend_long lval, zend_string *str)
+{
+	zend_long str_lval;
+	double str_dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	if (type == IS_LONG) {
+		return ZEND_THREEWAY_COMPARE(lval, str_lval);
+	}
+
+	if (type == IS_DOUBLE) {
+		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
+	}
+
+	/* Transitivity: longs sort before non-numeric strings */
+	return ZSTR_LEN(str) == 0 ? 1 : -1;
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with compare_double_to_string() in Zend/zend_operators.c. */
+static zend_always_inline int php_array_compare_double_to_string_transitive(double dval, zend_string *str)
+{
+	zend_long str_lval;
+	double str_dval;
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+
+	ZEND_ASSERT(!zend_isnan(dval));
+
+	if (type == IS_LONG) {
+		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
+	}
+
+	if (type == IS_DOUBLE) {
+		return ZEND_THREEWAY_COMPARE(dval, str_dval);
+	}
+
+	/* Transitivity: doubles sort before non-numeric strings */
+	return ZSTR_LEN(str) == 0 ? 1 : -1;
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with zendi_smart_strcmp() in Zend/zend_operators.c. */
+static zend_always_inline int php_array_smart_strcmp_transitive(zend_string *s1, zend_string *s2)
+{
+	uint8_t ret1, ret2;
+	int oflow1, oflow2;
+	zend_long lval1 = 0, lval2 = 0;
+	double dval1 = 0.0, dval2 = 0.0;
+
+	if (UNEXPECTED(ZSTR_LEN(s1) == 0 || ZSTR_LEN(s2) == 0)) {
+		if (ZSTR_LEN(s1) == 0 && ZSTR_LEN(s2) == 0) {
+			return 0;
+		}
+		return ZSTR_LEN(s1) == 0 ? -1 : 1;
+	}
+
+	ret1 = is_numeric_string_ex(ZSTR_VAL(s1), ZSTR_LEN(s1), &lval1, &dval1, false, &oflow1, NULL);
+	ret2 = is_numeric_string_ex(ZSTR_VAL(s2), ZSTR_LEN(s2), &lval2, &dval2, false, &oflow2, NULL);
+
+	if (ret1 && ret2) {
+		/* Both numeric strings: compare numerically */
+#if ZEND_ULONG_MAX == 0xFFFFFFFF
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
+			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
+			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
+#else
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
+#endif
+			/* Both values are integers overflowed to the same side, and the
+			 * double comparison may have resulted in crucial accuracy lost */
+			return php_array_compare_non_numeric_strings(s1, s2);
+		}
+		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
+			if (ret1 != IS_DOUBLE) {
+				if (oflow2) {
+					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
+					return -1 * oflow2;
+				}
+				dval1 = (double) lval1;
+			} else if (ret2 != IS_DOUBLE) {
+				if (oflow1) {
+					return oflow1;
+				}
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				return php_array_compare_non_numeric_strings(s1, s2);
+			}
+			dval1 = dval1 - dval2;
+			return ZEND_NORMALIZE_BOOL(dval1);
+		} else { /* they both have to be long's */
+			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+		}
+	} else if (ret1) {
+		/* Transitivity: numeric strings sort before non-numeric strings */
+		return -1;
+	} else if (ret2) {
+		/* Transitivity: numeric strings sort before non-numeric strings */
+		return 1;
+	}
+
+	/* Both non-numeric: lexicographic comparison */
+	return php_array_compare_non_numeric_strings(s1, s2);
+}
+
+static zend_always_inline bool php_array_is_enum_zval(zval *zv)
+{
+	return Z_TYPE_P(zv) == IS_OBJECT && (Z_OBJCE_P(zv)->ce_flags & ZEND_ACC_ENUM);
+}
+
+static zend_always_inline int php_array_compare_enums_transitive(zval *lhs, zval *rhs)
+{
+	bool lhs_enum = php_array_is_enum_zval(lhs);
+	bool rhs_enum = php_array_is_enum_zval(rhs);
+
+	if (lhs_enum && rhs_enum) {
+		zend_object *lhs_obj = Z_OBJ_P(lhs);
+		zend_object *rhs_obj = Z_OBJ_P(rhs);
+		if (lhs_obj == rhs_obj) {
+			return 0;
+		}
+		return lhs_obj->handle < rhs_obj->handle ? -1 : 1;
+	}
+
+	return lhs_enum ? 1 : -1;
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with zend_compare_symbol_tables() in Zend/zend_operators.c. */
+static int php_array_compare_symbol_tables_transitive(HashTable *ht1, HashTable *ht2)
+{
+	if (ht1 == ht2) {
+		return 0;
+	}
+
+	GC_TRY_ADDREF(ht1);
+	GC_TRY_ADDREF(ht2);
+
+	int ret = zend_hash_compare(ht1, ht2, (compare_func_t) php_array_compare_transitive, 0);
+
+	GC_TRY_DTOR_NO_REF(ht1);
+	GC_TRY_DTOR_NO_REF(ht2);
+
+	return ret;
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with zend_compare_arrays() in Zend/zend_operators.c. */
+static int php_array_compare_arrays_transitive(zval *a1, zval *a2)
+{
+	return php_array_compare_symbol_tables_transitive(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
+}
+
+/* Transitive variant for SORT_REGULAR.
+ * Keep in sync with zend_std_compare_objects() in Zend/zend_object_handlers.c. */
+static int php_array_compare_objects_transitive(zval *o1, zval *o2)
+{
+	if (Z_TYPE_P(o1) != IS_OBJECT || Z_TYPE_P(o2) != IS_OBJECT) {
+		return zend_compare(o1, o2);
+	}
+
+	if (Z_OBJ_HT_P(o1)->compare && Z_OBJ_HT_P(o1)->compare != zend_std_compare_objects) {
+		return Z_OBJ_HT_P(o1)->compare(o1, o2);
+	}
+
+	zend_object *zobj1 = Z_OBJ_P(o1);
+	zend_object *zobj2 = Z_OBJ_P(o2);
+
+	if (zobj1 == zobj2) {
+		return 0; /* the same object */
+	}
+	if (zobj1->ce != zobj2->ce) {
+		return ZEND_UNCOMPARABLE; /* different classes */
+	}
+
+	if (!zobj1->properties && !zobj2->properties
+			&& !zend_object_is_lazy(zobj1) && !zend_object_is_lazy(zobj2)) {
+		zend_property_info *info;
+		int i;
+
+		if (!zobj1->ce->default_properties_count) {
+			return 0;
+		}
+
+		/* It's enough to protect only one of the objects.
+		 * The second one may be referenced from the first and this may cause
+		 * false recursion detection.
+		 */
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1))) {
+			zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+			return ZEND_UNCOMPARABLE;
+		}
+		Z_PROTECT_RECURSION_P(o1);
+
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+		int ret;
+
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			zval *p1, *p2;
+
+			info = zobj1->ce->properties_info_table[i];
+
+			if (!info) {
+				continue;
+			}
+
+			p1 = OBJ_PROP(zobj1, info->offset);
+			p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (Z_TYPE_P(p1) != IS_UNDEF) {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
+					/* Transitivity: recurse via transitive comparison */
+					ret = php_array_compare_transitive(p1, p2);
+					if (ret != 0) {
+						Z_UNPROTECT_RECURSION_P(o1);
+						goto done;
+					}
+				} else {
+					Z_UNPROTECT_RECURSION_P(o1);
+					ret = 1;
+					goto done;
+				}
+			} else {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
+					Z_UNPROTECT_RECURSION_P(o1);
+					ret = 1;
+					goto done;
+				}
+			}
+		}
+
+		Z_UNPROTECT_RECURSION_P(o1);
+		ret = 0;
+
+done:
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
+	} else {
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+
+		/* Transitivity: recurse via transitive comparison */
+		int ret = php_array_compare_symbol_tables_transitive(
+				zend_std_get_properties_ex(zobj1),
+				zend_std_get_properties_ex(zobj2));
+
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
+	}
+}
+
+#define PHP_ARRAY_TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
+
+/* Transitive variant for SORT_REGULAR.
+ * Cases like null/bool/long-long are identical to zend_compare but duplicated
+ * here to avoid per-comparison dispatch overhead.
+ * Keep in sync with zend_compare() in Zend/zend_operators.c. */
+static int php_array_compare_transitive(zval *op1, zval *op2)
+{
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	switch (PHP_ARRAY_TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_LONG):
+			return Z_LVAL_P(op1) > Z_LVAL_P(op2) ? 1 : (Z_LVAL_P(op1) < Z_LVAL_P(op2) ? -1 : 0);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_LONG):
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+				/* Transitivity: NaN sorts after longs (IEEE 754 totalOrder) */
+				return 1;
+			}
+			return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), (double) Z_LVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_DOUBLE):
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+				/* Transitivity: longs sort before NaN (IEEE 754 totalOrder) */
+				return -1;
+			}
+			return ZEND_THREEWAY_COMPARE((double) Z_LVAL_P(op1), Z_DVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+				/* Transitivity: NaN sorts last among doubles (IEEE 754 totalOrder) */
+				return zend_isnan(Z_DVAL_P(op2)) ? 0 : 1;
+			}
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+				/* Transitivity: NaN sorts last among doubles (IEEE 754 totalOrder) */
+				return -1;
+			}
+			return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_ARRAY, IS_ARRAY):
+			/* Transitivity: recurse via transitive comparison */
+			return php_array_compare_arrays_transitive(op1, op2);
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_NULL):
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_FALSE):
+		case PHP_ARRAY_TYPE_PAIR(IS_FALSE, IS_NULL):
+		case PHP_ARRAY_TYPE_PAIR(IS_FALSE, IS_FALSE):
+		case PHP_ARRAY_TYPE_PAIR(IS_TRUE, IS_TRUE):
+			return 0;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_TRUE):
+			return -1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_TRUE, IS_NULL):
+			return 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_STRING):
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				return 0;
+			}
+			/* Transitivity: numeric strings sort before non-numeric strings */
+			return php_array_smart_strcmp_transitive(Z_STR_P(op1), Z_STR_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_STRING):
+			return Z_STRLEN_P(op2) == 0 ? 0 : -1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_NULL):
+			return Z_STRLEN_P(op1) == 0 ? 0 : 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_LONG, IS_STRING):
+			/* Transitivity: longs sort before non-numeric strings */
+			return php_array_compare_long_to_string_transitive(Z_LVAL_P(op1), Z_STR_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_LONG):
+			/* Transitivity: longs sort before non-numeric strings */
+			return -php_array_compare_long_to_string_transitive(Z_LVAL_P(op2), Z_STR_P(op1));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_DOUBLE, IS_STRING):
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+				/* Transitivity: NaN sorts before non-numeric strings (IEEE 754 totalOrder) */
+				return -1;
+			}
+			/* Transitivity: doubles sort before non-numeric strings */
+			return php_array_compare_double_to_string_transitive(Z_DVAL_P(op1), Z_STR_P(op2));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_STRING, IS_DOUBLE):
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+				/* Transitivity: NaN sorts before non-numeric strings (IEEE 754 totalOrder) */
+				return 1;
+			}
+			/* Transitivity: doubles sort before non-numeric strings */
+			return -php_array_compare_double_to_string_transitive(Z_DVAL_P(op2), Z_STR_P(op1));
+
+		case PHP_ARRAY_TYPE_PAIR(IS_OBJECT, IS_NULL):
+			return 1;
+
+		case PHP_ARRAY_TYPE_PAIR(IS_NULL, IS_OBJECT):
+			return -1;
+
+		default:
+			if (Z_TYPE_P(op1) == IS_OBJECT
+			 || Z_TYPE_P(op2) == IS_OBJECT) {
+				if (UNEXPECTED(php_array_is_enum_zval(op1) || php_array_is_enum_zval(op2))) {
+					/* Transitivity: enums ordered by object handle */
+					return php_array_compare_enums_transitive(op1, op2);
+				}
+				/* Transitivity: recurse via transitive comparison */
+				return php_array_compare_objects_transitive(op1, op2);
+			}
+
+			return zend_compare(op1, op2);
+	}
+}
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type)
 {
