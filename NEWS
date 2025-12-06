@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (ndossche)
+  . Added `clamp()`. (kylekatarnls, thinkverse)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
