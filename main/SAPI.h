@@ -77,6 +77,7 @@ typedef struct {
 
 	char *path_translated;
 	char *request_uri;
+	char *path_info;
 
 	/* Do not use request_body directly, but the php://input stream wrapper instead */
 	struct _php_stream *request_body;
