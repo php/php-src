@@ -4485,7 +4485,9 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
-			zend_verify_return_error(EX(func), retval_ptr);
+			if (!EG(exception)) {
+				zend_verify_return_error(EX(func), retval_ptr);
+			}
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
@@ -9398,6 +9400,22 @@ ZEND_VM_C_LABEL(default_branch):
 	}
 }
 
+// FIXME: Smart branch?
+ZEND_VM_HANDLER(211, ZEND_HAS_TYPE, ANY, CONST)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zval *expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	const zend_type *type = Z_PTR_P(GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R));
+
+	// FIXME: Abusing internal/return type flags to achieve strict type check
+	bool result = zend_check_type(type, expr, NULL, 1, 1);
+
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)
 {
 	USE_OPLINE
@@ -9958,6 +9976,33 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(212, ZEND_IS_NUMERIC, ANY, UNUSED)
+{
+	USE_OPLINE
+
+	zval *op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zval *result = EX_VAR(opline->result.var);
+
+ZEND_VM_C_LABEL(try_again):
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+		case IS_DOUBLE:
+			ZVAL_TRUE(result);
+			break;
+		case IS_STRING:
+			ZVAL_BOOL(result, is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), NULL, NULL, 0));
+			break;
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			ZEND_VM_C_GOTO(try_again);
+		default:
+			ZVAL_FALSE(result);
+			break;
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 

@@ -125,6 +125,7 @@ static inline bool may_have_side_effects(
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_ARRAY_KEY_EXISTS:
 		case ZEND_COPY_TMP:
+		case ZEND_HAS_TYPE:
 			/* No side effects */
 			return false;
 		case ZEND_FREE:
