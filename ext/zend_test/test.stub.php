@@ -5,6 +5,14 @@
  * @generate-legacy-arginfo 80000
  * @undocumentable
  */
+
+#if 0
+declare(
+    c_include='<stdint.h>',
+    c_include='"zend_attributes.h"'
+);
+#endif
+
 namespace {
     require "Zend/zend_attributes.stub.php";
 
