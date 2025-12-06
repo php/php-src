@@ -107,6 +107,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
+  . AF_UNSPEC.
 
 ========================================
 11. Changes to INI File Handling

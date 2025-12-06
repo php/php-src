@@ -71,7 +71,9 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in milliseconds
-        transmitted data can remain unacknowledged. (James Lucas)
+    transmitted data can remain unacknowledged. (James Lucas)
+  . Added AF_UNSPEC support for sock_addrinfo_lookup() as a sole umbrella for
+    AF_INET* family only. (David Carlier)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
