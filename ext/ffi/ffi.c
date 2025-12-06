@@ -3687,18 +3687,17 @@ void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
 static void zend_ffi_throw_parser_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
+	zend_string *message = zend_vstrpprintf(0, format, va);
 
 	if (EG(current_execute_data)) {
-		zend_throw_exception(zend_ffi_parser_exception_ce, message, 0);
+		zend_throw_exception_zstr(zend_ffi_parser_exception_ce, message, 0);
 	} else {
-		zend_error(E_WARNING, "FFI Parser: %s", message);
+		zend_error(E_WARNING, "FFI Parser: %s", ZSTR_VAL(message));
 	}
 
-	efree(message);
+	zend_string_release_ex(message, false);
 	va_end(va);
 }
 /* }}} */
@@ -5790,18 +5789,17 @@ ZEND_GET_MODULE(ffi)
 void zend_ffi_parser_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
+	zend_string *message = zend_vstrpprintf(0, format, va);
 
 	if (EG(current_execute_data)) {
-		zend_throw_exception(zend_ffi_parser_exception_ce, message, 0);
+		zend_throw_exception_zstr(zend_ffi_parser_exception_ce, message, 0);
 	} else {
-		zend_error(E_WARNING, "FFI Parser: %s", message);
+		zend_error(E_WARNING, "FFI Parser: %s", ZSTR_VAL(message));
 	}
 
-	efree(message);
+	zend_string_release_ex(message, false);
 	va_end(va);
 
 	LONGJMP(FFI_G(bailout), FAILURE);
