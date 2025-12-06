@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f754368e28f6e45bf3a63a403e49f5659c29d2c6 */
+ * Stub hash: 66fae9539bdaa50d736dbfa53c41f2f0059c88c6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -316,6 +316,9 @@ static void register_sockets_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("AF_INET", AF_INET, CONST_PERSISTENT);
 #if defined(HAVE_IPV6)
 	REGISTER_LONG_CONSTANT("AF_INET6", AF_INET6, CONST_PERSISTENT);
+#endif
+#if defined(AF_UNSPEC)
+	REGISTER_LONG_CONSTANT("AF_UNSPEC", AF_UNSPEC, CONST_PERSISTENT);
 #endif
 #if defined(AF_DIVERT)
 	REGISTER_LONG_CONSTANT("AF_DIVERT", AF_DIVERT, CONST_PERSISTENT);
