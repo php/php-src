@@ -1736,11 +1736,24 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 	x = a;
 	while (x > 0){
 		if (r > 0) {
+			if (my1>INT_MAX-1 ||
+			    my2<INT_MIN+1 ||
+			    ry>INT64_MAX-dx ||
+			    r<INT64_MIN+ry) {
+				return;
+			}
 			my1++;my2--;
 			ry +=dx;
 			r  -=ry;
 		}
 		if (r <= 0){
+			if (x<INT_MIN+1 ||
+			    mx1>INT_MAX-1 ||
+			    mx2<INT_MIN+1 ||
+			    rx<INT64_MIN+dy ||
+			    r>INT64_MAX-rx) {
+				return;
+			}
 			x--;
 			mx1++;mx2--;
 			rx -=dy;
@@ -1781,11 +1794,24 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 	old_y2=-2;
 	while (x > 0){
 		if (r > 0) {
+			if (my1>INT_MAX-1 ||
+			    my2<INT_MIN+1 ||
+			    ry>INT64_MAX-dx ||
+			    r<INT64_MIN+ry) {
+				return;
+			}
 			my1++;my2--;
 			ry +=dx;
 			r  -=ry;
 		}
 		if (r <= 0){
+			if (x<INT_MIN+1 ||
+			    mx1>INT_MAX-1 ||
+			    mx2<INT_MIN+1 ||
+			    rx<INT64_MIN+dy ||
+			    r>INT64_MAX-rx) {
+				return;
+			}
 			x--;
 			mx1++;mx2--;
 			rx -=dy;
