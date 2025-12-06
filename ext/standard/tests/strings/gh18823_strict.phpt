@@ -15,5 +15,5 @@ try {
 }
 ?>
 --EXPECT--
-setlocale(): Argument #2 ($locales) must be of type array|string, int given
-setlocale(): Argument #3 must be of type array|string, int given
+setlocale(): Argument #2 ($locales) must be of type array|string|null, int given
+setlocale(): Argument #3 must be of type array|string|null, int given
