@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Mbstring:
   . ini_set() with mbstring.detect_order changes the order of mb_detect_order
     as intended, since mbstring.detect_order is an INI_ALL setting. (tobee94)
+  . Added GB18030-2022 to default encoding list for zh-CN. (HeRaNO)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
