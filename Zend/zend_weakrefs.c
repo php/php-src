@@ -128,7 +128,7 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 
 	if (!tagged_ptr) {
 #if ZEND_DEBUG
-	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
+	ZEND_ASSERT("Weakref not registered?");
 #endif
         return;
     }
