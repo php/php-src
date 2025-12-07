@@ -4421,7 +4421,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 			if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(data + remain), limit - remain) == limit - remain) {
 				exif_isobmff_parse_meta(data, data + limit, &pos);
 			}
-			if ((pos.size) &&
+			if ((pos.size >= 2) &&
 				(pos.size < ImageInfo->FileSize) &&
 				(ImageInfo->FileSize - pos.size >= pos.offset) &&
 				(php_stream_seek(ImageInfo->infile, pos.offset + 2, SEEK_SET) >= 0)) {

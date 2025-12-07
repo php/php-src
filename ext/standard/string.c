@@ -4955,7 +4955,7 @@ PHP_FUNCTION(setlocale)
 
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
-			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
+			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, &args[i]);
 			goto out;
 		}
 	}
