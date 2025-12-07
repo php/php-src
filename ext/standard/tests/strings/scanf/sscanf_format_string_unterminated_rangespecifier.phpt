@@ -36,10 +36,10 @@ foreach ($formats as $format) {
 ?>
 --EXPECT--
 Using format string '%[':
-ValueError: Unmatched [ in format string
+ValueError: sscanf(): Argument #2 ($format) unterminated [ format specifier
 Using format string '%[]':
-ValueError: Unmatched [ in format string
+ValueError: sscanf(): Argument #2 ($format) unterminated [ format specifier
 Using format string '%[^':
-ValueError: Unmatched [ in format string
+ValueError: sscanf(): Argument #2 ($format) unterminated [ format specifier
 Using format string '%[^]':
-ValueError: Unmatched [ in format string
+ValueError: sscanf(): Argument #2 ($format) unterminated [ format specifier

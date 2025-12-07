@@ -80,15 +80,15 @@ int(0)
 NULL
 int(1)
 string(4) "data"
-Variable is not assigned by any conversion specifiers
+fscanf(): Argument #4 is not assigned by any conversion specifiers
 string(4) "data"
 NULL
-Variable is not assigned by any conversion specifiers
+fscanf(): Argument #3 is not assigned by any conversion specifiers
 array(0) {
 }
 array(0) {
 }
-Bad scan conversion character "."
+fscanf(): Argument #2 ($format) unknown format specifier "."
 array(0) {
 }
 array(0) {
@@ -96,5 +96,5 @@ array(0) {
 bool(false)
 array(0) {
 }
-Different numbers of variable names and field specifiers
+fscanf(): Argument #2 ($format) Different numbers of variable names and field specifiers
 Done

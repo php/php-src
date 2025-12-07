@@ -75,7 +75,6 @@
 #define SCAN_NOSKIP     0x1       /* Don't skip blanks. */
 #define SCAN_SUPPRESS	0x2	  /* Suppress assignment. */
 #define SCAN_UNSIGNED	0x4	  /* Read an unsigned value. */
-#define SCAN_WIDTH      0x8       /* A width value was supplied. */
 
 #define SCAN_SIGNOK     0x10      /* A +/- character is allowed. */
 #define SCAN_NODIGITS   0x20      /* No digits have been scanned. */
@@ -299,21 +298,18 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-static int ValidateFormat(const zend_string *zstr_format, uint32_t format_arg_num, uint32_t numVars, uint32_t *totalSubs)
+static bool isFormatStringValid(const zend_string *zstr_format, uint32_t format_arg_num, uint32_t numVars, uint32_t *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
-	int flags;
 	bool gotXpg = false;
 	bool gotSequential = false;
-	const char *ch = NULL;
 	uint32_t staticAssign[STATIC_LIST_SIZE];
 	uint32_t *nassign = staticAssign;
 	uint32_t objIndex = 0;
 	uint32_t xpgSize = 0;
 	uint32_t nspace = STATIC_LIST_SIZE;
-	zend_ulong value;
+	bool bindToVariables = numVars;
 
-	bool assignToVariables = numVars;
 	/*
 	 * Initialize an array that records the number of times a variable
 	 * is assigned to by the format string.  We use this to detect if
@@ -325,100 +321,129 @@ static int ValidateFormat(const zend_string *zstr_format, uint32_t format_arg_nu
 	}
 	memset(nassign, 0, sizeof(uint32_t)*numVars);
 
-	const char *format = ZSTR_VAL(zstr_format);
-	while (*format != '\0') {
-		ch = format++;
-		flags = 0;
-
-		if (*ch != '%') {
+	const char *end_ptr = ZSTR_VAL(zstr_format) + ZSTR_LEN(zstr_format);
+	for (const char *ptr = ZSTR_VAL(zstr_format); ptr < end_ptr; ptr++) {
+		bool isCurrentSpecifierBound = true;
+		/* Look for specifier start */
+		if (*ptr != '%') {
 			continue;
 		}
-		ch = format++;
-		if (*ch == '%') {
-			continue;
-		}
-		if (*ch == '*') {
-			flags |= SCAN_SUPPRESS;
-			ch = format++;
-			goto xpgCheckDone;
-		}
+		ptr++;
 
-		if ( isdigit( (int)*ch ) ) {
-			/*
-			 * Check for an XPG3-style %n$ specification.  Note: there
-			 * must not be a mixture of XPG3 specs and non-XPG3 specs
-			 * in the same format string.
-			 */
-			char *end = NULL;
-			value = ZEND_STRTOUL(format-1, &end, 10);
-			if (*end != '$') {
-				goto notXpg;
-			}
-			format = end+1;
-			ch     = format++;
-			gotXpg = true;
-			if (gotSequential) {
-				goto mixedXPG;
-			}
-			if ((value < 1) || (assignToVariables && (value > numVars))) {
-				goto badIndex;
-			} else if (!assignToVariables) {
-				/*
-				 * In the case where no vars are specified, the user can
-				 * specify %9999$ legally, so we have to consider special
-				 * rules for growing the assign array.  'value' is
-				 * guaranteed to be > 0.
-				 */
-
-				/* set a lower artificial limit on this
-				 * in the interest of security and resource friendliness
-				 * 255 arguments should be more than enough. - cc
-				 */
-				if (value > SCAN_MAX_ARGS) {
-					goto badIndex;
-				}
-
-				xpgSize = (xpgSize > value) ? xpgSize : value;
-			}
-			objIndex = value - 1;
-			goto xpgCheckDone;
-		}
-
-notXpg:
-		gotSequential = true;
-		if (gotXpg) {
-mixedXPG:
-			zend_value_error("%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+		if (UNEXPECTED(ptr == end_ptr)) {
+			zend_argument_value_error(format_arg_num, "unterminated format specifier");
 			goto error;
 		}
 
-xpgCheckDone:
-		/*
-		 * Parse any width specifier.
-		 */
-		if (isdigit(UCHAR(*ch))) {
-			char *end = NULL;
-			value = ZEND_STRTOUL(format-1, &end, 10);
-			flags |= SCAN_WIDTH;
-			format = end;
-			ch = format++;
+		/* Literal % so continue */
+		if (*ptr == '%') {
+			continue;
+		} else if (*ptr == '*') {
+			/* Consumed specifier but not assigned to variable */
+			isCurrentSpecifierBound = false;
+			ptr++;
+			if (UNEXPECTED(ptr == end_ptr)) {
+				zend_argument_value_error(format_arg_num, "unterminated format specifier");
+				goto error;
+			}
 		}
 
-		/*
-		 * Ignore size specifier.
-		 */
-		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
-			ch = format++;
+		if (isdigit(*ptr)) {
+			/* We might either have an XPG3-style %n$ specification,
+			 * or we are parsing the _maximum field width_ of the specifier.
+			 *
+			 * Note: there must not be a mixture of XPG3 specs and non-XPG3 specs
+			 * in the same format string.
+			 */
+
+			char *width_end = NULL;
+			zend_ulong width = ZEND_STRTOUL(ptr, &width_end, 10);
+			if (UNEXPECTED(width_end == end_ptr)) {
+				zend_argument_value_error(format_arg_num, "unterminated format specifier");
+				goto error;
+			}
+			ptr = width_end;
+
+			if (*ptr != '$' && isCurrentSpecifierBound) {
+				gotSequential = true;
+			} else {
+				/* We indeed have an XPG3 style spec */
+				ptr++;
+				if (UNEXPECTED(ptr == end_ptr)) {
+					zend_argument_value_error(format_arg_num, "unterminated format specifier");
+					goto error;
+				}
+				if (UNEXPECTED(gotSequential)) {
+					zend_argument_value_error(format_arg_num, "cannot mix \"%%\" and \"%%n$\" conversion specifiers");
+					goto error;
+				}
+
+				zend_ulong argument_index = width;
+				gotXpg = true;
+
+				if (UNEXPECTED(argument_index < 1 || (bindToVariables && argument_index > numVars))) {
+					zend_argument_value_error(format_arg_num, "argument index %%%" ZEND_ULONG_FMT_SPEC "$ is out of range", argument_index);
+					goto error;
+				} else if (!bindToVariables) {
+					/*
+					 * In the case where no vars are specified, the user can
+					 * specify %9999$ legally, so we have to consider special
+					 * rules for growing the assign array.  'value' is
+					 * guaranteed to be > 0.
+					 */
+
+					/* set a lower artificial limit on this
+					 * in the interest of security and resource friendliness
+					 * 255 arguments should be more than enough. - cc
+					 */
+					if (argument_index > SCAN_MAX_ARGS) {
+						// TODO Specify limit?
+						zend_argument_value_error(format_arg_num, "argument index %%%" ZEND_ULONG_FMT_SPEC "$ is out of range", argument_index);
+						goto error;
+					}
+
+					xpgSize = MAX(argument_index, xpgSize);
+				}
+				objIndex = argument_index - 1;
+
+				/* Check if we have a width argument with the XPG3 specifier */
+				if (!isdigit(*ptr)) {
+					goto length_modifier;
+				}
+				/* Grab the width to be able to continue */
+				width = ZEND_STRTOUL(ptr, &width_end, 10);
+				if (UNEXPECTED(width_end == end_ptr)) {
+					zend_argument_value_error(format_arg_num, "unterminated format specifier");
+					goto error;
+				}
+				ptr = width_end;
+			}
+		} else if (isCurrentSpecifierBound) {
+			if (UNEXPECTED(gotXpg)) {
+				zend_argument_value_error(format_arg_num, "cannot mix \"%%\" and \"%%n$\" conversion specifiers");
+				goto error;
+			}
+			gotSequential = true;
 		}
 
-		if (!(flags & SCAN_SUPPRESS) && assignToVariables && (objIndex >= numVars)) {
-			goto badIndex;
+length_modifier:
+		/* Ignore length modifier */
+		if (*ptr == 'l' || *ptr == 'L' || *ptr == 'h') {
+			ptr++;
+			if (UNEXPECTED(ptr == end_ptr)) {
+				zend_argument_value_error(format_arg_num, "unterminated format specifier");
+				goto error;
+			}
 		}
 
-		/*
-		 * Handle the various field types.
-		 */
-		switch (*ch) {
+		if (isCurrentSpecifierBound && bindToVariables && (objIndex >= numVars)) {
+			zend_argument_value_error(format_arg_num, "Different numbers of variable names and field specifiers");
+			goto error;
+		}
+
+		/* Handle specifiers */
+		ZEND_ASSERT(ptr != end_ptr);
+		switch (*ptr) {
 			case 'n':
 			case 'd':
 			case 'D':
@@ -440,48 +465,44 @@ xpgCheckDone:
 				/* ANSI. since Zend auto allocates space for vars, this is no */
 				/* problem - cc                                               */
 				/*
-				if (flags & SCAN_WIDTH) {
-					php_error_docref(NULL, E_WARNING, "Field width may not be specified in %c conversion");
+				if (hasFieldWidth) {
+					php_error_docref(NULL, E_WARNING, "Field width may not be specified in %%c conversion");
 					goto error;
 				}
 				*/
 				break;
 
+			/* Range specifier */
 			case '[':
-				if (*format == '\0') {
-					goto badSet;
-				}
-				ch = format++;
-				if (*ch == '^') {
-					if (*format == '\0') {
-						goto badSet;
+				ptr++;
+				/* Not match flag */
+				if (*ptr == '^') {
+					ptr++;
+					if (UNEXPECTED(ptr == end_ptr)) {
+						zend_argument_value_error(format_arg_num, "unterminated [ format specifier");
+						goto error;
 					}
-					ch = format++;
 				}
-				if (*ch == ']') {
-					if (*format == '\0') {
-						goto badSet;
-					}
-					ch = format++;
+				/* If ] is the first character of the range it means it should be *included*
+				 * in the range and not mark the end of it (as it would be empty otherwise) */
+				if (*ptr == ']') {
+					ptr++;
 				}
-				while (*ch != ']') {
-					if (*format == '\0') {
-						goto badSet;
+				while (*ptr != ']') {
+					if (UNEXPECTED(ptr == end_ptr)) {
+						zend_argument_value_error(format_arg_num, "unterminated [ format specifier");
+						goto error;
 					}
-					ch = format++;
+					ptr++;
 				}
 				break;
-badSet:
-				zend_value_error("Unmatched [ in format string");
-				goto error;
 
-			default: {
-				zend_value_error("Bad scan conversion character \"%c\"", *ch);
+			default:
+				zend_argument_value_error(format_arg_num, "unknown format specifier \"%c\"", *ptr);
 				goto error;
-			}
 		}
 
-		if (!(flags & SCAN_SUPPRESS)) {
+		if (isCurrentSpecifierBound) {
 			if (objIndex >= nspace) {
 				/*
 				 * Expand the nassign buffer.  If we are using XPG specifiers,
@@ -509,12 +530,12 @@ badSet:
 			nassign[objIndex]++;
 			objIndex++;
 		}
-	} /* while (*format != '\0') */
+	}
 
 	/*
 	 * Verify that all of the variable were assigned exactly once.
 	 */
-	if (!assignToVariables) {
+	if (!bindToVariables) {
 		if (xpgSize) {
 			numVars = xpgSize;
 		} else {
@@ -526,35 +547,38 @@ badSet:
 
 	for (uint32_t i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
-			zend_value_error("%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
+			if (bindToVariables) {
+				/* +1 as arguments are 1-indexed not 0-indexed */
+				zend_argument_value_error(i + 1 + format_arg_num, "is assigned by multiple \"%%n$\" conversion specifiers");
+			} else {
+				zend_argument_value_error(format_arg_num, "argument %" PRIu32 " is assigned by multiple \"%%n$\" conversion specifiers", i+1);
+			}
 			goto error;
 		} else if (!xpgSize && (nassign[i] == 0)) {
 			/*
 			 * If the space is empty, and xpgSize is 0 (means XPG wasn't
 			 * used, and/or numVars != 0), then too many vars were given
 			 */
-			zend_value_error("Variable is not assigned by any conversion specifiers");
+			if (bindToVariables) {
+				/* +1 as arguments are 1-indexed not 0-indexed */
+				zend_argument_value_error(i + 1 + format_arg_num, "is not assigned by any conversion specifiers");
+			} else {
+				zend_argument_value_error(format_arg_num, "argument %" PRIu32 " is not assigned by any conversion specifiers", i+1);
+			}
 			goto error;
 		}
 	}
 
 	if (nassign != staticAssign) {
-		efree((char *)nassign);
+		efree(nassign);
 	}
-	return SCAN_SUCCESS;
-
-badIndex:
-	if (gotXpg) {
-		zend_value_error("%s", "\"%n$\" argument index out of range");
-	} else {
-		zend_value_error("Different numbers of variable names and field specifiers");
-	}
+	return true;
 
 error:
 	if (nassign != staticAssign) {
-		efree((char *)nassign);
+		efree(nassign);
 	}
-	return SCAN_ERROR_INVALID_FORMAT;
+	return false;
 #undef STATIC_LIST_SIZE
 }
 /* }}} */
@@ -602,8 +626,8 @@ PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_forma
 	 * Check for errors in the format string.
 	 */
 	uint32_t totalVars = 0;
-	if (ValidateFormat(zstr_format, format_arg_num, numVars, &totalVars) != SCAN_SUCCESS) {
-		scan_set_error_return( assignToVariables, return_value );
+	/* Throws when format is invalid */
+	if (!isFormatStringValid(zstr_format, format_arg_num, numVars, &totalVars)) {
 		return SCAN_ERROR_INVALID_FORMAT;
 	}
 

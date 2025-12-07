@@ -20,4 +20,4 @@ try {
 *** Testing sscanf() : error conditions ***
 
 -- Testing sscanf() function with more than expected no. of arguments --
-Variable is not assigned by any conversion specifiers
+sscanf(): Argument #5 is not assigned by any conversion specifiers

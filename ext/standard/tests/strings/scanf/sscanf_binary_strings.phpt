@@ -18,8 +18,15 @@ try {
 }
 ?>
 --EXPECT--
-array(1) {
+array(3) {
   [0]=>
   string(5) "Hello"
+  [1]=>
+  NULL
+  [2]=>
+  NULL
 }
-ValueError: Variable is not assigned by any conversion specifiers
+int(1)
+string(5) "Hello"
+NULL
+NULL

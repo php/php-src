@@ -38,34 +38,34 @@ foreach ($formats as $format) {
 ?>
 --EXPECT--
 Using format string '%':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%2':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%2L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%1$':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%1$L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%1$2':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%1$2L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*2':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*2L':
-ValueError: Bad scan conversion character "
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*1$':
-ValueError: Bad scan conversion character "$"
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*1$L':
-ValueError: Bad scan conversion character "$"
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*1$2':
-ValueError: Bad scan conversion character "$"
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier
 Using format string '%*1$2L':
-ValueError: Bad scan conversion character "$"
+ValueError: sscanf(): Argument #2 ($format) unterminated format specifier

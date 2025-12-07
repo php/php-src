@@ -58,12 +58,12 @@ unlink($filename);
 --EXPECT--
 *** Testing fscanf() for error conditions ***
 fscanf(): supplied resource is not a valid File-Handle resource
-Different numbers of variable names and field specifiers
+fscanf(): Argument #2 ($format) Different numbers of variable names and field specifiers
 array(0) {
 }
-Bad scan conversion character "
-Bad scan conversion character "
-Bad scan conversion character "."
-Bad scan conversion character "m"
+fscanf(): Argument #2 ($format) unterminated format specifier
+fscanf(): Argument #2 ($format) unterminated format specifier
+fscanf(): Argument #2 ($format) unknown format specifier "."
+fscanf(): Argument #2 ($format) unknown format specifier "m"
 
 *** Done ***

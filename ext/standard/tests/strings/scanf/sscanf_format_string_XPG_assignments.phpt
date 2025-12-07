@@ -30,8 +30,8 @@ foreach ($formats as $format) {
 ?>
 --EXPECT--
 Using format string '%1$s %2$s %1$s':
-ValueError: Variable is assigned by multiple "%n$" conversion specifiers
-ValueError: Variable is assigned by multiple "%n$" conversion specifiers
+ValueError: sscanf(): Argument #2 ($format) argument 1 is assigned by multiple "%n$" conversion specifiers
+ValueError: sscanf(): Argument #3 is assigned by multiple "%n$" conversion specifiers
 Using format string '%1$s %*s %3$s':
 array(3) {
   [0]=>
@@ -41,7 +41,7 @@ array(3) {
   [2]=>
   NULL
 }
-ValueError: Variable is not assigned by any conversion specifiers
+ValueError: sscanf(): Argument #4 is not assigned by any conversion specifiers
 Using format string '%s %*s %3$s':
-ValueError: cannot mix "%" and "%n$" conversion specifiers
-ValueError: cannot mix "%" and "%n$" conversion specifiers
+ValueError: sscanf(): Argument #2 ($format) cannot mix "%" and "%n$" conversion specifiers
+ValueError: sscanf(): Argument #2 ($format) cannot mix "%" and "%n$" conversion specifiers
