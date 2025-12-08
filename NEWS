@@ -13,7 +13,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
 
-
+- LDAP:
+  . Fix memory leak in ldap_set_options(). (ndossche)
+ 
 18 Dec 2025, PHP 8.4.16
 
 - Core:

@@ -663,14 +663,15 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				goto failure;
 			}
 
+			zend_string *context_str = NULL;
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "context", sizeof("context") - 1)) != NULL) {
-				tmpstring = zval_get_string(tmp);
+				context_str = zval_get_string(tmp);
 				if (EG(exception)) {
 					rc = -1;
 					goto failure;
 				}
-				context.bv_val = ZSTR_VAL(tmpstring);
-				context.bv_len = ZSTR_LEN(tmpstring);
+				context.bv_val = ZSTR_VAL(context_str);
+				context.bv_len = ZSTR_LEN(context_str);
 				vlvInfo.ldvlv_context = &context;
 			} else {
 				vlvInfo.ldvlv_context = NULL;
@@ -681,6 +682,9 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 			rc = ldap_create_vlv_control_value(ld, &vlvInfo, &control_value);
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create VLV control value: %s (%d)", ldap_err2string(rc), rc);
+			}
+			if (context_str) {
+				zend_string_release_ex(context_str, false);
 			}
 		} else {
 			zend_type_error("%s(): Control OID %s cannot be of type array", get_active_function_name(), ZSTR_VAL(control_oid));
