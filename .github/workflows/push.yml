@@ -164,6 +164,8 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v5
+      - name: Update clang
+        uses: ./.github/actions/macos-update-clang
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache

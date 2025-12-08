@@ -367,6 +367,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
+      - name: Update clang
+        uses: ./.github/actions/macos-update-clang
       - name: brew
         uses: ./.github/actions/brew
       - name: ./configure
