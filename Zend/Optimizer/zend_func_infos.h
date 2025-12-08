@@ -373,7 +373,7 @@ static const func_info_t func_infos[] = {
 	F1("session_cache_limiter", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("socket_get_option", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_LONG|MAY_BE_FALSE),
 	FN("socket_export_stream", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	F1("socket_addrinfo_lookup", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_LONG),
+	F1("socket_addrinfo_lookup", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_FALSE),
 	F1("socket_addrinfo_explain", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY),
 	FN("sodium_crypto_kx_client_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	FN("sodium_crypto_kx_server_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),

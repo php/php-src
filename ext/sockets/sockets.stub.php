@@ -2302,10 +2302,11 @@ function socket_recvmsg(Socket $socket, array &$message, int $flags = 0): int|fa
 function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
 
 /**
- * @return array<int, AddressInfo>|int
+ * @return array<int, AddressInfo>|false
+ * @param int $error_code
  * @refcount 1
  */
-function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = []): array|int {}
+function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = [], &$error_code = null): array|false {}
 
 function socket_addrinfo_connect(AddressInfo $address): Socket|false {}
 
