@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20631 (Integer underflow in exif HEIF parsing
     when pos.size < 2). (Oblivionsage)
 
+- LDAP:
+  . Fix memory leak in ldap_set_options(). (ndossche)
+
+
 18 Dec 2025, PHP 8.5.1
 
 - Core:
