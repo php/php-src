@@ -11,6 +11,7 @@ if test "$PHP_ZEND_TEST" != "no"; then
       observer.c
       test.c
       zend_mm_custom_handlers.c
+      zend_mm_observer.c
     ]),
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
