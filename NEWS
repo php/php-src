@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.2
 
+- Core:
+  . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
+    with dynamic class const lookup default argument). (ilutov)
+
 - EXIF:
   . Fixed bug GH-20631 (Integer underflow in exif HEIF parsing
     when pos.size < 2). (Oblivionsage)
