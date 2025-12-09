@@ -62,6 +62,7 @@
 #  ifndef URI_DOXYGEN
 #    include <uriparser/Uri.h>
 #    include "UriCommon.h"
+#    include "UriSets.h"
 #  endif
 
 URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out, UriBool spaceToPlus,
@@ -108,72 +109,7 @@ URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfter
             prevWasCr = URI_FALSE;
             break;
 
-        case _UT('a'): /* ALPHA */
-        case _UT('A'):
-        case _UT('b'):
-        case _UT('B'):
-        case _UT('c'):
-        case _UT('C'):
-        case _UT('d'):
-        case _UT('D'):
-        case _UT('e'):
-        case _UT('E'):
-        case _UT('f'):
-        case _UT('F'):
-        case _UT('g'):
-        case _UT('G'):
-        case _UT('h'):
-        case _UT('H'):
-        case _UT('i'):
-        case _UT('I'):
-        case _UT('j'):
-        case _UT('J'):
-        case _UT('k'):
-        case _UT('K'):
-        case _UT('l'):
-        case _UT('L'):
-        case _UT('m'):
-        case _UT('M'):
-        case _UT('n'):
-        case _UT('N'):
-        case _UT('o'):
-        case _UT('O'):
-        case _UT('p'):
-        case _UT('P'):
-        case _UT('q'):
-        case _UT('Q'):
-        case _UT('r'):
-        case _UT('R'):
-        case _UT('s'):
-        case _UT('S'):
-        case _UT('t'):
-        case _UT('T'):
-        case _UT('u'):
-        case _UT('U'):
-        case _UT('v'):
-        case _UT('V'):
-        case _UT('w'):
-        case _UT('W'):
-        case _UT('x'):
-        case _UT('X'):
-        case _UT('y'):
-        case _UT('Y'):
-        case _UT('z'):
-        case _UT('Z'):
-        case _UT('0'): /* DIGIT */
-        case _UT('1'):
-        case _UT('2'):
-        case _UT('3'):
-        case _UT('4'):
-        case _UT('5'):
-        case _UT('6'):
-        case _UT('7'):
-        case _UT('8'):
-        case _UT('9'):
-        case _UT('-'): /* "-" / "." / "_" / "~" */
-        case _UT('.'):
-        case _UT('_'):
-        case _UT('~'):
+        case URI_SET_UNRESERVED(_UT):
             /* Copy unmodified */
             write[0] = read[0];
             write++;
@@ -263,51 +199,9 @@ const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout, UriBool plusToSpa
 
         case _UT('%'):
             switch (read[1]) {
-            case _UT('0'):
-            case _UT('1'):
-            case _UT('2'):
-            case _UT('3'):
-            case _UT('4'):
-            case _UT('5'):
-            case _UT('6'):
-            case _UT('7'):
-            case _UT('8'):
-            case _UT('9'):
-            case _UT('a'):
-            case _UT('b'):
-            case _UT('c'):
-            case _UT('d'):
-            case _UT('e'):
-            case _UT('f'):
-            case _UT('A'):
-            case _UT('B'):
-            case _UT('C'):
-            case _UT('D'):
-            case _UT('E'):
-            case _UT('F'):
+            case URI_SET_HEXDIG(_UT):
                 switch (read[2]) {
-                case _UT('0'):
-                case _UT('1'):
-                case _UT('2'):
-                case _UT('3'):
-                case _UT('4'):
-                case _UT('5'):
-                case _UT('6'):
-                case _UT('7'):
-                case _UT('8'):
-                case _UT('9'):
-                case _UT('a'):
-                case _UT('b'):
-                case _UT('c'):
-                case _UT('d'):
-                case _UT('e'):
-                case _UT('f'):
-                case _UT('A'):
-                case _UT('B'):
-                case _UT('C'):
-                case _UT('D'):
-                case _UT('E'):
-                case _UT('F'): {
+                case URI_SET_HEXDIG(_UT): {
                     /* Percent group found */
                     const unsigned char left = URI_FUNC(HexdigToInt)(read[1]);
                     const unsigned char right = URI_FUNC(HexdigToInt)(read[2]);
