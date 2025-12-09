@@ -68,6 +68,7 @@
 #    include <uriparser/UriIp4.h>
 #    include "UriIp4Base.h"
 #    include <uriparser/UriBase.h>
+#    include "UriSets.h"
 #  endif
 
 /* Prototypes */
@@ -194,16 +195,7 @@ URI_FUNC(ParseDecOctetOne)(UriIp4Parser * parser, const URI_CHAR * first,
     }
 
     switch (*first) {
-    case _UT('0'):
-    case _UT('1'):
-    case _UT('2'):
-    case _UT('3'):
-    case _UT('4'):
-    case _UT('5'):
-    case _UT('6'):
-    case _UT('7'):
-    case _UT('8'):
-    case _UT('9'):
+    case URI_SET_DIGIT(_UT):
         uriPushToStack(parser, (unsigned char)(9 + *first - _UT('9')));
         return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(parser, first + 1,
                                                               afterLast);
@@ -272,16 +264,7 @@ URI_FUNC(ParseDecOctetThree)(UriIp4Parser * parser, const URI_CHAR * first,
     }
 
     switch (*first) {
-    case _UT('0'):
-    case _UT('1'):
-    case _UT('2'):
-    case _UT('3'):
-    case _UT('4'):
-    case _UT('5'):
-    case _UT('6'):
-    case _UT('7'):
-    case _UT('8'):
-    case _UT('9'):
+    case URI_SET_DIGIT(_UT):
         uriPushToStack(parser, (unsigned char)(9 + *first - _UT('9')));
         return first + 1;
 

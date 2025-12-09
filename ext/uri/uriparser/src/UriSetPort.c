@@ -62,20 +62,10 @@
 #    include <uriparser/Uri.h>
 #    include "UriCommon.h"
 #    include "UriMemory.h"
+#    include "UriSets.h"
 #  endif
 
 #  include <assert.h>
-
-#  define URI_SET_DIGIT \
-  _UT('0') : case _UT('1'): \
-  case _UT('2'): \
-  case _UT('3'): \
-  case _UT('4'): \
-  case _UT('5'): \
-  case _UT('6'): \
-  case _UT('7'): \
-  case _UT('8'): \
-  case _UT('9')
 
 UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first, const URI_CHAR * afterLast) {
     if ((first == NULL) || (afterLast == NULL)) {
@@ -85,7 +75,7 @@ UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first, const URI_CHAR * afte
     /* NOTE: Grammar reads "port = *DIGIT" which includes the empty string. */
     while (first < afterLast) {
         switch (first[0]) {
-        case URI_SET_DIGIT:
+        case URI_SET_DIGIT(_UT):
             break;
         default:
             return URI_FALSE;
