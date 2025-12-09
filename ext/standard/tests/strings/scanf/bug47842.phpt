@@ -1,5 +1,5 @@
 --TEST--
-Bug #47842      sscanf() does not support 64-bit values
+Bug #47842 sscanf() does not support 64-bit values
 --SKIPIF--
 <?php
 if (PHP_INT_MAX < pow(2,31)) die("skip PHP_INT_MAX < 32b\n");
