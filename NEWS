@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
 
+- PDO:
+  . Fixed bug GH-20553 (PDO::FETCH_CLASSTYPE ignores $constructorArgs in
+    PHP 8.5.0). (Girgias)
+
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
     __halt_compiler() when reading stub). (ndossche, TimWolla)
