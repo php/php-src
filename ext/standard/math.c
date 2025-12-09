@@ -393,12 +393,12 @@ PHP_FUNCTION(round)
 static void php_math_clamp(zval *return_value, zval *value, zval *min, zval *max)
 {
 	if (Z_TYPE_P(min) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
-		zend_argument_value_error(2, "cannot be NAN");
+		zend_argument_value_error(2, "must not be NAN");
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(max) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
-		zend_argument_value_error(3, "cannot be NAN");
+		zend_argument_value_error(3, "must not be NAN");
 		RETURN_THROWS();
 	}
 

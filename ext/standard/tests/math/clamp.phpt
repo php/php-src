@@ -91,10 +91,10 @@ int(10)
 InvalidArgumentException
 RuntimeException
 LogicException
-clamp(): Argument #2 ($min) cannot be NAN
-clamp(): Argument #2 ($min) cannot be NAN
-clamp(): Argument #3 ($max) cannot be NAN
-clamp(): Argument #3 ($max) cannot be NAN
+clamp(): Argument #2 ($min) must not be NAN
+clamp(): Argument #2 ($min) must not be NAN
+clamp(): Argument #3 ($max) must not be NAN
+clamp(): Argument #3 ($max) must not be NAN
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
