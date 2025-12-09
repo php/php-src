@@ -1,6 +1,19 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.1
+11 Dec 2025, PHP 8.5.1RC2
+
+- FTP:
+  . Fix GH-20603 issue on windows 32 bits. (devnexen)
+
+- PDO:
+  . Fixed bug GH-20553 (PDO::FETCH_CLASSTYPE ignores $constructorArgs in
+    PHP 8.5.0). (Girgias)
+
+- URI:
+  . Update to uriparser-0.9.9-79-gf47a7f0 (timwolla)
+
+
+04 Dec 2025, PHP 8.5.1RC1
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
@@ -47,10 +60,6 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
-
-- PDO:
-  . Fixed bug GH-20553 (PDO::FETCH_CLASSTYPE ignores $constructorArgs in
-    PHP 8.5.0). (Girgias)
 
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
