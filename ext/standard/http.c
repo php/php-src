@@ -83,6 +83,15 @@ try_again:
 	}
 }
 
+static zend_always_inline bool php_url_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 /* {{{ php_url_encode_hash */
 PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
@@ -98,6 +107,12 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 	if (GC_IS_RECURSIVE(ht)) {
 		/* Prevent recursion */
+		return;
+	}
+
+	/* Very deeply structured data could trigger a stack overflow, even without recursion. */
+	if (UNEXPECTED(php_url_check_stack_limit())) {
+		zend_throw_error(NULL, "Maximum call stack size reached.");
 		return;
 	}
 

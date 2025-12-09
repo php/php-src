@@ -1,6 +1,20 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.1
+?? ??? ????, PHP 8.5.2
+
+- Core:
+  . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
+    with dynamic class const lookup default argument). (ilutov)
+
+- EXIF:
+  . Fixed bug GH-20631 (Integer underflow in exif HEIF parsing
+    when pos.size < 2). (Oblivionsage)
+
+- LDAP:
+  . Fix memory leak in ldap_set_options(). (ndossche)
+
+
+18 Dec 2025, PHP 8.5.1
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
@@ -25,6 +39,10 @@ PHP                                                                        NEWS
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
+
+- Intl:
+  . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
+    suggests missing constants). (DanielEScherzer)
 
 - Lexbor:
   . Fixed bug GH-20501 (\Uri\WhatWg\Url lose host after calling
@@ -54,8 +72,19 @@ PHP                                                                        NEWS
   . Fixed ZPP type violation in phpdbg_get_executable() and phpdbg_end_oplog().
     (Girgias)
 
+- SPL:
+  . Fixed bug GH-20614 (SplFixedArray incorrectly handles references
+    in deserialization). (ndossche)
+
 - Standard:
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
+  . Fixed bug GH-20583 (Stack overflow in http_build_query
+    via deep structures). (ndossche)
+  . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
+
+- Streams:
+  . Fixed bug GH-20370 (User stream filters could violate typed property
+    constraints). (alexandre-daubois)
 
 - XML:
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle

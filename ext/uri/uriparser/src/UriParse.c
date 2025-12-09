@@ -71,81 +71,8 @@
 #    include "UriCommon.h"
 #    include "UriMemory.h"
 #    include "UriParseBase.h"
+#    include "UriSets.h"
 #  endif
-
-#  define URI_SET_DIGIT \
-  _UT('0') : case _UT('1'): \
-  case _UT('2'): \
-  case _UT('3'): \
-  case _UT('4'): \
-  case _UT('5'): \
-  case _UT('6'): \
-  case _UT('7'): \
-  case _UT('8'): \
-  case _UT('9')
-
-#  define URI_SET_HEX_LETTER_UPPER \
-  _UT('A') : case _UT('B'): \
-  case _UT('C'): \
-  case _UT('D'): \
-  case _UT('E'): \
-  case _UT('F')
-
-#  define URI_SET_HEX_LETTER_LOWER \
-  _UT('a') : case _UT('b'): \
-  case _UT('c'): \
-  case _UT('d'): \
-  case _UT('e'): \
-  case _UT('f')
-
-#  define URI_SET_HEXDIG \
-  URI_SET_DIGIT: \
-  case URI_SET_HEX_LETTER_UPPER: \
-  case URI_SET_HEX_LETTER_LOWER
-
-#  define URI_SET_ALPHA \
-  URI_SET_HEX_LETTER_UPPER: \
-  case URI_SET_HEX_LETTER_LOWER: \
-  case _UT('g'): \
-  case _UT('G'): \
-  case _UT('h'): \
-  case _UT('H'): \
-  case _UT('i'): \
-  case _UT('I'): \
-  case _UT('j'): \
-  case _UT('J'): \
-  case _UT('k'): \
-  case _UT('K'): \
-  case _UT('l'): \
-  case _UT('L'): \
-  case _UT('m'): \
-  case _UT('M'): \
-  case _UT('n'): \
-  case _UT('N'): \
-  case _UT('o'): \
-  case _UT('O'): \
-  case _UT('p'): \
-  case _UT('P'): \
-  case _UT('q'): \
-  case _UT('Q'): \
-  case _UT('r'): \
-  case _UT('R'): \
-  case _UT('s'): \
-  case _UT('S'): \
-  case _UT('t'): \
-  case _UT('T'): \
-  case _UT('u'): \
-  case _UT('U'): \
-  case _UT('v'): \
-  case _UT('V'): \
-  case _UT('w'): \
-  case _UT('W'): \
-  case _UT('x'): \
-  case _UT('X'): \
-  case _UT('y'): \
-  case _UT('Y'): \
-  case _UT('z'): \
-  case _UT('Z')
 
 static const URI_CHAR * URI_FUNC(ParseAuthority)(URI_TYPE(ParserState) * state,
                                                  const URI_CHAR * first,
@@ -340,26 +267,7 @@ static URI_INLINE const URI_CHAR * URI_FUNC(ParseAuthority)(URI_TYPE(ParserState
         return URI_FUNC(ParseAuthorityTwo)(state, afterIpLit2, afterLast);
     }
 
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_PCHAR(_UT):
         state->uri->userInfo.first = first; /* USERINFO BEGIN */
         return URI_FUNC(ParseOwnHostUserInfoNz)(state, first, afterLast, memory);
 
@@ -411,7 +319,7 @@ static const URI_CHAR * URI_FUNC(ParseHexZero)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case URI_SET_HEXDIG:
+    case URI_SET_HEXDIG(_UT):
         return URI_FUNC(ParseHexZero)(state, first + 1, afterLast);
 
     default:
@@ -433,26 +341,7 @@ static URI_INLINE const URI_CHAR * URI_FUNC(ParseHierPart)(URI_TYPE(ParserState)
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_PCHAR(_UT):
         return URI_FUNC(ParsePathRootless)(state, first, afterLast, memory);
 
     case _UT('/'):
@@ -478,24 +367,9 @@ static const URI_CHAR * URI_FUNC(ParseIpFutLoop)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
     case _UT(':'):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT):
         return URI_FUNC(ParseIpFutStopGo)(state, first + 1, afterLast, memory);
 
     default:
@@ -517,24 +391,9 @@ static const URI_CHAR * URI_FUNC(ParseIpFutStopGo)(URI_TYPE(ParserState) * state
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
     case _UT(':'):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT):
         return URI_FUNC(ParseIpFutLoop)(state, first, afterLast, memory);
 
     default:
@@ -568,7 +427,7 @@ static const URI_CHAR * URI_FUNC(ParseIpFuture)(URI_TYPE(ParserState) * state,
     }
 
     switch (first[1]) {
-    case URI_SET_HEXDIG: {
+    case URI_SET_HEXDIG(_UT): {
         const URI_CHAR * afterIpFutLoop;
         const URI_CHAR * const afterHexZero =
             URI_FUNC(ParseHexZero)(state, first + 2, afterLast);
@@ -643,7 +502,7 @@ static URI_INLINE const URI_CHAR * URI_FUNC(ParseIpLit2)(URI_TYPE(ParserState) *
 
     case _UT(':'):
     case _UT(']'):
-    case URI_SET_HEXDIG:
+    case URI_SET_HEXDIG(_UT):
         state->uri->hostData.ip6 = memory->malloc(
             memory, 1 * sizeof(UriIp6)); /* Freed when stopping on parse error */
         if (state->uri->hostData.ip6 == NULL) {
@@ -685,7 +544,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(URI_TYPE(ParserState) * stat
             /* Eat rest of IPv4 address */
             for (;;) {
                 switch (*first) {
-                case URI_SET_DIGIT:
+                case URI_SET_DIGIT(_UT):
                     if (digitCount == 4) {
                         URI_FUNC(StopSyntax)(state, first, memory);
                         return NULL;
@@ -780,7 +639,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(URI_TYPE(ParserState) * stat
             int walking = 1;
             do {
                 switch (*first) {
-                case URI_SET_HEX_LETTER_LOWER:
+                case URI_SET_HEX_LETTER_LOWER(_UT):
                     letterAmong = 1;
                     if (digitCount == 4) {
                         URI_FUNC(StopSyntax)(state, first, memory);
@@ -790,7 +649,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(URI_TYPE(ParserState) * stat
                     digitCount++;
                     break;
 
-                case URI_SET_HEX_LETTER_UPPER:
+                case URI_SET_HEX_LETTER_UPPER(_UT):
                     letterAmong = 1;
                     if (digitCount == 4) {
                         URI_FUNC(StopSyntax)(state, first, memory);
@@ -800,7 +659,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(URI_TYPE(ParserState) * stat
                     digitCount++;
                     break;
 
-                case URI_SET_DIGIT:
+                case URI_SET_DIGIT(_UT):
                     if (digitCount == 4) {
                         URI_FUNC(StopSyntax)(state, first, memory);
                         return NULL;
@@ -995,23 +854,8 @@ static const URI_CHAR * URI_FUNC(ParseMustBeSegmentNzNc)(URI_TYPE(ParserState) *
     }
 
     case _UT('@'):
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('+'):
-    case _UT('='):
-    case _UT('-'):
-    case _UT('.'):
-    case _UT('_'):
-    case _UT('~'):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT):
         return URI_FUNC(ParseMustBeSegmentNzNc)(state, first + 1, afterLast, memory);
 
     case _UT('/'): {
@@ -1118,24 +962,9 @@ static const URI_CHAR * URI_FUNC(ParseOwnHost2)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
     case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT): {
         const URI_CHAR * const afterPctSubUnres =
             URI_FUNC(ParsePctSubUnres)(state, first, afterLast, memory);
         if (afterPctSubUnres == NULL) {
@@ -1193,26 +1022,7 @@ URI_FUNC(ParseOwnHostUserInfo)(URI_TYPE(ParserState) * state, const URI_CHAR * f
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_PCHAR(_UT):
         return URI_FUNC(ParseOwnHostUserInfoNz)(state, first, afterLast, memory);
 
     default:
@@ -1239,24 +1049,9 @@ static const URI_CHAR * URI_FUNC(ParseOwnHostUserInfoNz)(URI_TYPE(ParserState) *
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
     case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT): {
         const URI_CHAR * const afterPctSubUnres =
             URI_FUNC(ParsePctSubUnres)(state, first, afterLast, memory);
         if (afterPctSubUnres == NULL) {
@@ -1331,19 +1126,7 @@ static const URI_CHAR * URI_FUNC(ParseOwnPortUserInfo)(URI_TYPE(ParserState) * s
     }
 
     switch (*first) {
-    /* begin sub-delims */
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('\''):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('*'):
-    case _UT('+'):
-    case _UT(','):
-    case _UT(';'):
-    case _UT('='):
-    /* end sub-delims */
+    case URI_SET_SUB_DELIMS(_UT):
     /* begin unreserved (except alpha and digit) */
     case _UT('-'):
     case _UT('.'):
@@ -1351,12 +1134,12 @@ static const URI_CHAR * URI_FUNC(ParseOwnPortUserInfo)(URI_TYPE(ParserState) * s
     case _UT('~'):
     /* end unreserved (except alpha and digit) */
     case _UT(':'):
-    case URI_SET_ALPHA:
+    case URI_SET_ALPHA(_UT):
         state->uri->hostText.afterLast = NULL; /* Not a host, reset */
         state->uri->portText.first = NULL; /* Not a port, reset */
         return URI_FUNC(ParseOwnUserInfo)(state, first + 1, afterLast, memory);
 
-    case URI_SET_DIGIT:
+    case URI_SET_DIGIT(_UT):
         return URI_FUNC(ParseOwnPortUserInfo)(state, first + 1, afterLast, memory);
 
     case _UT('%'):
@@ -1399,24 +1182,9 @@ static const URI_CHAR * URI_FUNC(ParseOwnUserInfo)(URI_TYPE(ParserState) * state
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
     case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT): {
         const URI_CHAR * const afterPctSubUnres =
             URI_FUNC(ParsePctSubUnres)(state, first, afterLast, memory);
         if (afterPctSubUnres == NULL) {
@@ -1522,26 +1290,7 @@ URI_FUNC(ParsePathAbsNoLeadSlash)(URI_TYPE(ParserState) * state, const URI_CHAR 
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_PCHAR(_UT): {
         const URI_CHAR * const afterSegmentNz =
             URI_FUNC(ParseSegmentNz)(state, first, afterLast, memory);
         if (afterSegmentNz == NULL) {
@@ -1600,25 +1349,7 @@ static const URI_CHAR * URI_FUNC(ParsePchar)(URI_TYPE(ParserState) * state,
     case _UT('%'):
         return URI_FUNC(ParsePctEncoded)(state, first, afterLast, memory);
 
-    case _UT(':'):
-    case _UT('@'):
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('+'):
-    case _UT('='):
-    case _UT('-'):
-    case _UT('.'):
-    case _UT('_'):
-    case _UT('~'):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_PCHAR_WITHOUT_PERCENT(_UT):
         return first + 1;
 
     default:
@@ -1652,14 +1383,14 @@ static const URI_CHAR * URI_FUNC(ParsePctEncoded)(URI_TYPE(ParserState) * state,
     }
 
     switch (first[1]) {
-    case URI_SET_HEXDIG:
+    case URI_SET_HEXDIG(_UT):
         if (afterLast - first < 3) {
             URI_FUNC(StopSyntax)(state, afterLast, memory);
             return NULL;
         }
 
         switch (first[2]) {
-        case URI_SET_HEXDIG:
+        case URI_SET_HEXDIG(_UT):
             return first + 3;
 
         default:
@@ -1698,23 +1429,8 @@ static const URI_CHAR * URI_FUNC(ParsePctSubUnres)(URI_TYPE(ParserState) * state
     case _UT('%'):
         return URI_FUNC(ParsePctEncoded)(state, first, afterLast, memory);
 
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('+'):
-    case _UT('='):
-    case _UT('-'):
-    case _UT('.'):
-    case _UT('_'):
-    case _UT('~'):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA:
+    case URI_SET_SUB_DELIMS(_UT):
+    case URI_SET_UNRESERVED(_UT):
         return first + 1;
 
     default:
@@ -1735,7 +1451,7 @@ static const URI_CHAR * URI_FUNC(ParsePort)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case URI_SET_DIGIT:
+    case URI_SET_DIGIT(_UT):
         return URI_FUNC(ParsePort)(state, first + 1, afterLast);
 
     default:
@@ -1758,26 +1474,7 @@ static const URI_CHAR * URI_FUNC(ParseQueryFrag)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_PCHAR(_UT): {
         const URI_CHAR * const afterPchar =
             URI_FUNC(ParsePchar)(state, first, afterLast, memory);
         if (afterPchar == NULL) {
@@ -1808,26 +1505,7 @@ static const URI_CHAR * URI_FUNC(ParseSegment)(URI_TYPE(ParserState) * state,
     }
 
     switch (*first) {
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('%'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('-'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT('.'):
-    case _UT(':'):
-    case _UT(';'):
-    case _UT('@'):
-    case _UT('\''):
-    case _UT('_'):
-    case _UT('~'):
-    case _UT('+'):
-    case _UT('='):
-    case URI_SET_DIGIT:
-    case URI_SET_ALPHA: {
+    case URI_SET_PCHAR(_UT): {
         const URI_CHAR * const afterPchar =
             URI_FUNC(ParsePchar)(state, first, afterLast, memory);
         if (afterPchar == NULL) {
@@ -1906,8 +1584,8 @@ static const URI_CHAR * URI_FUNC(ParseSegmentNzNcOrScheme2)(URI_TYPE(ParserState
     case _UT('.'):
     case _UT('+'):
     case _UT('-'):
-    case URI_SET_ALPHA:
-    case URI_SET_DIGIT:
+    case URI_SET_ALPHA(_UT):
+    case URI_SET_DIGIT(_UT):
         return URI_FUNC(ParseSegmentNzNcOrScheme2)(state, first + 1, afterLast, memory);
 
     case _UT('%'): {
@@ -2002,22 +1680,12 @@ static const URI_CHAR * URI_FUNC(ParseUriReference)(URI_TYPE(ParserState) * stat
     }
 
     switch (*first) {
-    case URI_SET_ALPHA:
+    case URI_SET_ALPHA(_UT):
         state->uri->scheme.first = first; /* SCHEME BEGIN */
         return URI_FUNC(ParseSegmentNzNcOrScheme2)(state, first + 1, afterLast, memory);
 
-    case URI_SET_DIGIT:
-    case _UT('!'):
-    case _UT('$'):
-    case _UT('&'):
-    case _UT('('):
-    case _UT(')'):
-    case _UT('*'):
-    case _UT(','):
-    case _UT(';'):
-    case _UT('\''):
-    case _UT('+'):
-    case _UT('='):
+    case URI_SET_DIGIT(_UT):
+    case URI_SET_SUB_DELIMS(_UT):
     case _UT('.'):
     case _UT('_'):
     case _UT('~'):

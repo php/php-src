@@ -317,6 +317,8 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
 		struct timeval *timeout)
 {
 	gettimeofday(limit_time, NULL);
+	const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
+	ZEND_ASSERT(limit_time->tv_sec < (timeoutmax - timeout->tv_sec));
 	limit_time->tv_sec += timeout->tv_sec;
 	limit_time->tv_usec += timeout->tv_usec;
 	if (limit_time->tv_usec >= 1000000) {

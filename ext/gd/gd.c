@@ -2976,7 +2976,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i;
+	int ch = 0, col, i;
+	unsigned int x, y;
 	size_t l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
@@ -3009,21 +3010,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, ch, col);
+			gdImageChar(im, font, (int)x, (int)y, ch, col);
 			break;
 		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
 		case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				gdImageChar(im, font, (int)x, (int)y, (int) ((unsigned char) str[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				gdImageCharUp(im, font, (int)x, (int)y, (int) str[i], col);
 				y -= font->w;
 			}
 			break;
@@ -3931,9 +3932,17 @@ PHP_FUNCTION(imagescale)
 		src_y = gdImageSY(im);
 
 		if (src_x && tmp_h < 0) {
+			if (tmp_w > (ZEND_LONG_MAX / src_y)) {
+				zend_argument_value_error(2, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_y));
+				RETURN_THROWS();
+			}
 			tmp_h = tmp_w * src_y / src_x;
 		}
 		if (src_y && tmp_w < 0) {
+			if (tmp_h > (ZEND_LONG_MAX / src_x)) {
+				zend_argument_value_error(3, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_x));
+				RETURN_THROWS();
+			}
 			tmp_w = tmp_h * src_x / src_y;
 		}
 	}
