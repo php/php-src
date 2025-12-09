@@ -400,15 +400,10 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (JSON_G(error_line) > 0 && JSON_G(error_column) > 0) {
-		zend_string *error_msg = php_json_get_error_msg_with_location(
-			JSON_G(error_code),
-			JSON_G(error_line),
-			JSON_G(error_column)
-		);
-		RETVAL_STR(error_msg);
-	} else {
-		RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
-	}
+	RETVAL_STR(php_json_get_error_msg_with_location(
+		JSON_G(error_code),
+		JSON_G(error_line),
+		JSON_G(error_column)
+	));
 }
 /* }}} */

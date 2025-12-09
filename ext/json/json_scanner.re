@@ -52,7 +52,7 @@
 
 #define PHP_JSON_INT_MAX_LENGTH (MAX_LENGTH_OF_LONG - 1)
 
-#define PHP_JSON_TOKEN_LENGTH(s) ((size_t) ((s)->cursor - (s)->token))
+#define PHP_JSON_TOKEN_LENGTH() ((size_t) (s->cursor - s->token))
 #define PHP_JSON_TOKEN_LOCATION(location) (s)->errloc.location
 
 static void php_json_scanner_copy_string(php_json_scanner *s, size_t esc_size)
@@ -198,7 +198,7 @@ std:
 	}
 	<JS>INT                  {
 		bool bigint = 0, negative = s->token[0] == '-';
-		size_t digits = PHP_JSON_TOKEN_LENGTH(s);
+		size_t digits = PHP_JSON_TOKEN_LENGTH();
 		PHP_JSON_TOKEN_LOCATION(last_column) += digits;
 		digits -= negative;
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
@@ -223,7 +223,7 @@ std:
 		}
 	}
 	<JS>FLOAT|EXP            {
-		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH(s);
+		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH();
 		ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));
 		return PHP_JSON_T_DOUBLE;
 	}
@@ -233,7 +233,7 @@ std:
 		goto std;
 	}
 	<JS>WS                   {
-		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH(s);
+		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH();
 		goto std;
 	}
 	<JS>EOI                  {

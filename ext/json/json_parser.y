@@ -306,11 +306,6 @@ static void php_json_yyerror(YYLTYPE *location, php_json_parser *parser, char co
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
 	}
-
-	parser->scanner.errloc.first_column = location->first_column;
-	parser->scanner.errloc.first_line = location->first_line;
-	parser->scanner.errloc.last_column = location->last_column;
-	parser->scanner.errloc.last_line = location->last_line;
 }
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
