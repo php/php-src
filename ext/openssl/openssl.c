@@ -1158,6 +1158,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_zval(return_value, "extensions", &subitem);
 	if (critcount > 0) {
 		add_assoc_zval(return_value, "criticalExtensions", &critext);
+	} else {
+		zval_ptr_dtor(&critext);
 	}
 	if (cert_str) {
 		X509_free(cert);
