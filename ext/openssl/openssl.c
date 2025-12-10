@@ -1133,7 +1133,6 @@ PHP_FUNCTION(openssl_x509_parse)
 			add_next_index_string(&critext, extname);
 			critcount++;
 		}
-
 		bio_out = BIO_new(BIO_s_mem());
 		if (bio_out == NULL) {
 			php_openssl_store_errors();
