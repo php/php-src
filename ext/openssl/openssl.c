@@ -4026,6 +4026,27 @@ static zend_result php_openssl_setup_rsa_padding(EVP_PKEY_CTX *pctx, EVP_PKEY *p
 	return SUCCESS;
 }
 
+static int php_openssl_setup_rsa_pss_salt_length(EVP_PKEY_CTX *pctx, EVP_PKEY *pkey, zend_long padding, zend_long salt_length)
+{
+	/* Only apply if using PSS padding */
+	if (padding != RSA_PKCS1_PSS_PADDING) {
+		return SUCCESS;
+	}
+
+	/* Only apply to RSA keys */
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA && EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA_PSS) {
+		return SUCCESS;
+	}
+
+	if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pctx, (int)salt_length) <= 0) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "Could not set RSA-PSS salt length");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ Signs data */
 PHP_FUNCTION(openssl_sign)
 {
@@ -4039,16 +4060,18 @@ PHP_FUNCTION(openssl_sign)
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
 	zend_long padding = 0;
+	zend_long salt_length = RSA_PSS_SALTLEN_AUTO;
 	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 5)
+	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_ZVAL(signature)
 		Z_PARAM_ZVAL(key)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
 		Z_PARAM_LONG(padding)
+		Z_PARAM_LONG(salt_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0, 3);
@@ -4069,12 +4092,14 @@ PHP_FUNCTION(openssl_sign)
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
+	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
 
 	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;
 	if (md_ctx != NULL &&
 			EVP_DigestSignInit(md_ctx, &pctx, mdtype, NULL, pkey) &&
 			php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
+			php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == SUCCESS &&
 			EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
 			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
 			EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
