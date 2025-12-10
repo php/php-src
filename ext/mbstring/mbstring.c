@@ -6395,7 +6395,7 @@ static zend_string* mb_mime_header_decode(zend_string *input, const mbfl_encodin
 					p = temp;
 					/* Decoding of MIME encoded word was successful;
 					 * Try to collapse a run of whitespace */
-					if (p < e && (*p == '\n' || *p == '\r')) {
+					if (p < e && (*p == '\n' || *p == '\r' || *p == ' ')) {
 						do {
 							p++;
 						} while (p < e && (*p == '\n' || *p == '\r' || *p == '\t' || *p == ' '));
