@@ -132,6 +132,8 @@ PHP                                                                        NEWS
     preloaded trait). (iliaal)
 
 - OpenSSL:
+  . Added $salt_length parameter to openssl_sign() and openssl_verify() with
+    new OPENSSL_RSA_PSS_SALTLEN_* constants. (Jakub Zelenka)
   . Fixed timeout for supplemental read at end of a blocking stream in SSL
     stream wrapper. (ilutov)
   . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
