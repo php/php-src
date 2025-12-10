@@ -4384,14 +4384,8 @@ ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, 
 
 ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 {
-	zend_string *lname;
 	size_t name_len = strlen(module_name);
-	zend_module_entry *module;
-
-	lname = zend_string_alloc(name_len, 0);
-	zend_str_tolower_copy(ZSTR_VAL(lname), module_name, name_len);
-	module = zend_hash_find_ptr(&module_registry, lname);
-	zend_string_efree(lname);
+	zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry, module_name, name_len);
 	return module ? module->version : NULL;
 }
 /* }}} */
