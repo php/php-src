@@ -2494,7 +2494,7 @@ PHP_METHOD(SplFileObject, fscanf)
 		RETURN_THROWS();
 	}
 
-	php_sscanf_internal(ZSTR_VAL(intern->u.file.current_line), format_str, 1, num_varargs, varargs, return_value);
+	php_sscanf_internal(ZSTR_VAL(intern->u.file.current_line), ZSTR_LEN(intern->u.file.current_line), format_str, 1, num_varargs, varargs, return_value);
 }
 /* }}} */
 

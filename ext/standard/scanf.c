@@ -595,7 +595,7 @@ error:
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal(const char *string, const zend_string *zstr_format, uint32_t format_arg_num,
+PHPAPI int php_sscanf_internal(const char *string, size_t string_len, const zend_string *zstr_format, uint32_t format_arg_num,
 				uint32_t argCount, zval *args,
 				zval *return_value)
 {
