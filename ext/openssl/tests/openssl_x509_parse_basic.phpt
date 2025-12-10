@@ -17,7 +17,7 @@ var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
 bool(true)
-array(16) {
+array(17) {
   ["name"]=>
   string(96) "/CN=Henrique do N. Angelo/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -167,7 +167,7 @@ array(16) {
     string(16) "basicConstraints"
   }
 }
-array(16) {
+array(17) {
   ["name"]=>
   string(96) "/CN=Henrique do N. Angelo/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/emailAddress=hnangelo@php.net"
   ["subject"]=>
