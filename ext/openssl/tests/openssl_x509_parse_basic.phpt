@@ -153,7 +153,7 @@ array(16) {
     }
   }
   ["extensions"]=>
-  array(4) {
+  array(3) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
@@ -303,14 +303,17 @@ array(16) {
     }
   }
   ["extensions"]=>
-  array(4) {
+  array(3) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
     string(%d) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
-    ["basicConstraints:critical"]=>
-    bool(true)
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
+  }
+  ["criticalExtensions"]=>
+  array(1) {
+    [0]=>
+    string(16) "basicConstraints"
   }
 }
