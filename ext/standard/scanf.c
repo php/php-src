@@ -583,6 +583,13 @@ error:
 }
 /* }}} */
 
+enum php_scan_op {
+	SCAN_STRING,
+	SCAN_INTEGER,
+	SCAN_FLOAT,
+	SCAN_RANGE
+};
+
 /* {{{ php_sscanf_internal
  * This is the internal function which does processing on behalf of
  * both sscanf() and fscanf()
@@ -601,19 +608,11 @@ PHPAPI int php_sscanf_internal(const char *string, size_t string_len, const zend
 {
 	int  numVars, nconversions;
 	int  result;
-	zend_long value;
 	zend_ulong  objIndex;
-	const char *end;
 	const char *baseString;
 	zval *current;
-	char op   = 0;
 	int  base = 0;
-	int  underflow = 0;
-	size_t width;
 	int_string_formater fn = NULL;
-	const char *ch;
-	char sch;
-	int  flags;
 
 	numVars = argCount;
 	if (numVars < 0) {
@@ -671,90 +670,90 @@ PHPAPI int php_sscanf_internal(const char *string, size_t string_len, const zend
 	nconversions = 0;
 	/* note ! - we need to limit the loop for objIndex to keep it in bounds */
 
-	const char *format = ZSTR_VAL(zstr_format);
-	while (*format != '\0') {
-		ch    = format++;
-		flags = 0;
-
-		/*
-		 * If we see whitespace in the format, skip whitespace in the string.
-		 */
-		if ( isspace( (int)*ch ) ) {
-			sch = *string;
-			while ( isspace( (int)sch ) ) {
-				if (*string == '\0') {
-					goto done;
+	bool is_fully_consumed = true;
+	const char *end_string_ptr = string + string_len;
+	const char *end_format_ptr = ZSTR_VAL(zstr_format) + ZSTR_LEN(zstr_format);
+	for (const char *format = ZSTR_VAL(zstr_format); format < end_format_ptr; format++) {
+		bool isCurrentSpecifierBound = true;
+		zend_ulong width = 0;
+		/* Whitespace in format => gobble up all whitespace in the string */
+		if (isspace(*format)) {
+			while (isspace(*string)) {
+				if (string == end_string_ptr) {
+					goto new_done;
 				}
 				string++;
-				sch = *string;
 			}
 			continue;
-		}
-
-		if (*ch != '%') {
-literal:
-			if (*string == '\0') {
-				underflow = 1;
-				goto done;
+		} else if (*format != '%') {
+new_literal:
+			if (string == end_string_ptr) {
+				is_fully_consumed = false;
+				goto new_done;
 			}
-			sch = *string;
+			/* String doesn't match format */
+			if (*string != *format) {
+				goto new_done;
+			}
 			string++;
-			if (*ch != sch) {
-				goto done;
-			}
 			continue;
+		} else {
+			ZEND_ASSERT(*format == '%');
+			format++;
 		}
 
-		ch = format++;
-		if (*ch == '%') {
-			goto literal;
+		/* %% sequence wants to check for a single % in the string */
+		if (*format == '%') {
+			goto new_literal;
+		} else if (*format == '*') {
+			/* Consumed specifier but not assigned to variable */
+			isCurrentSpecifierBound = false;
+			format++;
 		}
 
-		/*
-		 * Check for assignment suppression ('*') or an XPG3-style
-		 * assignment ('%n$').
-		 */
-		if (*ch == '*') {
-			flags |= SCAN_SUPPRESS;
-			ch = format++;
-		} else if ( isdigit(UCHAR(*ch))) {
-			char *end = NULL;
-			zend_ulong assignment_index = ZEND_STRTOUL(format-1, &end, 10);
-			if (*end == '$') {
-				format = end+1;
-				ch = format++;
-				objIndex = assignment_index - 1;
+		if (isdigit(*format)) {
+			/* We might either have an XPG3-style %n$ specification,
+			 * or we are parsing the _maximum field width_ of the specifier.
+			 *
+			 * Note: there must not be a mixture of XPG3 specs and non-XPG3 specs
+			 * in the same format string.
+			 */
+
+			char *width_end = NULL;
+			width = ZEND_STRTOUL(format, &width_end, 10);
+			format = width_end;
+
+			if (*format == '$') {
+				/* We indeed have an XPG3 style spec */
+				format++;
+				zend_ulong argument_index = width;
+				width = 0;
+				objIndex = argument_index - 1;
+
+				/* Check if we have a width argument with the XPG3 specifier */
+				if (!isdigit(*format)) {
+					goto length_modifier;
+				}
+				/* Grab the width to be able to continue */
+				width = ZEND_STRTOUL(format, &width_end, 10);
+				format = width_end;
 			}
 		}
 
-		/*
-		 * Parse any width specifier.
-		 */
-		if ( isdigit(UCHAR(*ch))) {
-			char *end_ptr = NULL;
-			width = ZEND_STRTOUL(format-1, &end_ptr, 10);
-			format = end_ptr;
-			ch = format++;
-		} else {
-			width = 0;
+length_modifier:
+		/* Ignore length modifier */
+		if (*format == 'l' || *format == 'L' || *format == 'h') {
+			format++;
 		}
 
-		/*
-		 * Ignore size specifier.
-		 */
-		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
-			ch = format++;
-		}
-
-		/*
-		 * Handle the various field types.
-		 */
-		switch (*ch) {
-			case 'n':
-				if (!(flags & SCAN_SUPPRESS)) {
-					if (assignToVariables && objIndex >= argCount) {
-						break;
-					} else if (assignToVariables) {
+		bool read_unsigned_integer = false;
+		bool preserve_whitespace = false;
+		enum php_scan_op op;
+		switch (*format) {
+			case 'n': {
+				// TODO: Warn if this situation arises in format string?
+				if (isCurrentSpecifierBound) {
+					if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_LONG(current, (zend_long) (string - baseString));
 					} else {
@@ -763,33 +762,34 @@ literal:
 				}
 				nconversions++;
 				continue;
+			}
 
 			case 'd':
 			case 'D':
-				op = 'i';
+				op = SCAN_INTEGER;
 				base = 10;
 				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'i':
-				op = 'i';
+				op = SCAN_INTEGER;
 				base = 0;
 				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'o':
-				op = 'i';
+				op = SCAN_INTEGER;
 				base = 8;
 				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'x':
 			case 'X':
-				op = 'i';
+				op = SCAN_INTEGER;
 				base = 16;
 				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'u':
-				op = 'i';
+				op = SCAN_INTEGER;
 				base = 10;
-				flags |= SCAN_UNSIGNED;
+				read_unsigned_integer = true;
 				fn = (int_string_formater)ZEND_STRTOUL_PTR;
 				break;
 
@@ -797,16 +797,16 @@ literal:
 			case 'e':
 			case 'E':
 			case 'g':
-				op = 'f';
+				op = SCAN_FLOAT;
 				break;
 
 			case 's':
-				op = 's';
+				op = SCAN_STRING;
 				break;
 
 			case 'c':
-				op = 's';
-				flags |= SCAN_NOSKIP;
+				op = SCAN_STRING;
+				preserve_whitespace = true;
 				/*-cc-*/
 				if (0 == width) {
 					width = 1;
@@ -814,270 +814,125 @@ literal:
 				/*-cc-*/
 				break;
 			case '[':
-				op = '[';
-				flags |= SCAN_NOSKIP;
+				op = SCAN_RANGE;
+				preserve_whitespace = true;
 				break;
-		}   /* switch */
-
-		/*
-		 * At this point, we will need additional characters from the
-		 * string to proceed.
-		 */
-		if (*string == '\0') {
-			underflow = 1;
-			goto done;
 		}
 
-		/*
-		 * Skip any leading whitespace at the beginning of a field unless
-		 * the format suppresses this behavior.
-		 */
-		if (!(flags & SCAN_NOSKIP)) {
-			while (*string != '\0') {
-				sch = *string;
-				if (! isspace((int)sch) ) {
-					break;
-				}
+		/* Unless the specifier preserves whitespace, ignore whitespace in string */
+		if (!preserve_whitespace) {
+			while (string != end_string_ptr && isspace(*string)) {
 				string++;
 			}
-			if (*string == '\0') {
-				underflow = 1;
-				goto done;
-			}
 		}
 
-		/*
-		 * Perform the requested scanning operation.
-		 */
+		/* Check that we are not at the end of the string, as we need to consume bytes to satisfy the specifier
+		 * Note: this cannot be checked before due to the %n specifier */
+		if (string == end_string_ptr) {
+			is_fully_consumed = false;
+			goto new_done;
+		}
+		ZEND_ASSERT(string != end_string_ptr);
+
 		switch (op) {
-			case 'c':
-			case 's':
-				/*
-				 * Scan a string up to width characters or whitespace.
-				 */
+			/* Scan a string up to width characters or whitespace. */
+			case SCAN_STRING: {
 				if (width == 0) {
-					width = (size_t) ~0;
+					/* We should be using uz/zu but does not exist in C yet
+					 * https://thephd.dev/_vendor/future_cxx/papers/C%20-%20Literal%20Suffixes%20for%20size_t.html */
+					width = ~0u;
 				}
-				end = string;
-				while (*end != '\0') {
-					sch = *end;
-					if ( isspace( (int)sch ) ) {
+				const char *start = string;
+				while (string != end_string_ptr) {
+					/* Consider nul byte as whitespace here */
+					if (isspace(*string) || *string == '\0' || width-- == 0) {
 						break;
 					}
-					end++;
-					if (--width == 0) {
-					   break;
-					}
+					string++;
 				}
-				if (!(flags & SCAN_SUPPRESS)) {
-					if (assignToVariables && objIndex >= argCount) {
-						break;
-					} else if (assignToVariables) {
+				if (isCurrentSpecifierBound) {
+					if (assignToVariables) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
+						ZEND_TRY_ASSIGN_REF_STRINGL(current, start, string-start);
 					} else {
-						add_index_stringl(return_value, objIndex++, string, end-string);
+						add_index_stringl(return_value, objIndex++, start, string-start);
 					}
 				}
-				string = end;
 				break;
+			}
 
-			case '[': {
-				CharSet cset;
-
+			case SCAN_RANGE: {
 				if (width == 0) {
-					width = (size_t) ~0;
+					/* We should be using uz/zu but does not exist in C yet
+					 * https://thephd.dev/_vendor/future_cxx/papers/C%20-%20Literal%20Suffixes%20for%20size_t.html */
+					width = ~0u;
 				}
-				end = string;
+				format++;
 
+				CharSet cset;
+				const char *start = string;
 				format = BuildCharSet(&cset, format);
-				while (*end != '\0') {
-					sch = *end;
-					if (!CharInSet(&cset, sch)) {
+				while (string != end_string_ptr) {
+					if (!CharInSet(&cset, *string) || width-- == 0) {
 						break;
 					}
-					end++;
-					if (--width == 0) {
-						break;
-					}
+					string++;
 				}
 				ReleaseCharSet(&cset);
 
-				if (string == end) {
-					/*
-					 * Nothing matched the range, stop processing
-					 */
-					goto done;
+				/* Nothing matched the range, stop processing */
+				if (UNEXPECTED(string == start)) {
+					//is_fully_consumed = false;
+					goto new_done;
 				}
-				if (!(flags & SCAN_SUPPRESS)) {
-					if (assignToVariables && objIndex >= argCount) {
-						break;
-					} else if (assignToVariables) {
+				if (isCurrentSpecifierBound) {
+					if (assignToVariables) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
+						ZEND_TRY_ASSIGN_REF_STRINGL(current, start, string-start);
 					} else {
-						add_index_stringl(return_value, objIndex++, string, end-string);
+						add_index_stringl(return_value, objIndex++, start, string-start);
 					}
 				}
-				string = end;
 				break;
 			}
-/*
-			case 'c':
-			   / Scan a single character./
 
-				sch = *string;
-				string++;
-				if (!(flags & SCAN_SUPPRESS)) {
-					if (assignToVariables) {
-						char __buf[2];
-						__buf[0] = sch;
-						__buf[1] = '\0';
-						current = args[objIndex++];
-						zval_ptr_dtor_nogc(*current);
-						ZVAL_STRINGL( *current, __buf, 1);
-					} else {
-						add_index_stringl(return_value, objIndex++, &sch, 1);
-					}
+			case SCAN_INTEGER: {
+				ZEND_ASSERT(fn != NULL && "must have a valid strto{int} function");
+				bool release_buffer = false;
+				char *buf = (char*)string;
+				if (width != 0) {
+					width = MIN(end_string_ptr-string, width);
+					buf = estrndup(string, width);
+					release_buffer = true;
 				}
-				break;
-*/
-			case 'i': {
-				/* Temporary buffer to hold scanned number */
-				char buf[64];
-				char *buf_end;
+				char *int_end = NULL;
+				zend_long value = (*fn)(buf, &int_end, base);
+				ptrdiff_t l = int_end - buf;
+				if (release_buffer) {
+					efree(buf);
+				}
+				/* Did not parse an integer */
+				if (l == 0) {
+					//is_fully_consumed = false;
+					goto new_done;
+				}
+				string += l;
 				/*
-				 * Scan an unsigned or signed integer.
-				 */
-				/*-cc-*/
-				buf[0] = '\0';
-				/*-cc-*/
-				if ((width == 0) || (width > sizeof(buf) - 1)) {
-					width = sizeof(buf) - 1;
-				}
-
-				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO;
-				for (buf_end = buf; width > 0; width--) {
-					switch (*string) {
-						/*
-						 * The 0 digit has special meaning at the beginning of
-						 * a number.  If we are unsure of the base, it
-						 * indicates that we are in base 8 or base 16 (if it is
-						 * followed by an 'x').
-						 */
-						case '0':
-							/*-cc-*/
-							if (base == 16) {
-								flags |= SCAN_XOK;
-							}
-							/*-cc-*/
-							if (base == 0) {
-								base = 8;
-								flags |= SCAN_XOK;
-							}
-							if (flags & SCAN_NOZERO) {
-								flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS | SCAN_NOZERO);
-							} else {
-								flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
-							}
-							goto addToInt;
-
-						case '1': case '2': case '3': case '4':
-						case '5': case '6': case '7':
-							if (base == 0) {
-								base = 10;
-							}
-							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
-							goto addToInt;
-
-						case '8': case '9':
-							if (base == 0) {
-								base = 10;
-							}
-							if (base <= 8) {
-								break;
-							}
-							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
-							goto addToInt;
-
-						case 'A': case 'B': case 'C':
-						case 'D': case 'E': case 'F':
-						case 'a': case 'b': case 'c':
-						case 'd': case 'e': case 'f':
-							if (base <= 10) {
-								break;
-							}
-							flags &= ~(SCAN_SIGNOK | SCAN_XOK | SCAN_NODIGITS);
-							goto addToInt;
-
-						case '+': case '-':
-							if (flags & SCAN_SIGNOK) {
-								flags &= ~SCAN_SIGNOK;
-								goto addToInt;
-							}
-							break;
-
-						case 'x': case 'X':
-							if ((flags & SCAN_XOK) && (buf_end == buf+1)) {
-								base = 16;
-								flags &= ~SCAN_XOK;
-								goto addToInt;
-							}
-							break;
-					}
-
-					/*
-					 * We got an illegal character so we are done accumulating.
-					 */
-					break;
-
-addToInt:
-					/*
-					 * Add the character to the temporary buffer.
-					 */
-					*buf_end++ = *string++;
-					if (*string == '\0') {
-						break;
-					}
-				}
-
-				/*
-				 * Check to see if we need to back up because we only got a
-				 * sign or a trailing x after a 0.
-				 */
-				if (flags & SCAN_NODIGITS) {
-					if (*string == '\0') {
-						underflow = 1;
-					}
-					goto done;
-				} else if (buf_end[-1] == 'x' || buf_end[-1] == 'X') {
-					buf_end--;
-					string--;
-				}
-
-				/*
-				 * Scan the value from the temporary buffer.  If we are
-				 * returning a large unsigned value, we have to convert it back
+				 * If we are returning a large unsigned value, we have to convert it back
 				 * to a string since PHP only supports signed values.
-				 */
-				if (!(flags & SCAN_SUPPRESS)) {
-					*buf_end = '\0';
-					value = (zend_long) (*fn)(buf, NULL, base);
-					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, value); /* INTL: ISO digit */
-						if (assignToVariables && objIndex >= argCount) {
-							break;
-						} else if (assignToVariables) {
-							/* change passed value type to string */
+				*/
+				if (isCurrentSpecifierBound) {
+					if (read_unsigned_integer && UNEXPECTED(value < 0)) {
+						zend_string *uint_str = strpprintf(0, ZEND_ULONG_FMT, value);
+						if (assignToVariables) {
 							current = args + objIndex++;
-							ZEND_TRY_ASSIGN_REF_STRING(current, buf);
+							ZEND_TRY_ASSIGN_REF_STR(current, uint_str);
 						} else {
-							add_index_string(return_value, objIndex++, buf);
+							add_index_str(return_value, objIndex++, uint_str);
 						}
+						// TODO Need to free?
 					} else {
-						if (assignToVariables && objIndex >= argCount) {
-							break;
-						} else if (assignToVariables) {
+						if (assignToVariables) {
 							current = args + objIndex++;
 							ZEND_TRY_ASSIGN_REF_LONG(current, value);
 						} else {
@@ -1088,104 +943,29 @@ addToInt:
 				break;
 			}
 
-			case 'f': {
-				/* Temporary buffer to hold scanned number */
-				char buf[64];
-				char *buf_end;
-				/*
-				 * Scan a floating point number
-				 */
-				buf[0] = '\0';     /* call me pedantic */
-				if ((width == 0) || (width > sizeof(buf) - 1)) {
-					width = sizeof(buf) - 1;
+			case SCAN_FLOAT: {
+				bool release_buffer = false;
+				char *buf = (char*)string;
+				if (width != 0) {
+					width = MIN(end_string_ptr-string, width);
+					buf = estrndup(string, width);
+					release_buffer = true;
 				}
-				flags |= SCAN_SIGNOK | SCAN_NODIGITS | SCAN_PTOK | SCAN_EXPOK;
-				for (buf_end = buf; width > 0; width--) {
-					switch (*string) {
-						case '0': case '1': case '2': case '3':
-						case '4': case '5': case '6': case '7':
-						case '8': case '9':
-							flags &= ~(SCAN_SIGNOK | SCAN_NODIGITS);
-							goto addToFloat;
-						case '+':
-						case '-':
-							if (flags & SCAN_SIGNOK) {
-								flags &= ~SCAN_SIGNOK;
-								goto addToFloat;
-							}
-							break;
-						case '.':
-							if (flags & SCAN_PTOK) {
-								flags &= ~(SCAN_SIGNOK | SCAN_PTOK);
-								goto addToFloat;
-							}
-							break;
-						case 'e':
-						case 'E':
-							/*
-							 * An exponent is not allowed until there has
-							 * been at least one digit.
-							 */
-							if ((flags & (SCAN_NODIGITS | SCAN_EXPOK)) == SCAN_EXPOK) {
-								flags = (flags & ~(SCAN_EXPOK|SCAN_PTOK))
-									| SCAN_SIGNOK | SCAN_NODIGITS;
-								goto addToFloat;
-							}
-							break;
-					}
-
-					/*
-					 * We got an illegal character so we are done accumulating.
-					 */
-					break;
-
-addToFloat:
-					/*
-					 * Add the character to the temporary buffer.
-					 */
-					*buf_end++ = *string++;
-					if (*string == '\0') {
-						break;
-					}
+				const char *float_end = NULL;
+				double dvalue = zend_strtod(buf, &float_end);
+				ptrdiff_t l = float_end - buf;
+				if (release_buffer) {
+					efree(buf);
 				}
-
-				/*
-				 * Check to see if we need to back up because we saw a
-				 * trailing 'e' or sign.
-				 */
-				if (flags & SCAN_NODIGITS) {
-					if (flags & SCAN_EXPOK) {
-						/*
-						 * There were no digits at all so scanning has
-						 * failed and we are done.
-						 */
-						if (*string == '\0') {
-							underflow = 1;
-						}
-						goto done;
-					}
-
-					/*
-					 * We got a bad exponent ('e' and maybe a sign).
-					 */
-					buf_end--;
-					string--;
-					if (*buf_end != 'e' && *buf_end != 'E') {
-						buf_end--;
-						string--;
-					}
+				/* Did not parse a float */
+				if (l == 0) {
+					//is_fully_consumed = false;
+					goto new_done;
 				}
+				string += l;
 
-				/*
-				 * Scan the value from the temporary buffer.
-				 */
-				if (!(flags & SCAN_SUPPRESS)) {
-					double dvalue;
-					*buf_end = '\0';
-					dvalue = zend_strtod(buf, NULL);
-					if (assignToVariables && objIndex >= argCount) {
-						break;
-					} else if (assignToVariables) {
+				if (isCurrentSpecifierBound) {
+					if (assignToVariables) {
 						current = args + objIndex++;
 						ZEND_TRY_ASSIGN_REF_DOUBLE(current, dvalue);
 					} else {
@@ -1194,14 +974,14 @@ addToFloat:
 				}
 				break;
 			}
-		} /* switch (op) */
+		}
 		nconversions++;
-	} /*  while (*format != '\0') */
+	}
+new_done:
 
-done:
 	result = SCAN_SUCCESS;
 
-	if (underflow && (0==nconversions)) {
+	if (!is_fully_consumed && 0 == nconversions) {
 		scan_set_error_return( assignToVariables, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (assignToVariables) {

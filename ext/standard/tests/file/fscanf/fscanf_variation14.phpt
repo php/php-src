@@ -121,7 +121,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -187,7 +190,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -253,7 +259,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -319,7 +328,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -385,7 +397,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -451,7 +466,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -517,7 +535,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -583,7 +604,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -649,7 +673,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -715,7 +742,10 @@ array(1) {
   string(4) "true"
 }
 NULL
-NULL
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(2) "\0"
@@ -790,7 +820,10 @@ array(1) {
   [0]=>
   NULL
 }
-NULL
+array(1) {
+  [0]=>
+  NULL
+}
 array(1) {
   [0]=>
   NULL
@@ -846,7 +879,8 @@ array(0) {
 array(0) {
 }
 NULL
-NULL
+array(0) {
+}
 array(0) {
 }
 array(0) {

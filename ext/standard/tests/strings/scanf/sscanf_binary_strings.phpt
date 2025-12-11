@@ -22,11 +22,11 @@ array(3) {
   [0]=>
   string(5) "Hello"
   [1]=>
-  NULL
+  string(9) "wonderful"
   [2]=>
-  NULL
+  string(6) "World!"
 }
-int(1)
+int(3)
 string(5) "Hello"
-NULL
-NULL
+string(9) "wonderful"
+string(6) "World!"
