@@ -3,6 +3,7 @@ clamp() tests
 --INI--
 precision=14
 date.timezone=UTC
+zend.assertions=1
 --FILE--
 <?php
 
