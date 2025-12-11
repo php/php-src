@@ -7,6 +7,19 @@ mbstring
 
 $subject = '=?us-ascii?Q?The_PH?=  =?us-ascii?Q?P_8.5?=';
 var_dump(mb_decode_mimeheader($subject));
+
+// mb_decode_mimeheader's backward compatible for TAB(\t)
+$subject = "=?us-ascii?Q?The_PH?=\t=?us-ascii?Q?P_8.5?=";
+var_dump(mb_decode_mimeheader($subject));
+
+$subject = "=?us-ascii?Q?The_PH?=\t =?us-ascii?Q?P_8.5?=";
+var_dump(mb_decode_mimeheader($subject));
+
+$subject = "=?us-ascii?Q?The_PH?= \t =?us-ascii?Q?P_8.5?=";
+var_dump(mb_decode_mimeheader($subject));
 ?>
 --EXPECTF--
+string(11) "The PHP 8.5"
+string(11) "The PHP 8.5"
+string(11) "The PHP 8.5"
 string(11) "The PHP 8.5"
