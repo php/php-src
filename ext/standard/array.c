@@ -359,23 +359,6 @@ static int php_array_data_compare_string_locale_unstable_i(Bucket *f, Bucket *s)
 }
 /* }}} */
 
-/* Returns the position of a PHP type in the total ordering used by SORT_STRICT. */
-static zend_always_inline int php_array_type_order(uint8_t type)
-{
-	switch (type) {
-		case IS_NULL:      return 0;
-		case IS_FALSE:     return 1;
-		case IS_TRUE:      return 2;
-		case IS_LONG:      return 3;
-		case IS_DOUBLE:    return 4;
-		case IS_STRING:    return 5;
-		case IS_ARRAY:     return 6;
-		case IS_OBJECT:    return 7;
-		case IS_RESOURCE:  return 8;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-}
-
 static zend_always_inline int php_array_compare_strings(zend_string *s1, zend_string *s2)
 {
 	if (s1 == s2) {
@@ -441,7 +424,8 @@ static int php_array_sort_compare_objects_strict(zval *o1, zval *o2)
 		return Z_OBJ_HT_P(o1)->compare(o1, o2);
 	}
 
-	/* Compare declared properties directly when no dynamic properties exist */
+	/* Compare declared properties directly when no dynamic properties exist.
+	 * Lazy objects are excluded so they get initialized via zend_std_get_properties_ex(). */
 	if (!zobj1->properties && !zobj2->properties
 			&& !zend_object_is_lazy(zobj1) && !zend_object_is_lazy(zobj2)) {
 		zend_property_info *info;
@@ -555,11 +539,7 @@ static zend_always_inline int php_array_sort_compare_strict(zval *op1, zval *op2
 	}
 
 	/* Types differ: order by type hierarchy */
-	/* Special case: IS_FALSE (2) and IS_TRUE (3) are both bool, so compare by value */
-	if ((t1 | 1) == IS_TRUE && (t2 | 1) == IS_TRUE) {
-		return t1 > t2 ? 1 : -1;
-	}
-	return php_array_type_order(t1) > php_array_type_order(t2) ? 1 : -1;
+	return t1 > t2 ? 1 : -1;
 }
 
 static zend_always_inline int php_array_data_compare_strict_unstable_i(Bucket *f, Bucket *s)
