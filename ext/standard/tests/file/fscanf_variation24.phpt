@@ -16,30 +16,21 @@ if($file_handle == false)
   exit("Error:failed to open file $filename");
 
 // array of strings
-$strings = array (
-  "",
+$strings = [
   '',
-  "0",
   '0',
-  "1",
   '1',
-  "\x01",
-  '\x01',
   "\01",
   '\01',
   'string',
-  "string",
-  "true",
-  "FALSE",
+  'true',
   'false',
-  'TRUE',
-  "NULL",
   'null'
-);
+];
 
 $char_formats = array( "%c",
                "%hc", "%lc", "%Lc",
-               " %c", "%c ", "% c",
+               " %c", "%c ",
                "\t%c", "\n%c", "%4c",
                "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
@@ -93,19 +84,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -118,18 +97,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -141,19 +108,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -168,19 +123,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -193,18 +136,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -216,19 +147,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -243,19 +162,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -268,18 +175,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -291,19 +186,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -318,19 +201,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -343,18 +214,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -366,19 +225,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -388,18 +235,9 @@ bool(false)
 
 -- iteration 5 --
 NULL
-NULL
 array(1) {
   [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -412,18 +250,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -435,19 +261,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -462,19 +276,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -487,18 +289,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -510,19 +300,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
 }
 array(1) {
   [0]=>
@@ -531,40 +309,10 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-bool(false)
-
--- iteration 8 --
-NULL
 NULL
 array(1) {
   [0]=>
   string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
 }
 array(1) {
   [0]=>
@@ -577,18 +325,6 @@ array(1) {
 array(1) {
   [0]=>
   string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(1) "\"
-}
-array(1) {
-  [0]=>
-  string(1) "s"
 }
 array(1) {
   [0]=>
@@ -600,19 +336,43 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
   string(1) "f"
 }
 array(1) {
   [0]=>
-  string(1) "T"
+  string(1) "n"
+}
+bool(false)
+
+-- iteration 8 --
+NULL
+array(1) {
+  [0]=>
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  string(1) "N"
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(1) ""
+}
+array(1) {
+  [0]=>
+  string(1) "\"
+}
+array(1) {
+  [0]=>
+  string(1) "s"
+}
+array(1) {
+  [0]=>
+  string(1) "t"
+}
+array(1) {
+  [0]=>
+  string(1) "f"
 }
 array(1) {
   [0]=>
@@ -621,11 +381,9 @@ array(1) {
 bool(false)
 
 -- iteration 9 --
-NULL
-NULL
 array(1) {
   [0]=>
-  string(1) "0"
+  string(0) ""
 }
 array(1) {
   [0]=>
@@ -637,55 +395,27 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
   string(1) ""
 }
 array(1) {
   [0]=>
-  string(1) "\"
+  string(3) "\01"
 }
 array(1) {
   [0]=>
-  string(1) ""
+  string(4) "stri"
 }
 array(1) {
   [0]=>
-  string(1) "\"
+  string(4) "true"
 }
 array(1) {
   [0]=>
-  string(1) "s"
+  string(4) "fals"
 }
 array(1) {
   [0]=>
-  string(1) "s"
-}
-array(1) {
-  [0]=>
-  string(1) "t"
-}
-array(1) {
-  [0]=>
-  string(1) "F"
-}
-array(1) {
-  [0]=>
-  string(1) "f"
-}
-array(1) {
-  [0]=>
-  string(1) "T"
-}
-array(1) {
-  [0]=>
-  string(1) "N"
-}
-array(1) {
-  [0]=>
-  string(1) "n"
+  string(4) "null"
 }
 bool(false)
 
@@ -696,31 +426,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
   string(1) "0"
 }
 array(1) {
   [0]=>
   string(1) "1"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(4) "\x01"
 }
 array(1) {
   [0]=>
@@ -732,11 +442,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(4) "stri"
-}
-array(1) {
-  [0]=>
-  string(4) "stri"
+  string(6) "string"
 }
 array(1) {
   [0]=>
@@ -744,19 +450,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(4) "FALS"
-}
-array(1) {
-  [0]=>
-  string(4) "fals"
-}
-array(1) {
-  [0]=>
-  string(4) "TRUE"
-}
-array(1) {
-  [0]=>
-  string(4) "NULL"
+  string(5) "false"
 }
 array(1) {
   [0]=>
@@ -767,15 +461,7 @@ bool(false)
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
-  string(1) "0"
+  NULL
 }
 array(1) {
   [0]=>
@@ -787,27 +473,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  NULL
 }
 array(1) {
   [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(4) "\x01"
-}
-array(1) {
-  [0]=>
-  string(1) ""
-}
-array(1) {
-  [0]=>
-  string(3) "\01"
-}
-array(1) {
-  [0]=>
-  string(6) "string"
+  NULL
 }
 array(1) {
   [0]=>
@@ -819,19 +489,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(5) "FALSE"
-}
-array(1) {
-  [0]=>
   string(5) "false"
-}
-array(1) {
-  [0]=>
-  string(4) "TRUE"
-}
-array(1) {
-  [0]=>
-  string(4) "NULL"
 }
 array(1) {
   [0]=>
@@ -840,99 +498,6 @@ array(1) {
 bool(false)
 
 -- iteration 12 --
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  string(6) "string"
-}
-array(1) {
-  [0]=>
-  string(6) "string"
-}
-array(1) {
-  [0]=>
-  string(4) "true"
-}
-array(1) {
-  [0]=>
-  string(5) "FALSE"
-}
-array(1) {
-  [0]=>
-  string(5) "false"
-}
-array(1) {
-  [0]=>
-  string(4) "TRUE"
-}
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-array(1) {
-  [0]=>
-  string(4) "null"
-}
-bool(false)
-
--- iteration 13 --
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
 array(0) {
 }
 array(0) {

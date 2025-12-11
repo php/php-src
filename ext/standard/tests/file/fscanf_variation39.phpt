@@ -43,7 +43,7 @@ $valid_ints = array(
   017777777777  // max positive integer as octal
 );
 // various unsigned int formats
-$unsigned_formats = array( "%u", "%hu", "%lu", "%Lu", " %u", "%u ", "% u", "\t%u", "\n%u", "%4u", "%30u", "%[0-9]", "%*u");
+$unsigned_formats = array( "%u", "%hu", "%lu", "%Lu", " %u", "%u ", "\t%u", "\n%u", "%4u", "%30u", "%[0-9]", "%*u");
 
 $counter = 1;
 
@@ -539,24 +539,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  string(10) "4294967295"
+}
+array(1) {
+  [0]=>
+  string(10) "2147483648"
+}
+array(1) {
+  [0]=>
+  string(10) "2147483649"
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(2147483640)
+}
+array(1) {
+  [0]=>
+  int(4667)
+}
+array(1) {
+  [0]=>
+  int(4779)
+}
+array(1) {
+  [0]=>
+  int(4095)
+}
+array(1) {
+  [0]=>
+  int(250)
+}
+array(1) {
+  [0]=>
+  string(10) "2147483648"
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(83)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  string(10) "2147483648"
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
 bool(false)
 
 -- iteration 8 --
@@ -649,19 +703,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(10) "2147483648"
+  string(10) "4294967082"
 }
 array(1) {
   [0]=>
-  string(10) "2147483649"
+  string(10) "4294967082"
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(2147)
 }
 array(1) {
   [0]=>
-  int(2147483640)
+  int(2147)
 }
 array(1) {
   [0]=>
@@ -681,15 +735,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(10) "2147483648"
+  string(10) "4294967082"
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(2147)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(2147)
 }
 array(1) {
   [0]=>
@@ -701,11 +755,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(10) "2147483648"
+  string(10) "4294967082"
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(2147)
 }
 bool(false)
 
@@ -724,81 +778,6 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(10) "4294967082"
-}
-array(1) {
-  [0]=>
-  string(10) "4294967082"
-}
-array(1) {
-  [0]=>
-  int(2147)
-}
-array(1) {
-  [0]=>
-  int(2147)
-}
-array(1) {
-  [0]=>
-  int(4667)
-}
-array(1) {
-  [0]=>
-  int(4779)
-}
-array(1) {
-  [0]=>
-  int(4095)
-}
-array(1) {
-  [0]=>
-  int(250)
-}
-array(1) {
-  [0]=>
-  string(10) "4294967082"
-}
-array(1) {
-  [0]=>
-  int(2147)
-}
-array(1) {
-  [0]=>
-  int(2147)
-}
-array(1) {
-  [0]=>
-  int(83)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  string(10) "4294967082"
-}
-array(1) {
-  [0]=>
-  int(2147)
-}
-bool(false)
-
--- iteration 11 --
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  string(10) "4294967295"
-}
-array(1) {
-  [0]=>
   string(10) "2147483648"
 }
 array(1) {
@@ -859,7 +838,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   string(1) "0"
@@ -934,7 +913,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

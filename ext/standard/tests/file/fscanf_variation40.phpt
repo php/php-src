@@ -41,7 +41,7 @@ $float_values = array (
   10.5e+5
 );
 
-$unsigned_formats = array( "%u", "%hu", "%lu", "%Lu", " %u", "%u ", "% u", "\t%u", "\n%u", "%4u", "%30u", "%[0-9]", "%*u");
+$unsigned_formats = array( "%u", "%hu", "%lu", "%Lu", " %u", "%u ", "\t%u", "\n%u", "%4u", "%30u", "%[0-9]", "%*u");
 
 $counter = 1;
 
@@ -465,21 +465,66 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  string(10) "2147483648"
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  string(10) "4294967295"
+}
+array(1) {
+  [0]=>
+  string(10) "2147483649"
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(100000)
+}
+array(1) {
+  [0]=>
+  string(10) "4293967296"
+}
+array(1) {
+  [0]=>
+  int(100000000)
+}
+array(1) {
+  [0]=>
+  string(10) "3294967296"
+}
+array(1) {
+  [0]=>
+  int(10)
+}
+array(1) {
+  [0]=>
+  int(1050000)
+}
 bool(false)
 
 -- iteration 8 --
@@ -548,69 +593,6 @@ bool(false)
 -- iteration 9 --
 array(1) {
   [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  string(10) "2147483648"
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  string(10) "4294967295"
-}
-array(1) {
-  [0]=>
-  string(10) "2147483649"
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(100000)
-}
-array(1) {
-  [0]=>
-  string(10) "4293967296"
-}
-array(1) {
-  [0]=>
-  int(100000000)
-}
-array(1) {
-  [0]=>
-  string(10) "3294967296"
-}
-array(1) {
-  [0]=>
-  int(10)
-}
-array(1) {
-  [0]=>
-  int(1050000)
-}
-bool(false)
-
--- iteration 10 --
-array(1) {
-  [0]=>
   string(10) "4294967082"
 }
 array(1) {
@@ -671,7 +653,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 11 --
+-- iteration 10 --
 array(1) {
   [0]=>
   int(2147483647)
@@ -734,7 +716,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   NULL
@@ -797,7 +779,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

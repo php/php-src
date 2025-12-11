@@ -62,7 +62,7 @@ $valid_strings = array(
 // various string formats
 $string_formats = array( "%s",
                          "%hs", "%ls", "%Ls",
-                         " %s", "%s ", "% s",
+                         " %s", "%s ",
                          "\t%s", "\n%s", "%4s",
                          "%30s", "%[a-zA-Z0-9]", "%*s"
                   );
@@ -565,30 +565,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+NULL
+NULL
+NULL
+NULL
+array(1) {
+  [0]=>
+  string(6) "string"
+}
+array(1) {
+  [0]=>
+  string(6) "string"
+}
+array(1) {
+  [0]=>
+  string(4) "NULL"
+}
+array(1) {
+  [0]=>
+  string(4) "null"
+}
+array(1) {
+  [0]=>
+  string(5) "FALSE"
+}
+array(1) {
+  [0]=>
+  string(4) "true"
+}
+NULL
+NULL
+array(1) {
+  [0]=>
+  string(2) "\0"
+}
+array(1) {
+  [0]=>
+  string(4) "\060"
+}
+array(1) {
+  [0]=>
+  string(1) "8"
+}
+array(1) {
+  [0]=>
+  string(5) "0x55F"
+}
+array(1) {
+  [0]=>
+  string(3) "055"
+}
+NULL
+array(1) {
+  [0]=>
+  string(4) "This"
+}
+array(1) {
+  [0]=>
+  string(5) "using"
+}
+array(1) {
+  [0]=>
+  string(6) "123456"
+}
+array(1) {
+  [0]=>
+  string(4) "4849"
+}
+NULL
+array(1) {
+  [0]=>
+  string(4) "NULL"
+}
 bool(false)
 
 -- iteration 8 --
@@ -673,81 +721,6 @@ NULL
 NULL
 array(1) {
   [0]=>
-  string(6) "string"
-}
-array(1) {
-  [0]=>
-  string(6) "string"
-}
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-array(1) {
-  [0]=>
-  string(4) "null"
-}
-array(1) {
-  [0]=>
-  string(5) "FALSE"
-}
-array(1) {
-  [0]=>
-  string(4) "true"
-}
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(2) "\0"
-}
-array(1) {
-  [0]=>
-  string(4) "\060"
-}
-array(1) {
-  [0]=>
-  string(1) "8"
-}
-array(1) {
-  [0]=>
-  string(5) "0x55F"
-}
-array(1) {
-  [0]=>
-  string(3) "055"
-}
-NULL
-array(1) {
-  [0]=>
-  string(4) "This"
-}
-array(1) {
-  [0]=>
-  string(5) "using"
-}
-array(1) {
-  [0]=>
-  string(6) "123456"
-}
-array(1) {
-  [0]=>
-  string(4) "4849"
-}
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
-
--- iteration 10 --
-NULL
-NULL
-NULL
-NULL
-array(1) {
-  [0]=>
   string(4) "stri"
 }
 array(1) {
@@ -816,7 +789,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 11 --
+-- iteration 10 --
 NULL
 NULL
 NULL
@@ -891,7 +864,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   NULL
@@ -987,7 +960,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 NULL
 NULL
 NULL

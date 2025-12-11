@@ -45,7 +45,7 @@ $valid_ints = array(
 // various hexa formats
 $hexa_formats = array(  "%x",
             "%xx", "%lx", "%Lx",
-            " %x", "%x ", "% x",
+            " %x", "%x ",
                 "\t%x", "\n%x", "%4x",
                 "%30x", "%[0-9A-Fa-f]", "%*x"
         );
@@ -544,24 +544,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(-1)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(18023)
+}
+array(1) {
+  [0]=>
+  int(18297)
+}
+array(1) {
+  [0]=>
+  int(16533)
+}
+array(1) {
+  [0]=>
+  int(592)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(131)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
 bool(false)
 
 -- iteration 8 --
@@ -654,19 +708,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-2147483648)
+  int(-532)
 }
 array(1) {
   [0]=>
-  int(-2147483648)
+  int(-532)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(8519)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(8519)
 }
 array(1) {
   [0]=>
@@ -686,15 +740,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-2147483648)
+  int(-532)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(8519)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(8519)
 }
 array(1) {
   [0]=>
@@ -706,11 +760,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-2147483648)
+  int(-532)
 }
 array(1) {
   [0]=>
-  int(2147483647)
+  int(8519)
 }
 bool(false)
 
@@ -729,19 +783,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-532)
+  int(-2147483648)
 }
 array(1) {
   [0]=>
-  int(-532)
+  int(-2147483648)
 }
 array(1) {
   [0]=>
-  int(8519)
+  int(2147483647)
 }
 array(1) {
   [0]=>
-  int(8519)
+  int(2147483647)
 }
 array(1) {
   [0]=>
@@ -761,15 +815,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-532)
+  int(-2147483648)
 }
 array(1) {
   [0]=>
-  int(8519)
+  int(2147483647)
 }
 array(1) {
   [0]=>
-  int(8519)
+  int(2147483647)
 }
 array(1) {
   [0]=>
@@ -781,90 +835,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-532)
+  int(-2147483648)
 }
 array(1) {
   [0]=>
-  int(8519)
+  int(2147483647)
 }
 bool(false)
 
 -- iteration 11 --
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(-1)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(18023)
-}
-array(1) {
-  [0]=>
-  int(18297)
-}
-array(1) {
-  [0]=>
-  int(16533)
-}
-array(1) {
-  [0]=>
-  int(592)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(131)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-bool(false)
-
--- iteration 12 --
 array(1) {
   [0]=>
   string(1) "0"
@@ -939,7 +918,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

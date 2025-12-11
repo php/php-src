@@ -39,7 +39,7 @@ $valid_ints = array(
 // various char formats
 $char_formats = array( "%c",
                "%hc", "%lc", "%Lc",
-               " %c", "%c ", "% c",
+               " %c", "%c ",
                "\t%c", "\n%c", "%4c",
                "%30c", "%[a-bA-B@#$&]", "%*c");
 
@@ -537,24 +537,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
+array(1) {
+  [0]=>
+  string(1) "4"
+}
+array(1) {
+  [0]=>
+  string(1) "4"
+}
+array(1) {
+  [0]=>
+  string(1) "4"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
+array(1) {
+  [0]=>
+  string(1) "8"
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "2"
+}
 bool(false)
 
 -- iteration 8 --
@@ -643,81 +697,6 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "-"
-}
-array(1) {
-  [0]=>
-  string(1) "-"
-}
-array(1) {
-  [0]=>
-  string(1) "-"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-array(1) {
-  [0]=>
-  string(1) "4"
-}
-array(1) {
-  [0]=>
-  string(1) "4"
-}
-array(1) {
-  [0]=>
-  string(1) "4"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-array(1) {
-  [0]=>
-  string(1) "-"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-array(1) {
-  [0]=>
-  string(1) "8"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
-  string(1) "-"
-}
-array(1) {
-  [0]=>
-  string(1) "2"
-}
-bool(false)
-
--- iteration 10 --
-array(1) {
-  [0]=>
-  string(1) "0"
-}
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
   string(2) "-1"
 }
 array(1) {
@@ -782,7 +761,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 11 --
+-- iteration 10 --
 array(1) {
   [0]=>
   string(1) "0"
@@ -857,7 +836,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   NULL
@@ -932,7 +911,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

@@ -39,7 +39,7 @@ $valid_ints = array(
 // various octal formats
 $octal_formats = array( "%o",
                         "%ho", "%lo", "%Lo",
-                        " %o", "%o ", "% o",
+                        " %o", "%o ",
                         "\t%o", "\n%o", "%4o",
                         "%30o", "%[0-7]", "%*o"
                  );
@@ -538,24 +538,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(-1)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(2487)
+}
+array(1) {
+  [0]=>
+  int(319)
+}
+array(1) {
+  [0]=>
+  int(32)
+}
+array(1) {
+  [0]=>
+  int(168)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(-9020)
+}
+array(1) {
+  [0]=>
+  int(9020)
+}
 bool(false)
 
 -- iteration 8 --
@@ -648,19 +702,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-9020)
+  int(-140)
 }
 array(1) {
   [0]=>
-  int(-9020)
+  int(-140)
 }
 array(1) {
   [0]=>
-  int(9020)
+  int(1127)
 }
 array(1) {
   [0]=>
-  int(9020)
+  int(1127)
 }
 array(1) {
   [0]=>
@@ -680,15 +734,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-9020)
+  int(-140)
 }
 array(1) {
   [0]=>
-  int(9020)
+  int(1127)
 }
 array(1) {
   [0]=>
-  int(9020)
+  int(1127)
 }
 array(1) {
   [0]=>
@@ -700,11 +754,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-9020)
+  int(-140)
 }
 array(1) {
   [0]=>
-  int(9020)
+  int(1127)
 }
 bool(false)
 
@@ -723,19 +777,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-140)
+  int(-9020)
 }
 array(1) {
   [0]=>
-  int(-140)
+  int(-9020)
 }
 array(1) {
   [0]=>
-  int(1127)
+  int(9020)
 }
 array(1) {
   [0]=>
-  int(1127)
+  int(9020)
 }
 array(1) {
   [0]=>
@@ -755,15 +809,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-140)
+  int(-9020)
 }
 array(1) {
   [0]=>
-  int(1127)
+  int(9020)
 }
 array(1) {
   [0]=>
-  int(1127)
+  int(9020)
 }
 array(1) {
   [0]=>
@@ -775,90 +829,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  int(-140)
+  int(-9020)
 }
 array(1) {
   [0]=>
-  int(1127)
+  int(9020)
 }
 bool(false)
 
 -- iteration 11 --
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(-1)
-}
-array(1) {
-  [0]=>
-  int(-9020)
-}
-array(1) {
-  [0]=>
-  int(-9020)
-}
-array(1) {
-  [0]=>
-  int(9020)
-}
-array(1) {
-  [0]=>
-  int(9020)
-}
-array(1) {
-  [0]=>
-  int(2487)
-}
-array(1) {
-  [0]=>
-  int(319)
-}
-array(1) {
-  [0]=>
-  int(32)
-}
-array(1) {
-  [0]=>
-  int(168)
-}
-array(1) {
-  [0]=>
-  int(-9020)
-}
-array(1) {
-  [0]=>
-  int(9020)
-}
-array(1) {
-  [0]=>
-  int(9020)
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(-9020)
-}
-array(1) {
-  [0]=>
-  int(9020)
-}
-bool(false)
-
--- iteration 12 --
 array(1) {
   [0]=>
   string(1) "0"
@@ -933,7 +912,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

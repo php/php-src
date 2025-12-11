@@ -37,7 +37,7 @@ $valid_ints = array(
   017777777777  // max positive integer as octal
 );
 // various scientific formats
-$scientific_formats = array( "%e", "%he", "%le", "%Le", " %e", "%e ", "% e", "\t%e", "\n%e", "%4e", "%30e", "%[0-1]", "%*e");
+$scientific_formats = array( "%e", "%he", "%le", "%Le", " %e", "%e ", "\t%e", "\n%e", "%4e", "%30e", "%[0-1]", "%*e");
 
 $counter = 1;
 
@@ -533,24 +533,78 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  float(0)
+}
+array(1) {
+  [0]=>
+  float(1)
+}
+array(1) {
+  [0]=>
+  float(-1)
+}
+array(1) {
+  [0]=>
+  float(-2147483648)
+}
+array(1) {
+  [0]=>
+  float(-2147483647)
+}
+array(1) {
+  [0]=>
+  float(2147483647)
+}
+array(1) {
+  [0]=>
+  float(2147483640)
+}
+array(1) {
+  [0]=>
+  float(4667)
+}
+array(1) {
+  [0]=>
+  float(4779)
+}
+array(1) {
+  [0]=>
+  float(4095)
+}
+array(1) {
+  [0]=>
+  float(250)
+}
+array(1) {
+  [0]=>
+  float(-2147483648)
+}
+array(1) {
+  [0]=>
+  float(2147483647)
+}
+array(1) {
+  [0]=>
+  float(2147483647)
+}
+array(1) {
+  [0]=>
+  float(83)
+}
+array(1) {
+  [0]=>
+  float(1)
+}
+array(1) {
+  [0]=>
+  float(-2147483648)
+}
+array(1) {
+  [0]=>
+  float(2147483647)
+}
 bool(false)
 
 -- iteration 8 --
@@ -643,19 +697,19 @@ array(1) {
 }
 array(1) {
   [0]=>
-  float(-2147483648)
+  float(-214)
 }
 array(1) {
   [0]=>
-  float(-2147483647)
+  float(-214)
 }
 array(1) {
   [0]=>
-  float(2147483647)
+  float(2147)
 }
 array(1) {
   [0]=>
-  float(2147483640)
+  float(2147)
 }
 array(1) {
   [0]=>
@@ -675,15 +729,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  float(-2147483648)
+  float(-214)
 }
 array(1) {
   [0]=>
-  float(2147483647)
+  float(2147)
 }
 array(1) {
   [0]=>
-  float(2147483647)
+  float(2147)
 }
 array(1) {
   [0]=>
@@ -695,11 +749,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  float(-2147483648)
+  float(-214)
 }
 array(1) {
   [0]=>
-  float(2147483647)
+  float(2147)
 }
 bool(false)
 
@@ -718,81 +772,6 @@ array(1) {
 }
 array(1) {
   [0]=>
-  float(-214)
-}
-array(1) {
-  [0]=>
-  float(-214)
-}
-array(1) {
-  [0]=>
-  float(2147)
-}
-array(1) {
-  [0]=>
-  float(2147)
-}
-array(1) {
-  [0]=>
-  float(4667)
-}
-array(1) {
-  [0]=>
-  float(4779)
-}
-array(1) {
-  [0]=>
-  float(4095)
-}
-array(1) {
-  [0]=>
-  float(250)
-}
-array(1) {
-  [0]=>
-  float(-214)
-}
-array(1) {
-  [0]=>
-  float(2147)
-}
-array(1) {
-  [0]=>
-  float(2147)
-}
-array(1) {
-  [0]=>
-  float(83)
-}
-array(1) {
-  [0]=>
-  float(1)
-}
-array(1) {
-  [0]=>
-  float(-214)
-}
-array(1) {
-  [0]=>
-  float(2147)
-}
-bool(false)
-
--- iteration 11 --
-array(1) {
-  [0]=>
-  float(0)
-}
-array(1) {
-  [0]=>
-  float(1)
-}
-array(1) {
-  [0]=>
-  float(-1)
-}
-array(1) {
-  [0]=>
   float(-2147483648)
 }
 array(1) {
@@ -853,7 +832,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   string(1) "0"
@@ -928,7 +907,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

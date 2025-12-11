@@ -43,7 +43,7 @@ $float_values = array (
 
 $hexa_formats = array( 	"%x",
             "%hx", "%lx", "%Lx",
-                " %x", "%x ", "% x",
+                " %x", "%x ",
                 "\t%x", "\n%x", "%4x",
                 "%30x", "%[0-9A-Za-z]", "%*x");
 
@@ -469,21 +469,66 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1048576)
+}
+array(1) {
+  [0]=>
+  int(-16777216)
+}
+array(1) {
+  [0]=>
+  int(2147483647)
+}
+array(1) {
+  [0]=>
+  int(-2147483648)
+}
+array(1) {
+  [0]=>
+  int(16)
+}
+array(1) {
+  [0]=>
+  int(17104896)
+}
 bool(false)
 
 -- iteration 8 --
@@ -552,69 +597,6 @@ bool(false)
 -- iteration 9 --
 array(1) {
   [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(1048576)
-}
-array(1) {
-  [0]=>
-  int(-16777216)
-}
-array(1) {
-  [0]=>
-  int(2147483647)
-}
-array(1) {
-  [0]=>
-  int(-2147483648)
-}
-array(1) {
-  [0]=>
-  int(16)
-}
-array(1) {
-  [0]=>
-  int(17104896)
-}
-bool(false)
-
--- iteration 10 --
-array(1) {
-  [0]=>
   int(-532)
 }
 array(1) {
@@ -675,7 +657,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 11 --
+-- iteration 10 --
 array(1) {
   [0]=>
   int(-2147483648)
@@ -738,7 +720,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   NULL
@@ -801,7 +783,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

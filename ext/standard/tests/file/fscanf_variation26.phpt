@@ -20,7 +20,7 @@ $char_types = array( 'a', "a", 67, -67, 99 );
 
 $char_formats = array( "%c",
                "%hc", "%lc", "%Lc",
-               " %c", "%c ", "% c",
+               " %c", "%c ",
                "\t%c", "\n%c", "%4c",
                "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
@@ -206,11 +206,26 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+array(1) {
+  [0]=>
+  string(1) "6"
+}
+array(1) {
+  [0]=>
+  string(1) "-"
+}
+array(1) {
+  [0]=>
+  string(1) "9"
+}
 bool(false)
 
 -- iteration 8 --
@@ -247,15 +262,15 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) "6"
+  string(2) "67"
 }
 array(1) {
   [0]=>
-  string(1) "-"
+  string(3) "-67"
 }
 array(1) {
   [0]=>
-  string(1) "9"
+  string(2) "99"
 }
 bool(false)
 
@@ -297,29 +312,6 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(3) "-67"
-}
-array(1) {
-  [0]=>
-  string(2) "99"
-}
-bool(false)
-
--- iteration 12 --
-array(1) {
-  [0]=>
-  string(1) "a"
-}
-array(1) {
-  [0]=>
-  string(1) "a"
-}
-array(1) {
-  [0]=>
-  string(2) "67"
-}
-array(1) {
-  [0]=>
   NULL
 }
 array(1) {
@@ -328,7 +320,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {

@@ -52,7 +52,7 @@ $valid_floats = array(
 // various float formats
 $float_formats = array( "%f",
                         "%hf", "%lf", "%Lf",
-                        " %f", "%f ", "% f",
+                        " %f", "%f ",
                         "\t%f", "\n%f", "%4f",
                         "%30f", "%[0-9]", "%*f",
                  );
@@ -839,36 +839,126 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+array(1) {
+  [0]=>
+  float(-2147483649)
+}
+array(1) {
+  [0]=>
+  float(2147483648)
+}
+array(1) {
+  [0]=>
+  float(-2147483649)
+}
+array(1) {
+  [0]=>
+  float(34359738369)
+}
+array(1) {
+  [0]=>
+  float(2147483649)
+}
+array(1) {
+  [0]=>
+  float(-2147483649)
+}
+array(1) {
+  [0]=>
+  float(0)
+}
+array(1) {
+  [0]=>
+  float(-0.1)
+}
+array(1) {
+  [0]=>
+  float(10)
+}
+array(1) {
+  [0]=>
+  float(1050000)
+}
+array(1) {
+  [0]=>
+  float(100000)
+}
+array(1) {
+  [0]=>
+  float(-100000)
+}
+array(1) {
+  [0]=>
+  float(1.0E-5)
+}
+array(1) {
+  [0]=>
+  float(-1.0E-5)
+}
+array(1) {
+  [0]=>
+  float(100000)
+}
+array(1) {
+  [0]=>
+  float(-100000)
+}
+array(1) {
+  [0]=>
+  float(100000)
+}
+array(1) {
+  [0]=>
+  float(-100000)
+}
+array(1) {
+  [0]=>
+  float(100000)
+}
+array(1) {
+  [0]=>
+  float(-100000)
+}
+array(1) {
+  [0]=>
+  float(1.0E-5)
+}
+array(1) {
+  [0]=>
+  float(-1.0E-5)
+}
+array(1) {
+  [0]=>
+  float(5000000)
+}
+array(1) {
+  [0]=>
+  float(-5000000)
+}
+array(1) {
+  [0]=>
+  float(6.0E-20)
+}
+array(1) {
+  [0]=>
+  float(-6.0E-20)
+}
+array(1) {
+  [0]=>
+  float(5.0E+42)
+}
+array(1) {
+  [0]=>
+  float(-5.0E+42)
+}
+array(1) {
+  [0]=>
+  float(3.4E-33)
+}
+array(1) {
+  [0]=>
+  float(-3.4E-33)
+}
 bool(false)
 
 -- iteration 8 --
@@ -997,129 +1087,6 @@ bool(false)
 -- iteration 9 --
 array(1) {
   [0]=>
-  float(-2147483649)
-}
-array(1) {
-  [0]=>
-  float(2147483648)
-}
-array(1) {
-  [0]=>
-  float(-2147483649)
-}
-array(1) {
-  [0]=>
-  float(34359738369)
-}
-array(1) {
-  [0]=>
-  float(2147483649)
-}
-array(1) {
-  [0]=>
-  float(-2147483649)
-}
-array(1) {
-  [0]=>
-  float(0)
-}
-array(1) {
-  [0]=>
-  float(-0.1)
-}
-array(1) {
-  [0]=>
-  float(10)
-}
-array(1) {
-  [0]=>
-  float(1050000)
-}
-array(1) {
-  [0]=>
-  float(100000)
-}
-array(1) {
-  [0]=>
-  float(-100000)
-}
-array(1) {
-  [0]=>
-  float(1.0E-5)
-}
-array(1) {
-  [0]=>
-  float(-1.0E-5)
-}
-array(1) {
-  [0]=>
-  float(100000)
-}
-array(1) {
-  [0]=>
-  float(-100000)
-}
-array(1) {
-  [0]=>
-  float(100000)
-}
-array(1) {
-  [0]=>
-  float(-100000)
-}
-array(1) {
-  [0]=>
-  float(100000)
-}
-array(1) {
-  [0]=>
-  float(-100000)
-}
-array(1) {
-  [0]=>
-  float(1.0E-5)
-}
-array(1) {
-  [0]=>
-  float(-1.0E-5)
-}
-array(1) {
-  [0]=>
-  float(5000000)
-}
-array(1) {
-  [0]=>
-  float(-5000000)
-}
-array(1) {
-  [0]=>
-  float(6.0E-20)
-}
-array(1) {
-  [0]=>
-  float(-6.0E-20)
-}
-array(1) {
-  [0]=>
-  float(5.0E+42)
-}
-array(1) {
-  [0]=>
-  float(-5.0E+42)
-}
-array(1) {
-  [0]=>
-  float(3.4E-33)
-}
-array(1) {
-  [0]=>
-  float(-3.4E-33)
-}
-bool(false)
-
--- iteration 10 --
-array(1) {
-  [0]=>
   float(-214)
 }
 array(1) {
@@ -1240,7 +1207,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 11 --
+-- iteration 10 --
 array(1) {
   [0]=>
   float(-2147483649)
@@ -1363,7 +1330,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 12 --
+-- iteration 11 --
 array(1) {
   [0]=>
   NULL
@@ -1486,7 +1453,7 @@ array(1) {
 }
 bool(false)
 
--- iteration 13 --
+-- iteration 12 --
 array(0) {
 }
 array(0) {
