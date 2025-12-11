@@ -27,19 +27,10 @@ $heredoc_numeric_string = <<<EOT
 123456 3993
 4849 string
 EOT;
-/* null heardoc string */
-$heredoc_empty_string = <<<EOT
-EOT;
-$heredoc_null_string = <<<EOT
-NULL
-EOT;
 
 $valid_strings = array(
-  "",
-  " ",
   '',
   ' ',
-  "string",
   'string',
   "NULL",
   'null',
@@ -55,8 +46,6 @@ $valid_strings = array(
   "@#$#$%%$^^$%^%^$^&",
   $heredoc_string,
   $heredoc_numeric_string,
-  $heredoc_empty_string,
-  $heredoc_null_string
 );
 
 // various string formats
@@ -69,15 +58,9 @@ $string_formats = array( "%s",
 
 $counter = 1;
 
-// writing to the file
-foreach($valid_strings as $string) {
-    try {
-        fprintf($file_handle, $string);
-    } catch (\ValueError $e) {
-    } catch (\ArgumentCountError $e) {
-    }
-  fprintf($file_handle, "\n");
-}
+$string = implode("\n", $valid_strings);
+fwrite($file_handle, $string);
+
 // closing the file
 fclose($file_handle);
 
@@ -117,12 +100,6 @@ unlink($filename);
 -- iteration 1 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -165,7 +142,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -182,22 +162,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 2 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -240,7 +208,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -257,22 +228,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 3 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -315,7 +274,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -332,22 +294,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 4 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -390,7 +340,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -407,22 +360,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 5 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -465,7 +406,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -482,22 +426,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 6 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -540,7 +472,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -557,22 +492,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 7 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -615,7 +538,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -632,22 +558,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 8 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -690,7 +604,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -707,22 +624,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 9 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(4) "stri"
-}
 array(1) {
   [0]=>
   string(4) "stri"
@@ -765,7 +670,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(4) "@#$#"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -782,22 +690,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 10 --
 NULL
 NULL
-NULL
-NULL
-array(1) {
-  [0]=>
-  string(6) "string"
-}
 array(1) {
   [0]=>
   string(6) "string"
@@ -840,7 +736,10 @@ array(1) {
   [0]=>
   string(3) "055"
 }
-NULL
+array(1) {
+  [0]=>
+  string(18) "@#$#$%%$^^$%^%^$^&"
+}
 array(1) {
   [0]=>
   string(4) "This"
@@ -857,12 +756,6 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-NULL
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 11 --
 array(1) {
@@ -872,18 +765,6 @@ array(1) {
 array(1) {
   [0]=>
   NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  string(6) "string"
 }
 array(1) {
   [0]=>
@@ -950,23 +831,10 @@ array(1) {
   [0]=>
   string(4) "4849"
 }
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  string(4) "NULL"
-}
-bool(false)
 
 -- iteration 12 --
 NULL
 NULL
-NULL
-NULL
-array(0) {
-}
 array(0) {
 }
 array(0) {
@@ -989,7 +857,6 @@ array(0) {
 }
 array(0) {
 }
-NULL
 array(0) {
 }
 array(0) {
@@ -998,9 +865,7 @@ array(0) {
 }
 array(0) {
 }
-NULL
 array(0) {
 }
-bool(false)
 
 *** Done ***
