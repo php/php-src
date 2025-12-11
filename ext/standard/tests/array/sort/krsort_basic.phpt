@@ -9,6 +9,7 @@ Test krsort() function : basic functionality
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
+ *  5.SORT_STRICT - compare items by type first, then by value
 */
 
 echo "*** Testing krsort() : basic functionality ***\n";
@@ -66,6 +67,21 @@ var_dump( $temp_array);
 echo "\n-- Testing krsort() by supplying numeric array, 'flag' = SORT_NUMERIC --\n";
 $temp_array = $unsorted_numerics;
 var_dump( krsort($temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing krsort() by supplying mixed key array, 'flag' = SORT_STRICT --\n";
+$mixed_keys = array( 1 => "int1", "1a" => "str1a", 2 => "int2", "2b" => "str2b" );
+var_dump( krsort($mixed_keys, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $mixed_keys);
+
+echo "\n-- Testing krsort() by supplying string array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_strings;
+var_dump( krsort($temp_array, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing krsort() by supplying numeric array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_numerics;
+var_dump( krsort($temp_array, SORT_STRICT) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
@@ -226,6 +242,53 @@ array(8) {
 }
 
 -- Testing krsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [555]=>
+  int(2)
+  [100]=>
+  int(4)
+  [33]=>
+  int(3)
+  [22]=>
+  int(1)
+}
+
+-- Testing krsort() by supplying mixed key array, 'flag' = SORT_STRICT --
+bool(true)
+array(4) {
+  ["2b"]=>
+  string(5) "str2b"
+  ["1a"]=>
+  string(5) "str1a"
+  [2]=>
+  string(4) "int2"
+  [1]=>
+  string(4) "int1"
+}
+
+-- Testing krsort() by supplying string array, 'flag' = SORT_STRICT --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing krsort() by supplying numeric array, 'flag' = SORT_STRICT --
 bool(true)
 array(4) {
   [555]=>
