@@ -6402,6 +6402,8 @@ static zend_string* mb_mime_header_decode(zend_string *input, const mbfl_encodin
 						/* We will only actually output a space if this is not immediately followed
 						 * by another valid encoded word */
 						space_pending = true;
+					} else {
+						space_pending = false;
 					}
 					continue;
 				}
