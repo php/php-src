@@ -580,10 +580,13 @@ AC_CHECK_FUNCS(m4_normalize([
   putenv
   reallocarray
   scandir
+  sendfile
+  sendfilev
   setenv
   setitimer
   shutdown
   sigprocmask
+  splice
   statfs
   statvfs
   std_syslog
@@ -1687,6 +1690,15 @@ PHP_ADD_SOURCES_X([main],
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
   [PHP_FASTCGI_OBJS],
   [no])
+
+PHP_ADD_SOURCES([main/io], m4_normalize([
+    php_io.c
+    php_io_copy_bsd.c
+    php_io_copy_linux.c
+    php_io_copy_macos.c
+    php_io_copy_solaris.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_SOURCES([main/streams], m4_normalize([
     cast.c
