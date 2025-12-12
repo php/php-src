@@ -24,8 +24,10 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_operators.h"
+#include "zend_types.h"
 #include "zend_variables.h"
 #include "zend_constants.h"
+#include "zend_sanitizers.h"
 
 #include <stdint.h>
 
@@ -329,6 +331,7 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
 	page->prev = prev;
+	ZEND_POISON_MEMORY_REGION(page->top, (uintptr_t)page->end - (uintptr_t)page->top);
 	return page;
 }
 
@@ -349,11 +352,13 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 
 	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
+		ZEND_UNPOISON_MEMORY_REGION(call, used_stack);
 		ZEND_ASSERT_VM_STACK_GLOBAL;
 		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, object_or_called_scope);
 		return call;
 	} else {
 		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+		ZEND_UNPOISON_MEMORY_REGION(call, used_stack);
 		zend_vm_init_call_frame(call, call_info, func, num_args, object_or_called_scope);
 		return call;
 	}
@@ -375,6 +380,21 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 
 	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,
 		func, num_args, object_or_called_scope);
+}
+
+static zend_always_inline zend_execute_data *zend_vm_stack_pop_call_frame(zend_execute_data *execute_data)
+{
+#ifdef __SANITIZE_ADDRESS__
+	zend_execute_data *prev_execute_data = execute_data->prev_execute_data;
+
+	ZEND_POISON_MEMORY_REGION(execute_data, (uintptr_t)EG(vm_stack_top) - (uintptr_t)execute_data);
+	EG(vm_stack_top) = (zval*)execute_data;
+
+	return prev_execute_data;
+#else
+	EG(vm_stack_top) = (zval*)execute_data;
+	return execute_data->prev_execute_data;
+#endif
 }
 
 static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_info, zend_execute_data *call)
@@ -422,6 +442,7 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 		EG(vm_stack) = prev;
 		efree(p);
 	} else {
+		ZEND_POISON_MEMORY_REGION(call, (uintptr_t)EG(vm_stack_top) - (uintptr_t)call);
 		EG(vm_stack_top) = (zval*)call;
 	}
 
@@ -440,6 +461,7 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(
 	zend_execute_data **call, uint32_t passed_args, uint32_t additional_args)
 {
 	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
+		ZEND_UNPOISON_MEMORY_REGION(EG(vm_stack_top), additional_args * sizeof(zval));
 		EG(vm_stack_top) += additional_args;
 	} else {
 		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
