@@ -17,14 +17,12 @@
 
 #include <unicode/udat.h>
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "dateformat_class.h"
 #include "dateformat.h"
 
 /* {{{ Get formatter's last error code. */
-U_CFUNC PHP_FUNCTION( datefmt_get_error_code )
+PHP_FUNCTION( datefmt_get_error_code )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -43,7 +41,7 @@ U_CFUNC PHP_FUNCTION( datefmt_get_error_code )
 /* }}} */
 
 /* {{{ Get text description for formatter's last error code. */
-U_CFUNC PHP_FUNCTION( datefmt_get_error_message )
+PHP_FUNCTION( datefmt_get_error_message )
 {
 	zend_string *message = NULL;
 	DATE_FORMAT_METHOD_INIT_VARS;

@@ -20,11 +20,6 @@
 
 #include <php.h>
 
-/* Even if we're included from C++, don't introduce C++ definitions
- * because we were included with extern "C". The effect would be that
- * when the headers defined any method, they would do so with C linkage */
-#undef U_SHOW_CPLUSPLUS_API
-#define U_SHOW_CPLUSPLUS_API 0
 #include "collator/collator_sort.h"
 #include <unicode/ubrk.h>
 #include "intl_error.h"

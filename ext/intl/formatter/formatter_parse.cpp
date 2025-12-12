@@ -16,11 +16,8 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
-
 #include <unicode/ustring.h>
 #include <locale.h>
 
@@ -30,7 +27,7 @@ extern "C" {
 #define ICU_LOCALE_BUG 1
 
 /* {{{ Parse a number. */
-U_CFUNC PHP_FUNCTION( numfmt_parse )
+PHP_FUNCTION( numfmt_parse )
 {
 	zend_long type = FORMAT_TYPE_DOUBLE;
 	UChar* sstr = NULL;
@@ -122,7 +119,7 @@ cleanup:
 /* }}} */
 
 /* {{{ Parse a number as currency. */
-U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
+PHP_FUNCTION( numfmt_parse_currency )
 {
 	double number;
 	UChar currency[5] = {0};

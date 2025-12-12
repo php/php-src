@@ -17,17 +17,11 @@
 #define INTL_COMMON_ENUM_H
 
 #include <unicode/umachine.h>
-#ifdef __cplusplus
 #include <unicode/strenum.h>
-extern "C" {
 #include <math.h>
-#endif
 #include <php.h>
 #include "../intl_error.h"
 #include "../intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 #define INTLITERATOR_ERROR(ii)						(ii)->err
 #define INTLITERATOR_ERROR_P(ii)					&(INTLITERATOR_ERROR(ii))
@@ -67,17 +61,15 @@ typedef struct {
 extern zend_class_entry *IntlIterator_ce_ptr;
 extern zend_object_handlers IntlIterator_handlers;
 
-U_CFUNC void zoi_with_current_dtor(zend_object_iterator *iter);
-U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter);
-U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
-U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter);
-U_CFUNC HashTable *zoi_with_current_get_gc(zend_object_iterator *iter, zval **table, int *n);
+void zoi_with_current_dtor(zend_object_iterator *iter);
+zend_result zoi_with_current_valid(zend_object_iterator *iter);
+zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
+void zoi_with_current_invalidate_current(zend_object_iterator *iter);
+HashTable *zoi_with_current_get_gc(zend_object_iterator *iter, zval **table, int *n);
 
-#ifdef __cplusplus
 using icu::StringEnumeration;
-U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
-#endif
+void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
 
-U_CFUNC void intl_register_common_symbols(int module_number);
+void intl_register_common_symbols(int module_number);
 
 #endif // INTL_COMMON_ENUM_H

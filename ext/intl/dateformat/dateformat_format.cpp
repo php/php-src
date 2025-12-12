@@ -19,11 +19,8 @@
 #include <unicode/ustring.h>
 #include <unicode/unum.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_convert.h"
-}
-
 #include "../common/common_date.h"
 #include "dateformat.h"
 #include "dateformat_class.h"
@@ -139,7 +136,7 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 
 
 /* {{{ Format the time value as a string. */
-U_CFUNC PHP_FUNCTION(datefmt_format)
+PHP_FUNCTION(datefmt_format)
 {
 	UDate 		timestamp	= 0;
 	HashTable	*hash_arr	= NULL;

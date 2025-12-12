@@ -21,7 +21,6 @@
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 
-extern "C" {
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
@@ -29,7 +28,6 @@ extern "C" {
 #include "calendar_arginfo.h"
 #include <zend_exceptions.h>
 #include <assert.h>
-}
 
 using icu::GregorianCalendar;
 using icu::Locale;
@@ -40,7 +38,7 @@ zend_class_entry *GregorianCalendar_ce_ptr;
 zend_object_handlers Calendar_handlers;
 /* }}} */
 
-U_CFUNC	void calendar_object_create(zval *object,
+void calendar_object_create(zval *object,
 									Calendar *calendar)
 {
 	UClassID classId = calendar->getDynamicClassID();
@@ -57,14 +55,14 @@ U_CFUNC	void calendar_object_create(zval *object,
 	calendar_object_construct(object, calendar);
 }
 
-U_CFUNC Calendar *calendar_fetch_native_calendar(zend_object *object)
+Calendar *calendar_fetch_native_calendar(zend_object *object)
 {
 	Calendar_object *co = php_intl_calendar_fetch_object(object);
 
 	return co->ucal;
 }
 
-U_CFUNC void calendar_object_construct(zval *object,
+void calendar_object_construct(zval *object,
 									   Calendar *calendar)
 {
 	Calendar_object *co;

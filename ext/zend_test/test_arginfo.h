@@ -629,39 +629,39 @@ static void register_test_symbols(int module_number)
 
 
 	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_attr_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, true);
-	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_attr_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_attr", sizeof("zend_test_deprecated_attr") - 1), attribute_name_Deprecated_func_zend_test_deprecated_attr_0, 1);
+	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_attr_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_attr", sizeof("zend_test_deprecated_attr") - 1), attribute_name_Deprecated_func_zend_test_deprecated_attr_0, 1);
 	zend_string_release_ex(attribute_name_Deprecated_func_zend_test_deprecated_attr_0, true);
 	zend_string *attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_zend_test_nodiscard_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_zend_test_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_nodiscard", sizeof("zend_test_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_nodiscard_0, 1);
+	zend_attribute *attribute_NoDiscard_func_zend_test_nodiscard_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_nodiscard", sizeof("zend_test_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_nodiscard_0, 1);
 	zend_string_release_ex(attribute_name_NoDiscard_func_zend_test_nodiscard_0, true);
 	ZVAL_STR_COPY(&attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, true);
-	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, 1);
+	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, 1);
 	zend_string_release_ex(attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, true);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1, 1);
+	zend_attribute *attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1, 1);
 	zend_string_release_ex(attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1, true);
 	zend_string *attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1_arg0_str = zend_string_init("custom message 2", strlen("custom message 2"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1->args[0].value, attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1_arg0_str);
 	attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
-	zend_attribute *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1), 0, attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, 1);
+	zend_attribute *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1), 0, attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, 1);
 	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str = zend_string_init("value1", strlen("value1"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str);
 
 	zend_string *attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_string_init_interned("ZendTestAttributeWithArguments", sizeof("ZendTestAttributeWithArguments") - 1, true);
-	zend_attribute *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_attribute_with_named_argument", sizeof("zend_test_attribute_with_named_argument") - 1), attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, 1);
+	zend_attribute *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(CG(function_table), "zend_test_attribute_with_named_argument", sizeof("zend_test_attribute_with_named_argument") - 1), attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, 1);
 	zend_string_release_ex(attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, true);
 	zend_string *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str = zend_string_init("foo", strlen("foo"), 1);
 	ZVAL_STR(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].value, attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str);
@@ -948,7 +948,7 @@ static zend_class_entry *register_class_ZendAttributeTest(void)
 
 
 	zend_string *attribute_name_ZendTestAttribute_func_testmethod_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, true);
-	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "testmethod", sizeof("testmethod") - 1), attribute_name_ZendTestAttribute_func_testmethod_0, 0);
+	zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "testmethod", sizeof("testmethod") - 1), attribute_name_ZendTestAttribute_func_testmethod_0, 0);
 	zend_string_release_ex(attribute_name_ZendTestAttribute_func_testmethod_0, true);
 
 	return class_entry;
@@ -1127,13 +1127,13 @@ static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttr
 
 
 	zend_string *attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
-	zend_attribute *attribute_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "no_override", sizeof("no_override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0, 1);
+	zend_attribute *attribute_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "no_override", sizeof("no_override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0, 1);
 	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_no_override_arg0_0_arg0_str = zend_string_init("value2", strlen("value2"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_no_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_no_override_arg0_0_arg0_str);
 
 	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
-	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
+	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
 	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str = zend_string_init("value3", strlen("value3"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str);
@@ -1154,7 +1154,7 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 
 
 	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
-	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
+	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
 	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str = zend_string_init("value4", strlen("value4"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str);

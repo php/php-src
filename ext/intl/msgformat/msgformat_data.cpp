@@ -24,7 +24,7 @@
 /* {{{ void msgformat_data_init( msgformat_data* mf_data )
  * Initialize internals of msgformat_data.
  */
-U_CFUNC void msgformat_data_init( msgformat_data* mf_data )
+void msgformat_data_init( msgformat_data* mf_data )
 {
 	if( !mf_data )
 		return;
@@ -40,7 +40,7 @@ U_CFUNC void msgformat_data_init( msgformat_data* mf_data )
 /* {{{ void msgformat_data_free( msgformat_data* mf_data )
  * Clean up memory allocated for msgformat_data
  */
-U_CFUNC void msgformat_data_free(msgformat_data* mf_data)
+void msgformat_data_free(msgformat_data* mf_data)
 {
 	if (!mf_data)
 		return;

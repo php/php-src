@@ -13,13 +13,11 @@
 */
 
 #include <unicode/uloc.h>
-extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
 #include "locale_class.h"
 #include "locale.h"
 #include "locale_arginfo.h"
-}
 
 zend_class_entry *Locale_ce_ptr = NULL;
 
@@ -30,7 +28,7 @@ zend_class_entry *Locale_ce_ptr = NULL;
 /* {{{ locale_register_Locale_class
  * Initialize 'Locale' class
  */
-U_CFUNC void locale_register_Locale_class( void )
+void locale_register_Locale_class( void )
 {
 	/* Create and register 'Locale' class. */
 	Locale_ce_ptr = register_class_Locale();

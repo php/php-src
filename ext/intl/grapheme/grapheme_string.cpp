@@ -22,11 +22,9 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include <php.h>
 #include "grapheme.h"
 #include "grapheme_util.h"
-}
 
 #include <unicode/utypes.h>
 #include <unicode/utf8.h>
@@ -37,7 +35,7 @@ extern "C" {
 /* }}} */
 
 /* {{{ Get number of graphemes in a string */
-U_CFUNC PHP_FUNCTION(grapheme_strlen)
+PHP_FUNCTION(grapheme_strlen)
 {
 	char* string;
 	size_t string_len;
@@ -86,7 +84,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strlen)
 /* }}} */
 
 /* {{{ Find position of first occurrence of a string within another */
-U_CFUNC PHP_FUNCTION(grapheme_strpos)
+PHP_FUNCTION(grapheme_strpos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -140,7 +138,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strpos)
 /* }}} */
 
 /* {{{ Find position of first occurrence of a string within another, ignoring case differences */
-U_CFUNC PHP_FUNCTION(grapheme_stripos)
+PHP_FUNCTION(grapheme_stripos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -206,7 +204,7 @@ U_CFUNC PHP_FUNCTION(grapheme_stripos)
 /* }}} */
 
 /* {{{ Find position of last occurrence of a string within another */
-U_CFUNC PHP_FUNCTION(grapheme_strrpos)
+PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
 	char *locale = "";
@@ -266,7 +264,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrpos)
 /* }}} */
 
 /* {{{ Find position of last occurrence of a string within another, ignoring case */
-U_CFUNC PHP_FUNCTION(grapheme_strripos)
+PHP_FUNCTION(grapheme_strripos)
 {
 	char *haystack, *needle, *locale = "";
 	size_t haystack_len, needle_len, locale_len = 0;
@@ -334,7 +332,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strripos)
 /* }}} */
 
 /* {{{ Returns part of a string */
-U_CFUNC PHP_FUNCTION(grapheme_substr)
+PHP_FUNCTION(grapheme_substr)
 {
 	char *str, *locale = "";
 	zend_string *u8_sub_str;
@@ -609,14 +607,14 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 /* }}} */
 
 /* {{{ Finds first occurrence of a string within another */
-U_CFUNC PHP_FUNCTION(grapheme_strstr)
+PHP_FUNCTION(grapheme_strstr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 /* f_ignore_case */);
 }
 /* }}} */
 
 /* {{{ Finds first occurrence of a string within another */
-U_CFUNC PHP_FUNCTION(grapheme_stristr)
+PHP_FUNCTION(grapheme_stristr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1 /* f_ignore_case */);
 }
@@ -719,7 +717,7 @@ static const grapheme_extract_iter grapheme_extract_iters[] = {
 /* }}} */
 
 /* {{{ Function to extract a sequence of default grapheme clusters */
-U_CFUNC PHP_FUNCTION(grapheme_extract)
+PHP_FUNCTION(grapheme_extract)
 {
 	char *str, *pstr;
 	UText ut = UTEXT_INITIALIZER;
@@ -849,7 +847,7 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 	RETURN_STRINGL(((char *)pstr), ret_pos);
 }
 
-U_CFUNC PHP_FUNCTION(grapheme_str_split)
+PHP_FUNCTION(grapheme_str_split)
 {
 	char *pstr, *end;
 	zend_string *str;
@@ -927,7 +925,7 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 	ubrk_close(bi);
 }
 
-U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
+PHP_FUNCTION(grapheme_levenshtein)
 {
 	zend_string *string1, *string2;
 	zend_long cost_ins = 1;
