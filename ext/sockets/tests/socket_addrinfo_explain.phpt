@@ -12,6 +12,11 @@ $result = socket_addrinfo_explain($addrinfo[0]);
 // Musl sets ai_canonname even if AI_CANONNAME is not specified.
 unset($result['ai_canonname']);
 var_dump($result);
+// Solaris uses different numeric values for SOCK_* constants,
+// so avoid comparing raw integers in EXPECTF.
+if ($result['ai_socktype'] != SOCK_DGRAM) {
+    echo "Wrong socktype\n";
+}
 echo "Done";
 ?>
 --EXPECTF--
@@ -21,7 +26,7 @@ array(5) {
   ["ai_family"]=>
   int(2)
   ["ai_socktype"]=>
-  int(2)
+  int(%s)
   ["ai_protocol"]=>
   int(%d)
   ["ai_addr"]=>

@@ -1,0 +1,87 @@
+name: Solaris
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+  runExtraTests:
+    default: false
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Solaris
+      uses: vmactions/solaris-vm@v1
+      with:
+        release: "11.4-gcc"
+        usesh: true
+        copyback: false
+        disable-cache: true
+        prepare: |
+          cd $GITHUB_WORKSPACE
+          pkg install bison developer/icu libzip oniguruma re2c
+
+          ./buildconf -f
+          CC=gcc CXX=g++ \
+          PATH=/usr/gnu/bin:/usr/bin \
+          PKG_CONFIG_PATH=/usr/lib/amd64/pkgconfig \
+          ./configure \
+            --prefix=/usr/local \
+            --enable-debug \
+            --enable-option-checking=fatal \
+            --enable-fpm \
+            --without-pear \
+            --with-bz2 \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --enable-gd \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-libxml \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-mbstring \
+            --with-curl \
+            --enable-sockets \
+            --with-openssl \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --enable-zend-test \
+            --enable-dl-test=shared \
+            --enable-intl \
+            --with-mhash \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d \
+            ${{ inputs.configurationParameters }}
+
+          gmake -j2
+          mkdir /etc/php.d
+          gmake install > /dev/null
+          echo opcache.enable_cli=1 > /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.preload_user=root >> /etc/php.d/opcache.ini
+        run: |
+          cd $GITHUB_WORKSPACE
+
+          export SKIP_BROKEN_PSET_CREATE=1
+          export SKIP_IO_CAPTURE_TESTS=1
+          export CI_NO_IPV6=1
+          export STACK_LIMIT_DEFAULTS_CHECK=1
+          PATH=/usr/gnu/bin:/usr/bin \
+          sapi/cli/php run-tests.php \
+            -P -q -j1 \
+            -g FAIL,BORK,LEAK,XLEAK \
+            --no-progress \
+            --offline \
+            --show-diff \
+            --show-slow 1000 \
+            --set-timeout 120
+
+          if test "${{ inputs.runExtraTests }}" = "true"; then
+            sapi/cli/php run-extra-tests.php
+          fi

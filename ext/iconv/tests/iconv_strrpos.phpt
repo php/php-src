@@ -2,6 +2,12 @@
 iconv_strrpos()
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
+?>
 --INI--
 iconv.internal_charset=ISO-8859-1
 --FILE--
