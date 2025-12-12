@@ -37,32 +37,37 @@ function list_system_locales() {
    pass as argument to setlocale() */
 echo "*** Testing setlocale() by passing multiple locales as argument ***\n";
 
+if (PHP_OS_FAMILY === 'Solaris') {
+  $utfending="UTF-8";
+} else {
+  $utfending="utf8";
+}
 
 //set of currency symbol according to above list of locales
 $currency_symbol = array(
-  "en_US.utf8" => "USD",
-  "en_AU.utf8" => "AUD",
-  "ko_KR.utf8" => "KRW",
-  "zh_CN.utf8" => "CNY",
-  "de_DE.utf8" => "EUR",
-  "es_EC.utf8" => "USD",
-  "fr_FR.utf8" => "EUR",
-  "ja_JP.utf8" => "JPY",
-  "el_GR.utf8" => "EUR",
-  "nl_NL.utf8" =>"EUR"
+  "en_US.$utfending" => "USD",
+  "en_AU.$utfending" => "AUD",
+  "ko_KR.$utfending" => "KRW",
+  "zh_CN.$utfending" => "CNY",
+  "de_DE.$utfending" => "EUR",
+  "es_EC.$utfending" => "USD",
+  "fr_FR.$utfending" => "EUR",
+  "ja_JP.$utfending" => "JPY",
+  "el_GR.$utfending" => "EUR",
+  "nl_NL.$utfending" =>"EUR"
 );
 
 // gather all the locales installed in the system
 $all_system_locales = list_system_locales();
 
 // Now check for three locales that is present in the system and use that as argument to setlocale()
-if( in_array("en_US.utf8",$all_system_locales) ||
-    in_array("Ko_KR.utf8",$all_system_locales) ||
-    in_array("zh_CN.utf8",$all_system_locales) ) {
+if( in_array("en_US.$utfending",$all_system_locales) ||
+    in_array("Ko_KR.$utfending",$all_system_locales) ||
+    in_array("zh_CN.$utfending",$all_system_locales) ) {
   echo "-- Testing setlocale() by giving 'category' as LC_ALL & multiple locales(en_US.utf8, Ko_KR.utf8, zh_CN.utf8) --\n";
 
   // call setlocale()
-  $new_locale = setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8");
+  $new_locale = setlocale(LC_ALL, "en_US.$utfending", "Ko_KR.$utfending", "zh_CN.$utfending");
 
   // dump the name of the new locale set by setlocale()
   var_dump($new_locale);

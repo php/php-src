@@ -62,6 +62,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_msan = in_array('CI: MSAN', $labels, true);
     $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
     $test_pecl = in_array('CI: PECL', $labels, true);
+    $test_solaris = in_array('CI: Solaris', $labels, true);
     $test_windows = in_array('CI: Windows', $labels, true);
 
     $jobs = [];
@@ -131,6 +132,9 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     }
     if (($all_jobs && $ref === 'master') || $test_pecl) {
         $jobs['PECL'] = true;
+    }
+    if (version_compare($php_version, '8.6', '>=') && ($all_jobs || $test_solaris)) {
+        $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
         $jobs['WINDOWS']['matrix'] = $all_variations
