@@ -147,11 +147,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
 	*(result) = mul_ex;                             \
 } while (0)
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale);
-
-bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
-
-bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
+bool bc_divide_ex(bc_num numerator, bc_num divisor, bc_num *quot, bc_num *rem, size_t scale, bool use_quot, bool use_rem);
 
 bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
 
@@ -187,5 +183,10 @@ bool bc_sqrt(bc_num *num, size_t scale);
 #define bc_new_num_nonzeroed(length, scale)	_bc_new_num_nonzeroed_ex((length), (scale), 0)
 #define bc_free_num(num)					_bc_free_num_ex((num), 0)
 #define bc_num2str(num)						bc_num2str_ex((num), (num->n_scale))
+
+/* div and mod */
+#define bc_divide(n1, n2, quot, scale)		bc_divide_ex((n1), (n2), (quot), NULL, (scale), true, false)
+#define bc_modulo(n1, n2, rem, scale) 		bc_divide_ex((n1), (n2), NULL, (rem), (scale), false, true)
+#define bc_divmod(n1, n2, quot, rem, scale)	bc_divide_ex((n1), (n2), (quot), (rem), (scale), true, true)
 
 #endif
