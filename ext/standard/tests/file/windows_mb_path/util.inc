@@ -1,36 +1,7 @@
 <?php
 
-function get_active_cp($kind = "")
+function get_basename($path, $echo = true)
 {
-    if (version_compare(PHP_VERSION, '7.1', '<')) {
-        $s = exec("chcp");
-        preg_match(",.*: (\d+),", $s, $m);
-
-        return $m[1];
-    } else {
-        return sapi_windows_cp_get($kind);
-    }
-}
-
-function set_active_cp($cp, $echo = true)
-{
-    if (version_compare(PHP_VERSION, '7.1', '<')) {
-        $ret = exec("chcp $cp");
-    } else {
-        if (!sapi_windows_cp_set($cp)) {
-            echo "Failed to set cp $cp\n";
-            return;
-        }
-
-        if ($echo) echo "Active code page: ", get_active_cp(), "\n";
-    }
-}
-
-function get_basename_with_cp($path, $cp, $echo = true)
-{
-    $old_cp = get_active_cp();
-    set_active_cp($cp, $echo);
-
     if ($echo) echo "getting basename of $path\n";
 
     $cmd = "powershell -command \"Get-Item -Path '$path' | Format-Table -HideTableHeaders Name\"";
@@ -39,14 +10,26 @@ function get_basename_with_cp($path, $cp, $echo = true)
     if ($echo) var_dump($out, $out == basename($path));
     if ($echo) var_dump(realpath($path));
 
-    set_active_cp($old_cp, $echo);
+    return $out;
+}
+
+function get_basename_with_cp($path, $cp, $echo = true)
+{
+    $old_cp = sapi_windows_cp_get();
+    sapi_windows_cp_set($cp);
+    if ($echo) echo "Active code page: ", sapi_windows_cp_get(), "\n";
+
+    $out = get_basename($path, $echo);
+
+    sapi_windows_cp_set($old_cp);
+    if ($echo) echo "Active code page: ", sapi_windows_cp_get(), "\n";
 
     return $out;
 }
 
 function skip_if_wrong_cp($cp, $kind = "")
 {
-    if (get_active_cp($kind) != $cp) {
+    if (sapi_windows_cp_get($kind) != $cp) {
         die("skip this test expect codepage $cp");
     }
 }
@@ -121,9 +104,9 @@ function create_data($id, $item = "", $cp = 65001, $utf8 = true)
             mkdir($prefix);
         }
 
-        if (0 === strpos($id, "dir")) {
+        if (str_starts_with($id, "dir")) {
             create_verify_dir($prefix, $item, $cp);
-        } else if (0 === strpos($id, "file")) {
+        } else if (str_starts_with($id, "file")) {
             /* a bit unhandy, but content can be put from outside, if needed */
             create_verify_file($prefix, $item, "dummy content", $cp);
         } else {
