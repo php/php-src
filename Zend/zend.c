@@ -1483,10 +1483,24 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		info->filename = zend_string_copy(error_filename);
 		info->message = zend_string_copy(message);
 
-		/* This is very inefficient for a large number of errors.
-		 * Use pow2 realloc if it becomes a problem. */
 		EG(num_errors)++;
-		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
+		// pondering if uint32_t is more appropriate but would need to align the allocation size then
+		size_t *errors_size;
+
+		if (EG(num_errors) == 1) {
+			errors_size = emalloc(sizeof(size_t) + (2 * sizeof(zend_error_info *)));
+			// can be seen as "waste" but to have a round even number from start
+			*errors_size = 2;
+		} else {
+			errors_size = (size_t *)(EG(errors) - 1);
+			if (EG(num_errors) == *errors_size) {
+				size_t tmp = *errors_size + (*errors_size >> 1);
+				// not sure we can get high number of errors so safe `might be` over cautious here
+				errors_size = safe_erealloc(errors_size, sizeof(size_t) + (tmp * sizeof(zend_error_info *)), 1, 0);
+				*errors_size = tmp;
+			}
+		}
+		EG(errors) = (zend_error_info **)(errors_size + 1);
 		EG(errors)[EG(num_errors)-1] = info;
 
 		/* Do not process non-fatal recorded error */
@@ -1803,9 +1817,9 @@ ZEND_API void zend_free_recorded_errors(void)
 		zend_error_info *info = EG(errors)[i];
 		zend_string_release(info->filename);
 		zend_string_release(info->message);
-		efree(info);
+		efree_size(info, sizeof(zend_error_info));
 	}
-	efree(EG(errors));
+	efree(((size_t *)EG(errors)) - 1);
 	EG(errors) = NULL;
 	EG(num_errors) = 0;
 }
@@ -2016,12 +2030,12 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 }
 /* }}} */
 
-#define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
+#define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%u) : %s"
 
 ZEND_API char *zend_make_compiled_string_description(const char *name) /* {{{ */
 {
 	const char *cur_filename;
-	int cur_lineno;
+	uint32_t cur_lineno;
 	char *compiled_string_description;
 
 	if (zend_is_compiling()) {
