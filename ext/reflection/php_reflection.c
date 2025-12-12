@@ -6639,10 +6639,6 @@ static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string 
 		*scope = NULL;
 		return SUCCESS;
 	}
-	if (zend_string_equals(scope_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
-		*scope = EX(prev_execute_data)->func->common.scope;
-		return SUCCESS;
-	}
 
 	*scope = zend_lookup_class(scope_name);
 	if (!*scope) {
@@ -6726,10 +6722,25 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 		}
 	}
 
-	if (obj) {
+	if (obj && !prop->hooks) {
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
-		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
-			RETURN_FALSE;
+		if ( Z_TYPE_P(prop_val) == IS_UNDEF) {
+			if (!obj->ce->__get || (Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
+				RETURN_FALSE;
+			}
+			if (obj->ce->__isset) {
+				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
+				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
+					GC_ADDREF(obj);
+					*guard |= ZEND_GUARD_PROPERTY_ISSET;
+					zval member;
+					ZVAL_STR(&member, ref->unmangled_name);
+					zend_call_known_instance_method_with_1_params(obj->ce->__isset, obj, return_value, &member);
+					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
+					OBJ_RELEASE(obj);
+					return;
+				}
+			}
 		}
 	}
 
