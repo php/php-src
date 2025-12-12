@@ -4492,7 +4492,6 @@ PHP_METHOD(PharFileInfo, __construct)
 
 	entry_obj->entry = entry_info;
 	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {
-		++entry_info->fp_refcount;
 		/* The phar data must exist to keep the alias locked. */
 		ZEND_ASSERT(!phar_data->is_persistent);
 		++phar_data->refcount;
@@ -4540,7 +4539,6 @@ PHP_METHOD(PharFileInfo, __destruct)
 		efree(entry);
 		entry_obj->entry = NULL;
 	} else if (!entry->is_persistent) {
-		--entry->fp_refcount;
 		/* The entry itself still lives in the manifest,
 		 * which will either be freed here if the file info was the last reference; or freed later. */
 		entry_obj->entry = NULL;
