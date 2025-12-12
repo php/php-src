@@ -24,7 +24,7 @@ serialize(new B());
 ?>
 Done
 --EXPECTF--
-Warning: serialize(): A::__sleep() should return an array only containing the names of instance-variables to serialize in %s on line %d
+Warning: serialize(): A::__sleep() should return an array of property names, or return null/void to delegate to default serialization in %s on line %d
 
 Warning: serialize(): B::__sleep() should return an array only containing the names of instance-variables to serialize in %s on line %d
 
