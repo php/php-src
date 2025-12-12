@@ -12,8 +12,9 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
-$old_cp = get_active_cp();
-set_active_cp(65001);
+$old_cp = sapi_windows_cp_get();
+sapi_windows_cp_set(65001);
+echo "Active code page: ", sapi_windows_cp_get(), "\n";
 
 $prefix = __DIR__ . DIRECTORY_SEPARATOR . "testBug64699" . DIRECTORY_SEPARATOR;
 
@@ -41,10 +42,10 @@ foreach ($dirs as $d) {
 }
 rmdir($prefix);
 
-set_active_cp($old_cp);
+sapi_windows_cp_set($old_cp);
 
 ?>
---EXPECTF--
+--EXPECT--
 Active code page: 65001
 filetype()[dir ] == is_dir()[dir ] -> OK: .
 filetype()[dir ] == is_dir()[dir ] -> OK: ..
@@ -54,4 +55,3 @@ filetype()[dir ] == is_dir()[dir ] -> OK: ソ
 filetype()[dir ] == is_dir()[dir ] -> OK: ゾ
 filetype()[dir ] == is_dir()[dir ] -> OK: 多国語
 filetype()[dir ] == is_dir()[dir ] -> OK: 表
-Active code page: %d
