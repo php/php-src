@@ -142,7 +142,7 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (13) {
+object(Dom\Notation)#4 (14) {
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>
@@ -151,6 +151,8 @@ object(Dom\Notation)#4 (13) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
