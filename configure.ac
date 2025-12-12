@@ -1142,46 +1142,6 @@ esac
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
 unset LIBS
 
-dnl PEAR
-dnl ----------------------------------------------------------------------------
-
-PHP_HELP_SEPARATOR([PEAR:])
-PHP_CONFIGURE_PART([Configuring PEAR])
-
-dnl If CLI is disabled disable PEAR.
-AS_VAR_IF([PHP_CLI], [no], [with_pear=no])
-
-PHP_ARG_WITH([pear],
-  [whether to install PEAR],
-  [AS_HELP_STRING([[--with-pear[=DIR]]],
-    [Install PEAR in DIR [PREFIX/lib/php]])],
-  [no],
-  [yes])
-
-AS_VAR_IF([PHP_PEAR], [no],, [
-  AC_MSG_WARN([The --with-pear option is deprecated])
-
-  dnl PEAR dependencies.
-  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_text_wrap([
-    PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
-    or disable PEAR (--without-pear).
-  ]))])
-
-  install_pear=install-pear
-
-  AS_VAR_IF([PHP_PEAR], [yes],
-    [AS_CASE([$PHP_LAYOUT],
-      [GNU], [PEAR_INSTALLDIR=$datadir/pear],
-      [PEAR_INSTALLDIR=$libdir/php])],
-    [PEAR_INSTALLDIR=$PHP_PEAR])
-
-  PHP_SUBST([PEAR_INSTALLDIR])
-  PHP_ADD_BUILD_DIR([pear])
-  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/pear/Makefile.frag],
-    [$abs_srcdir/pear],
-    [pear])
-])
-
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
@@ -1622,7 +1582,7 @@ else
 fi;
 
 all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
-install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $pharcmd_install"
 
 PHP_SUBST([all_targets])
 PHP_SUBST([install_targets])
