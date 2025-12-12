@@ -2,15 +2,8 @@
 Test rename() with a dir for multibyte filenames
 --SKIPIF--
 <?php
-
-include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
-
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
-
 ?>
 --CONFLICTS--
 file2_mb

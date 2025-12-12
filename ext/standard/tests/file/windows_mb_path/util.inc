@@ -51,25 +51,6 @@ function skip_if_wrong_cp($cp, $kind = "")
     }
 }
 
-function skip_if_no_required_exts()
-{
-    $exts = func_get_args();
-    $exts[] = "iconv";
-
-    foreach ($exts as $ext) {
-        if (!extension_loaded($ext)) {
-            die("skip $ext is not loaded");
-        }
-    }
-}
-
-function skip_if_not_win()
-{
-    if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-        die('skip windows only test');
-    }
-}
-
 function create_verify_file($prefix, $basename, $content = "", $cp = 65001)
 {
     $full = $prefix . DIRECTORY_SEPARATOR . $basename;
