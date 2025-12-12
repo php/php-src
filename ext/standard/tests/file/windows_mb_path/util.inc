@@ -90,29 +90,9 @@ function remove_data($id, $dir = NULL)
     }
 }
 
-function create_data($id, $item = "", $cp = 65001, $utf8 = true)
+/* Keep this file ASCII, so zend.multibyte related stuff can be tasted as well. */
+include __DIR__ . DIRECTORY_SEPARATOR . "util_utf8.inc";
+function create_data($id, $item = "", $cp = 65001)
 {
-    if ($utf8) {
-        /* Keep this file ASCII, so zend.multibyte related stuff can be tasted as well. */
-        include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util_utf8.inc";
-        return create_data_from_utf8($id, $item, $cp);
-    } else {
-
-        $prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . $id;
-
-        if (!is_dir($prefix)) {
-            mkdir($prefix);
-        }
-
-        if (str_starts_with($id, "dir")) {
-            create_verify_dir($prefix, $item, $cp);
-        } else if (str_starts_with($id, "file")) {
-            /* a bit unhandy, but content can be put from outside, if needed */
-            create_verify_file($prefix, $item, "dummy content", $cp);
-        } else {
-            echo "Item has either to start with \"dir\" or \"file\"";
-        }
-    }
-
-    return $prefix;
+    return create_data_from_utf8($id, $item, $cp);
 }
