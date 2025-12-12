@@ -3231,7 +3231,12 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{ */
+typedef enum {
+	PHP_DATE_MODIFY_WARNING,
+	PHP_DATE_MODIFY_THROW
+} php_date_modify_error_mode;
+
+static bool php_date_modify(zval *object, char *modify, size_t modify_len, const php_date_modify_error_mode error_mode) /* {{{ */
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
@@ -3251,10 +3256,22 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	if (err && err->error_count) {
 		/* spit out the first library error message, at least */
-		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
-			err->error_messages[0].position,
-			err->error_messages[0].character ? err->error_messages[0].character : ' ',
-			err->error_messages[0].message);
+		if (error_mode == PHP_DATE_MODIFY_THROW) {
+			zend_string *func_name = get_active_function_or_method_name();
+			zend_throw_exception_ex(date_ce_date_malformed_string_exception, 0,
+				"%s(): Failed to parse time string (%s) at position %d (%c): %s",
+				ZSTR_VAL(func_name),
+				modify,
+				err->error_messages[0].position,
+				err->error_messages[0].character ? err->error_messages[0].character : ' ',
+				err->error_messages[0].message);
+			zend_string_release_ex(func_name, false);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
+				err->error_messages[0].position,
+				err->error_messages[0].character ? err->error_messages[0].character : ' ',
+				err->error_messages[0].message);
+		}
 		timelib_time_dtor(tmp_time);
 		return false;
 	}
@@ -3323,7 +3340,7 @@ PHP_FUNCTION(date_modify)
 		RETURN_THROWS();
 	}
 
-	if (!php_date_modify(object, modify, modify_len)) {
+	if (!php_date_modify(object, modify, modify_len, PHP_DATE_MODIFY_WARNING)) {
 		RETURN_FALSE;
 	}
 
@@ -3337,20 +3354,15 @@ PHP_METHOD(DateTime, modify)
 	zval                *object;
 	char                *modify;
 	size_t               modify_len;
-	zend_error_handling  zeh;
 
 	object = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(modify, modify_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_replace_error_handling(EH_THROW, date_ce_date_malformed_string_exception, &zeh);
-	if (!php_date_modify(object, modify, modify_len)) {
-		zend_restore_error_handling(&zeh);
+	if (!php_date_modify(object, modify, modify_len, PHP_DATE_MODIFY_THROW)) {
 		RETURN_THROWS();
 	}
-
-	zend_restore_error_handling(&zeh);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(object));
 }
@@ -3362,7 +3374,6 @@ PHP_METHOD(DateTimeImmutable, modify)
 	zval *object, new_object;
 	char *modify;
 	size_t   modify_len;
-	zend_error_handling zeh;
 
 	object = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3371,14 +3382,10 @@ PHP_METHOD(DateTimeImmutable, modify)
 
 	date_clone_immutable(object, &new_object);
 
-	zend_replace_error_handling(EH_THROW, date_ce_date_malformed_string_exception, &zeh);
-	if (!php_date_modify(&new_object, modify, modify_len)) {
+	if (!php_date_modify(&new_object, modify, modify_len, PHP_DATE_MODIFY_THROW)) {
 		zval_ptr_dtor(&new_object);
-		zend_restore_error_handling(&zeh);
 		RETURN_THROWS();
 	}
-
-	zend_restore_error_handling(&zeh);
 
 	RETURN_OBJ(Z_OBJ(new_object));
 }
@@ -3436,7 +3443,7 @@ PHP_METHOD(DateTimeImmutable, add)
 }
 /* }}} */
 
-static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{{ */
+static void php_date_sub(zval *object, zval *interval, zval *return_value, const bool should_throw) /* {{{ */
 {
 	php_date_obj     *dateobj;
 	php_interval_obj *intobj;
@@ -3448,7 +3455,15 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 	DATE_CHECK_INITIALIZED(intobj->initialized, Z_OBJCE_P(interval));
 
 	if (intobj->diff->have_weekday_relative || intobj->diff->have_special_relative) {
-		php_error_docref(NULL, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
+		if (should_throw) {
+			zend_string *func_name = get_active_function_or_method_name();
+			zend_throw_exception_ex(date_ce_date_invalid_operation_exception, 0,
+				"%s(): Only non-special relative time specifications are supported for subtraction",
+				ZSTR_VAL(func_name));
+			zend_string_release_ex(func_name, false);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
+		}
 		return;
 	}
 
@@ -3470,7 +3485,7 @@ PHP_FUNCTION(date_sub)
 		RETURN_THROWS();
 	}
 
-	php_date_sub(object, interval, return_value);
+	php_date_sub(object, interval, return_value, false);
 	RETURN_OBJ_COPY(Z_OBJ_P(object));
 }
 /* }}} */
@@ -3479,15 +3494,12 @@ PHP_FUNCTION(date_sub)
 PHP_METHOD(DateTime, sub)
 {
 	zval *object, *interval;
-	zend_error_handling zeh;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &object, date_ce_date, &interval, date_ce_interval) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zend_replace_error_handling(EH_THROW, date_ce_date_invalid_operation_exception, &zeh);
-	php_date_sub(object, interval, return_value);
-	zend_restore_error_handling(&zeh);
+	php_date_sub(object, interval, return_value, true);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(object));
 }
@@ -3497,7 +3509,6 @@ PHP_METHOD(DateTime, sub)
 PHP_METHOD(DateTimeImmutable, sub)
 {
 	zval *object, *interval, new_object;
-	zend_error_handling zeh;
 
 	object = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3506,9 +3517,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 	date_clone_immutable(object, &new_object);
 
-	zend_replace_error_handling(EH_THROW, date_ce_date_invalid_operation_exception, &zeh);
-	php_date_sub(&new_object, interval, return_value);
-	zend_restore_error_handling(&zeh);
+	php_date_sub(&new_object, interval, return_value, true);
 
 	RETURN_OBJ(Z_OBJ(new_object));
 }
