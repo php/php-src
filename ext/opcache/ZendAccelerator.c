@@ -138,15 +138,9 @@ static zend_result (*orig_post_startup_cb)(void);
 static zend_result accel_post_startup(void);
 static zend_result accel_finish_startup(void);
 
-#ifndef ZEND_WIN32
-# define PRELOAD_SUPPORT
-#endif
-
-#ifdef PRELOAD_SUPPORT
 static void preload_shutdown(void);
 static void preload_activate(void);
 static void preload_restart(void);
-#endif
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -2737,11 +2731,9 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 				}
 
 				zend_shared_alloc_restore_state();
-#ifdef PRELOAD_SUPPORT
 				if (ZCSG(preload_script)) {
 					preload_restart();
 				}
-#endif
 
 #ifdef HAVE_JIT
 				zend_jit_restart();
@@ -2783,11 +2775,9 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 	zend_jit_activate();
 #endif
 
-#ifdef PRELOAD_SUPPORT
 	if (ZCSG(preload_script)) {
 		preload_activate();
 	}
-#endif
 
 	return SUCCESS;
 }
@@ -3488,11 +3478,9 @@ void accel_shutdown(void)
 		return;
 	}
 
-#ifdef PRELOAD_SUPPORT
 	if (ZCSG(preload_script)) {
 		preload_shutdown();
 	}
-#endif
 
 	_file_cache_only = file_cache_only;
 
@@ -3605,7 +3593,6 @@ void accelerator_shm_read_unlock(void)
 }
 
 /* Preloading */
-#ifdef PRELOAD_SUPPORT
 static HashTable *preload_scripts = NULL;
 static zend_op_array *(*preload_orig_compile_file)(zend_file_handle *file_handle, int type);
 
@@ -4976,6 +4963,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	return ret;
 }
 
+#ifndef ZEND_WIN32
 static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 {
 	uid_t euid = geteuid();
@@ -5042,7 +5030,7 @@ static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 
 	return SUCCESS;
 }
-#endif /* ZEND_WIN32 */
+#endif /* !ZEND_WIN32 */
 
 static zend_result accel_finish_startup(void)
 {
@@ -5053,11 +5041,6 @@ static zend_result accel_finish_startup(void)
 	if (!(ZCG(accel_directives).preload && *ZCG(accel_directives).preload)) {
 		return SUCCESS;
 	}
-
-#ifdef ZEND_WIN32
-	zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
-	return FAILURE;
-#else /* ZEND_WIN32 */
 
 	if (UNEXPECTED(file_cache_only)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
@@ -5074,7 +5057,9 @@ static zend_result accel_finish_startup(void)
 		return SUCCESS;
 	}
 
-
+#ifdef ZEND_WIN32
+	return accel_finish_startup_preload(false);
+#else
 	pid_t pid;
 	if (accel_finish_startup_preload_subprocess(&pid) == FAILURE) {
 		zend_shared_alloc_unlock();
@@ -5140,7 +5125,7 @@ static zend_result accel_finish_startup(void)
 			return FAILURE;
 		}
 	}
-#endif /* ZEND_WIN32 */
+#endif /* !ZEND_WIN32 */
 }
 
 static void accel_activate(void) {
