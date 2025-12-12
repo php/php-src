@@ -412,7 +412,7 @@ static bool autoload_func_info_equals(
 		&& alfi1->closure == alfi2->closure;
 }
 
-static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_string *lc_name) {
+static zval *spl_perform_autoload(zend_string *class_name, zend_string *lc_name) {
 	if (!spl_autoload_functions) {
 		return NULL;
 	}
@@ -442,13 +442,9 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 			break;
 		}
 
-		if (ZSTR_HAS_CE_CACHE(class_name) &&  ZSTR_GET_CE_CACHE(class_name)) {
-			return (zend_class_entry*)ZSTR_GET_CE_CACHE(class_name);
-		} else {
-			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
-			if (ce) {
-				return ce;
-			}
+		zval *ce_ptr = zend_hash_find(EG(class_table), lc_name);
+		if (ce_ptr) {
+			return ce_ptr;
 		}
 
 		zend_hash_move_forward_ex(spl_autoload_functions, &pos);
