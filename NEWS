@@ -389,6 +389,7 @@ PHP                                                                        NEWS
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
   . Fixed bug GH-19065 (Long match statement can segfault compiler during
     recursive SSA renaming). (nielsdos, Arnaud)
+  . Fixed GH-18223 (Traits methods precedence). (alexandre-daubois)
 
 - Calendar:
   . Fixed bug GH-19371 (integer overflow in calendar.c). (nielsdos)
