@@ -2643,6 +2643,28 @@ PHP_FUNCTION(quotemeta)
 }
 /* }}} */
 
+PHP_FUNCTION(str_extend)
+{
+	zend_string *str;
+	zend_long size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	size_t len = ZSTR_LEN(str);
+	if (len > size) {
+		zend_argument_value_error(2, "must not be smaller than the input string");
+		RETURN_THROWS();
+	}
+
+	ZVAL_UNDEF(ZEND_CALL_ARG(execute_data, 0)); // avoid copies, so that we may benefit from the RC=1 optimization
+	RETVAL_STR(zend_string_extend(str, size, 0));
+	Z_STRLEN_P(return_value) = len;
+}
+/* }}} */
+
 /* {{{ Returns ASCII value of character
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
