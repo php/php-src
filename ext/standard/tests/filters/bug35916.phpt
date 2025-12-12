@@ -42,6 +42,6 @@ unlink($file);
 --EXPECTF--
 fffffffffff
 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 hello
 THANK YOU
