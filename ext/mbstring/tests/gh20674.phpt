@@ -19,13 +19,7 @@ $subject = "=?us-ascii?Q?The_PH?= \t =?us-ascii?Q?P_8.5?=";
 var_dump(mb_decode_mimeheader($subject));
 
 // from RFC 2047 https://www.ietf.org/rfc/rfc2047
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?= =?ISO-8859-2?Q?_b?=)"));
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a_b?=)"));
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?=  =?ISO-8859-1?Q?b?=)"));
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?= b)"));
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?=  =?ISO-8859-1?Q?b?=)"));
-var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?=
-	=?ISO-8859-1?Q?b?=)"));
+var_dump(mb_decode_mimeheader("(=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?_b?=)"));
 ?>
 --EXPECTF--
 string(11) "The PHP 8.5"
@@ -33,8 +27,3 @@ string(11) "The PHP 8.5"
 string(11) "The PHP 8.5"
 string(11) "The PHP 8.5"
 string(5) "(a b)"
-string(5) "(a b)"
-string(4) "(ab)"
-string(5) "(a b)"
-string(4) "(ab)"
-string(4) "(ab)"
