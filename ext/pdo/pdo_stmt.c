@@ -1932,6 +1932,7 @@ static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *val
 			zend_throw_error(NULL, "Property queryString is read only");
 			return value;
 		}
+		cache_slot = NULL;
 	}
 	return zend_std_write_property(object, name, value, cache_slot);
 }
