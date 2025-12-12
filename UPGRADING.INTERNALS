@@ -64,6 +64,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
     as it was unused and could return the wrong result.
 
+- ext/mbstring:
+  . Added GB18030-2022 to default encoding list for zh-CN.
+
 ========================
 4. OpCode changes
 ========================
