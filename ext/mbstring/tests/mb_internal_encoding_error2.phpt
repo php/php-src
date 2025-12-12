@@ -17,6 +17,8 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_internal_encoding() : error conditions ***
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "unknown-encoding" given

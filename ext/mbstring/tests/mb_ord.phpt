@@ -44,7 +44,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-mb_internal_encoding("utf-7");
+ini_set("internal_encoding", "utf-7");
 try {
     var_dump( mb_ord("\u{d800}") );
 } catch (\ValueError $e) {
