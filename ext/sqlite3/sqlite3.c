@@ -648,7 +648,7 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 			break;
 
 		case SQLITE3_TEXT:
-			ZVAL_STRING(data, (char*)sqlite3_column_text(stmt, column));
+			ZVAL_STRINGL(data, (const char *) sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
 			break;
 
 		case SQLITE_BLOB:
