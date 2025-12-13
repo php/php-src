@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
     (David Carlier)
 
+- Sqlite3:
+  . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
+    null returned). (ndossche, plusminmax)
+
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
 
