@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - LDAP:
   . Fix memory leak in ldap_set_options(). (ndossche)
 
+- SPL:
+  . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
+    (David Carlier)
+
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
 
