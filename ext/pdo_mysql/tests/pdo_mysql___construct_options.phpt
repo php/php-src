@@ -73,7 +73,7 @@ MySQLPDOTest::skip();
         }
 
         if (!is_object($db = new PDO($dsn, $user, $pass, array())))
-            printf("[002] Expecting object got %s/%s¸\n", gettype($db), $db);
+            printf("[002] Expecting object got %s/%s\n", gettype($db), $db);
 
         $invalid = 999;
         if (is_object($db = new PDO($dsn, $user, $pass, array($invalid => true))))
