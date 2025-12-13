@@ -234,6 +234,8 @@ PHP                                                                        NEWS
     non-printable characters in string literals). (nielsdos, WangYihang)
   . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
   . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
+  . Added #[\DelayedTargetValidation] attribute. (DanielEScherzer)
+  . Support #[\Deprecated] on traits. (DanielEScherzer)
 
 - BCMath:
   . Simplify `bc_divide()` code. (SakiTakamachi)
@@ -325,6 +327,7 @@ PHP                                                                        NEWS
     (kocsismate)
   . Fixed bug GH-16993 (filter_var_array with FILTER_VALIDATE_INT|FILTER_NULL_ON_FAILURE
     should emit warning for invalid filter usage). (alexandre-daubois)
+  . Added FILTER_THROW_ON_FAILURE flag. (DanielEScherzer)
 
 - FPM:
   . Fixed bug GH-19817 (Decode SCRIPT_FILENAME issue in php 8.5).
