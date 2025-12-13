@@ -9,6 +9,7 @@ Test arsort() function : basic functionality
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
+ *  SORT_STRICT - compare items by type first, then by value
 */
 
 echo "*** Testing arsort() : basic functionality ***\n";
@@ -65,6 +66,21 @@ var_dump( $temp_array);
 echo "\n-- Testing arsort() by supplying numeric array, 'flag' = SORT_NUMERIC --\n";
 $temp_array = $unsorted_numerics;
 var_dump( arsort($temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing arsort() by supplying mixed type array, 'flag' = SORT_STRICT --\n";
+$mixed_types = array( "a" => 1, "b" => "1", "c" => 2, "d" => "2", "e" => true, "f" => false, "g" => null );
+var_dump( arsort($mixed_types, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $mixed_types);
+
+echo "\n-- Testing arsort() by supplying string array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_strings;
+var_dump( arsort($temp_array, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing arsort() by supplying numeric array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_numerics;
+var_dump( arsort($temp_array, SORT_STRICT) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
@@ -225,6 +241,59 @@ array(8) {
 }
 
 -- Testing arsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [3]=>
+  int(555)
+  [1]=>
+  int(100)
+  [2]=>
+  int(33)
+  [4]=>
+  int(22)
+}
+
+-- Testing arsort() by supplying mixed type array, 'flag' = SORT_STRICT --
+bool(true)
+array(7) {
+  ["d"]=>
+  string(1) "2"
+  ["b"]=>
+  string(1) "1"
+  ["c"]=>
+  int(2)
+  ["a"]=>
+  int(1)
+  ["e"]=>
+  bool(true)
+  ["f"]=>
+  bool(false)
+  ["g"]=>
+  NULL
+}
+
+-- Testing arsort() by supplying string array, 'flag' = SORT_STRICT --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing arsort() by supplying numeric array, 'flag' = SORT_STRICT --
 bool(true)
 array(4) {
   [3]=>

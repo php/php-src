@@ -9,6 +9,7 @@ Test sort() function : basic functionality
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
+ *  SORT_STRICT - compare items by type first, then by value
 */
 
 echo "*** Testing sort() : basic functionality ***\n";
@@ -66,6 +67,21 @@ var_dump( $temp_array);
 echo "\n-- Testing sort() by supplying numeric array, 'flag' = SORT_NUMERIC --\n";
 $temp_array = $unsorted_numerics;
 var_dump( sort($temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing sort() by supplying mixed type array, 'flag' = SORT_STRICT --\n";
+$mixed_types = array( 1, "1", 2, "2", true, false, null );
+var_dump( sort($mixed_types, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $mixed_types);
+
+echo "\n-- Testing sort() by supplying string array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_strings;
+var_dump( sort($temp_array, SORT_STRICT) ); // expecting : bool(true)
+var_dump( $temp_array);
+
+echo "\n-- Testing sort() by supplying numeric array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_numerics;
+var_dump( sort($temp_array, SORT_STRICT) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
@@ -226,6 +242,59 @@ array(8) {
 }
 
 -- Testing sort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [0]=>
+  int(22)
+  [1]=>
+  int(33)
+  [2]=>
+  int(100)
+  [3]=>
+  int(555)
+}
+
+-- Testing sort() by supplying mixed type array, 'flag' = SORT_STRICT --
+bool(true)
+array(7) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  bool(true)
+  [3]=>
+  int(1)
+  [4]=>
+  int(2)
+  [5]=>
+  string(1) "1"
+  [6]=>
+  string(1) "2"
+}
+
+-- Testing sort() by supplying string array, 'flag' = SORT_STRICT --
+bool(true)
+array(8) {
+  [0]=>
+  string(6) "Orange"
+  [1]=>
+  string(7) "Orange1"
+  [2]=>
+  string(7) "Orange3"
+  [3]=>
+  string(6) "banana"
+  [4]=>
+  string(5) "lemon"
+  [5]=>
+  string(6) "orange"
+  [6]=>
+  string(7) "orange2"
+  [7]=>
+  string(8) "orange20"
+}
+
+-- Testing sort() by supplying numeric array, 'flag' = SORT_STRICT --
 bool(true)
 array(4) {
   [0]=>

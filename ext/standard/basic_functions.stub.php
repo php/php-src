@@ -83,6 +83,11 @@ const SORT_LOCALE_STRING = UNKNOWN;
 const SORT_NATURAL = UNKNOWN;
 /**
  * @var int
+ * @cvalue PHP_SORT_STRICT
+ */
+const SORT_STRICT = UNKNOWN;
+/**
+ * @var int
  * @cvalue PHP_SORT_FLAG_CASE
  */
 const SORT_FLAG_CASE = UNKNOWN;

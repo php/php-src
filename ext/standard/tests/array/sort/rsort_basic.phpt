@@ -63,6 +63,21 @@ $temp_array = $unsorted_numerics;
 var_dump( rsort($temp_array, SORT_NUMERIC) );
 var_dump( $temp_array);
 
+echo "\n-- Testing rsort() by supplying mixed type array, 'flag' = SORT_STRICT --\n";
+$mixed_types = array( 1, "1", 2, "2", true, false, null );
+var_dump( rsort($mixed_types, SORT_STRICT) );
+var_dump( $mixed_types);
+
+echo "\n-- Testing rsort() by supplying string array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_strings;
+var_dump( rsort($temp_array, SORT_STRICT) );
+var_dump( $temp_array);
+
+echo "\n-- Testing rsort() by supplying numeric array, 'flag' = SORT_STRICT --\n";
+$temp_array = $unsorted_numerics;
+var_dump( rsort($temp_array, SORT_STRICT) );
+var_dump( $temp_array);
+
 echo "Done";
 ?>
 --EXPECT--
@@ -221,6 +236,59 @@ array(8) {
 }
 
 -- Testing rsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [0]=>
+  int(555)
+  [1]=>
+  int(100)
+  [2]=>
+  int(33)
+  [3]=>
+  int(22)
+}
+
+-- Testing rsort() by supplying mixed type array, 'flag' = SORT_STRICT --
+bool(true)
+array(7) {
+  [0]=>
+  string(1) "2"
+  [1]=>
+  string(1) "1"
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+  [4]=>
+  bool(true)
+  [5]=>
+  bool(false)
+  [6]=>
+  NULL
+}
+
+-- Testing rsort() by supplying string array, 'flag' = SORT_STRICT --
+bool(true)
+array(8) {
+  [0]=>
+  string(8) "orange20"
+  [1]=>
+  string(7) "orange2"
+  [2]=>
+  string(6) "orange"
+  [3]=>
+  string(5) "lemon"
+  [4]=>
+  string(6) "banana"
+  [5]=>
+  string(7) "Orange3"
+  [6]=>
+  string(7) "Orange1"
+  [7]=>
+  string(6) "Orange"
+}
+
+-- Testing rsort() by supplying numeric array, 'flag' = SORT_STRICT --
 bool(true)
 array(4) {
   [0]=>

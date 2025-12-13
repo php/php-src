@@ -54,6 +54,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 #define PHP_SORT_ASC                4
 #define PHP_SORT_LOCALE_STRING      5
 #define PHP_SORT_NATURAL            6
+#define PHP_SORT_STRICT             7
 #define PHP_SORT_FLAG_CASE          8
 
 #define PHP_COUNT_NORMAL      0
