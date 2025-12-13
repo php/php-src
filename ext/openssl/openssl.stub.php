@@ -262,6 +262,22 @@ const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
  */
 const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue RSA_PSS_SALTLEN_DIGEST
+ */
+const OPENSSL_RSA_PSS_SALTLEN_DIGEST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PSS_SALTLEN_AUTO
+ */
+const OPENSSL_RSA_PSS_SALTLEN_AUTO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PSS_SALTLEN_MAX
+ */
+const OPENSSL_RSA_PSS_SALTLEN_MAX = UNKNOWN;
+
 /* Informational stream wrapper constants */
 
 /**
@@ -619,7 +635,7 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0, int $salt_length = OPENSSL_RSA_PSS_SALTLEN_AUTO): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
 function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
