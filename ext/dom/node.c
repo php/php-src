@@ -2081,6 +2081,93 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
+static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
+{
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+				if (!ns) {
+					return;
+				}
+
+				zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+				if (Z_ISNULL_P(zv)) {
+					ZVAL_LONG(zv, 1);
+				} else {
+					Z_LVAL_P(zv)++;
+				}
+
+				bool should_free;
+				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
+
+				memset(ns, 0, sizeof(*ns));
+				ns->type = XML_LOCAL_NAMESPACE;
+				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
+				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+				ns->next = node->nsDef;
+				node->nsDef = ns;
+
+				ns->_private = attr;
+				if (attr->prev) {
+					attr->prev = attr->next;
+				} else {
+					node->properties = attr->next;
+				}
+				if (attr->next) {
+					attr->next->prev = attr->prev;
+				}
+			}
+		}
+
+		if (node->ns && !node->ns->prefix) { // TODO: is this complete?
+			/* Workaround for the behaviour where xmlSearchNs() can return the current namespace */
+			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
+			node->ns = xmlSearchNs(node->doc, node, NULL);
+		}
+	}
+}
+
+static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
+{
+	dom_relink_ns_decls_element(links, root);
+
+	xmlNodePtr base = root;
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		dom_relink_ns_decls_element(links, node);
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
+static void dom_unlink_ns_decls(HashTable *links)
+{
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
+		if (h & 1) {
+			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
+			node->ns = Z_PTR_P(data);
+		} else {
+			xmlNodePtr node = (xmlNodePtr) h;
+			while (Z_LVAL_P(data)-- > 0) {
+				xmlNsPtr ns = node->nsDef;
+				node->nsDef = node->nsDef->next;
+
+				xmlAttrPtr attr = ns->_private;
+				if (attr->prev) {
+					attr->prev->next = attr;
+				} else {
+					node->properties = attr;
+				}
+				if (attr->next) {
+					attr->next->prev = attr;
+				}
+
+				xmlFreeNs(ns);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
 {
 	xmlNodePtr root = user_data;
@@ -2136,7 +2223,23 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 	docp = nodep->doc;
 
-	if (! docp) {
+	HashTable links;
+	bool modern = php_dom_follow_spec_node(nodep);
+	if (modern) {
+		xmlNodePtr root = nodep;
+		while (root->parent) {
+			root = root->parent;
+		}
+
+		if (UNEXPECTED(root->type != XML_DOCUMENT_NODE && root->type != XML_HTML_DOCUMENT_NODE)) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Canonicalization can only happen on nodes attached to a document.", /* strict */ true);
+			RETURN_THROWS();
+		}
+
+		zend_hash_init(&links, 0, NULL, NULL, false);
+		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+	} else if (!docp) {
+		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");
 		RETURN_THROWS();
 	}
@@ -2158,12 +2261,12 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");
-			RETURN_THROWS();
+			goto clean_links;
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_value_name(tmp));
-			RETURN_THROWS();
+			goto clean_links;
 		}
 		xquery = Z_STRVAL_P(tmp);
 
@@ -2195,7 +2298,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			}
 			xmlXPathFreeContext(ctxp);
 			zend_throw_error(NULL, "XPath query did not return a nodeset");
-			RETURN_THROWS();
+			goto clean_links;
 		}
 	}
 
@@ -2263,6 +2366,12 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		if (mode == 1 && (ret >= 0)) {
 			RETURN_LONG(bytes);
 		}
+	}
+
+clean_links:
+	if (modern) {
+		dom_unlink_ns_decls(&links);
+		zend_hash_destroy(&links);
 	}
 }
 /* }}} */
