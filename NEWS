@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
     with dynamic class const lookup default argument). (ilutov)
+  . Fixed bug GH-20695 (Assertion failure in normalize_value() when parsing
+    malformed INI input via parse_ini_string()). (ndossche)
 
 - Bz2:
   . Fixed bug GH-20620 (bzcompress overflow on large source size).
