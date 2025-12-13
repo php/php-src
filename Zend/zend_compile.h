@@ -976,7 +976,6 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void);
 		} \
 	} while (0)
 
-void zend_free_internal_arg_info(zend_internal_function *function);
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);
