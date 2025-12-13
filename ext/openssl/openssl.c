@@ -4171,24 +4171,22 @@ cleanup:
 /* {{{ Seals data */
 PHP_FUNCTION(openssl_seal)
 {
-	zval *pubkeys, *pubkey, *sealdata, *ekeys, *iv = NULL, *tag = NULL;
+	zval *pubkeys, *pubkey, *sealdata, *ekeys, *iv = NULL;
 	HashTable *pubkeysht;
-	EVP_PKEY **pkeys = NULL;
-	int i, len1, len2, *eksl = NULL, nkeys = 0, iv_len;
-	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], *buf = NULL, **eks = NULL;
+	EVP_PKEY **pkeys;
+	int i, len1, len2, *eksl, nkeys, iv_len;
+	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], *buf = NULL, **eks;
 	char * data;
 	size_t data_len;
 	char *method;
 	size_t method_len;
 	const EVP_CIPHER *cipher;
-	EVP_CIPHER_CTX *ctx = NULL;
-	size_t tag_len;
+	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzas|z!z!", &data, &data_len,
-				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv, &tag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzas|z", &data, &data_len,
+				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		RETURN_THROWS();
 	}
-	RETVAL_FALSE;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data, 1);
 
@@ -4196,32 +4194,19 @@ PHP_FUNCTION(openssl_seal)
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
 		zend_argument_must_not_be_empty_error(4);
-		goto clean_exit;
+		RETURN_THROWS();
 	}
 
 	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		goto clean_exit;
+		RETURN_FALSE;
 	}
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
 		zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
-		goto clean_exit;
-	}
-
-	ctx = EVP_CIPHER_CTX_new();
-	if (ctx == NULL || !EVP_EncryptInit(ctx,cipher,NULL,NULL)) {
-		php_openssl_store_errors();
-		goto clean_exit;
-	}
-
-	tag_len = EVP_CIPHER_CTX_get_tag_length(ctx);
-	if ((tag != NULL) != (tag_len > 0)) {
-		const char *imp = tag ? "cannot" : "must";
-		zend_argument_value_error(7, "%s be specified for the chosen cipher algorithm", imp);
-		goto clean_exit;
+		RETURN_THROWS();
 	}
 
 	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
@@ -4238,11 +4223,20 @@ PHP_FUNCTION(openssl_seal)
 			if (!EG(exception)) {
 				php_error_docref(NULL, E_WARNING, "Not a public key (%dth member of pubkeys)", i+1);
 			}
+			RETVAL_FALSE;
 			goto clean_exit;
 		}
 		eks[i] = emalloc(EVP_PKEY_size(pkeys[i]) + 1);
 		i++;
 	} ZEND_HASH_FOREACH_END();
+
+	ctx = EVP_CIPHER_CTX_new();
+	if (ctx == NULL || !EVP_EncryptInit(ctx,cipher,NULL,NULL)) {
+		EVP_CIPHER_CTX_free(ctx);
+		php_openssl_store_errors();
+		RETVAL_FALSE;
+		goto clean_exit;
+	}
 
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(ctx));
@@ -4252,15 +4246,10 @@ PHP_FUNCTION(openssl_seal)
 			!EVP_SealUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
 			!EVP_SealFinal(ctx, buf + len1, &len2)) {
 		efree(buf);
+		EVP_CIPHER_CTX_free(ctx);
 		php_openssl_store_errors();
+		RETVAL_FALSE;
 		goto clean_exit;
-	}
-
-	if (tag) {
-		zend_string *tag_str = zend_string_alloc(tag_len, 0);
-		EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, ZSTR_LEN(tag_str), ZSTR_VAL(tag_str));
-		ZSTR_VAL(tag_str)[ZSTR_LEN(tag_str)] = 0;
-		ZEND_TRY_ASSIGN_REF_NEW_STR(tag, tag_str);
 	}
 
 	if (len1 + len2 > 0) {
@@ -4269,6 +4258,7 @@ PHP_FUNCTION(openssl_seal)
 
 		ekeys = zend_try_array_init(ekeys);
 		if (!ekeys) {
+			EVP_CIPHER_CTX_free(ctx);
 			goto clean_exit;
 		}
 
@@ -4286,35 +4276,21 @@ PHP_FUNCTION(openssl_seal)
 	} else {
 		efree(buf);
 	}
-
 	RETVAL_LONG(len1 + len2);
+	EVP_CIPHER_CTX_free(ctx);
 
 clean_exit:
-	if (ctx) {
-		EVP_CIPHER_CTX_free(ctx);
-	}
-
-	if (pkeys) {
-		for (i=0; i<nkeys; i++) {
-			if (pkeys[i] != NULL) {
-				EVP_PKEY_free(pkeys[i]);
-			}
+	for (i=0; i<nkeys; i++) {
+		if (pkeys[i] != NULL) {
+			EVP_PKEY_free(pkeys[i]);
 		}
-		efree(pkeys);
-	}
-
-	if (eks) {
-		for (i=0; i<nkeys; i++) {
-			if (eks[i]) {
-				efree(eks[i]);
-			}
+		if (eks[i]) {
+			efree(eks[i]);
 		}
-		efree(eks);
 	}
-
-	if (eksl) {
-		efree(eksl);
-	}
+	efree(eks);
+	efree(eksl);
+	efree(pkeys);
 }
 /* }}} */
 
@@ -4322,25 +4298,22 @@ clean_exit:
 PHP_FUNCTION(openssl_open)
 {
 	zval *privkey, *opendata;
-	EVP_PKEY *pkey = NULL;
+	EVP_PKEY *pkey;
 	int len1, len2, cipher_iv_len;
-	unsigned char *buf = NULL, *iv_buf;
-	EVP_CIPHER_CTX *ctx = NULL;
+	unsigned char *buf, *iv_buf;
+	EVP_CIPHER_CTX *ctx;
 	char * data;
 	size_t data_len;
 	char * ekey;
 	size_t ekey_len;
 	char *method, *iv = NULL;
 	size_t method_len, iv_len = 0;
-	zend_string *tag = NULL;
 	const EVP_CIPHER *cipher;
-	int tag_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szszs|s!S!", &data, &data_len, &opendata,
-				&ekey, &ekey_len, &privkey, &method, &method_len, &iv, &iv_len, &tag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szszs|s!", &data, &data_len, &opendata,
+				&ekey, &ekey_len, &privkey, &method, &method_len, &iv, &iv_len) == FAILURE) {
 		RETURN_THROWS();
 	}
-	RETVAL_FALSE;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data, 1);
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(ekey_len, ekey, 3);
@@ -4350,24 +4323,24 @@ PHP_FUNCTION(openssl_open)
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_WARNING, "Unable to coerce parameter 4 into a private key");
 		}
-		goto clean_exit;
+		RETURN_FALSE;
 	}
 
 	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		goto clean_exit;
+		RETURN_FALSE;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
 			zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
-			goto clean_exit;
+			RETURN_THROWS();
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
 			php_error_docref(NULL, E_WARNING, "IV length is invalid");
-			goto clean_exit;
+			RETURN_FALSE;
 		}
 		iv_buf = (unsigned char *)iv;
 	} else {
@@ -4377,48 +4350,20 @@ PHP_FUNCTION(openssl_open)
 	buf = emalloc(data_len + 1);
 
 	ctx = EVP_CIPHER_CTX_new();
-	if (ctx == NULL || !EVP_OpenInit(ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey)) {
-		php_openssl_store_errors();
-		goto clean_exit;
-	}
-
-	tag_len = EVP_CIPHER_CTX_get_tag_length(ctx);
-	if ((tag != NULL) != (tag_len > 0)) {
-		const char *imp = tag ? "cannot" : "must";
-		zend_argument_value_error(7, "%s be specified for the chosen cipher algorithm", imp);
-		goto clean_exit;
-	}
-	if (tag) {
-		if (ZSTR_LEN(tag) != tag_len) {
-			zend_argument_value_error(7, "must be %d bytes long", tag_len);
-			goto clean_exit;
-		}
-
-		if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, ZSTR_LEN(tag), ZSTR_VAL(tag))) {
-			php_openssl_store_errors();
-			goto clean_exit;
-		}
-	}
-
-	if (EVP_OpenUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) &&
-		EVP_OpenFinal(ctx, buf + len1, &len2) && (len1 + len2 > 0)) {
+	if (ctx != NULL && EVP_OpenInit(ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
+			EVP_OpenUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) &&
+			EVP_OpenFinal(ctx, buf + len1, &len2) && (len1 + len2 > 0)) {
 		buf[len1 + len2] = '\0';
 		ZEND_TRY_ASSIGN_REF_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
 		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
+		RETVAL_FALSE;
 	}
 
-clean_exit:
-	if (buf) {
-		efree(buf);
-	}
-	if (pkey) {
-		EVP_PKEY_free(pkey);
-	}
-	if (ctx) {
-		EVP_CIPHER_CTX_free(ctx);
-	}
+	efree(buf);
+	EVP_PKEY_free(pkey);
+	EVP_CIPHER_CTX_free(ctx);
 }
 /* }}} */
 

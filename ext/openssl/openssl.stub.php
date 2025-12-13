@@ -628,15 +628,14 @@ function openssl_verify(string $data, string $signature, $public_key, string|int
  * @param string $sealed_data
  * @param array $encrypted_keys
  * @param string $iv
- * @param string $tag
  */
-function openssl_seal(#[\SensitiveParameter] string $data, &$sealed_data, &$encrypted_keys, array $public_key, string $cipher_algo, &$iv = null, &$tag = null): int|false {}
+function openssl_seal(#[\SensitiveParameter] string $data, &$sealed_data, &$encrypted_keys, array $public_key, string $cipher_algo, &$iv = null): int|false {}
 
 /**
  * @param string $output
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_open(string $data, #[\SensitiveParameter] &$output, string $encrypted_key, #[\SensitiveParameter] $private_key, string $cipher_algo, ?string $iv = null, ?string $tag = null): bool {}
+function openssl_open(string $data, #[\SensitiveParameter] &$output, string $encrypted_key, #[\SensitiveParameter] $private_key, string $cipher_algo, ?string $iv = null): bool {}
 
 /**
  * @return array<int, string>
