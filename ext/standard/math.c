@@ -389,6 +389,62 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
+/* Return the given value if in range of min and max */
+static void php_math_clamp(zval *return_value, zval *value, zval *min, zval *max)
+{
+	if (Z_TYPE_P(min) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
+		zend_argument_value_error(2, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE_P(max) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
+		zend_argument_value_error(3, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, min) == -1) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, value) == -1) {
+		RETURN_COPY(max);
+	}
+
+	if (zend_compare(value, min) == -1) {
+		RETURN_COPY(min);
+	}
+
+	RETURN_COPY(value);
+}
+
+/* {{{ Return the given value if in range of min and max */
+PHP_FUNCTION(clamp)
+{
+	zval *zvalue, *zmin, *zmax;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL(zvalue)
+		Z_PARAM_ZVAL(zmin)
+		Z_PARAM_ZVAL(zmax)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
+}
+/* }}} */
+
+/* {{{ Return the given value if in range of min and max */
+ZEND_FRAMELESS_FUNCTION(clamp, 3)
+{
+	zval *zvalue, *zmin, *zmax;
+	Z_FLF_PARAM_ZVAL(1, zvalue);
+	Z_FLF_PARAM_ZVAL(2, zmin);
+	Z_FLF_PARAM_ZVAL(3, zmax);
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
+}
+/* }}} */
+
 /* {{{ Returns the sine of the number in radians */
 PHP_FUNCTION(sin)
 {
