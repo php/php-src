@@ -195,7 +195,7 @@ magic_stream(struct magic_set *ms, php_stream *stream)
 file_private const char *
 file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 {
-	const char *ret = NULL;
+	int	rv = -1;
 	unsigned char *buf;
 	zend_stat_t   sb = {0};
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
@@ -218,7 +218,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	case 0:			/* nothing found */
 		break;
 	default:		/* matched it and printed type */
-		ret = file_getbuffer(ms);
+		rv = 0;
 		goto done;
 	}
 
@@ -230,6 +230,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 		if (!stream) {
 			if (unreadable_info(ms, sb.st_mode, inname) == -1)
 				goto done;
+			rv = -1;
 			goto done;
 		}
 	}
@@ -238,6 +239,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	if (php_stream_stat(stream, &ssb) < 0) {
 		if (ms->flags & MAGIC_ERROR) {
 			file_error(ms, errno, "cannot stat `%s'", inname);
+			rv = -1;
 			goto done;
 		}
 	}
@@ -246,26 +248,15 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	/*
 	 * try looking at the first ms->bytes_max bytes
 	 */
-	zend_begin_record_errors();
 	if ((nbytes = php_stream_read(stream, (char *)buf, ms->bytes_max - nbytes)) < 0) {
-		if (errno == EISDIR) {
-			EG(record_errors) = false;
-			ret = "directory";
-		} else {
-			zend_emit_recorded_errors();
-			file_error(ms, errno, "cannot read `%s'", inname);
-		}
-		zend_free_recorded_errors();
+		file_error(ms, errno, "cannot read `%s'", inname);
 		goto done;
 	}
-	zend_emit_recorded_errors();
-	zend_free_recorded_errors();
 
 	(void)memset(buf + nbytes, 0, SLOP); /* NUL terminate */
 	if (file_buffer(ms, stream, &sb, inname, buf, CAST(size_t, nbytes)) == -1)
 		goto done;
-	ret = file_getbuffer(ms);
-
+	rv = 0;
 done:
 	efree(buf);
 
@@ -273,7 +264,7 @@ done:
 		php_stream_close(stream);
 	}
 out:
-	return ret;
+	return rv == 0 ? file_getbuffer(ms) : NULL;
 }
 
 

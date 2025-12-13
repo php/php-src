@@ -242,14 +242,12 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 	ZEND_ASSERT(!zend_str_has_nul_byte(path));
 	ZEND_ASSERT(context != NULL);
 
-#ifdef PHP_WIN32
 	php_stream_statbuf ssb;
 	if (php_stream_stat_path_ex(ZSTR_VAL(path), 0, &ssb, context) == SUCCESS) {
 		if (ssb.sb.st_mode & S_IFDIR) {
 			return "directory";
 		}
 	}
-#endif
 
 	php_stream *stream = php_stream_open_wrapper_ex(ZSTR_VAL(path), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {
