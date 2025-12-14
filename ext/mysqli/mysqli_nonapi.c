@@ -1018,6 +1018,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 
 	if (FAIL == mysqlnd_begin_transaction(mysql->mysql, flags, name)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1042,6 +1043,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	}
 
 	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1065,6 +1067,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 		RETURN_THROWS();
 	}
 	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;

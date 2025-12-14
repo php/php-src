@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 
 - Bz2:
   . Fixed bug GH-20620 (bzcompress overflow on large source size).
-    (David Carlier)  
+    (David Carlier)
 
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
@@ -22,7 +22,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
- 
+
 18 Dec 2025, PHP 8.4.16
 
 - Core:
@@ -73,6 +73,9 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed bug GH-20492 (mbstring compile warning due to non-strings).
     (ndossche)
+
+- mysqli:
+  . Make mysqli_begin_transaction() report errors properly. (Kamil Tekiela)
 
 - MySQLnd:
   . Fixed bug GH-20528 (Regression breaks mysql connexion using an IPv6 address
