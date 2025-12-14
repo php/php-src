@@ -31,7 +31,11 @@ var_dump($would);
 var_dump(flock($fp, LOCK_UN, $would));
 var_dump($would);
 
-var_dump(flock($fp, -1));
+try {
+    var_dump(flock($fp, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 try {
     var_dump(flock($fp, 0));
@@ -59,5 +63,5 @@ bool(true)
 int(0)
 bool(true)
 int(0)
-bool(true)
+flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
