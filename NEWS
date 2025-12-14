@@ -50,6 +50,10 @@ PHP                                                                        NEWS
   . Soap::__setCookie() when cookie name is a digit is now not stored and represented
     as a string anymore but a int. (David Carlier)
 
+- SPL:
+  . DirectoryIterator key can now work better with filesystem supporting larger
+    directory indexing. (David Carlier)
+
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
