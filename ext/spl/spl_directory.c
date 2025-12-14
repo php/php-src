@@ -414,7 +414,7 @@ static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 			spl_filesystem_dir_open(intern, source->path);
 			/* read until we hit the position in which we were before */
 			bool skip_dots = SPL_HAS_FLAG(source->flags, SPL_FILE_DIR_SKIPDOTS);
-			int index;
+			zend_long index;
 			for (index = 0; index < source->u.dir.index; ++index) {
 				do {
 					spl_filesystem_dir_read(intern);
