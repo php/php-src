@@ -7,7 +7,8 @@ plusminmax
 --FILE--
 <?php
 $db = new SQLite3(':memory:');
-$db->prepare('BEGIN;')->execute()->fetchArray();
+var_dump($db->prepare('BEGIN;')->execute()->fetchArray());
 ?>
 --EXPECTF--
 Warning: SQLite3Result::fetchArray(): Unable to execute statement: cannot start a transaction within a transaction in %s on line %d
+bool(false)
