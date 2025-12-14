@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_class_alias.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_lazy_objects.h"
@@ -105,6 +106,7 @@ PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
 PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI zend_class_entry *reflection_constant_ptr;
 PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
+PHPAPI zend_class_entry *reflection_class_alias_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
@@ -1235,8 +1237,10 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 		zend_string *key;
 		zend_class_entry *ce;
 		int num_classes = 0;
+		zval *ce_or_alias;
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			_extension_class_string(ce, key, &str_classes, ZSTR_VAL(sub_indent), module, &num_classes);
 		} ZEND_HASH_FOREACH_END();
 		if (num_classes) {
@@ -5438,9 +5442,11 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
 
 					for (j = 0; j < ce->num_traits; j++) {
-						zend_class_entry *trait =
-							zend_hash_find_ptr(CG(class_table), ce->trait_names[j].lc_name);
-						ZEND_ASSERT(trait && "Trait must exist");
+						zval *trait_entry =
+							zend_hash_find(CG(class_table), ce->trait_names[j].lc_name);
+						ZEND_ASSERT(trait_entry && "Trait must exist");
+						zend_class_entry *trait;
+						Z_CE_FROM_ZVAL_P(trait, trait_entry);
 						if (zend_hash_exists(&trait->function_table, lcname)) {
 							class_name = trait->name;
 							break;
@@ -6817,7 +6823,9 @@ ZEND_METHOD(ReflectionExtension, getClasses)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		add_extension_class(ce, key, return_value, module, true);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -6835,7 +6843,9 @@ ZEND_METHOD(ReflectionExtension, getClassNames)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		add_extension_class(ce, key, return_value, module, false);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -7897,6 +7907,76 @@ ZEND_METHOD(ReflectionConstant, __toString)
 	RETURN_STR(smart_str_extract(&str));
 }
 
+ZEND_METHOD(ReflectionClassAlias, __construct)
+{
+	zend_string *name;
+
+	zval *object = ZEND_THIS;
+	reflection_object *intern = Z_REFLECTION_P(object);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// First use zend_lookup_class() which will also take care of autoloading,
+	// but that will always return the underlying class entry; don't complain
+	// about deprecations here
+	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_SILENT);
+	if (ce == NULL) {
+		if (!EG(exception)) {
+			zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", ZSTR_VAL(name));
+		}
+		RETURN_THROWS();
+	}
+
+	// We now know that the alias exists, find it somewhere in the class_table
+	zend_string *lc_name;
+	if (ZSTR_VAL(name)[0] == '\\') {
+		lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+	} else {
+		lc_name = zend_string_tolower(name);
+	}
+
+	zval *entry = zend_hash_find(EG(class_table), lc_name);
+	zend_string_release_ex(lc_name, /* persistent */ false);
+	ZEND_ASSERT(entry != NULL);
+
+	if (Z_TYPE_P(entry) != IS_ALIAS_PTR) {
+		ZEND_ASSERT(Z_TYPE_P(entry) == IS_PTR);
+		zend_throw_exception_ex(reflection_exception_ptr, -1, "\"%s\" is not an alias", ZSTR_VAL(name));
+		RETURN_THROWS();
+	}
+
+	zend_class_alias *alias = Z_CLASS_ALIAS_P(entry);
+
+	intern->ptr = alias;
+	intern->ref_type = REF_TYPE_OTHER;
+
+	zval *name_zv = reflection_prop_name(object);
+	zval_ptr_dtor(name_zv);
+	ZVAL_STR_COPY(name_zv, name);
+}
+
+ZEND_METHOD(ReflectionClassAlias, __toString)
+{
+	reflection_object *intern;
+	zend_class_alias *alias;
+	smart_str str = {0};
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(alias);
+
+	smart_str_append_printf(
+		&str,
+		"%s - alias for %s",
+		Z_STRVAL_P(reflection_prop_name(ZEND_THIS)),
+		ZSTR_VAL(alias->ce->name)
+	);
+	RETURN_STR(smart_str_extract(&str));
+}
+
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -8001,6 +8081,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_constant_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_property_hook_type_ptr = register_class_PropertyHookType();
+
+	reflection_class_alias_ptr = register_class_ReflectionClassAlias(reflector_ptr);
+	reflection_class_alias_ptr->create_object = reflection_objects_new;
+	reflection_class_alias_ptr->default_object_handlers = &reflection_object_handlers;
 
 	REFLECTION_G(key_initialized) = 0;
 

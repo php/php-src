@@ -18,6 +18,7 @@
 */
 
 #include "zend.h"
+#include "zend_class_alias.h"
 #include "zend_API.h"
 #include "zend_attributes.h"
 #include "zend_gc.h"
@@ -1431,7 +1432,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
-			ce = Z_PTR_P(zv);
+			Z_CE_FROM_ZVAL_P(ce, zv);
 			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
 			 && ZSTR_VAL(key)[0] != 0) {

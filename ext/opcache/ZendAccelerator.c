@@ -22,6 +22,7 @@
 #include "main/php.h"
 #include "main/php_globals.h"
 #include "zend.h"
+#include "zend_class_alias.h"
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
@@ -680,9 +681,8 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
 	ZEND_HASH_MAP_FOREACH_BUCKET(CG(class_table), p) {
-		zend_class_entry *ce;
-
-		ce = (zend_class_entry*)Z_PTR(p->val);
+		zend_class_entry *ce = NULL;
+		Z_CE_FROM_ZVAL(ce, p->val);
 
 		if (p->key) {
 			p->key = new_interned_string(p->key);
@@ -3634,8 +3634,9 @@ static void preload_shutdown(void)
 	}
 
 	if (EG(class_table)) {
+		zend_class_entry *ce;
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
+			Z_CE_FROM_ZVAL_P(ce, zv);
 			if (ce->type == ZEND_INTERNAL_CLASS && Z_TYPE_P(zv) != IS_ALIAS_PTR) {
 				break;
 			}
@@ -3723,7 +3724,8 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
 	ZEND_HASH_MAP_FOREACH_BUCKET_FROM(src, p, EG(persistent_classes_count)) {
-		zend_class_entry *ce = Z_PTR(p->val);
+		zend_class_entry *ce;
+		Z_CE_FROM_ZVAL(ce, p->val);
 
 		/* Possible with internal class aliases */
 		if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -3787,17 +3789,27 @@ static void preload_sort_classes(void *base, size_t count, size_t siz, compare_f
 
 	while (b1 < end) {
 try_again:
-		ce = (zend_class_entry*)Z_PTR(b1->val);
+		Z_CE_FROM_ZVAL(ce, b1->val);
 		if (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) {
 			p = ce->parent;
 			if (p->type == ZEND_USER_CLASS) {
 				b2 = b1 + 1;
 				while (b2 < end) {
-					if (p ==  Z_PTR(b2->val)) {
-						tmp = *b1;
-						*b1 = *b2;
-						*b2 = tmp;
-						goto try_again;
+					if (Z_TYPE(b2->val) == IS_ALIAS_PTR) {
+						if (p == Z_CLASS_ALIAS(b2->val)->ce) {
+							tmp = *b1;
+							*b1 = *b2;
+							*b2 = tmp;
+							goto try_again;
+						}
+					} else {
+						ZEND_ASSERT(Z_TYPE(b2->val) == IS_PTR);
+						if (p ==  Z_PTR(b2->val)) {
+							tmp = *b1;
+							*b1 = *b2;
+							*b2 = tmp;
+							goto try_again;
+						}
 					}
 					b2++;
 				}
@@ -3836,9 +3848,9 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 
 	if (ce->parent_name) {
 		zend_string *key = zend_string_tolower(ce->parent_name);
-		zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
+		zval *parent_entry = zend_hash_find(EG(class_table), key);
 		zend_string_release(key);
-		if (!parent) {
+		if (!parent_entry) {
 			error->kind = "Unknown parent ";
 			error->name = ZSTR_VAL(ce->parent_name);
 			return FAILURE;
@@ -3847,9 +3859,9 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 
 	if (ce->num_interfaces) {
 		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
-			zend_class_entry *interface =
-				zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
-			if (!interface) {
+			zval *interface_entry =
+				zend_hash_find(EG(class_table), ce->interface_names[i].lc_name);
+			if (!interface_entry) {
 				error->kind = "Unknown interface ";
 				error->name = ZSTR_VAL(ce->interface_names[i].name);
 				return FAILURE;
@@ -3859,9 +3871,9 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 
 	if (ce->num_traits) {
 		for (uint32_t i = 0; i < ce->num_traits; i++) {
-			zend_class_entry *trait =
-				zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
-			if (!trait) {
+			zval *trait_entry =
+				zend_hash_find(EG(class_table), ce->trait_names[i].lc_name);
+			if (!trait_entry) {
 				error->kind = "Unknown trait ";
 				error->name = ZSTR_VAL(ce->trait_names[i].name);
 				return FAILURE;
@@ -4034,7 +4046,7 @@ static void preload_link(void)
 		changed = false;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL_FROM(EG(class_table), key, zv, EG(persistent_classes_count)) {
-			ce = Z_PTR_P(zv);
+			Z_CE_FROM_ZVAL_P(ce, zv);
 
 			/* Possible with internal class aliases */
 			if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -4097,13 +4109,24 @@ static void preload_link(void)
 			} zend_catch {
 				/* Clear variance obligations that were left behind on bailout. */
 				if (CG(delayed_variance_obligations)) {
-					zend_hash_index_del(
-						CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
+					if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+						zend_hash_index_del(
+							CG(delayed_variance_obligations), (uintptr_t) Z_CLASS_ALIAS_P(zv)->ce);
+					} else {
+						ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);						
+						zend_hash_index_del(
+							CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
+					}
 				}
 
 				/* Restore the original class. */
 				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
-				Z_CE_P(zv) = orig_ce;
+				if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+					Z_CLASS_ALIAS_P(zv)->ce = orig_ce;
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					Z_CE_P(zv) = orig_ce;
+				}
 				orig_ce->ce_flags &= ~temporary_flags;
 				zend_arena_release(&CG(arena), checkpoint);
 
@@ -4125,8 +4148,7 @@ static void preload_link(void)
 		changed = false;
 
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			ce = Z_PTR_P(zv);
-
+			Z_CE_FROM_ZVAL_P(ce, zv);
 			/* Possible with internal class aliases */
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				if (Z_TYPE_P(zv) != IS_ALIAS_PTR) {
@@ -4150,7 +4172,7 @@ static void preload_link(void)
 	/* Warn for classes that could not be linked. */
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL_FROM(
 			EG(class_table), key, zv, EG(persistent_classes_count)) {
-		ce = Z_PTR_P(zv);
+		Z_CE_FROM_ZVAL_P(ce, zv);
 
 		/* Possible with internal class aliases */
 		if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -4204,7 +4226,11 @@ static void preload_link(void)
 		ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 		preload_remove_declares(op_array);
 	} ZEND_HASH_FOREACH_END();
-	ZEND_HASH_MAP_FOREACH_PTR_FROM(EG(class_table), ce, EG(persistent_classes_count)) {
+	zend_string *_unused;
+	(void)_unused;
+	// No ZEND_HASH_MAP_FOREACH_VAL_FROM
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL_FROM(EG(class_table), _unused, zv, EG(persistent_classes_count)) {
+		Z_CE_FROM_ZVAL_P(ce, zv);
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->type == ZEND_USER_FUNCTION) {
 				preload_remove_declares(op_array);
@@ -4404,18 +4430,21 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 static void preload_optimize(zend_persistent_script *script)
 {
 	zend_class_entry *ce;
+	zval *zv;
 	zend_persistent_script *tmp_script;
 
 	zend_shared_alloc_init_xlat_table();
 
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+	ZEND_HASH_MAP_FOREACH_VAL(&script->script.class_table, zv) {
+		Z_CE_FROM_ZVAL_P(ce, zv);
 		if (ce->ce_flags & ZEND_ACC_TRAIT) {
 			preload_register_trait_methods(ce);
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_MAP_FOREACH_PTR(preload_scripts, tmp_script) {
-		ZEND_HASH_MAP_FOREACH_PTR(&tmp_script->script.class_table, ce) {
+		ZEND_HASH_MAP_FOREACH_VAL(&tmp_script->script.class_table, zv) {
+			Z_CE_FROM_ZVAL_P(ce, zv);
 			if (ce->ce_flags & ZEND_ACC_TRAIT) {
 				preload_register_trait_methods(ce);
 			}
@@ -4425,12 +4454,14 @@ static void preload_optimize(zend_persistent_script *script)
 	zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
 	zend_accel_finalize_delayed_early_binding_list(script);
 
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+	ZEND_HASH_MAP_FOREACH_VAL(&script->script.class_table, zv) {
+		Z_CE_FROM_ZVAL_P(ce, zv);
 		preload_fix_trait_methods(ce);
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_MAP_FOREACH_PTR(preload_scripts, script) {
-		ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+		ZEND_HASH_MAP_FOREACH_VAL(&script->script.class_table, zv) {
+			Z_CE_FROM_ZVAL_P(ce, zv);
 			preload_fix_trait_methods(ce);
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
@@ -4581,7 +4612,9 @@ static void accel_reset_arena_info(zend_persistent_script *script)
 	ZEND_HASH_MAP_FOREACH_PTR(&script->script.function_table, op_array) {
 		zend_accel_clear_call_graph_ptrs(op_array);
 	} ZEND_HASH_FOREACH_END();
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_VAL(&script->script.class_table, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->scope == ce
 			 && op_array->type == ZEND_USER_FUNCTION

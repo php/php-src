@@ -782,6 +782,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
                                             zend_file_cache_metainfo *info,
                                             void                     *buf)
 {
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 	zend_class_entry *ce;
 
 	SERIALIZE_PTR(Z_PTR_P(zv));
@@ -1637,6 +1638,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
                                                        zend_persistent_script  *script,
                                                        void                    *buf)
 {
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 	if (!IS_UNSERIALIZED(Z_PTR_P(zv))) {
 		zend_class_constant *c;
 
@@ -1662,6 +1664,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
                                               zend_persistent_script  *script,
                                               void                    *buf)
 {
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 	zend_class_entry *ce;
 
 	UNSERIALIZE_PTR(Z_PTR_P(zv));
