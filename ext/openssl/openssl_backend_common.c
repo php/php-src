@@ -1448,7 +1448,10 @@ EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 
 	int egdsocket, seeded;
 	char *randfile = php_openssl_conf_get_string(req->req_config, req->section_name, "RANDFILE");
-	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
+	if (php_openssl_load_rand_file(randfile, &egdsocket, &seeded) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Failed to load RANDFILE");
+		return NULL;
+	}
 
 	EVP_PKEY *key = NULL;
 	EVP_PKEY *params = NULL;
@@ -1539,7 +1542,9 @@ EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 	req->priv_key = key;
 
 cleanup:
-	php_openssl_write_rand_file(randfile, egdsocket, seeded);
+	if (php_openssl_write_rand_file(randfile, egdsocket, seeded) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Failed to write to RANDFILE");
+	}
 	EVP_PKEY_free(params);
 	EVP_PKEY_CTX_free(ctx);
 	return key;
