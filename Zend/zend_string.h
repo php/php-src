@@ -261,7 +261,7 @@ static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t
 	ZEND_ASSERT(len >= ZSTR_LEN(s));
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
+			ret = (zend_string *)perealloc3(s, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), _ZSTR_STRUCT_SIZE(ZSTR_LEN(s)), persistent);
 			ZSTR_LEN(ret) = len;
 			zend_string_forget_hash_val(ret);
 			return ret;

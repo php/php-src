@@ -2448,6 +2448,11 @@ function substr_replace(array|string $string, array|string $replace, array|int $
  */
 function quotemeta(string $string): string {}
 
+/**
+ * @compile-time-eval
+ */
+function str_extend(string $string, int $size): string {}
+
 /** @compile-time-eval */
 function ord(string $character): int {}
 
