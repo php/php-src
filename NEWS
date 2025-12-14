@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fix some deprecations on newer libxml versions regarding input
     buffer/parser handling. (ndossche)
 
+- mysqli:
+  . Make mysqli_begin_transaction() report errors properly. (Kamil Tekiela)
+
 - MySQLnd:
   . Fixed bug GH-20528 (Regression breaks mysql connexion using an IPv6 address
     enclosed in square brackets). (Remi)
