@@ -905,6 +905,16 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			}
 		}
 #endif
+
+#ifdef PDO_USE_MYSQLND
+		{
+			zend_long send_clear_password = pdo_attr_lval(driver_options,
+					PDO_MYSQL_ATTR_SEND_CLEAR_PASSWORD, -1);
+			if (send_clear_password == 1) {
+				connect_opts |= CLIENT_SEND_CLEAR_PASSWORD;
+			}
+		}
+#endif
 	}
 
 	/* Always explicitly set the LOCAL_INFILE option. */
