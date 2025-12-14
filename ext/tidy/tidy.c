@@ -148,6 +148,8 @@ static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
 
+zend_class_entry *tidy_ce_exception;
+
 zend_module_entry tidy_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"tidy",
@@ -853,6 +855,9 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = XtOffsetOf(PHPTidyObj, std);
 	tidy_object_handlers_node.free_obj = tidy_object_handlers_doc.free_obj = tidy_object_free_storage;
 
+	tidy_ce_exception = register_class_TidyException(zend_ce_exception);
+	tidy_ce_exception->create_object = zend_ce_exception->create_object;
+
 	register_tidy_symbols(module_number);
 
 	php_output_handler_alias_register(ZEND_STRL("ob_tidyhandler"), php_tidy_output_handler_init);
@@ -1078,12 +1083,12 @@ PHP_FUNCTION(tidy_parse_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
-		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
-		RETURN_FALSE;
+		zend_throw_error(tidy_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
-		zend_string_release_ex(contents, 0);
+		zend_string_release_ex(contents, false);
 		zend_value_error("File content is too long");
 		RETURN_THROWS();
 	}
@@ -1354,11 +1359,9 @@ PHP_METHOD(tidy, __construct)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	obj = Z_TIDY_P(ZEND_THIS);
-
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
-			zend_throw_error(zend_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
+			zend_throw_error(tidy_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 			RETURN_THROWS();
 		}
 
@@ -1370,6 +1373,8 @@ PHP_METHOD(tidy, __construct)
 
 		zend_error_handling error_handling;
 		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+		obj = Z_TIDY_P(ZEND_THIS);
+
 		if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) != SUCCESS) {
 			zend_restore_error_handling(&error_handling);
 			zend_string_release_ex(contents, 0);
@@ -1400,11 +1405,9 @@ PHP_METHOD(tidy, parseFile)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	obj = Z_TIDY_P(ZEND_THIS);
-
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
-		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
-		RETURN_FALSE;
+		zend_throw_error(tidy_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
@@ -1412,6 +1415,8 @@ PHP_METHOD(tidy, parseFile)
 		zend_value_error("File content is too long");
 		RETURN_THROWS();
 	}
+
+	obj = Z_TIDY_P(ZEND_THIS);
 
 	RETVAL_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) == SUCCESS
 				&& php_tidy_parse_string(obj, contents, enc) == SUCCESS);
