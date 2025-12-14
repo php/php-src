@@ -665,9 +665,11 @@ PHP_FUNCTION(password_algos) {
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
+	size_t i = 0;
+	array_init_size(return_value, zend_hash_num_elements(&php_password_algos));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_password_algos, algo) {
-		add_next_index_str(return_value, zend_string_copy(algo));
+		add_index_str(return_value, i++, zend_string_copy(algo));
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
