@@ -1006,7 +1006,7 @@ ZEND_FUNCTION(method_exists)
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true for the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
-					&& zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME));
+					&& zend_string_equals_ci(method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE)));
 
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);
@@ -1017,7 +1017,7 @@ ZEND_FUNCTION(method_exists)
 	} else {
 	    /* Returns true for fake Closure::__invoke */
 	    if (ce == zend_ce_closure
-	        && zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME)) {
+	        && zend_string_equals_ci(method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
 	        RETURN_TRUE;
 	    }
 	}
@@ -1587,7 +1587,7 @@ ZEND_FUNCTION(get_resources)
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if (zend_string_equals_literal(type, "Unknown")) {
+	} else if (zend_string_equals(type, ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED))) {
 		array_init(return_value);
 		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
 			if (!key && Z_RES_TYPE_P(val) <= 0) {
