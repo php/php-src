@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20668 (\Uri\WhatWg\Url::withHost() crashes (SEGV) for URLs
     using the file: scheme). (lexborisov)
 
+- Sqlite3:
+  . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
+    null returned). (ndossche, plusminmax)
+
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
 
