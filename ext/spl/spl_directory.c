@@ -292,6 +292,11 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_string *
 	intern->type = SPL_FS_DIR;
 	intern->u.dir.dirp = php_stream_opendir(ZSTR_VAL(path), REPORT_ERRORS, FG(default_context));
 
+	if (intern->u.dir.dirp) {
+		/* we prevent potential UAF with conflicting explicit fclose(), relying on the object destructor for this */
+		intern->u.dir.dirp->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
+
 	if (ZSTR_LEN(path) > 1 && IS_SLASH_AT(ZSTR_VAL(path), ZSTR_LEN(path)-1)) {
 		intern->path = zend_string_init(ZSTR_VAL(path), ZSTR_LEN(path)-1, 0);
 	} else {
