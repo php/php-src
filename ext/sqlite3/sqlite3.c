@@ -2043,6 +2043,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 		default:
 			php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+			RETURN_FALSE;
 	}
 }
 /* }}} */
