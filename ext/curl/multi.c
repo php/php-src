@@ -448,6 +448,109 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 }
 /* }}} */
 
+/* {{{ */
+PHP_FUNCTION(curl_multi_socket_action)
+{
+	zval *z_mh;
+	zval *z_socket;
+	zend_long ev_bitmask;
+	zval *z_still_running;
+
+	ZEND_PARSE_PARAMETERS_START(4,4)
+		Z_PARAM_OBJECT_OF_CLASS(z_mh, curl_multi_ce)
+		Z_PARAM_ZVAL(z_socket)
+		Z_PARAM_LONG(ev_bitmask)
+		Z_PARAM_ZVAL(z_still_running)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_curlm *mh = Z_CURL_MULTI_P(z_mh);
+
+	curl_socket_t socket;
+
+	if (Z_TYPE_P(z_socket) == IS_LONG) {
+		socket = (curl_socket_t) Z_LVAL_P(z_socket);
+	} else {
+		php_stream *p_stream;
+		php_stream_from_zval(p_stream, z_socket);
+		if (php_stream_cast(
+				p_stream, PHP_STREAM_AS_FD,
+				(void**) &socket, REPORT_ERRORS) != SUCCESS) {
+			return;
+		}
+	}
+
+	int still_running = zval_get_long(z_still_running);
+	CURLMcode error = curl_multi_socket_action(
+		mh->multi, socket, ev_bitmask, &still_running);
+	ZEND_TRY_ASSIGN_REF_LONG(z_still_running, still_running);
+
+	SAVE_CURLM_ERROR(mh, error);
+	RETURN_LONG((zend_long) error);
+}
+
+static int _php_curl_multi_timerfunction(CURLM *multi, zend_long timeout, void *userp) {
+	php_curlm *mh = (php_curlm *) userp;
+
+	zval z_object;
+	ZVAL_OBJ_COPY(&z_object, &mh->std);
+
+	zval z_timeout;
+	ZVAL_LONG(&z_timeout, timeout);
+
+	zval call_args[2] = {z_object, z_timeout};
+	zval retval;
+	zend_call_known_fcc(&mh->handlers.timer_function, &retval, /* param_count */ 2, call_args, /* named_params */ NULL);
+
+	if (!Z_ISUNDEF(retval)) {
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(&z_object);
+	return SUCCESS;
+}
+
+static int _php_curl_multi_socketfunction(CURL *easy, curl_socket_t socket, int what, void *userp, void *stream) {
+	php_curlm *mh = (php_curlm *) userp;
+	php_stream *p_stream;
+
+	if (stream == NULL && what != CURL_POLL_REMOVE) {
+		p_stream = (void*) php_stream_fopen_from_fd(socket, "rw", NULL);
+		if (!p_stream) {
+			return FAILURE;
+		}
+
+		if (curl_multi_assign(mh->multi, socket, p_stream) != CURLM_OK) {
+			php_stream_close(p_stream);
+			return FAILURE;
+		}
+	} else {
+		p_stream = (php_stream*) stream;
+	}
+
+	zval z_stream;
+	php_stream_to_zval(p_stream, &z_stream);
+
+	zval *z_easy = _php_curl_multi_find_easy_handle(mh, easy);
+
+	zval z_what;
+	ZVAL_LONG(&z_what, what);
+	zval call_args[3] = {*z_easy, z_stream, z_what};
+	zval retval;
+	zend_call_known_fcc(&mh->handlers.socket_function, &retval, /* param_count */ 3, call_args, /* named_params */ NULL);
+
+	if (!Z_ISUNDEF(retval)) {
+		zval_ptr_dtor(&retval);
+	}
+
+	if (what == CURL_POLL_REMOVE && p_stream != NULL) {
+		curl_multi_assign(mh->multi, socket, NULL);
+		php_stream_close(p_stream);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
@@ -497,6 +600,49 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 				return false;
 			}
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
+			break;
+		}
+		case CURLMOPT_SOCKETFUNCTION: {
+			if (ZEND_FCC_INITIALIZED(mh->handlers.socket_function)) {
+				zend_fcc_dtor(&mh->handlers.socket_function);
+			}
+
+			char *error_str = NULL;
+			if (UNEXPECTED(!zend_is_callable_ex(zvalue, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, &mh->handlers.socket_function, /* error */ &error_str))) {
+				if (!EG(exception)) {
+					zend_argument_type_error(2, "must be a valid callback for option CURLMOPT_SOCKETFUNCTION, %s", error_str);
+				}
+				efree(error_str);
+				return false;
+			}
+			zend_fcc_addref(&mh->handlers.socket_function);
+
+			error = curl_multi_setopt(mh->multi, CURLMOPT_SOCKETFUNCTION, _php_curl_multi_socketfunction);
+			if (error != CURLM_OK) {
+				return false;
+			}
+			error = curl_multi_setopt(mh->multi, CURLMOPT_SOCKETDATA, mh);
+			break;
+		}
+		case CURLMOPT_TIMERFUNCTION: {
+			if (ZEND_FCC_INITIALIZED(mh->handlers.timer_function)) {
+				zend_fcc_dtor(&mh->handlers.timer_function);
+			}
+
+			char *error_str = NULL;
+			if (UNEXPECTED(!zend_is_callable_ex(zvalue, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, &mh->handlers.timer_function, /* error */ &error_str))) {
+				if (!EG(exception)) {
+					zend_argument_type_error(2, "must be a valid callback for option CURLMOPT_TIMERFUNCTION, %s", error_str);
+				}
+				efree(error_str);
+				return false;
+			}
+			zend_fcc_addref(&mh->handlers.timer_function);
+			error = curl_multi_setopt(mh->multi, CURLMOPT_TIMERFUNCTION, _php_curl_multi_timerfunction);
+			if (error != CURLM_OK) {
+				return false;
+			}
+			error = curl_multi_setopt(mh->multi, CURLMOPT_TIMERDATA, mh);
 			break;
 		}
 		default:
@@ -575,6 +721,14 @@ static void curl_multi_free_obj(zend_object *object)
 		zend_fcc_dtor(&mh->handlers.server_push);
 	}
 
+	if (ZEND_FCC_INITIALIZED(mh->handlers.timer_function)) {
+		zend_fcc_dtor(&mh->handlers.timer_function);
+	}
+
+	if (ZEND_FCC_INITIALIZED(mh->handlers.socket_function)) {
+		zend_fcc_dtor(&mh->handlers.socket_function);
+	}
+
 	zend_object_std_dtor(&mh->std);
 }
 
@@ -586,6 +740,14 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 
 	if (ZEND_FCC_INITIALIZED(curl_multi->handlers.server_push)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl_multi->handlers.server_push);
+	}
+
+	if (ZEND_FCC_INITIALIZED(curl_multi->handlers.timer_function)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl_multi->handlers.timer_function);
+	}
+
+	if (ZEND_FCC_INITIALIZED(curl_multi->handlers.socket_function)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl_multi->handlers.socket_function);
 	}
 
 	zend_llist_position pos;
