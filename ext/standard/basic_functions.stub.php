@@ -1491,7 +1491,7 @@ function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-function header_register_callback(callable $callback): bool {}
+function header_register_callback(callable $callback): true {}
 
 /* main/output.c */
 
@@ -2016,11 +2016,11 @@ function get_include_path(): string|false {}
 /** @refcount 1 */
 function print_r(mixed $value, bool $return = false): string|true {}
 
-function connection_aborted(): int {}
+function connection_aborted(): bool {}
 
 function connection_status(): int {}
 
-function ignore_user_abort(?bool $enable = null): int {}
+function ignore_user_abort(?bool $enable = null): bool {}
 
 #ifdef HAVE_GETSERVBYNAME
 function getservbyname(string $service, string $protocol): int|false {}
@@ -2040,7 +2040,7 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-function register_tick_function(callable $callback, mixed ...$args): bool {}
+function register_tick_function(callable $callback, mixed ...$args): true {}
 
 function unregister_tick_function(callable $callback): void {}
 
