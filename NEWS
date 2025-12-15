@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
 
+- Mbstring
+  . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
+    separator). (Yuya Hamada)
+
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
