@@ -40,6 +40,11 @@ void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, c
 	} else if (flags & IR_BUILTIN_FUNC) {
 		fprintf(f, " __builtin");
 	}
+	if (flags & IR_CONST_FUNC) {
+		fprintf(f, " __const");
+	} else if (flags & IR_PURE_FUNC) {
+		fprintf(f, " __pure");
+	}
 }
 
 static void ir_save_dessa_moves(const ir_ctx *ctx, int b, ir_block *bb, FILE *f)
@@ -107,6 +112,10 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
 			fprintf(f, "sym(%s%s)",
+				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+				ir_get_str(ctx, insn->val.name));
+		} else if (insn->op == IR_LABEL) {
+			fprintf(f, "label(%s%s)",
 				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
 				ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
@@ -271,6 +280,13 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					case IR_OPND_NUM:
 						fprintf(f, "%s%d", first ? "(" : ", ", ref);
 						first = 0;
+						break;
+					case IR_OPND_LABEL_REF:
+						if (ref) {
+							IR_ASSERT(IR_IS_CONST_REF(ref));
+							fprintf(f, "%sc_%d", first ? "(" : ", ", -ref);
+							first = 0;
+						}
 						break;
 				}
 			} else if (opnd_kind == IR_OPND_NUM) {
