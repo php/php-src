@@ -72,6 +72,12 @@ PHP                                                                        NEWS
     via deep structures). (ndossche)
   . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
 
+- URI:
+  . Fixed bug GH-20366 (ext/uri incorrectly throws ValueError when encountering
+    null byte). (kocsismate)
+  . Fixed CVE-2025-67899 (uriparser through 0.9.9 allows unbounded recursion
+    and stack consumption). (Sebastian Pipping)
+
 - XML:
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
     special characters in attributes when passing data to callback). (ndossche)
@@ -83,10 +89,6 @@ PHP                                                                        NEWS
 - Zlib:
   . Fix assertion failures resulting in crashes with stream filter
     object parameters. (ndossche)
-
-- URI:
-  . Fixed bug GH-20366 (ext/uri incorrectly throws ValueError when encountering
-    null byte). (kocsismate)
 
 20 Nov 2025, PHP 8.5.0
 
