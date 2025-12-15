@@ -602,6 +602,13 @@ const TCP_CONGESTION = UNKNOWN;
  */
 const TCP_SYNCNT = UNKNOWN;
 #endif
+#ifdef TCP_USER_TIMEOUT
+/**
+ * @var int
+ * @cvalue TCP_USER_TIMEOUT
+ */
+const TCP_USER_TIMEOUT = UNKNOWN;
+#endif
 #ifdef SO_ZEROCOPY
 /**
  * @var int

@@ -90,6 +90,9 @@ PHP 8.6 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Sockets:
+  . TCP_USER_TIMEOUT (Linux only).
+
 ========================================
 11. Changes to INI File Handling
 ========================================

@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Soap::__setCookie() when cookie name is a digit is now not stored and represented
     as a string anymore but a int. (David Carlier)
 
+- Sockets:
+  . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in milliseconds
+        transmitted data can remain unacknowledged. (James Lucas)
+
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
