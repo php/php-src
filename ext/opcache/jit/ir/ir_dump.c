@@ -129,6 +129,11 @@ void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f)
 					case IR_OPND_CONTROL_REF:
 						fprintf(f, "\tn%d -> n%d [style=dashed,dir=back,weight=%d];\n", ref, i, REF_WEIGHT);
 						break;
+					case IR_OPND_LABEL_REF:
+						if (ref) {
+							fprintf(f, "\tc%d -> n%d [color=blue,weight=%d];\n", -ref, i, REF_WEIGHT);
+						}
+						break;
 				}
 			}
 		}
@@ -491,6 +496,8 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
 			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.name));
+		} else if (insn->op == IR_LABEL) {
+			fprintf(f, "label(%s)", ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
 			fprintf(f, "func *");
 			ir_print_const(ctx, insn, f, true);
@@ -647,6 +654,12 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 						case IR_OPND_NUM:
 							fprintf(f, "%s%d", first ? "(" : ", ", ref);
 							first = 0;
+							break;
+						case IR_OPND_LABEL_REF:
+							if (ref) {
+								IR_ASSERT(IR_IS_CONST_REF(ref));
+								fprintf(f, "%sc_%d", first ? "(" : ", ", -ref);
+							}
 							break;
 					}
 				} else if (opnd_kind == IR_OPND_NUM) {

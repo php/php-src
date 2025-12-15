@@ -361,20 +361,20 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
 					j = ctx->cfg_blocks[j].idom;
 				}
+				clone = ir_hashtab_find(&hash, j);
+				if (clone == IR_INVALID_VAL) {
+					clone = clones_count++;
+					ir_hashtab_add(&hash, j, clone);
+					clones[clone].block = j;
+					clones[clone].use_count = 0;
+					clones[clone].use = -1;
+				}
+				uses[uses_count].ref = use;
+				uses[uses_count].block = i;
+				uses[uses_count].next = clones[clone].use;
+				clones[clone].use_count++;
+				clones[clone].use = uses_count++;
 			}
-			clone = ir_hashtab_find(&hash, j);
-			if (clone == IR_INVALID_VAL) {
-				clone = clones_count++;
-				ir_hashtab_add(&hash, j, clone);
-				clones[clone].block = j;
-				clones[clone].use_count = 0;
-				clones[clone].use = -1;
-			}
-			uses[uses_count].ref = use;
-			uses[uses_count].block = i;
-			uses[uses_count].next = clones[clone].use;
-			clones[clone].use_count++;
-			clones[clone].use = uses_count++;
 		}
 	}
 
@@ -1007,7 +1007,11 @@ int ir_schedule(ir_ctx *ctx)
 		start = i = bb->start;
 		_xlat[i] = bb->start = insns_count;
 		insn = &ctx->ir_base[i];
-		if (insn->op == IR_CASE_VAL) {
+		if (insn->op == IR_BEGIN) {
+			if (insn->op2) {
+				consts_count += ir_count_constant(_xlat, insn->op2);
+			}
+		} else if (insn->op == IR_CASE_VAL) {
 			IR_ASSERT(insn->op2 < IR_TRUE);
 			consts_count += ir_count_constant(_xlat, insn->op2);
 		} else if (insn->op == IR_CASE_RANGE) {
@@ -1255,7 +1259,7 @@ restart:
 						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
 						new_insn->proto = ir_strl(&new_ctx, proto, len);
 					}
-				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR) {
+				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR || new_insn->op == IR_LABEL) {
 					size_t len;
 					const char *str = ir_get_strl(ctx, new_insn->val.name, &len);
 					new_insn->val.u64 = ir_strl(&new_ctx, str, len);
@@ -1292,7 +1296,7 @@ restart:
 				} else {
 					new_insn->proto = 0;
 				}
-			} else if (insn->op == IR_SYM || insn->op == IR_STR) {
+			} else if (insn->op == IR_SYM || insn->op == IR_STR || insn->op == IR_LABEL) {
 				size_t len;
 				const char *str = ir_get_strl(ctx, insn->val.name, &len);
 				new_insn->val.u64 = ir_strl(&new_ctx, str, len);
@@ -1364,6 +1368,8 @@ restart:
 					size_t len;
 					const char *str = ir_get_strl(ctx, insn->op2, &len);
 					new_insn->op2 = ir_strl(&new_ctx, str, len);
+				} else if (new_insn->op == IR_BEGIN && insn->op2) {
+					new_insn->op2 = _xlat[insn->op2];
 				} else {
 					new_insn->op2 = insn->op2;
 				}

@@ -820,11 +820,14 @@ slow_case:
 			succ_b = ctx->cfg_edges[bb->successors];
 			if (bb->successors_count != 1) {
 				/* LOOP_END/END may be linked with the following ENTRY by a fake edge */
-				IR_ASSERT(bb->successors_count == 2);
-				if (blocks[succ_b].flags & IR_BB_ENTRY) {
+				if (bb->successors_count != 2) {
+					complete = 0;
+					break;
+				} else if (blocks[succ_b].flags & IR_BB_ENTRY) {
 					succ_b = ctx->cfg_edges[bb->successors + 1];
-				} else {
-					IR_ASSERT(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY);
+				} else if (!(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY)) {
+					complete = 0;
+					break;
 				}
 			}
 			dom_depth = blocks[succ_b].dom_depth;;
