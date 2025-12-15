@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     with dynamic class const lookup default argument). (ilutov)
   . Fixed bug GH-20695 (Assertion failure in normalize_value() when parsing
     malformed INI input via parse_ini_string()). (ndossche)
+  . Fixed bug GH-20714 (Uncatchable exception thrown in generator). (ilutov)
 
 - Bz2:
   . Fixed bug GH-20620 (bzcompress overflow on large source size).
