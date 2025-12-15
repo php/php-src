@@ -2329,6 +2329,22 @@ PHP_FUNCTION(socket_set_option)
 		}
 #endif
 
+#if defined(TCP_USER_TIMEOUT)
+		case TCP_USER_TIMEOUT: {
+			ov = zval_get_long(arg4);
+
+			// TCP_USER_TIMEOUT unsigned int
+			if (ov < 0 || ov > UINT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
+				RETURN_FALSE;
+			}
+
+			optlen = sizeof(ov);
+			opt_ptr = &ov;
+			break;
+		}
+#endif
+
 #if defined(UDP_SEGMENT)
 		case UDP_SEGMENT: {
 			ov = zval_get_long(arg4);
