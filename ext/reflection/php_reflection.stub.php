@@ -572,9 +572,9 @@ class ReflectionProperty implements Reflector
 
     public function isFinal(): bool {}
 
-    public function isReadable(?object $object = null, ?string $scope = 'static'): bool {}
+    public function isReadable(?string $scope, ?object $object = null): bool {}
 
-    public function isWritable(?object $object = null, ?string $scope = 'static'): bool {}
+    public function isWritable(?string $scope, ?object $object = null): bool {}
 }
 
 /** @not-serializable */

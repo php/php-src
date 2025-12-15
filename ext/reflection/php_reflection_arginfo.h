@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f0018fa5d1204c853476bdd34385f3ec85285249 */
+ * Stub hash: 918c9d5ef5f69a060848768d7a455577d3bb5796 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -472,9 +472,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_isFinal arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_isReadable, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_isReadable, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scope, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scope, IS_STRING, 1, "\'static\'")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_isWritable arginfo_class_ReflectionProperty_isReadable

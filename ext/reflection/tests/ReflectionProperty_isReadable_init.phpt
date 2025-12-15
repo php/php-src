@@ -49,7 +49,7 @@ $test = static function ($class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from global: ';
-        var_dump($rp->isReadable(new $class, NULL));
+        var_dump($rp->isReadable(null, new $class));
     }
 };
 

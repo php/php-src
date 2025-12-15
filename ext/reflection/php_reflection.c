@@ -6682,20 +6682,22 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 {
 	reflection_object *intern;
 	property_reference *ref;
+	zend_string *scope_name;
 	zend_object *obj = NULL;
-	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJ_OR_NULL(obj)
-		Z_PARAM_STR_OR_NULL(scope_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 	zend_property_info *prop = ref->prop;
 	if (!prop) {
-		_DO_THROW("May not use isReadable on dynamic properties");
-		RETURN_THROWS();
+		if (!obj->properties) {
+			RETURN_FALSE;
+		}
+		RETURN_BOOL(zend_hash_find_ptr(obj->properties, ref->unmangled_name) != NULL);
 	}
 
 	if (obj) {
@@ -6751,20 +6753,22 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 {
 	reflection_object *intern;
 	property_reference *ref;
+	zend_string *scope_name;
 	zend_object *obj = NULL;
-	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJ_OR_NULL(obj)
-		Z_PARAM_STR_OR_NULL(scope_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 	zend_property_info *prop = ref->prop;
 	if (!prop) {
-		_DO_THROW("May not use isWritable on dynamic properties");
-		RETURN_THROWS();
+		if (obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
 	}
 
 	if (obj) {

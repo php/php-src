@@ -16,7 +16,7 @@ $test = static function ($scope) {
     $rc = new ReflectionClass(A::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
-        var_dump($rp->isReadable(null, $scope));
+        var_dump($rp->isReadable($scope, null));
     }
 };
 

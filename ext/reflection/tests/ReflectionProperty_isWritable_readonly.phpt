@@ -22,7 +22,7 @@ function test($instance) {
     $rc = new ReflectionClass($instance);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from A: ';
-        var_dump($rp->isWritable($instance, $instance::class));
+        var_dump($rp->isWritable($instance::class, $instance));
     }
 }
 
