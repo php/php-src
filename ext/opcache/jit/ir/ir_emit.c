@@ -244,32 +244,30 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 		ir_insn *arg = &ctx->ir_base[ir_insn_op(insn, j)];
 		type = arg->type;
 		if (IR_IS_TYPE_INT(type)) {
-			if (arg->op == IR_ARGVAL) {
-				continue;
-			} else if (int_param < int_reg_params_count) {
+			if (int_param < int_reg_params_count && arg->op != IR_ARGVAL) {
 				regs[j] = int_reg_params[int_param];
 				count = j + 1;
+				int_param++;
+#ifdef _WIN64
+				/* WIN64 calling convention use common couter for int and fp registers */
+				fp_param++;
+#endif
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
-			int_param++;
-#ifdef _WIN64
-			/* WIN64 calling convention use common couter for int and fp registers */
-			fp_param++;
-#endif
 		} else {
 			IR_ASSERT(IR_IS_TYPE_FP(type));
 			if (fp_param < fp_reg_params_count) {
 				regs[j] = fp_reg_params[fp_param];
 				count = j + 1;
+				fp_param++;
+#ifdef _WIN64
+				/* WIN64 calling convention use common couter for int and fp registers */
+				int_param++;
+#endif
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
-			fp_param++;
-#ifdef _WIN64
-			/* WIN64 calling convention use common couter for int and fp registers */
-			int_param++;
-#endif
 		}
 	}
 	return count;
@@ -426,7 +424,7 @@ typedef struct _ir_common_backend_data {
 	ir_bitset          emit_constants;
 } ir_common_backend_data;
 
-static int ir_const_label(ir_ctx *ctx, ir_ref ref)
+static int ir_get_const_label(ir_ctx *ctx, ir_ref ref)
 {
 	ir_common_backend_data *data = ctx->data;
 	int label = ctx->cfg_blocks_count - ref;
@@ -1015,11 +1013,16 @@ int ir_match(ir_ctx *ctx)
 			entries_count++;
 		}
 		ctx->rules[start] = IR_SKIPPED | IR_NOP;
+		if (ctx->ir_base[start].op == IR_BEGIN && ctx->ir_base[start].op2) {
+			ctx->flags2 |= IR_HAS_BLOCK_ADDR;
+		}
 		ref = bb->end;
 		if (bb->successors_count == 1) {
 			insn = &ctx->ir_base[ref];
 			if (insn->op == IR_END || insn->op == IR_LOOP_END) {
-				ctx->rules[ref] = insn->op;
+				if (!ctx->rules[ref]) {
+					ctx->rules[ref] = insn->op;
+				}
 				ref = prev_ref[ref];
 				if (ref == start && ctx->cfg_edges[bb->successors] != b) {
 					if (EXPECTED(!(bb->flags & IR_BB_ENTRY))) {
