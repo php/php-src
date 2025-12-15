@@ -1508,8 +1508,8 @@ static bool ir_may_promote_f2d(ir_ctx *ctx, ir_ref ref)
 		switch (insn->op) {
 			case IR_FP2FP:
 				return 1;
-			case IR_INT2FP:
-				return ctx->use_lists[ref].count == 1;
+//			case IR_INT2FP:
+//				return ctx->use_lists[ref].count == 1;
 			case IR_NEG:
 			case IR_ABS:
 				return ctx->use_lists[ref].count == 1 &&
@@ -2110,7 +2110,9 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				 && !IR_IS_SYM_CONST(ctx->ir_base[use_insn->op1].op)) {
 					ctx->ir_base[use].op1 = ir_ext_const(ctx, &ctx->ir_base[use_insn->op1], op, type);
 				} else {
-					ctx->ir_base[use].op1 = ir_ext_ref(ctx, use, use_insn->op1, op, type, worklist);
+					ir_ref tmp = ir_ext_ref(ctx, use, use_insn->op1, op, type, worklist);
+					use_insn = &ctx->ir_base[use];
+					use_insn->op1 = tmp;
 				}
 				ir_bitqueue_add(worklist, use);
 			}
@@ -2119,7 +2121,9 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				 && !IR_IS_SYM_CONST(ctx->ir_base[use_insn->op2].op)) {
 					ctx->ir_base[use].op2 = ir_ext_const(ctx, &ctx->ir_base[use_insn->op2], op, type);
 				} else {
-					ctx->ir_base[use].op2 = ir_ext_ref(ctx, use, use_insn->op2, op, type, worklist);
+					ir_ref tmp = ir_ext_ref(ctx, use, use_insn->op2, op, type, worklist);
+					use_insn = &ctx->ir_base[use];
+					use_insn->op2 = tmp;
 				}
 				ir_bitqueue_add(worklist, use);
 			}
@@ -2147,7 +2151,9 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 					 && !IR_IS_SYM_CONST(ctx->ir_base[use_insn->op1].op)) {
 						ctx->ir_base[use].op1 = ir_ext_const(ctx, &ctx->ir_base[use_insn->op1], op, type);
 					} else {
-						ctx->ir_base[use].op1 = ir_ext_ref(ctx, use, use_insn->op1, op, type, worklist);
+						ir_ref tmp = ir_ext_ref(ctx, use, use_insn->op1, op, type, worklist);
+						use_insn = &ctx->ir_base[use];
+						use_insn->op1 = tmp;
 					}
 					ir_bitqueue_add(worklist, use);
 				}
@@ -2156,7 +2162,9 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 					 && !IR_IS_SYM_CONST(ctx->ir_base[use_insn->op2].op)) {
 						ctx->ir_base[use].op2 = ir_ext_const(ctx, &ctx->ir_base[use_insn->op2], op, type);
 					} else {
-						ctx->ir_base[use].op2 = ir_ext_ref(ctx, use, use_insn->op2, op, type, worklist);
+						ir_ref tmp = ir_ext_ref(ctx, use, use_insn->op2, op, type, worklist);
+						use_insn = &ctx->ir_base[use];
+						use_insn->op2 = tmp;
 					}
 					ir_bitqueue_add(worklist, use);
 				}
@@ -2178,7 +2186,8 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 	 && !IR_IS_SYM_CONST(ctx->ir_base[phi_insn->op2].op)) {
 		ctx->ir_base[phi_ref].op2 = ir_ext_const(ctx, &ctx->ir_base[phi_insn->op2], op, type);
 	} else {
-		ctx->ir_base[phi_ref].op2 = ir_ext_ref(ctx, phi_ref, phi_insn->op2, op, type, worklist);
+		ir_ref tmp = ir_ext_ref(ctx, phi_ref, phi_insn->op2, op, type, worklist);
+		ctx->ir_base[phi_ref].op2 = tmp;
 	}
 
 	return 1;
@@ -2250,42 +2259,6 @@ static void ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin, ir_bitqueue *
 {
 	ir_ref prev, next;
 	ir_use_list *use_list;
-
-	if (ctx->use_lists[begin].count > 1) {
-		ir_ref *p, n, i, use;
-		ir_insn *use_insn;
-		ir_ref region = end;
-		ir_ref next = IR_UNUSED;
-
-		while (!IR_IS_BB_START(ctx->ir_base[region].op)) {
-			region = ctx->ir_base[region].op1;
-		}
-
-		use_list = &ctx->use_lists[begin];
-		n = use_list->count;
-		for (p = &ctx->use_edges[use_list->refs], i = 0; i < n; p++, i++) {
-			use = *p;
-			use_insn = &ctx->ir_base[use];
-			if (ir_op_flags[use_insn->op] & IR_OP_FLAG_CONTROL) {
-				IR_ASSERT(!next);
-				next = use;
-			} else {
-				IR_ASSERT(use_insn->op == IR_VAR);
-				IR_ASSERT(use_insn->op1 == begin);
-				use_insn->op1 = region;
-				if (ir_use_list_add(ctx, region, use)) {
-					/* restore after reallocation */
-					use_list = &ctx->use_lists[begin];
-					n = use_list->count;
-					p = &ctx->use_edges[use_list->refs + i];
-				}
-			}
-		}
-
-		IR_ASSERT(next);
-		ctx->use_edges[use_list->refs] = next;
-		use_list->count = 1;
-	}
 
 	IR_ASSERT(ctx->ir_base[begin].op == IR_BEGIN);
 	IR_ASSERT(ctx->ir_base[end].op == IR_END);
@@ -3595,7 +3568,10 @@ folding:
 			if (!(ctx->flags & IR_OPT_CFG)) {
 				/* pass */
 			} else if (insn->op == IR_BEGIN) {
-				if (insn->op1 && ctx->ir_base[insn->op1].op == IR_END) {
+				if (insn->op1
+				 && !insn->op2 /* no computed goto label */
+				 && ctx->use_lists[i].count == 1
+				 && ctx->ir_base[insn->op1].op == IR_END) {
 					ir_merge_blocks(ctx, insn->op1, i, worklist);
 				}
 			} else if (insn->op == IR_MERGE) {

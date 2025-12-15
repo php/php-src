@@ -118,7 +118,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 {
 	char buf[128];
 
-	if (insn->op == IR_FUNC || insn->op == IR_SYM) {
+	if (insn->op == IR_FUNC || insn->op == IR_SYM || insn->op == IR_LABEL) {
 		fprintf(f, "%s", ir_get_str(ctx, insn->val.name));
 		return;
 	} else if (insn->op == IR_STR) {
@@ -290,6 +290,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_kind_prb     IR_OPND_PROB
 #define ir_op_kind_opt     IR_OPND_PROB
 #define ir_op_kind_pro     IR_OPND_PROTO
+#define ir_op_kind_lbl     IR_OPND_LABEL_REF
 
 #define _IR_OP_FLAGS(name, flags, op1, op2, op3) \
 	IR_OP_FLAGS(ir_op_flag_ ## flags, ir_op_kind_ ## op1, ir_op_kind_ ## op2, ir_op_kind_ ## op3),
@@ -689,6 +690,13 @@ ir_ref ir_const_str(ir_ctx *ctx, ir_ref str)
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_STR, IR_ADDR, 0));
 }
 
+ir_ref ir_const_label(ir_ctx *ctx, ir_ref str)
+{
+	ir_val val;
+	val.u64 = str;
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_LABEL, IR_ADDR, 0));
+}
+
 ir_ref ir_str(ir_ctx *ctx, const char *s)
 {
 	size_t len;
@@ -877,6 +885,17 @@ static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir
 	}
 
 	return IR_UNUSED;
+}
+
+IR_ALWAYS_INLINE ir_ref _ir_fold_cast(ir_ctx *ctx, ir_ref ref, ir_type type)
+{
+	if (ctx->ir_base[ref].type == type) {
+		return ref;
+	} else if (IR_IS_CONST_REF(ref) && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)) {
+		return ir_const(ctx, ctx->ir_base[ref].val, type);
+	} else {
+		return ir_emit1(ctx, IR_OPT(IR_BITCAST, type), ref);
+	}
 }
 
 #define IR_FOLD(X)        IR_FOLD1(X, __LINE__)
@@ -1158,7 +1177,7 @@ ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def)
 	IR_ASSERT(var < 0);
 	if (!ir_hashtab_add(ctx->binding, def, var)) {
 		/* Add a copy with different binding */
-		def = ir_emit2(ctx, IR_OPT(IR_COPY, ctx->ir_base[def].type), def, 1);
+		def = ir_emit2(ctx, IR_OPT(IR_COPY, ctx->ir_base[def].type), def, IR_COPY_HARD);
 		ir_hashtab_add(ctx->binding, def, var);
 	}
 	return def;
@@ -1836,8 +1855,49 @@ int ir_mem_flush(void *ptr, size_t size)
 	return 1;
 }
 #else
+
+#if defined(__linux__) && defined(__x86_64__) && defined(PKEY_DISABLE_WRITE)
+# define HAVE_PKEY_MPROTECT 1
+#endif
+
+#ifdef HAVE_PKEY_MPROTECT
+
+#ifndef PKEY_DISABLE_EXECUTE
+# define PKEY_DISABLE_EXECUTE 0
+#endif
+
+int pkey_mprotect(void* addr, size_t len, int prot, int pkey) __attribute__((weak));
+int pkey_alloc(unsigned int, unsigned int) __attribute__((weak));
+int pkey_free(int) __attribute__((weak));
+int pkey_set(int, unsigned) __attribute__((weak));
+
+static int ir_pkey = 0;
+#endif
+
 void *ir_mem_mmap(size_t size)
 {
+#ifdef HAVE_PKEY_MPROTECT
+	if (!ir_pkey && pkey_mprotect) {
+		int key = pkey_alloc(0, PKEY_DISABLE_WRITE);
+		if (key > 0) {
+			ir_pkey = key;
+		}
+	}
+	if (ir_pkey > 0) {
+		void *ret = mmap(NULL, size, PROT_EXEC|PROT_READ|PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+		if (ret == MAP_FAILED) {
+			return NULL;
+		}
+		if (pkey_mprotect(ret, size, PROT_EXEC|PROT_READ|PROT_WRITE, ir_pkey) != 0) {
+#ifdef IR_DEBUG
+			fprintf(stderr, "pkey_mprotect() failed\n");
+#endif
+			munmap(ret, size);
+			return NULL;
+		}
+		return ret;
+	}
+#endif
 	int prot_flags = PROT_EXEC;
 #if defined(__NetBSD__)
 	prot_flags |= PROT_MPROTECT(PROT_READ|PROT_WRITE);
@@ -1852,11 +1912,28 @@ void *ir_mem_mmap(size_t size)
 int ir_mem_unmap(void *ptr, size_t size)
 {
 	munmap(ptr, size);
+#ifdef HAVE_PKEY_MPROTECT
+//	if (ir_pkey > 0) {
+//		pkey_free(ir_pkey);
+//		ir_pkey = 0;
+//	}
+#endif
 	return 1;
 }
 
 int ir_mem_protect(void *ptr, size_t size)
 {
+#ifdef HAVE_PKEY_MPROTECT
+	if (ir_pkey > 0) {
+		if (pkey_set(ir_pkey, PKEY_DISABLE_WRITE)) {
+#ifdef IR_DEBUG
+			fprintf(stderr, "mprotect() failed\n");
+#endif
+			return 0;
+		}
+		return 1;
+	}
+#endif
 	if (mprotect(ptr, size, PROT_READ | PROT_EXEC) != 0) {
 #ifdef IR_DEBUG
 		fprintf(stderr, "mprotect() failed\n");
@@ -1868,6 +1945,17 @@ int ir_mem_protect(void *ptr, size_t size)
 
 int ir_mem_unprotect(void *ptr, size_t size)
 {
+#ifdef HAVE_PKEY_MPROTECT
+	if (ir_pkey > 0) {
+		if (pkey_set(ir_pkey, PKEY_DISABLE_EXECUTE)) {
+#ifdef IR_DEBUG
+			fprintf(stderr, "mprotect() failed\n");
+#endif
+			return 0;
+		}
+		return 1;
+	}
+#endif
 	if (mprotect(ptr, size, PROT_READ | PROT_WRITE) != 0) {
 #ifdef IR_DEBUG
 		fprintf(stderr, "mprotect() failed\n");
@@ -2070,7 +2158,26 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type
 			}
 		} else if (insn->op == IR_RSTORE) {
 			modified_regset |= (1 << insn->op3);
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_CALL || insn->op == IR_VSTORE) {
+		} else if (insn->op == IR_CALL) {
+			ir_insn *func = &ctx->ir_base[insn->op2];
+			ir_ref func_proto;
+			const ir_proto_t *proto;
+
+			if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+				func_proto = func->proto;
+			} else if (func->op == IR_PROTO) {
+				func_proto = func->op2;
+			} else {
+				break;
+			}
+			if (!func_proto) {
+				break;
+			}
+			proto = (const ir_proto_t *)ir_get_str(ctx, func_proto);
+			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
+				break;
+			}
+		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_VSTORE) {
 			return IR_UNUSED;
 		}
 		ref = insn->op1;
@@ -2116,7 +2223,26 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 					break;
 				}
 			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_CALL || insn->op == IR_STORE) {
+		} else if (insn->op == IR_CALL) {
+			ir_insn *func = &ctx->ir_base[insn->op2];
+			ir_ref func_proto;
+			const ir_proto_t *proto;
+
+			if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+				func_proto = func->proto;
+			} else if (func->op == IR_PROTO) {
+				func_proto = func->op2;
+			} else {
+				break;
+			}
+			if (!func_proto) {
+				break;
+			}
+			proto = (const ir_proto_t *)ir_get_str(ctx, func_proto);
+			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
+				break;
+			}
+		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_STORE) {
 			break;
 		}
 		ref = insn->op1;
@@ -3013,6 +3139,16 @@ void _ir_IJMP(ir_ctx *ctx, ir_ref addr)
 	ctx->control = IR_UNUSED;
 }
 
+ir_ref _ir_IGOTO(ir_ctx *ctx, ir_ref addr)
+{
+	ir_ref ref;
+
+	IR_ASSERT(ctx->control);
+	ctx->control = ref = ir_emit2(ctx, IR_IGOTO, ctx->control, addr);
+	ctx->control = IR_UNUSED;
+	return ref;
+}
+
 ir_ref _ir_ADD_OFFSET(ir_ctx *ctx, ir_ref addr, uintptr_t offset)
 {
 	if (offset) {
@@ -3135,6 +3271,18 @@ void _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val)
 	ctx->control = ir_emit3(ctx, IR_VSTORE, ctx->control, var, val);
 }
 
+ir_ref _ir_VLOAD_v(ir_ctx *ctx, ir_type type, ir_ref var)
+{
+	IR_ASSERT(ctx->control);
+	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VLOAD_v, type), ctx->control, var);
+}
+
+void _ir_VSTORE_v(ir_ctx *ctx, ir_ref var, ir_ref val)
+{
+	IR_ASSERT(ctx->control);
+	ctx->control = ir_emit3(ctx, IR_VSTORE_v, ctx->control, var, val);
+}
+
 ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset)
 {
 	IR_ASSERT(ctx->control);
@@ -3193,6 +3341,18 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 	ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
 }
 
+ir_ref _ir_LOAD_v(ir_ctx *ctx, ir_type type, ir_ref addr)
+{
+	IR_ASSERT(ctx->control);
+	return ctx->control = ir_emit2(ctx, IR_OPT(IR_LOAD_v, type), ctx->control, addr);
+}
+
+void _ir_STORE_v(ir_ctx *ctx, ir_ref addr, ir_ref val)
+{
+	IR_ASSERT(ctx->control);
+	ctx->control = ir_emit3(ctx, IR_STORE_v, ctx->control, addr, val);
+}
+
 void _ir_VA_START(ir_ctx *ctx, ir_ref list)
 {
 	IR_ASSERT(ctx->control);
@@ -3217,11 +3377,13 @@ ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list)
 	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list);
 }
 
-ir_ref _ir_VA_ARG_EX(ir_ctx *ctx, ir_type type, ir_ref list, size_t size)
+ir_ref _ir_VA_ARG_EX(ir_ctx *ctx, ir_type type, ir_ref list, size_t size, size_t align)
 {
 	IR_ASSERT(ctx->control);
-	IR_ASSERT(size <= 0x7fffffff);
-	return ctx->control = ir_emit3(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list, (ir_ref)size);
+	IR_ASSERT(size <= 0x0fffffff);
+	IR_ASSERT(align != 0 && ((align & (align - 1)) == 0) && align <= 128);
+	return ctx->control = ir_emit3(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list,
+		(ir_ref)IR_VA_ARG_OP3(size, align));
 }
 
 ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx)
