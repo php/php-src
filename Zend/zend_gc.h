@@ -167,7 +167,7 @@ static zend_always_inline void zend_get_gc_buffer_add_ptr(
 static zend_always_inline void zend_get_gc_buffer_use(
 		zend_get_gc_buffer *gc_buffer, zval **table, int *n) {
 	*table = gc_buffer->start;
-	*n = gc_buffer->cur - gc_buffer->start;
+	*n = (int)(gc_buffer->cur - gc_buffer->start);
 }
 
 END_EXTERN_C()
