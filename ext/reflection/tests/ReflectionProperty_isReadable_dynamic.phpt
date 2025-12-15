@@ -18,8 +18,11 @@ var_dump($r->isReadable(null, $a));
 $a = new A;
 var_dump($r->isReadable(null, $a));
 
+var_dump($r->isReadable(null, null));
+
 ?>
 --EXPECT--
 bool(true)
+bool(false)
 bool(false)
 bool(false)

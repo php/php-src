@@ -6692,20 +6692,39 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
-	zend_property_info *prop = ref->prop;
-	if (!prop) {
-		if (!obj->properties) {
-			RETURN_FALSE;
-		}
-		RETURN_BOOL(zend_hash_find_ptr(obj->properties, ref->unmangled_name) != NULL);
-	}
 
-	if (obj) {
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
 		if (!instanceof_function(obj->ce, prop->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
 			RETURN_THROWS();
 		}
 		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
+	}
+
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (obj && obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
+			RETURN_TRUE;
+		}
+handle_magic_get:
+		if (ce->__get) {
+			if (obj && ce->__isset) {
+				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
+				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
+					GC_ADDREF(obj);
+					*guard |= ZEND_GUARD_PROPERTY_ISSET;
+					zval member;
+					ZVAL_STR(&member, ref->unmangled_name);
+					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
+					OBJ_RELEASE(obj);
+					return;
+				}
+			}
+			RETURN_TRUE;
+		}
+		RETURN_FALSE;
 	}
 
 	zend_class_entry *scope;
@@ -6714,7 +6733,7 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 	}
 
 	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
-		RETURN_FALSE;
+		goto handle_magic_get;
 	}
 
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
@@ -6722,27 +6741,13 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 			RETURN_FALSE;
 		}
-	}
-
-	if (obj && !prop->hooks) {
+	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
-		if ( Z_TYPE_P(prop_val) == IS_UNDEF) {
-			if (!obj->ce->__get || (Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
-				RETURN_FALSE;
+		if (Z_TYPE_P(prop_val) == IS_UNDEF) {
+			if (!(Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
+				goto handle_magic_get;
 			}
-			if (obj->ce->__isset) {
-				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
-				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
-					GC_ADDREF(obj);
-					*guard |= ZEND_GUARD_PROPERTY_ISSET;
-					zval member;
-					ZVAL_STR(&member, ref->unmangled_name);
-					zend_call_known_instance_method_with_1_params(obj->ce->__isset, obj, return_value, &member);
-					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
-					OBJ_RELEASE(obj);
-					return;
-				}
-			}
+			RETURN_FALSE;
 		}
 	}
 
@@ -6763,15 +6768,9 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
-	zend_property_info *prop = ref->prop;
-	if (!prop) {
-		if (obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES) {
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
-	}
 
-	if (obj) {
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
 		if (!instanceof_function(obj->ce, prop->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
 			RETURN_THROWS();
@@ -6779,11 +6778,23 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
 	}
 
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (!(ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+			RETURN_TRUE;
+		}
+handle_magic_set:
+		RETURN_BOOL(ce->__set);
+	}
+
 	zend_class_entry *scope;
 	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		goto handle_magic_set;
+	}
 	uint32_t set_visibility = prop->flags & ZEND_ACC_PPP_SET_MASK;
 	if (!set_visibility) {
 		set_visibility = zend_visibility_to_set_visibility(prop->flags & ZEND_ACC_PPP_MASK);
