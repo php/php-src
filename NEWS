@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20668 (\Uri\WhatWg\Url::withHost() crashes (SEGV) for URLs
     using the file: scheme). (lexborisov)
 
+- Mbstring
+  . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
+    separator). (Yuya Hamada)
+
 - Sqlite3:
   . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
     null returned). (ndossche, plusminmax)
