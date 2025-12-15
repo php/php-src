@@ -935,6 +935,7 @@ PHP 8.5 UPGRADE NOTES
   . T_PIPE.
 
 - Standard:
+  . IMAGETYPE_HEIF.
   . IMAGETYPE_SVG when libxml is loaded.
 
 ========================================
