@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f754368e28f6e45bf3a63a403e49f5659c29d2c6 */
+ * Stub hash: 038081ca7bb98076d4b559d93b4c9300acc47160 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -526,6 +526,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(TCP_SYNCNT)
 	REGISTER_LONG_CONSTANT("TCP_SYNCNT", TCP_SYNCNT, CONST_PERSISTENT);
+#endif
+#if defined(TCP_USER_TIMEOUT)
+	REGISTER_LONG_CONSTANT("TCP_USER_TIMEOUT", TCP_USER_TIMEOUT, CONST_PERSISTENT);
 #endif
 #if defined(SO_ZEROCOPY)
 	REGISTER_LONG_CONSTANT("SO_ZEROCOPY", SO_ZEROCOPY, CONST_PERSISTENT);

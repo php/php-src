@@ -1773,7 +1773,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_THROWS();
 			}
 
-			memset(&sll, 0, sizeof(sll));			
+			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
 
@@ -2121,6 +2121,28 @@ PHP_FUNCTION(socket_set_option)
 
 			optlen = sizeof(tfs);
 			opt_ptr = &tfs;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
+#if defined(TCP_USER_TIMEOUT)
+		case TCP_USER_TIMEOUT: {
+			zend_long timeout = zval_get_long(arg4);
+
+			// TCP_USER_TIMEOUT unsigned int
+			if (timeout < 0 || timeout > UINT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
+				RETURN_THROWS();
+			}
+
+			unsigned int val = (unsigned int)timeout;
+			optlen = sizeof(val);
+			opt_ptr = &val;
 			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 				RETURN_FALSE;
