@@ -313,7 +313,9 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 			zend_object *old_exception = NULL;
 			const zend_op *old_opline_before_exception = NULL;
 			if (EG(exception)) {
-				if (EG(current_execute_data)) {
+				if (EG(current_execute_data)
+				 && EG(current_execute_data)->opline
+				 && EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 					EG(current_execute_data)->opline = EG(opline_before_exception);
 					old_opline_before_exception = EG(opline_before_exception);
 				}
@@ -330,7 +332,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 			zend_generator_resume(generator);
 
 			if (old_exception) {
-				if (EG(current_execute_data)) {
+				if (old_opline_before_exception) {
 					EG(current_execute_data)->opline = EG(exception_op);
 					EG(opline_before_exception) = old_opline_before_exception;
 				}
