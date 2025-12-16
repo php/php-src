@@ -1773,7 +1773,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_THROWS();
 			}
 
-			memset(&sll, 0, sizeof(sll));			
+			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
 
@@ -2331,7 +2331,7 @@ PHP_FUNCTION(socket_set_option)
 
 #if defined(TCP_USER_TIMEOUT)
 		case TCP_USER_TIMEOUT: {
-			ov = zval_get_long(arg4);
+			zval timeout = zval_get_long(arg4);
 
 			// TCP_USER_TIMEOUT unsigned int
 			if (ZEND_LONG_UINT_OVFL(ov)) {
@@ -2339,8 +2339,9 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			optlen = sizeof(ov);
-			opt_ptr = &ov;
+			unsigned int val = (unsigned int)timeout;
+			optlen = sizeof(val);
+			opt_ptr = &val;
 			break;
 		}
 #endif
