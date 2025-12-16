@@ -6695,6 +6695,10 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 
 	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			_DO_THROW("null is expected as object argument for static properties");
+			RETURN_THROWS();
+		}
 		if (!instanceof_function(obj->ce, prop->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
 			RETURN_THROWS();
@@ -6733,7 +6737,10 @@ handle_magic_get:
 	}
 
 	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
-		goto handle_magic_get;
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_get;
+		}
+		RETURN_FALSE;
 	}
 
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
@@ -6749,6 +6756,12 @@ handle_magic_get:
 			}
 			RETURN_FALSE;
 		}
+	} else if (prop->flags & ZEND_ACC_STATIC) {
+		if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+			zend_class_init_statics(ce);
+		}
+		zval *prop_val = CE_STATIC_MEMBERS(ce) + prop->offset;
+		RETURN_BOOL(!Z_ISUNDEF_P(prop_val));
 	}
 
 	RETURN_TRUE;
@@ -6771,6 +6784,10 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 
 	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			_DO_THROW("null is expected as object argument for static properties");
+			RETURN_THROWS();
+		}
 		if (!instanceof_function(obj->ce, prop->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
 			RETURN_THROWS();
@@ -6797,7 +6814,10 @@ handle_magic_set:
 	}
 
 	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
-		goto handle_magic_set;
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_set;
+		}
+		RETURN_FALSE;
 	}
 	uint32_t set_visibility = prop->flags & ZEND_ACC_PPP_SET_MASK;
 	if (!set_visibility) {
@@ -6812,10 +6832,7 @@ handle_magic_set:
 		if (!prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 			RETURN_FALSE;
 		}
-	}
-
-	if (obj && (prop->flags & ZEND_ACC_READONLY)) {
-		ZEND_ASSERT(prop->offset != ZEND_VIRTUAL_PROPERTY_OFFSET);
+	} else if (obj && (prop->flags & ZEND_ACC_READONLY)) {
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
 		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
 			RETURN_FALSE;
