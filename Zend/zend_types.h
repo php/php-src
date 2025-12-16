@@ -638,6 +638,10 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
+/* used for PFAs/FCCs */
+#define _IS_PLACEHOLDER_ARG         20
+#define _IS_PLACEHOLDER_VARIADIC    21
+
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
 #define ZEND_GUARD_PROPERTY_SET		(1<<1)
