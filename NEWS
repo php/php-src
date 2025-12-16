@@ -95,6 +95,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
     buffer). (Arnaud)
 
+- PDO:
+  . Fixed GHSA-8xr5-qppj-gvwj (PDO quoting result null deref). (CVE-2025-14180)
+    (Jakub Zelenka)
+
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
     __halt_compiler() when reading stub). (ndossche, TimWolla)
@@ -113,7 +117,12 @@ PHP                                                                        NEWS
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
   . Fixed bug GH-20583 (Stack overflow in http_build_query
     via deep structures). (ndossche)
-  . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
+  . Fixed GHSA-www2-q4fc-65wf (Null byte termination in dns_get_record()).
+    (ndossche)
+  . Fixed GHSA-h96m-rvf9-jgm2 (Heap buffer overflow in array_merge()).
+    (CVE-2025-14178) (ndossche)
+  . Fixed GHSA-3237-qqm7-mfv7 (Information Leak of Memory in getimagesize).
+    (CVE-2025-14177) (ndossche)
 
 - Streams:
   . Fixed bug GH-20370 (User stream filters could violate typed property
