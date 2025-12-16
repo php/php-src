@@ -2334,9 +2334,9 @@ PHP_FUNCTION(socket_set_option)
 			ov = zval_get_long(arg4);
 
 			// TCP_USER_TIMEOUT unsigned int
-			if (ov < 0 || ov > UINT_MAX) {
+			if (ZEND_LONG_UINT_OVFL(ov)) {
 				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
-				RETURN_FALSE;
+				RETURN_THROWS;
 			}
 
 			optlen = sizeof(ov);
