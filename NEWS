@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21097 (Accessing Dom\Node properties can can throw TypeError).
     (ndossche)
 
+- Opcache:
+  . Fixed bug GH-20718 ("Insufficient shared memory" when using JIT on Solaris).
+    (Petr Sumbera)
+
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
