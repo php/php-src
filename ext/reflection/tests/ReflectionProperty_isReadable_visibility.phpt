@@ -9,20 +9,32 @@ class B extends A {
     public $a;
     protected $b;
     private $c;
-    public protected(set) int $d;
+    public protected(set) int $d = 42;
 }
 
 class C extends B {}
+
+class D extends C {
+    public function __get($name) {}
+}
+
+class E extends D {
+    private $f;
+
+    public function __isset($name) {
+        return $name === 'f';
+    }
+}
 
 $test = static function ($scope) {
     $rc = new ReflectionClass(B::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
-        var_dump($rp->isReadable($scope, null));
+        var_dump($rp->isReadable($scope, $scope && $scope !== 'A' ? new $scope : null));
     }
 };
 
-foreach (['A', 'B', 'C'] as $scope) {
+foreach (['A', 'B', 'C', 'D', 'E'] as $scope) {
     $test($scope);
 }
 $test(null);
@@ -41,6 +53,14 @@ a from C: bool(true)
 b from C: bool(true)
 c from C: bool(false)
 d from C: bool(true)
+a from D: bool(true)
+b from D: bool(true)
+c from D: bool(true)
+d from D: bool(true)
+a from E: bool(true)
+b from E: bool(true)
+c from E: bool(false)
+d from E: bool(true)
 a from global: bool(true)
 b from global: bool(false)
 c from global: bool(false)

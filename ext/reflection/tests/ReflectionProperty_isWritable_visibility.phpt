@@ -16,17 +16,22 @@ class B extends A {
 
 class C extends B {}
 
+class D extends C {
+    public function __set($name, $value) {}
+}
+
 $test = static function ($scope) {
     $rc = new ReflectionClass(B::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
-        var_dump($rp->isWritable($scope, null));
+        var_dump($rp->isWritable($scope, $scope && $scope !== 'A' ? new $scope : null));
     }
 };
 
 $test('A');
 $test('B');
 $test('C');
+$test('D');
 $test(null);
 
 ?>
@@ -49,6 +54,12 @@ c from C: bool(false)
 d from C: bool(false)
 e from C: bool(true)
 f from C: bool(true)
+a from D: bool(true)
+b from D: bool(true)
+c from D: bool(true)
+d from D: bool(false)
+e from D: bool(true)
+f from D: bool(true)
 a from global: bool(true)
 b from global: bool(false)
 c from global: bool(false)

@@ -6783,6 +6783,10 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 		if (!(ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
 			RETURN_TRUE;
 		}
+		/* This path is effectively unreachable, but theoretically possible for
+		 * two internal classes where ZEND_ACC_NO_DYNAMIC_PROPERTIES is only
+		 * added to the subclass, in which case a ReflectionProperty can be
+		 * constructed on the parent class, and then tested on the subclass. */
 handle_magic_set:
 		RETURN_BOOL(ce->__set);
 	}
