@@ -352,6 +352,7 @@ static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_interval(zend_object *object);
+static HashTable *date_object_get_properties_for_interval(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_for_timezone(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, int *n);
@@ -1816,6 +1817,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
+	date_object_handlers_interval.get_properties_for = date_object_get_properties_for_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 	date_object_handlers_interval.compare = date_interval_compare_objects;
@@ -2231,6 +2233,33 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 
 	intervalobj = php_interval_obj_from_obj(object);
 	props = zend_std_get_properties(object);
+	if (!intervalobj->initialized) {
+		return props;
+	}
+
+	date_interval_object_to_hash(intervalobj, props);
+
+	return props;
+} /* }}} */
+
+static HashTable *date_object_get_properties_for_interval(zend_object *object, zend_prop_purpose purpose) /* {{{ */
+{
+	HashTable *props;
+	php_interval_obj *intervalobj;
+
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
+
+	intervalobj = php_interval_obj_from_obj(object);
+	props = zend_array_dup(zend_std_get_properties(object));
 	if (!intervalobj->initialized) {
 		return props;
 	}
