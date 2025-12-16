@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.30
+18 Dec 2025, PHP 8.2.30
 
 - Curl:
   . Fix curl build and test failures with version 8.16.
