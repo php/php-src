@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.1
+18 Dec 2025, PHP 8.5.1
 
 - Core:
   . Sync all boost.context files with release 1.86.0. (mvorisek)
@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug GH-20553 (PDO::FETCH_CLASSTYPE ignores $constructorArgs in
     PHP 8.5.0). (Girgias)
+  . Fixed GHSA-8xr5-qppj-gvwj (PDO quoting result null deref). (CVE-2025-14180)
+    (Jakub Zelenka)
 
 - Phar:
   . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
@@ -70,7 +72,12 @@ PHP                                                                        NEWS
   . Fix memory leak in array_diff() with custom type checks. (ndossche)
   . Fixed bug GH-20583 (Stack overflow in http_build_query
     via deep structures). (ndossche)
-  . Fixed bug GH-20584 (Information Leak of Memory). (ndossche)
+  . Fixed GHSA-www2-q4fc-65wf (Null byte termination in dns_get_record()).
+    (ndossche)
+  . Fixed GHSA-h96m-rvf9-jgm2 (Heap buffer overflow in array_merge()).
+    (CVE-2025-14178) (ndossche)
+  . Fixed GHSA-3237-qqm7-mfv7 (Information Leak of Memory in getimagesize).
+    (CVE-2025-14177) (ndossche)
 
 - URI:
   . Fixed bug GH-20366 (ext/uri incorrectly throws ValueError when encountering
