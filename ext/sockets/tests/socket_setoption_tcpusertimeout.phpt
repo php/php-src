@@ -28,6 +28,6 @@ var_dump($retval_3 === $timeout);
 socket_close($socket);
 ?>
 --EXPECT--
-socket_setopt(): Argument #4 ($value) must be of between 0 and %d
+socket_setopt(): Argument #4 ($value) must be of between 0 and 4294967295
 bool(true)
 bool(true)
