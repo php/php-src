@@ -20,19 +20,19 @@ class D extends C {
     public function __set($name, $value) {}
 }
 
-$test = static function ($scope) {
+function test($scope) {
     $rc = new ReflectionClass(B::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
         var_dump($rp->isWritable($scope, $scope && $scope !== 'A' ? new $scope : null));
     }
-};
+}
 
-$test('A');
-$test('B');
-$test('C');
-$test('D');
-$test(null);
+test('A');
+test('B');
+test('C');
+test('D');
+test(null);
 
 ?>
 --EXPECT--

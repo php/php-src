@@ -26,18 +26,18 @@ class E extends D {
     }
 }
 
-$test = static function ($scope) {
+function test($scope) {
     $rc = new ReflectionClass(B::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
         var_dump($rp->isReadable($scope, $scope && $scope !== 'A' ? new $scope : null));
     }
-};
+}
 
 foreach (['A', 'B', 'C', 'D', 'E'] as $scope) {
-    $test($scope);
+    test($scope);
 }
-$test(null);
+test(null);
 
 ?>
 --EXPECT--

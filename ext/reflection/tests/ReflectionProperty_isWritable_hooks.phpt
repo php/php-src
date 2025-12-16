@@ -12,16 +12,16 @@ class A {
     public $f { get {} set {} }
 }
 
-$test = static function ($scope) {
+function test($scope) {
     $rc = new ReflectionClass(A::class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from ' . ($scope ?? 'global') . ': ';
         var_dump($rp->isWritable($scope, null));
     }
-};
+}
 
-$test('A');
-$test(null);
+test('A');
+test(null);
 
 ?>
 --EXPECT--

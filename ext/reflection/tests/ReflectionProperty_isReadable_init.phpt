@@ -45,17 +45,17 @@ class C {
     public function __get($name) {}
 }
 
-$test = static function ($class) {
+function test($class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getProperties() as $rp) {
         echo $rp->getName() . ' from global: ';
         var_dump($rp->isReadable(null, new $class));
     }
-};
+}
 
-$test('A');
-$test('B');
-$test('C');
+test('A');
+test('B');
+test('C');
 
 ?>
 --EXPECT--
