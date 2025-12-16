@@ -1,5 +1,5 @@
 --TEST--
-Test if socket_set_option() works, option:SO_SNDTIMEO
+Test if socket_set_option() works, option:TCP_USER_TIMEOUT
 --EXTENSIONS--
 sockets
 --SKIPIF--
@@ -15,14 +15,14 @@ if (!$socket) {
 socket_set_block($socket);
 
 try {
-	socket_setopt($src, SOL_TCP, TCP_USER_TIMEOUT, -1);
+	socket_setopt($socket, SOL_TCP, TCP_USER_TIMEOUT, -1);
 } catch (\ValueError $e) {
 	echo $e->getMessage(), PHP_EOL;
 }
 
 $timeout = 200;
-$retval_2 = socket_set_option( $socket, SOL_TCP, TCP_USER_TIMEOUT, $timeout);
-$retval_3 = socket_get_option( $socket, SOL_TCP, TCP_USER_TIMEOUT);
+$retval_2 = socket_set_option($socket, SOL_TCP, TCP_USER_TIMEOUT, $timeout);
+$retval_3 = socket_get_option($socket, SOL_TCP, TCP_USER_TIMEOUT);
 var_dump($retval_2);
 var_dump($retval_3 === $timeout);
 socket_close($socket);
