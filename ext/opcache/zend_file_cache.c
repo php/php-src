@@ -268,7 +268,7 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	}
 
 	len = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
-	ret = (void*)(info->str_size | Z_UL(1));
+	ret = (void*)(info->str_size | 1);
 	zend_shared_alloc_register_xlat_entry(str, ret);
 
 	zend_string *s = (zend_string*)ZCG(mem);

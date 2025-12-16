@@ -1018,7 +1018,7 @@ static ZEND_FUNCTION(zend_test_is_zend_ptr)
 		Z_PARAM_LONG(addr);
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(is_zend_ptr((void*)addr));
+	RETURN_BOOL(is_zend_ptr((void*)(intptr_t)addr));
 }
 
 static ZEND_FUNCTION(zend_test_log_err_debug)

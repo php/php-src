@@ -59,9 +59,24 @@
 #endif
 
 /* Comparison zend_long vs size_t */
-#define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) > (size_t)(zlong))
-#define ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) >= (size_t)(zlong))
-#define ZEND_SIZE_T_LT_ZEND_LONG(size, zlong) ((zlong) >= 0 && (size) < (size_t)(zlong))
-#define ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong) ((zlong) >= 0 && (size) <= (size_t)(zlong))
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+# define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || ((zlong) < SIZE_MAX && (size) > (size_t)(zlong)))
+# define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) (zulong < SIZE_MAX && (size) > (size_t)(zulong))
+# define ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong) ((zlong) < 0 || ((zlong) <= SIZE_MAX && (size) >= (size_t)(zlong)))
+# define ZEND_SIZE_T_GTE_ZEND_ULONG(size, zulong) ((zulong) <= SIZE_MAX && (size) >= (size_t)(zulong))
+# define ZEND_SIZE_T_LT_ZEND_LONG(size, zlong) ((zlong) >= SIZE_MAX || ((zlong) > 0 && (size) < (size_t)(zlong)))
+# define ZEND_SIZE_T_LT_ZEND_ULONG(size, zulong) ((zulong) >= SIZE_MAX || (size) < (size_t)(zulong))
+# define ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong) ((zlong) > SIZE_MAX || ((zlong) >= 0 && (size) <= (size_t)(zlong)))
+# define ZEND_SIZE_T_LTE_ZEND_ULONG(size, zulong) ((zulong) > SIZE_MAX || (size) <= (size_t)(zlong))
+#else
+# define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) > (size_t)(zlong))
+# define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) ((size) > (size_t)(zulong))
+# define ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) >= (size_t)(zlong))
+# define ZEND_SIZE_T_GTE_ZEND_ULONG(size, zulong) ((size) >= (size_t)(zulong))
+# define ZEND_SIZE_T_LT_ZEND_LONG(size, zlong) ((zlong) > 0 && (size) < (size_t)(zlong))
+# define ZEND_SIZE_T_LT_ZEND_ULONG(size, zulong) ((size) < (size_t)(zulong))
+# define ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong) ((zlong) >= 0 && (size) <= (size_t)(zlong))
+# define ZEND_SIZE_T_LTE_ZEND_ULONG(size, zulong) ((size) <= (size_t)(zulong))
+#endif
 
 #endif /* ZEND_RANGE_CHECK_H */

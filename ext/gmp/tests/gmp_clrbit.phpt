@@ -46,9 +46,9 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "0"
-gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
+gmp_clrbit(): Argument #2 ($index) must be between 0 and %d
 string(2) "-1"
-gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
+gmp_clrbit(): Argument #2 ($index) must be between 0 and %d
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
