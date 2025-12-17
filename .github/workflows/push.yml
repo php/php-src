@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-${{ !matrix.asan && '22' || '24' }}.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: System info
@@ -154,7 +154,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
@@ -185,7 +185,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Update clang
         uses: ./.github/actions/macos-update-clang
       - name: brew
@@ -235,7 +235,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -346,6 +346,6 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: FreeBSD
         uses: ./.github/actions/freebsd
