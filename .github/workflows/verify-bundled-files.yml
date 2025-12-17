@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Detect changed files
         uses: dorny/paths-filter@v3
