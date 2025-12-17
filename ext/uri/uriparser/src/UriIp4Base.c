@@ -43,54 +43,45 @@
  */
 
 #ifndef URI_DOXYGEN
-# include "UriIp4Base.h"
+#  include "UriIp4Base.h"
 #endif
 
-
-
 void uriStackToOctet(UriIp4Parser * parser, unsigned char * octet) {
-	switch (parser->stackCount) {
-	case 1:
-		*octet = parser->stackOne;
-		break;
+    switch (parser->stackCount) {
+    case 1:
+        *octet = parser->stackOne;
+        break;
 
-	case 2:
-		*octet = parser->stackOne * 10
-				+ parser->stackTwo;
-		break;
+    case 2:
+        *octet = parser->stackOne * 10 + parser->stackTwo;
+        break;
 
-	case 3:
-		*octet = parser->stackOne * 100
-				+ parser->stackTwo * 10
-				+ parser->stackThree;
-		break;
+    case 3:
+        *octet = parser->stackOne * 100 + parser->stackTwo * 10 + parser->stackThree;
+        break;
 
-	default:
-		;
-	}
-	parser->stackCount = 0;
+    default:;
+    }
+    parser->stackCount = 0;
 }
 
-
-
 void uriPushToStack(UriIp4Parser * parser, unsigned char digit) {
-	switch (parser->stackCount) {
-	case 0:
-		parser->stackOne = digit;
-		parser->stackCount = 1;
-		break;
+    switch (parser->stackCount) {
+    case 0:
+        parser->stackOne = digit;
+        parser->stackCount = 1;
+        break;
 
-	case 1:
-		parser->stackTwo = digit;
-		parser->stackCount = 2;
-		break;
+    case 1:
+        parser->stackTwo = digit;
+        parser->stackCount = 2;
+        break;
 
-	case 2:
-		parser->stackThree = digit;
-		parser->stackCount = 3;
-		break;
+    case 2:
+        parser->stackThree = digit;
+        parser->stackCount = 3;
+        break;
 
-	default:
-		;
-	}
+    default:;
+    }
 }

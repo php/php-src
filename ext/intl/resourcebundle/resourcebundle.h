@@ -21,6 +21,12 @@
 
 #include "resourcebundle/resourcebundle_class.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void resourcebundle_extract_value( zval *target, ResourceBundle_object *source);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // #ifndef RESOURCEBUNDLE_CLASS_H

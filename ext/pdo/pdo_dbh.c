@@ -805,7 +805,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 			*bval = false;
 			return true;
 		case IS_LONG:
-			*bval = zval_is_true(value);
+			*bval = zend_is_true(value);
 			return true;
 		case IS_STRING: /* TODO Should string be allowed? */
 		default:
@@ -1190,7 +1190,7 @@ PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	zend_string *statement;
 	zend_long fetch_mode;
-	bool fetch_mode_is_null = 1;
+	bool fetch_mode_is_null = true;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
@@ -1321,6 +1321,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, false);
 	efree(func);
 }
 /* }}} */
@@ -1336,6 +1337,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, true);
 	pefree(func, 1);
 }
 /* }}} */
@@ -1394,7 +1396,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		func.type = ZEND_INTERNAL_FUNCTION;
 		func.handler = funcs->handler;
 		func.function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
-		func.scope = dbh_obj->std.ce;
+		func.scope = pdo_dbh_ce;
 		func.prototype = NULL;
 		ZEND_MAP_PTR(func.run_time_cache) = rt_cache_size ? pecalloc(rt_cache_size, 1, dbh->is_persistent) : NULL;
 		func.T = ZEND_OBSERVER_ENABLED;
@@ -1408,7 +1410,19 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
+			uint32_t num_arg_info = 1 + funcs->num_args;
+			if (func.fn_flags & ZEND_ACC_VARIADIC) {
+				num_arg_info++;
+			}
+
+			zend_arg_info *arg_info = safe_pemalloc(num_arg_info,
+					sizeof(zend_arg_info), 0, dbh->is_persistent);
+			for (uint32_t i = 0; i < num_arg_info; i++) {
+				zend_convert_internal_arg_info(&arg_info[i],
+						&funcs->arg_info[i], i == 0, dbh->is_persistent);
+			}
+
+			func.arg_info = arg_info + 1;
 			func.num_args = funcs->num_args;
 			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;
@@ -1594,7 +1608,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);
-	dbh_free(dbh, 0);
+	dbh_free(dbh, false);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce)
@@ -1618,7 +1632,7 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 {
 	if (res->ptr) {
 		pdo_dbh_t *dbh = (pdo_dbh_t*)res->ptr;
-		dbh_free(dbh, 1);
+		dbh_free(dbh, true);
 		res->ptr = NULL;
 	}
 }

@@ -33,16 +33,13 @@ $array_arg = array(
 /*7*/  array("hex1" => 0x123, 'hex2' => 0xabc, "hex\t3" => 0xABC, "hex\04" => 0xAb1),
 
        // array with negative hexa values
-       array(NULL => -0x123, "NULL" => -0xabc, "-ABC" => -0xABC, -0xAB1 => -0xAb1),
+       array('' => -0x123, "NULL" => -0xabc, "-ABC" => -0xABC, -0xAB1 => -0xAb1),
 
        // array with positive octal values
 /*9*/  array(0123 => 0123, "0234" => 0234, '034' => 034, 00 => 00),
 
        // array with negative octal values
        array(-0123 => -0123, "-0234" => -0234, '-034' => -034),
-
-       // array with null values
-/*11*/ array(NULL => NULL, "null" => NULL, "NULL" => NULL)
 
 );
 
@@ -208,18 +205,5 @@ array(3) {
   int(-%d)
   [2]=>
   int(-%d)
-}
-
--- Iteration 11 --
-bool(true)
-
-The output array is:
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 Done

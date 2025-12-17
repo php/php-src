@@ -488,6 +488,7 @@ static void dom_unset_property(zend_object *object, zend_string *member, void **
 	zend_std_unset_property(object, member, cache_slot);
 }
 
+/* This custom handler is necessary to avoid a recursive construction of the entire subtree. */
 static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
 	dom_object			*obj = php_dom_obj_from_obj(object);
@@ -497,6 +498,11 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	zend_string			*string_key;
 	dom_prop_handler	*entry;
 	zend_string         *object_str;
+
+	/* As we have a custom implementation, we must manually check for overrides. */
+	if (object->ce->__debugInfo) {
+		return zend_std_get_debug_info(object, is_temp);
+	}
 
 	*is_temp = 1;
 
@@ -1369,9 +1375,7 @@ PHP_MINFO_FUNCTION(dom)
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOM_API_VERSION);
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
-#ifdef LIBXML_HTML_ENABLED
 	php_info_print_table_row(2, "HTML Support", "enabled");
-#endif
 #ifdef LIBXML_XPATH_ENABLED
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
@@ -2261,7 +2265,7 @@ static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_l
 		if (0 == (is_numeric_string_type = is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), lval, &dval, true))) {
 			return true;
 		} else if (is_numeric_string_type == IS_DOUBLE) {
-			*lval = zend_dval_to_lval_cap(dval);
+			*lval = zend_dval_to_lval_cap(dval, Z_STR_P(offset));
 		}
 	} else {
 		*lval = zval_get_long(offset);
@@ -2709,20 +2713,10 @@ xmlChar *php_dom_libxml_fix_file_path(xmlChar *path)
 
 xmlDocPtr php_dom_create_html_doc(void)
 {
-#ifdef LIBXML_HTML_ENABLED
 	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
 	if (EXPECTED(lxml_doc)) {
 		lxml_doc->dict = xmlDictCreate();
 	}
-#else
-	/* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
-	 * This code mimics the behaviour. */
-	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-	if (EXPECTED(lxml_doc)) {
-		lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-		lxml_doc->dict = xmlDictCreate();
-	}
-#endif
 	return lxml_doc;
 }
 

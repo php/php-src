@@ -13,7 +13,7 @@
 #include <Zend/zend_API.h>
 #include <php.h>
 
-#include "ext/dom/lexbor/selectors-adapted/selectors.h"
+#include "selectors.h"
 #include "../../namespace_compat.h"
 #include "../../domexception.h"
 #include "../../php_dom.h"
@@ -35,7 +35,22 @@ static void dom_lxb_str_wrapper_release(dom_lxb_str_wrapper *wrapper)
 	}
 }
 
-static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_literal(const xmlNode *node, const char *name)
+static bool lxb_selectors_str_cmp_loright(const char *lhs, const char *rhs)
+{
+	while (true) {
+		if (*rhs != zend_tolower_ascii(*lhs)) {
+			return false;
+		}
+		if (!*lhs) {
+			return true;
+		}
+		++rhs;
+		++lhs;
+	}
+}
+
+/* `name` is lowercase */
+static zend_always_inline bool lxb_selectors_cmp_html_name_lit(const xmlNode *node, const char *name)
 {
 	return strcmp((const char *) node->name, name) == 0;
 }
@@ -48,14 +63,15 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, co
 
 static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xmlNode *node, const lxb_selectors_adapted_id *id)
 {
-	uintptr_t ptr = (uintptr_t) node->name;
-	if (id->interned && (ptr & (ZEND_MM_ALIGNMENT - 1)) != 0) {
-		/* It cannot be a heap-allocated string because the pointer is not properly aligned for a heap allocation.
-		 * Therefore, it must be interned into the dictionary pool. */
-		return node->name == id->name;
+	ZEND_ASSERT(node->doc != NULL);
+	if (php_dom_ns_is_html_and_document_is_html(node)) {
+		/* From https://html.spec.whatwg.org/#case-sensitivity-of-selectors:
+		 * The element name must be compared case sensitively _after_ converting the selector to lowercase.
+		 * E.g. selector "DIV" must match element "div" but not "Div". */
+		return lxb_selectors_str_cmp_loright((const char *) id->name, (const char *) node->name);
+	} else {
+		return strcmp((const char *) node->name, (const char *) id->name) == 0;
 	}
-
-	return strcmp((const char *) node->name, (const char *) id->name) == 0;
 }
 
 static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNode *node, const lxb_char_t *name)
@@ -64,9 +80,8 @@ static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNod
 	ZEND_ASSERT(node->doc != NULL);
 	if (php_dom_ns_is_html_and_document_is_html(node)) {
 		/* No need to handle DTD entities as we're in HTML. */
-		size_t name_bound = strlen((const char *) name) + 1;
 		for (const xmlAttr *cur = node->properties; cur != NULL; cur = cur->next) {
-			if (lexbor_str_data_nlocmp_right(cur->name, name, name_bound)) {
+			if (lxb_selectors_str_cmp_loright((const char *) name, (const char *) cur->name)) {
 				attr = cur;
 				break;
 			}
@@ -154,18 +169,7 @@ static bool lxb_selectors_is_lowercased_html_attrib_name(const lxb_css_selector_
 static void lxb_selectors_adapted_set_entry_id_ex(lxb_selectors_entry_t *entry, const lxb_css_selector_t *selector, const xmlNode *node)
 {
 	entry->id.attr_case_insensitive = lxb_selectors_is_lowercased_html_attrib_name(selector);
-
-	if (node->doc != NULL && node->doc->dict != NULL) {
-		const xmlChar *interned = xmlDictExists(node->doc->dict, selector->name.data, selector->name.length);
-		if (interned != NULL) {
-			entry->id.name = interned;
-			entry->id.interned = true;
-			return;
-		}
-	}
-
 	entry->id.name = selector->name.data;
-	entry->id.interned = false;
 }
 
 static zend_always_inline void lxb_selectors_adapted_set_entry_id(lxb_selectors_entry_t *entry, const lxb_css_selector_t *selector, const xmlNode *node)
@@ -1686,8 +1690,8 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ANY_LINK:
 			/* https://drafts.csswg.org/selectors/#the-any-link-pseudo */
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "a")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "area")))
+				&& (lxb_selectors_cmp_html_name_lit(node, "a")
+					|| lxb_selectors_cmp_html_name_lit(node, "area")))
 			{
 				return lxb_selectors_adapted_has_attr(node, "href");
 			}
@@ -1705,7 +1709,7 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 			if (!php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)) {
 				return false;
 			}
-			if (lxb_selectors_adapted_cmp_local_name_literal(node, "input")) {
+			if (lxb_selectors_cmp_html_name_lit(node, "input")) {
 				const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "type");
 				if (dom_attr == NULL) {
 					return false;
@@ -1729,7 +1733,7 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 
 				return res;
 			}
-			else if(lxb_selectors_adapted_cmp_local_name_literal(node, "option")) {
+			else if(lxb_selectors_cmp_html_name_lit(node, "option")) {
 				return lxb_selectors_adapted_has_attr(node, "selected");
 			}
 
@@ -1802,8 +1806,8 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 		case LXB_CSS_SELECTOR_PSEUDO_CLASS_LINK:
 			/* https://html.spec.whatwg.org/multipage/semantics-other.html#selector-link */
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "a")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "area")))
+				&& (lxb_selectors_cmp_html_name_lit(node, "a")
+					|| lxb_selectors_cmp_html_name_lit(node, "area")))
 			{
 				return lxb_selectors_adapted_has_attr(node, "href");
 			}
@@ -1823,9 +1827,9 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 
 		case LXB_CSS_SELECTOR_PSEUDO_CLASS_OPTIONAL:
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "select")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
+				&& (lxb_selectors_cmp_html_name_lit(node, "input")
+					|| lxb_selectors_cmp_html_name_lit(node, "select")
+					|| lxb_selectors_cmp_html_name_lit(node, "textarea")))
 			{
 				return !lxb_selectors_adapted_has_attr(node, "required");
 			}
@@ -1840,8 +1844,8 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 
 		case LXB_CSS_SELECTOR_PSEUDO_CLASS_PLACEHOLDER_SHOWN:
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
+				&& (lxb_selectors_cmp_html_name_lit(node, "input")
+					|| lxb_selectors_cmp_html_name_lit(node, "textarea")))
 			{
 				return lxb_selectors_adapted_has_attr(node, "placeholder");
 			}
@@ -1856,9 +1860,9 @@ lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
 
 		case LXB_CSS_SELECTOR_PSEUDO_CLASS_REQUIRED:
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "select")
-					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
+				&& (lxb_selectors_cmp_html_name_lit(node, "input")
+					|| lxb_selectors_cmp_html_name_lit(node, "select")
+					|| lxb_selectors_cmp_html_name_lit(node, "textarea")))
 			{
 				return lxb_selectors_adapted_has_attr(node, "required");
 			}
@@ -2104,24 +2108,24 @@ lxb_selectors_pseudo_class_disabled(const xmlNode *node)
 	}
 
 	if (lxb_selectors_adapted_has_attr(node, "disabled")
-		&& (lxb_selectors_adapted_cmp_local_name_literal(node, "button")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "input")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "select")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "optgroup")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "fieldset")))
+		&& (lxb_selectors_cmp_html_name_lit(node, "button")
+			|| lxb_selectors_cmp_html_name_lit(node, "input")
+			|| lxb_selectors_cmp_html_name_lit(node, "select")
+			|| lxb_selectors_cmp_html_name_lit(node, "textarea")
+			|| lxb_selectors_cmp_html_name_lit(node, "optgroup")
+			|| lxb_selectors_cmp_html_name_lit(node, "fieldset")))
 	{
 		return true;
 	}
 
-	if (lxb_selectors_adapted_cmp_local_name_literal(node, "fieldset")) {
+	if (lxb_selectors_cmp_html_name_lit(node, "fieldset")) {
 		const xmlNode *fieldset = node;
 		node = node->parent;
 
 		while (node != NULL && CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
 			/* node is a disabled fieldset that is an ancestor of fieldset */
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
-				&& lxb_selectors_adapted_cmp_local_name_literal(node, "fieldset")
+				&& lxb_selectors_cmp_html_name_lit(node, "fieldset")
 				&& lxb_selectors_adapted_has_attr(node, "disabled"))
 			{
 				/* Search first legend child and figure out if fieldset is a descendent from that. */
@@ -2129,7 +2133,7 @@ lxb_selectors_pseudo_class_disabled(const xmlNode *node)
 				do {
 					if (search_current->type == XML_ELEMENT_NODE
 						&& php_dom_ns_is_fast(search_current, php_dom_ns_is_html_magic_token)
-						&& lxb_selectors_adapted_cmp_local_name_literal(search_current, "legend")) {
+						&& lxb_selectors_cmp_html_name_lit(search_current, "legend")) {
 						/* search_current is a legend element. */
 						const xmlNode *inner_search_current = fieldset;
 
@@ -2235,8 +2239,8 @@ static bool
 lxb_selectors_pseudo_class_read_write(const xmlNode *node)
 {
 	if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)) {
-		if (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
-			|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")) {
+		if (lxb_selectors_cmp_html_name_lit(node, "input")
+			|| lxb_selectors_cmp_html_name_lit(node, "textarea")) {
 			return !lxb_selectors_adapted_has_attr(node, "readonly") && !lxb_selectors_adapted_has_attr(node, "disabled");
 		} else {
 			const xmlAttr *attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "contenteditable");

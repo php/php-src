@@ -732,7 +732,7 @@ static void zend_persist_op_array(zval *zv)
 	}
 }
 
-static zend_op_array *zend_persist_class_method(zend_op_array *op_array, zend_class_entry *ce)
+static zend_op_array *zend_persist_class_method(zend_op_array *op_array, const zend_class_entry *ce)
 {
 	zend_op_array *old_op_array;
 
@@ -834,7 +834,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
 	if (prop->prototype) {
-		zend_property_info *new_prototype = (zend_property_info *) zend_shared_alloc_get_xlat_entry(prop->prototype);
+		const zend_property_info *new_prototype = (const zend_property_info *) zend_shared_alloc_get_xlat_entry(prop->prototype);
 		if (new_prototype) {
 			prop->prototype = new_prototype;
 		}
@@ -854,7 +854,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 					}
 				}
 #endif
-				zend_property_info *new_prop_info = (zend_property_info *) zend_shared_alloc_get_xlat_entry(hook->prop_info);
+				const zend_property_info *new_prop_info = (const zend_property_info *) zend_shared_alloc_get_xlat_entry(hook->prop_info);
 				if (new_prop_info) {
 					hook->prop_info = new_prop_info;
 				}
@@ -868,7 +868,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 
 static void zend_persist_class_constant(zval *zv)
 {
-	zend_class_constant *orig_c = Z_PTR_P(zv);
+	const zend_class_constant *orig_c = Z_PTR_P(zv);
 	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(orig_c);
 	zend_class_entry *ce;
 
@@ -967,12 +967,11 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			}
 		}
 		if (ce->default_static_members_table) {
-			int i;
 			ce->default_static_members_table = zend_shared_memdup_free(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
 
 			/* Persist only static properties in this class.
 			 * Static properties from parent classes will be handled in class_copy_ctor and are marked with IS_INDIRECT */
-			for (i = 0; i < ce->default_static_members_count; i++) {
+			for (uint32_t i = 0; i < ce->default_static_members_count; i++) {
 				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
 					zend_persist_zval(&ce->default_static_members_table[i]);
 				}
@@ -1287,7 +1286,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 }
 
 #ifdef HAVE_JIT
-static void zend_accel_persist_jit_op_array(zend_op_array *op_array, zend_class_entry *ce)
+static void zend_accel_persist_jit_op_array(zend_op_array *op_array, const zend_class_entry *ce)
 {
 	if (op_array->type == ZEND_USER_FUNCTION) {
 		if (op_array->scope == ce
@@ -1301,7 +1300,7 @@ static void zend_accel_persist_jit_op_array(zend_op_array *op_array, zend_class_
 	}
 }
 
-static void zend_accel_persist_link_func_info(zend_op_array *op_array, zend_class_entry *ce)
+static void zend_accel_persist_link_func_info(zend_op_array *op_array, const zend_class_entry *ce)
 {
 	if (op_array->type == ZEND_USER_FUNCTION
 	 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
@@ -1421,7 +1420,7 @@ static zend_early_binding *zend_persist_early_bindings(
 	return early_bindings;
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, bool for_shm)
 {
 	Bucket *p;
 

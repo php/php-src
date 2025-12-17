@@ -14,7 +14,5 @@ unserialize($poc);
 ?>
 DONE
 --EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Warning: unserialize(): Error at offset 50 of 50 bytes in %s on line %d
 DONE

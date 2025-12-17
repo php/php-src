@@ -46,42 +46,36 @@
 #include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriVersion.c"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriVersion.c"
-#  undef URI_PASS_UNICODE
-# endif
+#  ifdef URI_ENABLE_ANSI
+#    define URI_PASS_ANSI 1
+#    include "UriVersion.c"
+#    undef URI_PASS_ANSI
+#  endif
+#  ifdef URI_ENABLE_UNICODE
+#    define URI_PASS_UNICODE 1
+#    include "UriVersion.c"
+#    undef URI_PASS_UNICODE
+#  endif
 #else
-# ifdef URI_PASS_ANSI
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  include <uriparser/UriDefsUnicode.h>
-#  include <wchar.h>
-# endif
+#  ifdef URI_PASS_ANSI
+#    include <uriparser/UriDefsAnsi.h>
+#  else
+#    include <uriparser/UriDefsUnicode.h>
+#    include <wchar.h>
+#  endif
 
-
-
-#ifndef URI_DOXYGEN
-# include <uriparser/Uri.h>
-#endif
-
-
+#  ifndef URI_DOXYGEN
+#    include <uriparser/Uri.h>
+#  endif
 
 const URI_CHAR * URI_FUNC(BaseRuntimeVersion)(void) {
-#if defined(URI_PASS_ANSI)
-	return URI_VER_ANSI;
-#elif defined(URI_PASS_UNICODE)
-	return URI_VER_UNICODE;
-#else
-# error Either URI_PASS_ANSI or URI_PASS_UNICODE must be defined
-#endif
+#  if defined(URI_PASS_ANSI)
+    return URI_VER_ANSI;
+#  elif defined(URI_PASS_UNICODE)
+    return URI_VER_UNICODE;
+#  else
+#    error Either URI_PASS_ANSI or URI_PASS_UNICODE must be defined
+#  endif
 }
-
-
 
 #endif

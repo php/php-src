@@ -23,8 +23,35 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <mach-o/dyld.h>
 
 TSRMLS_CACHE_EXTERN();
+
+/* Thunk format used since dydl 1284 (approx. MacOS 15)
+ * https://github.com/apple-oss-distributions/dyld/blob/9307719dd8dc9b385daa412b03cfceb897b2b398/libdyld/ThreadLocalVariables.h#L146 */
+#if defined(__x86_64__) || defined(__aarch64__)
+struct TLV_Thunkv2
+{
+	void*        func;
+	uint32_t     key;
+	uint32_t     offset;
+};
+#else
+struct TLV_Thunkv2
+{
+	void*        func;
+	uint16_t     key;
+	uint16_t     offset;
+};
+#endif
+
+/* Thunk format used in earlier versions */
+struct TLV_Thunkv1
+{
+	void*       func;
+	size_t      key;
+	size_t      offset;
+};
 
 zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	size_t *tcb_offset,
@@ -37,12 +64,25 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	}
 
 #if defined(__x86_64__)
-	size_t *ti;
+	struct TLV_Thunkv2 *thunk;
 	__asm__ __volatile__(
 		"leaq __tsrm_ls_cache(%%rip),%0"
-		: "=r" (ti));
-	*module_offset = ti[2];
-	*module_index = ti[1] * 8;
+		: "=r" (thunk));
+
+	/* Detect dyld 1284: With dyld 1284, thunk->func will be _tlv_get_addr.
+	 * Unfortunately this symbol is private, but we can find it
+	 * as _tlv_bootstrap+8: https://github.com/apple-oss-distributions/dyld/blob/9307719dd8dc9b385daa412b03cfceb897b2b398/libdyld/threadLocalHelpers.s#L54
+	 * In earlier versions, thunk->func will be tlv_get_addr, which is not
+	 * _tlv_bootstrap+8.
+	 */
+	if (thunk->func == (void*)((char*)_tlv_bootstrap + 8)) {
+		*module_offset = thunk->offset;
+		*module_index = (size_t)thunk->key * 8;
+	} else {
+		struct TLV_Thunkv1 *thunkv1 = (struct TLV_Thunkv1*) thunk;
+		*module_offset = thunkv1->offset;
+		*module_index = thunkv1->key * 8;
+	}
 
 	return SUCCESS;
 #endif

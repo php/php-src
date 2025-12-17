@@ -38,6 +38,8 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_hrtime.h"
+#include "zend_enum.h"
+#include "zend_closures.h"
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
@@ -553,7 +555,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
-			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
+			print_hash(buf, Z_ARRVAL_P(expr), indent, false);
 			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
@@ -583,12 +585,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
-					print_hash(buf, (HashTable*) &zend_empty_array, indent, 1);
+					print_hash(buf, (HashTable*) &zend_empty_array, indent, true);
 					break;
 				}
 
 				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
-				print_hash(buf, properties, indent, 1);
+				print_hash(buf, properties, indent, true);
 				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
@@ -641,7 +643,7 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 /* }}} */
 
 #ifdef ZTS
-static bool short_tags_default      = 1;
+static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define short_tags_default			1
@@ -817,7 +819,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->saved_fpu_cw = 0;
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
-	executor_globals->active = 0;
+	executor_globals->active = false;
 	executor_globals->bailout = NULL;
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;
@@ -910,7 +912,7 @@ static bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	/* While we keep registering $GLOBALS as an auto-global, we do not create an
 	 * actual variable for it. Access to it handled specially by the compiler. */
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -1026,7 +1028,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	executor_globals = ts_resource(executor_globals_id);
 
 	compiler_globals_dtor(compiler_globals);
-	compiler_globals->in_compilation = 0;
+	compiler_globals->in_compilation = false;
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 
@@ -1054,6 +1056,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
+	zend_object_handlers_startup();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
@@ -1077,6 +1080,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
+
+    zend_enum_startup();
+    zend_closure_startup();
 }
 /* }}} */
 
@@ -1501,12 +1507,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
-		zend_execute_data *ex;
-		const zend_op *opline;
-
 		if (type & E_FATAL_ERRORS) {
-			ex = EG(current_execute_data);
-			opline = NULL;
+			zend_execute_data *ex = EG(current_execute_data);
+			const zend_op *opline = NULL;
+
 			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 				ex = ex->prev_execute_data;
 			}

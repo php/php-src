@@ -23,6 +23,8 @@ int(1)
 
 Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(1)
+
+Warning: unexpected NAN value was coerced to string in %s on line %d
 string(3) "NAN"
 string(8) "1.0E+121"
 string(3) "INF"

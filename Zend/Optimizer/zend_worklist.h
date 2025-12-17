@@ -97,12 +97,12 @@ static inline bool zend_worklist_push(zend_worklist *worklist, int i)
 	ZEND_ASSERT(i >= 0 && i < worklist->stack.capacity);
 
 	if (zend_bitset_in(worklist->visited, i)) {
-		return 0;
+		return false;
 	}
 
 	zend_bitset_incl(worklist->visited, i);
 	zend_worklist_stack_push(&worklist->stack, i);
-	return 1;
+	return true;
 }
 
 static inline int zend_worklist_peek(const zend_worklist *worklist)

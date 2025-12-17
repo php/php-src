@@ -19,6 +19,9 @@
 #include <php.h>
 #include <unicode/utypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* status );
 void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* status );
 
@@ -32,5 +35,8 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv );
 zval* collator_convert_string_to_double( zval* str, zval *rv );
 
 zend_string *collator_zval_to_string(zval *arg);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // COLLATOR_CONVERT_H

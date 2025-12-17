@@ -215,6 +215,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 					}
 					zend_tmp_string_release(tmp_str);
 				} else {
+					zend_tmp_string_release(tmp_str);
 					zend_fcc_dtor(fcc);
 					efree(fcc);
 					return FAILURE;

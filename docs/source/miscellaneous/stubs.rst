@@ -489,7 +489,7 @@ generated. You can include this file conditionally, such as:
    #endif
 
 When ``@generate-legacy-arginfo`` is passed the minimum PHP version ID that needs to be supported,
-then only one arginfo file is going to be generated, and ``#if`` prepocessor directives will ensure
+then only one arginfo file is going to be generated, and ``#if`` preprocessor directives will ensure
 compatibility with all the required PHP 8 versions.
 
 PHP Version IDs are as follows: ``80000`` for PHP 8.0, ``80100`` for PHP PHP 8.1, ``80200`` for PHP

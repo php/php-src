@@ -2453,8 +2453,18 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_THROWS();
 	}
 
+	if (!zend_finite(input)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	if (output <= 0.0) {
 		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(output)) {
+		zend_argument_value_error(3, "must be finite");
 		RETURN_THROWS();
 	}
 
@@ -2966,7 +2976,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i;
+	int ch = 0, col, i;
+	unsigned int x, y;
 	size_t l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
@@ -2999,21 +3010,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, ch, col);
+			gdImageChar(im, font, (int)x, (int)y, ch, col);
 			break;
 		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
 		case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				gdImageChar(im, font, (int)x, (int)y, (int) ((unsigned char) str[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				gdImageCharUp(im, font, (int)x, (int)y, (int) str[i], col);
 				y -= font->w;
 			}
 			break;
@@ -3605,7 +3616,7 @@ PHP_FUNCTION(imagefilter)
 	zval *tmp;
 
 	typedef void (*image_filter)(INTERNAL_FUNCTION_PARAMETERS);
-	zend_long filtertype;
+	zend_long filtertype = 0;
 	image_filter filters[] =
 	{
 		php_image_filter_negate ,
@@ -3623,15 +3634,17 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_scatter
 	};
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {
-		WRONG_PARAM_COUNT;
-	} else if (zend_parse_parameters(2, "Ol", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+	/* We need to do some initial ZPP parsing to be able to extract the filter value */
+	if (zend_parse_parameters(MIN(2, ZEND_NUM_ARGS()), "Ol*", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+
 		RETURN_THROWS();
 	}
 
-	if (filtertype >= 0 && filtertype <= IMAGE_FILTER_MAX) {
-		filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (UNEXPECTED(filtertype < 0 || filtertype > IMAGE_FILTER_MAX)) {
+		zend_argument_value_error(2, "must be one of the IMG_FILTER_* filter constants");
+		RETURN_THROWS();
 	}
+	filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -3919,9 +3932,17 @@ PHP_FUNCTION(imagescale)
 		src_y = gdImageSY(im);
 
 		if (src_x && tmp_h < 0) {
+			if (tmp_w > (ZEND_LONG_MAX / src_y)) {
+				zend_argument_value_error(2, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_y));
+				RETURN_THROWS();
+			}
 			tmp_h = tmp_w * src_y / src_x;
 		}
 		if (src_y && tmp_w < 0) {
+			if (tmp_h > (ZEND_LONG_MAX / src_x)) {
+				zend_argument_value_error(3, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_x));
+				RETURN_THROWS();
+			}
 			tmp_w = tmp_h * src_x / src_y;
 		}
 	}
@@ -4376,7 +4397,7 @@ static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num) {
 			}
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
-			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
+			if (zend_str_has_nul_byte(Z_STR_P(to_zval))) {
 				zend_argument_type_error(arg_num, "must not contain null bytes");
 				return NULL;
 			}

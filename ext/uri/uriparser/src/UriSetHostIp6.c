@@ -40,143 +40,119 @@
 #include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriSetHostIp6.c"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriSetHostIp6.c"
-#  undef URI_PASS_UNICODE
-# endif
+#  ifdef URI_ENABLE_ANSI
+#    define URI_PASS_ANSI 1
+#    include "UriSetHostIp6.c"
+#    undef URI_PASS_ANSI
+#  endif
+#  ifdef URI_ENABLE_UNICODE
+#    define URI_PASS_UNICODE 1
+#    include "UriSetHostIp6.c"
+#    undef URI_PASS_UNICODE
+#  endif
 #else
-# ifdef URI_PASS_ANSI
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  include <uriparser/UriDefsUnicode.h>
-#  include <wchar.h>
-# endif
+#  ifdef URI_PASS_ANSI
+#    include <uriparser/UriDefsAnsi.h>
+#  else
+#    include <uriparser/UriDefsUnicode.h>
+#    include <wchar.h>
+#  endif
 
+#  ifndef URI_DOXYGEN
+#    include <uriparser/Uri.h>
+#    include "UriMemory.h"
+#    include "UriSetHostBase.h"
+#    include "UriSetHostCommon.h"
+#  endif
 
+#  include <assert.h>
+#  include <string.h> /* for memcpy */
 
-#ifndef URI_DOXYGEN
-# include <uriparser/Uri.h>
-# include "UriMemory.h"
-# include "UriSetHostBase.h"
-# include "UriSetHostCommon.h"
-#endif
+#  define URI_MAX_IP6_LEN \
+      (8 * 4 + 7 * 1) /* i.e. 8 full quads plus 7 colon separators \
+                       */
 
+int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output, const URI_CHAR * first,
+                                  const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    /* NOTE: output is allowed to be NULL */
+    if ((first == NULL) || (afterLast == NULL)) {
+        return URI_ERROR_NULL;
+    }
 
+    URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
-#include <assert.h>
-#include <string.h>  /* for memcpy */
+    /* Are we dealing with potential IPvFuture input? */
+    if (first < afterLast) {
+        switch (first[0]) {
+        case _UT('v'):
+        case _UT('V'):
+            return URI_ERROR_SYNTAX;
+        default:
+            break;
+        }
+    }
 
+    /* Are we dealing with IPv6 input? */
+    /* Assemble "//[..]" input wrap for upcoming parse as a URI
+     * NOTE: If the input contains closing "]" on its own, the resulting
+     *       string will not be valid URI syntax, and hence there is
+     *       no risk of false positives from "bracket injection". */
+    URI_CHAR candidate[3 + URI_MAX_IP6_LEN + 1 + 1] = _UT("//[");
+    const size_t inputLenChars = (afterLast - first);
 
+    /* Detect overflow */
+    if (inputLenChars > URI_MAX_IP6_LEN) {
+        return URI_ERROR_SYNTAX;
+    }
 
-#define URI_MAX_IP6_LEN (8 * 4 + 7 * 1)  /* i.e. 8 full quads plus 7 colon separators */
+    memcpy(candidate + 3, first, inputLenChars * sizeof(URI_CHAR));
+    memcpy(candidate + 3 + inputLenChars, _UT("]"),
+           2 * sizeof(URI_CHAR)); /* includes zero terminator */
 
+    /* Parse as an RFC 3986 URI */
+    const size_t candidateLenChars = 3 + inputLenChars + 1;
+    URI_TYPE(Uri) uri;
+    const int res = URI_FUNC(ParseSingleUriExMm)(
+        &uri, candidate, candidate + candidateLenChars, NULL, memory);
 
+    assert((res == URI_SUCCESS) || (res == URI_ERROR_SYNTAX)
+           || (res == URI_ERROR_MALLOC));
 
-int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast,
-		UriMemoryManager * memory) {
-	/* NOTE: output is allowed to be NULL */
-	if ((first == NULL) || (afterLast == NULL)) {
-		return URI_ERROR_NULL;
-	}
+    if (res == URI_SUCCESS) {
+        assert(uri.hostData.ip6 != NULL);
 
-	URI_CHECK_MEMORY_MANAGER(memory);  /* may return */
+        if (output != NULL) {
+            memcpy(output->data, uri.hostData.ip6->data, sizeof(output->data));
+        }
 
-	/* Are we dealing with potential IPvFuture input? */
-	if (first < afterLast) {
-		switch (first[0]) {
-			case _UT('v'):
-			case _UT('V'):
-				return URI_ERROR_SYNTAX;
-			default:
-				break;
-		}
-	}
+        URI_FUNC(FreeUriMembersMm)(&uri, memory);
+    }
 
-	/* Are we dealing with IPv6 input? */
-	{
-		/* Assemble "//[..]" input wrap for upcoming parse as a URI
-		 * NOTE: If the input contains closing "]" on its own, the resulting
-		 *       string will not be valid URI syntax, and hence there is
-		 *       no risk of false positives from "bracket injection". */
-		URI_CHAR candidate[3 + URI_MAX_IP6_LEN + 1 + 1] = _UT("//[");
-		const size_t inputLenChars = (afterLast - first);
-
-		/* Detect overflow */
-		if (inputLenChars > URI_MAX_IP6_LEN) {
-			return URI_ERROR_SYNTAX;
-		}
-
-		memcpy(candidate + 3, first, inputLenChars * sizeof(URI_CHAR));
-		memcpy(candidate + 3 + inputLenChars, _UT("]"), 2 * sizeof(URI_CHAR));  /* includes zero terminator */
-
-		/* Parse as an RFC 3986 URI */
-		{
-			const size_t candidateLenChars = 3 + inputLenChars + 1;
-			URI_TYPE(Uri) uri;
-			const int res = URI_FUNC(ParseSingleUriExMm)(&uri, candidate, candidate + candidateLenChars, NULL, memory);
-
-			assert((res == URI_SUCCESS) || (res == URI_ERROR_SYNTAX) || (res == URI_ERROR_MALLOC));
-
-			if (res == URI_SUCCESS) {
-				assert(uri.hostData.ip6 != NULL);
-
-				if (output != NULL) {
-					memcpy(output->data, uri.hostData.ip6->data, sizeof(output->data));
-				}
-
-				URI_FUNC(FreeUriMembersMm)(&uri, memory);
-			}
-
-			return res;
-		}
-	}
+    return res;
 }
 
-
-
-int URI_FUNC(ParseIpSixAddress)(UriIp6 * output,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast) {
-	return URI_FUNC(ParseIpSixAddressMm)(output, first, afterLast, NULL);
+int URI_FUNC(ParseIpSixAddress)(UriIp6 * output, const URI_CHAR * first,
+                                const URI_CHAR * afterLast) {
+    return URI_FUNC(ParseIpSixAddressMm)(output, first, afterLast, NULL);
 }
 
-
-
-int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory) {
+int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * afterLast,
+                                    UriMemoryManager * memory) {
     return URI_FUNC(ParseIpSixAddressMm)(NULL, first, afterLast, memory);
 }
 
-
-
 int URI_FUNC(IsWellFormedHostIp6)(const URI_CHAR * first, const URI_CHAR * afterLast) {
-	return URI_FUNC(IsWellFormedHostIp6Mm)(first, afterLast, NULL);
+    return URI_FUNC(IsWellFormedHostIp6Mm)(first, afterLast, NULL);
 }
 
-
-
-int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast,
-		UriMemoryManager * memory) {
-	return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_IP6, first, afterLast, memory);
+int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                           const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_IP6, first, afterLast, memory);
 }
 
-
-
-int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast) {
-	return URI_FUNC(SetHostIp6Mm)(uri, first, afterLast, NULL);
+int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                         const URI_CHAR * afterLast) {
+    return URI_FUNC(SetHostIp6Mm)(uri, first, afterLast, NULL);
 }
-
-
 
 #endif

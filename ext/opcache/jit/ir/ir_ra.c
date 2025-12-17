@@ -776,9 +776,6 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 						if (insn->op == IR_PARAM) {
 							/* We may reuse parameter stack slot for spilling */
 							ctx->live_intervals[v]->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
-						} else if (insn->op == IR_VLOAD) {
-							/* Load may be fused into the usage instruction */
-							ctx->live_intervals[v]->flags |= IR_LIVE_INTERVAL_MEM_LOAD;
 						}
 						def_pos = IR_DEF_LIVE_POS_FROM_REF(ref);
 					}
@@ -845,11 +842,17 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							ival = ctx->live_intervals[v];
 						}
 						ir_add_use(ctx, ival, j, use_pos, reg, IR_USE_FLAGS(def_flags, j), hint_ref);
-					} else if (ctx->rules) {
-						if (ctx->rules[input] & IR_FUSED) {
-						    ir_add_fusion_ranges(ctx, ref, input, bb, live);
-						} else if (ctx->rules[input] == (IR_SKIPPED|IR_RLOAD)) {
-							ir_set_alocated_reg(ctx, ref, j, ctx->ir_base[input].op2);
+					} else {
+						if (ctx->rules) {
+							if ((ctx->rules[input] & (IR_FUSED|IR_SKIPPED)) == IR_FUSED) {
+								ir_add_fusion_ranges(ctx, ref, input, bb, live);
+							} else if (ctx->rules[input] == (IR_SKIPPED|IR_RLOAD)) {
+								ir_set_alocated_reg(ctx, ref, j, ctx->ir_base[input].op2);
+							}
+						}
+						if (reg != IR_REG_NONE) {
+							use_pos = IR_LOAD_LIVE_POS_FROM_REF(ref);
+							ir_add_fixed_live_range(ctx, reg, use_pos, use_pos + IR_USE_SUB_REF);
 						}
 					}
 				} else if (reg != IR_REG_NONE) {
@@ -1193,7 +1196,7 @@ static void ir_add_fusion_ranges(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_block
 		n = IR_INPUT_EDGES_COUNT(flags);
 		j = 1;
 		p = insn->ops + j;
-		if (flags & IR_OP_FLAG_CONTROL) {
+		if (flags & (IR_OP_FLAG_CONTROL|IR_OP_FLAG_PINNED)) {
 			j++;
 			p++;
 		}
@@ -1340,7 +1343,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						if (insn->op != IR_VADDR) {
+						if (insn->op != IR_VADDR && insn->op != IR_PARAM) {
 							insn->op3 = ctx->vars;
 							ctx->vars = ref;
 						}
@@ -1396,9 +1399,6 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 						if (insn->op == IR_PARAM) {
 							/* We may reuse parameter stack slot for spilling */
 							ctx->live_intervals[v]->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
-						} else if (insn->op == IR_VLOAD) {
-							/* Load may be fused into the usage instruction */
-							ctx->live_intervals[v]->flags |= IR_LIVE_INTERVAL_MEM_LOAD;
 						}
 						def_pos = IR_DEF_LIVE_POS_FROM_REF(ref);
 					}
@@ -1465,17 +1465,17 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							ival = ctx->live_intervals[v];
 						}
 						ir_add_use(ctx, ival, j, use_pos, reg, IR_USE_FLAGS(def_flags, j), hint_ref);
-					} else if (ctx->rules) {
-						if (ctx->rules[input] & IR_FUSED) {
-						    ir_add_fusion_ranges(ctx, ref, input, bb, live_in_block, b);
-						} else {
-							if (ctx->rules[input] == (IR_SKIPPED|IR_RLOAD)) {
+					} else {
+						if (ctx->rules) {
+							if ((ctx->rules[input] & (IR_FUSED|IR_SKIPPED)) == IR_FUSED) {
+								ir_add_fusion_ranges(ctx, ref, input, bb, live_in_block, b);
+							} else if (ctx->rules[input] == (IR_SKIPPED|IR_RLOAD)) {
 								ir_set_alocated_reg(ctx, ref, j, ctx->ir_base[input].op2);
 							}
-							if (reg != IR_REG_NONE) {
-								use_pos = IR_LOAD_LIVE_POS_FROM_REF(ref);
-								ir_add_fixed_live_range(ctx, reg, use_pos, use_pos + IR_USE_SUB_REF);
-							}
+						}
+						if (reg != IR_REG_NONE) {
+							use_pos = IR_LOAD_LIVE_POS_FROM_REF(ref);
+							ir_add_fixed_live_range(ctx, reg, use_pos, use_pos + IR_USE_SUB_REF);
 						}
 					}
 				} else if (reg != IR_REG_NONE) {
@@ -1605,7 +1605,7 @@ static void ir_vregs_join(ir_ctx *ctx, uint32_t r1, uint32_t r2)
 		}
 		while (*prev && ((*prev)->pos < use_pos->pos ||
 			((*prev)->pos == use_pos->pos &&
-				(use_pos->op_num == 0 || (*prev)->op_num < use_pos->op_num)))) {
+				(use_pos->op_num == 0 || ((*prev)->op_num != 0 && (*prev)->op_num < use_pos->op_num))))) {
 			if ((*prev)->hint_ref > 0 && ctx->vregs[(*prev)->hint_ref] == r2) {
 				(*prev)->hint_ref = 0;
 			}
@@ -1627,8 +1627,9 @@ static void ir_vregs_join(ir_ctx *ctx, uint32_t r1, uint32_t r2)
 
 	ctx->live_intervals[r1]->flags |=
 		IR_LIVE_INTERVAL_COALESCED | (ival->flags & (IR_LIVE_INTERVAL_HAS_HINT_REGS|IR_LIVE_INTERVAL_HAS_HINT_REFS));
-	if (ctx->ir_base[IR_LIVE_POS_TO_REF(ctx->live_intervals[r1]->use_pos->pos)].op != IR_VLOAD) {
-		ctx->live_intervals[r1]->flags &= ~IR_LIVE_INTERVAL_MEM_LOAD;
+	if (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM) {
+		IR_ASSERT(!(ctx->live_intervals[r1]->flags & IR_LIVE_INTERVAL_MEM_PARAM));
+		ctx->live_intervals[r1]->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
 	}
 	ctx->live_intervals[r2] = NULL;
 
@@ -2333,16 +2334,6 @@ static ir_live_pos ir_first_use_pos_after(ir_live_interval *ival, ir_live_pos po
 	if (p && p->pos == pos && p->op_num != 0) {
 		p = p->next;
 	}
-	while (p && !(p->flags & flags)) {
-		p = p->next;
-	}
-	return p ? p->pos : 0x7fffffff;
-}
-
-static ir_live_pos ir_first_use_pos(ir_live_interval *ival, uint8_t flags)
-{
-	ir_use_pos *p = ival->use_pos;
-
 	while (p && !(p->flags & flags)) {
 		p = p->next;
 	}
@@ -3190,7 +3181,6 @@ select_register:
 		/* split current before its first use position that requires a register */
 		ir_live_pos split_pos;
 
-spill_current:
 		if (next_use_pos == ival->range.start) {
 			IR_ASSERT(ival->use_pos && ival->use_pos->op_num == 0);
 			/* split right after definition */
@@ -3224,7 +3214,6 @@ spill_current:
 			return IR_REG_NONE;
 		}
 		if (split_pos >= blockPos[reg]) {
-try_next_available_register:
 			IR_REGSET_EXCL(available, reg);
 			if (IR_REGSET_IS_EMPTY(available)) {
 				fprintf(stderr, "LSRA Internal Error: Unsolvable conflict. Allocation is not possible\n");
@@ -3270,23 +3259,6 @@ try_next_available_register:
 					}
 					IR_LOG_LSRA("      ---- Finish", other, "");
 				} else {
-					if (ir_first_use_pos(other, IR_USE_MUST_BE_IN_REG) <= other->end) {
-						if (!(ival->flags & IR_LIVE_INTERVAL_TEMP)) {
-							next_use_pos = ir_first_use_pos(ival, IR_USE_MUST_BE_IN_REG);
-							if (next_use_pos == ival->range.start) {
-								IR_ASSERT(ival->use_pos && ival->use_pos->op_num == 0);
-								/* split right after definition */
-								split_pos = next_use_pos + 1;
-							} else {
-								split_pos = ir_find_optimal_split_position(ctx, ival, ival->range.start, next_use_pos - 1, 1);
-							}
-
-							if (split_pos > ival->range.start) {
-								goto spill_current;
-							}
-						}
-						goto try_next_available_register;
-					}
 					child = other;
 					other->reg = IR_REG_NONE;
 					if (prev) {
@@ -3396,12 +3368,13 @@ static int ir_fix_dessa_tmps(ir_ctx *ctx, uint8_t type, ir_ref from, ir_ref to)
 static bool ir_ival_spill_for_fuse_load(ir_ctx *ctx, ir_live_interval *ival, ir_reg_alloc_data *data)
 {
 	ir_use_pos *use_pos = ival->use_pos;
-	ir_insn *insn;
 
 	if (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM) {
 		IR_ASSERT(!ival->next && use_pos && use_pos->op_num == 0);
-		insn = &ctx->ir_base[IR_LIVE_POS_TO_REF(use_pos->pos)];
+#if IR_DEBUG
+		ir_insn *insn = &ctx->ir_base[IR_LIVE_POS_TO_REF(use_pos->pos)];
 		IR_ASSERT(insn->op == IR_PARAM);
+#endif
 		use_pos = use_pos->next;
 		if (use_pos && (use_pos->next || (use_pos->flags & IR_USE_MUST_BE_IN_REG))) {
 			return 0;
@@ -3413,38 +3386,6 @@ static bool ir_ival_spill_for_fuse_load(ir_ctx *ctx, ir_live_interval *ival, ir_
 				return 0;
 			}
 		}
-
-		return 1;
-	} else if (ival->flags & IR_LIVE_INTERVAL_MEM_LOAD) {
-		insn = &ctx->ir_base[IR_LIVE_POS_TO_REF(use_pos->pos)];
-		IR_ASSERT(insn->op == IR_VLOAD);
-		IR_ASSERT(ctx->ir_base[insn->op2].op == IR_VAR);
-		use_pos = use_pos->next;
-		if (use_pos && (use_pos->next || (use_pos->flags & IR_USE_MUST_BE_IN_REG))) {
-			return 0;
-		}
-
-		if (use_pos) {
-			ir_block *bb = ir_block_from_live_pos(ctx, use_pos->pos);
-			if (bb->loop_depth && bb != ir_block_from_live_pos(ctx, ival->use_pos->pos)) {
-				return 0;
-			}
-			/* check if VAR may be clobbered between VLOAD and use */
-			ir_use_list *use_list = &ctx->use_lists[insn->op2];
-			ir_ref n = use_list->count;
-			ir_ref *p = &ctx->use_edges[use_list->refs];
-			for (; n > 0; p++, n--) {
-				ir_ref use = *p;
-				if (ctx->ir_base[use].op == IR_VSTORE) {
-					if (use > IR_LIVE_POS_TO_REF(ival->use_pos->pos) && use < IR_LIVE_POS_TO_REF(use_pos->pos)) {
-						return 0;
-					}
-				} else if (ctx->ir_base[use].op == IR_VADDR) {
-					return 0;
-				}
-			}
-		}
-		ival->stack_spill_pos = ctx->ir_base[insn->op2].op3;
 
 		return 1;
 	}
@@ -3550,7 +3491,7 @@ static int ir_linear_scan(ir_ctx *ctx)
 	for (j = ctx->vregs_count; j != 0; j--) {
 		ival = ctx->live_intervals[j];
 		if (ival) {
-			if (!(ival->flags & (IR_LIVE_INTERVAL_MEM_PARAM|IR_LIVE_INTERVAL_MEM_LOAD))
+			if (!(ival->flags & IR_LIVE_INTERVAL_MEM_PARAM)
 					|| !ir_ival_spill_for_fuse_load(ctx, ival, &data)) {
 				ir_add_to_unhandled(&unhandled, ival);
 			}

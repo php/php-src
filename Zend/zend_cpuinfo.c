@@ -93,21 +93,21 @@ static unsigned get_xcr0_eax(void) {
 static bool is_avx_supported(void) {
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
 		/* No support for AVX */
-		return 0;
+		return false;
 	}
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_OSXSAVE)) {
 		/* The operating system does not support XSAVE. */
-		return 0;
+		return false;
 	}
 	if ((get_xcr0_eax() & 0x6) != 0x6) {
 		/* XCR0 SSE and AVX bits must be set. */
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 #else
 static bool is_avx_supported(void) {
-	return 0;
+	return false;
 }
 #endif
 

@@ -127,8 +127,8 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
 	smart_string version_info = {0};
 	smart_string_append_printf(&version_info,
-		"PHP %s (%s) (built: %s) (%s)\n",
-		PHP_VERSION, sapi_module->name, php_build_date,
+		"PHP " PHP_VERSION " (%s) (built: %s) (%s)\n",
+		sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
 #else
@@ -148,8 +148,12 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #endif
 	);
 	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
-	if (php_build_provider()) {
-		smart_string_append_printf(&version_info, "Built by %s\n", php_build_provider());
+
+	const char *build_provider = php_build_provider();
+	if (build_provider) {
+		smart_string_appends(&version_info, "Built by ");
+		smart_string_appends(&version_info, build_provider);
+		smart_string_appendc(&version_info, '\n');
 	}
 	smart_string_appends(&version_info, get_zend_version());
 	smart_string_0(&version_info);
@@ -160,7 +164,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 PHPAPI void php_print_version(sapi_module_struct *sapi_module)
 {
 	char *version_info = php_get_version(sapi_module);
-	php_printf("%s", version_info);
+	PHPWRITE(version_info, strlen(version_info));
 	efree(version_info);
 }
 
@@ -346,7 +350,8 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 		}
 
 		zend_ini_entry *max_mem_limit_ini = zend_hash_str_find_ptr(EG(ini_directives), ZEND_STRL("max_memory_limit"));
-		entry->value = zend_string_copy(max_mem_limit_ini->value);
+		entry->value = zend_string_init(ZSTR_VAL(max_mem_limit_ini->value), ZSTR_LEN(max_mem_limit_ini->value), true);
+		GC_MAKE_PERSISTENT_LOCAL(entry->value);
 		PG(memory_limit) = PG(max_memory_limit);
 
 		return SUCCESS;
@@ -697,12 +702,13 @@ static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
-			new_value && zend_string_equals_literal(new_value, "syslog")) {
+			new_value && !zend_string_equals_literal(new_value, "syslog") && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -711,12 +717,13 @@ static PHP_INI_MH(OnUpdateErrorLog)
 static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */

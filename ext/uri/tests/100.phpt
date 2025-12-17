@@ -10,7 +10,7 @@ var_dump(zend_test_uri_parser("https://%65xample:%65xample@%65xample.com:123/%65
 
 ?>
 --EXPECT--
-array(2) {
+array(3) {
   ["normalized"]=>
   array(8) {
     ["scheme"]=>
@@ -31,6 +31,25 @@ array(2) {
     string(7) "example"
   }
   ["raw"]=>
+  array(8) {
+    ["scheme"]=>
+    string(5) "https"
+    ["username"]=>
+    string(9) "%65xample"
+    ["password"]=>
+    string(9) "%65xample"
+    ["host"]=>
+    string(13) "%65xample.com"
+    ["port"]=>
+    int(123)
+    ["path"]=>
+    string(15) "/%65xample.html"
+    ["query"]=>
+    string(19) "%65xample=%65xample"
+    ["fragment"]=>
+    string(9) "%65xample"
+  }
+  ["struct"]=>
   array(8) {
     ["scheme"]=>
     string(5) "https"

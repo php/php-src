@@ -90,6 +90,7 @@ require_once 'skipifconnectfailure.inc';
         // MYSQLI_TYPE_GEOMETRY => array('GEOMETRY', 'TODO add testing'),
         MYSQLI_TYPE_NEWDECIMAL => array('DECIMAL', '1.1'),
         MYSQLI_TYPE_BIT => array('BIT', 0),
+        MYSQLI_TYPE_JSON => array('JSON', '[]'),
     );
 
     foreach ($datatypes as $php_type => $datatype) {

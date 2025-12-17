@@ -281,7 +281,7 @@ PHP_FUNCTION(com_get_active_object)
 	char *module_name;
 	size_t module_name_len;
 	zend_long code_page;
-	bool code_page_is_null = 1;
+	bool code_page_is_null = true;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -538,7 +538,7 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0, 0);
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, false, false);
 
 	/* release variants */
 	if (vargs) {
@@ -649,7 +649,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 		return FAILURE;
 	}
 
-	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0, allow_noarg);
+	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, false, allow_noarg);
 }
 
 /* {{{ Generate a globally unique identifier (GUID) */

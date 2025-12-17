@@ -136,10 +136,6 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
 	}
-	if (!Z_ISUNDEF(mysql->li_read)) {
-		zval_ptr_dtor(&(mysql->li_read));
-		ZVAL_UNDEF(&mysql->li_read);
-	}
 }
 /* }}} */
 
@@ -316,7 +312,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					has_property = zval_is_true(value);
+					has_property = zend_is_true(value);
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -424,6 +420,19 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	mysqli_convert_zv_to_mysqlnd
 };
 
+static PHP_INI_MH(OnUpdateDefaultPort)
+{
+	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
+
+	if (value < 0 || value > USHRT_MAX) {
+		return FAILURE;
+	}
+
+	MyG(default_port) = (unsigned short)value;
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
@@ -433,7 +442,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
-	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateLong,		default_port,		zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateDefaultPort,		default_port,		zend_mysqli_globals,		mysqli_globals)
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			MYSQL_UNIX_ADDR,PHP_INI_ALL,OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #else
@@ -775,7 +784,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		}
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");

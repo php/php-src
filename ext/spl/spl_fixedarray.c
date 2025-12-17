@@ -303,12 +303,12 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 
 static zend_object *spl_fixedarray_new(zend_class_entry *class_type)
 {
-	return spl_fixedarray_object_new_ex(class_type, NULL, 0);
+	return spl_fixedarray_object_new_ex(class_type, NULL, false);
 }
 
 static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 {
-	zend_object *new_object = spl_fixedarray_object_new_ex(old_object->ce, old_object, 1);
+	zend_object *new_object = spl_fixedarray_object_new_ex(old_object->ce, old_object, true);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -562,9 +562,7 @@ PHP_METHOD(SplFixedArray, __wakeup)
 	HashTable *intern_ht = zend_std_get_properties(Z_OBJ_P(ZEND_THIS));
 	zval *data;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->array.size == 0) {
 		int index = 0;
@@ -589,9 +587,7 @@ PHP_METHOD(SplFixedArray, __serialize)
 	zval *current;
 	zend_string *key;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	HashTable *ht = zend_std_get_properties(&intern->std);
 	uint32_t num_properties = zend_hash_num_elements(ht);
@@ -639,7 +635,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		intern->array.size = 0;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, elem) {
 			if (key == NULL) {
-				ZVAL_COPY(&intern->array.elements[intern->array.size], elem);
+				ZVAL_COPY_DEREF(&intern->array.elements[intern->array.size], elem);
 				intern->array.size++;
 			} else {
 				Z_TRY_ADDREF_P(elem);
@@ -666,9 +662,7 @@ PHP_METHOD(SplFixedArray, count)
 	zval *object = ZEND_THIS;
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	RETURN_LONG(intern->array.size);
@@ -678,9 +672,7 @@ PHP_METHOD(SplFixedArray, toArray)
 {
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
@@ -706,7 +698,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 	spl_fixedarray array;
 	spl_fixedarray_object *intern;
 	int num;
-	bool save_indexes = 1;
+	bool save_indexes = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|b", &data, &save_indexes) == FAILURE) {
 		RETURN_THROWS();
@@ -774,9 +766,7 @@ PHP_METHOD(SplFixedArray, getSize)
 	zval *object = ZEND_THIS;
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	RETURN_LONG(intern->array.size);
@@ -815,7 +805,7 @@ PHP_METHOD(SplFixedArray, offsetExists)
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
-	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0));
+	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, false));
 }
 
 /* Returns the value at the specified $index. */
@@ -832,7 +822,7 @@ PHP_METHOD(SplFixedArray, offsetGet)
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
 
 	if (value) {
-		RETURN_COPY_DEREF(value);
+		RETURN_COPY(value);
 	} else {
 		RETURN_NULL();
 	}
@@ -871,9 +861,7 @@ PHP_METHOD(SplFixedArray, offsetUnset)
 /* Create a new iterator from a SplFixedArray instance. */
 PHP_METHOD(SplFixedArray, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

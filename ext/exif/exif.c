@@ -2104,7 +2104,7 @@ static inline char *exif_offset_info_try_get(
 static inline bool exif_offset_info_contains(
 		const exif_offset_info *info, const char *start, size_t length) {
 	if (ptr_offset_overflows(start, length)) {
-		return 0;
+		return false;
 	}
 
 	/* start and valid_start are both inclusive, end and valid_end are both exclusive,
@@ -3261,6 +3261,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 #define REQUIRE_NON_EMPTY() do { \
 	if (byte_count == 0) { \
+		EFREE_IF(outside); \
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname_debug(tag, tag_table)); \
 		return false; \
 	} \
@@ -4420,7 +4421,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 			if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(data + remain), limit - remain) == limit - remain) {
 				exif_isobmff_parse_meta(data, data + limit, &pos);
 			}
-			if ((pos.size) &&
+			if ((pos.size >= 2) &&
 				(pos.size < ImageInfo->FileSize) &&
 				(ImageInfo->FileSize - pos.size >= pos.offset) &&
 				(php_stream_seek(ImageInfo->infile, pos.offset + 2, SEEK_SET) >= 0)) {

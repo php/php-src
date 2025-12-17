@@ -341,7 +341,7 @@ U_CFUNC PHP_NAMED_FUNCTION(zif_locale_set_default)
 * common code shared by get_primary_language,get_script or get_region or get_variant
 * result = 0 if error, 1 if successful , -1 if no value
 */
-static zend_string* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
+static zend_string* get_icu_value_internal( const char* loc_name , const char* tag_name, int* result , int fromParseLocale)
 {
 	zend_string* tag_value	    = NULL;
 	int32_t      tag_value_len  = 512;
@@ -466,7 +466,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 * Gets the value from ICU , called when PHP userspace function is called
 * common code shared by get_primary_language,get_script or get_region or get_variant
 */
-static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
+static void get_icu_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 
 	char*          loc_name        	= NULL;
@@ -544,7 +544,7 @@ U_CFUNC PHP_FUNCTION(locale_get_primary_language )
 /* {{{
  * common code shared by display_xyz functions to  get the value from ICU
  }}} */
-static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
+static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*          loc_name        	= NULL;
 	size_t         loc_name_len    	= 0;
@@ -801,7 +801,7 @@ U_CFUNC PHP_FUNCTION(locale_canonicalize)
 * returns 1 if successful , -1 if not found ,
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char* key_name)
 {
 	zval *ele_value;
 
@@ -826,7 +826,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 /* {{{ append_prefix , appends the prefix needed
 * e.g. private adds 'x'
 */
-static void add_prefix(smart_str* loc_name, char* key_name)
+static void add_prefix(smart_str* loc_name, const char* key_name)
 {
 	if( strncmp(key_name , LOC_PRIVATE_TAG , 7) == 0 ){
 		smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
@@ -842,7 +842,7 @@ static void add_prefix(smart_str* loc_name, char* key_name)
 * returns 1 if successful , -1 if not found ,
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, const char* key_name)
 {
 	zval	*ele_value;
 	int 	isFirstSubtag 	= 0;
@@ -1053,7 +1053,7 @@ static zend_string* get_private_subtags(const char* loc_name)
 /* }}} */
 
 /* {{{ code used by locale_parse */
-static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
+static int add_array_entry(const char* loc_name, zval* hash_arr, const char* key_name)
 {
 	zend_string*   key_value 	= NULL;
 	char*   cur_key_name	= NULL;
@@ -1287,6 +1287,7 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 		/* canonicalize lang_tag */
 		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
 		if( result <=0) {
+			zend_string_release_ex( can_loc_range, false );
 			intl_error_set(NULL, status, "unable to canonicalize lang_tag");
 			RETURN_FALSE;
 		}
@@ -1573,8 +1574,6 @@ U_CFUNC PHP_FUNCTION(locale_lookup)
 }
 /* }}} */
 
-/* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
-/* }}} */
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
 U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 {

@@ -36,7 +36,6 @@
 #define ZEND_EXCEPTION_LINE_OFF 4
 #define ZEND_EXCEPTION_TRACE_OFF 5
 #define ZEND_EXCEPTION_PREVIOUS_OFF 6
-#define ZEND_EXCEPTION_SEVERITY_OFF 7
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
@@ -401,7 +400,7 @@ ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
-	bool lineno_is_null = 1;
+	bool lineno_is_null = true;
 	zval   tmp, *object, *previous = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SllS!l!O!", &message, &code, &severity, &filename, &lineno, &lineno_is_null, &previous, zend_ce_throwable) == FAILURE) {
@@ -415,7 +414,7 @@ ZEND_METHOD(ErrorException, __construct)
 	}
 
 	ZVAL_LONG(&tmp, severity);
-	zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_SEVERITY_OFF, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}

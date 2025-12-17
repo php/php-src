@@ -6,4 +6,3 @@
 
 // "test" database must exist. i.e. "createdb test" before testing
 $conn_str = getenv('PGSQL_TEST_CONNSTR') ?: "host=localhost dbname=test port=5432 user=postgres password=postgres";    // connection string
-?>

@@ -57,6 +57,19 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+$x = new class {
+    public static function dump() {}
+};
+
+$classes = get_declared_classes();
+
+try {
+    $str = str_repeat($classes[count($classes) - 1] . '::dump', random_int(1, 1));
+    $xpath->registerPhpFunctions([$str]);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a callable, function "nonexistent" not found or invalid function name
@@ -67,3 +80,4 @@ DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array with 
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array containing valid callback names
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array containing valid callback names
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a valid callback name
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array containing valid callback names

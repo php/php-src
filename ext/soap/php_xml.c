@@ -79,12 +79,15 @@ static xmlDocPtr soap_xmlParse_ex(xmlParserCtxtPtr ctxt)
 {
 	xmlDocPtr ret;
 	if (ctxt) {
+#if LIBXML_VERSION >= 21300
+		xmlCtxtSetOptions(ctxt, XML_PARSE_HUGE | XML_PARSE_NO_XXE | XML_PARSE_NONET | XML_PARSE_NOBLANKS);
+#else
 		php_libxml_sanitize_parse_ctxt_options(ctxt);
-		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
 		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		ctxt->keepBlanks = 0;
 		ctxt->options |= XML_PARSE_HUGE;
 		ZEND_DIAGNOSTIC_IGNORED_END
+#endif
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;

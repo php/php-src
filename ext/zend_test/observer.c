@@ -155,7 +155,7 @@ static void observer_show_init(zend_function *fbc)
 			php_printf("%*s<!-- init %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
 	} else {
-		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
+		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 	}
 }
 
@@ -178,7 +178,7 @@ static void observer_show_init_backtrace(zend_execute_data *execute_data)
 				php_printf("%*s%s()\n", indent, "", ZSTR_VAL(fbc->common.function_name));
 			}
 		} else {
-			php_printf("%*s{main} %s\n", indent, "", ZSTR_VAL(fbc->op_array.filename));
+			php_printf("%*s{main} %s\n", indent, "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 		}
 	} while ((ex = ex->prev_execute_data) != NULL);
 	php_printf("%*s-->\n", 2 * ZT_G(observer_nesting_depth), "");

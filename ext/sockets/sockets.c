@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
  */
 
+#include "zend_exceptions.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -250,7 +251,7 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 #else
 	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
 #endif
-		return 0;
+		return false;
 	}
 
 	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
@@ -262,7 +263,7 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 
 	if (IS_INVALID_SOCKET(sock)) {
 		PHP_SOCKET_ERROR(sock, "unable to create listening socket", errno);
-		return 0;
+		return false;
 	}
 
 	sock->type = PF_INET;
@@ -270,16 +271,16 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 	if (bind(sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to bind to given address", errno);
 		close(sock->bsd_socket);
-		return 0;
+		return false;
 	}
 
 	if (listen(sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to listen on socket", errno);
 		close(sock->bsd_socket);
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -295,14 +296,14 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
-		return 0;
+		return false;
 	}
 #else
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
-		return 0;
+		return false;
 	}
 
 #if !defined(PHP_WIN32)
@@ -314,7 +315,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 
 	if ((mode = fcntl(out_sock->bsd_socket, F_GETFD)) < 0) {
 		PHP_SOCKET_ERROR(out_sock, "unable to get fcntl mode on the socket", errno);
-		return 0;
+		return false;
 	}
 
 	int cloexec = (mode | FD_CLOEXEC);
@@ -322,7 +323,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 	if (mode != cloexec) {
 		if (fcntl(out_sock->bsd_socket, F_SETFD, cloexec) < 0) {
 			PHP_SOCKET_ERROR(out_sock, "unable to set cloexec mode on the socket", errno);
-			return 0;
+			return false;
 		}
 	}
 #endif
@@ -332,7 +333,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 	out_sock->blocking = 1;
 	out_sock->type = la->sa_family;
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -1580,7 +1581,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -1607,7 +1612,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
@@ -2557,7 +2566,7 @@ bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 		retsock->type = addr.ss_family;
 	} else {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain socket family", errno);
-		return 0;
+		return false;
 	}
 
 	/* determine blocking mode */
@@ -2565,13 +2574,13 @@ bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 	t = fcntl(socket, F_GETFL);
 	if (t == -1) {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain blocking state", errno);
-		return 0;
+		return false;
 	} else {
 		retsock->blocking = !(t & O_NONBLOCK);
 	}
 #endif
 
-	return 1;
+	return true;
 }
 
 /* {{{ Imports a stream that encapsulates a socket into a socket extension resource. */

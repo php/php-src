@@ -53,11 +53,6 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-#include <openssl/core_names.h>
-#include <openssl/param_build.h>
-#include <openssl/provider.h>
-#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
@@ -308,7 +303,7 @@ bool php_openssl_check_path_ex(
 		fs_file_path_len = file_path_len;
 	}
 
-	if (CHECK_NULL_PATH(fs_file_path, fs_file_path_len)) {
+	if (zend_char_has_nul_byte(fs_file_path, fs_file_path_len)) {
 		error_msg = "must not contain any null bytes";
 		error_type = E_ERROR;
 	} else if (expand_filepath(fs_file_path, real_path) == NULL) {
@@ -4375,7 +4370,7 @@ PHP_FUNCTION(openssl_open)
 /* {{{ Return array of available digest algorithms */
 PHP_FUNCTION(openssl_get_md_methods)
 {
-	bool aliases = 0;
+	bool aliases = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -4387,7 +4382,7 @@ PHP_FUNCTION(openssl_get_md_methods)
 /* {{{ Return array of available cipher algorithms */
 PHP_FUNCTION(openssl_get_cipher_methods)
 {
-	bool aliases = 0;
+	bool aliases = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -4429,7 +4424,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 /* {{{ Computes digest hash value for given data using given method, returns raw or binhex encoded string */
 PHP_FUNCTION(openssl_digest)
 {
-	bool raw_output = 0;
+	bool raw_output = false;
 	char *data, *method;
 	size_t data_len, method_len;
 	const EVP_MD *mdtype;

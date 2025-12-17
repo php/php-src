@@ -487,7 +487,7 @@ static zend_result php_session_initialize(void)
 	}
 
 	/* GC must be done after read */
-	php_session_gc(0);
+	php_session_gc(false);
 
 	if (PS(session_vars)) {
 		zend_string_release_ex(PS(session_vars), 0);
@@ -1635,16 +1635,16 @@ PHPAPI zend_result php_session_reset_id(void)
 	}
 
 	/* Apply trans sid if sid cookie is not set */
-	apply_trans_sid = 0;
+	apply_trans_sid = false;
 	if (APPLY_TRANS_SID) {
-		apply_trans_sid = 1;
+		apply_trans_sid = true;
 		if (PS(use_cookies) &&
 			(data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE")))) {
 			ZVAL_DEREF(data);
 			if (Z_TYPE_P(data) == IS_ARRAY &&
 				(potential_session_id = zend_hash_find(Z_ARRVAL_P(data), PS(session_name)))) {
 				ZVAL_DEREF(potential_session_id);
-				apply_trans_sid = 0;
+				apply_trans_sid = false;
 			}
 		}
 	}
@@ -1858,15 +1858,15 @@ PHP_FUNCTION(session_set_cookie_params)
 					domain = zval_get_string(value);
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "secure")) {
-					secure = zval_is_true(value);
+					secure = zend_is_true(value);
 					secure_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "partitioned")) {
-					partitioned = zval_is_true(value);
+					partitioned = zend_is_true(value);
 					partitioned_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "httponly")) {
-					httponly = zval_is_true(value);
+					httponly = zend_is_true(value);
 					httponly_null = 0;
 					found++;
 				} else if (zend_string_equals_literal_ci(key, "samesite")) {
@@ -2113,7 +2113,7 @@ PHP_FUNCTION(session_set_save_handler)
 	/* OOP Version */
 	if (ZEND_NUM_ARGS() <= 2) {
 		zval *obj = NULL;
-		bool register_shutdown = 1;
+		bool register_shutdown = true;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
 			RETURN_THROWS();
@@ -2336,7 +2336,7 @@ PHP_FUNCTION(session_id)
 /* Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	bool del_ses = 0;
+	bool del_ses = false;
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(session_cache_limiter)
 PHP_FUNCTION(session_cache_expire)
 {
 	zend_long expires;
-	bool expires_is_null = 1;
+	bool expires_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &expires, &expires_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -2741,7 +2741,7 @@ PHP_FUNCTION(session_gc)
 		RETURN_FALSE;
 	}
 
-	num = php_session_gc(1);
+	num = php_session_gc(true);
 	if (num < 0) {
 		RETURN_FALSE;
 	}
@@ -3069,17 +3069,17 @@ static bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_progres
 	zval *potential_session_id;
 
 	if (Z_ISUNDEF(PG(http_globals)[where])) {
-		return 0;
+		return false;
 	}
 
 	if ((potential_session_id = zend_hash_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name)))
 			&& Z_TYPE_P(potential_session_id) == IS_STRING) {
 		zval_ptr_dtor(dest);
 		ZVAL_COPY_DEREF(dest, potential_session_id);
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *progress)
@@ -3088,7 +3088,7 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 	if (PS(use_cookies)) {
 		sapi_module.treat_data(PARSE_COOKIE, NULL, NULL);
 		if (early_find_sid_in(&progress->sid, TRACK_VARS_COOKIE, progress)) {
-			progress->apply_trans_sid = 0;
+			progress->apply_trans_sid = false;
 			return;
 		}
 	}
@@ -3104,13 +3104,13 @@ static bool php_check_cancel_upload(php_session_rfc1867_progress *progress)
 	zval *progress_ary, *cancel_upload;
 
 	if ((progress_ary = zend_symtable_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s)) == NULL) {
-		return 0;
+		return false;
 	}
 	if (Z_TYPE_P(progress_ary) != IS_ARRAY) {
-		return 0;
+		return false;
 	}
 	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), ZEND_STRL("cancel_upload"))) == NULL) {
-		return 0;
+		return false;
 	}
 	return Z_TYPE_P(cancel_upload) == IS_TRUE;
 }
@@ -3247,7 +3247,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), ZEND_STRL("bytes_processed"));
 
-				php_rinit_session(0);
+				php_rinit_session(false);
 				PS(id) = zend_string_copy(Z_STR(progress->sid));
 				if (progress->apply_trans_sid) {
 					/* Enable trans sid by modifying flags */
@@ -3274,7 +3274,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), ZEND_STRL("bytes_processed"));
 
 			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_DATA: {
@@ -3287,7 +3287,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_END: {
@@ -3306,7 +3306,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_END: {
@@ -3320,7 +3320,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 						SEPARATE_ARRAY(&progress->data);
 						add_assoc_bool_ex(&progress->data, ZEND_STRL("done"), 1);
 						Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
-						php_session_rfc1867_update(progress, 1);
+						php_session_rfc1867_update(progress, true);
 					}
 				}
 				php_rshutdown_session_globals();

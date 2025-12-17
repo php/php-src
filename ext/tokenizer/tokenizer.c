@@ -381,7 +381,7 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	zend_restore_lexical_state(&original_lex_state);
 	zend_hash_destroy(&interned_strings);
 
-	return 1;
+	return true;
 }
 
 struct event_context {

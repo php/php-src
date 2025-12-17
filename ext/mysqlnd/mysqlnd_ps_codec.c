@@ -317,7 +317,7 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATE;
-		t.neg = 0;
+		t.neg = false;
 
 		t.second_part = t.hour = t.minute = t.second = 0;
 
@@ -354,7 +354,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
-		t.neg = 0;
+		t.neg = false;
 
 		t.year	 = (unsigned int) sint2korr(to);
 		t.month = (unsigned int) to[2];

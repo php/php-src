@@ -131,13 +131,9 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
-		dt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, 1, 0);
 		smart_str_appends(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
-		smart_str_appends(&buf, "=deleted; expires=");
-		smart_str_append(&buf, dt);
-		smart_str_appends(&buf, "; Max-Age=0");
-		zend_string_free(dt);
+		smart_str_appends(&buf, "=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0");
 	} else {
 		smart_str_appends(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
@@ -217,13 +213,13 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
-			*secure = zval_is_true(value);
+			*secure = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
-			*httponly = zval_is_true(value);
+			*httponly = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
 			*samesite = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
-			*partitioned = zval_is_true(value);
+			*partitioned = zend_is_true(value);
 		} else {
 			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
 			return FAILURE;
@@ -385,6 +381,14 @@ PHP_FUNCTION(http_response_code)
 			}
 			RETURN_FALSE;
 		}
+
+		if (SG(sapi_headers).http_status_line) {
+			php_error_docref(NULL, E_WARNING, "Calling http_response_code() after header('HTTP/...') has no effect");
+			// If it is decided that this should have effect in the future, replace warning with
+			// efree(SG(sapi_headers).http_status_line);
+			// SG(sapi_headers).http_status_line = NULL;
+		}
+
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;

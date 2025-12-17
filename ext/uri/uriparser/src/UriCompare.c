@@ -41,128 +41,120 @@
 #include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriCompare.c"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriCompare.c"
-#  undef URI_PASS_UNICODE
-# endif
+#  ifdef URI_ENABLE_ANSI
+#    define URI_PASS_ANSI 1
+#    include "UriCompare.c"
+#    undef URI_PASS_ANSI
+#  endif
+#  ifdef URI_ENABLE_UNICODE
+#    define URI_PASS_UNICODE 1
+#    include "UriCompare.c"
+#    undef URI_PASS_UNICODE
+#  endif
 #else
-# ifdef URI_PASS_ANSI
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  include <uriparser/UriDefsUnicode.h>
-#  include <wchar.h>
-# endif
+#  ifdef URI_PASS_ANSI
+#    include <uriparser/UriDefsAnsi.h>
+#  else
+#    include <uriparser/UriDefsUnicode.h>
+#    include <wchar.h>
+#  endif
 
+#  ifndef URI_DOXYGEN
+#    include <uriparser/Uri.h>
+#    include <uriparser/UriIp4.h>
+#    include "UriCommon.h"
+#  endif
 
+UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
+    /* NOTE: Both NULL means equal! */
+    if ((a == NULL) || (b == NULL)) {
+        return ((a == NULL) && (b == NULL)) ? URI_TRUE : URI_FALSE;
+    }
 
-#ifndef URI_DOXYGEN
-# include <uriparser/Uri.h>
-# include <uriparser/UriIp4.h>
-# include "UriCommon.h"
-#endif
+    /* scheme */
+    if (URI_FUNC(CompareRange)(&(a->scheme), &(b->scheme))) {
+        return URI_FALSE;
+    }
 
+    /* absolutePath */
+    if ((a->scheme.first == NULL) && (a->absolutePath != b->absolutePath)) {
+        return URI_FALSE;
+    }
 
+    /* userInfo */
+    if (URI_FUNC(CompareRange)(&(a->userInfo), &(b->userInfo))) {
+        return URI_FALSE;
+    }
 
-UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a,
-		const URI_TYPE(Uri) * b) {
-	/* NOTE: Both NULL means equal! */
-	if ((a == NULL) || (b == NULL)) {
-		return ((a == NULL) && (b == NULL)) ? URI_TRUE : URI_FALSE;
-	}
+    /* Host */
+    if (((a->hostData.ip4 == NULL) != (b->hostData.ip4 == NULL))
+        || ((a->hostData.ip6 == NULL) != (b->hostData.ip6 == NULL))
+        || ((a->hostData.ipFuture.first == NULL)
+            != (b->hostData.ipFuture.first == NULL))) {
+        return URI_FALSE;
+    }
 
-	/* scheme */
-	if (URI_FUNC(CompareRange)(&(a->scheme), &(b->scheme))) {
-		return URI_FALSE;
-	}
+    if (a->hostData.ip4 != NULL) {
+        if (memcmp(a->hostData.ip4->data, b->hostData.ip4->data, 4)) {
+            return URI_FALSE;
+        }
+    }
 
-	/* absolutePath */
-	if ((a->scheme.first == NULL)&& (a->absolutePath != b->absolutePath)) {
-		return URI_FALSE;
-	}
+    if (a->hostData.ip6 != NULL) {
+        if (memcmp(a->hostData.ip6->data, b->hostData.ip6->data, 16)) {
+            return URI_FALSE;
+        }
+    }
 
-	/* userInfo */
-	if (URI_FUNC(CompareRange)(&(a->userInfo), &(b->userInfo))) {
-		return URI_FALSE;
-	}
+    if (a->hostData.ipFuture.first != NULL) {
+        if (URI_FUNC(CompareRange)(&(a->hostData.ipFuture), &(b->hostData.ipFuture))) {
+            return URI_FALSE;
+        }
+    }
 
-	/* Host */
-	if (((a->hostData.ip4 == NULL) != (b->hostData.ip4 == NULL))
-			|| ((a->hostData.ip6 == NULL) != (b->hostData.ip6 == NULL))
-			|| ((a->hostData.ipFuture.first == NULL)
-				!= (b->hostData.ipFuture.first == NULL))) {
-		return URI_FALSE;
-	}
+    if ((a->hostData.ip4 == NULL) && (a->hostData.ip6 == NULL)
+        && (a->hostData.ipFuture.first == NULL)) {
+        if (URI_FUNC(CompareRange)(&(a->hostText), &(b->hostText))) {
+            return URI_FALSE;
+        }
+    }
 
-	if (a->hostData.ip4 != NULL) {
-		if (memcmp(a->hostData.ip4->data, b->hostData.ip4->data, 4)) {
-			return URI_FALSE;
-		}
-	}
+    /* portText */
+    if (URI_FUNC(CompareRange)(&(a->portText), &(b->portText))) {
+        return URI_FALSE;
+    }
 
-	if (a->hostData.ip6 != NULL) {
-		if (memcmp(a->hostData.ip6->data, b->hostData.ip6->data, 16)) {
-			return URI_FALSE;
-		}
-	}
+    /* Path */
+    if ((a->pathHead == NULL) != (b->pathHead == NULL)) {
+        return URI_FALSE;
+    }
 
-	if (a->hostData.ipFuture.first != NULL) {
-		if (URI_FUNC(CompareRange)(&(a->hostData.ipFuture), &(b->hostData.ipFuture))) {
-			return URI_FALSE;
-		}
-	}
+    if (a->pathHead != NULL) {
+        URI_TYPE(PathSegment) * walkA = a->pathHead;
+        URI_TYPE(PathSegment) * walkB = b->pathHead;
+        do {
+            if (URI_FUNC(CompareRange)(&(walkA->text), &(walkB->text))) {
+                return URI_FALSE;
+            }
+            if ((walkA->next == NULL) != (walkB->next == NULL)) {
+                return URI_FALSE;
+            }
+            walkA = walkA->next;
+            walkB = walkB->next;
+        } while (walkA != NULL);
+    }
 
-	if ((a->hostData.ip4 == NULL)
-			&& (a->hostData.ip6 == NULL)
-			&& (a->hostData.ipFuture.first == NULL)) {
-		if (URI_FUNC(CompareRange)(&(a->hostText), &(b->hostText))) {
-			return URI_FALSE;
-		}
-	}
+    /* query */
+    if (URI_FUNC(CompareRange)(&(a->query), &(b->query))) {
+        return URI_FALSE;
+    }
 
-	/* portText */
-	if (URI_FUNC(CompareRange)(&(a->portText), &(b->portText))) {
-		return URI_FALSE;
-	}
+    /* fragment */
+    if (URI_FUNC(CompareRange)(&(a->fragment), &(b->fragment))) {
+        return URI_FALSE;
+    }
 
-	/* Path */
-	if ((a->pathHead == NULL) != (b->pathHead == NULL)) {
-		return URI_FALSE;
-	}
-
-	if (a->pathHead != NULL) {
-		URI_TYPE(PathSegment) * walkA = a->pathHead;
-		URI_TYPE(PathSegment) * walkB = b->pathHead;
-		do {
-			if (URI_FUNC(CompareRange)(&(walkA->text), &(walkB->text))) {
-				return URI_FALSE;
-			}
-			if ((walkA->next == NULL) != (walkB->next == NULL)) {
-				return URI_FALSE;
-			}
-			walkA = walkA->next;
-			walkB = walkB->next;
-		} while (walkA != NULL);
-	}
-
-	/* query */
-	if (URI_FUNC(CompareRange)(&(a->query), &(b->query))) {
-		return URI_FALSE;
-	}
-
-	/* fragment */
-	if (URI_FUNC(CompareRange)(&(a->fragment), &(b->fragment))) {
-		return URI_FALSE;
-	}
-
-	return URI_TRUE; /* Equal*/
+    return URI_TRUE; /* Equal*/
 }
-
-
 
 #endif

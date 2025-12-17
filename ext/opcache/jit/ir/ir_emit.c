@@ -32,8 +32,14 @@
   do { \
     size_t _sz = (sz), _need = (need); \
     if (_sz < _need) { \
+      size_t _limit = sizeof(t) * DASM_SEC2POS(1); \
+      if (_need > _limit) { \
+        Dst_REF->status = DASM_S_NOMEM; \
+        return; \
+      } \
       if (_sz < 16) _sz = 16; \
       while (_sz < _need) _sz += _sz; \
+      if (_sz > _limit) _sz = _limit; \
       (p) = (t *)ir_mem_realloc((p), _sz); \
       (sz) = _sz; \
     } \
@@ -167,11 +173,24 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 		if (insn->op == IR_PARAM) {
 			if (IR_IS_TYPE_INT(insn->type)) {
 				if (use == ref) {
+#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
+					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
+						/* struct passed by value on stack */
+						return IR_REG_NONE;
+					} else
+#endif
 					if (int_param < int_reg_params_count) {
 						return int_reg_params[int_param];
 					} else {
 						return IR_REG_NONE;
 					}
+#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
+				} else {
+					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
+						/* struct passed by value on stack */
+						continue;
+					}
+#endif
 				}
 				int_param++;
 #ifdef _WIN64
@@ -222,32 +241,33 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	n = insn->inputs_count;
 	n = IR_MIN(n, IR_MAX_REG_ARGS + 2);
 	for (j = 3; j <= n; j++) {
-		type = ctx->ir_base[ir_insn_op(insn, j)].type;
+		ir_insn *arg = &ctx->ir_base[ir_insn_op(insn, j)];
+		type = arg->type;
 		if (IR_IS_TYPE_INT(type)) {
-			if (int_param < int_reg_params_count) {
+			if (int_param < int_reg_params_count && arg->op != IR_ARGVAL) {
 				regs[j] = int_reg_params[int_param];
 				count = j + 1;
+				int_param++;
+#ifdef _WIN64
+				/* WIN64 calling convention use common couter for int and fp registers */
+				fp_param++;
+#endif
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
-			int_param++;
-#ifdef _WIN64
-			/* WIN64 calling convention use common couter for int and fp registers */
-			fp_param++;
-#endif
 		} else {
 			IR_ASSERT(IR_IS_TYPE_FP(type));
 			if (fp_param < fp_reg_params_count) {
 				regs[j] = fp_reg_params[fp_param];
 				count = j + 1;
+				fp_param++;
+#ifdef _WIN64
+				/* WIN64 calling convention use common couter for int and fp registers */
+				int_param++;
+#endif
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
-			fp_param++;
-#ifdef _WIN64
-			/* WIN64 calling convention use common couter for int and fp registers */
-			int_param++;
-#endif
 		}
 	}
 	return count;
@@ -404,7 +424,7 @@ typedef struct _ir_common_backend_data {
 	ir_bitset          emit_constants;
 } ir_common_backend_data;
 
-static int ir_const_label(ir_ctx *ctx, ir_ref ref)
+static int ir_get_const_label(ir_ctx *ctx, ir_ref ref)
 {
 	ir_common_backend_data *data = ctx->data;
 	int label = ctx->cfg_blocks_count - ref;
@@ -993,11 +1013,16 @@ int ir_match(ir_ctx *ctx)
 			entries_count++;
 		}
 		ctx->rules[start] = IR_SKIPPED | IR_NOP;
+		if (ctx->ir_base[start].op == IR_BEGIN && ctx->ir_base[start].op2) {
+			ctx->flags2 |= IR_HAS_BLOCK_ADDR;
+		}
 		ref = bb->end;
 		if (bb->successors_count == 1) {
 			insn = &ctx->ir_base[ref];
 			if (insn->op == IR_END || insn->op == IR_LOOP_END) {
-				ctx->rules[ref] = insn->op;
+				if (!ctx->rules[ref]) {
+					ctx->rules[ref] = insn->op;
+				}
 				ref = prev_ref[ref];
 				if (ref == start && ctx->cfg_edges[bb->successors] != b) {
 					if (EXPECTED(!(bb->flags & IR_BB_ENTRY))) {

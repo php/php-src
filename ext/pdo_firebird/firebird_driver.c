@@ -297,7 +297,7 @@ static FbTokenType php_firebird_get_token(const char** begin, const char* end)
 
 static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 {
-	bool passAsIs = 1, execBlock = 0;
+	bool passAsIs = true, execBlock = false;
 	zend_long pindex = -1;
 	char pname[254], ident[253], ident2[253];
 	unsigned int l;
@@ -354,7 +354,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 		strncpy(ident2, i2, l);
 		ident2[l] = '\0';
 		execBlock = !strcasecmp(ident2, "BLOCK");
-		passAsIs = 0;
+		passAsIs = false;
 	}
 	else
 	{
@@ -592,7 +592,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			php_firebird_rollback_transaction(dbh);
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 
 	/* isc_detach_database returns 0 on success, 1 on failure. */
 	if (H->db && isc_detach_database(H->isc_status, &H->db)) {
@@ -904,7 +904,7 @@ static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 	if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ false)) {
 		return false;
 	}
-	H->in_manually_txn = 1;
+	H->in_manually_txn = true;
 	return true;
 }
 /* }}} */
@@ -954,7 +954,7 @@ static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	return true;
 }
 /* }}} */
@@ -990,7 +990,7 @@ static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	return true;
 }
 /* }}} */
@@ -1353,7 +1353,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		dbh->password = pestrdup(vars[5].optval, dbh->is_persistent);
 	}
 
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	H->is_writable_txn = pdo_attr_lval(driver_options, PDO_FB_WRITABLE_TRANSACTION, 1);
 	zend_long txn_isolation_level = pdo_attr_lval(driver_options, PDO_FB_TRANSACTION_ISOLATION_LEVEL, PDO_FB_REPEATABLE_READ);
 	if (txn_isolation_level == PDO_FB_READ_COMMITTED ||

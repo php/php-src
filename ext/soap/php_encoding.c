@@ -284,7 +284,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 			smart_str prefix = {0};
 
 			if (node_ptr == node) {
-				return 0;
+				return false;
 			}
 			if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
 				attr = get_attribute(attr, "id");
@@ -322,12 +322,12 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 				set_ns_prop(node, SOAP_1_2_ENC_NAMESPACE, "ref", id);
 			}
 			smart_str_free(&prefix);
-			return 1;
+			return true;
 		} else {
 			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data, node);
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
@@ -341,11 +341,11 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
 				zval_ptr_dtor(data);
 				ZVAL_COPY(data, data_ptr);
-				return 1;
+				return true;
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
@@ -1797,9 +1797,9 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
 				return model_array_element(tmp);
 			} ZEND_HASH_FOREACH_END();
+
+			break;
 		}
-		/* TODO Check this is correct */
-		ZEND_FALLTHROUGH;
 		case XSD_CONTENT_GROUP: {
 			return model_array_element(model->u.group->model);
 		}
@@ -3579,6 +3579,11 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_P(ztype);
+			if (cur_type == UNKNOWN_TYPE) {
+				/* Mimic guess_xml_convert() where we use the type of the data.
+				 * UNDEFs are handled transparently as it will error out upon encoding the data. */
+				cur_type = Z_TYPE_P(Z_VAR_ENC_VALUE_P(tmp));
+			}
 
 			zval *zstype = Z_VAR_ENC_STYPE_P(tmp);
 			if (Z_TYPE_P(zstype) == IS_STRING) {

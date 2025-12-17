@@ -125,7 +125,7 @@ PHP_METHOD(mysqli_warning, next)
 	}
 
 	if (obj->ptr) {
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;

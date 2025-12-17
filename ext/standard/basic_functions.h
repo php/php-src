@@ -49,7 +49,6 @@ PHP_RSHUTDOWN_FUNCTION(browscap);
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers);
 PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
-PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore);
 
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;

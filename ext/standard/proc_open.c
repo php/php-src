@@ -503,7 +503,7 @@ typedef struct _descriptorspec_item {
 } descriptorspec_item;
 
 static zend_string *get_valid_arg_string(zval *zv, uint32_t elem_num) {
-	zend_string *str = zval_get_string(zv);
+	zend_string *str = zval_try_get_string(zv);
 	if (!str) {
 		return NULL;
 	}
@@ -643,7 +643,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 
 		append_win_escaped_arg(&str, arg_str, !is_prog_name && is_cmd_execution);
 
-		is_prog_name = 0;
+		is_prog_name = false;
 		zend_string_release(arg_str);
 	} ZEND_HASH_FOREACH_END();
 	smart_str_0(&str);

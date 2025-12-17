@@ -46,23 +46,17 @@
 /* Allow multi inclusion */
 #include "UriDefsConfig.h"
 
-
-
 #undef URI_CHAR
 #define URI_CHAR char
 
 #undef _UT
 #define _UT(x) x
 
-
-
 #undef URI_FUNC
 #define URI_FUNC(x) uri##x##A
 
 #undef URI_TYPE
 #define URI_TYPE(x) Uri##x##A
-
-
 
 #undef URI_STRLEN
 #define URI_STRLEN strlen
@@ -76,7 +70,7 @@
 /* TODO Remove on next source-compatibility break */
 #undef URI_SNPRINTF
 #if (defined(__WIN32__) || defined(_WIN32) || defined(WIN32))
-# define URI_SNPRINTF _snprintf
+#  define URI_SNPRINTF _snprintf
 #else
-# define URI_SNPRINTF snprintf
+#  define URI_SNPRINTF snprintf
 #endif

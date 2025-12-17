@@ -268,7 +268,10 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 
                 /* xmlIsID does some other stuff too that is irrelevant here. */
                 if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && attr->node.ns == LXB_NS_HTML) {
-                    xmlAddID(NULL, lxml_doc, value, lxml_attr);
+                    if (xmlAddID(NULL, lxml_doc, value, lxml_attr) == 0) {
+                        /* If the ID already exists, the ID attribute still needs to be marked as an ID. */
+                        lxml_attr->atype = XML_ATTRIBUTE_ID;
+                    }
                 }
 
                 /* libxml2 doesn't support line numbers on this anyway, it derives them instead, so don't bother */

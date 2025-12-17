@@ -47,9 +47,9 @@
 	} while (0)
 
 static void zend_persist_zval_calc(zval *z);
-static void zend_persist_op_array_calc(zval *zv);
+static void zend_persist_op_array_calc(const zval *zv);
 
-static void zend_hash_persist_calc(HashTable *ht)
+static void zend_hash_persist_calc(const HashTable *ht)
 {
 	if ((HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) || ht->nNumUsed == 0) {
 		return;
@@ -79,7 +79,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		ADD_SIZE(sizeof(zend_ast_zval));
 		zend_persist_zval_calc(&((zend_ast_zval*)(ast))->val);
 	} else if (zend_ast_is_list(ast)) {
-		zend_ast_list *list = zend_ast_get_list(ast);
+		const zend_ast_list *list = zend_ast_get_list(ast);
 		ADD_SIZE(sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
 		for (i = 0; i < list->children; i++) {
 			if (list->child[i]) {
@@ -125,7 +125,7 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
-				HashTable *ht = Z_ARRVAL_P(z);
+				const HashTable *ht = Z_ARRVAL_P(z);
 
 				ADD_SIZE(size);
 				zend_hash_persist_calc(ht);
@@ -218,7 +218,7 @@ static void zend_persist_type_calc(zend_type *type)
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
 	if (op_array->function_name) {
-		zend_string *old_name = op_array->function_name;
+		const zend_string *old_name = op_array->function_name;
 		ADD_INTERNED_STRING(op_array->function_name);
 		/* Remember old function name, so it can be released multiple times if shared. */
 		if (op_array->function_name != old_name
@@ -258,7 +258,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 	if (op_array->literals) {
 		zval *p = op_array->literals;
-		zval *end = p + op_array->last_literal;
+		const zval *end = p + op_array->last_literal;
 		ADD_SIZE(sizeof(zval) * op_array->last_literal);
 		while (p < end) {
 			zend_persist_zval_calc(p);
@@ -272,7 +272,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	/* ZEND_ACC_PTR_OPS and ZEND_ACC_OVERRIDE use the same value */
 	if ((op_array->fn_flags & ZEND_ACC_PTR_OPS) && !op_array->function_name) {
 		zend_op *op = op_array->opcodes;
-		zend_op *end = op + op_array->last;
+		const zend_op *end = op + op_array->last;
 		while (op < end) {
 			if (op->opcode == ZEND_DECLARE_ATTRIBUTED_CONST) {
 				HashTable *attributes = Z_PTR_P(RT_CONSTANT(op+1, (op+1)->op1));
@@ -344,7 +344,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 }
 
-static void zend_persist_op_array_calc(zval *zv)
+static void zend_persist_op_array_calc(const zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
@@ -417,7 +417,7 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 	}
 }
 
-static void zend_persist_class_constant_calc(zval *zv)
+static void zend_persist_class_constant_calc(const zval *zv)
 {
 	zend_class_constant *c = Z_PTR_P(zv);
 
@@ -479,10 +479,8 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			}
 		}
 		if (ce->default_static_members_table) {
-		    int i;
-
 			ADD_SIZE(sizeof(zval) * ce->default_static_members_count);
-			for (i = 0; i < ce->default_static_members_count; i++) {
+			for (uint32_t i = 0; i < ce->default_static_members_count; i++) {
 				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
 					zend_persist_zval_calc(&ce->default_static_members_table[i]);
 				}
@@ -596,7 +594,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 	}
 }
 
-static void zend_accel_persist_class_table_calc(HashTable *class_table)
+static void zend_accel_persist_class_table_calc(const HashTable *class_table)
 {
 	Bucket *p;
 
@@ -629,7 +627,7 @@ static void zend_persist_early_bindings_calc(
 	}
 }
 
-uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, bool for_shm)
 {
 	Bucket *p;
 

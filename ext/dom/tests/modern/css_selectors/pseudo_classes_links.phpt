@@ -11,6 +11,7 @@ $dom = DOM\XMLDocument::createFromString(<<<XML
 <container>
     <a href="http://example.com">Link</a>
     <a xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Link</a>
+    <A xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Not actually a link</A>
     <area xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Link</area>
 </container>
 XML);
@@ -18,6 +19,7 @@ XML);
 test_helper($dom, ':any-link');
 test_helper($dom, ':link');
 test_helper($dom, 'a:not(:any-link)');
+test_helper($dom, ':not(:any-link)');
 
 ?>
 --EXPECT--
@@ -29,3 +31,12 @@ test_helper($dom, 'a:not(:any-link)');
 <area xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Link</area>
 --- Selector: a:not(:any-link) ---
 <a href="http://example.com">Link</a>
+--- Selector: :not(:any-link) ---
+<container>
+    <a href="http://example.com">Link</a>
+    <a xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Link</a>
+    <A xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Not actually a link</A>
+    <area xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Link</area>
+</container>
+<a href="http://example.com">Link</a>
+<A xmlns="http://www.w3.org/1999/xhtml" href="http://example.com">Not actually a link</A>

@@ -1,4 +1,4 @@
-PHP 8.5 INTERNALS UPGRADE NOTES
+PHP 8.6 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
 
@@ -14,166 +14,66 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
-    instead of `char*`.
-  . DL_LOAD now doesn't use RTLD_DEEPBIND deepbind anymore on platforms
-    where dlmopen with LM_ID_NEWLM is available:
-    this means shared library symbol isolation (if needed) must be enabled on
-    the user side when requiring libphp.so, by using dlmopen with LM_ID_NEWLM
-    instead of dlopen.
-    RTLD_DEEPBIND is still enabled when the Apache SAPI is in use.
-  . The ptr field of the php_stream_notifier struct is now a void* instead
-    of a zval. If the zval was used to store IS_PTR values only, the
-    extra layer of indirection can be removed. In other cases a zval can
-    be heap-allocated and stored in the pointer as a minimal change to keep
-    compatibility.
-  . The validator callbacks for internal attribute now return `zend_string *`
-    rather than `void`; instead of emitting an error when an attribute is
-    applied incorrectly, the error message should be returned as a zend_string
-    pointer. If the error will be delayed until runtime, it is stored in the
-    new `validation_error` field of the `zend_attribute` struct.
-    RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
-  . Added zend_safe_assign_to_variable_noref() function to safely assign
-    a value to a non-reference zval.
-  . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
-    could interfere.
-  . zend_get_callable_name() now returns the name of the underlying function
-    for fake closures.
-  . Added smart_string_append_printf() matching smart_str_append_printf() for
-    char* instead of zend_string*-based smart strings.
-  . Added php_build_provider() to retrieve the value of PHP_BUILD_PROVIDER at
-    runtime.
-  . Removed the cache_slot argument of zend_check_user_type_slow() because
-    now it only relies on the CE cache.
-  . Added ZEND_NONSTRING attribute macro for character arrays that do not
-    represent strings. This allows to silence the GCC 15.x
-    `-Wunterminated-string-initialization` warning.
-  . Added the zend_update_exception_properties() function for instantiating
-    Exception child classes. It updates the $message, $code, and $previous
-    properties.
-  . zend_exception_get_default() was removed, use zend_ce_exception directly.
-  . zend_get_error_exception() was removed, use zend_ce_error_exception
-    directly.
-  . ZEND_IS_XDIGIT() macro was removed because it was unused and its name
-    did not match its actual behavior.
-  . The following zend_string-related legacy aliases were removed:
-    * IS_INTERNED() - use ZSTR_IS_INTERNED()
-    * STR_EMPTY_ALLOC() - use ZSTR_EMPTY_ALLOC()
-    * _STR_HEADER_SIZE - use _ZSTR_HEADER_SIZE
-    * STR_ALLOCA_ALLOC() - use ZSTR_ALLOCA_ALLOC()
-    * STR_ALLOCA_INIT() - use ZSTR_ALLOCA_INIT()
-    * STR_ALLOCA_FREE() - use ZSTR_ALLOCA_FREE()
-  . zend_register_constant() now returns a pointer to the added constant
-    on success and NULL on failure instead of SUCCESS/FAILURE.
-    The specialized registration methods that previously had void returns
-    also return pointers to the added constants:
-    * zend_register_bool_constant()
-    * zend_register_null_constant()
-    * zend_register_long_constant()
-    * zend_register_double_constant()
-    * zend_register_string_constant()
-    * zend_register_stringl_constant()
-  . EG(fake_scope) now is a _const_ zend_class_entry*.
-  . zend_begin_record_errors() or EG(record_errors)=true cause errors to be
-    delayed. Before, errors would be recorded but not delayed.
-  . zend_mm_refresh_key_child() must be called on any zend_mm_heap inherited
-    from the parent process after a fork().
-  . HASH_KEY_IS_* constants have been moved in the zend_hash_key_type enum.
+  . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
+    zend_string_starts_with_literal_ci() now support strings containing NUL
+    bytes. Passing non-literal char* is no longer supported.
+  . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
+  . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
+    added, given the primary flags were running out of bits.
+  . The zval_is_true() alias of zend_is_true() has been removed. Call
+    zend_is_true() directly instead.
+  . The _zval_get_*() compatibility macros for PHP 7.2 have been removed
+    call the variant without the leading underscore instead.
+    Affected: _zval_get_long, _zval_get_double, _zval_get_string,
+    _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
+  . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
+    unsafe. Directly use ZEND_LONG_FMT with a function from the
+    printf family.
+  . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
+    Call zval_ptr_dtor_nogc() directly instead.
+  . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_make_callable() function has been removed, if a callable zval
+    needs to be obtained use the zend_get_callable_zval_from_fcc() function
+    instead. If this was used to store a callable, then an FCC should be
+    stored instead.
+  . The zend_active_function{_ex}() functions now return a const zend_function
+    pointer.
+  . The zend_get_call_trampoline_func() API now takes the __call or
+    __callStatic zend_function* instead of a CE and a boolean argument.
+  . The zend_set_hash_symbol() API has been removed.
+  . Added zend_hash_str_lookup().
+  . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
+    removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
+    instead.
+  . PHP_HAVE_STREAMS macro removed from <php.h>.
+  . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
+    zend_internal_arg_info on internal functions, unless the
+    ZEND_ACC_USER_ARG_INFO flag was set.
 
 ========================
 2. Build system changes
 ========================
 
-- Abstract
-  . Preprocessor macro SIZEOF_PTRDIFF_T has been removed.
-  . Preprocessor macro SIZEOF_INTMAX_T has been removed.
-
-- Windows build system changes
-  . SAPI() and ADD_SOURCES() now support the optional `duplicate_sources`
-    parameter.  If truthy, no rules to build the object files are generated.
-    This allows to build additional variants of SAPIs (e.g. a DLL and EXE)
-    without duplicate build rules.  It is up to the SAPI maintainers to ensure
-    that appropriate build rules are created.
-
-- Unix build system changes
-  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex: lib64)
-    configure options are used to ${libdir}/php (ex: /usr/lib64/php)
-  . PHP_ODBC_CFLAGS, PHP_ODBC_LFLAGS, PHP_ODBC_LIBS, PHP_ODBC_TYPE preprocessor
-    macros defined by ext/odbc are now defined in php_config.h instead of the
-    build-defs.h header.
-  . Autoconf macro AX_CHECK_COMPILE_FLAG updated to serial 11.
-  . Autoconf macro PHP_AP_EXTRACT_VERSION has been removed.
-  . Autoconf macro PHP_BUILD_THREAD_SAFE has been removed (set enable_zts
-    manually).
-  . Autoconf macro PHP_CHECK_SIZEOF is obsolete (use AC_CHECK_SIZEOF).
-  . Autoconf macro PHP_DEF_HAVE has been removed (use AC_DEFINE).
-  . Autoconf macro PHP_OUTPUT has been removed (use AC_CONFIG_FILES).
-  . Autoconf macro PHP_TEST_BUILD has been removed (use AC_* macros).
-  . Preprocessor macro HAVE_PTRDIFF_T has been removed.
-  . Preprocessor macro HAVE_INTMAX_T has been removed.
-  . Preprocessor macro HAVE_SSIZE_T has been removed.
-  . Preprocessor macro SIZEOF_SSIZE_T has been removed.
-
 ========================
 3. Module changes
 ========================
 
-- Gd:
-  . The gdImageScale*() and gdImageRotate*() helpers are now internal in the
-    bundled libgd, like they have been in external libgd as of gd-2.1.1.
+- ext/xml:
+  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
+    as it was unused.
+  . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
+    as it was unused and could return the wrong result.
 
-- Hash:
-  . Hash functions now use proper hash_spec_result enum for return values
-    instead of using SUCCESS and FAILURE.
-
-- JSON:
-  . php_json_encode_serializable_object() now assumes `EG(active)`,
-    if not a bailout is caused. Therefore a minor BC break exists if the
-    `PHP_JSON_PARTIAL_OUTPUT_ON_ERROR` option is in use.
-    However, this situation is highly unlikely.
-
-- Libxml:
-  . The refcount APIs now return an `unsigned int` instead of an `int`.
-  . Removed php_libxml_xmlCheckUTF8(). Use xmlCheckUTF8() from libxml instead.
-
-- PDO:
-  . Added `php_pdo_stmt_valid_db_obj_handle()` to check if the database object
-    is still valid. This is useful when a GC cycle is collected and the
-    database object can be destroyed prior to destroying the statement.
-
-- Random:
-  . The handlers parameter of php_random_engine_common_init() has been
-    removed. Use the default_object_handlers field on the CE instead.
-
-- Standard:
-  . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
-    non-ex counterparts do not work in-place.
-  . The php_std_date() function has been removed. Use php_format_date() with
-    the "D, d M Y H:i:s \\G\\M\\T" format instead.
-  . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
-  . The functionality of getimagesize(), image_type_to_mime_type(),
-    and image_type_to_extension() is now extensible using the internal APIs
-    php_image_register_handler() and php_image_unregister_handler() in
-    php_image.h.
-  . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
-    were removed. Use the corresponding headers in Zend/ instead.
-
-- URI:
-  . Internal API for URI handling was added via the php_uri_*() functions.
+- ext/mbstring:
+  . Added GB18030-2022 to default encoding list for zh-CN.
 
 ========================
 4. OpCode changes
 ========================
 
-* New ZEND_DECLARE_ATTRIBUTED_CONST is used when a global constant is declared
-  with `const` and has attributes; this opcode is used *instead* of the
-  ZEND_DECLARE_CONST, and in addition to the name of the constant and the
-  value to use, has a ZEND_OP_DATA with a pointer to the compiled attributes.
-
 ========================
 5. SAPI changes
 ========================
-
-- SAPIs must now call php_child_init() after a fork. If php-src code was
-  executed in other threads than the one initiating the fork,
-  refresh_memory_manager() must be called in every such thread.

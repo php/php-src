@@ -2502,3 +2502,43 @@ AC_DEFUN([PHP_REMOVE_OPTIMIZATION_FLAGS], [
   CFLAGS=$(echo "$CFLAGS" | $SED -e "$sed_script")
   CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e "$sed_script")
 ])
+
+dnl
+dnl PHP_C_STANDARD_LIBRARY
+dnl
+dnl Determine the C standard library used for the build. The uclibc is checked
+dnl first because it also defines the __GLIBC__ and could otherwise be detected
+dnl as glibc. Musl C library is determined heuristically.
+dnl
+AC_DEFUN([PHP_C_STANDARD_LIBRARY],
+[AC_CACHE_CHECK([C standard library implementation],
+[php_cv_c_standard_library],
+[php_cv_c_standard_library=unknown
+dnl Check if C standard library is uclibc.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <features.h>],
+[#ifndef __UCLIBC__
+  (void) __UCLIBC__;
+#endif])],
+[php_cv_c_standard_library=uclibc],
+[php_cv_c_standard_library=unknown])])
+dnl Check if C standard library is GNU C.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <features.h>],
+[#ifndef __GLIBC__
+  (void) __GLIBC__;
+#endif])],
+[php_cv_c_standard_library=glibc],
+[php_cv_c_standard_library=unknown])])
+dnl Check if C standard library is musl libc.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdarg.h>],
+[#ifndef __DEFINED_va_list
+  (void) __DEFINED_va_list;
+#endif])],
+[php_cv_c_standard_library=musl],
+[AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1],
+[php_cv_c_standard_library=musl],
+[php_cv_c_standard_library=unknown])])])
+])
+])

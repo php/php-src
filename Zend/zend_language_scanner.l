@@ -30,6 +30,7 @@
 #include "zend_language_scanner_defs.h"
 
 #include <errno.h>
+#include <stdint.h>
 #include "zend.h"
 #ifdef ZEND_WIN32
 # include <Winuser.h>
@@ -600,7 +601,7 @@ static zend_op_array *zend_compile(int type)
 	CG(ast_arena) = zend_arena_create(1024 * 32);
 
 	if (!zendparse()) {
-		int last_lineno = CG(zend_lineno);
+		uint32_t last_lineno = CG(zend_lineno);
 		zend_file_context original_file_context;
 		zend_oparray_context original_oparray_context;
 		zend_op_array *original_active_op_array = CG(active_op_array);
@@ -1140,7 +1141,7 @@ skip_escape_conversion:
 		unsigned char *str;
 		// TODO: avoid realocation ???
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)(&str, &sz, (unsigned char *)s, Z_STRLEN_P(zendlval));
 		zval_ptr_dtor(zendlval);
 		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
@@ -1172,7 +1173,7 @@ static bool strip_multiline_string_indentation(
 	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
 
-	int newline_count = 0;
+	uint32_t newline_count = 0;
 	size_t newline_len;
 	const char *nl;
 
@@ -1253,7 +1254,7 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 }
 
 /* Check that { }, [ ], ( ) are nested correctly */
-static void report_bad_nesting(char opening, int opening_lineno, char closing)
+static void report_bad_nesting(char opening, uint32_t opening_lineno, char closing)
 {
 	char   buf[256];
 	size_t used = 0;
@@ -1361,7 +1362,7 @@ int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
 int offset;
-int start_line = CG(zend_lineno);
+uint32_t start_line = CG(zend_lineno);
 
 	ZVAL_UNDEF(zendlval);
 restart:
@@ -2499,7 +2500,7 @@ inline_char_handler:
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
 	} else {
-		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %d", CG(zend_lineno));
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %" PRIu32, CG(zend_lineno));
 		if (PARSER_MODE()) {
 			RETURN_TOKEN(T_ERROR);
 		}
@@ -2616,7 +2617,7 @@ skip_escape_conversion:
 		zend_string *new_str;
 		s = Z_STRVAL_P(zendlval);
 		// TODO: avoid reallocation ???
-		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, Z_STRLEN_P(zendlval));
 		new_str = zend_string_init(str, sz, 0);
 		if (str != s) {
 			efree(str);

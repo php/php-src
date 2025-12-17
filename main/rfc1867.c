@@ -1048,7 +1048,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					if (wlen == (size_t)-1) {
 						/* write failed */
 #if DEBUG_FILE_UPLOAD
-						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", strerror(errno));
+						char errstr[256];
+						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 #endif
 						cancel_upload = PHP_UPLOAD_ERROR_F;
 					} else if (wlen < blen) {

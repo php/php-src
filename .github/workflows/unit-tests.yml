@@ -1,0 +1,75 @@
+name: Unit Tests
+on:
+  push:
+    paths:
+      - 'main/network.c'
+      - 'tests/unit/**'
+      - '.github/workflows/unit-tests.yml'
+    branches:
+      - master
+  pull_request:
+    paths:
+      - 'main/network.c'
+      - 'tests/unit/**'
+      - '.github/workflows/unit-tests.yml'
+    branches:
+      - '**'
+  workflow_dispatch: ~
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.url || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CC: ccache gcc
+  CXX: ccache g++
+
+jobs:
+  UNIT_TESTS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: UNIT_TESTS_LINUX_X64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies
+        run: |
+          set -x
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcmocka-dev \
+            autoconf \
+            gcc \
+            make \
+            unzip \
+            bison \
+            re2c \
+            locales \
+            ccache
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "unit-tests-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
+          
+      - name: ./configure (minimal build)
+        uses: ./.github/actions/configure-unit-tests
+        
+      - name: make libphp.a
+        run: |
+          set -x
+          make -j$(/usr/bin/nproc) >/dev/null
+          
+      - name: Run unit tests
+        run: |
+          set -x
+          cd tests/unit
+          make test
+

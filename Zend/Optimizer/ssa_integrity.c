@@ -25,20 +25,20 @@ static inline bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
 	int use;
 	FOREACH_USE(&ssa->vars[var], use) {
 		if (use == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_USE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_in_phi_use_chain(zend_ssa *ssa, int var, zend_ssa_phi *check) {
 	zend_ssa_phi *phi;
 	FOREACH_PHI_USE(&ssa->vars[var], phi) {
 		if (phi == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_PHI_USE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_used_by_op(zend_ssa *ssa, int op, int check) {
@@ -59,30 +59,30 @@ static inline bool is_in_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi, int check
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
 		if (source == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_PHI_SOURCE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_in_predecessors(zend_cfg *cfg, zend_basic_block *block, int check) {
 	int i, *predecessors = &cfg->predecessors[block->predecessor_offset];
 	for (i = 0; i < block->predecessors_count; i++) {
 		if (predecessors[i] == check) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static inline bool is_in_successors(zend_basic_block *block, int check) {
 	int s;
 	for (s = 0; s < block->successors_count; s++) {
 		if (block->successors[s] == check) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static inline bool is_var_type(uint8_t type) {

@@ -132,6 +132,93 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_OFFSETS) . '$/s';
 
+const EXPECTF_OUTPUT_FLOAT_OOB_OFFSETS = <<<OUTPUT
+Read before write:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: Undefined array key 0 in %s on line %d
+NULL
+Write:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+Read:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+int(5)
+Read-Write:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+isset():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+bool(true)
+empty():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+bool(false)
+null coalesce:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+int(25)
+Reference to dimension:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+int(100)
+unset():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+Nested read:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: Undefined array key 0 in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line 74
+NULL
+Nested write:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+Nested Read-Write:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+Nested isset():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+bool(true)
+Nested empty():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+bool(false)
+Nested null coalesce:
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+int(30)
+Nested unset():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
+OUTPUT;
+
+$EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_OOB_OFFSETS) . '$/s';
+
 const EXPECTED_OUTPUT_NULL_OFFSETS = <<<OUTPUT
 Read before write:
 
@@ -356,6 +443,7 @@ foreach ($offsets as $dimension) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
@@ -384,6 +472,7 @@ foreach ($offsets as $offset) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {

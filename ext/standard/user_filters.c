@@ -148,13 +148,30 @@ static php_stream_filter_status_t userfilter_filter(
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
-	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
-	if (stream_prop) {
-		/* Give the userfilter class a hook back to the stream */
-		zval_ptr_dtor(stream_prop);
-		php_stream_to_zval(stream, stream_prop);
-		Z_ADDREF_P(stream_prop);
+	/* Give the userfilter class a hook back to the stream */
+	const zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = Z_OBJCE_P(obj);
+
+	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
+	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
+	if (stream_property_exists) {
+		zval stream_zval;
+		php_stream_to_zval(stream, &stream_zval);
+		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
+		/* If property update threw an exception, skip filter execution */
+		if (EG(exception)) {
+			EG(fake_scope) = old_scope;
+			if (buckets_in->head) {
+				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+			}
+			zend_string_release(stream_name);
+			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= orig_no_fclose;
+			return PSFS_ERR_FATAL;
+		}
 	}
+
+	EG(fake_scope) = old_scope;
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
@@ -196,10 +213,15 @@ static php_stream_filter_status_t userfilter_filter(
 
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
-	 * from being destroyed properly */
-	if (stream_prop) {
-		convert_to_null(stream_prop);
+	 * from being destroyed properly.
+	 * Since the property accepted a resource assignment above, it must have
+	 * no type hint or be typed as mixed, so we can safely assign null.
+	 */
+	if (stream_property_exists) {
+		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
 	}
+
+	zend_string_release(stream_name);
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
@@ -237,7 +259,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	len = strlen(filtername);
 
 	/* determine the classname/class entry */
-	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {
+	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), filtername, len))) {
 		char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
@@ -285,7 +307,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
 
 	/* filtername */
-	add_property_string(&obj, "filtername", (char*)filtername);
+	add_property_string(&obj, "filtername", filtername);
 
 	/* and the parameters, if any */
 	if (filterparams) {
@@ -301,9 +323,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
-			/* User reported filter creation error "return false;" */
-			zval_ptr_dtor(&retval);
-
 			/* Kill the filter (safely) */
 			ZVAL_UNDEF(&filter->abstract);
 			php_stream_filter_free(filter);
@@ -404,16 +423,18 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
 	}
 
+	/* If the bucket is already on a brigade we have to unlink it first to keep the
+	 * linked list consistent. Furthermore, we can transfer the refcount in that case. */
+	if (bucket->brigade) {
+		php_stream_bucket_unlink(bucket);
+	} else {
+		bucket->refcount++;
+	}
+
 	if (append) {
 		php_stream_bucket_append(brigade, bucket);
 	} else {
 		php_stream_bucket_prepend(brigade, bucket);
-	}
-	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
- 	 * multiple times. See bug35916.phpt for reference.
-	 */
-	if (bucket->refcount == 1) {
-		bucket->refcount++;
 	}
 }
 /* }}} */

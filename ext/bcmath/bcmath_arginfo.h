@@ -208,9 +208,9 @@ static zend_class_entry *register_class_BcMath_Number(zend_class_entry *class_en
 
 	zval property_scale_default_value;
 	ZVAL_UNDEF(&property_scale_default_value);
-	zend_string *property_scale_name = zend_string_init("scale", sizeof("scale") - 1, 1);
+	zend_string *property_scale_name = zend_string_init("scale", sizeof("scale") - 1, true);
 	zend_declare_typed_property(class_entry, property_scale_name, &property_scale_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_scale_name);
+	zend_string_release_ex(property_scale_name, true);
 
 	return class_entry;
 }

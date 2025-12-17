@@ -25,13 +25,6 @@ the lazy dog
 This is a double quoted string
 EOT;
 
-// heredoc with different whitespaces
-$diff_whitespaces = <<<EOT
-hello\r world\t
-1111\t\t != 2222\v\v
-heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
-EOT;
-
 // heredoc with quoted strings and numeric values
 $numeric_string = <<<EOT
 11 < 12. 123 >22
@@ -43,10 +36,10 @@ EOT;
 // array to be passsed to $arr1 argument
 $arr1 = array (
   1, 1.1, "hello", "one", NULL, 2,
-  'world', true, false, false => 5, 'aaaa\r', "aaaa\r",
-  $numeric_string, $diff_whitespaces,
+  'world', true, false, false => 5, 'aaaa\n', "aaaa\n",
+  $numeric_string,
   "one" => "ten", 4 => "four", "two" => 2, 2 => "two",
-  '', null => "null", '' => 'emptys'
+  '', '' => 'emptys'
 );
 
 // arrays to be passed to $arr2 argument
@@ -56,9 +49,9 @@ $arrays = array (
        array(false,true), // array with default keys and boolean values
        array(), // empty array
 /*5*/  array(NULL), // array with NULL
-       array("a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // array with double quoted strings
-       array('a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // array with single quoted strings
-       array($blank_line, $multiline_string, $diff_whitespaces, $numeric_string),  // array with heredocs
+       array("a\v\f","aaaa\n","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // array with double quoted strings
+       array('a\v\f','aaaa\n','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // array with single quoted strings
+       array($blank_line, $multiline_string, $numeric_string),  // array with heredocs
 
        // associative arrays
 /*9*/  array(1 => "one", 2 => "two", 3 => "three"),  // explicit numeric keys, string values
@@ -68,11 +61,11 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*14*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -128,7 +121,7 @@ array(3) {
   bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
 array(3) {
@@ -136,7 +129,7 @@ array(3) {
   bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
 -- Iteration 4 --
@@ -148,59 +141,51 @@ array(0) {
 array(2) {
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
 array(2) {
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
 -- Iteration 6 --
 array(1) {
   [10]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
 array(1) {
   [10]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
 }
 -- Iteration 7 --
 array(1) {
   [9]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
 }
 array(1) {
   [9]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
 }
 -- Iteration 8 --
-array(2) {
+array(1) {
   [11]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
 "
-  [12]=>
-  string(88) "hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"
 }
-array(2) {
+array(1) {
   [11]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
 "
-  [12]=>
-  string(88) "hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"
 }
 -- Iteration 9 --
 array(2) {
@@ -264,79 +249,74 @@ array(3) {
   bool(true)
 }
 -- Iteration 14 --
-array(2) {
+array(3) {
+  [7]=>
+  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
-array(2) {
+array(3) {
+  [7]=>
+  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
 }
 -- Iteration 15 --
 array(3) {
-  [7]=>
-  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 array(3) {
-  [7]=>
-  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 -- Iteration 16 --
 array(3) {
+  [7]=>
+  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
-  [""]=>
-  string(6) "emptys"
 }
 array(3) {
+  [7]=>
+  bool(true)
   [8]=>
   bool(false)
-  [13]=>
+  [12]=>
   string(0) ""
-  [""]=>
-  string(6) "emptys"
 }
 -- Iteration 17 --
 array(3) {
-  [7]=>
-  bool(true)
-  [8]=>
-  bool(false)
-  [13]=>
-  string(0) ""
+  [0]=>
+  int(5)
+  [5]=>
+  int(2)
+  ["two"]=>
+  int(2)
 }
 array(3) {
-  [7]=>
-  bool(true)
-  [8]=>
-  bool(false)
-  [13]=>
-  string(0) ""
+  [0]=>
+  int(5)
+  [5]=>
+  int(2)
+  ["two"]=>
+  int(2)
 }
 -- Iteration 18 --
-array(1) {
-  [0]=>
-  int(5)
-}
-array(1) {
-  [0]=>
-  int(5)
-}
--- Iteration 19 --
 array(0) {
 }
 array(0) {

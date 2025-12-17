@@ -42,28 +42,27 @@ static zend_string *get_known_string_by_property_name(php_uri_property_name prop
 	}
 }
 
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode)
+void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
 
-	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(uri_object->parser, property_name);
 
-	if (UNEXPECTED(property_handler->read(internal_uri->uri, component_read_mode, return_value) == FAILURE)) {
-		zend_throw_exception_ex(uri_error_ce, 0, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
+	if (UNEXPECTED(property_handler->read(uri_object->uri, component_read_mode, return_value) == FAILURE)) {
+		zend_throw_exception_ex(php_uri_ce_error, 0, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 }
 
-static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
+static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
 {
-	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	php_uri_object *old_uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(old_uri_object->uri != NULL);
 
-	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+	zend_object *new_object = old_uri_object->std.handlers->clone_obj(&old_uri_object->std);
 	if (new_object == NULL) {
 		RETURN_THROWS();
 	}
@@ -72,19 +71,19 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(old_uri_object->parser, property_name);
 
-	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
-	URI_ASSERT_INITIALIZATION(new_internal_uri);
+	php_uri_object *new_uri_object = php_uri_object_from_obj(new_object);
+	ZEND_ASSERT(new_uri_object->uri != NULL);
 	if (UNEXPECTED(property_handler->write == NULL)) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_object->ce->name),
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_uri_object->std.ce->name),
 			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
-	if (UNEXPECTED(property_handler->write(new_internal_uri->uri, property_zv, &errors) == FAILURE)) {
+	if (UNEXPECTED(property_handler->write(new_uri_object->uri, property_zv, &errors) == FAILURE)) {
 		zval_ptr_dtor(&errors);
 		RETURN_THROWS();
 	}
@@ -92,26 +91,26 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	ZEND_ASSERT(Z_ISUNDEF(errors));
 }
 
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_string *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR(value)
+		Z_PARAM_STR(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
 	ZVAL_STR(&zv, value);
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_string *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH_STR_OR_NULL(value)
+		Z_PARAM_STR_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
@@ -121,10 +120,10 @@ void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_prope
 		ZVAL_STR(&zv, value);
 	}
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_long_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_long value;
 	bool value_is_null;
@@ -140,5 +139,5 @@ void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_prop
 		ZVAL_LONG(&zv, value);
 	}
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }

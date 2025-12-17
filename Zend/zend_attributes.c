@@ -38,7 +38,7 @@ static zend_object_handlers attributes_object_handlers_sensitive_parameter_value
 
 static HashTable internal_attributes;
 
-uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
+uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
@@ -265,7 +265,7 @@ ZEND_METHOD(NoDiscard, __construct)
 	}
 }
 
-static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
+static zend_attribute *get_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
 		zend_attribute *attr;
@@ -280,7 +280,7 @@ static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname,
 	return NULL;
 }
 
-static zend_attribute *get_attribute_str(HashTable *attributes, const char *str, size_t len, uint32_t offset)
+static zend_attribute *get_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset)
 {
 	if (attributes) {
 		zend_attribute *attr;
@@ -295,27 +295,27 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 	return NULL;
 }
 
-ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname)
+ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *lcname)
 {
 	return get_attribute(attributes, lcname, 0);
 }
 
-ZEND_API zend_attribute *zend_get_attribute_str(HashTable *attributes, const char *str, size_t len)
+ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, const char *str, size_t len)
 {
 	return get_attribute_str(attributes, str, len, 0);
 }
 
-ZEND_API zend_attribute *zend_get_parameter_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
+ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)
 {
 	return get_attribute(attributes, lcname, offset + 1);
 }
 
-ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes, const char *str, size_t len, uint32_t offset)
+ZEND_API zend_attribute *zend_get_parameter_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset)
 {
 	return get_attribute_str(attributes, str, len, offset + 1);
 }
 
-ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t i, zend_class_entry *scope)
+ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *attr, uint32_t i, zend_class_entry *scope)
 {
 	if (i >= attr->argc) {
 		return FAILURE;
@@ -447,7 +447,7 @@ ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
 	return smart_str_extract(&str);
 }
 
-ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr)
+ZEND_API bool zend_is_attribute_repeated(const HashTable *attributes, const zend_attribute *attr)
 {
 	zend_attribute *other;
 

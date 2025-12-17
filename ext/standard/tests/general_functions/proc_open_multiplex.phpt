@@ -1,5 +1,11 @@
 --TEST--
 Multiplexing of child output
+--SKIPIF--
+<?php
+if (getenv('GITHUB_ACTIONS') && str_starts_with(php_uname('m'), 'ppc')) {
+    die('skip Flaky on GitHub Actions PPC runner');
+}
+?>
 --FILE--
 <?php
 $php = getenv("TEST_PHP_EXECUTABLE");

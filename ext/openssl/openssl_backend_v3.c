@@ -24,6 +24,18 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(openssl)
 
+void php_openssl_backend_init(void)
+{
+#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
+	OSSL_PROVIDER_load(NULL, "legacy");
+	OSSL_PROVIDER_load(NULL, "default");
+#endif
+
+	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
+
+	php_openssl_backend_init_common();
+}
+
 void php_openssl_backend_shutdown(void)
 {
 	(void) 0;
@@ -889,6 +901,11 @@ X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in)
 	}
 
 	return xr;
+}
+
+STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in)
+{
+	return PEM_X509_INFO_read_bio_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
 }
 
 EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)

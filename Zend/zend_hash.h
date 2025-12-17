@@ -218,6 +218,7 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 /* Find or add NULL, if doesn't exist */
 ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
+ZEND_API zval* ZEND_FASTCALL zend_hash_str_lookup(HashTable *ht, const char *str, size_t len);
 
 #define ZEND_HASH_INDEX_LOOKUP(_ht, _h, _ret) do { \
 		if (EXPECTED(HT_IS_PACKED(_ht))) { \
@@ -471,6 +472,17 @@ static zend_always_inline bool zend_hash_str_exists_ind(const HashTable *ht, con
 	zv = zend_hash_str_find(ht, str, len);
 	return zv && (Z_TYPE_P(zv) != IS_INDIRECT ||
 			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
+}
+
+static zend_always_inline zval *zend_symtable_add(HashTable *ht, zend_string *key, zval *pData)
+{
+	zend_ulong idx;
+
+	if (ZEND_HANDLE_NUMERIC(key, idx)) {
+		return zend_hash_index_add(ht, idx, pData);
+	} else {
+		return zend_hash_add(ht, key, pData);
+	}
 }
 
 static zend_always_inline zval *zend_symtable_add_new(HashTable *ht, zend_string *key, zval *pData)

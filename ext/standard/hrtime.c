@@ -31,9 +31,9 @@
 	} while (0)
 #endif
 #define PHP_RETURN_HRTIME(t) do { \
-	char _a[ZEND_LTOA_BUF_LEN]; \
+	char _a[65]; \
 	double _d; \
-	HRTIME_U64A(t, _a, ZEND_LTOA_BUF_LEN); \
+	HRTIME_U64A(t, _a, sizeof(_a)); \
 	_d = zend_strtod(_a, NULL); \
 	RETURN_DOUBLE(_d); \
 	} while (0)

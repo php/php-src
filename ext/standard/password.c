@@ -140,7 +140,7 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 
 	if (!php_password_bcrypt_valid(hash)) {
 		/* Should never get called this way. */
-		return 1;
+		return true;
 	}
 
 	sscanf(ZSTR_VAL(hash), "$2y$" ZEND_LONG_FMT "$", &old_cost);
@@ -156,12 +156,12 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
 	if (!ret) {
-		return 0;
+		return false;
 	}
 
 	if (ZSTR_LEN(hash) < 13) {
 		zend_string_free(ret);
-		return 0;
+		return false;
 	}
 
 	/* We're using this method instead of == in order to provide

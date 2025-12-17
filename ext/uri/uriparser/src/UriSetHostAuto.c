@@ -40,100 +40,85 @@
 #include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "UriSetHostAuto.c"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "UriSetHostAuto.c"
-#  undef URI_PASS_UNICODE
-# endif
+#  ifdef URI_ENABLE_ANSI
+#    define URI_PASS_ANSI 1
+#    include "UriSetHostAuto.c"
+#    undef URI_PASS_ANSI
+#  endif
+#  ifdef URI_ENABLE_UNICODE
+#    define URI_PASS_UNICODE 1
+#    include "UriSetHostAuto.c"
+#    undef URI_PASS_UNICODE
+#  endif
 #else
-# ifdef URI_PASS_ANSI
-#  include <uriparser/UriDefsAnsi.h>
-# else
-#  include <uriparser/UriDefsUnicode.h>
-#  include <wchar.h>
-# endif
+#  ifdef URI_PASS_ANSI
+#    include <uriparser/UriDefsAnsi.h>
+#  else
+#    include <uriparser/UriDefsUnicode.h>
+#    include <wchar.h>
+#  endif
 
+#  ifndef URI_DOXYGEN
+#    include <uriparser/Uri.h>
+#    include "UriSetHostBase.h"
+#    include "UriSetHostCommon.h"
+#    include "UriMemory.h"
+#  endif
 
+#  include <assert.h>
 
-#ifndef URI_DOXYGEN
-# include <uriparser/Uri.h>
-# include "UriSetHostBase.h"
-# include "UriSetHostCommon.h"
-# include "UriMemory.h"
-#endif
+int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                            const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
+        return URI_ERROR_NULL;
+    }
 
+    URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
+    if ((first == NULL) || (first >= afterLast)) {
+        return URI_FUNC(SetHostRegNameMm)(uri, first, afterLast, memory);
+    }
 
-#include <assert.h>
+    /* Auto-detect type and then apply */
+    UriHostType hostType;
 
+    /* IPv6 or IPvFuture? */
+    if (first[0] == _UT('[')) {
+        if ((afterLast - first < 2) || (afterLast[-1] != _UT(']'))) {
+            return URI_ERROR_SYNTAX;
+        }
 
+        /* Drop the bracket wrap (for InternalSetHostMm call below) */
+        first++;
+        afterLast--;
 
-int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast,
-		UriMemoryManager * memory) {
-	if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
-		return URI_ERROR_NULL;
-	}
+        if (first >= afterLast) {
+            return URI_ERROR_SYNTAX;
+        }
 
-	URI_CHECK_MEMORY_MANAGER(memory);  /* may return */
+        switch (first[0]) {
+        case _UT('v'):
+        case _UT('V'):
+            hostType = URI_HOST_TYPE_IPFUTURE;
+            break;
+        default:
+            hostType = URI_HOST_TYPE_IP6;
+            break;
+        }
+        /* IPv4? */
+    } else if (URI_FUNC(IsWellFormedHostIp4)(first, afterLast)) {
+        hostType = URI_HOST_TYPE_IP4;
+    } else {
+        /* RegName! */
+        hostType = URI_HOST_TYPE_REGNAME;
+    }
 
-	if ((first == NULL) || (first >= afterLast)) {
-		return URI_FUNC(SetHostRegNameMm)(uri, first, afterLast, memory);
-	}
-
-	/* Auto-detect type and then apply */
-	{
-		UriHostType hostType;
-
-		/* IPv6 or IPvFuture? */
-		if (first[0] == _UT('[')) {
-			if ((afterLast - first < 2) || (afterLast[-1] != _UT(']'))) {
-				return URI_ERROR_SYNTAX;
-			}
-
-			/* Drop the bracket wrap (for InternalSetHostMm call below) */
-			first++;
-			afterLast--;
-
-			if (first >= afterLast) {
-			    return URI_ERROR_SYNTAX;
-			}
-
-			switch (first[0]) {
-				case _UT('v'):
-				case _UT('V'):
-					hostType = URI_HOST_TYPE_IPFUTURE;
-					break;
-				default:
-					hostType = URI_HOST_TYPE_IP6;
-					break;
-			}
-		/* IPv4? */
-		} else if (URI_FUNC(IsWellFormedHostIp4)(first, afterLast)) {
-			hostType = URI_HOST_TYPE_IP4;
-		} else {
-			/* RegName! */
-			hostType = URI_HOST_TYPE_REGNAME;
-		}
-
-		return URI_FUNC(InternalSetHostMm)(uri, hostType, first, afterLast, memory);
-	}
+    return URI_FUNC(InternalSetHostMm)(uri, hostType, first, afterLast, memory);
 }
 
-
-
-int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first,
-		const URI_CHAR * afterLast) {
-	return URI_FUNC(SetHostAutoMm)(uri, first, afterLast, NULL);
+int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                          const URI_CHAR * afterLast) {
+    return URI_FUNC(SetHostAutoMm)(uri, first, afterLast, NULL);
 }
-
-
 
 #endif

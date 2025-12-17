@@ -1,7 +1,8 @@
 <?php
 
 const BRANCHES = [
-    ['ref' => 'master', 'version' => [8, 5]],
+    ['ref' => 'master', 'version' => [8, 6]],
+    ['ref' => 'PHP-8.5', 'version' => [8, 5]],
     ['ref' => 'PHP-8.4', 'version' => [8, 4]],
     ['ref' => 'PHP-8.3', 'version' => [8, 3]],
     ['ref' => 'PHP-8.2', 'version' => [8, 2]],
@@ -48,8 +49,8 @@ function get_current_version(): array {
 
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
-$monday = date('w', time()) === '1';
-$discard_cache = $monday
+$sunday = date('w', time()) === '0';
+$discard_cache = $sunday
     || ($trigger === 'schedule' && $attempt !== 1)
     || $trigger === 'workflow_dispatch';
 if ($discard_cache) {

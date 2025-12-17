@@ -73,8 +73,8 @@ static const char *fill_errors(zval *errors)
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
-		object_init_ex(&error, uri_whatwg_url_validation_error_ce);
-		zend_update_property_string(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
+		object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
+		zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
 
 		const char *error_str;
 		zval failure;
@@ -199,10 +199,10 @@ static const char *fill_errors(zval *errors)
 		}
 
 		zval error_type;
-		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(uri_whatwg_url_validation_error_type_ce, error_str));
-		zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
+		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, error_str));
+		zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
 
-		zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("failure"), &failure);
+		zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("failure"), &failure);
 
 		if (Z_TYPE(failure) == IS_TRUE) {
 			result = error_str;
@@ -219,7 +219,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	zval err;
 	const char *reason = fill_errors(&err);
 	zend_object *exception = zend_throw_exception_ex(
-		uri_whatwg_invalid_url_exception_ce,
+		php_uri_ce_whatwg_invalid_url_exception,
 		0,
 		"The specified %s is malformed%s%s%s",
 		component,
@@ -274,12 +274,18 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 	return SUCCESS;
 }
 
+/* 4.2. URL miscellaneous: A URL includes credentials if its username or password is not the empty string. */
+static bool includes_credentials(const lxb_url_t *lexbor_uri)
+{
+	return lexbor_uri->username.length > 0 || lexbor_uri->password.length > 0;
+}
+
 static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->username.length) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
+	if (includes_credentials(lexbor_uri)) {
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -307,8 +313,8 @@ static zend_result php_uri_parser_whatwg_password_read(void *uri, php_uri_compon
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->password.length > 0) {
-		ZVAL_STRINGL(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
+	if (includes_credentials(lexbor_uri)) {
+		ZVAL_STRINGL_FAST(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -425,7 +431,7 @@ static zend_result php_uri_parser_whatwg_path_read(void *uri, php_uri_component_
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->path.str.length) {
+	if (lexbor_uri->path.str.length > 0) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->path.str.data, lexbor_uri->path.str.length);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -454,7 +460,7 @@ static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->query.length) {
+	if (lexbor_uri->query.data != NULL) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->query.data, lexbor_uri->query.length);
 	} else {
 		ZVAL_NULL(retval);
@@ -483,7 +489,7 @@ static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_compon
 {
 	const lxb_url_t *lexbor_uri = uri;
 
-	if (lexbor_uri->fragment.length) {
+	if (lexbor_uri->fragment.data != NULL) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->fragment.data, lexbor_uri->fragment.length);
 	} else {
 		ZVAL_NULL(retval);
@@ -565,7 +571,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 		zval err;
 		const char *reason = fill_errors(&err);
 		if (url == NULL && !silent) {
-			zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
+			zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
 			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
 		}
 		if (errors != NULL) {
@@ -614,19 +620,19 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 	return smart_str_extract(&uri_str);
 }
 
-static void php_uri_parser_whatwg_free(void *uri)
+static void php_uri_parser_whatwg_destroy(void *uri)
 {
 	lxb_url_t *lexbor_uri = uri;
 
 	lxb_url_destroy(lexbor_uri);
 }
 
-const php_uri_parser php_uri_parser_whatwg = {
+PHPAPI const php_uri_parser php_uri_parser_whatwg = {
 	.name = PHP_URI_PARSER_WHATWG,
 	.parse = php_uri_parser_whatwg_parse,
 	.clone = php_uri_parser_whatwg_clone,
 	.to_string = php_uri_parser_whatwg_to_string,
-	.free = php_uri_parser_whatwg_free,
+	.destroy = php_uri_parser_whatwg_destroy,
 	{
 		.scheme = {.read = php_uri_parser_whatwg_scheme_read, .write = php_uri_parser_whatwg_scheme_write},
 		.username = {.read = php_uri_parser_whatwg_username_read, .write = php_uri_parser_whatwg_username_write},

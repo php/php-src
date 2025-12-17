@@ -365,7 +365,7 @@ static void php_hash_do_hash(
 		RETURN_THROWS();
 	}
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
+		if (zend_char_has_nul_byte(data, data_len)) {
 			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -508,7 +508,7 @@ static void php_hash_do_hash_hmac(
 	}
 
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
+		if (zend_char_has_nul_byte(data, data_len)) {
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -577,13 +577,13 @@ PHP_FUNCTION(hash_hmac)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 0);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, false);
 }
 /* }}} */
 
@@ -594,13 +594,13 @@ PHP_FUNCTION(hash_hmac_file)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 1);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, true);
 }
 /* }}} */
 
@@ -778,7 +778,7 @@ PHP_FUNCTION(hash_final)
 {
 	zval *zhash;
 	php_hashcontext_object *hash;
-	bool raw_output = 0;
+	bool raw_output = false;
 	zend_string *digest;
 	size_t digest_len;
 
@@ -989,7 +989,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
 	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
 	size_t pass_len, salt_len = 0;
-	bool raw_output = 0;
+	bool raw_output = false;
 	const php_hash_ops *ops;
 	void *context;
 	HashTable *args = NULL;
@@ -1227,9 +1227,9 @@ PHP_FUNCTION(mhash)
 	}
 
 	if (key) {
-		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
+		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, true, false);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, NULL);
+		php_hash_do_hash(return_value, algo, data, data_len, true, false, NULL);
 	}
 
 	if (algo) {

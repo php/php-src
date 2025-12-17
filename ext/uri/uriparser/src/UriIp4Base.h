@@ -38,22 +38,16 @@
  */
 
 #ifndef URI_IP4_BASE_H
-#define URI_IP4_BASE_H 1
-
-
+#  define URI_IP4_BASE_H 1
 
 typedef struct UriIp4ParserStruct {
-	unsigned char stackCount;
-	unsigned char stackOne;
-	unsigned char stackTwo;
-	unsigned char stackThree;
+    unsigned char stackCount;
+    unsigned char stackOne;
+    unsigned char stackTwo;
+    unsigned char stackThree;
 } UriIp4Parser;
-
-
 
 void uriPushToStack(UriIp4Parser * parser, unsigned char digit);
 void uriStackToOctet(UriIp4Parser * parser, unsigned char * octet);
-
-
 
 #endif /* URI_IP4_BASE_H */

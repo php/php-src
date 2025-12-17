@@ -323,6 +323,7 @@ interface DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void;
 
     public function __serialize(): array;
@@ -339,6 +340,7 @@ class DateTime implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -456,6 +458,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -632,6 +635,7 @@ class DateTimeZone
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -658,6 +662,7 @@ class DateInterval
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -734,6 +739,7 @@ class DatePeriod implements IteratorAggregate
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */

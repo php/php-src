@@ -207,7 +207,7 @@ static zend_result ps_mm_key_exists(ps_mm *data, const zend_string *key)
 	if (!key) {
 		return FAILURE;
 	}
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, key, false);
 	if (sd) {
 		return SUCCESS;
 	}
@@ -365,7 +365,7 @@ PS_READ_FUNC(mm)
 		PS(session_status) = php_session_active;
 	}
 
-	sd = ps_sd_lookup(data, PS(id), 0);
+	sd = ps_sd_lookup(data, PS(id), false);
 	if (sd) {
 		*val = zend_string_init(sd->data, sd->datalen, 0);
 		ret = SUCCESS;
@@ -383,7 +383,7 @@ PS_WRITE_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 1);
+	sd = ps_sd_lookup(data, key, true);
 	if (!sd) {
 		sd = ps_sd_new(data, key);
 		ps_mm_debug(("new entry for %s\n", ZSTR_VAL(key)));
@@ -422,7 +422,7 @@ PS_DESTROY_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, key, false);
 	if (sd) {
 		ps_sd_destroy(data, sd);
 	}

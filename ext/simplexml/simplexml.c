@@ -1179,12 +1179,12 @@ static HashTable *sxe_get_properties(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static HashTable * sxe_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+/* This custom handler exists because the var_dump adds a pseudo "@attributes" key. */
+PHP_METHOD(SimpleXMLElement, __debugInfo)
 {
-	*is_temp = 1;
-	return sxe_get_prop_hash(object, 1);
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_ARR(sxe_get_prop_hash(Z_OBJ_P(ZEND_THIS), 1));
 }
-/* }}} */
 
 static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 {
@@ -1413,14 +1413,10 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 static inline void sxe_add_namespace_name_raw(zval *return_value, const char *prefix, const char *href)
 {
-	zend_string *key = zend_string_init(prefix, strlen(prefix), 0);
-	zval zv;
-
-	if (!zend_hash_exists(Z_ARRVAL_P(return_value), key)) {
-		ZVAL_STRING(&zv, href);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
+	zval *zv = zend_hash_str_lookup(Z_ARRVAL_P(return_value), prefix, strlen(prefix));
+	if (Z_ISNULL_P(zv)) {
+		ZVAL_STRING(zv, href);
 	}
-	zend_string_release_ex(key, 0);
 }
 
 static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{{ */
@@ -1489,7 +1485,7 @@ static inline void sxe_object_free_iterxpath(php_sxe_object *sxe)
 /* {{{ Return all namespaces in use */
 PHP_METHOD(SimpleXMLElement, getNamespaces)
 {
-	bool           recursive = 0;
+	bool           recursive = false;
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
 
@@ -1551,7 +1547,7 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 /* {{{ Return all namespaces registered with document */
 PHP_METHOD(SimpleXMLElement, getDocNamespaces)
 {
-	bool           recursive = 0, from_root = 1;
+	bool           recursive = false, from_root = true;
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
 
@@ -1589,7 +1585,7 @@ PHP_METHOD(SimpleXMLElement, children)
 	php_sxe_object *sxe;
 	zend_string    *nsprefix = NULL;
 	xmlNodePtr      node;
-	bool       isprefix = 0;
+	bool       isprefix = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!b", &nsprefix, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -1628,7 +1624,7 @@ PHP_METHOD(SimpleXMLElement, getName)
 	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	if (node) {
 		namelen = xmlStrlen(node->name);
-		RETURN_STRINGL((char*)node->name, namelen);
+		RETURN_STRINGL_FAST((const char *) node->name, namelen);
 	} else {
 		RETURN_EMPTY_STRING();
 	}
@@ -1641,7 +1637,7 @@ PHP_METHOD(SimpleXMLElement, attributes)
 	php_sxe_object *sxe;
 	zend_string    *nsprefix = NULL;
 	xmlNodePtr      node;
-	bool       isprefix = 0;
+	bool       isprefix = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!b", &nsprefix, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2028,7 +2024,7 @@ PHP_METHOD(SimpleXMLElement, key)
 	}
 
 	curnode = intern->node->node;
-	RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
+	RETURN_STRINGL_FAST((char*)curnode->name, xmlStrlen(curnode->name));
 }
 /* }}} */
 
@@ -2208,7 +2204,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_long            options = 0;
 	zend_class_entry *ce= ce_SimpleXMLElement;
 	zend_function    *fptr_count;
-	bool       isprefix = 0;
+	bool       isprefix = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lSb", &filename, &filename_len, &ce, &options, &ns, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2254,7 +2250,7 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_long            options = 0;
 	zend_class_entry *ce= ce_SimpleXMLElement;
 	zend_function    *fptr_count;
-	bool       isprefix = 0;
+	bool       isprefix = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lSb", &data, &data_len, &ce, &options, &ns, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2306,7 +2302,7 @@ PHP_METHOD(SimpleXMLElement, __construct)
 	size_t             data_len;
 	xmlDocPtr       docp;
 	zend_long            options = 0;
-	bool       is_url = 0, isprefix = 0;
+	bool       is_url = false, isprefix = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbSb", &data, &data_len, &options, &is_url, &ns, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2673,7 +2669,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.compare = sxe_objects_compare;
 	sxe_object_handlers.cast_object = sxe_object_cast;
 	sxe_object_handlers.count_elements = sxe_count_elements;
-	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
 

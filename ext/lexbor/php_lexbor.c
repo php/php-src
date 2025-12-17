@@ -72,7 +72,7 @@ zend_module_entry lexbor_module_entry = {
 	NULL,                       /* per-request startup function */
 	NULL,                       /* per-request shutdown function */
 	PHP_MINFO(lexbor),          /* information function */
-	NULL,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

@@ -265,6 +265,10 @@ if test "$PHP_GD" != "no"; then
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
       [Define to 1 if gd extension uses GD library bundled in PHP.])
 
+    AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1],
+      [Define to 1 if GD library has the 'gdImageGetInterpolationMethod'
+      function.])
+
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG

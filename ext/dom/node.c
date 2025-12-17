@@ -52,6 +52,13 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep, b
 	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
 		ret = dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
 	} else {
+		if (name_len == 1) {
+			if (uppercase) {
+				return ZSTR_CHAR(zend_toupper_ascii(*nodep->name));
+			} else {
+				return ZSTR_CHAR((zend_uchar) *nodep->name);
+			}
+		}
 		ret = zend_string_init((const char *) nodep->name, name_len, false);
 	}
 	if (uppercase) {
@@ -89,7 +96,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 			uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_ATTRIBUTE_NODE:
-			ZVAL_NEW_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
+			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
 			break;
 		case XML_NAMESPACE_DECL: {
 			xmlNsPtr ns = nodep->ns;
@@ -635,7 +642,7 @@ zend_result dom_node_local_name_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
-		ZVAL_STRING(retval, (char *) (nodep->name));
+		ZVAL_STRING_FAST(retval, (const char *) (nodep->name));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -1463,7 +1470,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	zval *id;
 	xmlNode *n, *node;
 	dom_object *intern;
-	bool recursive = 0;
+	bool recursive = false;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
@@ -1871,8 +1878,7 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			case XML_DOCUMENT_FRAG_NODE:
 			case XML_DOCUMENT_TYPE_NODE:
 			case XML_DTD_NODE:
-				RETURN_NULL();
-				break;
+				return;
 			default:
 				lookupp = nodep->parent;
 		}
@@ -1891,8 +1897,6 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			}
 		}
 	}
-
-	RETURN_NULL();
 }
 
 PHP_METHOD(DOMNode, lookupPrefix)
@@ -2058,16 +2062,14 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			prefix = NULL;
 		}
 		const char *ns_uri = dom_locate_a_namespace(nodep, prefix);
-		if (ns_uri == NULL) {
-			RETURN_NULL();
-		} else {
+		if (ns_uri != NULL) {
 			RETURN_STRING(ns_uri);
 		}
 	} else {
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 			if (nodep == NULL) {
-				RETURN_NULL();
+				return;
 			}
 		}
 
@@ -2076,8 +2078,6 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			RETURN_STRING((char *) nsptr->href);
 		}
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
@@ -2126,7 +2126,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(),
-			"s|bba!a!", &file, &file_len, &exclusive,
+			"p|bba!a!", &file, &file_len, &exclusive,
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -2287,13 +2287,12 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
-	char *value;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = (char *) xmlGetNodePath(nodep);
+	char *value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
 		/* This is only possible when an invalid argument is passed (e.g. namespace declaration, but that's not the case for this call site),
 		 * or on allocation failure. So in other words, this only happens on allocation failure. */
@@ -2301,7 +2300,6 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);
 		xmlFree(value);

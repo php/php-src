@@ -40,59 +40,59 @@ static zend_class_entry *register_class_IntlListFormatter(void)
 
 	zval const_TYPE_AND_value;
 	ZVAL_LONG(&const_TYPE_AND_value, ULISTFMT_TYPE_AND);
-	zend_string *const_TYPE_AND_name = zend_string_init_interned("TYPE_AND", sizeof("TYPE_AND") - 1, 1);
+	zend_string *const_TYPE_AND_name = zend_string_init_interned("TYPE_AND", sizeof("TYPE_AND") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_AND_name, &const_TYPE_AND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_AND_name);
+	zend_string_release_ex(const_TYPE_AND_name, true);
 #endif
 #if !(U_ICU_VERSION_MAJOR_NUM >= 67)
 
 	zval const_TYPE_AND_value;
 	ZVAL_LONG(&const_TYPE_AND_value, INTL_LISTFORMATTER_FALLBACK_TYPE_AND);
-	zend_string *const_TYPE_AND_name = zend_string_init_interned("TYPE_AND", sizeof("TYPE_AND") - 1, 1);
+	zend_string *const_TYPE_AND_name = zend_string_init_interned("TYPE_AND", sizeof("TYPE_AND") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_AND_name, &const_TYPE_AND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_AND_name);
+	zend_string_release_ex(const_TYPE_AND_name, true);
 #endif
 #if U_ICU_VERSION_MAJOR_NUM >= 67
 
 	zval const_TYPE_OR_value;
 	ZVAL_LONG(&const_TYPE_OR_value, ULISTFMT_TYPE_OR);
-	zend_string *const_TYPE_OR_name = zend_string_init_interned("TYPE_OR", sizeof("TYPE_OR") - 1, 1);
+	zend_string *const_TYPE_OR_name = zend_string_init_interned("TYPE_OR", sizeof("TYPE_OR") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_OR_name, &const_TYPE_OR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_OR_name);
+	zend_string_release_ex(const_TYPE_OR_name, true);
 
 	zval const_TYPE_UNITS_value;
 	ZVAL_LONG(&const_TYPE_UNITS_value, ULISTFMT_TYPE_UNITS);
-	zend_string *const_TYPE_UNITS_name = zend_string_init_interned("TYPE_UNITS", sizeof("TYPE_UNITS") - 1, 1);
+	zend_string *const_TYPE_UNITS_name = zend_string_init_interned("TYPE_UNITS", sizeof("TYPE_UNITS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_UNITS_name, &const_TYPE_UNITS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_UNITS_name);
+	zend_string_release_ex(const_TYPE_UNITS_name, true);
 
 	zval const_WIDTH_WIDE_value;
 	ZVAL_LONG(&const_WIDTH_WIDE_value, ULISTFMT_WIDTH_WIDE);
-	zend_string *const_WIDTH_WIDE_name = zend_string_init_interned("WIDTH_WIDE", sizeof("WIDTH_WIDE") - 1, 1);
+	zend_string *const_WIDTH_WIDE_name = zend_string_init_interned("WIDTH_WIDE", sizeof("WIDTH_WIDE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WIDTH_WIDE_name, &const_WIDTH_WIDE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WIDTH_WIDE_name);
+	zend_string_release_ex(const_WIDTH_WIDE_name, true);
 #endif
 #if !(U_ICU_VERSION_MAJOR_NUM >= 67)
 
 	zval const_WIDTH_WIDE_value;
 	ZVAL_LONG(&const_WIDTH_WIDE_value, INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE);
-	zend_string *const_WIDTH_WIDE_name = zend_string_init_interned("WIDTH_WIDE", sizeof("WIDTH_WIDE") - 1, 1);
+	zend_string *const_WIDTH_WIDE_name = zend_string_init_interned("WIDTH_WIDE", sizeof("WIDTH_WIDE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WIDTH_WIDE_name, &const_WIDTH_WIDE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WIDTH_WIDE_name);
+	zend_string_release_ex(const_WIDTH_WIDE_name, true);
 #endif
 #if U_ICU_VERSION_MAJOR_NUM >= 67
 
 	zval const_WIDTH_SHORT_value;
 	ZVAL_LONG(&const_WIDTH_SHORT_value, ULISTFMT_WIDTH_SHORT);
-	zend_string *const_WIDTH_SHORT_name = zend_string_init_interned("WIDTH_SHORT", sizeof("WIDTH_SHORT") - 1, 1);
+	zend_string *const_WIDTH_SHORT_name = zend_string_init_interned("WIDTH_SHORT", sizeof("WIDTH_SHORT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WIDTH_SHORT_name, &const_WIDTH_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WIDTH_SHORT_name);
+	zend_string_release_ex(const_WIDTH_SHORT_name, true);
 
 	zval const_WIDTH_NARROW_value;
 	ZVAL_LONG(&const_WIDTH_NARROW_value, ULISTFMT_WIDTH_NARROW);
-	zend_string *const_WIDTH_NARROW_name = zend_string_init_interned("WIDTH_NARROW", sizeof("WIDTH_NARROW") - 1, 1);
+	zend_string *const_WIDTH_NARROW_name = zend_string_init_interned("WIDTH_NARROW", sizeof("WIDTH_NARROW") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WIDTH_NARROW_name, &const_WIDTH_NARROW_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WIDTH_NARROW_name);
+	zend_string_release_ex(const_WIDTH_NARROW_name, true);
 #endif
 
 	return class_entry;

@@ -1,0 +1,43 @@
+name: Verify Bundled Files
+
+on:
+  push:
+    paths: &paths
+      - '.github/scripts/download-bundled/pcre2.sh'
+      - 'ext/pcre/pcre2lib/**'
+  pull_request:
+    paths: *paths
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch: ~
+
+permissions:
+  contents: read
+
+jobs:
+  VERIFY_BUNDLED_FILES:
+    name: Verify Bundled Files
+    runs-on: ubuntu-24.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+
+      - name: Detect changed files
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          base: master
+          filters: |
+            pcre2:
+              - '.github/scripts/download-bundled/pcre2.sh'
+              - 'ext/pcre/pcre2lib/**'
+
+      - name: PCRE2
+        if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/pcre2.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
+          echo "::endgroup::"

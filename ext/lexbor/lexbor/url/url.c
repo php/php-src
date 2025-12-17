@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024 Alexander Borisov
+ * Copyright (C) 2023-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -36,6 +36,7 @@ typedef enum {
     LXB_URL_MAP_PATH          = 0x10,
     LXB_URL_MAP_USERINFO      = 0x20,
     LXB_URL_MAP_COMPONENT     = 0x40,
+    LXB_URL_MAP_X_WWW_FORM    = 0x80,
     LXB_URL_MAP_ALL           = 0xff
 }
 lxb_url_map_type_t;
@@ -53,6 +54,13 @@ typedef struct {
     lexbor_str_t  *str;
 }
 lxb_url_idna_ctx_t;
+
+typedef struct {
+    lexbor_str_t **out_buf;
+    size_t out_length;
+    size_t out_size;
+}
+lxb_url_search_params_ctx_t;
 
 
 static const uint8_t lxb_url_map[256] =
@@ -89,22 +97,22 @@ static const uint8_t lxb_url_map[256] =
     LXB_URL_MAP_ALL, /* 0x1d */
     LXB_URL_MAP_ALL, /* 0x1e */
     LXB_URL_MAP_ALL, /* 0x1f */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT, /* 0x20 ( ) */
-    LXB_URL_MAP_UNDEF, /* 0x21 (!) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT, /* 0x22 (") */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT, /* 0x23 (#) */
-    LXB_URL_MAP_COMPONENT, /* 0x24 ($) */
-    LXB_URL_MAP_UNDEF, /* 0x25 (%) */
-    LXB_URL_MAP_COMPONENT, /* 0x26 (&) */
-    LXB_URL_MAP_SPECIAL_QUERY, /* 0x27 (') */
-    LXB_URL_MAP_UNDEF, /* 0x28 (() */
-    LXB_URL_MAP_UNDEF, /* 0x29 ()) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x20 ( ) */
+    LXB_URL_MAP_X_WWW_FORM, /* 0x21 (!) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x22 (") */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x23 (#) */
+    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x24 ($) */
+    LXB_URL_MAP_X_WWW_FORM, /* 0x25 (%) */
+    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x26 (&) */
+    LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_X_WWW_FORM, /* 0x27 (') */
+    LXB_URL_MAP_X_WWW_FORM, /* 0x28 (() */
+    LXB_URL_MAP_X_WWW_FORM, /* 0x29 ()) */
     LXB_URL_MAP_UNDEF, /* 0x2a (*) */
-    LXB_URL_MAP_COMPONENT, /* 0x2b (+) */
-    LXB_URL_MAP_COMPONENT, /* 0x2c (,) */
+    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2b (+) */
+    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2c (,) */
     LXB_URL_MAP_UNDEF, /* 0x2d (-) */
     LXB_URL_MAP_UNDEF, /* 0x2e (.) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x2f (/) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2f (/) */
     LXB_URL_MAP_UNDEF, /* 0x30 (0) */
     LXB_URL_MAP_UNDEF, /* 0x31 (1) */
     LXB_URL_MAP_UNDEF, /* 0x32 (2) */
@@ -115,13 +123,13 @@ static const uint8_t lxb_url_map[256] =
     LXB_URL_MAP_UNDEF, /* 0x37 (7) */
     LXB_URL_MAP_UNDEF, /* 0x38 (8) */
     LXB_URL_MAP_UNDEF, /* 0x39 (9) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x3a (:) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x3b (;) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT, /* 0x3c (<) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x3d (=) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT, /* 0x3e (>) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x3f (?) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x40 (@) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3a (:) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3b (;) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3c (<) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3d (=) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3e (>) */
+    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3f (?) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x40 (@) */
     LXB_URL_MAP_UNDEF, /* 0x41 (A) */
     LXB_URL_MAP_UNDEF, /* 0x42 (B) */
     LXB_URL_MAP_UNDEF, /* 0x43 (C) */
@@ -148,12 +156,12 @@ static const uint8_t lxb_url_map[256] =
     LXB_URL_MAP_UNDEF, /* 0x58 (X) */
     LXB_URL_MAP_UNDEF, /* 0x59 (Y) */
     LXB_URL_MAP_UNDEF, /* 0x5a (Z) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x5b ([) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x5c (\) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x5d (]) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x5e (^) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5b ([) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5c (\) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5d (]) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
     LXB_URL_MAP_UNDEF, /* 0x5f (_) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x60 (`) */
+    LXB_URL_MAP_PATH|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x60 (`) */
     LXB_URL_MAP_UNDEF, /* 0x61 (a) */
     LXB_URL_MAP_UNDEF, /* 0x62 (b) */
     LXB_URL_MAP_UNDEF, /* 0x63 (c) */
@@ -180,10 +188,10 @@ static const uint8_t lxb_url_map[256] =
     LXB_URL_MAP_UNDEF, /* 0x78 (x) */
     LXB_URL_MAP_UNDEF, /* 0x79 (y) */
     LXB_URL_MAP_UNDEF, /* 0x7a (z) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x7b ({) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x7c (|) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT, /* 0x7d (}) */
-    LXB_URL_MAP_UNDEF, /* 0x7e (~) */
+    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7b ({) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7c (|) */
+    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7d (}) */
+    LXB_URL_MAP_X_WWW_FORM, /* 0x7e (~) */
     LXB_URL_MAP_ALL, /* 0x7f */
     LXB_URL_MAP_ALL, /* 0x80 */
     LXB_URL_MAP_ALL, /* 0x81 */
@@ -471,7 +479,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
 #define lxb_url_parse_return(data, buf, status)                               \
     do {                                                                      \
         if ((buf) != (data)) {                                                \
-            lexbor_free((lxb_char_t *) (buf));                                \
+            parser->buffer = (lxb_char_t *) (buf);                            \
         }                                                                     \
         return (status);                                                      \
     }                                                                         \
@@ -604,6 +612,10 @@ lxb_url_percent_decode(const lxb_char_t *data, const lxb_char_t *end,
                        lexbor_str_t *str, lexbor_mraw_t *mraw,
                        lxb_url_host_opt_t *opt);
 
+static lxb_status_t
+lxb_url_percent_decode_plus(const lxb_char_t *data, const lxb_char_t *end,
+                            lexbor_str_t *str, lexbor_mraw_t *mraw);
+
 static const lxb_char_t *
 lxb_url_path_part_by_index(const lxb_url_t *url, size_t index,
                            size_t *out_length);
@@ -612,6 +624,10 @@ static lxb_status_t
 lxb_url_host_set_h(lxb_url_t *url, lxb_url_parser_t *parser,
                    const lxb_char_t *host, size_t length,
                    lxb_url_state_t override_state);
+
+static lxb_status_t
+lxb_url_search_params_parse(lxb_url_search_params_t *search_params,
+                            const lxb_char_t *query, size_t length);
 
 
 lxb_url_parser_t *
@@ -645,6 +661,7 @@ lxb_url_parser_init(lxb_url_parser_t *parser, lexbor_mraw_t *mraw)
     parser->mraw = mraw;
     parser->log = NULL;
     parser->idna = NULL;
+    parser->buffer = NULL;
 
     return LXB_STATUS_OK;
 
@@ -667,6 +684,10 @@ lxb_url_parser_clean(lxb_url_parser_t *parser)
     if (parser->log != NULL) {
         lexbor_plog_clean(parser->log);
     }
+
+    if (parser->buffer != NULL) {
+        parser->buffer = lexbor_free(parser->buffer);
+    }
 }
 
 lxb_url_parser_t *
@@ -678,6 +699,10 @@ lxb_url_parser_destroy(lxb_url_parser_t *parser, bool destroy_self)
 
     parser->log = lexbor_plog_destroy(parser->log, true);
     parser->idna = lxb_unicode_idna_destroy(parser->idna, true);
+
+    if (parser->buffer != NULL) {
+        parser->buffer = lexbor_free(parser->buffer);
+    }
 
     if (destroy_self) {
         return lexbor_free(parser);
@@ -1004,27 +1029,34 @@ lxb_url_path_append_wo_slash(lxb_url_t *url,
 static lxb_status_t
 lxb_url_path_append(lxb_url_t *url, const lxb_char_t *data, size_t length)
 {
-    size_t len;
-    lxb_char_t *p;
+    lxb_char_t *p, *begin;
     lexbor_str_t *str;
 
     str = &url->path.str;
 
     if (str->data == NULL) {
         p = lexbor_str_init(str, url->mraw, length + 1);
-        if (p == NULL) {
-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
-        }
+    }
+    else {
+        /* + 2 == begin '/' and end '\0' */
+        p = lexbor_str_check_size(str, url->mraw, length + 2);
     }
 
-    len = str->length;
-    str->length += 1;
+    if (p == NULL) {
+        return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
 
-    p = lexbor_str_append(&url->path.str, url->mraw, data, length);
+    begin = &str->data[str->length];
+    begin[0] = '/';
 
-    str->data[len] = '/';
+    if (length > 0) {
+        memcpy(&begin[1], data, sizeof(lxb_char_t) * length);
+    }
 
-    return (p != NULL) ? LXB_STATUS_OK : LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+    str->length += length + 1;
+    str->data[str->length] = '\0';
+
+    return LXB_STATUS_OK;
 }
 
 static lxb_status_t
@@ -1081,9 +1113,9 @@ lxb_url_host_copy(const lxb_url_host_t *src, lxb_url_host_t *dst,
         }
     }
 
-    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
-        dst->type = src->type;
+    dst->type = src->type;
 
+    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
         if (src->type == LXB_URL_HOST_TYPE__UNDEF) {
             return LXB_STATUS_OK;
         }
@@ -1785,7 +1817,6 @@ again:
         if (override_state != LXB_URL_STATE__UNDEF
             && url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE)
         {
-            p -= 1;
             state = LXB_URL_STATE_FILE_HOST_STATE;
             goto again;
         }
@@ -1906,7 +1937,7 @@ again:
             {
                 if (begin == p) {
                     if (override_state != LXB_URL_STATE__UNDEF) {
-                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_OK);
+                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_ERROR);
                     }
 
                     state = LXB_URL_STATE_PATH_START_STATE;
@@ -3056,7 +3087,7 @@ oh_my:
         return NULL;
     }
 
-    buf = lexbor_malloc(*length);
+    buf = lexbor_malloc(*length + 1);
     if (buf == NULL) {
         return NULL;
     }
@@ -3082,6 +3113,8 @@ oh_my:
     }
 
     *length = p_buf - buf;
+
+    buf[*length] = '\0';
 
     return buf;
 }
@@ -4012,6 +4045,50 @@ lxb_url_percent_decode(const lxb_char_t *data, const lxb_char_t *end,
     return LXB_STATUS_OK;
 }
 
+static lxb_status_t
+lxb_url_percent_decode_plus(const lxb_char_t *data, const lxb_char_t *end,
+                            lexbor_str_t *str, lexbor_mraw_t *mraw)
+{
+    lxb_char_t c, *dp;
+    lxb_status_t status;
+    const lxb_char_t *p;
+
+    status = lxb_url_str_init(str, mraw, (end - data) + 1);
+    if (status != LXB_STATUS_OK) {
+        return status;
+    }
+
+    p = data;
+    dp = str->data;
+
+    while (p < end) {
+        c = *p++;
+
+        if (c != '%') {
+            if (c == '+') {
+                c = ' ';
+            }
+
+            *dp++ = c;
+            continue;
+        }
+
+        if (p + 2 <= end && lexbor_str_res_map_hex[p[0]] != 0xff
+            && lexbor_str_res_map_hex[p[1]] != 0xff)
+        {
+            c = lexbor_str_res_map_hex[p[0]] << 4 | lexbor_str_res_map_hex[p[1]];
+            p += 2;
+        }
+
+        *dp++ = c;
+    }
+
+    *dp = '\0';
+    str->length = dp - str->data;
+
+    return LXB_STATUS_OK;
+}
+
 void
 lxb_url_erase(lxb_url_t *url)
 {
@@ -4123,6 +4200,7 @@ lxb_url_api_href_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     origin_mraw = parser->mraw;
@@ -4167,6 +4245,7 @@ lxb_url_api_protocol_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     status = lxb_url_parse_basic_h(parser, url, NULL, protocol, length,
@@ -4246,7 +4325,8 @@ lxb_url_host_set_h(lxb_url_t *url, lxb_url_parser_t *parser,
     lxb_url_parser_t self_parser;
     const lxb_char_t tmp[1] = "";
 
-    if (url->host.type == LXB_URL_HOST_TYPE_OPAQUE) {
+    /* If this’s URL has an opaque path, then return. */
+    if (url->path.opaque) {
         return LXB_STATUS_OK;
     }
 
@@ -4260,6 +4340,7 @@ lxb_url_host_set_h(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     old = url->host;
@@ -4314,6 +4395,7 @@ lxb_url_api_port_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     status = lxb_url_parse_basic_h(parser, url, NULL, port, length,
@@ -4348,6 +4430,7 @@ lxb_url_api_pathname_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     url->path.length = 0;
@@ -4390,6 +4473,7 @@ lxb_url_api_search_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     status = lxb_url_parse_basic_h(parser, url, NULL, search, length,
@@ -4429,6 +4513,7 @@ lxb_url_api_hash_set(lxb_url_t *url, lxb_url_parser_t *parser,
 
         parser->log = NULL;
         parser->idna = NULL;
+        parser->buffer = NULL;
     }
 
     status = lxb_url_parse_basic_h(parser, url, NULL, hash, length,
@@ -4861,4 +4946,748 @@ failed:
 	lxb_url_destroy(new_url);
 
 	return NULL;
+}
+
+lxb_url_search_params_t *
+lxb_url_search_params_init(lexbor_mraw_t *mraw,
+                           const lxb_char_t *query, size_t length)
+{
+    lxb_status_t status;
+    lxb_url_search_params_t *sp;
+
+    sp = lexbor_mraw_calloc(mraw, sizeof(lxb_url_search_params_t));
+    if (sp == NULL) {
+        return NULL;
+    }
+
+    sp->mraw = mraw;
+    sp->length = 0;
+
+    status = lxb_url_search_params_parse(sp, query, length);
+    if (status != LXB_STATUS_OK) {
+        return lxb_url_search_params_destroy(sp);
+    }
+
+    return sp;
+}
+
+lxb_inline lxb_url_search_entry_t *
+lxb_url_search_params_entry(lxb_url_search_params_t *search_params,
+                            lxb_url_search_entry_t *last, lexbor_mraw_t *mraw,
+                            const lxb_char_t *query, const lxb_char_t *p,
+                            lxb_status_t *status)
+{
+    lxb_url_search_entry_t *entry;
+
+    entry = lexbor_mraw_calloc(mraw,
+                               sizeof(lxb_url_search_entry_t));
+    if (entry == NULL) {
+        *status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+        return NULL;
+    }
+
+    last->next = entry;
+    entry->prev = last;
+    entry->next = NULL;
+
+    search_params->length += 1;
+
+    *status = lxb_url_percent_decode_plus(query, p, &entry->name, mraw);
+
+    return entry;
+}
+
+static lxb_status_t
+lxb_url_search_params_parse(lxb_url_search_params_t *search_params,
+                            const lxb_char_t *query, size_t length)
+{
+    lxb_char_t c;
+    lxb_status_t status;
+    const lxb_char_t *p, *end;
+    lexbor_mraw_t *mraw;
+    lxb_url_search_entry_t first, *last, *entry;
+
+    if (query == NULL || length == 0) {
+        return LXB_STATUS_OK;
+    }
+
+    if (*query == '?') {
+        query += 1;
+        length -= 1;
+    }
+
+    p = query;
+    end = p + length;
+    mraw = search_params->mraw;
+    last = &first;
+    last->next = NULL;
+    last->prev = NULL;
+
+    while (p < end) {
+        c = *p++;
+
+        if (c == '=') {
+            entry = lxb_url_search_params_entry(search_params, last, mraw,
+                                                query, p - 1, &status);
+            if (status != LXB_STATUS_OK) {
+                return status;
+            }
+
+            last = entry;
+            query = p;
+
+            while (p < end) {
+                c = *p;
+
+                if (c == '&') {
+                    break;
+                }
+
+                p += 1;
+            }
+
+            status = lxb_url_percent_decode_plus(query, p,
+                                                 &entry->value, mraw);
+            if (status != LXB_STATUS_OK) {
+                return status;
+            }
+
+            p += 1;
+            query = p;
+        }
+        else if (c == '&') {
+            entry = lxb_url_search_params_entry(search_params, last, mraw,
+                                                query, p - 1, &status);
+            if (status != LXB_STATUS_OK) {
+                return status;
+            }
+
+            last = entry;
+
+            lexbor_str_init(&entry->value, mraw, 0);
+            if (entry->value.data == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+
+            query = p;
+        }
+    }
+
+    if (query < p) {
+        entry = lxb_url_search_params_entry(search_params, last, mraw,
+                                            query, p, &status);
+        if (status != LXB_STATUS_OK) {
+            return status;
+        }
+
+        lexbor_str_init(&entry->value, mraw, 0);
+        if (entry->value.data == NULL) {
+            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+        }
+    }
+
+    search_params->first = first.next;
+
+    if (first.next != NULL) {
+        search_params->last = last;
+        search_params->first->prev = NULL;
+    }
+    else {
+        search_params->last = NULL;
+    }
+
+    return LXB_STATUS_OK;
+}
+
+lxb_url_search_params_t *
+lxb_url_search_params_destroy(lxb_url_search_params_t *search_params)
+{
+    lxb_url_search_entry_t *entry, *next;
+    lexbor_mraw_t *mraw;
+
+    if (search_params == NULL) {
+        return NULL;
+    }
+
+    entry = search_params->first;
+    mraw = search_params->mraw;
+
+    while (entry != NULL) {
+        next = entry->next;
+
+        lexbor_str_destroy(&entry->name, mraw, false);
+        lexbor_str_destroy(&entry->value, mraw, false);
+        lexbor_mraw_free(mraw, entry);
+
+        entry = next;
+    }
+
+    return lexbor_mraw_free(mraw, search_params);
+}
+
+static void
+lxb_url_search_params_entry_destroy(lxb_url_search_params_t *search_params,
+                                    lxb_url_search_entry_t *entry)
+{
+    lexbor_mraw_t *mraw = search_params->mraw;
+
+    lexbor_str_destroy(&entry->name, mraw, false);
+    lexbor_str_destroy(&entry->value, mraw, false);
+    lexbor_mraw_free(mraw, entry);
+}
+
+static lxb_status_t
+lxb_url_search_params_to_str(lexbor_str_t *str, lexbor_mraw_t *mraw,
+                             const lxb_char_t *data, size_t length)
+{
+    if (data == NULL || length == 0) {
+        lexbor_str_init(str, mraw, 0);
+    }
+    else {
+        lexbor_str_init_append(str, mraw, data, length);
+    }
+
+    return str->data != NULL ? LXB_STATUS_OK
+                             : LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+}
+
+lxb_url_search_entry_t *
+lxb_url_search_params_append(lxb_url_search_params_t *search_params,
+                             const lxb_char_t *name, size_t name_length,
+                             const lxb_char_t *value, size_t value_length)
+{
+    lxb_status_t status;
+    lxb_url_search_entry_t *entry;
+
+    entry = lexbor_mraw_calloc(search_params->mraw,
+                               sizeof(lxb_url_search_entry_t));
+    if (entry == NULL) {
+        return NULL;
+    }
+
+    status = lxb_url_search_params_to_str(&entry->name, search_params->mraw,
+                                          name, name_length);
+    if (status != LXB_STATUS_OK) {
+        goto failed;
+    }
+
+    status = lxb_url_search_params_to_str(&entry->value, search_params->mraw,
+                                          value, value_length);
+    if (status != LXB_STATUS_OK) {
+        goto failed;
+    }
+
+    if (search_params->first == NULL) {
+        search_params->first = entry;
+    }
+
+    if (search_params->last != NULL) {
+        search_params->last->next = entry;
+    }
+
+    entry->prev = search_params->last;
+    entry->next = NULL;
+    search_params->last = entry;
+
+    search_params->length += 1;
+
+    return entry;
+
+failed:
+
+    if (entry->name.data != NULL) {
+        lexbor_mraw_free(search_params->mraw, entry->name.data);
+    }
+
+    if (entry->value.data != NULL) {
+        lexbor_mraw_free(search_params->mraw, entry->value.data);
+    }
+
+    lexbor_mraw_free(search_params->mraw, entry);
+
+    return NULL;
+}
+
+static lexbor_action_t
+lxb_url_search_params_delete_cb(lxb_url_search_params_t *sp,
+                                lxb_url_search_entry_t *entry, void *ctx)
+{
+    if (sp->first == entry) {
+        sp->first = entry->next;
+    }
+
+    if (sp->last == entry) {
+        sp->last = entry->prev;
+    }
+
+    if (entry->next != NULL) {
+        entry->next->prev = entry->prev;
+    }
+
+    if (entry->prev != NULL) {
+        entry->prev->next = entry->next;
+    }
+
+    lxb_url_search_params_entry_destroy(sp, entry);
+
+    sp->length -= 1;
+
+    return LEXBOR_ACTION_OK;
+}
+
+void
+lxb_url_search_params_delete(lxb_url_search_params_t *search_params,
+                             const lxb_char_t *name, size_t name_length,
+                             const lxb_char_t *value, size_t value_length)
+{
+    lxb_url_search_params_match(search_params, name, name_length,
+                                value, value_length,
+                                lxb_url_search_params_delete_cb, NULL);
+}
+
+lxb_url_search_entry_t *
+lxb_url_search_params_get_entry(lxb_url_search_params_t *search_params,
+                                const lxb_char_t *name, size_t length)
+{
+    lexbor_str_t *str;
+    lxb_url_search_entry_t *entry;
+
+    entry = search_params->first;
+
+    while (entry != NULL) {
+        str = &entry->name;
+
+        if (str->length == length
+            && memcmp(str->data, name, length) == 0)
+        {
+            return entry;
+        }
+
+        entry = entry->next;
+    }
+
+    return NULL;
+}
+
+lexbor_str_t *
+lxb_url_search_params_get(lxb_url_search_params_t *search_params,
+                          const lxb_char_t *name, size_t length)
+{
+    lxb_url_search_entry_t *entry;
+
+    entry = lxb_url_search_params_get_entry(search_params, name, length);
+    if (entry == NULL) {
+        return NULL;
+    }
+
+    return &entry->value;
+}
+
+static lexbor_action_t
+lxb_url_search_params_get_all_cb(lxb_url_search_params_t *sp,
+                                 lxb_url_search_entry_t *entry, void *context)
+{
+    lxb_url_search_params_ctx_t *ctx = context;
+
+    if (ctx->out_length >= ctx->out_size) {
+        return LEXBOR_ACTION_STOP;
+    }
+
+    ctx->out_buf[ctx->out_length] = &entry->value;
+    ctx->out_length += 1;
+
+    return LEXBOR_ACTION_OK;
+}
+
+size_t
+lxb_url_search_params_get_all(lxb_url_search_params_t *search_params,
+                              const lxb_char_t *name, size_t length,
+                              lexbor_str_t **out_buf, size_t out_size)
+{
+    lxb_url_search_params_ctx_t ctx;
+
+    ctx.out_buf = out_buf;
+    ctx.out_length = 0;
+    ctx.out_size = out_size;
+
+    lxb_url_search_params_match(search_params, name, length, NULL, 0,
+                                lxb_url_search_params_get_all_cb, &ctx);
+    return ctx.out_length;
+}
+
+static lexbor_action_t
+lxb_url_search_params_get_count_cb(lxb_url_search_params_t *sp,
+                                   lxb_url_search_entry_t *entry, void *context)
+{
+    size_t *count = context;
+
+    *count += 1;
+
+    return LEXBOR_ACTION_OK;
+}
+
+size_t
+lxb_url_search_params_get_count(lxb_url_search_params_t *search_params,
+                                const lxb_char_t *name, size_t length)
+{
+    size_t count = 0;
+
+    lxb_url_search_params_match(search_params, name, length, NULL, 0,
+                                lxb_url_search_params_get_count_cb, &count);
+    return count;
+}
+
+lxb_url_search_entry_t *
+lxb_url_search_params_match_entry(lxb_url_search_params_t *search_params,
+                                  const lxb_char_t *name, size_t name_length,
+                                  const lxb_char_t *value, size_t value_length,
+                                  lxb_url_search_entry_t *entry)
+{
+    lexbor_str_t *str;
+
+    if (entry == NULL) {
+        entry = search_params->first;
+    }
+
+    while (entry != NULL) {
+        str = &entry->name;
+
+        if (str->length == name_length
+            && memcmp(str->data, name, name_length) == 0)
+        {
+            if (value != NULL) {
+                str = &entry->value;
+
+                if (str->length == value_length
+                    && memcmp(str->data, value, value_length) == 0)
+                {
+                    return entry;
+                }
+            }
+            else {
+                return entry;
+            }
+        }
+
+        entry = entry->next;
+    }
+
+    return NULL;
+}
+
+void
+lxb_url_search_params_match(lxb_url_search_params_t *search_params,
+                            const lxb_char_t *name, size_t name_length,
+                            const lxb_char_t *value, size_t value_length,
+                            lxb_url_search_params_match_f cb, void *ctx)
+{
+    lexbor_str_t *str;
+    lexbor_action_t action;
+    lxb_url_search_entry_t *entry, *next;
+
+    entry = search_params->first;
+
+    while (entry != NULL) {
+        str = &entry->name;
+        next = entry->next;
+
+        if (str->length == name_length
+            && memcmp(str->data, name, name_length) == 0)
+        {
+            if (value != NULL) {
+                str = &entry->value;
+
+                if (str->length == value_length
+                    && memcmp(str->data, value, value_length) == 0)
+                {
+                    action = cb(search_params, entry, ctx);
+                    if (action == LEXBOR_ACTION_STOP) {
+                        return;
+                    }
+                }
+            }
+            else {
+                action = cb(search_params, entry, ctx);
+                if (action == LEXBOR_ACTION_STOP) {
+                    return;
+                }
+            }
+        }
+
+        entry = next;
+    }
+}
+
+static lexbor_action_t
+lxb_url_search_params_has_cb(lxb_url_search_params_t *sp,
+                             lxb_url_search_entry_t *entry, void *ctx)
+{
+    bool *is = ctx;
+
+    *is = true;
+
+    return LEXBOR_ACTION_STOP;
+}
+
+bool
+lxb_url_search_params_has(lxb_url_search_params_t *search_params,
+                          const lxb_char_t *name, size_t name_length,
+                          const lxb_char_t *value, size_t value_length)
+{
+    bool is = false;
+
+    lxb_url_search_params_match(search_params, name, name_length,
+                                value, value_length,
+                                lxb_url_search_params_has_cb, &is);
+    return is;
+}
+
+lxb_url_search_entry_t *
+lxb_url_search_params_set(lxb_url_search_params_t *search_params,
+                          const lxb_char_t *name, size_t name_length,
+                          const lxb_char_t *value, size_t value_length)
+{
+    bool changed;
+    lxb_status_t status;
+    lexbor_str_t *str, str_name, str_value;
+    lexbor_mraw_t *mraw;
+    lxb_url_search_entry_t *entry, *next, *root;
+
+    mraw = search_params->mraw;
+    entry = search_params->first;
+    changed = false;
+    root = NULL;
+
+    while (entry != NULL) {
+        str = &entry->name;
+        next = entry->next;
+
+        if (str->length == name_length
+            && memcmp(str->data, name, name_length) == 0)
+        {
+            if (changed) {
+                lxb_url_search_params_delete_cb(search_params, entry, NULL);
+                entry = next;
+                continue;
+            }
+
+            str_name = entry->name;
+            str_value = entry->value;
+
+            status = lxb_url_search_params_to_str(&entry->name, mraw,
+                                                  name, name_length);
+            if (status != LXB_STATUS_OK) {
+                goto failed;
+            }
+
+            status = lxb_url_search_params_to_str(&entry->value, mraw,
+                                                  value, value_length);
+            if (status != LXB_STATUS_OK) {
+                lexbor_str_destroy(&entry->name, mraw, false);
+                goto failed;
+            }
+
+            lexbor_str_destroy(&str_name, mraw, false);
+            lexbor_str_destroy(&str_value, mraw, false);
+
+            changed = true;
+            root = entry;
+        }
+
+        entry = next;
+    }
+
+    if (!changed) {
+        return lxb_url_search_params_append(search_params, name, name_length,
+                                            value, value_length);
+    }
+
+    return root;
+
+failed:
+
+    entry->name = str_name;
+    entry->value = str_value;
+
+    return NULL;
+}
+
+lxb_inline int
+lxb_url_search_params_compare(lxb_url_search_entry_t *first,
+                              lxb_url_search_entry_t *second)
+{
+    return strcmp((const char *) first->name.data,
+                  (const char *) second->name.data);
+}
+
+void
+lxb_url_search_params_sort(lxb_url_search_params_t *search_params)
+{
+    lxb_url_search_entry_t *root, *new_root, *node, *current;
+
+    root = search_params->first;
+
+    if (root == NULL) {
+        return;
+    }
+
+    node = root;
+    root = root->next;
+
+    node->next = NULL;
+    new_root = node;
+
+    while (root != NULL) {
+        node = root;
+        root = root->next;
+
+        if (lxb_url_search_params_compare(node, new_root) < 0) {
+            node->next = new_root;
+            new_root->prev = node;
+            new_root = node;
+        }
+        else {
+            current = new_root;
+
+            while (current->next != NULL
+                   && lxb_url_search_params_compare(node, current->next) >= 0)
+            {
+                current = current->next;
+            }
+
+            node->next = current->next;
+
+            if (current->next != NULL) {
+                current->next->prev = node;
+            }
+
+            current->next = node;
+            node->prev = current;
+        }
+    }
+
+    new_root->prev = NULL;
+
+    search_params->first = new_root;
+    search_params->last = node->next != NULL ? node->next : node;
+}
+
+static size_t
+lxb_url_search_params_length(const lexbor_str_t *str)
+{
+    size_t length;
+    const lxb_char_t *p, *end;
+
+    p = str->data;
+    end = p + str->length;
+    length = str->length;
+
+    while (p < end) {
+        if (lxb_url_map[*p++] & LXB_URL_MAP_X_WWW_FORM) {
+            length += 2;
+        }
+    }
+
+    return length;
+}
+
+static lxb_char_t *
+lxb_url_search_params_to_buf(const lexbor_str_t *str, lxb_char_t *buf)
+{
+    lxb_char_t c;
+    const lxb_char_t *p, *end;
+
+    p = str->data;
+    end = p + str->length;
+
+    while (p < end) {
+        c = *p;
+
+        if (c == ' ') {
+            *buf++ = '+';
+        }
+        else if (lxb_url_map[c] & LXB_URL_MAP_X_WWW_FORM) {
+            *buf++ = '%';
+            *buf++ = lexbor_str_res_char_to_two_hex_value[c][0];
+            *buf++ = lexbor_str_res_char_to_two_hex_value[c][1];
+        }
+        else {
+            *buf++ = c;
+        }
+
+        p += 1;
+    }
+
+    return buf;
+}
+
+lxb_status_t
+lxb_url_search_params_serialize(lxb_url_search_params_t *search_params,
+                                lexbor_callback_f cb, void *ctx)
+{
+    size_t length;
+    lxb_status_t status;
+    lxb_char_t *p, *begin;
+    lxb_url_search_entry_t *entry;
+    lxb_char_t buf[1024];
+
+    entry = search_params->first;
+
+    if (entry == NULL) {
+        buf[0] = '\0';
+        return cb(buf, 0, ctx);
+    }
+
+    /* Calc length. */
+
+    length = 0;
+
+    while (entry != NULL) {
+        length += lxb_url_search_params_length(&entry->name);
+        length += lxb_url_search_params_length(&entry->value);
+        length += 2; /* = and & */
+
+        entry = entry->next;
+    }
+
+    if (length < sizeof(buf)) {
+        p = buf;
+    }
+    else {
+        p = lexbor_malloc(length);
+        if (p == NULL) {
+            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+        }
+    }
+
+    /* To buffer. */
+
+    begin = p;
+    entry = search_params->first;
+
+    p = lxb_url_search_params_to_buf(&entry->name, p);
+    *p++ = '=';
+    p = lxb_url_search_params_to_buf(&entry->value, p);
+
+    entry = entry->next;
+
+    while (entry != NULL) {
+        *p++ = '&';
+
+        p = lxb_url_search_params_to_buf(&entry->name, p);
+        *p++ = '=';
+        p = lxb_url_search_params_to_buf(&entry->value, p);
+
+        entry = entry->next;
+    }
+
+    *p = '\0';
+
+    status = cb(begin, p - begin, ctx);
+
+    if (buf != begin) {
+        lexbor_free(begin);
+    }
+
+    return status;
 }

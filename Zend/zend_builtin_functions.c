@@ -503,7 +503,7 @@ ZEND_FUNCTION(error_reporting)
 
 static bool validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
 {
-	bool ret = 1;
+	bool ret = true;
 	zval *val;
 
 	GC_PROTECT_RECURSION(ht);
@@ -512,10 +512,10 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 		if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
 			if (Z_IS_RECURSIVE_P(val)) {
 				zend_argument_value_error(argument_number, "cannot be a recursive array");
-				ret = 0;
+				ret = false;
 				break;
 			} else if (!validate_constant_array_argument(Z_ARRVAL_P(val), argument_number)) {
-				ret = 0;
+				ret = false;
 				break;
 			}
 		}
@@ -555,7 +555,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 ZEND_FUNCTION(define)
 {
 	zend_string *name;
-	zval *val, val_free;
+	zval *val;
 	bool non_cs = 0;
 	zend_constant c;
 
@@ -575,23 +575,16 @@ ZEND_FUNCTION(define)
 		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
 	}
 
-	ZVAL_UNDEF(&val_free);
-
-	if (Z_TYPE_P(val) == IS_ARRAY) {
-		if (Z_REFCOUNTED_P(val)) {
-			if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
-				RETURN_THROWS();
-			} else {
-				copy_constant_array(&c.value, val);
-				goto register_constant;
-			}
+	if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
+		if (!validate_constant_array_argument(Z_ARRVAL_P(val), 2)) {
+			RETURN_THROWS();
+		} else {
+			copy_constant_array(&c.value, val);
 		}
+	} else {
+		ZVAL_COPY(&c.value, val);
 	}
 
-	ZVAL_COPY(&c.value, val);
-	zval_ptr_dtor(&val_free);
-
-register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
@@ -824,8 +817,8 @@ ZEND_FUNCTION(get_class_vars)
 	}
 
 	scope = zend_get_executed_scope();
-	add_class_vars(scope, ce, 0, return_value);
-	add_class_vars(scope, ce, 1, return_value);
+	add_class_vars(scope, ce, false, return_value);
+	add_class_vars(scope, ce, true, return_value);
 }
 /* }}} */
 
@@ -1631,7 +1624,7 @@ static void add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 /* {{{ Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	bool zendext = 0;
+	bool zendext = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &zendext) == FAILURE) {
 		RETURN_THROWS();
@@ -1654,7 +1647,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 /* {{{ Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
-	bool categorize = 0;
+	bool categorize = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
 		RETURN_THROWS();
@@ -1722,6 +1715,18 @@ ZEND_FUNCTION(get_defined_constants)
 }
 /* }}} */
 
+static bool backtrace_is_arg_sensitive(const zend_execute_data *call, uint32_t offset)
+{
+	zend_attribute *attribute = zend_get_parameter_attribute_str(
+		call->func->common.attributes,
+		"sensitiveparameter",
+		sizeof("sensitiveparameter") - 1,
+		offset
+	);
+
+	return attribute != NULL;
+}
+
 static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
@@ -1745,14 +1750,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						zend_string *arg_name = call->func->op_array.vars[i];
 						zval original_arg;
 						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
-						zend_attribute *attribute = zend_get_parameter_attribute_str(
-							call->func->common.attributes,
-							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
-							i
-						);
-
-						bool is_sensitive = attribute != NULL;
+						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
 
 						if (arg) {
 							ZVAL_DEREF(arg);
@@ -1763,8 +1761,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 						if (is_sensitive) {
 							zval redacted_arg;
-							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+							object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
 							ZEND_HASH_FILL_SET(&redacted_arg);
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
@@ -1777,13 +1774,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				} else {
 					while (i < first_extra_arg) {
 						zval original_arg;
-						zend_attribute *attribute = zend_get_parameter_attribute_str(
-							call->func->common.attributes,
-							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
-							i
-						);
-						bool is_sensitive = attribute != NULL;
+						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
 
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							zval *arg = p;
@@ -1795,8 +1786,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 						if (is_sensitive) {
 							zval redacted_arg;
-							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+							object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
 							ZEND_HASH_FILL_SET(&redacted_arg);
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
@@ -1816,13 +1806,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				bool is_sensitive = 0;
 
 				if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-					zend_attribute *attribute = zend_get_parameter_attribute_str(
-						call->func->common.attributes,
-						"sensitiveparameter",
-						sizeof("sensitiveparameter") - 1,
-						MIN(i, call->func->common.num_args)
-					);
-					is_sensitive = attribute != NULL;
+					is_sensitive = backtrace_is_arg_sensitive(call, MIN(i, call->func->common.num_args));
 				}
 
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
@@ -1835,8 +1819,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 				if (is_sensitive) {
 					zval redacted_arg;
-					object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-					zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+					object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
 					ZEND_HASH_FILL_SET(&redacted_arg);
 				} else {
 					Z_TRY_ADDREF_P(&original_arg);
@@ -1853,14 +1836,27 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		ZVAL_EMPTY_ARRAY(arg_array);
 	}
 
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+	if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)
+	 /* __call and __callStatic are non-variadic, potentially with
+	  * HAS_EXTRA_NAMED_PARAMS set. Don't add extra args, as they're already
+	  * contained in the 2nd param. */
+	 && (call->func->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		zend_string *name;
 		zval *arg;
+
+		bool is_sensitive = backtrace_is_arg_sensitive(call, call->func->common.num_args);
+
 		SEPARATE_ARRAY(arg_array);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
 			ZVAL_DEREF(arg);
-			Z_TRY_ADDREF_P(arg);
-			zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+			if (is_sensitive) {
+				zval redacted_arg;
+				object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, arg, NULL);
+				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, &redacted_arg);
+			} else {
+				Z_TRY_ADDREF_P(arg);
+				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 }
@@ -1892,7 +1888,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 {
 	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
-	bool fake_frame = 0;
+	bool fake_frame = false;
 	int lineno, frameno = 0;
 	zend_function *func;
 	zend_string *filename;
@@ -2128,7 +2124,7 @@ not_frameless_call:
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			bool build_filename_arg = 1;
+			bool build_filename_arg = true;
 			zend_string *pseudo_function_name;
 			uint32_t include_kind = 0;
 			if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type) && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
@@ -2138,7 +2134,7 @@ not_frameless_call:
 			switch (include_kind) {
 				case ZEND_EVAL:
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_EVAL);
-					build_filename_arg = 0;
+					build_filename_arg = false;
 					break;
 				case ZEND_INCLUDE:
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_INCLUDE);
@@ -2160,7 +2156,7 @@ not_frameless_call:
 					}
 
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_UNKNOWN);
-					build_filename_arg = 0;
+					build_filename_arg = false;
 					break;
 			}
 
@@ -2194,9 +2190,9 @@ skip_frame:
 		 && prev->func
 		 && ZEND_USER_CODE(prev->func->common.type)
 		 && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-			fake_frame = 1;
+			fake_frame = true;
 		} else {
-			fake_frame = 0;
+			fake_frame = false;
 			include_filename = filename;
 			last_call = call;
 			call = prev;
@@ -2266,9 +2262,9 @@ ZEND_FUNCTION(get_extension_funcs)
 	if (module->functions) {
 		/* avoid BC break, if functions list is empty, will return an empty array */
 		array_init(return_value);
-		array = 1;
+		array = true;
 	} else {
-		array = 0;
+		array = false;
 	}
 
 	ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
@@ -2276,7 +2272,7 @@ ZEND_FUNCTION(get_extension_funcs)
 			&& zif->internal_function.module == module) {
 			if (!array) {
 				array_init(return_value);
-				array = 1;
+				array = true;
 			}
 			add_next_index_str(return_value, zend_string_copy(zif->common.function_name));
 		}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6bccdc2444e6a68ba615fc281235a4551d0b8819 */
+ * Stub hash: a8dae89983ccbcd5dd36d1cdee736d40af4fd33c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -129,6 +129,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
 
 #define arginfo_zend_test_zend_ini_str arginfo_zend_get_current_func_name
+
+#define arginfo_zend_test_zstr_init_literal arginfo_zend_get_current_func_name
 
 #if defined(ZEND_CHECK_STACK_LIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_call_stack_get, 0, 0, IS_ARRAY, 1)
@@ -316,6 +318,7 @@ static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
+static ZEND_FUNCTION(zend_test_zstr_init_literal);
 #if defined(ZEND_CHECK_STACK_LIMIT)
 static ZEND_FUNCTION(zend_test_zend_call_stack_get);
 static ZEND_FUNCTION(zend_test_zend_call_stack_use_all);
@@ -447,6 +450,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
+	ZEND_FE(zend_test_zstr_init_literal, arginfo_zend_test_zstr_init_literal)
 #if defined(ZEND_CHECK_STACK_LIMIT)
 	ZEND_FE(zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get)
 	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)
@@ -624,44 +628,44 @@ static void register_test_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 
 
-	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_attr_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
+	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_attr_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, true);
 	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_attr_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_attr", sizeof("zend_test_deprecated_attr") - 1), attribute_name_Deprecated_func_zend_test_deprecated_attr_0, 1);
-	zend_string_release(attribute_name_Deprecated_func_zend_test_deprecated_attr_0);
+	zend_string_release_ex(attribute_name_Deprecated_func_zend_test_deprecated_attr_0, true);
 	zend_string *attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_zend_test_nodiscard_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_string *attribute_name_NoDiscard_func_zend_test_nodiscard_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
 	zend_attribute *attribute_NoDiscard_func_zend_test_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_nodiscard", sizeof("zend_test_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_nodiscard_0, 1);
-	zend_string_release(attribute_name_NoDiscard_func_zend_test_nodiscard_0);
+	zend_string_release_ex(attribute_name_NoDiscard_func_zend_test_nodiscard_0, true);
 	ZVAL_STR_COPY(&attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
+	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, true);
 	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, 1);
-	zend_string_release(attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0);
+	zend_string_release_ex(attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, true);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
+	zend_string *attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
 	zend_attribute *attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1, 1);
-	zend_string_release(attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1, true);
 	zend_string *attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1_arg0_str = zend_string_init("custom message 2", strlen("custom message 2"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1->args[0].value, attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1_arg0_str);
 	attribute_NoDiscard_func_zend_test_deprecated_nodiscard_1->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
 	zend_attribute *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1), 0, attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, 1);
-	zend_string_release(attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0);
+	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str = zend_string_init("value1", strlen("value1"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str);
 
-	zend_string *attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_string_init_interned("ZendTestAttributeWithArguments", sizeof("ZendTestAttributeWithArguments") - 1, 1);
+	zend_string *attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_string_init_interned("ZendTestAttributeWithArguments", sizeof("ZendTestAttributeWithArguments") - 1, true);
 	zend_attribute *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_attribute_with_named_argument", sizeof("zend_test_attribute_with_named_argument") - 1), attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, 1);
-	zend_string_release(attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0);
+	zend_string_release_ex(attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, true);
 	zend_string *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str = zend_string_init("foo", strlen("foo"), 1);
 	ZVAL_STR(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].value, attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str);
-	attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].name = zend_string_init_interned("arg", sizeof("arg") - 1, 1);
+	attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].name = zend_string_init_interned("arg", sizeof("arg") - 1, true);
 
 #if (PHP_VERSION_ID >= 80500)
 	zend_constant *const_ZEND_TEST_ATTRIBUTED_CONSTANT = zend_hash_str_find_ptr(EG(zend_constants), "ZEND_TEST_ATTRIBUTED_CONSTANT", sizeof("ZEND_TEST_ATTRIBUTED_CONSTANT") - 1);
@@ -685,10 +689,10 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 
 	zval const_DUMMY_value;
 	ZVAL_LONG(&const_DUMMY_value, 0);
-	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, 1);
+	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, true);
 	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
-	zend_string_release(const_DUMMY_name);
+	zend_string_release_ex(const_DUMMY_name, true);
 
 	return class_entry;
 }
@@ -708,82 +712,82 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 
 	zval const_TYPED_CLASS_CONST1_value;
 	ZVAL_EMPTY_ARRAY(&const_TYPED_CLASS_CONST1_value);
-	zend_string *const_TYPED_CLASS_CONST1_name = zend_string_init_interned("TYPED_CLASS_CONST1", sizeof("TYPED_CLASS_CONST1") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST1_name = zend_string_init_interned("TYPED_CLASS_CONST1", sizeof("TYPED_CLASS_CONST1") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST1_name, &const_TYPED_CLASS_CONST1_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST1_name, &const_TYPED_CLASS_CONST1_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST1_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST1_name, true);
 
 	zval const_TYPED_CLASS_CONST2_value;
 	ZVAL_LONG(&const_TYPED_CLASS_CONST2_value, 42);
-	zend_string *const_TYPED_CLASS_CONST2_name = zend_string_init_interned("TYPED_CLASS_CONST2", sizeof("TYPED_CLASS_CONST2") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST2_name = zend_string_init_interned("TYPED_CLASS_CONST2", sizeof("TYPED_CLASS_CONST2") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_ARRAY));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST2_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST2_name, true);
 
 	zval const_TYPED_CLASS_CONST3_value;
 	ZVAL_LONG(&const_TYPED_CLASS_CONST3_value, 1);
-	zend_string *const_TYPED_CLASS_CONST3_name = zend_string_init_interned("TYPED_CLASS_CONST3", sizeof("TYPED_CLASS_CONST3") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST3_name = zend_string_init_interned("TYPED_CLASS_CONST3", sizeof("TYPED_CLASS_CONST3") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST3_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST3_name, true);
 
 	zval const_ZEND_TEST_DEPRECATED_value;
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_value, 42);
-	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, 1);
+	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #else
 	zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
-	zend_string_release(const_ZEND_TEST_DEPRECATED_name);
+	zend_string_release_ex(const_ZEND_TEST_DEPRECATED_name, true);
 
 	zval const_ZEND_TEST_DEPRECATED_ATTR_value;
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_ATTR_value, 42);
-	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, 1);
+	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #else
 	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
-	zend_string_release(const_ZEND_TEST_DEPRECATED_ATTR_name);
+	zend_string_release_ex(const_ZEND_TEST_DEPRECATED_ATTR_name, true);
 
 	zval property__StaticProp_default_value;
 	ZVAL_NULL(&property__StaticProp_default_value);
-	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, 1);
+	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, true);
 	zend_declare_typed_property(class_entry, property__StaticProp_name, &property__StaticProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
-	zend_string_release(property__StaticProp_name);
+	zend_string_release_ex(property__StaticProp_name, true);
 
 	zval property_staticIntProp_default_value;
 	ZVAL_LONG(&property_staticIntProp_default_value, 123);
-	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, true);
 	zend_declare_typed_property(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_staticIntProp_name);
+	zend_string_release_ex(property_staticIntProp_name, true);
 
 	zval property_intProp_default_value;
 	ZVAL_LONG(&property_intProp_default_value, 123);
-	zend_string *property_intProp_name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+	zend_string *property_intProp_name = zend_string_init("intProp", sizeof("intProp") - 1, true);
 	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_intProp_name);
+	zend_string_release_ex(property_intProp_name, true);
 
 	zval property_classProp_default_value;
 	ZVAL_NULL(&property_classProp_default_value);
-	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, true);
 	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass")-1, 1);
 	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 0, MAY_BE_NULL));
-	zend_string_release(property_classProp_name);
+	zend_string_release_ex(property_classProp_name, true);
 
 	zval property_classUnionProp_default_value;
 	ZVAL_NULL(&property_classUnionProp_default_value);
-	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, true);
 	zend_string *property_classUnionProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
 	zend_string *property_classUnionProp_class_Iterator = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
 	zend_type_list *property_classUnionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
@@ -792,11 +796,11 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Iterator, 0, 0);
 	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_UNION(property_classUnionProp_type_list, MAY_BE_NULL);
 	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
-	zend_string_release(property_classUnionProp_name);
+	zend_string_release_ex(property_classUnionProp_name, true);
 
 	zval property_classIntersectionProp_default_value;
 	ZVAL_UNDEF(&property_classIntersectionProp_default_value);
-	zend_string *property_classIntersectionProp_name = zend_string_init("classIntersectionProp", sizeof("classIntersectionProp") - 1, 1);
+	zend_string *property_classIntersectionProp_name = zend_string_init("classIntersectionProp", sizeof("classIntersectionProp") - 1, true);
 	zend_string *property_classIntersectionProp_class_Traversable = zend_string_init("Traversable", sizeof("Traversable") - 1, 1);
 	zend_string *property_classIntersectionProp_class_Countable = zend_string_init("Countable", sizeof("Countable") - 1, 1);
 	zend_type_list *property_classIntersectionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
@@ -805,32 +809,32 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	property_classIntersectionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classIntersectionProp_class_Countable, 0, 0);
 	zend_type property_classIntersectionProp_type = ZEND_TYPE_INIT_INTERSECTION(property_classIntersectionProp_type_list, 0);
 	zend_declare_typed_property(class_entry, property_classIntersectionProp_name, &property_classIntersectionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classIntersectionProp_type);
-	zend_string_release(property_classIntersectionProp_name);
+	zend_string_release_ex(property_classIntersectionProp_name, true);
 
 	zval property_readonlyProp_default_value;
 	ZVAL_UNDEF(&property_readonlyProp_default_value);
-	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, 1);
+	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, true);
 #if (PHP_VERSION_ID >= 80100)
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #elif (PHP_VERSION_ID >= 80000)
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #endif
-	zend_string_release(property_readonlyProp_name);
+	zend_string_release_ex(property_readonlyProp_name, true);
 
 	zval property_finalProp_default_value;
 	ZVAL_UNDEF(&property_finalProp_default_value);
-	zend_string *property_finalProp_name = zend_string_init("finalProp", sizeof("finalProp") - 1, 1);
+	zend_string *property_finalProp_name = zend_string_init("finalProp", sizeof("finalProp") - 1, true);
 #if (PHP_VERSION_ID >= 80400)
 	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #elif (PHP_VERSION_ID >= 80000)
 	zend_declare_typed_property(class_entry, property_finalProp_name, &property_finalProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #endif
-	zend_string_release(property_finalProp_name);
+	zend_string_release_ex(property_finalProp_name, true);
 
 
-	zend_string *attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
+	zend_string *attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, true);
 	zend_attribute *attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_add_class_constant_attribute(class_entry, const_ZEND_TEST_DEPRECATED_ATTR, attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0, 1);
-	zend_string_release(attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0);
+	zend_string_release_ex(attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0, true);
 	zend_string *attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0->args[0].value, attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0_str);
 	attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
@@ -912,40 +916,40 @@ static zend_class_entry *register_class_ZendAttributeTest(void)
 
 	zval const_TEST_CONST_value;
 	ZVAL_LONG(&const_TEST_CONST_value, 1);
-	zend_string *const_TEST_CONST_name = zend_string_init_interned("TEST_CONST", sizeof("TEST_CONST") - 1, 1);
+	zend_string *const_TEST_CONST_name = zend_string_init_interned("TEST_CONST", sizeof("TEST_CONST") - 1, true);
 	zend_class_constant *const_TEST_CONST = zend_declare_class_constant_ex(class_entry, const_TEST_CONST_name, &const_TEST_CONST_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_TEST_CONST_name);
+	zend_string_release_ex(const_TEST_CONST_name, true);
 
 	zval property_testProp_default_value;
 	ZVAL_NULL(&property_testProp_default_value);
-	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
+	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, true);
 	zend_property_info *property_testProp = zend_declare_typed_property(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
-	zend_string_release(property_testProp_name);
+	zend_string_release_ex(property_testProp_name, true);
 
 
-	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_0 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_0 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, true);
 	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_0, 0);
-	zend_string_release(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_0);
+	zend_string_release_ex(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_0, true);
 
-	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, true);
 	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1, 0);
-	zend_string_release(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1);
+	zend_string_release_ex(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1, true);
 
 
-	zend_string *attribute_name_ZendTestRepeatableAttribute_property_testProp_0 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_property_testProp_0 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, true);
 	zend_add_property_attribute(class_entry, property_testProp, attribute_name_ZendTestRepeatableAttribute_property_testProp_0, 0);
-	zend_string_release(attribute_name_ZendTestRepeatableAttribute_property_testProp_0);
+	zend_string_release_ex(attribute_name_ZendTestRepeatableAttribute_property_testProp_0, true);
 
-	zend_string *attribute_name_ZendTestPropertyAttribute_property_testProp_1 = zend_string_init_interned("ZendTestPropertyAttribute", sizeof("ZendTestPropertyAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestPropertyAttribute_property_testProp_1 = zend_string_init_interned("ZendTestPropertyAttribute", sizeof("ZendTestPropertyAttribute") - 1, true);
 	zend_attribute *attribute_ZendTestPropertyAttribute_property_testProp_1 = zend_add_property_attribute(class_entry, property_testProp, attribute_name_ZendTestPropertyAttribute_property_testProp_1, 1);
-	zend_string_release(attribute_name_ZendTestPropertyAttribute_property_testProp_1);
+	zend_string_release_ex(attribute_name_ZendTestPropertyAttribute_property_testProp_1, true);
 	zend_string *attribute_ZendTestPropertyAttribute_property_testProp_1_arg0_str = zend_string_init("testProp", strlen("testProp"), 1);
 	ZVAL_STR(&attribute_ZendTestPropertyAttribute_property_testProp_1->args[0].value, attribute_ZendTestPropertyAttribute_property_testProp_1_arg0_str);
 
 
-	zend_string *attribute_name_ZendTestAttribute_func_testmethod_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestAttribute_func_testmethod_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, true);
 	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "testmethod", sizeof("testmethod") - 1), attribute_name_ZendTestAttribute_func_testmethod_0, 0);
-	zend_string_release(attribute_name_ZendTestAttribute_func_testmethod_0);
+	zend_string_release_ex(attribute_name_ZendTestAttribute_func_testmethod_0, true);
 
 	return class_entry;
 }
@@ -964,13 +968,13 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 
 	zval property_testProp_default_value;
 	ZVAL_NULL(&property_testProp_default_value);
-	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
+	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, true);
 	zend_declare_typed_property(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
-	zend_string_release(property_testProp_name);
+	zend_string_release_ex(property_testProp_name, true);
 
 	zval property_classUnionProp_default_value;
 	ZVAL_UNDEF(&property_classUnionProp_default_value);
-	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, true);
 	zend_string *property_classUnionProp_class_Traversable = zend_string_init("Traversable", sizeof("Traversable") - 1, 1);
 	zend_string *property_classUnionProp_class_Countable = zend_string_init("Countable", sizeof("Countable") - 1, 1);
 	zend_type_list *property_classUnionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
@@ -979,7 +983,7 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Countable, 0, 0);
 	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_UNION(property_classUnionProp_type_list, 0);
 	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
-	zend_string_release(property_classUnionProp_name);
+	zend_string_release_ex(property_classUnionProp_name, true);
 
 	return class_entry;
 }
@@ -996,9 +1000,9 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
-	zend_string *attribute_name_Attribute_class_ZendTestAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ZendTestAttribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute_0);
+	zend_string_release_ex(attribute_name_Attribute_class_ZendTestAttribute_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL);
 
 	return class_entry;
@@ -1018,17 +1022,17 @@ static zend_class_entry *register_class_ZendTestAttributeWithArguments(void)
 
 	zval property_arg_default_value;
 	ZVAL_UNDEF(&property_arg_default_value);
-	zend_string *property_arg_name = zend_string_init("arg", sizeof("arg") - 1, 1);
+	zend_string *property_arg_name = zend_string_init("arg", sizeof("arg") - 1, true);
 #if (PHP_VERSION_ID >= 80100)
 	zend_declare_typed_property(class_entry, property_arg_name, &property_arg_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 #elif (PHP_VERSION_ID >= 80000)
 	zend_declare_typed_property(class_entry, property_arg_name, &property_arg_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 #endif
-	zend_string_release(property_arg_name);
+	zend_string_release_ex(property_arg_name, true);
 
-	zend_string *attribute_name_Attribute_class_ZendTestAttributeWithArguments_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestAttributeWithArguments_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ZendTestAttributeWithArguments_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttributeWithArguments_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ZendTestAttributeWithArguments_0);
+	zend_string_release_ex(attribute_name_Attribute_class_ZendTestAttributeWithArguments_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttributeWithArguments_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL);
 
 	return class_entry;
@@ -1046,9 +1050,9 @@ static zend_class_entry *register_class_ZendTestRepeatableAttribute(void)
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
-	zend_string *attribute_name_Attribute_class_ZendTestRepeatableAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestRepeatableAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ZendTestRepeatableAttribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestRepeatableAttribute_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ZendTestRepeatableAttribute_0);
+	zend_string_release_ex(attribute_name_Attribute_class_ZendTestRepeatableAttribute_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestRepeatableAttribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL | ZEND_ATTRIBUTE_IS_REPEATABLE);
 
 	return class_entry;
@@ -1068,13 +1072,13 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 
 	zval property_parameter_default_value;
 	ZVAL_UNDEF(&property_parameter_default_value);
-	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
+	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, true);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_parameter_name);
+	zend_string_release_ex(property_parameter_name, true);
 
-	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ZendTestParameterAttribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestParameterAttribute_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ZendTestParameterAttribute_0);
+	zend_string_release_ex(attribute_name_Attribute_class_ZendTestParameterAttribute_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestParameterAttribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 
 	return class_entry;
@@ -1097,14 +1101,14 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 
 	zval property_parameter_default_value;
 	ZVAL_UNDEF(&property_parameter_default_value);
-	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
+	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, true);
 	zend_string *property_parameter_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.4\n         */", 98, 1);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, property_parameter_comment, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_parameter_name);
+	zend_string_release_ex(property_parameter_name, true);
 
-	zend_string *attribute_name_Attribute_class_ZendTestPropertyAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestPropertyAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ZendTestPropertyAttribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestPropertyAttribute_0, 1);
-	zend_string_release(attribute_name_Attribute_class_ZendTestPropertyAttribute_0);
+	zend_string_release_ex(attribute_name_Attribute_class_ZendTestPropertyAttribute_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestPropertyAttribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 
 	return class_entry;
@@ -1122,15 +1126,15 @@ static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttr
 #endif
 
 
-	zend_string *attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
 	zend_attribute *attribute_ZendTestParameterAttribute_func_no_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "no_override", sizeof("no_override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0, 1);
-	zend_string_release(attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0);
+	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_no_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_no_override_arg0_0_arg0_str = zend_string_init("value2", strlen("value2"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_no_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_no_override_arg0_0_arg0_str);
 
-	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
 	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
-	zend_string_release(attribute_name_ZendTestParameterAttribute_func_override_arg0_0);
+	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str = zend_string_init("value3", strlen("value3"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str);
 
@@ -1149,9 +1153,9 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 #endif
 
 
-	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestParameterAttribute_func_override_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, true);
 	zend_attribute *attribute_ZendTestParameterAttribute_func_override_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "override", sizeof("override") - 1), 0, attribute_name_ZendTestParameterAttribute_func_override_arg0_0, 1);
-	zend_string_release(attribute_name_ZendTestParameterAttribute_func_override_arg0_0);
+	zend_string_release_ex(attribute_name_ZendTestParameterAttribute_func_override_arg0_0, true);
 	zend_string *attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str = zend_string_init("value4", strlen("value4"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_override_arg0_0->args[0].value, attribute_ZendTestParameterAttribute_func_override_arg0_0_arg0_str);
 
@@ -1171,14 +1175,14 @@ static zend_class_entry *register_class_ZendTestClassWithPropertyAttribute(void)
 
 	zval property_attributed_default_value;
 	ZVAL_UNDEF(&property_attributed_default_value);
-	zend_string *property_attributed_name = zend_string_init("attributed", sizeof("attributed") - 1, 1);
+	zend_string *property_attributed_name = zend_string_init("attributed", sizeof("attributed") - 1, true);
 	zend_property_info *property_attributed = zend_declare_typed_property(class_entry, property_attributed_name, &property_attributed_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_attributed_name);
+	zend_string_release_ex(property_attributed_name, true);
 
 
-	zend_string *attribute_name_ZendTestAttribute_property_attributed_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, 1);
+	zend_string *attribute_name_ZendTestAttribute_property_attributed_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, true);
 	zend_add_property_attribute(class_entry, property_attributed, attribute_name_ZendTestAttribute_property_attributed_0, 0);
-	zend_string_release(attribute_name_ZendTestAttribute_property_attributed_0);
+	zend_string_release_ex(attribute_name_ZendTestAttribute_property_attributed_0, true);
 
 	return class_entry;
 }
@@ -1316,10 +1320,10 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 
 	zval property_foo_default_value;
 	ZVAL_UNDEF(&property_foo_default_value);
-	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, 1);
+	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, true);
 	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo")-1, 1);
 	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS2_ZendSubNS_Foo, 0, 0));
-	zend_string_release(property_foo_name);
+	zend_string_release_ex(property_foo_name, true);
 
 	return class_entry;
 }

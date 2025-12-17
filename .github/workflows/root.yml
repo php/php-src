@@ -31,11 +31,6 @@ jobs:
       - name: Generate Matrix
         id: set-matrix
         run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   NIGHTLY:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}
@@ -52,6 +47,7 @@ jobs:
       branch: ${{ matrix.branch.ref }}
       community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       libmysqlclient_with_mysqli: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1) }}
+      macos_arm64_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '15' || '14' }}
       run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       run_linux_ppc64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       run_macos_arm64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
@@ -62,7 +58,9 @@ jobs:
       windows_version: '2022'
       vs_crt_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) && 'vs17') || 'vs16' }}
       skip_laravel: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
-      skip_symfony: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
+      symfony_version: ${{ (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '8.1')
+        || ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 2) && '7.4')
+        || '' }}
       skip_wordpress: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       variation_enable_zend_max_execution_timers: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9 }}
     secrets: inherit

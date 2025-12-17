@@ -39,7 +39,7 @@ typedef struct _scdf_ctx {
 		void (*visit_instr)(
 			struct _scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_op);
 		void (*visit_phi)(
-			struct _scdf_ctx *scdf, zend_ssa_phi *phi);
+			struct _scdf_ctx *scdf, const zend_ssa_phi *phi);
 		void (*mark_feasible_successors)(
 			struct _scdf_ctx *scdf, int block_num, zend_basic_block *block,
 			zend_op *opline, zend_ssa_op *ssa_op);
@@ -49,10 +49,10 @@ typedef struct _scdf_ctx {
 void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
 void scdf_solve(scdf_ctx *scdf, const char *name);
 
-uint32_t scdf_remove_unreachable_blocks(scdf_ctx *scdf);
+uint32_t scdf_remove_unreachable_blocks(const scdf_ctx *scdf);
 
 /* Add uses to worklist */
-static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {
+static inline void scdf_add_to_worklist(const scdf_ctx *scdf, int var_num) {
 	const zend_ssa *ssa = scdf->ssa;
 	const zend_ssa_var *var = &ssa->vars[var_num];
 	int use;
@@ -66,7 +66,7 @@ static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {
 }
 
 /* This should usually not be necessary, however it's used for type narrowing. */
-static inline void scdf_add_def_to_worklist(scdf_ctx *scdf, int var_num) {
+static inline void scdf_add_def_to_worklist(const scdf_ctx *scdf, int var_num) {
 	const zend_ssa_var *var = &scdf->ssa->vars[var_num];
 	if (var->definition >= 0) {
 		zend_bitset_incl(scdf->instr_worklist, var->definition);

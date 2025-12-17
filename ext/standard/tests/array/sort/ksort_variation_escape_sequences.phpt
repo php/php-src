@@ -4,7 +4,6 @@ Test ksort() function: sorting escape sequences
 <?php
 
 const EXPECTED_RESULT = [
-    null => null,
     "\t" => "\t",
     "\n" => "\n",
     "\v" => "\v",
@@ -18,7 +17,6 @@ const EXPECTED_RESULT = [
 ];
 
 $array = [
-    null => null,
     "\a" => "\a",
     "\cx" => "\cx",
     "\e" => "\e",

@@ -64,6 +64,11 @@
  * unless buf is not NULL.
  * Also works sensibly for win32 */
 BEGIN_EXTERN_C()
+#ifdef PHP_WIN32
+char *php_socket_strerror_s(long err, char *buf, size_t bufsize);
+#else
+#define php_socket_strerror_s php_socket_strerror
+#endif
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 PHPAPI zend_string *php_socket_error_str(long err);
 END_EXTERN_C()
@@ -118,7 +123,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 #define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
-
+#define STREAM_SOCKOP_SO_REUSEADDR        (1 << 6)
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */

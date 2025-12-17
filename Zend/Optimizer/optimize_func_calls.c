@@ -37,7 +37,7 @@ typedef struct _optimizer_call_info {
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 
-static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opline)
+static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op *opline)
 {
 	int call = 0;
 
@@ -76,7 +76,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 	}
 }
 
-static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_op *opline, zend_function *func)
+static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, zend_op *opline, const zend_function *func)
 {
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
@@ -153,7 +153,7 @@ static bool has_known_send_mode(const optimizer_call_info *info, uint32_t arg_nu
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
-	zend_op *end = opline + op_array->last;
+	const zend_op *end = opline + op_array->last;
 	int call = 0;
 	void *checkpoint;
 	optimizer_call_info *call_stack;
@@ -237,7 +237,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				call_stack[call].func = NULL;
 				call_stack[call].opline = NULL;
-				call_stack[call].try_inline = 0;
+				call_stack[call].try_inline = false;
 				call_stack[call].func_arg_num = (uint32_t)-1;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
@@ -265,7 +265,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								&& opline->op2_type == IS_UNUSED) {
 							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
 							 * Performing the replacement would create an invalid opcode. */
-							call_stack[call - 1].try_inline = 0;
+							call_stack[call - 1].try_inline = false;
 							break;
 						}
 
@@ -279,7 +279,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAL_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -291,7 +291,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_CHECK_FUNC_ARG:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					call_stack[call - 1].func_arg_num = (uint32_t)-1;
 					break;
 				}
@@ -305,7 +305,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* Don't transform SEND_FUNC_ARG if any FETCH opcodes weren't transformed. */
 				if (call_stack[call - 1].last_check_func_arg_opline == NULL) {
 					if (opline->op2_type == IS_CONST) {
-						call_stack[call - 1].try_inline = 0;
+						call_stack[call - 1].try_inline = false;
 					}
 					break;
 				}
@@ -314,7 +314,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				ZEND_FALLTHROUGH;
 			case ZEND_SEND_VAR_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -329,7 +329,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAR_NO_REF_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -347,14 +347,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_SEND_VAR:
 			case ZEND_SEND_REF:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 				break;
 			case ZEND_SEND_UNPACK:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_ARRAY:
-				call_stack[call - 1].try_inline = 0;
+				call_stack[call - 1].try_inline = false;
 				break;
 			default:
 				break;

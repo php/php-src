@@ -19,6 +19,5 @@ class bar extends foo
 
 var_dump(str_replace("\0", '\0', serialize(new bar())));
 ?>
---EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 string(114) "O:3:"bar":3:{s:12:"\0foo\0private";s:7:"private";s:12:"\0*\0protected";s:9:"protected";s:6:"public";s:6:"public";}"

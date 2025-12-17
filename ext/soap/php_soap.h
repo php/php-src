@@ -171,8 +171,9 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  wsdl_cache;
 	int        cur_uniq_ref;
 	HashTable *ref_map;
-	zend_string *lang_en;
 ZEND_END_MODULE_GLOBALS(soap)
+
+extern zend_string *soap_lang_en;
 
 #ifdef ZTS
 #include "TSRM.h"

@@ -77,7 +77,6 @@ typedef lxb_selectors_entry_t *
 
 typedef struct {
 	const xmlChar *name;
-	bool interned;
 	bool attr_case_insensitive;
 } lxb_selectors_adapted_id;
 

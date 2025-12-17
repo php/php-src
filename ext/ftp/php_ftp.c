@@ -147,8 +147,15 @@ PHP_FUNCTION(ftp_connect)
 		RETURN_THROWS();
 	}
 
+	const uint64_t timeoutmax = (uint64_t)((double) PHP_TIMEOUT_ULL_MAX / 1000000.0);
+
 	if (timeout_sec <= 0) {
 		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (timeout_sec >= timeoutmax) {
+		zend_argument_value_error(3, "must be less than " ZEND_ULONG_FMT, timeoutmax);
 		RETURN_THROWS();
 	}
 
@@ -483,7 +490,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
-	bool	recursive = 0;
+	bool	recursive = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &z_ftp, php_ftp_ce, &dir, &dir_len, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -815,7 +822,7 @@ PHP_FUNCTION(ftp_nb_get)
 }
 /* }}} */
 
-/* {{{ Continues retrieving/sending a file nbronously */
+/* {{{ Continues to retrieve or send a file in non-blocking mode */
 PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
@@ -828,7 +835,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (!ftp->nb) {
-		php_error_docref(NULL, E_WARNING, "No nbronous transfer to continue");
+		php_error_docref(NULL, E_WARNING, "No non-blocking transfer to continue");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 

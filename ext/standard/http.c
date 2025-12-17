@@ -83,6 +83,15 @@ try_again:
 	}
 }
 
+static zend_always_inline bool php_url_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 /* {{{ php_url_encode_hash */
 PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
@@ -101,6 +110,12 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		return;
 	}
 
+	/* Very deeply structured data could trigger a stack overflow, even without recursion. */
+	if (UNEXPECTED(php_url_check_stack_limit())) {
+		zend_throw_error(NULL, "Maximum call stack size reached.");
+		return;
+	}
+
 	if (!arg_sep) {
 		arg_sep = PG(arg_separator).output;
 		if (ZSTR_LEN(arg_sep) == 0) {
@@ -109,14 +124,14 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */

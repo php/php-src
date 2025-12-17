@@ -22,8 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20240925
-#define PHP_HAVE_STREAMS
+#define PHP_API_VERSION 20250926
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
 

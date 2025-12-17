@@ -37,10 +37,12 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "test_arginfo.h"
+#include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
+#include "zend_observer.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -594,6 +596,13 @@ static ZEND_FUNCTION(zend_test_zend_ini_str)
 	RETURN_STR(ZT_G(str_test));
 }
 
+static ZEND_FUNCTION(zend_test_zstr_init_literal)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STR(ZSTR_INIT_LITERAL("foo\0bar", false));
+}
+
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)
 {
 	zend_string *str;
@@ -741,8 +750,13 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 		RETURN_THROWS();
 	}
 
-	uri_internal_t *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
+	php_uri_internal *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
 	if (uri == NULL) {
+		RETURN_THROWS();
+	}
+
+	php_uri *uri_struct = php_uri_parse_to_struct(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), PHP_URI_COMPONENT_READ_MODE_RAW, false);
+	if (uri_struct == NULL) {
 		RETURN_THROWS();
 	}
 
@@ -787,7 +801,56 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 	php_uri_get_fragment(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
 	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
 	zend_hash_str_add(Z_ARR_P(return_value), "raw", strlen("raw"), &raw);
+	zval from_struct;
+	zval dummy;
+	array_init(&from_struct);
+	if (uri_struct->scheme) {
+		ZVAL_STR_COPY(&dummy, uri_struct->scheme);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_SCHEME), &dummy);
+	if (uri_struct->user) {
+		ZVAL_STR_COPY(&dummy, uri_struct->user);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_USERNAME), &dummy);
+	if (uri_struct->password) {
+		ZVAL_STR_COPY(&dummy, uri_struct->password);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PASSWORD), &dummy);
+	if (uri_struct->host) {
+		ZVAL_STR_COPY(&dummy, uri_struct->host);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_HOST), &dummy);
+	ZVAL_LONG(&dummy, uri_struct->port);
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PORT), &dummy);
+	if (uri_struct->path) {
+		ZVAL_STR_COPY(&dummy, uri_struct->path);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PATH), &dummy);
+	if (uri_struct->query) {
+		ZVAL_STR_COPY(&dummy, uri_struct->query);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_QUERY), &dummy);
+	if (uri_struct->fragment) {
+		ZVAL_STR_COPY(&dummy, uri_struct->fragment);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &dummy);
+	zend_hash_str_add(Z_ARR_P(return_value), "struct", strlen("struct"), &from_struct);
 
+	php_uri_struct_free(uri_struct);
 	php_uri_free(uri);
 }
 
@@ -969,16 +1032,38 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
+typedef struct _zend_test_object {
+	zend_internal_function *tmp_method;
+	zend_object std;
+} zend_test_object;
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
-	zend_object *obj = zend_objects_new(class_type);
-	object_properties_init(obj, class_type);
-	obj->handlers = &zend_test_class_handlers;
-	return obj;
+	zend_test_object *intern = zend_object_alloc(sizeof(zend_test_object), class_type);
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	return &intern->std;
+}
+
+static void zend_test_class_free_obj(zend_object *object)
+{
+	zend_test_object *intern = (zend_test_object*)((char*)object - XtOffsetOf(zend_test_object, std));
+
+	if (intern->tmp_method) {
+		zend_internal_function *func = intern->tmp_method;
+		intern->tmp_method = NULL;
+		zend_string_release_ex(func->function_name, 0);
+		zend_free_internal_arg_info(func, false);
+		efree(func);
+	}
+
+	zend_object_std_dtor(object);
 }
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
+	zend_test_object *intern = (zend_test_object*)((char*)(*object) - XtOffsetOf(zend_test_object, std));
+
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
 
@@ -992,9 +1077,45 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 		fptr->num_args = 0;
 		fptr->scope = (*object)->ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+		fptr->fn_flags2 = 0;
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
 		fptr->doc_comment = NULL;
+
+		return (zend_function*)fptr;
+	} else if (zend_string_equals_literal_ci(name, "testTmpMethodWithArgInfo")) {
+		if (intern->tmp_method) {
+			return (zend_function*)intern->tmp_method;
+		}
+
+		const zend_function_entry *entry = &class_ZendTestTmpMethods_methods[0];
+		zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
+		memset(fptr, 0, sizeof(zend_internal_function));
+		fptr->type = ZEND_INTERNAL_FUNCTION;
+		fptr->handler = entry->handler;
+		fptr->function_name = zend_string_init(entry->fname, strlen(entry->fname), false);
+		fptr->scope = intern->std.ce;
+		fptr->prototype = NULL;
+		fptr->T = ZEND_OBSERVER_ENABLED;
+		fptr->fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
+
+		zend_internal_function_info *info = (zend_internal_function_info*)entry->arg_info;
+
+		uint32_t num_arg_info = 1 + entry->num_args;
+		zend_arg_info *arg_info = safe_emalloc(num_arg_info, sizeof(zend_arg_info), 0);
+		for (uint32_t i = 0; i < num_arg_info; i++) {
+			zend_convert_internal_arg_info(&arg_info[i], &entry->arg_info[i], i == 0, false);
+		}
+
+		fptr->arg_info = arg_info + 1;
+		fptr->num_args = entry->num_args;
+		if (info->required_num_args == (uint32_t)-1) {
+			fptr->required_num_args = entry->num_args;
+		} else {
+			fptr->required_num_args = info->required_num_args;
+		}
+
+		intern->tmp_method = fptr;
 
 		return (zend_function*)fptr;
 	}
@@ -1016,6 +1137,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 		fptr->num_args = 0;
 		fptr->scope = ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
+		fptr->fn_flags2 = 0;
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
 		fptr->doc_comment = NULL;
@@ -1080,6 +1202,18 @@ static ZEND_METHOD(_ZendTestClass, variadicTest) {
 	}
 
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
+ZEND_METHOD(ZendTestTmpMethods, testTmpMethodWithArgInfo)
+{
+	zend_object *obj;
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2);
+		Z_PARAM_OPTIONAL;
+		Z_PARAM_OBJ_OR_NULL(obj);
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
 }
 
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
@@ -1387,11 +1521,14 @@ PHP_MINIT_FUNCTION(zend_test)
 	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
+	zend_test_class->default_object_handlers = &zend_test_class_handlers;
 
 	zend_test_child_class = register_class__ZendTestChildClass(zend_test_class);
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
+	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
 
 	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
 

@@ -57,18 +57,34 @@ if test "$PHP_TIDY" != "no"; then
     [],
     [-L$TIDY_LIBDIR])
 
-  dnl The tidyOptGetCategory function (added in libtidy 5.4.0) if only useable
-  dnl if TidyInternalCategory (added in libtidy 5.6.0) is also present.
-  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyInternalCategory],
-    [AC_DEFINE([HAVE_TIDYOPTGETCATEGORY], [1],
-      [Define to 1 if Tidy library has the 'tidyOptGetCategory' function.])],
-    [],
-    [-L$TIDY_LIBDIR])
-
   PHP_ADD_LIBRARY_WITH_PATH([$TIDY_LIB_NAME],
     [$TIDY_LIBDIR],
     [TIDY_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$TIDY_INCDIR])
+
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=-I$TIDY_INCDIR
+
+  dnl The tidyOptGetCategory function (added in tidy-html5 5.4.0) is only
+  dnl useable if TidyInternalCategory (added in tidy-html5 5.6.0) is also
+  dnl present.
+  AC_CACHE_CHECK([for tidyOptGetCategory], [php_ac_cv_have_tidyoptgetcategory],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <tidy.h>],[
+     TidyDoc doc = tidyCreate();
+     TidyOption badopt = tidyGetOptionByName(doc, "<bad>");
+     Bool v = (tidyOptGetCategory(badopt) == TidyInternalCategory);
+     (void)v;
+     tidyRelease(doc);
+    ])],
+    [php_ac_cv_have_tidyoptgetcategory=yes],
+    [php_ac_cv_have_tidyoptgetcategory=no])
+  ])
+  AS_VAR_IF([php_ac_cv_have_tidyoptgetcategory], [yes],
+    [AC_DEFINE([HAVE_TIDYOPTGETCATEGORY], [1],
+      [Define to 1 if Tidy library has the 'tidyOptGetCategory' function and
+      supports the 'TidyInternalCategory' enumeration.])])
+
+  CPPFLAGS=$old_CPPFLAGS
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream. Fixed in
   dnl tidy-html5 5.7.20: https://github.com/htacg/tidy-html5/issues/866

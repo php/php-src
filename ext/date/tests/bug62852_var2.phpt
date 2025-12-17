@@ -22,8 +22,6 @@ try {
 var_dump( $foo );
 ?>
 --EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug62852_var2.php:%d
 Stack trace:
 #0 [internal function]: DateTime->__unserialize(Array)

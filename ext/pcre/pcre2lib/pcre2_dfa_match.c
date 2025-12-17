@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2024 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -156,7 +156,6 @@ static const uint8_t coptable[] = {
   0,                             /* CLASS                                  */
   0,                             /* NCLASS                                 */
   0,                             /* XCLASS - variable length               */
-  0,                             /* ECLASS - variable length               */
   0,                             /* REF                                    */
   0,                             /* REFI                                   */
   0,                             /* DNREF                                  */
@@ -176,7 +175,6 @@ static const uint8_t coptable[] = {
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
   0,                             /* NA assert behind                       */
-  0,                             /* Assert scan substring                  */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
@@ -190,7 +188,7 @@ static const uint8_t coptable[] = {
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
-  0, 0,                          /* \B and \b in UCP mode                  */
+  0, 0                           /* \B and \b in UCP mode                  */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -236,7 +234,6 @@ static const uint8_t poptable[] = {
   1,                             /* CLASS                                  */
   1,                             /* NCLASS                                 */
   1,                             /* XCLASS - variable length               */
-  1,                             /* ECLASS - variable length               */
   0,                             /* REF                                    */
   0,                             /* REFI                                   */
   0,                             /* DNREF                                  */
@@ -256,7 +253,6 @@ static const uint8_t poptable[] = {
   0,                             /* Assert behind not                      */
   0,                             /* NA assert                              */
   0,                             /* NA assert behind                       */
-  0,                             /* Assert scan substring                  */
   0,                             /* ONCE                                   */
   0,                             /* SCRIPT_RUN                             */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
@@ -270,12 +266,8 @@ static const uint8_t poptable[] = {
   0, 0,                          /* COMMIT, COMMIT_ARG                     */
   0, 0, 0,                       /* FAIL, ACCEPT, ASSERT_ACCEPT            */
   0, 0, 0,                       /* CLOSE, SKIPZERO, DEFINE                */
-  1, 1,                          /* \B and \b in UCP mode                  */
+  1, 1                           /* \B and \b in UCP mode                  */
 };
-
-/* Compile-time check that these tables have the correct size. */
-STATIC_ASSERT(sizeof(coptable) == OP_TABLE_LENGTH, coptable);
-STATIC_ASSERT(sizeof(poptable) == OP_TABLE_LENGTH, poptable);
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
 and \w */
@@ -703,6 +695,7 @@ for (;;)
   int i, j;
   int clen, dlen;
   uint32_t c, d;
+  int forced_fail = 0;
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
   reset_could_continue = FALSE;
@@ -848,6 +841,19 @@ for (;;)
 
     switch (codevalue)
       {
+/* ========================================================================== */
+      /* These cases are never obeyed. This is a fudge that causes a compile-
+      time error if the vectors coptable or poptable, which are indexed by
+      opcode, are not the correct length. It seems to be the only way to do
+      such a check at compile time, as the sizeof() operator does not work
+      in the C preprocessor. */
+
+      case OP_TABLE_LENGTH:
+      case OP_TABLE_LENGTH +
+        ((sizeof(coptable) == OP_TABLE_LENGTH) &&
+         (sizeof(poptable) == OP_TABLE_LENGTH)):
+      return 0;
+
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry
       on with the next opcode. For repeating opcodes, also add the repeat
@@ -1173,6 +1179,10 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[1])
           {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll ||
@@ -1452,6 +1462,10 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
@@ -1713,6 +1727,10 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
@@ -1999,6 +2017,10 @@ for (;;)
         const ucd_record * prop = GET_UCD(c);
         switch(code[1 + IMM2_SIZE + 1])
           {
+          case PT_ANY:
+          OK = TRUE;
+          break;
+
           case PT_LAMP:
           chartype = prop->chartype;
           OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
@@ -2641,53 +2663,34 @@ for (;;)
 
       case OP_CLASS:
       case OP_NCLASS:
-#ifdef SUPPORT_WIDE_CHARS
       case OP_XCLASS:
-      case OP_ECLASS:
-#endif
         {
         BOOL isinclass = FALSE;
         int next_state_offset;
         PCRE2_SPTR ecode;
 
-#ifdef SUPPORT_WIDE_CHARS
-        /* An extended class may have a table or a list of single characters,
-        ranges, or both, and it may be positive or negative. There's a
-        function that sorts all this out. */
-
-        if (codevalue == OP_XCLASS)
-         {
-         ecode = code + GET(code, 1);
-         if (clen > 0)
-           isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE,
-             (const uint8_t*)mb->start_code, utf);
-         }
-
-        /* A nested set-based class has internal opcodes for performing
-        set operations. */
-
-        else if (codevalue == OP_ECLASS)
-         {
-         ecode = code + GET(code, 1);
-         if (clen > 0)
-           isinclass = PRIV(eclass)(c, code + 1 + LINK_SIZE, ecode,
-             (const uint8_t*)mb->start_code, utf);
-         }
-
-        else
-#endif /* SUPPORT_WIDE_CHARS */
-
         /* For a simple class, there is always just a 32-byte table, and we
         can set isinclass from it. */
 
+        if (codevalue != OP_XCLASS)
           {
           ecode = code + 1 + (32 / sizeof(PCRE2_UCHAR));
           if (clen > 0)
             {
             isinclass = (c > 255)? (codevalue == OP_NCLASS) :
-              ((((const uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
+              ((((uint8_t *)(code + 1))[c/8] & (1u << (c&7))) != 0);
             }
           }
+
+        /* An extended class may have a table or a list of single characters,
+        ranges, or both, and it may be positive or negative. There's a
+        function that sorts all this out. */
+
+        else
+         {
+         ecode = code + GET(code, 1);
+         if (clen > 0) isinclass = PRIV(xclass)(c, code + 1 + LINK_SIZE, utf);
+         }
 
         /* At this point, isinclass is set for all kinds of class, and ecode
         points to the byte after the end of the class. If there is a
@@ -2781,6 +2784,7 @@ for (;;)
       though the other "backtracking verbs" are not supported. */
 
       case OP_FAIL:
+      forced_fail++;    /* Count FAILs for multiple states */
       break;
 
       case OP_ASSERT:
@@ -3054,7 +3058,7 @@ for (;;)
         if (codevalue == OP_BRAPOSZERO)
           {
           allow_zero = TRUE;
-          ++code;  /* The following opcode will be one of the above BRAs */
+          codevalue = *(++code);  /* Codevalue will be one of above BRAs */
           }
         else allow_zero = FALSE;
 
@@ -3267,12 +3271,18 @@ for (;;)
   matches that we are going to find. If partial matching has been requested,
   check for appropriate conditions.
 
+  The "forced_ fail" variable counts the number of (*F) encountered for the
+  character. If it is equal to the original active_count (saved in
+  workspace[1]) it means that (*F) was found on every active state. In this
+  case we don't want to give a partial match.
+
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
 
   if (new_count <= 0)
     {
     if (could_continue &&                            /* Some could go on, and */
+        forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (mb->moptions & PCRE2_PARTIAL_HARD) != 0      /* Hard partial */
         ||                                           /* or... */
@@ -3428,7 +3438,7 @@ if ((re->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH/8)
 /* PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART are match-time flags in the
 options variable for this function. Users of PCRE2 who are not calling the
 function directly would like to have a way of setting these flags, in the same
-way that they can set pcre2_compile() flags like PCRE2_NO_AUTO_POSSESS with
+way that they can set pcre2_compile() flags like PCRE2_NO_AUTOPOSSESS with
 constructions like (*NO_AUTOPOSSESS). To enable this, (*NOTEMPTY) and
 (*NOTEMPTY_ATSTART) set bits in the pattern's "flag" function which can now be
 transferred to the options for this function. The bits are guaranteed to be
@@ -3518,7 +3528,8 @@ if (mb->match_limit_depth > re->limit_depth)
 if (mb->heap_limit > re->limit_heap)
   mb->heap_limit = re->limit_heap;
 
-mb->start_code = (PCRE2_SPTR)((const uint8_t *)re + re->code_start);
+mb->start_code = (PCRE2_UCHAR *)((uint8_t *)re + sizeof(pcre2_real_code)) +
+  re->name_count * re->name_entry_size;
 mb->tables = re->tables;
 mb->start_subject = subject;
 mb->end_subject = end_subject;
@@ -3565,9 +3576,7 @@ switch(re->newline_convention)
   mb->nltype = NLTYPE_ANYCRLF;
   break;
 
-  default:
-  PCRE2_DEBUG_UNREACHABLE();
-  return PCRE2_ERROR_INTERNAL;
+  default: return PCRE2_ERROR_INTERNAL;
   }
 
 /* Check a UTF string for validity if required. For 8-bit and 16-bit strings,
@@ -3696,7 +3705,7 @@ for (;;)
   these, for testing and for ensuring that all callouts do actually occur.
   The optimizations must also be avoided when restarting a DFA match. */
 
-  if ((re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0 &&
+  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
       (options & PCRE2_DFA_RESTART) == 0)
     {
     /* If firstline is TRUE, the start of the match is constrained to the first

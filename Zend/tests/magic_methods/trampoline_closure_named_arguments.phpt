@@ -42,7 +42,7 @@ var_dump($type);
 var_dump($type->getName());
 
 ?>
---EXPECT--
+--EXPECTF--
 -- Non-static cases --
 string(4) "test"
 array(3) {
@@ -69,7 +69,7 @@ array(4) {
   ["a"]=>
   int(123)
   ["b"]=>
-  object(Test)#1 (0) {
+  object(Test)#%d (0) {
   }
 }
 string(4) "test"
@@ -77,7 +77,7 @@ array(2) {
   ["a"]=>
   int(123)
   ["b"]=>
-  object(Test)#1 (0) {
+  object(Test)#%d (0) {
   }
 }
 string(4) "test"
@@ -114,7 +114,7 @@ array(4) {
   ["a"]=>
   int(123)
   ["b"]=>
-  object(Test)#1 (0) {
+  object(Test)#%d (0) {
   }
 }
 string(10) "testStatic"
@@ -122,7 +122,7 @@ array(2) {
   ["a"]=>
   int(123)
   ["b"]=>
-  object(Test)#1 (0) {
+  object(Test)#%d (0) {
   }
 }
 string(10) "testStatic"
@@ -136,12 +136,12 @@ array(1) {
 -- Reflection tests --
 array(1) {
   [0]=>
-  object(ReflectionParameter)#4 (1) {
+  object(ReflectionParameter)#%d (1) {
     ["name"]=>
     string(9) "arguments"
   }
 }
 bool(true)
-object(ReflectionNamedType)#5 (0) {
+object(ReflectionNamedType)#%d (0) {
 }
 string(5) "mixed"

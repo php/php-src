@@ -62,19 +62,8 @@ typedef enum {
 
 typedef ZEND_RESULT_CODE zend_result;
 
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-# ifdef ZEND_WIN32
-#  define ZEND_SIZE_MAX  _UI64_MAX
-# else
-#  define ZEND_SIZE_MAX  SIZE_MAX
-# endif
-#else
-# if defined(ZEND_WIN32)
-#  define ZEND_SIZE_MAX  _UI32_MAX
-# else
-#  define ZEND_SIZE_MAX SIZE_MAX
-# endif
-#endif
+/* This constant is deprecated, use SIZE_MAX instead */
+#define ZEND_SIZE_MAX SIZE_MAX
 
 #ifdef ZTS
 #define ZEND_TLS static TSRM_TLS

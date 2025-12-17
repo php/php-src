@@ -329,7 +329,7 @@ pm.max_spare_servers = 3
 ;      it must be associated with embraces to specify the name of the header:
 ;      - %{Content-Type}o
 ;      - %{X-Powered-By}o
-;      - %{Transfert-Encoding}o
+;      - %{Transfer-Encoding}o
 ;      - ....
 ;  %p: PID of the child that serviced the request
 ;  %P: PID of the parent of the child that serviced the request

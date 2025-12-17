@@ -116,7 +116,8 @@ static const enum mbfl_no_encoding php_mb_default_identify_list_cn[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_cn,
-	mbfl_no_encoding_cp936
+	mbfl_no_encoding_cp936,
+	mbfl_no_encoding_gb18030_2022
 };
 
 static const enum mbfl_no_encoding php_mb_default_identify_list_tw_hk[] = {
@@ -313,7 +314,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
 		entry = list;
 		n = 0;
-		included_auto = 0;
+		included_auto = false;
 		p1 = tmpstr;
 		while (1) {
 			const char *comma = memchr(p1, ',', endp - p1);
@@ -333,7 +334,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 					size_t i;
-					included_auto = 1;
+					included_auto = true;
 					for (i = 0; i < identify_list_size; i++) {
 						*entry++ = mbfl_no2encoding(*src++);
 						n++;
@@ -379,7 +380,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
 	const mbfl_encoding **list = ecalloc(size, sizeof(mbfl_encoding*));
 	const mbfl_encoding **entry = list;
-	bool included_auto = 0;
+	bool included_auto = false;
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
@@ -396,7 +397,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 				size_t j;
 
-				included_auto = 1;
+				included_auto = true;
 				for (j = 0; j < identify_list_size; j++) {
 					*entry++ = mbfl_no2encoding(*src++);
 					n++;
@@ -718,6 +719,11 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 	}
 	MBSTRG(detect_order_list) = list;
 	MBSTRG(detect_order_list_size) = size;
+
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		php_mb_populate_current_detect_order_list();
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -729,7 +735,7 @@ static zend_result _php_mb_ini_mbstring_http_input_set(const char *new_value, si
 		list = (const mbfl_encoding**)pecalloc(1, sizeof(mbfl_encoding*), 1);
 		*list = &mbfl_encoding_pass;
 		size = 1;
-	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ 1, /* arg_num */ 0) || size == 0) {
+	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ true, /* arg_num */ 0) || size == 0) {
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {
@@ -2788,7 +2794,7 @@ try_again:
 			case IS_FALSE:
 			case IS_LONG:
 			case IS_DOUBLE:
-				ZVAL_COPY(&entry_tmp, entry);
+				ZVAL_COPY_VALUE(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(
@@ -5578,19 +5584,16 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 
 static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
-	zend_long idx;
 	zend_string *key;
 	zval *entry;
 	bool valid = true;
-
-	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return false;
 	}
 	GC_TRY_PROTECT_RECURSION(vars);
-	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(vars, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
 			if (!mb_check_str_encoding(key, encoding)) {
@@ -5984,6 +5987,11 @@ static void php_mb_populate_current_detect_order_list(void)
 			entry[i] = mbfl_no2encoding(src[i]);
 		}
 	}
+
+	if (MBSTRG(current_detect_order_list) != NULL) {
+		efree(ZEND_VOIDP(MBSTRG(current_detect_order_list)));
+	}
+
 	MBSTRG(current_detect_order_list) = entry;
 	MBSTRG(current_detect_order_list_size) = nentries;
 }
@@ -6667,13 +6675,15 @@ static zend_string* mb_mime_header_decode(zend_string *input, const mbfl_encodin
 					p = temp;
 					/* Decoding of MIME encoded word was successful;
 					 * Try to collapse a run of whitespace */
-					if (p < e && (*p == '\n' || *p == '\r')) {
+					if (p < e && (*p == '\n' || *p == '\r' || *p == '\t' || *p == ' ')) {
 						do {
 							p++;
 						} while (p < e && (*p == '\n' || *p == '\r' || *p == '\t' || *p == ' '));
 						/* We will only actually output a space if this is not immediately followed
 						 * by another valid encoded word */
 						space_pending = true;
+					} else {
+						space_pending = false;
 					}
 					continue;
 				}

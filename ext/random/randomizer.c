@@ -509,8 +509,7 @@ PHP_METHOD(Random_Randomizer, __serialize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZVAL_ARR(&t, zend_std_get_properties(&randomizer->std));
-	Z_TRY_ADDREF(t);
+	ZVAL_ARR(&t, zend_array_dup(zend_std_get_properties(&randomizer->std)));
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 }
 /* }}} */

@@ -34,7 +34,6 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
-#include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
 
 #ifdef HAVE_SNMP

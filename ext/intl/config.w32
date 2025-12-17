@@ -13,34 +13,34 @@ if (PHP_INTL != "no") {
 								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		ADD_EXTENSION_DEP('intl', 'date');
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
-				collator_attr.c \
-				collator_class.c \
-				collator_compare.c \
-				collator_convert.c \
-				collator_create.c \
-				collator_error.c \
-				collator_is_numeric.c \
-				collator_locale.c \
-				collator_sort.c \
+				collator_attr.cpp \
+				collator_class.cpp \
+				collator_compare.cpp \
+				collator_convert.cpp \
+				collator_create.cpp \
+				collator_error.cpp \
+				collator_is_numeric.cpp \
+				collator_locale.cpp \
+				collator_sort.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/common", "\
-				common_error.c \
+				common_error.cpp \
 				common_enum.cpp \
 				common_date.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/converter", "\
-				converter.c \
+				converter.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
-				formatter_attr.c \
-				formatter_class.c \
-				formatter_data.c \
-				formatter_format.c \
-				formatter_main.c \
-				formatter_parse.c \
+				formatter_attr.cpp \
+				formatter_class.cpp \
+				formatter_data.cpp \
+				formatter_format.cpp \
+				formatter_main.cpp \
+				formatter_parse.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/listformatter", "\
-				listformatter_class.c \
+				listformatter_class.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/locale", "\
 				locale.cpp \
@@ -57,20 +57,23 @@ if (PHP_INTL != "no") {
 				msgformat_parse.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/grapheme", "\
-                                grapheme_string.c grapheme_util.c  \
+                                grapheme_string.cpp grapheme_util.cpp  \
                                 ", "intl");
 		ADD_SOURCES(configure_module_dirname + "/normalizer", "\
 				normalizer_class.cpp \
 				normalizer_normalize.cpp \
 				", "intl");
+		ADD_SOURCES(configure_module_dirname + "/rangeformatter", "\
+				rangeformatter_class.cpp \
+				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/dateformat", "\
-				dateformat.c \
-				dateformat_class.c \
-				dateformat_attr.c \
-				dateformat_format.c \
+				dateformat.cpp \
+				dateformat_class.cpp \
+				dateformat_attr.cpp \
+				dateformat_format.cpp \
 				dateformat_format_object.cpp \
-				dateformat_parse.c \
-				dateformat_data.c \
+				dateformat_parse.cpp \
+				dateformat_data.cpp \
 				dateformat_attrcpp.cpp \
 				dateformat_helpers.cpp \
 				dateformat_create.cpp \
@@ -84,22 +87,22 @@ if (PHP_INTL != "no") {
 				idn.cpp",
 				"intl");
 		ADD_SOURCES(configure_module_dirname + "/resourcebundle", "\
-				resourcebundle.c \
-				resourcebundle_class.c \
-				resourcebundle_iterator.c",
+				resourcebundle.cpp \
+				resourcebundle_class.cpp \
+				resourcebundle_iterator.cpp",
 				"intl");
 
 		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
 			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
-					spoofchecker_class.c \
-					spoofchecker_create.c \
-					spoofchecker_main.c",
+					spoofchecker_class.cpp \
+					spoofchecker_create.cpp \
+					spoofchecker_main.cpp",
 					"intl");
 		}
 
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
-				transliterator_class.c \
-				transliterator_methods.c",
+				transliterator_class.cpp \
+				transliterator_methods.cpp",
 				"intl");
 
 		ADD_SOURCES(configure_module_dirname + "/timezone", "\

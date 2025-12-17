@@ -256,7 +256,7 @@ PHP_FUNCTION(msg_receive)
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
 	zend_long desiredmsgtype, maxsize, flags = 0;
 	zend_long realflags = 0;
-	bool do_unserialize = 1;
+	bool do_unserialize = true;
 	sysvmsg_queue_t *mq = NULL;
 	struct php_msgbuf *messagebuffer = NULL; /* buffer to transmit */
 	int result;
@@ -337,7 +337,7 @@ PHP_FUNCTION(msg_send)
 {
 	zval *message, *queue, *zerror=NULL;
 	zend_long msgtype;
-	bool do_serialize = 1, blocking = 1;
+	bool do_serialize = true, blocking = true;
 	sysvmsg_queue_t * mq = NULL;
 	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;

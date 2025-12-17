@@ -36,9 +36,14 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
+static zend_arg_info zarginfo_class_UnitEnum_cases[sizeof(arginfo_class_UnitEnum_cases)/sizeof(zend_internal_arg_info)];
+static zend_arg_info zarginfo_class_BackedEnum_from[sizeof(arginfo_class_BackedEnum_from)/sizeof(zend_internal_arg_info)];
+static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_BackedEnum_tryFrom)/sizeof(zend_internal_arg_info)];
+
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
 {
 	zend_object *zobj = zend_objects_new(ce);
+	GC_ADD_FLAGS(zobj, GC_NOT_COLLECTABLE);
 	ZVAL_OBJ(result, zobj);
 
 	zval *zname = OBJ_PROP_NUM(zobj, 0);
@@ -445,7 +450,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 	cases_function->function_name = ZSTR_KNOWN(ZEND_STR_CASES);
 	cases_function->fn_flags = fn_flags;
 	cases_function->doc_comment = NULL;
-	cases_function->arg_info = (zend_internal_arg_info *) (arginfo_class_UnitEnum_cases + 1);
+	cases_function->arg_info = zarginfo_class_UnitEnum_cases + 1;
 	zend_enum_register_func(ce, ZEND_STR_CASES, cases_function);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
@@ -456,7 +461,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		from_function->doc_comment = NULL;
 		from_function->num_args = 1;
 		from_function->required_num_args = 1;
-		from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_from + 1);
+		from_function->arg_info = zarginfo_class_BackedEnum_from + 1;
 		zend_enum_register_func(ce, ZEND_STR_FROM, from_function);
 
 		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
@@ -466,7 +471,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->doc_comment = NULL;
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
-		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
+		try_from_function->arg_info = zarginfo_class_BackedEnum_tryFrom + 1;
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
 	}
 }
@@ -631,4 +636,17 @@ ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name) {
 	zend_class_constant *c = zend_hash_str_find_ptr(CE_CONSTANTS_TABLE(ce), name, strlen(name));
 	return zend_enum_case_from_class_constant(c);
+}
+
+void zend_enum_startup(void)
+{
+	for (size_t i = 0; i < sizeof(zarginfo_class_UnitEnum_cases)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_UnitEnum_cases[i], &arginfo_class_UnitEnum_cases[i], i == 0, true);
+	}
+	for (size_t i = 0; i < sizeof(zarginfo_class_BackedEnum_from)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_BackedEnum_from[i], &arginfo_class_BackedEnum_from[i], i == 0, true);
+	}
+	for (size_t i = 0; i < sizeof(zarginfo_class_BackedEnum_tryFrom)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_BackedEnum_tryFrom[i], &arginfo_class_BackedEnum_tryFrom[i], i == 0, true);
+	}
 }

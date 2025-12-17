@@ -281,14 +281,14 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
-	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, false);
 	return ht;
 }
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
-	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0);
+	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, false);
 	return ht;
 }
 
@@ -296,7 +296,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(const zval *val1, const zval *va
 {
 	zval *zv;
 	HashTable *ht = emalloc(sizeof(HashTable));
-	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, false);
 	ht->nNumUsed = ht->nNumOfElements = ht->nNextFreeElement = 2;
 	zend_hash_real_init_packed_ex(ht);
 
@@ -1060,6 +1060,13 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_new(HashTable *ht, const char *st
 	zend_ulong h = zend_hash_func(str, len);
 
 	return _zend_hash_str_add_or_update_i(ht, str, len, h, pData, HASH_ADD_NEW);
+}
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_str_lookup(HashTable *ht, const char *str, size_t len)
+{
+	zend_ulong h = zend_hash_func(str, len);
+
+	return _zend_hash_str_add_or_update_i(ht, str, len, h, NULL, HASH_LOOKUP);
 }
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_empty_element(HashTable *ht, zend_ulong h)
@@ -2375,7 +2382,7 @@ static zend_always_inline void zend_array_dup_packed_elements(const HashTable *s
 	const zval *end = p + source->nNumUsed;
 
 	do {
-		if (!zend_array_dup_value(source, p, q, 1, with_holes)) {
+		if (!zend_array_dup_value(source, p, q, true, with_holes)) {
 			if (with_holes) {
 				ZVAL_UNDEF(q);
 			}
@@ -2400,13 +2407,13 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 	}
 
 	do {
-		if (!zend_array_dup_element(source, target, idx, p, q, 0, static_keys, with_holes)) {
+		if (!zend_array_dup_element(source, target, idx, p, q, false, static_keys, with_holes)) {
 			uint32_t target_idx = idx;
 
 			idx++; p++;
 			if (EXPECTED(!HT_HAS_ITERATORS(target))) {
 				while (p != end) {
-					if (zend_array_dup_element(source, target, target_idx, p, q, 0, static_keys, with_holes)) {
+					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
 						if (source->nInternalPointer == idx) {
 							target->nInternalPointer = target_idx;
 						}
@@ -2419,7 +2426,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 				uint32_t iter_pos = zend_hash_iterators_lower_pos(target, idx);
 
 				while (p != end) {
-					if (zend_array_dup_element(source, target, target_idx, p, q, 0, static_keys, with_holes)) {
+					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
 						if (source->nInternalPointer == idx) {
 							target->nInternalPointer = target_idx;
 						}
@@ -2496,9 +2503,9 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 		HT_HASH_RESET_PACKED(target);
 
 		if (HT_IS_WITHOUT_HOLES(target)) {
-			zend_array_dup_packed_elements(source, target, 0);
+			zend_array_dup_packed_elements(source, target, false);
 		} else {
-			zend_array_dup_packed_elements(source, target, 1);
+			zend_array_dup_packed_elements(source, target, true);
 		}
 	} else {
 		/* Indirects are removed during duplication, remove HASH_FLAG_HAS_EMPTY_IND accordingly. */
@@ -2515,15 +2522,15 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 
 		if (HT_HAS_STATIC_KEYS_ONLY(target)) {
 			if (HT_IS_WITHOUT_HOLES(source)) {
-				idx = zend_array_dup_elements(source, target, 1, 0);
+				idx = zend_array_dup_elements(source, target, true, false);
 			} else {
-				idx = zend_array_dup_elements(source, target, 1, 1);
+				idx = zend_array_dup_elements(source, target, true, true);
 			}
 		} else {
 			if (HT_IS_WITHOUT_HOLES(source)) {
-				idx = zend_array_dup_elements(source, target, 0, 0);
+				idx = zend_array_dup_elements(source, target, false, false);
 			} else {
-				idx = zend_array_dup_elements(source, target, 0, 1);
+				idx = zend_array_dup_elements(source, target, false, true);
 			}
 		}
 		target->nNumUsed = idx;
@@ -2851,7 +2858,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(const HashTable *
 }
 
 
-/* This function should be made binary safe  */
 ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
 {
 	uint32_t idx;

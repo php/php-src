@@ -37,17 +37,13 @@
  */
 
 #if !defined(URI_CONFIG_H)
-# define URI_CONFIG_H 1
+#  define URI_CONFIG_H 1
 
-
-
-#define PACKAGE_VERSION "@PROJECT_VERSION@"
+#  define PACKAGE_VERSION "@PROJECT_VERSION@"
 
 /*
-#define HAVE_WPRINTF*
+#define HAVE_WPRINTF
 #define HAVE_REALLOCARRAY
 */
 
-
-
-#endif  /* !defined(URI_CONFIG_H) */
+#endif /* !defined(URI_CONFIG_H) */

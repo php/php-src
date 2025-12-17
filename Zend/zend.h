@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.5.0-dev"
+#define ZEND_VERSION "4.6.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -152,11 +152,12 @@ struct _zend_class_entry {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
-	int refcount;
+	uint32_t refcount;
 	uint32_t ce_flags;
+	uint32_t ce_flags2;
 
 	int default_properties_count;
-	int default_static_members_count;
+	uint32_t default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);
@@ -441,7 +442,7 @@ typedef struct {
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
-ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
+ZEND_API void zend_restore_error_handling(const zend_error_handling *saved);
 ZEND_API void zend_begin_record_errors(void);
 ZEND_API void zend_emit_recorded_errors(void);
 ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors);

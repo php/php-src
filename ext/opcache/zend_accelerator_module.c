@@ -34,7 +34,6 @@
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_filestat.h"
 #include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
@@ -62,7 +61,7 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-static int validate_api_restriction(void)
+static bool validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
 		size_t len = strlen(ZCG(accel_directives).restrict_api);
@@ -71,10 +70,10 @@ static int validate_api_restriction(void)
 		    strlen(SG(request_info).path_translated) < len ||
 		    memcmp(SG(request_info).path_translated, ZCG(accel_directives).restrict_api, len) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " API is restricted by \"restrict_api\" configuration directive");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
@@ -178,8 +177,8 @@ static ZEND_INI_MH(OnEnable)
 			}
 			return FAILURE;
 		} else {
-			*p = 0;
-			ZCG(accelerator_enabled) = 0;
+			*p = false;
+			ZCG(accelerator_enabled) = false;
 			return SUCCESS;
 		}
 	}
@@ -363,7 +362,7 @@ ZEND_INI_BEGIN()
 #endif
 ZEND_INI_END()
 
-static int filename_is_in_cache(zend_string *filename)
+static bool filename_is_in_cache(zend_string *filename)
 {
 	zend_string *key;
 
@@ -373,27 +372,26 @@ static int filename_is_in_cache(zend_string *filename)
 		if (persistent_script && !persistent_script->corrupted) {
 			if (ZCG(accel_directives).validate_timestamps) {
 				zend_file_handle handle;
-				int ret;
+				bool ret;
 
 				zend_stream_init_filename_ex(&handle, filename);
-				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS
-					? 1 : 0;
+				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
 				zend_destroy_file_handle(&handle);
 				return ret;
 			}
 
-			return 1;
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 
-static int filename_is_in_file_cache(zend_string *filename)
+static bool filename_is_in_file_cache(zend_string *filename)
 {
 	zend_string *realpath = zend_resolve_path(filename);
 	if (!realpath) {
-		return 0;
+		return false;
 	}
 
 	zend_file_handle handle;
@@ -406,7 +404,7 @@ static int filename_is_in_file_cache(zend_string *filename)
 	return result != NULL;
 }
 
-static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
+static bool accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (ZEND_NUM_ARGS() == 1) {
 		zval *zv = ZEND_CALL_ARG(execute_data , 1);
@@ -415,7 +413,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 			return filename_is_in_cache(Z_STR_P(zv));
 		}
 	}
-	return 0;
+	return false;
 }
 
 static ZEND_NAMED_FUNCTION(accel_file_exists)
@@ -670,7 +668,7 @@ ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
-	bool fetch_scripts = 1;
+	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
@@ -937,7 +935,7 @@ ZEND_FUNCTION(opcache_reset)
 ZEND_FUNCTION(opcache_invalidate)
 {
 	zend_string *script_name;
-	bool force = 0;
+	bool force = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &script_name, &force) == FAILURE) {
 		RETURN_THROWS();
@@ -947,11 +945,7 @@ ZEND_FUNCTION(opcache_invalidate)
 		RETURN_FALSE;
 	}
 
-	if (zend_accel_invalidate(script_name, force) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_accel_invalidate(script_name, force) == SUCCESS);
 }
 
 /* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */

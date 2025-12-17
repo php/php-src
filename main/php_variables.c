@@ -745,7 +745,7 @@ static inline void php_register_server_variables(void)
 	/* store request init time */
 	ZVAL_DOUBLE(&tmp, sapi_get_request_time());
 	php_register_variable_quick("REQUEST_TIME_FLOAT", sizeof("REQUEST_TIME_FLOAT")-1, &tmp, ht);
-	ZVAL_LONG(&tmp, zend_dval_to_lval(Z_DVAL(tmp)));
+	ZVAL_LONG(&tmp, zend_dval_to_lval_silent(Z_DVAL(tmp)));
 	php_register_variable_quick("REQUEST_TIME", sizeof("REQUEST_TIME")-1, &tmp, ht);
 }
 /* }}} */

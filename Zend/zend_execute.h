@@ -48,11 +48,11 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
-ZEND_API bool zend_is_valid_class_name(zend_string *name);
+ZEND_API bool zend_is_valid_class_name(const zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
-ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
-ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
+ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex);
+ZEND_API zend_object *zend_get_this_object(const zend_execute_data *ex);
 ZEND_API zend_result zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
 ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
 ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, bool handle_exceptions);
@@ -234,6 +234,9 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 		}
 		Z_OBJ_P(result)->properties = ht;
 	} else if (Z_TYPE_P(expr) != IS_NULL) {
+		if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+			zend_nan_coerced_to_type_warning(IS_OBJECT);
+		}
 		Z_OBJ_P(result)->properties = ht = zend_new_array(1);
 		expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
 		if (op1_type == IS_CONST) {
@@ -248,6 +251,9 @@ static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr,
 	extern zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+				zend_nan_coerced_to_type_warning(IS_ARRAY);
+			}
 			ZVAL_ARR(result, zend_new_array(1));
 			expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 			if (op1_type == IS_CONST) {
@@ -353,7 +359,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 	}
 }
 
-static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
+static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, const zend_function *func)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args + func->common.T;
 
@@ -447,11 +453,11 @@ ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
 ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
-ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data);
+ZEND_API const zend_function *zend_active_function_ex(const zend_execute_data *execute_data);
 
-static zend_always_inline zend_function *zend_active_function(void)
+static zend_always_inline const zend_function *zend_active_function(void)
 {
-	zend_function *func = EG(current_execute_data)->func;
+	const zend_function *func = EG(current_execute_data)->func;
 	if (ZEND_USER_CODE(func->type)) {
 		return zend_active_function_ex(EG(current_execute_data));
 	} else {

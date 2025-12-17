@@ -39,12 +39,12 @@ struct _zend_call_info {
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
 	bool               is_frameless; /* A frameless function sends arguments through operands */
-	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
+	uint32_t           num_args;	/* Number of arguments, excluding named and variadic arguments */
 	zend_send_arg_info      arg_info[1];
 };
 
 struct _zend_func_info {
-	int                     num;
+	uint32_t                num;
 	uint32_t                flags;
 	zend_ssa                ssa;          /* Static Single Assignment Form  */
 	zend_call_info         *caller_info;  /* where this function is called from */
@@ -54,7 +54,7 @@ struct _zend_func_info {
 };
 
 typedef struct _zend_call_graph {
-	int                     op_arrays_count;
+	uint32_t                op_arrays_count;
 	zend_op_array         **op_arrays;
 	zend_func_info         *func_infos;
 } zend_call_graph;
@@ -63,7 +63,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
 ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
-ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array);
+ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, const zend_func_info *info, const zend_op_array *op_array);
 ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info);
 
 END_EXTERN_C()

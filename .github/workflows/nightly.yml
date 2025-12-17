@@ -14,6 +14,9 @@ on:
       libmysqlclient_with_mysqli:
         required: true
         type: boolean
+      macos_arm64_version:
+        required: true
+        type: string
       run_alpine:
         required: true
         type: boolean
@@ -38,9 +41,9 @@ on:
       skip_laravel:
         required: true
         type: boolean
-      skip_symfony:
+      symfony_version:
         required: true
-        type: boolean
+        type: string
       skip_wordpress:
         required: true
         type: boolean
@@ -93,9 +96,9 @@ jobs:
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container:
-      image: 'alpine:3.20.1'
+      image: 'alpine:3.22'
     steps:
       - name: git checkout
         uses: actions/checkout@v5
@@ -103,11 +106,6 @@ jobs:
           ref: ${{ inputs.branch }}
       - name: apk
         uses: ./.github/actions/apk
-      - name: LLVM 17 (ASAN-only)
-        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
-        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
-        run: |
-          apk add clang17 compiler-rt
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -122,8 +120,8 @@ jobs:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-17
-            CXX=clang++-17
+            CC=clang-20
+            CXX=clang++-20
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
@@ -140,12 +138,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
-
   LINUX_X64:
     services:
       mysql:
@@ -274,11 +266,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
     strategy:
       fail-fast: false
@@ -360,27 +347,24 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
     strategy:
       fail-fast: false
       matrix:
         debug: [true, false]
         zts: [true, false]
-        os: ['13', '14']
+        arch: ['X64', 'ARM64']
         exclude:
-          - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
-    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.os }}
+          - arch: ${{ !inputs.run_macos_arm64 && 'ARM64' || '*never*' }}
+    name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || inputs.macos_arm64_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
+      - name: Update clang
+        uses: ./.github/actions/macos-update-clang
       - name: brew
         uses: ./.github/actions/brew
       - name: ./configure
@@ -398,7 +382,7 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: tracing
@@ -410,7 +394,7 @@ jobs:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: function
@@ -420,11 +404,6 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
     if: inputs.branch == 'master'
     services:
@@ -485,11 +464,6 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
     strategy:
       fail-fast: false
@@ -618,9 +592,9 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: ${{ !cancelled() && !inputs.skip_symfony }}
+        if: ${{ !cancelled() && inputs.symfony_version != '' }}
         run: |
-          git clone https://github.com/symfony/symfony.git --depth=1
+          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ inputs.symfony_version }}"
           cd symfony
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -654,7 +628,8 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: ${{ !cancelled() && !inputs.skip_symfony }}
+        # composer create-project will automatically pick the right Symfony version for us.
+        if: ${{ !cancelled() && inputs.symfony_version != '' }}
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-req=php+
           cd symfony_demo
@@ -676,11 +651,6 @@ jobs:
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
     services:
       mysql:
@@ -762,11 +732,6 @@ jobs:
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
     name: MSAN
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -853,11 +818,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
@@ -900,11 +860,6 @@ jobs:
           withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
     if: inputs.branch == 'master'
     runs-on: ubuntu-22.04
@@ -1012,11 +967,6 @@ jobs:
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
-      - name: Notify Slack
-        if: failure()
-        uses: ./.github/actions/notify-slack
-        with:
-          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
     strategy:
       fail-fast: false
@@ -1042,7 +992,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
       PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"

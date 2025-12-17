@@ -49,10 +49,6 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Warning: unserialize(): Error at offset 17 of 24 bytes in %s on line %d
 bool(false)
 

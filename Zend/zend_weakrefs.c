@@ -181,7 +181,7 @@ ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pDa
 ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
 	zval *zv = zend_hash_index_find(ht, zend_object_to_weakref_key(key));
 	if (zv) {
-		zend_weakref_unregister(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_BARE_HT), 1);
+		zend_weakref_unregister(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_BARE_HT), true);
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -194,7 +194,7 @@ static void zend_weakrefs_hash_clean_ex(HashTable *ht, int type) {
 		 * Let freeing the corresponding values for WeakMap entries be done in zend_hash_clean, freeing objects sequentially.
 		 * The performance difference is notable for larger WeakMaps with worse cache locality. */
 		zend_weakref_unregister(
-			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(ht, type), 0);
+			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(ht, type), false);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(ht);
 }
@@ -237,7 +237,7 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *return_value) {
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), zend_object_to_weakref_key(referent));
 	if (!tagged_ptr) {
-		return 0;
+		return false;
 	}
 
 	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
@@ -247,7 +247,7 @@ static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *re
 found_weakref:
 		wr = ptr;
 		RETVAL_OBJ_COPY(&wr->std);
-		return 1;
+		return true;
 	}
 
 	if (tag == ZEND_WEAKREF_TAG_HT) {
@@ -259,7 +259,7 @@ found_weakref:
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	return 0;
+	return false;
 }
 
 static zend_always_inline void zend_weakref_create(zend_object *referent, zval *return_value) {
@@ -285,7 +285,7 @@ static void zend_weakref_free(zend_object *zo) {
 	zend_weakref *wr = zend_weakref_from(zo);
 
 	if (wr->referent) {
-		zend_weakref_unregister(wr->referent, ZEND_WEAKREF_ENCODE(wr, ZEND_WEAKREF_TAG_REF), 1);
+		zend_weakref_unregister(wr->referent, ZEND_WEAKREF_ENCODE(wr, ZEND_WEAKREF_TAG_REF), true);
 	}
 
 	zend_object_std_dtor(&wr->std);
@@ -370,18 +370,25 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_addr = Z_OBJ_P(offset);
 	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
-	if (zv == NULL) {
-		if (type != BP_VAR_IS) {
-			zend_throw_error(NULL,
-				"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
+	if (type == BP_VAR_W || type == BP_VAR_RW) {
+		if (zv == NULL) {
+			zval value;
+			zend_weakref_register(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
+			ZVAL_NULL(&value);
+			zv = zend_hash_index_add_new(&wm->ht, zend_object_to_weakref_key(obj_addr), &value);
+		}
+		ZVAL_MAKE_REF(zv);
+	} else {
+		if (zv == NULL) {
+			if (type != BP_VAR_IS) {
+				zend_throw_error(NULL,
+					"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
+				return NULL;
+			}
 			return NULL;
 		}
-		return NULL;
 	}
 
-	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		ZVAL_MAKE_REF(zv);
-	}
 	return zv;
 }
 
@@ -455,7 +462,7 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 		return;
 	}
 
-	zend_weakref_unregister(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), 1);
+	zend_weakref_unregister(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), true);
 }
 
 static zend_result zend_weakmap_count_elements(zend_object *object, zend_long *count)
@@ -731,7 +738,7 @@ ZEND_METHOD(WeakMap, offsetGet)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY(return_value, zv);
+	RETURN_COPY_DEREF(zv);
 }
 
 ZEND_METHOD(WeakMap, offsetSet)
@@ -769,9 +776,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 
 ZEND_METHOD(WeakMap, count)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_long count;
 	zend_weakmap_count_elements(Z_OBJ_P(ZEND_THIS), &count);
@@ -780,9 +785,7 @@ ZEND_METHOD(WeakMap, count)
 
 ZEND_METHOD(WeakMap, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

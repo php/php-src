@@ -42,7 +42,6 @@ printf("serialized temp    :    %s\n", $stc);
 
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 serialized original:    O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:1;}}
 serialized temp    :    O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:1;}}
 serialized original:    O:1:"C":1:{s:1:"b";O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:2;}}}

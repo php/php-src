@@ -614,34 +614,36 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 			size_t msg_len = strlen(message);
 			size_t new_len = 0;
 
-			for (size_t i = 0; i < msg_len - 1; ++i) {
-				if (message[i] == '\r' && message[i + 1] == '\n') {
-					++new_len;
-				}
-			}
-
-			if (new_len == 0) {
-				fprintf(sendmail, "%s", message);
-			} else {
-				converted_message = emalloc(msg_len - new_len + 1);
-				size_t j = 0;
-				for (size_t i = 0; i < msg_len; ++i) {
-					if (i < msg_len - 1 && message[i] == '\r' && message[i + 1] == '\n') {
-						converted_message[j++] = '\n';
-						++i; /* skip LF part */
-					} else {
-						converted_message[j++] = message[i];
+			if (msg_len > 0) {
+				for (size_t i = 0; i < msg_len - 1; ++i) {
+					if (message[i] == '\r' && message[i + 1] == '\n') {
+						++new_len;
 					}
 				}
 
-				converted_message[j] = '\0';
-				fprintf(sendmail, "%s", converted_message);
-				efree(converted_message);
+				if (new_len == 0) {
+					fprintf(sendmail, "%s", message);
+				} else {
+					converted_message = emalloc(msg_len - new_len + 1);
+					size_t j = 0;
+					for (size_t i = 0; i < msg_len; ++i) {
+						if (i < msg_len - 1 && message[i] == '\r' && message[i + 1] == '\n') {
+							converted_message[j++] = '\n';
+							++i; /* skip LF part */
+						} else {
+							converted_message[j++] = message[i];
+						}
+					}
+
+					converted_message[j] = '\0';
+					fprintf(sendmail, "%s", converted_message);
+					efree(converted_message);
+				}
 			}
 		} else {
 			fprintf(sendmail, "%s", message);
 		}
-		
+
 		fprintf(sendmail, "%s", line_sep);
 #ifdef PHP_WIN32
 		ret = pclose(sendmail);

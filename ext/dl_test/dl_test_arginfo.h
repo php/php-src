@@ -57,9 +57,9 @@ static zend_class_entry *register_class_DlTestSuperClass(void)
 
 	zval property_a_default_value;
 	ZVAL_UNDEF(&property_a_default_value);
-	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, 1);
+	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, true);
 	zend_declare_typed_property(class_entry, property_a_name, &property_a_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_a_name);
+	zend_string_release_ex(property_a_name, true);
 
 	return class_entry;
 }

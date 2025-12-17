@@ -115,11 +115,29 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #endif
 
+ZEND_API void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d);
+ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type);
+
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+	if (UNEXPECTED(!zend_finite(d))) {
+		zend_oob_double_to_long_error(d);
+		return 0;
+	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
+		zend_oob_double_to_long_error(d);
+		return zend_dval_to_lval_slow(d);
+	}
+	return (zend_long)d;
+}
+
+static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
+{
+	if (UNEXPECTED(!zend_finite(d))) {
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		return zend_dval_to_lval_slow(d);
@@ -128,11 +146,13 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 }
 
 /* Used to convert a string float to integer during an (int) cast */
-static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
+static zend_always_inline zend_long zend_dval_to_lval_cap(double d, const zend_string *s)
 {
-	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+	if (UNEXPECTED(!zend_finite(d))) {
+		zend_oob_string_to_long_error(s);
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
+		zend_oob_string_to_long_error(s);
 		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
 	}
 	return (zend_long)d;
@@ -143,13 +163,10 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return (double)l == d;
 }
 
-ZEND_API void zend_incompatible_double_to_long_error(double d);
-ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
-
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
 	zend_long l = zend_dval_to_lval(d);
-	if (!zend_is_long_compatible(d, l)) {
+	if (!zend_is_long_compatible(d, l) && ZEND_DOUBLE_FITS_LONG(d)) {
 		zend_incompatible_double_to_long_error(d);
 	}
 	return l;
@@ -373,22 +390,11 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 	return _try_convert_to_string(op);
 }
 
-/* Compatibility macros for 7.2 and below */
-#define _zval_get_long(op) zval_get_long(op)
-#define _zval_get_double(op) zval_get_double(op)
-#define _zval_get_string(op) zval_get_string(op)
-#define _zval_get_long_func(op) zval_get_long_func(op)
-#define _zval_get_double_func(op) zval_get_double_func(op)
-#define _zval_get_string_func(op) zval_get_string_func(op)
-
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
 ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op);
 ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op);
-
-#define zval_is_true(op) \
-	zend_is_true(op)
 
 static zend_always_inline bool i_zend_is_true(const zval *op)
 {
@@ -405,6 +411,9 @@ again:
 			}
 			break;
 		case IS_DOUBLE:
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(_IS_BOOL);
+			}
 			if (Z_DVAL_P(op)) {
 				result = 1;
 			}
