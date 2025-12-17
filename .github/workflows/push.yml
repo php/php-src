@@ -48,7 +48,7 @@ jobs:
       image: 'alpine:3.22'
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: apk
         uses: ./.github/actions/apk
       - name: System info

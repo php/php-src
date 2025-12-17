@@ -17,7 +17,7 @@ jobs:
     if: github.repository == 'php/php-src'
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install dependencies
         run: pip install sphinx-design sphinxawesome-theme rstfmt
       - name: Check formatting
