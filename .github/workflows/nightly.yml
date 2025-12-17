@@ -57,7 +57,7 @@ jobs:
     runs-on: [self-hosted, gentoo, ppc64]
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: System info
@@ -98,7 +98,7 @@ jobs:
       image: 'alpine:3.22'
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: apk
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-${{ matrix.asan && inputs.asan_ubuntu_version || inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -294,7 +294,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -357,7 +357,7 @@ jobs:
     runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Update clang
@@ -429,7 +429,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -477,7 +477,7 @@ jobs:
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -676,7 +676,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -734,7 +734,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -820,7 +820,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -865,38 +865,38 @@ jobs:
       CXX: ccache g++
     steps:
       - name: git checkout PHP
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: php
           ref: ${{ inputs.branch }}
       - name: git checkout apcu
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: krakjoe/apcu
           path: apcu
       - name: git checkout imagick
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: Imagick/imagick
           path: imagick
       - name: git checkout memcached
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
         if: false
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: xdebug/xdebug
           path: xdebug
       - name: git checkout yaml
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: php/pecl-file_formats-yaml
           path: yaml
@@ -1001,7 +1001,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Setup
@@ -1022,7 +1022,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: FreeBSD
