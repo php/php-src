@@ -20,7 +20,7 @@ jobs:
           # the correct commit hashes.
           fetch-depth: 0
       - name: Grab the commit mapping
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: branch-commit-cache.json
           # The cache key needs to change every time for the
