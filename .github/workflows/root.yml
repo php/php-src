@@ -13,7 +13,7 @@ jobs:
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           # Set fetch-depth to 0 to clone the full repository
           # including all branches. This is required to find
