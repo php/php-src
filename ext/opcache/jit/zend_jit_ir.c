@@ -10728,7 +10728,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	return 1;
 }
 
-static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, int call_level, int next_block)
+static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, int call_level, int b, int next_block)
 {
 	ir_ref if_skip_constructor = jit_IF_ex(jit, jit_CMP_IP(jit, IR_NE, opline), next_block);
 
@@ -10744,18 +10744,27 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 		}
 	}
 
+	/* Find the predecessor index of b in next_block. */
+	zend_basic_block *bb_next = &ssa->cfg.blocks[next_block];
+	int pred_i = -1;
+	for (pred_i = 0; pred_i < bb_next->predecessors_count; pred_i++) {
+		if (b == ssa->cfg.predecessors[bb_next->predecessor_offset + pred_i]) {
+			break;
+		}
+	}
+	ZEND_ASSERT(pred_i != -1);
+
 	/* override predecessors of the next block */
-	ZEND_ASSERT(jit->ssa->cfg.blocks[next_block].predecessors_count == 1);
 	if (!jit->ctx.control) {
-		ZEND_ASSERT(jit->bb_edges[jit->bb_predecessors[next_block]]);
+		ZEND_ASSERT(jit->bb_edges[jit->bb_predecessors[next_block] + pred_i]);
 		ir_IF_TRUE(if_skip_constructor);
-		ir_MERGE_2(jit->bb_edges[jit->bb_predecessors[next_block]], ir_END());
-		jit->bb_edges[jit->bb_predecessors[next_block]] = ir_END();
+		ir_MERGE_2(jit->bb_edges[jit->bb_predecessors[next_block] + pred_i], ir_END());
+		jit->bb_edges[jit->bb_predecessors[next_block] + pred_i] = ir_END();
 	} else {
-		ZEND_ASSERT(!jit->bb_edges[jit->bb_predecessors[next_block]]);
+		ZEND_ASSERT(!jit->bb_edges[jit->bb_predecessors[next_block] + pred_i]);
 		/* merge current control path with the true branch of constructor skip condition */
 		ir_MERGE_WITH_EMPTY_TRUE(if_skip_constructor);
-		jit->bb_edges[jit->bb_predecessors[next_block]] = ir_END();
+		jit->bb_edges[jit->bb_predecessors[next_block] + pred_i] = ir_END();
 
 		jit->b = -1;
 	}
