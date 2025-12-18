@@ -2331,7 +2331,7 @@ PHP_FUNCTION(socket_set_option)
 
 #if defined(TCP_USER_TIMEOUT)
 		case TCP_USER_TIMEOUT: {
-			zend_long timeout timeout = zval_get_long(arg4);
+			zend_long timeout = zval_get_long(arg4);
 
 			// TCP_USER_TIMEOUT unsigned int
 			if (timeout < 0 || timeout > UINT_MAX) {
