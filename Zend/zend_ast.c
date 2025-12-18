@@ -2409,6 +2409,8 @@ simple_list:
 				APPEND_STR("?");
 			} else if (ast->attr == _IS_PLACEHOLDER_VARIADIC) {
 				APPEND_STR("...");
+			} else {
+				ZEND_UNREACHABLE();
 			}
 			break;
 
