@@ -51,6 +51,7 @@ $example->bugySetMethod(5, 'in here');
 var_dump(json_encode($example));
 var_dump(json_encode($a));
 
+// child iterator modifications do not propagate to the parent iterator when working with arrays
 $b = [
     'test' => [
         'b' => [2 => '',3 => '',4 => ''],
@@ -66,5 +67,5 @@ var_dump(json_encode($b));
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 string(51) "{"test":{"a":{"2":"","3":"","4":"","5":"in here"}}}"
 string(51) "{"test":{"a":{"2":"","3":"","4":"","5":"in here"}}}"
-string(56) "{"test":{"b":{"2":"","3":"","4":"","5":"must be here"}}}"
+string(37) "{"test":{"b":{"2":"","3":"","4":""}}}"
 string(37) "{"test":{"b":{"2":"","3":"","4":""}}}"

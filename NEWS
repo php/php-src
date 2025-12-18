@@ -64,6 +64,7 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fixed bug GH-17935 (Add delayed separation in ArrayObject). (alexandre-daubois)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)

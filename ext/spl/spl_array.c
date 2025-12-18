@@ -44,8 +44,6 @@ typedef struct _spl_array_object {
 	uint32_t          ht_iter;
 	int               ar_flags;
 	unsigned char	  nApplyCount;
-	bool			  is_child;
-	Bucket			  *bucket;
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
@@ -166,8 +164,6 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 	object_properties_init(&intern->std, class_type);
 
 	intern->ar_flags = 0;
-	intern->is_child = false;
-	intern->bucket = NULL;
 	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
 		spl_array_object *other = spl_array_from_obj(orig);
@@ -466,21 +462,12 @@ static zval *spl_array_read_dimension(zend_object *object, zval *offset, int typ
 } /* }}} */
 
 /*
- * The assertion(HT_ASSERT_RC1(ht)) failed because the refcount was increased manually when intern->is_child is true.
- * We have to set the refcount to 1 to make assertion success and restore the refcount to the original value after
- * modifying the array when intern->is_child is true.
+ * Before modifying the internal array, we must ensure exclusive ownership
+ * to satisfy HT_ASSERT_RC1 in Zend hash operations.
+ *
+ * SEPARATE_ARRAY implements CoW: if the array is shared (RC > 1),
+ * it creates a duplicate via zend_array_dup() and updates intern->array.
  */
-static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t refcount) /* {{{ */
-{
-	uint32_t old_refcount = 0;
-	if (is_child) {
-		old_refcount = GC_REFCOUNT(ht);
-		GC_SET_REFCOUNT(ht, refcount);
-	}
-
-	return old_refcount;
-} /* }}} */
-
 static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
@@ -505,18 +492,15 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 	Z_TRY_ADDREF_P(value);
 
-	uint32_t refcount = 0;
 	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
+		if (Z_TYPE(intern->array) == IS_ARRAY) {
+			SEPARATE_ARRAY(&intern->array);
+		}
 		ht = spl_array_get_hash_table(intern);
 		if (UNEXPECTED(ht == intern->sentinel_array)) {
 			return;
 		}
-		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 		zend_hash_next_index_insert(ht, value);
-
-		if (refcount) {
-			spl_array_set_refcount(intern->is_child, ht, refcount);
-		}
 		return;
 	}
 
@@ -526,21 +510,19 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
+	if (Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
+	}
 	ht = spl_array_get_hash_table(intern);
 	if (UNEXPECTED(ht == intern->sentinel_array)) {
 		spl_hash_key_release(&key);
 		return;
 	}
-	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
 		zend_hash_update_ind(ht, key.key, value);
 		spl_hash_key_release(&key);
 	} else {
 		zend_hash_index_update(ht, key.h, value);
-	}
-
-	if (refcount) {
-		spl_array_set_refcount(intern->is_child, ht, refcount);
 	}
 } /* }}} */
 
@@ -570,8 +552,10 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
+	if (Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
+	}
 	ht = spl_array_get_hash_table(intern);
-	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 
 	if (key.key) {
 		zval *data = zend_hash_find(ht, key.key);
@@ -596,10 +580,6 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		spl_hash_key_release(&key);
 	} else {
 		zend_hash_index_del(ht, key.h);
-	}
-
-	if (refcount) {
-		spl_array_set_refcount(intern->is_child, ht, refcount);
 	}
 } /* }}} */
 
@@ -970,17 +950,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		if (Z_REFCOUNT_P(array) == 1) {
 			ZVAL_COPY(&intern->array, array);
 		} else {
-			//??? TODO: try to avoid array duplication
 			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
-
-			if (intern->is_child) {
-				Z_TRY_DELREF(intern->bucket->val);
-				/*
-				 * replace bucket->val with copied array, so the changes between
-				 * parent and child object can affect each other.
-				 */
-				ZVAL_COPY(&intern->bucket->val, &intern->array);
-			}
 		}
 	} else {
 		php_error_docref(NULL, E_DEPRECATED,
@@ -1850,15 +1820,6 @@ PHP_METHOD(RecursiveArrayIterator, hasChildren)
 static void spl_instantiate_child_arg(zend_class_entry *pce, zval *retval, zval *arg1, zval *arg2) /* {{{ */
 {
 	object_init_ex(retval, pce);
-	spl_array_object *new_intern = Z_SPLARRAY_P(retval);
-	/*
-	 * set new_intern->is_child is true to indicate that the object was created by
-	 * RecursiveArrayIterator::getChildren() method.
-	 */
-	new_intern->is_child = true;
-
-	/* find the bucket of parent object. */
-	new_intern->bucket = (Bucket *)((char *)(arg1) - XtOffsetOf(Bucket, val));;
 	zend_call_known_instance_method_with_2_params(pce->constructor, Z_OBJ_P(retval), NULL, arg1, arg2);
 }
 /* }}} */

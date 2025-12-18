@@ -26,7 +26,7 @@ array(3) {
   [0]=>
   array(1) {
     ["key2"]=>
-    string(5) "alter"
+    string(4) "val2"
   }
   ["key3"]=>
   string(4) "val3"
