@@ -1146,7 +1146,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 					zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
 					ZEND_ASSERT(args->children > 0);
-					if (args->children != 1 || args->child[0]->attr != _IS_PLACEHOLDER_VARIADIC) {
+					if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
 						/* TODO: PFAs */
 						return FAILURE;
 					}
@@ -1180,7 +1180,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 					zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
 					ZEND_ASSERT(args->children > 0);
-					if (args->children != 1 || args->child[0]->attr != _IS_PLACEHOLDER_VARIADIC) {
+					if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
 						/* TODO: PFAs */
 						return FAILURE;
 					}
@@ -2405,12 +2405,10 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_PLACEHOLDER_ARG:
-			if (ast->attr == _IS_PLACEHOLDER_ARG) {
-				APPEND_STR("?");
-			} else if (ast->attr == _IS_PLACEHOLDER_VARIADIC) {
+			if (ast->attr == ZEND_PLACEHOLDER_VARIADIC) {
 				APPEND_STR("...");
-			} else {
-				ZEND_UNREACHABLE();
+			} else  {
+				APPEND_STR("?");
 			}
 			break;
 
