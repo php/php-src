@@ -2331,16 +2331,17 @@ PHP_FUNCTION(socket_set_option)
 
 #if defined(TCP_USER_TIMEOUT)
 		case TCP_USER_TIMEOUT: {
-			ov = zval_get_long(arg4);
+			zend_long timeout timeout = zval_get_long(arg4);
 
 			// TCP_USER_TIMEOUT unsigned int
-			if (ov < 0 || ov > UINT_MAX) {
+			if (timeout < 0 || timeout > UINT_MAX) {
 				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
 				RETURN_THROWS();
 			}
 
-			optlen = sizeof(ov);
-			opt_ptr = &ov;
+            unsigned int val = (unsigned int)timeout;
+			optlen = sizeof(val);
+			opt_ptr = &val;
 			break;
 		}
 #endif
