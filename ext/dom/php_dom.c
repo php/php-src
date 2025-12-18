@@ -697,15 +697,17 @@ static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 	zend_object *clone = dom_objects_namespace_node_new(intern->dom.std.ce);
 	dom_object_namespace_node *clone_intern = php_dom_namespace_node_obj_from_obj(clone);
 
-	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
-	ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
-	xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
-
 	if (intern->parent_intern) {
 		clone_intern->parent_intern = intern->parent_intern;
 		GC_ADDREF(&clone_intern->parent_intern->std);
 	}
-	dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
+
+	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
+	if (original_node != NULL) {
+		ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
+		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
+		dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
+	}
 
 	zend_objects_clone_members(clone, &intern->dom.std);
 	return clone;
