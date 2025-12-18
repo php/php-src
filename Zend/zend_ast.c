@@ -1507,7 +1507,8 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CALLABLE_CONVERT)) {
 		zend_ast_fcc *fcc_ast = (zend_ast_fcc*) ast;
 
-		zend_ast_destroy(fcc_ast->args);
+		ast = fcc_ast->args;
+		goto tail_call;
 	}
 }
 
