@@ -1124,12 +1124,12 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 						if (!(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
 							zend_non_static_method_call(fptr);
-							
+
 							return FAILURE;
 						}
 						if ((fptr->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 							zend_abstract_method_call(fptr);
-							
+
 							return FAILURE;
 						} else if (fptr->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 							zend_error(E_DEPRECATED,
