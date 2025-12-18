@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20620 (bzcompress overflow on large source size).
     (David Carlier)
 
+- DOM:
+  . Fixed bug GH-20722 (Null pointer dereference in DOM namespace node cloning
+    via clone on malformed objects). (ndossche)
+
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
 
