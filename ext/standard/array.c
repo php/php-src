@@ -359,6 +359,205 @@ static int php_array_data_compare_string_locale_unstable_i(Bucket *f, Bucket *s)
 }
 /* }}} */
 
+static zend_always_inline int php_array_compare_strings(zend_string *s1, zend_string *s2)
+{
+	if (s1 == s2) {
+		return 0;
+	}
+	size_t len1 = ZSTR_LEN(s1);
+	size_t len2 = ZSTR_LEN(s2);
+	size_t min_len = len1 < len2 ? len1 : len2;
+	int cmp = memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), min_len);
+	if (cmp != 0) {
+		return cmp < 0 ? -1 : 1;
+	}
+	return ZEND_THREEWAY_COMPARE(len1, len2);
+}
+
+static zend_always_inline int php_array_sort_compare_strict(zval *op1, zval *op2);
+static int php_array_sort_compare_objects_strict(zval *o1, zval *o2);
+
+/* Wrapper for zend_hash_compare callback. php_array_sort_compare_strict is
+ * zend_always_inline for performance, so we need this addressable wrapper. */
+static int php_array_data_compare_strict_callback(zval *op1, zval *op2)
+{
+	return php_array_sort_compare_strict(op1, op2);
+}
+
+static int php_array_sort_compare_symbol_tables_strict(HashTable *ht1, HashTable *ht2)
+{
+	if (ht1 == ht2) {
+		return 0;
+	}
+
+	GC_TRY_ADDREF(ht1);
+	GC_TRY_ADDREF(ht2);
+
+	int ret = zend_hash_compare(ht1, ht2, (compare_func_t)php_array_data_compare_strict_callback, 0);
+
+	GC_TRY_DTOR_NO_REF(ht1);
+	GC_TRY_DTOR_NO_REF(ht2);
+
+	return ret;
+}
+
+static int php_array_sort_compare_objects_strict(zval *o1, zval *o2)
+{
+	ZEND_ASSERT(Z_TYPE_P(o1) == IS_OBJECT && Z_TYPE_P(o2) == IS_OBJECT);
+
+	zend_object *zobj1 = Z_OBJ_P(o1);
+	zend_object *zobj2 = Z_OBJ_P(o2);
+
+	if (zobj1->ce != zobj2->ce) {
+		return zobj1->ce > zobj2->ce ? 1 : -1;
+	}
+
+	if (zobj1 == zobj2) {
+		return 0;
+	}
+
+	if (zobj1->ce->ce_flags & ZEND_ACC_ENUM) {
+		return zobj1->handle > zobj2->handle ? 1 : -1;
+	}
+
+	if (Z_OBJ_HT_P(o1)->compare && Z_OBJ_HT_P(o1)->compare != zend_std_compare_objects) {
+		return Z_OBJ_HT_P(o1)->compare(o1, o2);
+	}
+
+	/* Compare declared properties directly when no dynamic properties exist.
+	 * Lazy objects are excluded so they get initialized via zend_std_get_properties_ex(). */
+	if (!zobj1->properties && !zobj2->properties
+			&& !zend_object_is_lazy(zobj1) && !zend_object_is_lazy(zobj2)) {
+		zend_property_info *info;
+		int i, ret;
+
+		if (!zobj1->ce->default_properties_count) {
+			return 0;
+		}
+
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1))) {
+			zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+			return ZEND_UNCOMPARABLE;
+		}
+		Z_PROTECT_RECURSION_P(o1);
+
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+
+		ret = 0;
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			zval *p1, *p2;
+
+			info = zobj1->ce->properties_info_table[i];
+
+			if (!info) {
+				continue;
+			}
+
+			p1 = OBJ_PROP(zobj1, info->offset);
+			p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (Z_TYPE_P(p1) != IS_UNDEF) {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
+					ret = php_array_sort_compare_strict(p1, p2);
+					if (ret != 0) {
+						break;
+					}
+				} else {
+					ret = 1;
+					break;
+				}
+			} else if (Z_TYPE_P(p2) != IS_UNDEF) {
+				ret = -1;
+				break;
+			}
+		}
+
+		Z_UNPROTECT_RECURSION_P(o1);
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+		return ret;
+	}
+
+	/* Dynamic properties exist: compare via property hash tables */
+	GC_ADDREF(zobj1);
+	GC_ADDREF(zobj2);
+
+	int ret = php_array_sort_compare_symbol_tables_strict(
+		zend_std_get_properties_ex(zobj1),
+		zend_std_get_properties_ex(zobj2)
+	);
+
+	OBJ_RELEASE(zobj1);
+	OBJ_RELEASE(zobj2);
+
+	return ret;
+}
+
+static zend_always_inline int php_array_sort_compare_strict(zval *op1, zval *op2)
+{
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+
+	uint8_t t1 = Z_TYPE_P(op1);
+	uint8_t t2 = Z_TYPE_P(op2);
+
+	if (t1 == t2) {
+		switch (t1) {
+			case IS_LONG:
+				return ZEND_THREEWAY_COMPARE(Z_LVAL_P(op1), Z_LVAL_P(op2));
+
+			case IS_STRING:
+				return php_array_compare_strings(Z_STR_P(op1), Z_STR_P(op2));
+
+			case IS_DOUBLE:
+				/* Per IEEE 754 totalOrder, NaN sorts after all other values */
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op1)))) {
+					return zend_isnan(Z_DVAL_P(op2)) ? 0 : 1;
+				}
+				if (UNEXPECTED(zend_isnan(Z_DVAL_P(op2)))) {
+					return -1;
+				}
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
+
+			case IS_ARRAY:
+				return php_array_sort_compare_symbol_tables_strict(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2));
+
+			case IS_OBJECT:
+				return php_array_sort_compare_objects_strict(op1, op2);
+
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+				return 0;
+
+			case IS_RESOURCE:
+				return ZEND_THREEWAY_COMPARE(Z_RES_P(op1)->handle, Z_RES_P(op2)->handle);
+
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+	}
+
+	/* Types differ: order by type hierarchy */
+	return t1 > t2 ? 1 : -1;
+}
+
+static zend_always_inline int php_array_data_compare_strict_unstable_i(Bucket *f, Bucket *s)
+{
+	return php_array_sort_compare_strict(&f->val, &s->val);
+}
+
+static zend_always_inline int php_array_key_compare_strict_unstable_i(Bucket *f, Bucket *s)
+{
+	if (f->key == NULL && s->key == NULL) {
+		return ZEND_THREEWAY_COMPARE((zend_long)f->h, (zend_long)s->h);
+	}
+	if (f->key && s->key) {
+		return php_array_compare_strings(f->key, s->key);
+	}
+	return f->key ? 1 : -1;
+}
+
 DEFINE_SORT_VARIANTS(key_compare);
 DEFINE_SORT_VARIANTS(key_compare_numeric);
 DEFINE_SORT_VARIANTS(key_compare_string_case);
@@ -371,6 +570,8 @@ DEFINE_SORT_VARIANTS(data_compare_string);
 DEFINE_SORT_VARIANTS(data_compare_string_locale);
 DEFINE_SORT_VARIANTS(natural_compare);
 DEFINE_SORT_VARIANTS(natural_case_compare);
+DEFINE_SORT_VARIANTS(key_compare_strict);
+DEFINE_SORT_VARIANTS(data_compare_strict);
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type)
 {
@@ -394,6 +595,9 @@ static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type)
 
 		case PHP_SORT_LOCALE_STRING:
 			return php_array_key_compare_string_locale;
+
+		case PHP_SORT_STRICT:
+			return php_array_key_compare_strict;
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -425,6 +629,9 @@ static bucket_compare_func_t php_get_key_reverse_compare_func(zend_long sort_typ
 		case PHP_SORT_LOCALE_STRING:
 			return php_array_reverse_key_compare_string_locale;
 
+		case PHP_SORT_STRICT:
+			return php_array_reverse_key_compare_strict;
+
 		case PHP_SORT_REGULAR:
 		default:
 			return php_array_reverse_key_compare;
@@ -455,6 +662,9 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type) /* {
 		case PHP_SORT_LOCALE_STRING:
 			return php_array_data_compare_string_locale;
 
+		case PHP_SORT_STRICT:
+			return php_array_data_compare_strict;
+
 		case PHP_SORT_REGULAR:
 		default:
 			return php_array_data_compare;
@@ -484,6 +694,9 @@ static bucket_compare_func_t php_get_data_reverse_compare_func(zend_long sort_ty
 
 		case PHP_SORT_LOCALE_STRING:
 			return php_array_reverse_data_compare_string_locale;
+
+		case PHP_SORT_STRICT:
+			return php_array_reverse_data_compare_strict;
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -540,6 +753,14 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 				return php_array_reverse_data_compare_string_locale_unstable;
 			} else {
 				return php_array_data_compare_string_locale_unstable;
+			}
+			break;
+
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_data_compare_strict_unstable;
+			} else {
+				return php_array_data_compare_strict_unstable;
 			}
 			break;
 
@@ -6008,6 +6229,7 @@ PHP_FUNCTION(array_multisort)
 				case PHP_SORT_STRING:
 				case PHP_SORT_NATURAL:
 				case PHP_SORT_LOCALE_STRING:
+				case PHP_SORT_STRICT:
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
