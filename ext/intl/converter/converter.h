@@ -21,12 +21,6 @@
 
 #include "php.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-int php_converter_minit(INIT_FUNC_ARGS);
-#ifdef __cplusplus
-}
-#endif
+U_CFUNC int php_converter_minit(INIT_FUNC_ARGS);
 
 #endif /* PHP_INTL_CONVERTER_H */

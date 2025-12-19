@@ -16,10 +16,8 @@
 
 #include <unicode/umachine.h>
 
-U_CDECL_BEGIN
 #include <math.h>
 #include <php.h>
-U_CDECL_END
 
 typedef enum {
 	PARTS_ITERATOR_KEY_SEQUENTIAL,
@@ -33,8 +31,8 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 										   parts_iter_key_type key_type);
 #endif
 
-U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
+zend_object_iterator *_breakiterator_get_iterator(
 		zend_class_entry *ce, zval *object, int by_ref);
-U_CFUNC void breakiterator_register_IntlPartsIterator_class(void);
+void breakiterator_register_IntlPartsIterator_class(void);
 
 #endif

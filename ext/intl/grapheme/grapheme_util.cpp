@@ -22,12 +22,10 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include <php.h>
 #include "grapheme.h"
 #include "grapheme_util.h"
 #include "intl_common.h"
-}
 
 #include <unicode/utypes.h>
 #include <unicode/ucol.h>
@@ -40,7 +38,7 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 /* }}} */
 
 /* {{{ grapheme_close_global_iterator - clean up */
-U_CFUNC void
+void
 grapheme_close_global_iterator( void )
 {
 	UBreakIterator *global_break_iterator = INTL_G( grapheme_iterator );
@@ -52,7 +50,7 @@ grapheme_close_global_iterator( void )
 /* }}} */
 
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-U_CFUNC void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
+void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
 	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
 	*sub_str = NULL;
@@ -101,7 +99,7 @@ U_CFUNC void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t
 
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last, const char* locale)
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last, const char* locale)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
@@ -219,7 +217,7 @@ finish:
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
-U_CFUNC zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
+zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
 	while ( len-- ) {
@@ -233,7 +231,7 @@ U_CFUNC zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 /* }}} */
 
 /* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
-U_CFUNC int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
+int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
 {
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode		status = U_ZERO_ERROR;
@@ -271,7 +269,7 @@ U_CFUNC int32_t grapheme_split_string(const UChar *text, int32_t text_length, in
 /* }}} */
 
 /* {{{ grapheme_count_graphemes */
-U_CFUNC int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
+int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
 {
 	int ret_len = 0;
 	int pos = 0;
@@ -295,7 +293,7 @@ U_CFUNC int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int3
 
 
 /* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
-U_CFUNC int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
+int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
 	int32_t pos;
 	int32_t (*iter_op)(UBreakIterator* bi);
@@ -335,7 +333,7 @@ U_CFUNC int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 /* }}} */
 
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
-U_CFUNC zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
+zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
 	char *p, *e;
 
@@ -375,7 +373,7 @@ U_CFUNC zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, ch
 /* }}} */
 
 /* {{{ grapheme_get_break_iterator: get a clone of the global character break iterator */
-U_CFUNC UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status )
+UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status )
 {
 	UBreakIterator *global_break_iterator = INTL_G( grapheme_iterator );
 

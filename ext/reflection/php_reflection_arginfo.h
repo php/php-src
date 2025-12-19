@@ -1426,7 +1426,7 @@ static zend_class_entry *register_class_ReflectionFunction(zend_class_entry *cla
 	zend_string_release_ex(const_IS_DEPRECATED_name, true);
 
 
-	zend_attribute *attribute_Deprecated_func_isdisabled_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "isdisabled", sizeof("isdisabled") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_isdisabled_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "isdisabled", sizeof("isdisabled") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_isdisabled_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_isdisabled_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_isdisabled_0_arg1_str = zend_string_init("as ReflectionFunction can no longer be constructed for disabled functions", strlen("as ReflectionFunction can no longer be constructed for disabled functions"), 1);
@@ -1494,7 +1494,7 @@ static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
-	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_setaccessible_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect since PHP 8.1", strlen("as it has no effect since PHP 8.1"), 1);
@@ -1659,7 +1659,7 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
-	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_setaccessible_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_setaccessible_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_setaccessible_0_arg1_str = zend_string_init("as it has no effect since PHP 8.1", strlen("as it has no effect since PHP 8.1"), 1);
@@ -1725,20 +1725,20 @@ static zend_class_entry *register_class_ReflectionParameter(zend_class_entry *cl
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
-	zend_attribute *attribute_Deprecated_func_getclass_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "getclass", sizeof("getclass") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_getclass_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "getclass", sizeof("getclass") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_getclass_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_getclass_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_getclass_0_arg1_str = zend_string_init("use ReflectionParameter::getType() instead", strlen("use ReflectionParameter::getType() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_getclass_0->args[1].value, attribute_Deprecated_func_getclass_0_arg1_str);
 	attribute_Deprecated_func_getclass_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_isarray_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "isarray", sizeof("isarray") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_isarray_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "isarray", sizeof("isarray") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_isarray_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_isarray_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_isarray_0->args[1].value, attribute_Deprecated_func_getclass_0_arg1_str);
 	attribute_Deprecated_func_isarray_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_iscallable_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "iscallable", sizeof("iscallable") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_iscallable_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "iscallable", sizeof("iscallable") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_iscallable_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_iscallable_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_iscallable_0->args[1].value, attribute_Deprecated_func_getclass_0_arg1_str);

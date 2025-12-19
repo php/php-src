@@ -13,11 +13,9 @@
  */
 
 #include "spoofchecker_class.h"
-extern "C" {
 #include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
-}
 
 #include <unicode/uspoof.h>
 
@@ -29,7 +27,7 @@ static zend_object_handlers Spoofchecker_handlers;
  */
 
 /* {{{ Spoofchecker_objects_free */
-U_CFUNC void Spoofchecker_objects_free(zend_object *object)
+void Spoofchecker_objects_free(zend_object *object)
 {
 	Spoofchecker_object* co = php_intl_spoofchecker_fetch_object(object);
 
@@ -40,7 +38,7 @@ U_CFUNC void Spoofchecker_objects_free(zend_object *object)
 /* }}} */
 
 /* {{{ Spoofchecker_object_create */
-U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
+zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
 
@@ -89,7 +87,7 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 /* {{{ spoofchecker_register_Spoofchecker_class
  * Initialize 'Spoofchecker' class
  */
-U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
+void spoofchecker_register_Spoofchecker_class(void)
 {
 	/* Create and register 'Spoofchecker' class. */
 	Spoofchecker_ce_ptr = register_class_Spoofchecker();
@@ -108,7 +106,7 @@ U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
  * Initialize internals of Spoofchecker_object.
  * Must be called before any other call to 'spoofchecker_object_...' functions.
  */
-U_CFUNC void spoofchecker_object_init(Spoofchecker_object* co)
+void spoofchecker_object_init(Spoofchecker_object* co)
 {
 	if (!co) {
 		return;
@@ -121,7 +119,7 @@ U_CFUNC void spoofchecker_object_init(Spoofchecker_object* co)
 /* {{{ void spoofchecker_object_destroy( Spoofchecker_object* co )
  * Clean up mem allocted by internals of Spoofchecker_object
  */
-U_CFUNC void spoofchecker_object_destroy(Spoofchecker_object* co)
+void spoofchecker_object_destroy(Spoofchecker_object* co)
 {
 	if (!co) {
 		return;

@@ -22,13 +22,11 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "collator_class.h"
 
 /* {{{ Get collator's last error code. */
-U_CFUNC PHP_FUNCTION( collator_get_error_code )
+PHP_FUNCTION( collator_get_error_code )
 {
 	COLLATOR_METHOD_INIT_VARS
 
@@ -50,7 +48,7 @@ U_CFUNC PHP_FUNCTION( collator_get_error_code )
 /* }}} */
 
 /* {{{ Get text description for collator's last error code. */
-U_CFUNC PHP_FUNCTION( collator_get_error_message )
+PHP_FUNCTION( collator_get_error_message )
 {
 	zend_string* message = nullptr;
 

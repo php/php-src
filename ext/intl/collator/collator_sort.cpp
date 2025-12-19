@@ -22,10 +22,8 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "collator.h"
 #include "collator_class.h"
 #include "collator_sort.h"
@@ -309,7 +307,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 /* }}} */
 
 /* {{{ Sort array using specified collator. */
-U_CFUNC PHP_FUNCTION( collator_sort )
+PHP_FUNCTION( collator_sort )
 {
 	collator_sort_internal( true, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -327,7 +325,7 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 /* {{{ Equivalent to standard PHP sort using Collator.
  * Uses ICU ucol_getSortKey for performance.
  */
-U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
+PHP_FUNCTION( collator_sort_with_sort_keys )
 {
 	zval*       array                = nullptr;
 	zval        garbage;
@@ -492,14 +490,14 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 /* }}} */
 
 /* {{{ Sort array using specified collator, maintaining index association. */
-U_CFUNC PHP_FUNCTION( collator_asort )
+PHP_FUNCTION( collator_asort )
 {
 	collator_sort_internal( false, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ Get a sort key for a string from a Collator. */
-U_CFUNC PHP_FUNCTION( collator_get_sort_key )
+PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = nullptr;
 	size_t           str_len  = 0;

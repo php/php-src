@@ -259,21 +259,21 @@ static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class
 	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
 
 
-	zend_attribute *attribute_Deprecated_func_attach_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "attach", sizeof("attach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_attach_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "attach", sizeof("attach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_attach_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_attach_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_attach_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetSet() instead", strlen("use method SplObjectStorage::offsetSet() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_attach_0->args[1].value, attribute_Deprecated_func_attach_0_arg1_str);
 	attribute_Deprecated_func_attach_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_detach_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "detach", sizeof("detach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_detach_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "detach", sizeof("detach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_detach_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_detach_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_detach_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetUnset() instead", strlen("use method SplObjectStorage::offsetUnset() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_detach_0->args[1].value, attribute_Deprecated_func_detach_0_arg1_str);
 	attribute_Deprecated_func_detach_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_contains_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "contains", sizeof("contains") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_attribute *attribute_Deprecated_func_contains_0 = zend_add_function_attribute((zend_function *)zend_hash_str_find_ptr(&class_entry->function_table, "contains", sizeof("contains") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_contains_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_contains_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_contains_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetExists() instead", strlen("use method SplObjectStorage::offsetExists() instead"), 1);
