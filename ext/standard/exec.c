@@ -377,7 +377,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 /* }}} */
 
 /* {{{ php_escape_shell_arg */
-PHPAPI zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
+static zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
 {
 	size_t x, y = 0;
 	zend_string *cmd;
