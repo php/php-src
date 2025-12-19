@@ -663,11 +663,10 @@ parse_eol:
 			p = e;
 			goto parse_eol;
 		}
+
+		zend_string_efree(target_buf);
 	}
 
-	if (target_buf) {
-		zend_string_free(target_buf);
-	}
 	php_stream_close(stream);
 }
 /* }}} */
