@@ -93,7 +93,7 @@ typedef cpuset_t *cpu_set_t;
 #elif defined(HAVE_PSET_BIND)
 #include <sys/pset.h>
 typedef psetid_t cpu_set_t;
- #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, (p <= 0 ? getpid() : p), &m)
+ #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, p, &m)
  #define sched_setaffinity(p, c, m) pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL)
  #define PCNTL_CPUSET(mask) mask
  #define PCNTL_CPU_ISSET(i, mask) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
