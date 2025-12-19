@@ -7,7 +7,6 @@ openssl
 $data = "Testing openssl_sign()";
 $privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrong = "wrong";
-
 var_dump(openssl_sign($data, $sign1, $privkey, OPENSSL_ALGO_SHA256));
 var_dump(bin2hex($sign1));
 var_dump(openssl_sign($data, $sign2, $privkey, OPENSSL_ALGO_SHA256));
@@ -17,6 +16,10 @@ var_dump(strlen($sign1));
 var_dump(openssl_sign($data, $sign2, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING));
 var_dump(strlen($sign2));
 var_dump($sign1 === $sign2);
+var_dump(openssl_sign($data, $sign3, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_DIGEST));
+var_dump(strlen($sign3));
+var_dump(openssl_sign($data, $sign4, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, 32));
+var_dump(strlen($sign4));
 var_dump(openssl_sign($data, $sign, $wrong));
 ?>
 --EXPECTF--
@@ -29,6 +32,10 @@ int(128)
 bool(true)
 int(128)
 bool(false)
+bool(true)
+int(128)
+bool(true)
+int(128)
 
 Warning: openssl_sign(): Supplied key param cannot be coerced into a private key in %s on line %d
 bool(false)
