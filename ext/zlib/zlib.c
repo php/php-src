@@ -807,17 +807,12 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				HashTable *dictionary = Z_ARR_P(option_buffer);
 				bool result = true;
 
-				if (!HT_IS_PACKED(dictionary)) {
-					zend_argument_value_error(2, "must be of type array with keys as integer");
-					return false;
-				}
-
 				if (zend_hash_num_elements(dictionary) > 0) {
 					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
 					size_t total = 0;
 
 					zval *cur;
-					ZEND_HASH_PACKED_FOREACH_VAL(dictionary, cur) {
+					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
 						zend_string *string = zval_try_get_string(cur);
 						if (string == NULL) {
 							result = false;
