@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20695 (Assertion failure in normalize_value() when parsing
     malformed INI input via parse_ini_string()). (ndossche)
   . Fixed bug GH-20714 (Uncatchable exception thrown in generator). (ilutov)
+  . Fixed bug GH-20352 (UAF in php_output_handler_free via re-entrant
+    ob_start() during error deactivation). (ndossche)
 
 - DOM:
   . Fixed bug GH-20722 (Null pointer dereference in DOM namespace node cloning
