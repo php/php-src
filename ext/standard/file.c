@@ -1555,7 +1555,6 @@ PHPAPI PHP_FUNCTION(fread)
 
 	str = php_stream_read_to_str(stream, len);
 	if (!str) {
-		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
 
