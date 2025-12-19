@@ -5,7 +5,7 @@ sockets
 --SKIPIF--
 <?php
 if (!defined('TCP_USER_TIMEOUT')) { die('skip TCP_USER_TIMEOUT is not defined'); }
-if (PHP_INT_SIZE != 4) { die("skip 32-bit only") };
+if (PHP_INT_SIZE != 4) { die("skip 32-bit only"); }
 ?>
 --FILE--
 <?php
