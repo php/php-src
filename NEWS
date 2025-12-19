@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
     separator). (Yuya Hamada)
 
+- Phar:
+  . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
+    (ndossche)
+
 - SPL:
   . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
     (David Carlier)
