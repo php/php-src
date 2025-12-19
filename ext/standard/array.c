@@ -127,7 +127,16 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 	} else if (f->key && s->key) {
-		return zendi_smart_strcmp(f->key, s->key);
+		/* Enable transitive comparison mode for consistent key sorting.
+		 * Save the previous state to handle reentrancy. */
+		bool old_transitive_mode = EG(transitive_compare_mode);
+		EG(transitive_compare_mode) = true;
+
+		int result = zendi_smart_strcmp(f->key, s->key);
+
+		/* Restore previous state */
+		EG(transitive_compare_mode) = old_transitive_mode;
+		return result;
 	}
 	if (f->key) {
 		ZVAL_STR(&first, f->key);
@@ -139,7 +148,17 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
 	} else {
 		ZVAL_LONG(&second, s->h);
 	}
-	return zend_compare(&first, &second);
+
+	/* Enable transitive comparison mode for mixed key types.
+	 * Save the previous state to handle reentrancy. */
+	bool old_transitive_mode = EG(transitive_compare_mode);
+	EG(transitive_compare_mode) = true;
+
+	int result = zend_compare(&first, &second);
+
+	/* Restore previous state */
+	EG(transitive_compare_mode) = old_transitive_mode;
+	return result;
 }
 /* }}} */
 
@@ -285,26 +304,76 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 
 static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	int result = zend_compare(&f->val, &s->val);
-	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
-	 * that would be observable via comparison operators. */
-	zval *rhs = &s->val;
-	ZVAL_DEREF(rhs);
-	if (UNEXPECTED(Z_TYPE_P(rhs) == IS_OBJECT)
-	 && result == ZEND_UNCOMPARABLE
-	 && (Z_OBJCE_P(rhs)->ce_flags & ZEND_ACC_ENUM)) {
-		zval *lhs = &f->val;
-		ZVAL_DEREF(lhs);
-		if (Z_TYPE_P(lhs) == IS_OBJECT && (Z_OBJCE_P(lhs)->ce_flags & ZEND_ACC_ENUM)) {
-			// Order doesn't matter, we just need to group the same enum values
-			uintptr_t lhs_uintptr = (uintptr_t)Z_OBJ_P(lhs);
-			uintptr_t rhs_uintptr = (uintptr_t)Z_OBJ_P(rhs);
-			return lhs_uintptr == rhs_uintptr ? 0 : (lhs_uintptr < rhs_uintptr ? -1 : 1);
-		} else {
-			// Shift enums to the end of the array
-			return -1;
-		}
+	if (EXPECTED(Z_TYPE(f->val) == IS_LONG && Z_TYPE(s->val) == IS_LONG)) {
+		return ZEND_THREEWAY_COMPARE(Z_LVAL(f->val), Z_LVAL(s->val));
 	}
+	
+	if (EXPECTED(Z_TYPE(f->val) == IS_DOUBLE && Z_TYPE(s->val) == IS_DOUBLE)) {
+		return ZEND_THREEWAY_COMPARE(Z_DVAL(f->val), Z_DVAL(s->val));
+	}
+
+	bool old_transitive_mode = EG(transitive_compare_mode);
+	if (EXPECTED(!old_transitive_mode)) {
+		EG(transitive_compare_mode) = true;
+	}
+	
+	int result;
+	
+	/* Dereference before type checking */
+	zval *op1 = &f->val;
+	zval *op2 = &s->val;
+	ZVAL_DEREF(op1);
+	ZVAL_DEREF(op2);
+	
+	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
+		result = zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2));
+	} else if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
+		if (Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
+			result = 0;
+		} else if (Z_OBJCE_P(op1) != Z_OBJCE_P(op2)) {
+			result = ZEND_UNCOMPARABLE;
+			
+			/* Enum ordering for array_unique */
+			if (UNEXPECTED((Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM) || 
+			               (Z_OBJCE_P(op2)->ce_flags & ZEND_ACC_ENUM))) {
+				if ((Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM) && 
+				    !(Z_OBJCE_P(op2)->ce_flags & ZEND_ACC_ENUM)) {
+					result = 1;
+				} else if (!(Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM) && 
+				           (Z_OBJCE_P(op2)->ce_flags & ZEND_ACC_ENUM)) {
+					result = -1;
+				} else {
+					result = ZEND_THREEWAY_COMPARE((uintptr_t)Z_OBJ_P(op1), (uintptr_t)Z_OBJ_P(op2));
+				}
+			}
+		} else if ((Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM)) {
+			result = ZEND_THREEWAY_COMPARE((uintptr_t)Z_OBJ_P(op1), (uintptr_t)Z_OBJ_P(op2));
+		} else {
+			result = zend_compare(op1, op2);
+		}
+	} else if (Z_TYPE_P(op1) == IS_ARRAY && Z_TYPE_P(op2) == IS_ARRAY) {
+		if (Z_ARR_P(op1) == Z_ARR_P(op2)) {
+			result = 0;
+		} else {
+			uint32_t n1 = zend_hash_num_elements(Z_ARRVAL_P(op1));
+			uint32_t n2 = zend_hash_num_elements(Z_ARRVAL_P(op2));
+			
+			if (n1 != n2) {
+				/* Different sizes - order by size */
+				result = ZEND_THREEWAY_COMPARE(n1, n2);
+			} else {
+				/* Same size - deep comparison */
+				result = zend_compare(op1, op2);
+			}
+		}
+	} else {
+		result = zend_compare(op1, op2);
+	}
+	
+	if (EXPECTED(!old_transitive_mode)) {
+		EG(transitive_compare_mode) = false;
+	}
+	
 	return result;
 }
 /* }}} */
