@@ -678,7 +678,8 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	for (count = 0;; count++) {
 		/* gr_mem entries may be misaligned on macos. */
 		char *gr_mem;
-		memcpy(&gr_mem, &g->gr_mem[count], sizeof(char *));
+		char *entry = (char *)g->gr_mem + (count * sizeof (char *));
+		memcpy(&gr_mem, entry, sizeof(char *));
 		if (!gr_mem) {
 			break;
 		}

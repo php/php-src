@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fix SplFileInfo::openFile() in write mode. (ndossche)
   . Fix build on legacy OpenSSL 1.1.0 systems. (Giovanni Giacobbi)
 
+- POSIX:
+  . Fixed crash on posix groups to php array creation on macos.
+    (David Carlier)
+
 - SPL:
   . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
     (David Carlier)
