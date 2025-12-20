@@ -41,6 +41,7 @@
 #include "Optimizer/zend_worklist.h"
 
 #include "jit/zend_jit_internal.h"
+#include "jit/zend_jit_shared.h"
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 #include <pthread.h>
@@ -54,7 +55,6 @@ zend_jit_globals jit_globals;
 #endif
 
 //#define CONTEXT_THREADED_JIT
-#define ZEND_JIT_USE_RC_INFERENCE
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
 # define ZEND_SSA_RC_INFERENCE_FLAG ZEND_SSA_RC_INFERENCE
@@ -67,8 +67,6 @@ zend_jit_globals jit_globals;
 #endif
 
 #define JIT_PREFIX      "JIT$"
-#define JIT_STUB_PREFIX "JIT$$"
-#define TRACE_PREFIX    "TRACE-"
 
 bool zend_jit_startup_ok = false;
 
@@ -82,10 +80,6 @@ const zend_op *zend_jit_halt_op = NULL;
 static int zend_write_protect = 1;
 #endif
 
-static void *dasm_buf = NULL;
-static void *dasm_end = NULL;
-static void **dasm_ptr = NULL;
-
 static size_t dasm_size = 0;
 
 static zend_long jit_bisect_pos = 0;
@@ -94,9 +88,6 @@ static zend_vm_opcode_handler_t zend_jit_runtime_jit_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_profile_jit_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_func_hot_counter_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_loop_hot_counter_handler = NULL;
-static zend_vm_opcode_handler_t zend_jit_func_trace_counter_handler = NULL;
-static zend_vm_opcode_handler_t zend_jit_ret_trace_counter_handler = NULL;
-static zend_vm_opcode_handler_t zend_jit_loop_trace_counter_handler = NULL;
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
@@ -771,25 +762,7 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 	return 1;
 }
 
-#define OP_RANGE(ssa_op, opN) \
-	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
-	  ssa->var_info && \
-	  (ssa_op)->opN##_use >= 0 && \
-	  ssa->var_info[(ssa_op)->opN##_use].has_range) ? \
-	 &ssa->var_info[(ssa_op)->opN##_use].range : NULL)
-
-#define OP1_RANGE()      OP_RANGE(ssa_op, op1)
-#define OP2_RANGE()      OP_RANGE(ssa_op, op2)
-#define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
-
-#include "jit/zend_jit_helpers.c"
 #include "Zend/zend_cpuinfo.h"
-
-#ifdef HAVE_GCC_GLOBAL_REGS
-# define GCC_GLOBAL_REGS 1
-#else
-# define GCC_GLOBAL_REGS 0
-#endif
 
 /* By default avoid JITing inline handlers if it does not seem profitable due to lack of
  * type information. Disabling this option allows testing some JIT handlers in the
@@ -797,8 +770,6 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 #ifndef PROFITABILITY_CHECKS
 # define PROFITABILITY_CHECKS 1
 #endif
-
-#define BP_JIT_IS 6 /* Used for ISSET_ISEMPTY_DIM_OBJ. see BP_VAR_*defines in Zend/zend_compile.h */
 
 /* The generated code may contain tautological comparisons, ignore them. */
 #if defined(__clang__)
