@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
     (ndossche)
 
+- POSIX:
+  . Fixed crash on posix groups to php array creation on macos.
+    (David Carlier)
+
 - SPL:
   . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
     (David Carlier)
