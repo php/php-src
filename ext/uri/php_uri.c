@@ -30,7 +30,7 @@
 #include "uri_parser_rfc3986.h"
 #include "uri_parser_php_parse_url.h"
 #include "php_uri_arginfo.h"
-#include "uriparser/UriBase.h"
+#include "uriparser/Uri.h"
 
 zend_class_entry *php_uri_ce_rfc3986_uri;
 zend_class_entry *php_uri_ce_whatwg_url;
