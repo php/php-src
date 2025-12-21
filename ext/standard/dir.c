@@ -558,11 +558,15 @@ PHP_FUNCTION(scandir)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, n);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	for (i = 0; i < n; i++) {
-		add_next_index_str(return_value, namelist[i]);
-	}
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		for (i = 0; i < n; i++) {
+			ZEND_HASH_FILL_SET_STR(namelist[i]);
+			ZEND_HASH_FILL_NEXT();
+		}
+	} ZEND_HASH_FILL_END();
 
 	if (n) {
 		efree(namelist);
