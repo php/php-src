@@ -2310,15 +2310,16 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 		/* verify local file header */
 		phar_zip_file_header local;
 		phar_zip_data_desc desc;
+		php_stream *stream = phar_open_archive_fp(idata->phar);
 
-		if (SUCCESS != phar_open_archive_fp(idata->phar)) {
+		if (!stream) {
 			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"",
 				idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
-		php_stream_seek(phar_get_entrypfp(idata->internal_file), entry->header_offset, SEEK_SET);
+		php_stream_seek(stream, entry->header_offset, SEEK_SET);
 
-		if (sizeof(local) != php_stream_read(phar_get_entrypfp(idata->internal_file), (char *) &local, sizeof(local))) {
+		if (sizeof(local) != php_stream_read(stream, (char *) &local, sizeof(local))) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")",
 				idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
@@ -2326,12 +2327,12 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 
 		/* check for data descriptor */
 		if (((PHAR_ZIP_16(local.flags)) & 0x8) == 0x8) {
-			php_stream_seek(phar_get_entrypfp(idata->internal_file),
+			php_stream_seek(stream,
 					entry->header_offset + sizeof(local) +
 					PHAR_ZIP_16(local.filename_len) +
 					PHAR_ZIP_16(local.extra_len) +
 					entry->compressed_filesize, SEEK_SET);
-			if (sizeof(desc) != php_stream_read(phar_get_entrypfp(idata->internal_file),
+			if (sizeof(desc) != php_stream_read(stream,
 							    (char *) &desc, sizeof(desc))) {
 				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")",
 					idata->phar->fname, ZSTR_VAL(entry->filename));

@@ -107,11 +107,12 @@ php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links) /* {{{ */
 	}
 
 	if (phar_get_fp_type(entry) == PHAR_FP) {
-		if (!phar_get_entrypfp(entry)) {
+		php_stream *stream = phar_get_entrypfp(entry);
+		if (!stream) {
 			/* re-open just in time for cases where our refcount reached 0 on the phar archive */
-			phar_open_archive_fp(entry->phar);
+			stream = phar_open_archive_fp(entry->phar);
 		}
-		return phar_get_entrypfp(entry);
+		return stream;
 	} else if (phar_get_fp_type(entry) == PHAR_UFP) {
 		return phar_get_entrypufp(entry);
 	} else if (entry->fp_type == PHAR_MOD) {
@@ -709,23 +710,21 @@ static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 }
 
 /* initialize a phar_archive_data's read-only fp for existing phar data */
-zend_result phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
+php_stream *phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 {
-	if (phar_get_pharfp(phar)) {
-		return SUCCESS;
+	php_stream *stream = phar_get_pharfp(phar);
+	if (stream) {
+		return stream;
 	}
 
 	if (php_check_open_basedir(phar->fname)) {
-		return FAILURE;
+		return NULL;
 	}
 
-	phar_set_pharfp(phar, php_stream_open_wrapper(phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL));
+	stream = php_stream_open_wrapper(phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, NULL);
+	phar_set_pharfp(phar, stream);
 
-	if (!phar_get_pharfp(phar)) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return stream;
 }
 /* }}} */
 
@@ -829,7 +828,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, ch
 	}
 
 	if (!phar_get_pharfp(phar)) {
-		if (FAILURE == phar_open_archive_fp(phar)) {
+		if (!phar_open_archive_fp(phar)) {
 			spprintf(error, 4096, "phar error: Cannot open phar archive \"%s\" for reading", phar->fname);
 			return FAILURE;
 		}
