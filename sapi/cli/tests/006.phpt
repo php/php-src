@@ -49,6 +49,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Constant [ <persistent> int PREG_SET_ORDER ] { 2 }
     Constant [ <persistent> int PREG_OFFSET_CAPTURE ] { 256 }
     Constant [ <persistent> int PREG_UNMATCHED_AS_NULL ] { 512 }
+    Constant [ <persistent> int PREG_REPLACE_COUNT_CHANGES ] { 1 }
     Constant [ <persistent> int PREG_SPLIT_NO_EMPTY ] { 1 }
     Constant [ <persistent> int PREG_SPLIT_DELIM_CAPTURE ] { 2 }
     Constant [ <persistent> int PREG_SPLIT_OFFSET_CAPTURE ] { 4 }
@@ -97,6 +98,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
