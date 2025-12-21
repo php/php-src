@@ -42,7 +42,7 @@ $after = preg_replace_callback('/a/', fn($m) => 'x', $before, -1, $count, PREG_R
 show("callback_change", $before, $after, $count);
 echo "callback_change: " . $after . "\n";
 
-/* Edge case: replacements change locally but cancel out globally */
+/* Replacements change locally but cancel out globally */
 function cancel_out_callback($arr) {
     return match ($arr[0]) {
         'a' => 'ab',
@@ -52,6 +52,43 @@ function cancel_out_callback($arr) {
 $before3 = "abba";
 $after = preg_replace_callback('/^a|bba/', 'cancel_out_callback', $before3, -1, $count, PREG_REPLACE_COUNT_CHANGES);
 show("callback_cancel_out", $before3, $after, $count);
+
+/* Cancel out would happen, but limit prevents it */
+$after = preg_replace_callback('/^a|bba/', 'cancel_out_callback', $before3, 1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("callback_cancel_out_limit_1", $before3, $after, $count);
+echo "callback_cancel_out_limit_1: " . $after . "\n";
+
+/* Zero length match inside the string */
+$before4 = "ab";
+$after = preg_replace('/(?=b)/', '', $before4, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("empty_lookahead_identity", $before4, $after, $count);
+
+$after = preg_replace('/(?=b)/', 'X', $before4, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("empty_lookahead_change", $before4, $after, $count);
+echo "empty_lookahead_change: " . $after . "\n";
+
+/* Zero length match at every position */
+$after = preg_replace('/(?=)/', '', $before4, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("empty_everywhere_identity", $before4, $after, $count);
+
+$after = preg_replace('/(?=)/', '-', $before4, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("empty_everywhere_change", $before4, $after, $count);
+echo "empty_everywhere_change: " . $after . "\n";
+
+/* Subject array should count per element */
+$subjects = ["abba", "abca"];
+$after = preg_replace_callback('/^a|bba/', 'cancel_out_callback', $subjects, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+echo "array_subject_after: " . var_export($after, true) . "\n";
+echo "array_subject_count: " . $count . "\n";
+
+/* UTF 8, ensure byte comparison is correct */
+$before5 = "éaé";
+$after = preg_replace('/é/u', 'é', $before5, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("utf8_identity", $before5, $after, $count);
+
+$after = preg_replace('/é/u', 'e', $before5, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("utf8_change", $before5, $after, $count);
+echo "utf8_change: " . $after . "\n";
 
 /* Empty string match behavior */
 $before2 = "abc";
@@ -80,6 +117,29 @@ callback_change: 2 REPLACEMENTS
 callback_change: xbcx
 callback_cancel_out: NO REPLACEMENTS
 callback_cancel_out: 0 REPLACEMENTS
+callback_cancel_out_limit_1: CHANGED
+callback_cancel_out_limit_1: 1 REPLACEMENTS
+callback_cancel_out_limit_1: abbba
+empty_lookahead_identity: NO REPLACEMENTS
+empty_lookahead_identity: 0 REPLACEMENTS
+empty_lookahead_change: CHANGED
+empty_lookahead_change: 1 REPLACEMENTS
+empty_lookahead_change: aXb
+empty_everywhere_identity: NO REPLACEMENTS
+empty_everywhere_identity: 0 REPLACEMENTS
+empty_everywhere_change: CHANGED
+empty_everywhere_change: 3 REPLACEMENTS
+empty_everywhere_change: -a-b-
+array_subject_after: array (
+  0 => 'abba',
+  1 => 'abbca',
+)
+array_subject_count: 1
+utf8_identity: NO REPLACEMENTS
+utf8_identity: 0 REPLACEMENTS
+utf8_change: CHANGED
+utf8_change: 2 REPLACEMENTS
+utf8_change: eae
 empty_match_identity: NO REPLACEMENTS
 empty_match_identity: 0 REPLACEMENTS
 empty_match_change: CHANGED
