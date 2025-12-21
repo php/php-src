@@ -671,17 +671,18 @@ PHP_FUNCTION(enchant_dict_suggest)
 	}
 
 	PHP_ENCHANT_GET_DICT;
-	array_init(return_value);
 
 	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg);
 	if (suggs && n_sugg) {
-		size_t i;
+		array_init_size(return_value, n_sugg);
 
-		for (i = 0; i < n_sugg; i++) {
+		for (size_t i = 0; i < n_sugg; i++) {
 			add_next_index_string(return_value, suggs[i]);
 		}
 
 		enchant_dict_free_string_list(pdict->pdict, suggs);
+	} else {
+		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */
