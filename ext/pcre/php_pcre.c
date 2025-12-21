@@ -1641,6 +1641,13 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		}
 	}
 
+	const bool count_changes = (flags & PREG_REPLACE_COUNT_CHANGES) != 0;
+    size_t local_replace_count = 0;
+    size_t *replace_count_ptr = replace_count;
+    if (count_changes && replace_count) {
+        replace_count_ptr = &local_replace_count;
+    }
+
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Array of subpattern offsets */
@@ -1769,14 +1776,14 @@ matched:
 				result_len += (walkbuf - (ZSTR_VAL(result) + result_len));
 			}
 
-			if (replace_count) {
+			if (replace_count_ptr) {
 				bool count_changes = flags & PREG_REPLACE_COUNT_CHANGES;
                 if (!count_changes) {
-                    ++*replace_count;
+                    ++*replace_count_ptr;
                 } else {
                     if (rep_len != match_len_local ||
                         (match_len_local && memcmp(rep_ptr, match, match_len_local) != 0)) {
-                        ++*replace_count;
+                        ++*replace_count_ptr;
                     }
                 }
             }
@@ -1855,6 +1862,15 @@ error:
 		pcre2_match_data_free(match_data);
 	}
 
+	if (count_changes && replace_count && result != NULL) {
+		/* If the final output is identical to the input, no effective changes happened. */
+		if (ZSTR_LEN(result) == subject_len
+			&& (subject_len == 0 || memcmp(ZSTR_VAL(result), subject, subject_len) == 0)) {
+			local_replace_count = 0;
+		}
+		*replace_count += local_replace_count;
+	}
+
 	return result;
 }
 /* }}} */
@@ -1913,6 +1929,13 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
+	const bool count_changes = (flags & PREG_REPLACE_COUNT_CHANGES) != 0;
+	size_t local_replace_count = 0;
+	size_t *replace_count_ptr = replace_count;
+	if (count_changes && replace_count) {
+		replace_count_ptr = &local_replace_count;
+	}
+
 	/* Array of subpattern offsets */
 	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
@@ -1961,15 +1984,14 @@ matched:
 				goto error;
 			}
 
-            if (replace_count) {
-                zend_long count_changes = flags & PREG_REPLACE_COUNT_CHANGES;
+            if (replace_count_ptr) {
                 if (!count_changes) {
-                    ++*replace_count;
+                    ++*replace_count_ptr;
                 } else {
                     size_t match_len = (size_t)(offsets[1] - offsets[0]);
                     if (ZSTR_LEN(eval_result) != match_len ||
                         (match_len && memcmp(ZSTR_VAL(eval_result), match, match_len) != 0)) {
-                        ++*replace_count;
+                        ++*replace_count_ptr;
                     }
                 }
             }
@@ -2065,6 +2087,16 @@ error:
 		pcre2_match_data_free(match_data);
 	}
 	mdata_used = old_mdata_used;
+
+	if (count_changes && replace_count && result != NULL) {
+		/* If the final output is identical to the input, no effective changes happened. */
+		if (ZSTR_LEN(result) == ZSTR_LEN(subject_str)
+			&& (ZSTR_LEN(subject_str) == 0
+				|| memcmp(ZSTR_VAL(result), ZSTR_VAL(subject_str), ZSTR_LEN(subject_str)) == 0)) {
+			local_replace_count = 0;
+		}
+		*replace_count += local_replace_count;
+	}
 
 	return result;
 }

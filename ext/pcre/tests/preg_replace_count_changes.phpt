@@ -42,6 +42,17 @@ $after = preg_replace_callback('/a/', fn($m) => 'x', $before, -1, $count, PREG_R
 show("callback_change", $before, $after, $count);
 echo "callback_change: " . $after . "\n";
 
+/* Edge case: replacements change locally but cancel out globally */
+function cancel_out_callback($arr) {
+    return match ($arr[0]) {
+        'a' => 'ab',
+        'bba' => 'ba',
+    };
+}
+$before3 = "abba";
+$after = preg_replace_callback('/^a|bba/', 'cancel_out_callback', $before3, -1, $count, PREG_REPLACE_COUNT_CHANGES);
+show("callback_cancel_out", $before3, $after, $count);
+
 /* Empty string match behavior */
 $before2 = "abc";
 $after = preg_replace('/^/', '', $before2, -1, $count, PREG_REPLACE_COUNT_CHANGES);
@@ -67,6 +78,8 @@ callback_identity: 0 REPLACEMENTS
 callback_change: CHANGED
 callback_change: 2 REPLACEMENTS
 callback_change: xbcx
+callback_cancel_out: NO REPLACEMENTS
+callback_cancel_out: 0 REPLACEMENTS
 empty_match_identity: NO REPLACEMENTS
 empty_match_identity: 0 REPLACEMENTS
 empty_match_change: CHANGED
