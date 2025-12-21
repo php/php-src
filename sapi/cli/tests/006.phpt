@@ -44,7 +44,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
   }
 
-  - Constants [19] {
+  - Constants [20] {
     Constant [ <persistent> int PREG_PATTERN_ORDER ] { 1 }
     Constant [ <persistent> int PREG_SET_ORDER ] { 2 }
     Constant [ <persistent> int PREG_OFFSET_CAPTURE ] { 256 }
@@ -92,7 +92,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
     Function [ <internal:pcre> function preg_replace ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> array|string $pattern ]
         Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
