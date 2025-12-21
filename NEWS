@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
     (David Carlier)
+  . Don't truncate length. (ndossche)
 
 - Date:
   . Fixed bug GH-20936 (DatePeriod::__set_state() cannot handle null start).
