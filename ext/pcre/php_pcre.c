@@ -27,6 +27,8 @@
 #define PREG_OFFSET_CAPTURE			(1<<8)
 #define PREG_UNMATCHED_AS_NULL		(1<<9)
 
+#define PREG_REPLACE_COUNT_CHANGES	(1<<0)
+
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 #define PREG_SPLIT_OFFSET_CAPTURE	(1<<2)
@@ -1571,7 +1573,8 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  zend_string *subject_str,
 							  const char *subject, size_t subject_len,
 							  zend_string *replace_str,
-							  size_t limit, size_t *replace_count)
+							  size_t limit, size_t *replace_count,
+							  zend_long flags)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
 	zend_string	 		*result;			/* Function result */
@@ -1587,7 +1590,7 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 	}
 	pce->refcount++;
 	result = php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_str,
-		limit, replace_count);
+		limit, replace_count, flags);
 	pce->refcount--;
 
 	return result;
@@ -1595,7 +1598,7 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count, zend_long flags)
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
@@ -1658,6 +1661,9 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 		if (count >= 0 && limit > 0) {
 			bool simple_string;
+			const char *rep_ptr = NULL;
+            size_t rep_len = 0;
+            size_t match_len_local = 0;
 
 			/* Check for too many substrings condition. */
 			if (UNEXPECTED(count == 0)) {
@@ -1675,12 +1681,9 @@ matched:
 				break;
 			}
 
-			if (replace_count) {
-				++*replace_count;
-			}
-
 			/* Set the match location in subject */
 			match = subject + offsets[0];
+			match_len_local = (size_t)(offsets[1] - offsets[0]);
 
 			new_len = result_len + offsets[0] - last_end_offset; /* part before the match */
 
@@ -1723,10 +1726,15 @@ matched:
 			}
 
 			if (simple_string) {
-				/* copy replacement */
-				memcpy(&ZSTR_VAL(result)[result_len], ZSTR_VAL(replace_str), ZSTR_LEN(replace_str)+1);
-				result_len += ZSTR_LEN(replace_str);
+		        rep_ptr = ZSTR_VAL(replace_str);
+	            rep_len = ZSTR_LEN(replace_str);
+
+			    /* copy replacement */
+			    memcpy(&ZSTR_VAL(result)[result_len], ZSTR_VAL(replace_str), ZSTR_LEN(replace_str)+1);
+			    result_len += ZSTR_LEN(replace_str);
 			} else {
+				char *rep_start = ZSTR_VAL(result) + result_len;
+
 				/* copy replacement and backrefs */
 				walkbuf = ZSTR_VAL(result) + result_len;
 
@@ -1753,9 +1761,25 @@ matched:
 					walk_last = walk[-1];
 				}
 				*walkbuf = '\0';
+
+				rep_ptr = rep_start;
+                rep_len = (size_t)(walkbuf - rep_start);
+
 				/* increment the result length by how much we've added to the string */
 				result_len += (walkbuf - (ZSTR_VAL(result) + result_len));
 			}
+
+			if (replace_count) {
+				bool count_changes = flags & PREG_REPLACE_COUNT_CHANGES;
+                if (!count_changes) {
+                    ++*replace_count;
+                } else {
+                    if (rep_len != match_len_local ||
+                        (match_len_local && memcmp(rep_ptr, match, match_len_local) != 0)) {
+                        ++*replace_count;
+                    }
+                }
+            }
 
 			limit--;
 
@@ -1922,10 +1946,6 @@ matched:
 				break;
 			}
 
-			if (replace_count) {
-				++*replace_count;
-			}
-
 			/* Set the match location in subject */
 			match = ZSTR_VAL(subject_str) + offsets[0];
 
@@ -1940,6 +1960,20 @@ matched:
 			if (UNEXPECTED(eval_result == NULL)) {
 				goto error;
 			}
+
+            if (replace_count) {
+                zend_long count_changes = flags & PREG_REPLACE_COUNT_CHANGES;
+                if (!count_changes) {
+                    ++*replace_count;
+                } else {
+                    size_t match_len = (size_t)(offsets[1] - offsets[0]);
+                    if (ZSTR_LEN(eval_result) != match_len ||
+                        (match_len && memcmp(ZSTR_VAL(eval_result), match, match_len) != 0)) {
+                        ++*replace_count;
+                    }
+                }
+            }
+
 			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result) + ZSTR_MAX_OVERHEAD, new_len) -ZSTR_MAX_OVERHEAD;
 			if (new_len >= alloc_len) {
 				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
@@ -2057,7 +2091,7 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 /* {{{ php_pcre_replace_array */
 static zend_string *php_pcre_replace_array(HashTable *regex,
 	zend_string *replace_str, HashTable *replace_ht,
-	zend_string *subject_str, size_t limit, size_t *replace_count)
+	zend_string *subject_str, size_t limit, size_t *replace_count, zend_long flags)
 {
 	zval		*regex_entry;
 	zend_string *result;
@@ -2093,7 +2127,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 			/* Do the actual replacement and put the result back into subject_str
 			   for further replacements. */
 			result = php_pcre_replace(regex_str, subject_str, ZSTR_VAL(subject_str),
-				ZSTR_LEN(subject_str), replace_entry_str, limit, replace_count);
+				ZSTR_LEN(subject_str), replace_entry_str, limit, replace_count, flags);
 			zend_tmp_string_release(tmp_replace_entry_str);
 			zend_tmp_string_release(tmp_regex_str);
 			zend_string_release_ex(subject_str, 0);
@@ -2115,7 +2149,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 			/* Do the actual replacement and put the result back into subject_str
 			   for further replacements. */
 			result = php_pcre_replace(regex_str, subject_str, ZSTR_VAL(subject_str),
-				ZSTR_LEN(subject_str), replace_str, limit, replace_count);
+				ZSTR_LEN(subject_str), replace_str, limit, replace_count, flags);
 			zend_tmp_string_release(tmp_regex_str);
 			zend_string_release_ex(subject_str, 0);
 			subject_str = result;
@@ -2134,18 +2168,18 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 static zend_always_inline zend_string *php_replace_in_subject(
 	zend_string *regex_str, HashTable *regex_ht,
 	zend_string *replace_str, HashTable *replace_ht,
-	zend_string *subject, size_t limit, size_t *replace_count)
+	zend_string *subject, size_t limit, size_t *replace_count, zend_long flags)
 {
 	zend_string *result;
 
 	if (regex_str) {
 		ZEND_ASSERT(replace_str != NULL);
 		result = php_pcre_replace(regex_str, subject, ZSTR_VAL(subject), ZSTR_LEN(subject),
-			replace_str, limit, replace_count);
+			replace_str, limit, replace_count, flags);
 	} else {
 		ZEND_ASSERT(regex_ht != NULL);
 		result = php_pcre_replace_array(regex_ht, replace_str, replace_ht, subject,
-			limit, replace_count);
+			limit, replace_count, flags);
 	}
 	return result;
 }
@@ -2254,6 +2288,7 @@ static void _preg_replace_common(
 	HashTable *subject_ht, zend_string *subject_str,
 	zend_long limit,
 	zval *zcount,
+	zend_long flags,
 	bool is_filter
 ) {
 	size_t replace_count = 0;
@@ -2269,7 +2304,7 @@ static void _preg_replace_common(
 	if (subject_str) {
 		old_replace_count = replace_count;
 		result = php_replace_in_subject(regex_str, regex_ht, replace_str, replace_ht,
-			subject_str, limit, &replace_count);
+			subject_str, limit, &replace_count, flags);
 		if (result != NULL) {
 			if (!is_filter || replace_count > old_replace_count) {
 				RETVAL_STR(result);
@@ -2298,7 +2333,7 @@ static void _preg_replace_common(
 			zend_string *tmp_subject_entry_str;
 			zend_string *subject_entry_str = zval_get_tmp_string(subject_entry, &tmp_subject_entry_str);
 			result = php_replace_in_subject(regex_str, regex_ht, replace_str, replace_ht,
-				subject_entry_str, limit, &replace_count);
+				subject_entry_str, limit, &replace_count, flags);
 
 			if (result != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
@@ -2329,15 +2364,17 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 	HashTable *regex_ht, *replace_ht, *subject_ht;
 	zend_long limit = -1;
 	zval *zcount = NULL;
+	zend_long flags = 0;
 
 	/* Get function parameters and do error-checking. */
-	ZEND_PARSE_PARAMETERS_START(3, 5)
+	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
 		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
+		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
 	_preg_replace_common(
@@ -2345,7 +2382,8 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 		regex_ht, regex_str,
 		replace_ht, replace_str,
 		subject_ht, subject_str,
-		limit, zcount, is_filter);
+		limit, zcount,
+		flags, is_filter);
 }
 /* }}} */
 
@@ -2371,7 +2409,7 @@ ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
 		regex_ht, regex_str,
 		replace_ht, replace_str,
 		subject_ht, subject_str,
-		/* limit */ -1, /* zcount */ NULL, /* is_filter */ false);
+		/* limit */ -1, /* zcount */ NULL, /* flags */ 0, /* is_filter */ false);
 
 flf_clean:;
 	Z_FLF_PARAM_FREE_STR(1, regex_tmp);

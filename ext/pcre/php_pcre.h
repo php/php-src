@@ -25,7 +25,7 @@
 
 #include <locale.h>
 
-PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
+PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count, zend_long flags);
 PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);
 
 extern zend_module_entry pcre_module_entry;
@@ -53,7 +53,7 @@ PHPAPI void  php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str
 	zval *subpats, bool global, zend_long flags, zend_off_t start_offset);
 
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str,
-	size_t limit, size_t *replace_count);
+	size_t limit, size_t *replace_count, zend_long flags);
 
 PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags);
