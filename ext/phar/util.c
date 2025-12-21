@@ -709,7 +709,8 @@ static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
 }
 
-/* initialize a phar_archive_data's read-only fp for existing phar data */
+/* Initialize a phar_archive_data's read-only fp for existing phar data.
+ * The stream is owned by the `phar` object and must not be closed manually. */
 php_stream *phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 {
 	php_stream *stream = phar_get_pharfp(phar);
