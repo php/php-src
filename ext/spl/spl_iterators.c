@@ -1827,7 +1827,7 @@ PHP_METHOD(RegexIterator, accept)
 			/* Property type is ?string, so this should always succeed. */
 			ZEND_ASSERT(replacement_str != NULL);
 
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count, 0);
 
 			if (UNEXPECTED(!result)) {
 				zend_string_release(replacement_str);
