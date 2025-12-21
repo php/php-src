@@ -176,7 +176,6 @@ void init_executor(void) /* {{{ */
 	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
 
 	EG(exception) = NULL;
-	EG(prev_exception) = NULL;
 
 	EG(fake_scope) = NULL;
 	EG(trampoline).common.function_name = NULL;
@@ -1268,9 +1267,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_long previous_lineno = EG(lineno_override);
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
-	zend_exception_save();
 	ce = zend_autoload(autoload_name, lc_name);
-	zend_exception_restore();
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;
 
