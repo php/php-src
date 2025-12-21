@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
     (ndossche)
+  . Fix SplFileInfo::openFile() in write mode. (ndossche)
 
 - Sqlite3:
   . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
