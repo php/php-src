@@ -420,7 +420,7 @@ ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **err
 
 	phar = idata->phar;
 
-	if (idata->internal_file->fp_refcount < 2) {
+	if (idata->internal_file->fp_refcount < 2 && idata->internal_file->fileinfo_lock_count == 0) {
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
@@ -1571,7 +1571,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 	const zend_long readsize = sizeof(buffer) - sizeof(token);
 	const zend_long tokenlen = sizeof(token) - 1;
 	zend_long halt_offset;
-	size_t got;
+	ssize_t got;
 	uint32_t compression = PHAR_FILE_COMPRESSED_NONE;
 
 	if (error) {
@@ -1589,7 +1589,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 	/* Maybe it's better to compile the file instead of just searching,  */
 	/* but we only want the offset. So we want a .re scanner to find it. */
 	while(!php_stream_eof(fp)) {
-		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < (size_t) tokenlen) {
+		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < tokenlen) {
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 

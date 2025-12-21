@@ -726,7 +726,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 	}
 
 	if (entry->is_deleted) {
-		if (entry->fp_refcount <= 0) {
+		if (entry->fp_refcount <= 0 && entry->fileinfo_lock_count == 0) {
 			return ZEND_HASH_APPLY_REMOVE;
 		} else {
 			/* we can't delete this in-memory until it is closed */

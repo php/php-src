@@ -90,7 +90,7 @@ function remove_data($id, $dir = NULL)
     }
 }
 
-/* Keep this file ASCII, so zend.multibyte related stuff can be tasted as well. */
+/* Keep this file ASCII, so zend.multibyte related stuff can be tested as well. */
 include __DIR__ . DIRECTORY_SEPARATOR . "util_utf8.inc";
 function create_data($id, $item = "", $cp = 65001)
 {

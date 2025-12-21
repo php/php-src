@@ -216,6 +216,7 @@ typedef struct _phar_entry_info {
 	php_stream               *cfp;
 	enum phar_fp_type        fp_type;
 	int                      fp_refcount;
+	unsigned int             fileinfo_lock_count;
 	char                     *tmp;
 	phar_archive_data        *phar;
 	char                     *link; /* symbolic link to another file */
