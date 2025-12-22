@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20631 (Integer underflow in exif HEIF parsing
     when pos.size < 2). (Oblivionsage)
 
+- Intl:
+  . Fix leak in umsg_format_helper(). (ndossche)
+
 - LDAP:
   . Fix memory leak in ldap_set_options(). (ndossche)
 
