@@ -254,13 +254,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			} else {
 				php_stream *stream = phar_get_pharfp(phar);
 				if (stream == NULL) {
-					if (UNEXPECTED(FAILURE == phar_open_archive_fp(phar))) {
+					stream = phar_open_archive_fp(phar);
+					if (UNEXPECTED(!stream)) {
 						php_stream_wrapper_log_error(wrapper, options, "phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
 						efree(internal_file);
 						php_url_free(resource);
 						return NULL;
 					}
-					stream = phar_get_pharfp(phar);
 				}
 
 				phar_entry_info *entry;

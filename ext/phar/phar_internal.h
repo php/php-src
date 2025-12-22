@@ -440,7 +440,7 @@ php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links);
 phar_entry_info *phar_get_link_source(phar_entry_info *entry);
-zend_result phar_open_archive_fp(phar_archive_data *phar);
+php_stream *phar_open_archive_fp(phar_archive_data *phar);
 zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
