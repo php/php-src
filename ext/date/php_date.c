@@ -4063,7 +4063,7 @@ PHP_METHOD(DateTimeZone, __construct)
 }
 /* }}} */
 
-static bool php_date_timezone_initialize_from_hash(zval **return_value, php_timezone_obj **tzobj, const HashTable *myht) /* {{{ */
+static bool php_date_timezone_initialize_from_hash(php_timezone_obj **tzobj, const HashTable *myht) /* {{{ */
 {
 	zval            *z_timezone_type;
 
@@ -4104,7 +4104,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
-	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
+	if (!php_date_timezone_initialize_from_hash(&tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
 		RETURN_THROWS();
 	}
@@ -4124,7 +4124,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
+	if (!php_date_timezone_initialize_from_hash(&tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
 		RETURN_THROWS();
 	}
@@ -4188,7 +4188,7 @@ PHP_METHOD(DateTimeZone, __unserialize)
 
 	tzobj = Z_PHPTIMEZONE_P(object);
 
-	if (!php_date_timezone_initialize_from_hash(&object, &tzobj, myht)) {
+	if (!php_date_timezone_initialize_from_hash(&tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
 		RETURN_THROWS();
 	}
@@ -4613,7 +4613,7 @@ PHP_METHOD(DateInterval, __construct)
 }
 /* }}} */
 
-static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, const HashTable *myht) /* {{{ */
+static void php_date_interval_initialize_from_hash(php_interval_obj **intobj, const HashTable *myht) /* {{{ */
 {
 	/* If we have a date_string, use that instead */
 	const zval *date_str = zend_hash_str_find(myht, "date_string", strlen("date_string"));
@@ -4752,7 +4752,7 @@ PHP_METHOD(DateInterval, __set_state)
 
 	php_date_instantiate(date_ce_interval, return_value);
 	intobj = Z_PHPINTERVAL_P(return_value);
-	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
+	php_date_interval_initialize_from_hash(&intobj, myht);
 }
 /* }}} */
 
@@ -4823,7 +4823,7 @@ PHP_METHOD(DateInterval, __unserialize)
 
 	intervalobj = Z_PHPINTERVAL_P(object);
 
-	php_date_interval_initialize_from_hash(&object, &intervalobj, myht);
+	php_date_interval_initialize_from_hash(&intervalobj, myht);
 	restore_custom_dateinterval_properties(object, myht);
 }
 /* }}} */
@@ -4841,7 +4841,7 @@ PHP_METHOD(DateInterval, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
+	php_date_interval_initialize_from_hash(&intobj, myht);
 }
 /* }}} */
 
