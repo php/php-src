@@ -443,7 +443,7 @@ PHP_FUNCTION(mime_content_type)
 			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		}
 
-		php_stream_seek(stream, current_stream_pos, SEEK_SET);	
+		php_stream_seek(stream, current_stream_pos, SEEK_SET);
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
