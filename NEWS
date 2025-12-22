@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-20936 (DatePeriod::__set_state() cannot handle null start).
     (ndossche)
+  . Fix timezone offset with seconds losing precision. (ndossche)
 
 - DOM:
   . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
