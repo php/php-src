@@ -268,11 +268,12 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 	if (php_stream_stat(stream, &ssb) == SUCCESS) {
 		if (ssb.sb.st_mode & S_IFDIR) {
 			ret_val = "directory";
-		} else {
-			ret_val = magic_stream(magic, stream);
-			if (UNEXPECTED(ret_val == NULL)) {
-				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-			}
+		}
+	}
+	if (!ret_val) {
+		ret_val = magic_stream(magic, stream);
+		if (UNEXPECTED(ret_val == NULL)) {
+			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		}
 	}
 
@@ -430,8 +431,10 @@ PHP_FUNCTION(mime_content_type)
 	if (path) {
 		php_stream_context *context = php_stream_context_get_default(false);
 		ret_val = php_fileinfo_from_path(magic, path, context);
-	} else {
-		/* remember stream position for restoration */
+	}
+
+	if (!path) {
+		/* Remember stream position for restoration */
 		zend_off_t current_stream_pos = php_stream_tell(stream);
 		php_stream_seek(stream, 0, SEEK_SET);
 
@@ -440,7 +443,7 @@ PHP_FUNCTION(mime_content_type)
 			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		}
 
-		php_stream_seek(stream, current_stream_pos, SEEK_SET);
+		php_stream_seek(stream, current_stream_pos, SEEK_SET);	
 	}
 
 	if (UNEXPECTED(ret_val == NULL)) {
