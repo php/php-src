@@ -260,20 +260,26 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
+		/* This is a new phar that has perhaps had an alias/metadata set, but has never been flushed. */
+		bool remove_fname_cache = !zend_hash_num_elements(&phar->manifest);
+
 		if (phar->fp && (!(phar->flags & PHAR_FILE_COMPRESSION_MASK) || !phar->alias)) {
 			/* close open file handle - allows removal or rename of
 			the file on windows, which has greedy locking
-			only close if the archive was not already compressed.  If it
-			was compressed, then the fp does not refer to the original file.
-			We're also closing compressed files to save resources,
-			but only if the archive isn't aliased. */
+			only close if the archive was not already compressed.
+			We're also closing compressed files to save resources, but only if the archive isn't aliased.
+			If it was compressed, then the fp does not refer to the original compressed file:
+			it refers to the **uncompressed** filtered file stream.
+			Therefore, upon closing a compressed file we need to invalidate the phar archive such
+			that the code that reopens the phar will not try to use the **compressed** file as if it was uncompressed.
+			That would result in treating compressed file data as if it were compressed and using uncompressed file offsets
+			on the compressed file. */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
+			remove_fname_cache |= phar->flags & PHAR_FILE_COMPRESSION_MASK;
 		}
 
-		if (!zend_hash_num_elements(&phar->manifest)) {
-			/* this is a new phar that has perhaps had an alias/metadata set, but has never
-			been flushed */
+		if (remove_fname_cache) {
 			if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
