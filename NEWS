@@ -22,6 +22,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
 
+- Intl:
+  . Fix leak in umsg_format_helper(). (ndossche)
+
 - LDAP:
   . Fix memory leak in ldap_set_options(). (ndossche)
 
