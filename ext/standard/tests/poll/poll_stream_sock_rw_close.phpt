@@ -17,7 +17,7 @@ pt_expect_events($poll_ctx->wait(100), [
     [
         'events' => [
             'default' => [Io\Poll\Event::Write, Io\Poll\Event::Error, Io\Poll\Event::HangUp],
-            'kqueue|eventport' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp],
+            'Kqueue|EventPorts' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp],
         ],
         'data' => 'socket2_data'
     ]

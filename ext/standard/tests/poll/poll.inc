@@ -3,7 +3,22 @@
 
 function pt_new_stream_poll(): Io\Poll\Context {
     $backend = getenv('POLL_TEST_BACKEND');
-    return new Io\Poll\Context($backend === false ? Io\Poll\Backend::Auto : Io\Poll\Backend::from($backend));
+    if ($backend === false) {
+        return new Io\Poll\Context(Io\Poll\Backend::Auto);
+    }
+
+    // Map string to enum case using match
+    $backend_enum = match(strtolower($backend)) {
+        'auto' => Io\Poll\Backend::Auto,
+        'poll' => Io\Poll\Backend::Poll,
+        'epoll' => Io\Poll\Backend::Epoll,
+        'kqueue' => Io\Poll\Backend::Kqueue,
+        'eventports' => Io\Poll\Backend::EventPorts,
+        'wsapoll' => Io\Poll\Backend::WSAPoll,
+        default => throw new ValueError("Unknown backend: $backend"),
+    };
+
+    return new Io\Poll\Context($backend_enum);
 }
 
 function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): Io\Poll\Watcher {
@@ -157,7 +172,7 @@ function pt_expect_events($watchers, $expected, ?Io\Poll\Context $poll_ctx = nul
 
         // Check if events field is a backend-specific map (associative array with string keys)
         if (isset($exp_event['events']) && is_array($exp_event['events'])) {
-            // Check if it's a backend map (has string keys like 'default', 'kqueue', etc.)
+            // Check if it's a backend map (has string keys like 'default', 'Kqueue', etc.)
             $keys = array_keys($exp_event['events']);
             $is_backend_map = false;
             foreach ($keys as $key) {
@@ -246,7 +261,7 @@ function pt_resolve_backend_specific_value($backend_map, $current_backend) {
         return $backend_map[$current_backend];
     }
 
-    // Check for multi-backend keys (e.g., "poll|epoll")
+    // Check for multi-backend keys (e.g., "Kqueue|EventPorts")
     foreach ($backend_map as $key => $value) {
         if (strpos($key, '|') !== false) {
             $backends = array_map('trim', explode('|', $key));
