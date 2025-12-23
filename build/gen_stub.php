@@ -1299,6 +1299,19 @@ class VersionFlags {
     }
 }
 
+class IncludeInfo {
+    public /* readonly */ ?string $cond;
+    public /* readonly */ string $include;
+
+    public function __construct(
+        string $include,
+        ?string $cond,
+    ) {
+        $this->include = $include;
+        $this->cond = $cond;
+    }
+}
+
 class FuncInfo {
     public /* readonly */ FunctionOrMethodName $name;
     private /* readonly */ int $classFlags;
@@ -4189,6 +4202,8 @@ class FileInfo {
     public array $funcInfos = [];
     /** @var ClassInfo[] */
     public array $classInfos = [];
+    /** @var IncludeInfo[] */
+    public array $includeInfos = [];
     public bool $generateFunctionEntries = false;
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
@@ -4337,6 +4352,16 @@ class FileInfo {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
+
+            if ($stmt instanceof Stmt\Declare_) {
+                foreach ($stmt->declares as $declare) {
+                    if ($declare->key->name !== 'c_include') {
+                        throw new Exception("Unexpected declare {$declare->key->name}");
+                    }
+                    $this->includeInfos[] = new IncludeInfo((string)EvaluatedValue::createFromExpression($declare->value, null, null, [])->value, $cond);
+                }
+                continue;
+            }
     
             if ($stmt instanceof Stmt\Nop) {
                 continue;
@@ -5111,7 +5136,7 @@ function generateCodeWithConditions(
             continue;
         }
 
-        if ($info->cond && $info->cond !== $parentCond) {
+        if ($info->cond !== null && $info->cond !== $parentCond) {
             if ($openCondition !== null
                 && $info->cond !== $openCondition
             ) {
@@ -5161,6 +5186,17 @@ function generateArgInfoCode(
           . " * Stub hash: $stubHash */\n";
 
     $generatedFuncInfos = [];
+
+    $argInfoCode = generateCodeWithConditions(
+        $fileInfo->includeInfos, "\n",
+        static function (IncludeInfo $includeInfo) {
+            return sprintf("#include %s\n", $includeInfo->include);
+        }
+    );
+
+    if ($argInfoCode !== "") {
+        $code .= "$argInfoCode\n";
+    }
 
     $argInfoCode = generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
