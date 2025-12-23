@@ -519,11 +519,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"eor    x20, %1, %3\n"
 		"eor    x21, %2, %3\n"
 		"eor    x0, x0, x0\n"
-#if defined(__APPLE__)
-		"bl     _fun\n"
-#else
 		"bl     fun\n"
-#endif
 		"mov    %0, x0\n"
 		: "=r" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
