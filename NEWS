@@ -40,6 +40,9 @@ PHP                                                                        NEWS
   . Fix build on legacy OpenSSL 1.1.0 systems. (Giovanni Giacobbi)
   . Fixed bug #74154 (Phar extractTo creates empty files). (ndossche)
 
+- Session:
+  . Fix support for MM module. (Michael Orlitzky)
+
 - Sqlite3:
   . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
     null returned). (ndossche, plusminmax)
