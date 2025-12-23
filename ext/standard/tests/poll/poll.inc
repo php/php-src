@@ -1,20 +1,20 @@
 <?php
 // stream Poll Testing helper
 
-function pt_new_stream_poll(): PollContext {
+function pt_new_stream_poll(): Io\Poll\Context {
     $backend = getenv('POLL_TEST_BACKEND');
-    return new PollContext($backend === false ? PollBackend::Auto : PollBackend::from($backend));
+    return new Io\Poll\Context($backend === false ? Io\Poll\Backend::Auto : Io\Poll\Backend::from($backend));
 }
 
-function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): PollWatcher {
+function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): Io\Poll\Watcher {
     return $poll_ctx->add(new StreamPollHandle($stream), $events, $data);
 }
 
 function pt_skip_for_backend($backend, $msg): void {
     $backends_to_skip = is_array($backend) ? $backend : array($backend);
     $current_backend = pt_new_stream_poll()->getBackend();
-    if (in_array($current_backend->value, $backends_to_skip)) {
-        die("skip backend $current_backend->value $msg\n");
+    if (in_array($current_backend->name, $backends_to_skip)) {
+        die("skip backend {$current_backend->name} $msg\n");
     }
 }
 
@@ -76,7 +76,6 @@ function pt_new_tcp_socket_connections(int $num_conns): array {
         }
     }
 
-
     // Close the listening socket (no longer needed)
     fclose($server);
 
@@ -84,9 +83,17 @@ function pt_new_tcp_socket_connections(int $num_conns): array {
 }
 
 function pt_write_sleep($stream, $data, $delay = 10000): int|false {
-    $result = fwrite($stream, $data, $delay);
+    $result = fwrite($stream, $data);
     usleep($delay);
     return $result;
+}
+
+function pt_event_array_to_string(array $events): string {
+    $names = [];
+    foreach ($events as $event) {
+        $names[] = $event->name;
+    }
+    return empty($names) ? 'NONE' : implode('|', $names);
 }
 
 function pt_print_events($watchers, $read_data = false): void {
@@ -95,11 +102,11 @@ function pt_print_events($watchers, $read_data = false): void {
     }
     echo "Events count: " . count($watchers) . "\n";
     foreach ($watchers as $i => $watcher) {
-        if (!$watcher instanceof PollWatcher) {
+        if (!$watcher instanceof Io\Poll\Watcher) {
             die('Invalid event type');
         }
-        echo "Event[$i]: " . $watcher->getTriggeredEvents() . ", user data: " . $watcher->getData();
-        if ($read_data && $watcher->hasTriggered(POLL_EVENT_READ)) {
+        echo "Event[$i]: " . pt_event_array_to_string($watcher->getTriggeredEvents()) . ", user data: " . $watcher->getData();
+        if ($read_data && $watcher->hasTriggered(Io\Poll\Event::Read)) {
             $data = fread($watcher->getHandle()->getStream(), 1024);
             echo ", read data: '$data'";
         }
@@ -107,7 +114,7 @@ function pt_print_events($watchers, $read_data = false): void {
     }
 }
 
-function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): void {
+function pt_expect_events($watchers, $expected, ?Io\Poll\Context $poll_ctx = null): void {
     if (!is_array($watchers)) {
         die("Events must be an array\n");
     }
@@ -120,18 +127,18 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
     $expected_count = count($expected);
 
     // Get the current backend for backend-specific expectations
-    $backend = $poll_ctx ? $poll_ctx->getBackend() : 'unknown';
+    $backend = $poll_ctx ? $poll_ctx->getBackend()->name : 'unknown';
 
     if ($event_count !== $expected_count) {
         echo "Event count mismatch: got $event_count, expected $expected_count\n";
-        pt_print_mismatched_events($watchers, $expected, [], $backend->value);
+        pt_print_mismatched_events($watchers, $expected, [], $backend);
         return;
     }
 
     // Convert events to comparable format for matching
     $actual_events = [];
     foreach ($watchers as $watcher) {
-        if (!$watcher instanceof PollWatcher) {
+        if (!$watcher instanceof Io\Poll\Watcher) {
             die('Invalid event type');
         }
 
@@ -148,8 +155,23 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
     foreach ($expected as $exp_event) {
         $resolved_event = $exp_event;
 
+        // Check if events field is a backend-specific map (associative array with string keys)
         if (isset($exp_event['events']) && is_array($exp_event['events'])) {
-            $resolved_event['events'] = pt_resolve_backend_specific_value($exp_event['events'], $backend->value);
+            // Check if it's a backend map (has string keys like 'default', 'kqueue', etc.)
+            $keys = array_keys($exp_event['events']);
+            $is_backend_map = false;
+            foreach ($keys as $key) {
+                if (is_string($key)) {
+                    $is_backend_map = true;
+                    break;
+                }
+            }
+
+            if ($is_backend_map) {
+                // It's a backend-specific map, resolve it
+                $resolved_event['events'] = pt_resolve_backend_specific_value($exp_event['events'], $backend);
+            }
+            // Otherwise it's already an array of Event enums, leave it as-is
         }
 
         $resolved_expected[] = $resolved_event;
@@ -168,7 +190,7 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
             }
 
             // Check if events and data match
-            if ($act_event['events'] === $exp_event['events'] &&
+            if (pt_events_equal($act_event['events'], $exp_event['events']) &&
                 $act_event['data'] === $exp_event['data']) {
 
                 // If read data is expected, check it
@@ -195,8 +217,27 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
         echo "Events matched - count: $event_count\n";
     } else {
         echo "Events did not match:\n";
-        pt_print_mismatched_events($watchers, $expected, $matched, $backend->value);
+        pt_print_mismatched_events($watchers, $expected, $matched, $backend);
     }
+}
+
+function pt_events_equal($actual, $expected): bool {
+    // Both should be arrays of Event enums
+    if (!is_array($actual) || !is_array($expected)) {
+        return false;
+    }
+
+    if (count($actual) !== count($expected)) {
+        return false;
+    }
+
+    // Sort both arrays by event name for comparison
+    $actual_names = array_map(fn($e) => $e->name, $actual);
+    $expected_names = array_map(fn($e) => $e->name, $expected);
+    sort($actual_names);
+    sort($expected_names);
+
+    return $actual_names === $expected_names;
 }
 
 function pt_resolve_backend_specific_value($backend_map, $current_backend) {
@@ -224,21 +265,11 @@ function pt_resolve_backend_specific_value($backend_map, $current_backend) {
     die("No backend-specific value found for '$current_backend' and no default specified\n");
 }
 
-function pt_event_flags_to_string($flags): string {
-    $names = [];
-    if ($flags & POLL_EVENT_READ) $names[] = 'READ';
-    if ($flags & POLL_EVENT_WRITE) $names[] = 'WRITE';
-    if ($flags & POLL_EVENT_ERROR) $names[] = 'ERROR';
-    if ($flags & POLL_EVENT_HUP) $names[] = 'HUP';
-
-    return empty($names) ? 'NONE:' . $flags : implode('|', $names);
-}
-
 function pt_print_mismatched_events($actual_watchers, $expected_watchers, $matched = [], $backend_name = null): void {
     echo "Actual events:\n";
     foreach ($actual_watchers as $i => $watcher) {
         $match_status = isset($matched[$i]) ? " [MATCHED]" : " [UNMATCHED]";
-        $watcher_names = pt_event_flags_to_string($watcher->getTriggeredEvents());
+        $watcher_names = pt_event_array_to_string($watcher->getTriggeredEvents());
         echo "  Event[$i]: $watcher_names, user data: " . $watcher->getData() . $match_status . "\n";
     }
 
@@ -247,12 +278,25 @@ function pt_print_mismatched_events($actual_watchers, $expected_watchers, $match
         $was_matched = in_array($i, $matched);
         $match_status = $was_matched ? " [MATCHED]" : " [UNMATCHED]";
 
-        $watchers_value = $exp_event['events'];
-        if (is_array($watchers_value) && $backend_name !== null) {
-            $watchers_value = pt_resolve_backend_specific_value($watchers_value, $backend_name);
+        $events_value = $exp_event['events'];
+        
+        // Check if it's a backend-specific map
+        if (is_array($events_value) && $backend_name !== null) {
+            $keys = array_keys($events_value);
+            $is_backend_map = false;
+            foreach ($keys as $key) {
+                if (is_string($key)) {
+                    $is_backend_map = true;
+                    break;
+                }
+            }
+            
+            if ($is_backend_map) {
+                $events_value = pt_resolve_backend_specific_value($events_value, $backend_name);
+            }
         }
 
-        $watcher_names = pt_event_flags_to_string($watchers_value);
+        $watcher_names = is_array($events_value) ? pt_event_array_to_string($events_value) : 'INVALID';
         echo "  Event[$i]: $watcher_names, user data: " . $exp_event['data'];
         if (isset($exp_event['read'])) {
             echo ", read data: '" . $exp_event['read'] . "'";

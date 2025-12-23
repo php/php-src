@@ -3,7 +3,7 @@ Poll stream - socket write / read multiple times with edge triggering
 --SKIPIF--
 <?php
 require_once __DIR__ . '/poll.inc';
-pt_skip_for_backend(['poll', 'wsapoll', 'eventport'], 'does not support edge triggering')
+pt_skip_for_backend(['Poll', 'WSAPoll', 'EventPorts'], 'does not support edge triggering')
 ?>
 --FILE--
 <?php
@@ -12,37 +12,37 @@ require_once __DIR__ . '/poll.inc';
 list($socket1r, $socket1w) = pt_new_socket_pair();
 $poll_ctx = pt_new_stream_poll();
 
-pt_stream_poll_add($poll_ctx, $socket1r, POLL_EVENT_READ | POLL_EVENT_ET, "socket1_data");
-pt_stream_poll_add($poll_ctx, $socket1w, POLL_EVENT_WRITE | POLL_EVENT_ET, "socket2_data");
+pt_stream_poll_add($poll_ctx, $socket1r, [Io\Poll\Event::Read, Io\Poll\Event::EdgeTriggered], "socket1_data");
+pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write, Io\Poll\Event::EdgeTriggered], "socket2_data");
 
 pt_expect_events($poll_ctx->wait(0), [
-    ['events' => POLL_EVENT_WRITE, 'data' => 'socket2_data']
+    ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data']
 ]);
 
 pt_expect_events($poll_ctx->wait(0), []);
 
 fwrite($socket1w, "test data");
 pt_expect_events($poll_ctx->wait(100), [
-    ['events' => POLL_EVENT_READ, 'data' => 'socket1_data', 'read' => 'test data']
+    ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'test data']
 ]);
 
 fwrite($socket1w, "more data");
 pt_expect_events($poll_ctx->wait(100), [
-    ['events' => POLL_EVENT_WRITE, 'data' => 'socket2_data'],
-    ['events' => POLL_EVENT_READ, 'data' => 'socket1_data']
+    ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
+    ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data']
 ]);
 
 pt_expect_events($poll_ctx->wait(100), []);
 
 fwrite($socket1w, " and even more data");
 pt_expect_events($poll_ctx->wait(100), [
-    ['events' => POLL_EVENT_READ, 'data' => 'socket1_data', 'read' => 'more data and even more data']
+    ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'more data and even more data']
 ]);
 
 fclose($socket1r);
 pt_expect_events($poll_ctx->wait(100), [
     [
-        'events' => ['default' => POLL_EVENT_WRITE|POLL_EVENT_HUP, 'poll' => POLL_EVENT_HUP],
+        'events' => ['default' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp]],
         'data' => 'socket2_data'
     ]
 ], $poll_ctx);

@@ -76,6 +76,9 @@ typedef struct php_poll_ctx php_poll_ctx;
 typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
+PHPAPI bool php_poll_is_backend_available(php_poll_backend_type backend);
+PHPAPI bool php_poll_backend_supports_edge_triggering(php_poll_backend_type backend);
+
 PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, uint32_t flags);
 PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, uint32_t flags);
 

@@ -418,6 +418,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     image.c
     incomplete_class.c
     info.c
+    io_poll.c
     iptc.c
     levenshtein.c
     libavifinfo/avifinfo.c
@@ -432,7 +433,6 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     pageinfo.c
     password.c
     php_fopen_wrapper.c
-    poll.c
     proc_open.c
     quot_print.c
     scanf.c
