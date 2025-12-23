@@ -2,12 +2,15 @@
 set -ex
 cd "$(dirname "$0")/../../.."
 
+tmp_dir=/tmp/php-src-download-bundled/pcre2
+rm -rf "$tmp_dir"
+
 revision=refs/tags/pcre2-10.44
 
-git clone --depth 1 --recurse-submodules --revision="$revision" https://github.com/PCRE2Project/pcre2.git /tmp/php-src-bundled/pcre2
+git clone --depth 1 --recurse-submodules --revision="$revision" https://github.com/PCRE2Project/pcre2.git "$tmp_dir"
 
 rm -rf ext/pcre/pcre2lib
-cp -R /tmp/php-src-bundled/pcre2/src ext/pcre/pcre2lib
+cp -R "$tmp_dir"/src ext/pcre/pcre2lib
 
 cd ext/pcre/pcre2lib
 
