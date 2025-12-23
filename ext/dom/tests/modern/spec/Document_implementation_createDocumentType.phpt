@@ -25,7 +25,7 @@ foreach ($test_matrix as $test_item) {
 
 ?>
 --EXPECT--
-object(Dom\DocumentType)#3 (19) {
+object(Dom\DocumentType)#3 (20) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -46,6 +46,8 @@ object(Dom\DocumentType)#3 (19) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -68,7 +70,7 @@ object(Dom\DocumentType)#3 (19) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "system">
 
-object(Dom\DocumentType)#2 (19) {
+object(Dom\DocumentType)#2 (20) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -89,6 +91,8 @@ object(Dom\DocumentType)#2 (19) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -111,7 +115,7 @@ object(Dom\DocumentType)#2 (19) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "">
 
-object(Dom\DocumentType)#1 (19) {
+object(Dom\DocumentType)#1 (20) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -132,6 +136,8 @@ object(Dom\DocumentType)#1 (19) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -154,7 +160,7 @@ object(Dom\DocumentType)#1 (19) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname SYSTEM "system">
 
-object(Dom\DocumentType)#4 (19) {
+object(Dom\DocumentType)#4 (20) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -175,6 +181,8 @@ object(Dom\DocumentType)#4 (19) {
   NULL
   ["isConnected"]=>
   bool(false)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>

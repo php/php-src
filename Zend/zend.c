@@ -377,9 +377,9 @@ ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *form
 }
 /* }}} */
 
-static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent);
+static bool zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent);
 
-static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object) /* {{{ */
+static bool print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object) /* {{{ */
 {
 	zval *tmp;
 	zend_string *string_key;
@@ -400,7 +400,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 			if (is_object) {
 				const char *prop_name, *class_name;
 				size_t prop_len;
-				int mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
+				zend_result mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
 
 				smart_str_appendl(buf, prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {
@@ -419,7 +419,9 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 			smart_str_append_long(buf, num_key);
 		}
 		smart_str_appends(buf, "] => ");
-		zend_print_zval_r_to_buf(buf, tmp, indent+PRINT_ZVAL_INDENT);
+		if (UNEXPECTED(!zend_print_zval_r_to_buf(buf, tmp, indent+PRINT_ZVAL_INDENT))) {
+			return false;
+		}
 		smart_str_appends(buf, "\n");
 	} ZEND_HASH_FOREACH_END();
 	indent -= PRINT_ZVAL_INDENT;
@@ -427,6 +429,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 		smart_str_appendc(buf, ' ');
 	}
 	smart_str_appends(buf, ")\n");
+	return true;
 }
 /* }}} */
 
@@ -543,29 +546,28 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
 	smart_str_free(&buf);
 }
 
-static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* {{{ */
+static bool zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* {{{ */
 {
 	switch (Z_TYPE_P(expr)) {
-		case IS_ARRAY:
+		case IS_ARRAY: {
 			smart_str_appends(buf, "Array\n");
 			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(Z_ARRVAL_P(expr))) {
 					smart_str_appends(buf, " *RECURSION*");
-					return;
+					return true;
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
-			print_hash(buf, Z_ARRVAL_P(expr), indent, false);
+			bool status = print_hash(buf, Z_ARRVAL_P(expr), indent, false);
 			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
-			break;
+			return status;
+		}
 		case IS_OBJECT:
 			{
-				HashTable *properties;
-
 				zend_object *zobj = Z_OBJ_P(expr);
 				uint32_t *guard = zend_get_recursion_guard(zobj);
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
-				smart_str_appends(buf, ZSTR_VAL(class_name));
+				smart_str_append(buf, class_name);
 				zend_string_release_ex(class_name, 0);
 
 				if (!(zobj->ce->ce_flags & ZEND_ACC_ENUM)) {
@@ -581,37 +583,37 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 
 				if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 					smart_str_appends(buf, " *RECURSION*");
-					return;
+					return true;
 				}
 
-				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
-					print_hash(buf, (HashTable*) &zend_empty_array, indent, true);
-					break;
+				HashTable *properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG);
+				/* Either we must have properties as a HashTable (even if empty) or an exception if NULL is returned */
+				ZEND_ASSERT(properties || EG(exception));
+				if (UNEXPECTED(properties == NULL)) {
+					return false;
 				}
 
 				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
-				print_hash(buf, properties, indent, true);
+				bool status = print_hash(buf, properties, indent, true);
 				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
-				zend_release_properties(properties);
-				break;
+				zend_array_release(properties);
+				return status;
 			}
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(expr));
-			break;
+			return true;
 		case IS_REFERENCE:
-			zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
-			break;
+			return zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
 		case IS_STRING:
 			smart_str_append(buf, Z_STR_P(expr));
-			break;
-		default:
-			{
-				zend_string *str = zval_get_string_func(expr);
-				smart_str_append(buf, str);
-				zend_string_release_ex(str, 0);
-			}
-			break;
+			return true;
+		default: {
+			zend_string *str = zval_get_string_func(expr);
+			smart_str_append(buf, str);
+			zend_string_release_ex(str, 0);
+			return true;
+		}
 	}
 }
 /* }}} */
@@ -619,7 +621,11 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent) /* {{{ */
 {
 	smart_str buf = {0};
-	zend_print_zval_r_to_buf(&buf, expr, indent);
+	bool status = zend_print_zval_r_to_buf(&buf, expr, indent);
+	if (UNEXPECTED(!status)) {
+		smart_str_free(&buf);
+		return NULL;
+	}
 	smart_str_0(&buf);
 	return buf.s;
 }
@@ -628,6 +634,10 @@ ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent) /* {{{ */
 ZEND_API void zend_print_zval_r(zval *expr, int indent) /* {{{ */
 {
 	zend_string *str = zend_print_zval_r_to_str(expr, indent);
+	/* If an exception was triggered while printing the zval */
+	if (UNEXPECTED(str == NULL)) {
+		return;
+	}
 	zend_write(ZSTR_VAL(str), ZSTR_LEN(str));
 	zend_string_release_ex(str, 0);
 }

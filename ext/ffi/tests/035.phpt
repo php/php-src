@@ -23,6 +23,4 @@ object(FFI\CData:uint16_t[2])#%d (2) {
   [1]=>
   int(0)
 }
-object(FFI\CData:uint16_t[2])#%d (0) {
-}
 FFI\Exception: Use after free()

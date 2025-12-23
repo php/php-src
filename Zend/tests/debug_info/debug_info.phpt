@@ -13,30 +13,16 @@ class Foo {
   }
 }
 
-class Bar {
-  public $val = 123;
-
-  public function __debugInfo() {
-    return null;
-  }
-}
-
 $f = new Foo;
 var_dump($f);
 
-$b = new Bar;
-var_dump($b);
 ?>
---EXPECTF--
-object(Foo)#%d (3) {
+--EXPECT--
+object(Foo)#1 (3) {
   ["a"]=>
   int(1)
   ["b":protected]=>
   int(2)
   ["c":"Foo":private]=>
   int(3)
-}
-
-Deprecated: Returning null from Bar::__debugInfo() is deprecated, return an empty array instead in %s on line %d
-object(Bar)#%d (0) {
 }

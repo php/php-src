@@ -1,5 +1,5 @@
 --TEST--
-Testing __debugInfo() magic method with bad returns ZERO
+Testing __debugInfo() magic method with bad returns scalar (print_r)
 --FILE--
 <?php
 
@@ -13,12 +13,13 @@ class C {
   }
 }
 
-$c = new C(0);
-var_dump($c);
+$c = new C(true);
+print_r($c);
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: __debuginfo() must return an array in %s:%d
 Stack trace:
-#0 %s(%d): var_dump(Object(C))
+#0 %s(%d): print_r(Object(C))
 #1 {main}
   thrown in %s on line %d

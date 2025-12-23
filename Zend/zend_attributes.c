@@ -183,6 +183,9 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
 {
+	if (purpose == ZEND_PROP_PURPOSE_DEBUG) {
+		return (HashTable*)&zend_empty_array;
+	}
 	return NULL;
 }
 
