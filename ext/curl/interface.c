@@ -728,8 +728,8 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-    	return rval;
-    }
+		return rval;
+	}
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_prereqfunction() called\n");
@@ -924,42 +924,42 @@ static int curl_debug(CURL *handle, curl_infotype type, char *data, size_t size,
 {
 	php_curl *ch = (php_curl *)clientp;
 
-    #if PHP_CURL_DEBUG
-    	fprintf(stderr, "curl_debug() called\n");
-    	fprintf(stderr, "type = %d, data = %s\n", type, data);
-    #endif
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_debug() called\n");
+	fprintf(stderr, "type = %d, data = %s\n", type, data);
+#endif
 
 	// Implicitly store the headers for compatibility with CURLINFO_HEADER_OUT
 	// used as a Curl option. Previously, setting CURLINFO_HEADER_OUT set curl_debug
 	// as the CURLOPT_DEBUGFUNCTION and stored the debug data when type is set to
 	// CURLINFO_HEADER_OUT. For backward compatibility, we now store the headers
 	// but also call the user-callback function if available.
-    if (type == CURLINFO_HEADER_OUT) {
-    	if (ch->header.str) {
-    		zend_string_release_ex(ch->header.str, 0);
-    	}
-    	ch->header.str = zend_string_init(data, size, 0);
-    }
+	if (type == CURLINFO_HEADER_OUT) {
+		if (ch->header.str) {
+			zend_string_release_ex(ch->header.str, 0);
+		}
+		ch->header.str = zend_string_init(data, size, 0);
+	}
 
-    if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-       	return 0;
-    }
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
+		return 0;
+	}
 
-    zval args[3];
+	zval args[3];
 
-    GC_ADDREF(&ch->std);
-    ZVAL_OBJ(&args[0], &ch->std);
-    ZVAL_LONG(&args[1], type);
-    ZVAL_STRINGL(&args[2], data, size);
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], type);
+	ZVAL_STRINGL(&args[2], data, size);
 
-    ch->in_callback = true;
-    zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
-    ch->in_callback = false;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.debug, NULL, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-    zval_ptr_dtor(&args[0]);
-    zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[2]);
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
@@ -2282,9 +2282,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLINFO_HEADER_OUT:
 			if (ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
-                zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
-                return FAILURE;
-            }
+				zend_value_error("CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set");
+				return FAILURE;
+			}
 
 			if (zend_is_true(zvalue)) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
