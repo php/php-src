@@ -2,6 +2,7 @@
 Bug #74154 (Phar extractTo creates empty files)
 --EXTENSIONS--
 phar
+zlib
 --FILE--
 <?php
 
