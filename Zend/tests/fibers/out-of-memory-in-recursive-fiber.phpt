@@ -23,4 +23,4 @@ $fiber->start();
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %sout-of-memory-in-recursive-fiber.php on line %d
+Fatal error: Allowed memory size of %d bytes exhausted by %d bytes%S. Allocated %d bytes and need to allocate %d bytes to satisfy a request for %d bytes in %s on line %d
