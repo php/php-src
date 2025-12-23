@@ -50,6 +50,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
 
+- URI:
+  . Fixed bug GH-20771 (Assertion failure when getUnicodeHost() returns
+    empty string). (ndossche)
+
 18 Dec 2025, PHP 8.5.1
 
 - Core:
