@@ -99,7 +99,8 @@ php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 void php_poll_fd_table_cleanup(php_poll_fd_table *table);
 php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd);
 php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd);
-void php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
+php_poll_fd_entry *php_poll_fd_table_get_new(php_poll_fd_table *table, int fd);
+bool php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
 
 /* Accessor functions for table properties */
 static inline int php_poll_fd_table_count(php_poll_fd_table *table)

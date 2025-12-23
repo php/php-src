@@ -146,7 +146,7 @@ static zend_result eventport_backend_add(
 		return FAILURE;
 	}
 
-	php_poll_fd_entry *entry = php_poll_fd_table_get(backend_data->fd_table, fd);
+	php_poll_fd_entry *entry = php_poll_fd_table_get_new(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
