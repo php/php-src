@@ -54,14 +54,9 @@ php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd)
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
+php_poll_fd_entry *php_poll_fd_table_get_new(php_poll_fd_table *table, int fd)
 {
-	php_poll_fd_entry *entry = php_poll_fd_table_find(table, fd);
-	if (entry) {
-		return entry;
-	}
-
-	entry = php_poll_calloc(1, sizeof(php_poll_fd_entry), table->persistent);
+	php_poll_fd_entry *entry = php_poll_calloc(1, sizeof(php_poll_fd_entry), table->persistent);
 	if (!entry) {
 		return NULL;
 	}
@@ -82,14 +77,25 @@ php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
 	return entry;
 }
 
-void php_poll_fd_table_remove(php_poll_fd_table *table, int fd)
+php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
+{
+	php_poll_fd_entry *entry = php_poll_fd_table_find(table, fd);
+	if (entry) {
+		return entry;
+	}
+
+	return php_poll_fd_table_get_new(table, fd);
+}
+
+bool php_poll_fd_table_remove(php_poll_fd_table *table, int fd)
 {
 	zval *zv = zend_hash_index_find(&table->entries_ht, (zend_ulong) fd);
-	if (zv) {
-		php_poll_fd_entry *entry = Z_PTR_P(zv);
-		pefree(entry, table->persistent);
-		zend_hash_index_del(&table->entries_ht, (zend_ulong) fd);
+	if (zv == NULL) {
+		return false;
 	}
+	php_poll_fd_entry *entry = Z_PTR_P(zv);
+	pefree(entry, table->persistent);
+	return zend_hash_index_del(&table->entries_ht, (zend_ulong) fd) == SUCCESS;
 }
 
 /* Helper function for backends that need to iterate over all entries */

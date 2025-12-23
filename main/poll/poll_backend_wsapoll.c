@@ -120,7 +120,7 @@ static zend_result wsapoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t event
 		return FAILURE;
 	}
 
-	php_poll_fd_entry *entry = php_poll_fd_table_get(backend_data->fd_table, fd);
+	php_poll_fd_entry *entry = php_poll_fd_table_get_new(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -158,12 +158,11 @@ static zend_result wsapoll_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	wsapoll_backend_data_t *backend_data = (wsapoll_backend_data_t *) ctx->backend_data;
 
-	if (!php_poll_fd_table_find(backend_data->fd_table, fd)) {
+	if (!php_poll_fd_table_remove(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
 	}
 
-	php_poll_fd_table_remove(backend_data->fd_table, fd);
 	return SUCCESS;
 }
 
