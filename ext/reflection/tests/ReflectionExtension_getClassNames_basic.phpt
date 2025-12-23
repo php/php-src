@@ -14,11 +14,12 @@ foreach ($classNames as $className) {
 --EXPECT--
 AssertionError
 Directory
-PollBackend
-PollContext
-PollException
-PollHandle
-PollWatcher
+Io\Poll\Backend
+Io\Poll\Context
+Io\Poll\Event
+Io\Poll\Handle
+Io\Poll\PollException
+Io\Poll\Watcher
 RoundingMode
 StreamBucket
 StreamPollHandle
