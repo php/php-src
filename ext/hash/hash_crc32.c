@@ -200,7 +200,8 @@ static hash_spec_result php_crc32_serialize(const php_hashcontext_object *hash, 
 #endif
 	
 	array_init(zv);
-	ZVAL_LONG(&tmp, (zend_long) state_to_serialize);
+	/* Cast to int32_t for consistent serialization across 32-bit and 64-bit platforms */
+	ZVAL_LONG(&tmp, (int32_t) state_to_serialize);
 	zend_hash_next_index_insert(Z_ARRVAL_P(zv), &tmp);
 	
 	return HASH_SPEC_SUCCESS;

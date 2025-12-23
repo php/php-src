@@ -108,33 +108,33 @@ $serializations = [
         "adler32",
         "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjc6ImFkbGVyMzIiO2k6MTtpOjA7aToyO2E6MTp7aTowO2k6MTg3MDM5OTc4NDt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
-    [
+ [
         "crc32",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjU6ImNyYzMyIjtpOjE7aTowO2k6MjthOjE6e2k6MDtpOjI2NzE2NTI4OTA7fWk6MztpOjI7aTo0O2E6MDp7fX0="
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjU6ImNyYzMyIjtpOjE7aTowO2k6MjthOjE6e2k6MDtpOi0xNjIzMzE0NDA2O31pOjM7aToyO2k6NDthOjA6e319"
     ],
     [
         "crc32b",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjY6ImNyYzMyYiI7aToxO2k6MDtpOjI7YToxOntpOjA7aToyNTMyMDE3NTg1O31pOjM7aToyO2k6NDthOjA6e319"
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjY6ImNyYzMyYiI7aToxO2k6MDtpOjI7YToxOntpOjA7aTotMTc2Mjk0OTcxMTt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc32c",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjY6ImNyYzMyYyI7aToxO2k6MDtpOjI7YToxOntpOjA7aToyNzEzNjkwNDc2O31pOjM7aToyO2k6NDthOjA6e319"
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjY6ImNyYzMyYyI7aToxO2k6MDtpOjI7YToxOntpOjA7aTotMTU4MTI3NjgyMDt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc32-iso-hdlc",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjE0OiJjcmMzMi1pc28taGRsYyI7aToxO2k6MDtpOjI7YToxOntpOjA7aToyNTMyMDE3NTg1O31pOjM7aToyO2k6NDthOjA6e319"
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjE0OiJjcmMzMi1pc28taGRsYyI7aToxO2k6MDtpOjI7YToxOntpOjA7aTotMTc2Mjk0OTcxMTt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc32-iscsi",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjExOiJjcmMzMi1pc2NzaSI7aToxO2k6MDtpOjI7YToxOntpOjA7aToyNzEzNjkwNDc2O31pOjM7aToyO2k6NDthOjA6e319"
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjExOiJjcmMzMi1pc2NzaSI7aToxO2k6MDtpOjI7YToxOntpOjA7aTotMTU4MTI3NjgyMDt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc32-php",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjk6ImNyYzMyLXBocCI7aToxO2k6MDtpOjI7YToxOntpOjA7aToyNjcxNjUyODkwO31pOjM7aToyO2k6NDthOjA6e319"
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjk6ImNyYzMyLXBocCI7aToxO2k6MDtpOjI7YToxOntpOjA7aTotMTYyMzMxNDQwNjt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc64-nvme",
-        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjEwOiJjcmM2NC1udm1lIjtpOjE7aTowO2k6MjthOjI6e2k6MDtpOjE0NDk1Njg5NTA7aToxO2k6MzM3MzU5NTc3Mjt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
+        "TzoxMToiSGFzaENvbnRleHQiOjU6e2k6MDtzOjEwOiJjcmM2NC1udm1lIjtpOjE7aTowO2k6MjthOjI6e2k6MDtpOjE0NDk1Njg5NTA7aToxO2k6LTkyMTM3MTUyNDt9aTozO2k6MjtpOjQ7YTowOnt9fQ=="
     ],
     [
         "crc64-ecma-182",

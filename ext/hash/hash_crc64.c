@@ -136,10 +136,11 @@ static hash_spec_result php_crc64_serialize(const php_hashcontext_object *hash, 
 #endif
 	
 	array_init(zv);
-	/* Serialize 64-bit value as two 32-bit values for compatibility */
-	ZVAL_LONG(&tmp, (zend_long) (state_to_serialize & 0xFFFFFFFF));
+	/* Serialize 64-bit value as two 32-bit values for compatibility.
+	 * Cast to int32_t for consistent serialization across 32-bit and 64-bit platforms. */
+	ZVAL_LONG(&tmp, (int32_t) (state_to_serialize & 0xFFFFFFFF));
 	zend_hash_next_index_insert(Z_ARRVAL_P(zv), &tmp);
-	ZVAL_LONG(&tmp, (zend_long) (state_to_serialize >> 32));
+	ZVAL_LONG(&tmp, (int32_t) (state_to_serialize >> 32));
 	zend_hash_next_index_insert(Z_ARRVAL_P(zv), &tmp);
 	
 	return HASH_SPEC_SUCCESS;
