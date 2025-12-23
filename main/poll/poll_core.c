@@ -99,6 +99,40 @@ static const php_poll_backend_ops *php_poll_get_backend_ops_by_name(const char *
 	return NULL;
 }
 
+PHPAPI bool php_poll_is_backend_available(php_poll_backend_type backend)
+{
+	if (backend == PHP_POLL_BACKEND_AUTO) {
+		return true; /* Auto is always available */
+	}
+
+	for (int i = 0; i < num_registered_backends; i++) {
+		if (registered_backends[i] && registered_backends[i]->type == backend) {
+			return registered_backends[i]->is_available();
+		}
+	}
+
+	return false;
+}
+
+PHPAPI bool php_poll_backend_supports_edge_triggering(php_poll_backend_type backend)
+{
+	if (backend == PHP_POLL_BACKEND_AUTO) {
+		/* Check the first (best) available backend */
+		if (num_registered_backends > 0 && registered_backends[0]) {
+			return registered_backends[0]->supports_et;
+		}
+		return false;
+	}
+
+	for (int i = 0; i < num_registered_backends; i++) {
+		if (registered_backends[i] && registered_backends[i]->type == backend) {
+			return registered_backends[i]->supports_et;
+		}
+	}
+
+	return false;
+}
+
 static php_poll_ctx *php_poll_create_context(uint32_t flags)
 {
 	bool persistent = flags & PHP_POLL_FLAG_PERSISTENT;

@@ -10,15 +10,13 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 require_once __DIR__ . '/poll.inc';
 // this just prints default poll ctx
-$poll_ctx = new PollContext();
+$poll_ctx = new Io\Poll\Context();
 var_dump($poll_ctx->getBackend());
 // test with WSAPoll
-$poll_ctx = new PollContext(PollBackend::WSAPoll);
+$poll_ctx = new Io\Poll\Context(Io\Poll\Backend::WSAPoll);
 $backend = $poll_ctx->getBackend();
 var_dump($backend->name);
-var_dump($backend->value);
 ?>
 --EXPECTF--
-enum(PollBackend::%s)
+enum(Io\Poll\Backend::%s)
 string(7) "WSAPoll"
-string(7) "wsapoll"

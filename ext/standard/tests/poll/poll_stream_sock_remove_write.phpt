@@ -8,18 +8,18 @@ list($socket1r, $socket1w) = pt_new_socket_pair();
 list($socket2r, $socket2w) = pt_new_socket_pair();
 $poll_ctx = pt_new_stream_poll();
 
-$watcher1w = pt_stream_poll_add($poll_ctx, $socket1w, POLL_EVENT_WRITE, "socket_data_1");
-pt_stream_poll_add($poll_ctx, $socket2w, POLL_EVENT_WRITE, "socket_data_2");
+$watcher1w = pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket_data_1");
+pt_stream_poll_add($poll_ctx, $socket2w, [Io\Poll\Event::Write], "socket_data_2");
 
 pt_expect_events($poll_ctx->wait(0), [
-    ['events' => POLL_EVENT_WRITE, 'data' => 'socket_data_1'],
-    ['events' => POLL_EVENT_WRITE, 'data' => 'socket_data_2']
+    ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_1'],
+    ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_2']
 ]);
 
 $watcher1w->remove();
 
 pt_expect_events($poll_ctx->wait(0), [
-    ['events' => POLL_EVENT_WRITE, 'data' => 'socket_data_2']
+    ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_2']
 ]);
 
 // check that both streams are still usable
