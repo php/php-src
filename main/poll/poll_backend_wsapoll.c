@@ -29,7 +29,7 @@ static uint32_t wsapoll_events_to_native(uint32_t events)
 {
 	uint32_t native = 0;
 	if (events & PHP_POLL_READ) {
-		native |= POLLRDNORM | POLLRDBAND;
+		native |= POLLRDNORM;
 	}
 	if (events & PHP_POLL_WRITE) {
 		native |= POLLWRNORM;
@@ -46,7 +46,7 @@ static uint32_t wsapoll_events_to_native(uint32_t events)
 static uint32_t wsapoll_events_from_native(uint32_t native)
 {
 	uint32_t events = 0;
-	if (native & (POLLRDNORM | POLLRDBAND)) {
+	if (native & POLLRDNORM) {
 		events |= PHP_POLL_READ;
 	}
 	if (native & POLLWRNORM) {
