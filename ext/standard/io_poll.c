@@ -123,30 +123,37 @@ static zend_result php_io_poll_events_to_event_enums(uint32_t events, zval *even
 
 	if (events & PHP_POLL_READ) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Read"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_WRITE) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Write"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ERROR) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Error"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_HUP) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "HangUp"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_RDHUP) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "ReadHangUp"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ONESHOT) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "OneShot"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ET) {
 		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "EdgeTriggered"));
+		GC_ADDREF(Z_OBJ(enum_case));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 
