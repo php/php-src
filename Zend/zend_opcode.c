@@ -963,6 +963,38 @@ static void zend_calc_live_ranges(
 					/* OP_DATA is really part of the previous opcode. */
 					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
 				}
+			} else if (opline->opcode == ZEND_FE_FREE
+					&& opline->extended_value & ZEND_FREE_ON_RETURN
+					&& opnum + 1 < op_array->last
+					&& ((opline + 1)->opcode == ZEND_RETURN
+						|| (opline + 1)->opcode == ZEND_RETURN_BY_REF
+						|| (opline + 1)->opcode == ZEND_GENERATOR_RETURN)) {
+				/* FE_FREE with ZEND_FREE_ON_RETURN immediately followed by RETURN frees
+				 * the loop variable on early return. We need to split the live range
+				 * so GC doesn't access the freed variable after this FE_FREE.
+				 *
+				 * FE_FREE is included in the range only if it pertains to an early
+				 * return. */
+				uint32_t opnum_last_use = last_use[var_num]; // likely a FE_FREE
+				__auto_type opline_last_use = &op_array->opcodes[opnum_last_use];
+				if (opline_last_use->opcode == ZEND_FE_FREE &&
+						opline_last_use->extended_value & ZEND_FREE_ON_RETURN) {
+					/* another early return; we include the FE_FREE */
+					emit_live_range_raw(op_array, var_num, ZEND_LIVE_LOOP,
+						opnum + 2, opnum_last_use + 1);
+				} else if (opline_last_use->opcode == ZEND_FE_FREE &&
+						!(opline_last_use->extended_value & ZEND_FREE_ON_RETURN)) {
+					/* the normal return; don't include the FE_FREE */
+					emit_live_range_raw(op_array, var_num, ZEND_LIVE_LOOP,
+						opnum + 2, opnum_last_use);
+				} else {
+					/* if the last use is not FE_FREE, include it */
+					emit_live_range_raw(op_array, var_num, ZEND_LIVE_LOOP,
+						opnum + 2, opnum_last_use + 1);
+				}
+
+				/* Update last_use so next range includes this FE_FREE */
+				last_use[var_num] = opnum + 1;
 			}
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {

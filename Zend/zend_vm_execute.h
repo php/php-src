@@ -3234,18 +3234,44 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		 */
 		const zend_live_range *range = find_live_range(
 			&EX(func)->op_array, throw_op_num, throw_op->op1.var);
-		/* free op1 of the corresponding RETURN */
-		for (i = throw_op_num; i < range->end; i++) {
-			if (EX(func)->op_array.opcodes[i].opcode == ZEND_FREE
-			 || EX(func)->op_array.opcodes[i].opcode == ZEND_FE_FREE) {
+
+		/* free op1 of the corresponding RETURN - must use original throw_op_num
+		 * and first range, before any split-range skipping */
+		uint32_t range_end = range->end;
+		for (i = throw_op_num; i < range_end; i++) {
+			__auto_type current_opline = EX(func)->op_array.opcodes[i];
+			if (current_opline.opcode == ZEND_FREE
+			 || current_opline.opcode == ZEND_FE_FREE) {
+				if (current_opline.extended_value & ZEND_FREE_ON_RETURN) {
+					/* if this is a split end, the ZEND_RETURN is not included
+					 * in the range, so extend the range */
+					range_end++;
+				}
 				/* pass */
 			} else {
-				if (EX(func)->op_array.opcodes[i].opcode == ZEND_RETURN
-				 && (EX(func)->op_array.opcodes[i].op1_type & (IS_VAR|IS_TMP_VAR))) {
-					zval_ptr_dtor(EX_VAR(EX(func)->op_array.opcodes[i].op1.var));
+				if (current_opline.opcode == ZEND_RETURN
+				 && (current_opline.op1_type & (IS_VAR|IS_TMP_VAR))) {
+					zval_ptr_dtor(EX_VAR(current_opline.op1.var));
 				}
 				break;
 			}
+		}
+
+		/* skip any split ranges to find the final range of the loop var and
+		 * adjust throw_op_num */
+		for (;;) {
+			if (range->end < EX(func)->op_array.last) {
+				__auto_type last_range_opline = EX(func)->op_array.opcodes[range->end - 1];
+				if (last_range_opline.opcode == ZEND_FE_FREE &&
+						(last_range_opline.extended_value & ZEND_FREE_ON_RETURN)) {
+					/* the range was split, skip to find the final range */
+					throw_op_num = range->end + 1;
+					range = find_live_range(
+						&EX(func)->op_array, throw_op_num, throw_op->op1.var);
+					continue;
+				}
+			}
+			break;
 		}
 		throw_op_num = range->end;
 	}
