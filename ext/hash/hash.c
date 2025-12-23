@@ -12,7 +12,6 @@
   +----------------------------------------------------------------------+
   | Authors: Sara Golemon <pollita@php.net>                              |
   |          Scott MacVicar <scottmac@php.net>                           |
-  |          Don MacAskill <don@smugmug.com>           		             |
   +----------------------------------------------------------------------+
 */
 

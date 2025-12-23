@@ -28,17 +28,29 @@
 
 PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	PHP_CRC_INIT_CONTEXT(context, ~0, CRC_FAST_CRC32_BZIP2);
+#ifdef HAVE_CRC_FAST
+	php_crc_init_context32(&context->state, ~0, &context->using_crc_fast, &context->crc_fast_ctx, CRC_FAST_CRC32_BZIP2);
+#else
+	php_crc_init_context32(&context->state, ~0);
+#endif
 }
 
 PHP_HASH_API void PHP_CRC32BInit(PHP_CRC32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	PHP_CRC_INIT_CONTEXT(context, ~0, CRC_FAST_CRC32_ISO_HDLC);
+#ifdef HAVE_CRC_FAST
+	php_crc_init_context32(&context->state, ~0, &context->using_crc_fast, &context->crc_fast_ctx, CRC_FAST_CRC32_ISO_HDLC);
+#else
+	php_crc_init_context32(&context->state, ~0);
+#endif
 }
 
 PHP_HASH_API void PHP_CRC32CInit(PHP_CRC32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	PHP_CRC_INIT_CONTEXT(context, ~0, CRC_FAST_CRC32_ISCSI);
+#ifdef HAVE_CRC_FAST
+	php_crc_init_context32(&context->state, ~0, &context->using_crc_fast, &context->crc_fast_ctx, CRC_FAST_CRC32_ISCSI);
+#else
+	php_crc_init_context32(&context->state, ~0);
+#endif
 }
 
 /* Software-only CRC32 update function */
@@ -63,7 +75,12 @@ static void php_crc32_software_update(PHP_CRC32_CTX *context, const unsigned cha
 
 PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	PHP_CRC_UPDATE_CONTEXT(context, input, len, php_crc32_software_update);
+#ifdef HAVE_CRC_FAST
+	if (php_crc_update_context(context->using_crc_fast, &context->crc_fast_ctx, input, len)) {
+		return;
+	}
+#endif
+	php_crc32_software_update(context, input, len);
 }
 
 /* Software-only CRC32B update function */
@@ -88,7 +105,12 @@ static void php_crc32b_software_update(PHP_CRC32_CTX *context, const unsigned ch
 
 PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	PHP_CRC_UPDATE_CONTEXT(context, input, len, php_crc32b_software_update);
+#ifdef HAVE_CRC_FAST
+	if (php_crc_update_context(context->using_crc_fast, &context->crc_fast_ctx, input, len)) {
+		return;
+	}
+#endif
+	php_crc32b_software_update(context, input, len);
 }
 
 /* Software-only CRC32C update function */
@@ -113,7 +135,12 @@ static void php_crc32c_software_update(PHP_CRC32_CTX *context, const unsigned ch
 
 PHP_HASH_API void PHP_CRC32CUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	PHP_CRC_UPDATE_CONTEXT(context, input, len, php_crc32c_software_update);
+#ifdef HAVE_CRC_FAST
+	if (php_crc_update_context(context->using_crc_fast, &context->crc_fast_ctx, input, len)) {
+		return;
+	}
+#endif
+	php_crc32c_software_update(context, input, len);
 }
 
 /* Software-only CRC32 little-endian finalization */
@@ -180,7 +207,12 @@ PHP_HASH_API void PHP_CRC32BEFinal(unsigned char digest[4], PHP_CRC32_CTX *conte
 
 PHP_HASH_API zend_result PHP_CRC32Copy(const php_hash_ops *ops, const PHP_CRC32_CTX *orig_context, PHP_CRC32_CTX *copy_context)
 {
-	PHP_CRC_COPY_CONTEXT(orig_context, copy_context, uint32_t);
+#ifdef HAVE_CRC_FAST
+	php_crc_copy_context32(orig_context->using_crc_fast, &orig_context->crc_fast_ctx, orig_context->state,
+	                       &copy_context->using_crc_fast, &copy_context->crc_fast_ctx, &copy_context->state);
+#else
+	php_crc_copy_context32(orig_context->state, &copy_context->state);
+#endif
 	return SUCCESS;
 }
 
@@ -194,9 +226,9 @@ static hash_spec_result php_crc32_serialize(const php_hashcontext_object *hash, 
 	
 #ifdef HAVE_CRC_FAST
 	uint32_t state_to_serialize = (uint32_t)php_crc_get_serialization_state(
-		ctx, ctx->using_crc_fast, &ctx->crc_fast_ctx, ctx->state);
+		ctx->using_crc_fast, &ctx->crc_fast_ctx, ctx->state);
 #else
-	uint32_t state_to_serialize = ctx->state;
+	uint32_t state_to_serialize = (uint32_t)php_crc_get_serialization_state(ctx->state);
 #endif
 	
 	array_init(zv);
@@ -223,7 +255,11 @@ static hash_spec_result php_crc32_unserialize(php_hashcontext_object *hash, zend
 	}
 	
 	ctx->state = (uint32_t) Z_LVAL_P(tmp);
-	PHP_CRC_RESET_CONTEXT_FOR_UNSERIALIZE(ctx);
+#ifdef HAVE_CRC_FAST
+	php_crc_reset_context_for_unserialize(&ctx->using_crc_fast, &ctx->crc_fast_ctx);
+#else
+	php_crc_reset_context_for_unserialize();
+#endif
 	
 	return HASH_SPEC_SUCCESS;
 }
