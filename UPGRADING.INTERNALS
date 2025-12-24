@@ -70,6 +70,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 
+- ext/standard:
+  . _php_error_log() now has a formal return type of zend_result.
+  . _php_error_log() now accepts zend_string* values instead of char*.
+  . _php_error_log_ex() has been removed.
+
 ========================
 4. OpCode changes
 ========================

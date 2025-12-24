@@ -1330,19 +1330,18 @@ error options:
 /* {{{ Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
-	char *message, *opt = NULL, *headers = NULL;
-	size_t message_len, opt_len = 0, headers_len = 0;
+	zend_string *message, *opt = NULL, *headers = NULL;
 	zend_long erropt = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_STR(message)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(erropt)
-		Z_PARAM_PATH_OR_NULL(opt, opt_len)
-		Z_PARAM_STRING_OR_NULL(headers, headers_len)
+		Z_PARAM_PATH_STR_OR_NULL(opt)
+		Z_PARAM_STR_OR_NULL(headers)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (_php_error_log_ex((int) erropt, message, message_len, opt, headers) == FAILURE) {
+	if (_php_error_log((int) erropt, message, opt, headers) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1350,14 +1349,7 @@ PHP_FUNCTION(error_log)
 }
 /* }}} */
 
-/* For BC (not binary-safe!) */
-PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers) /* {{{ */
-{
-	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers);
-}
-/* }}} */
-
-PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers) /* {{{ */
+PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const zend_string *opt, const zend_string *headers) /* {{{ */
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
@@ -1365,7 +1357,7 @@ PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_le
 	switch (opt_err)
 	{
 		case 1:		/*send an email */
-			if (!php_mail(opt, "PHP error_log message", message, headers, NULL)) {
+			if (!php_mail(ZSTR_VAL(opt), "PHP error_log message", ZSTR_VAL(message), ZSTR_VAL(headers), NULL)) {
 				return FAILURE;
 			}
 			break;
@@ -1375,27 +1367,27 @@ PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_le
 			return FAILURE;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(opt, "a", REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(ZSTR_VAL(opt), "a", REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
-			nbytes = php_stream_write(stream, message, message_len);
+			nbytes = php_stream_write(stream, ZSTR_VAL(message), ZSTR_LEN(message));
 			php_stream_close(stream);
-			if (nbytes != message_len) {
+			if (nbytes != ZSTR_LEN(message)) {
 				return FAILURE;
 			}
 			break;
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message(message, -1);
+				sapi_module.log_message(ZSTR_VAL(message), -1);
 			} else {
 				return FAILURE;
 			}
 			break;
 
 		default:
-			php_log_err_with_severity(message, LOG_NOTICE);
+			php_log_err_with_severity(ZSTR_VAL(message), LOG_NOTICE);
 			break;
 	}
 	return SUCCESS;
