@@ -33,8 +33,7 @@
 
 
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
-			  const char *headers, const char *Subject, const char *mailTo, const char *data,
-			  char *mailCc);
+			  const char *headers, const char *Subject, const char *mailTo, const char *data);
 PHPAPI void TSMClose(void);
 PHPAPI const char *GetSMErrorText(int index);
 #endif							/* sendmail_h */
