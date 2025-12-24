@@ -68,21 +68,20 @@ typedef enum {
 	CONTAINS_NULL
 } php_mail_header_value_error_type;
 
-static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
+static php_mail_header_value_error_type php_mail_build_headers_check_field_value(const zend_string *value)
 {
 	size_t len = 0;
-	zend_string *value = Z_STR_P(val);
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.1 */
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
-	while (len < value->len) {
-		if (*(value->val+len) == '\r') {
-			if (*(value->val+len+1) != '\n') {
+	while (len < ZSTR_LEN(value)) {
+		if (*(ZSTR_VAL(value)+len) == '\r') {
+			if (*(ZSTR_VAL(value)+len+1) != '\n') {
 				return CONTAINS_CR_ONLY;
 			}
 
-			if (value->len - len >= 3
-				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')) {
+			if (ZSTR_LEN(value) - len >= 3
+				&& (*(ZSTR_VAL(value)+len+2) == ' ' || *(ZSTR_VAL(value)+len+2) == '\t')) {
 				len += 3;
 				continue;
 			}
@@ -96,15 +95,15 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 		 * Therefore, considering such an environment, folding with LF alone
 		 * is allowed.
 		 */
-		if (*(value->val+len) == '\n') {
-			if (value->len - len >= 2
-				&& (*(value->val+len+1) == ' '  || *(value->val+len+1) == '\t')) {
+		if (*(ZSTR_VAL(value)+len) == '\n') {
+			if (ZSTR_LEN(value) - len >= 2
+				&& (*(ZSTR_VAL(value)+len+1) == ' ' || *(ZSTR_VAL(value)+len+1) == '\t')) {
 				len += 2;
 				continue;
 			}
 			return CONTAINS_LF_ONLY;
 		}
-		if (*(value->val+len) == '\0') {
+		if (*(ZSTR_VAL(value)+len) == '\0') {
 			return CONTAINS_NULL;
 		}
 		len++;
@@ -138,7 +137,8 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 				return;
 			}
 
-			php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(val);
+			zend_string *str_value = Z_STR_P(val);
+			php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(str_value);
 			switch (error_type) {
 				case NO_HEADER_ERROR:
 					break;
@@ -161,7 +161,7 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 			}
 			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
-			smart_str_append(s, Z_STR_P(val));
+			smart_str_append(s, str_value);
 			smart_str_appendl(s, "\r\n", 2);
 			break;
 		case IS_ARRAY:
