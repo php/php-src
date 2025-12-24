@@ -113,7 +113,7 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 }
 
 
-static bool php_mail_build_headers_check_field_name(zend_string *key)
+static bool php_mail_build_headers_check_field_name(const zend_string *key)
 {
 	size_t len = 0;
 
@@ -128,9 +128,9 @@ static bool php_mail_build_headers_check_field_name(zend_string *key)
 }
 
 
-static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val);
+static void php_mail_build_headers_elems(smart_str *s, const zend_string *key, zval *val);
 
-static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *val)
+static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zval *val)
 {
 	switch(Z_TYPE_P(val)) {
 		case IS_STRING:
@@ -174,7 +174,7 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 }
 
 
-static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val)
+static void php_mail_build_headers_elems(smart_str *s, const zend_string *key, zval *val)
 {
 	zend_string *tmp_key;
 	zval *tmp_val;
@@ -208,7 +208,7 @@ do { \
 	} \
 } while(0)
 
-PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
+PHPAPI zend_string *php_mail_build_headers(const HashTable *headers)
 {
 	zend_ulong idx;
 	zend_string *key;
@@ -392,7 +392,7 @@ static void php_mail_log_to_syslog(char *message) {
 }
 
 
-static void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+static void php_mail_log_to_file(const char *filename, const char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
 	uint32_t flags = REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
@@ -446,7 +446,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
-	char *mail_log = INI_STR("mail.log");
+	const char *mail_log = INI_STR("mail.log");
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
@@ -495,7 +495,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		MAIL_RET(false);
 	}
 
-	char *line_sep;
+	const char *line_sep;
 	zend_string *cr_lf_mode = PG(mail_cr_lf_mode);
 	
 	if (cr_lf_mode && !zend_string_equals_literal(cr_lf_mode, "crlf")) {
