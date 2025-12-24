@@ -140,8 +140,8 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 		return NULL;
 	}
 
-	replace = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE), 0);
-	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
+	replace = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_UNIFY_REPLACE, false);
+	regex = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_UNIFY_PATTERN, false);
 
 	result = php_pcre_replace(regex,
 				  NULL, header, strlen(header),
@@ -149,24 +149,24 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 				  -1,
 				  NULL);
 
-	zend_string_release_ex(replace, 0);
-	zend_string_release_ex(regex, 0);
+	zend_string_release_ex(replace, false);
+	zend_string_release_ex(regex, false);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
-	replace = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, strlen(PHP_WIN32_MAIL_RMVDBL_PATTERN), 0);
-	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
+	replace = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_RMVDBL_PATTERN, false);
+	regex = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_RMVDBL_PATTERN, false);
 
 	result2 = php_pcre_replace(regex,
 				   result, ZSTR_VAL(result), ZSTR_LEN(result),
 				   replace,
 				  -1,
 				  NULL);
-	zend_string_release_ex(replace, 0);
-	zend_string_release_ex(regex, 0);
-	zend_string_release_ex(result, 0);
+	zend_string_release_ex(replace, false);
+	zend_string_release_ex(regex, false);
+	zend_string_release_ex(result, false);
 
 	return result2;
 }
