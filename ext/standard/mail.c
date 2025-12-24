@@ -245,13 +245,7 @@ PHPAPI zend_string *php_mail_build_headers(const HashTable *headers)
 		} else if (zend_string_equals_literal_ci(key, "subject")) {
 			zend_value_error("The additional headers cannot contain the \"Subject\" header");
 		} else {
-			if (Z_TYPE_P(val) == IS_STRING) {
-				php_mail_build_headers_elem(&s, key, val);
-			} else if (Z_TYPE_P(val) == IS_ARRAY) {
-				php_mail_build_headers_elems(&s, key, val);
-			} else {
-				zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
-			}
+			php_mail_build_headers_elem(&s, key, val);
 		}
 
 		if (EG(exception)) {
