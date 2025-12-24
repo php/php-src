@@ -344,7 +344,7 @@ PHP_FUNCTION(mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_str && ZSTR_LEN(headers_str) ? ZSTR_VAL(headers_str) : NULL, extra_cmd)) {
+	if (php_mail(to_r, subject_r, message, headers_str, extra_cmd)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -435,13 +435,13 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
-PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *message, const char *headers, const zend_string *extra_cmd)
+PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *message, const zend_string *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	const zend_string *mail_log = zend_ini_str(ZEND_STRL("mail.log"), false);
-	const char *hdr = headers;
+	const char *hdr = headers && ZSTR_LEN(headers) ? ZSTR_VAL(headers) : NULL;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
 	void (*sig_handler)(int) = NULL;
@@ -517,8 +517,8 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
-		if (headers != NULL && *headers) {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, headers);
+		if (headers != NULL && ZSTR_LEN(headers)) {
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, ZSTR_VAL(headers));
 		} else {
 			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
