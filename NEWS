@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20674 (mb_decode_mimeheader does not handle separator).
     (Yuya Hamada)
 
+- PCNTL:
+  . Fixed bug with pcntl_getcpuaffinity() on solaris regarding invalid
+    process ids handling. (David Carlier)
+
 - Phar:
   . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
     (ndossche)
