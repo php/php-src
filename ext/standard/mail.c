@@ -214,7 +214,8 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 	ZEND_HASH_FOREACH_KEY_VAL(headers, idx, key, val) {
 		if (!key) {
 			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
-			break;
+			smart_str_free(&s);
+			return NULL;
 		}
 		ZVAL_DEREF(val);
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */

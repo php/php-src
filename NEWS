@@ -57,6 +57,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
+  . Fix memory leak in mail() when header key is numeric. (Girgias)
 
 18 Dec 2025, PHP 8.4.16
 
