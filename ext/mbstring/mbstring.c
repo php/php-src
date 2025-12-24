@@ -4703,7 +4703,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));
+	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd));
 
 	if (extra_cmd) {
 		zend_string_release_ex(extra_cmd, 0);

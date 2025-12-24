@@ -343,7 +343,7 @@ PHP_FUNCTION(mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_str && ZSTR_LEN(headers_str) ? ZSTR_VAL(headers_str) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
+	if (php_mail(to_r, subject_r, message, headers_str && ZSTR_LEN(headers_str) ? ZSTR_VAL(headers_str) : NULL, extra_cmd)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -434,7 +434,7 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
-PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
+PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
@@ -551,7 +551,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 #endif
 	}
 	if (extra_cmd != NULL) {
-		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, extra_cmd);
+		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, ZSTR_VAL(extra_cmd));
 	} else {
 		sendmail_cmd = sendmail_path;
 	}
