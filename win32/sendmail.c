@@ -115,7 +115,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
                     const char *headers, char *headers_lc, char **error_message);
 static int MailConnect();
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
-static int Post(LPCSTR msg);
+static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
@@ -421,14 +421,14 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
-	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+	if (!Post(PW32G(mail_buffer))) {
 		int err = MailConnect();
 		if (0 != err) {
 			return (FAILED_TO_SEND);
 		}
 
-		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-			return (res);
+		if (!Post(PW32G(mail_buffer))) {
+			return (FAILED_TO_SEND);
 		}
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
@@ -438,8 +438,8 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 	SMTP_SKIP_SPACE(RPath);
 	FormatEmailAddress(PW32G(mail_buffer), RPath, "MAIL FROM:<%s>\r\n");
-	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-		return (res);
+	if (!Post(PW32G(mail_buffer))) {
+		return (FAILED_TO_SEND);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
@@ -453,9 +453,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	{
 		SMTP_SKIP_SPACE(token);
 		FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+		if (!Post(PW32G(mail_buffer))) {
 			efree(tempMailTo);
-			return (res);
+			return (FAILED_TO_SEND);
 		}
 		if ((res = Ack(&server_response)) != SUCCESS) {
 			SMTP_ERROR_RESPONSE(server_response);
@@ -474,9 +474,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		{
 			SMTP_SKIP_SPACE(token);
 			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+			if (!Post(PW32G(mail_buffer))) {
 				efree(tempMailTo);
-				return (res);
+				return (FAILED_TO_SEND);
 			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
@@ -514,9 +514,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		{
 			SMTP_SKIP_SPACE(token);
 			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+			if (!Post(PW32G(mail_buffer))) {
 				efree(tempMailTo);
-				return (res);
+				return (FAILED_TO_SEND);
 			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
@@ -539,9 +539,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		{
 			SMTP_SKIP_SPACE(token);
 			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+			if (!Post(PW32G(mail_buffer))) {
 				efree(tempMailTo);
-				return (res);
+				return (FAILED_TO_SEND);
 			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
@@ -587,9 +587,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			{
 				SMTP_SKIP_SPACE(token);
 				FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-				if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+				if (!Post(PW32G(mail_buffer))) {
 					efree(tempMailTo);
-					return (res);
+					return (FAILED_TO_SEND);
 				}
 				if ((res = Ack(&server_response)) != SUCCESS) {
 					SMTP_ERROR_RESPONSE(server_response);
@@ -625,11 +625,11 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		stripped_header = estrndup(headers, strlen(headers));
 	}
 
-	if ((res = Post("DATA\r\n")) != SUCCESS) {
+	if (!Post("DATA\r\n")) {
 		if (stripped_header) {
 			efree(stripped_header);
 		}
-		return (res);
+		return (FAILED_TO_SEND);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
@@ -670,24 +670,24 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			e2 = p + 1024;
 			c = *e2;
 			*e2 = '\0';
-			if ((res = Post(p)) != SUCCESS) {
+			if (!Post(p)) {
 				zend_string_free(data_cln);
-				return(res);
+				return(FAILED_TO_SEND);
 			}
 			*e2 = c;
 			p = e2;
 		}
-		if ((res = Post(p)) != SUCCESS) {
+		if (!Post(p)) {
 			zend_string_free(data_cln);
-			return(res);
+			return(FAILED_TO_SEND);
 		}
 	}
 
 	zend_string_free(data_cln);
 
 	/*send termination dot */
-	if ((res = Post("\r\n.\r\n")) != SUCCESS)
-		return (res);
+	if (!Post("\r\n.\r\n"))
+		return (FAILED_TO_SEND);
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
@@ -771,14 +771,14 @@ static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char
 	if (headers_lc) {
 		efree(headers_lc);
 	}
-	if ((res = Post(header_buffer)) != SUCCESS) {
+	if (!Post(header_buffer)) {
 		efree(header_buffer);
-		return (res);
+		return (FAILED_TO_SEND);
 	}
 	efree(header_buffer);
 
-	if ((res = Post("\r\n")) != SUCCESS) {
-		return (res);
+	if (!Post("\r\n")) {
+		return (FAILED_TO_SEND);
 	}
 
 	return (SUCCESS);
@@ -896,7 +896,7 @@ return 0;
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int Post(LPCSTR msg)
+static bool Post(LPCSTR msg)
 {
 	int len = (int)strlen(msg);
 	int slen;
@@ -905,16 +905,16 @@ static int Post(LPCSTR msg)
 #if SENDMAIL_DEBUG
 	if (msg)
 		printf("POST: '%s'\n", msg);
-	return (SUCCESS);
+	return true;
 #endif
 
 	while (len > 0) {
 		if ((slen = send(PW32G(mail_socket), msg + index, len, 0)) < 1)
-			return (FAILED_TO_SEND);
+			return false;
 		len -= slen;
 		index += slen;
 	}
-	return (SUCCESS);
+	return true;
 }
 
 
