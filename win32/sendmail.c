@@ -186,7 +186,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //*********************************************************************
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  const char *headers, const char *Subject, const char *mailTo, const char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath)
+			  char *mailCc, char *mailBcc)
 {
 	int ret;
 	char *RPath = NULL;
@@ -216,9 +216,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
-	if (mailRPath && *mailRPath) {
-		RPath = estrdup(mailRPath);
-	} else if (INI_STR("sendmail_from")) {
+	if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
