@@ -112,14 +112,13 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 	return NO_HEADER_ERROR;
 }
 
-
-static bool php_mail_build_headers_check_field_name(const zend_string *key)
+static zend_result php_mail_build_headers_check_field_name(const zend_string *key)
 {
 	size_t len = 0;
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2 */
-	while (len < key->len) {
-		if (*(key->val+len) < 33 || *(key->val+len) > 126 || *(key->val+len) == ':') {
+	while (len < ZSTR_LEN(key)) {
+		if (*(ZSTR_VAL(key)+len) < 33 || *(ZSTR_VAL(key)+len) > 126 || *(ZSTR_VAL(key)+len) == ':') {
 			return FAILURE;
 		}
 		len++;
