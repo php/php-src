@@ -74,6 +74,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . _php_error_log() now has a formal return type of zend_result.
   . _php_error_log() now accepts zend_string* values instead of char*.
   . _php_error_log_ex() has been removed.
+  . php_mail()'s extra_cmd parameter is now a zend_string*.
 
 ========================
 4. OpCode changes
