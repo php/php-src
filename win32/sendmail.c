@@ -112,7 +112,7 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
 static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
-                    const char *headers, char *headers_lc, char **error_message);
+                    const zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
 static bool Post(LPCSTR msg);
@@ -278,7 +278,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
+		ret = SendText(RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -387,7 +387,7 @@ static char *find_address(char *list, char **state)
 // History:
 //*********************************************************************
 static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
-			 const char *headers, char *headers_lc, char **error_message)
+			 const zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
@@ -464,11 +464,11 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	efree(tempMailTo);
 
 	/* Send mail to all Cc rcpt's */
-	if (headers && (pos1 = strstr(headers_lc, "cc:")) && ((pos1 == headers_lc) || (*(pos1-1) == '\n'))) {
+	if (headers && (pos1 = strstr(ZSTR_VAL(headers_lc), "cc:")) && ((pos1 == ZSTR_VAL(headers_lc)) || (*(pos1-1) == '\n'))) {
 		/* Real offset is memaddress from the original headers + difference of
 		 * string found in the lowercase headers + 3 characters to jump over
 		 * the cc: */
-		pos1 = headers + (pos1 - headers_lc) + 3;
+		pos1 = ZSTR_VAL(headers) + (pos1 - ZSTR_VAL(headers_lc)) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 			tempMailTo = estrndup(pos1, strlen(pos1));
 		} else {
@@ -508,11 +508,11 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
 	if (headers) {
-		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
+		if ((pos1 = strstr(ZSTR_VAL(headers_lc), "bcc:")) && (pos1 == ZSTR_VAL(headers_lc) || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headers + 4 characters to jump over
 			 * the bcc: */
-			pos1 = headers + (pos1 - headers_lc) + 4;
+			pos1 = ZSTR_VAL(headers) + (pos1 - ZSTR_VAL(headers_lc)) + 4;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 				tempMailTo = estrndup(pos1, strlen(pos1));
 				/* Later, when we remove the Bcc: out of the
@@ -557,19 +557,19 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 
 			/* Now that we've identified that we've a Bcc list,
 			   remove it from the current header. */
-			stripped_header = ecalloc(1, strlen(headers));
+			stripped_header = ecalloc(1, ZSTR_LEN(headers));
 			/* headers = point to string start of header
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
 			   Because we've added +4 above for parsing the Emails
 			   we've to subtract them here. */
-			memcpy(stripped_header, headers, pos1 - headers - 4);
+			memcpy(stripped_header, ZSTR_VAL(headers), pos1 - ZSTR_VAL(headers) - 4);
 			if (pos1 != pos2) {
 				/* if pos1 != pos2 , pos2 points to the rest of the headers.
 				   Since pos1 != pos2 if "\r\n" was found, we know those characters
 				   are there and so we jump over them (else we would generate a new header
 				   which would look like "\r\n\r\n". */
-				memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
+				memcpy(stripped_header + (pos1 - ZSTR_VAL(headers) - 4), pos2 + 2, strlen(pos2) - 2);
 			}
 		}
 	}
@@ -577,7 +577,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	/* Simplify the code that we create a copy of stripped_header no matter if
 	   we actually strip something or not. So we've a single efree() later. */
 	if (headers && !stripped_header) {
-		stripped_header = estrndup(headers, strlen(headers));
+		stripped_header = estrndup(ZSTR_VAL(headers), ZSTR_LEN(headers));
 	}
 
 	if (!Post("DATA\r\n")) {
