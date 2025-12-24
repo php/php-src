@@ -28,9 +28,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Fix memory leak in ldap_set_options(). (ndossche)
 
-- Mbstring
-  . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
-    separator). (Yuya Hamada)
+- Mbstring:
+  . Fixed bug GH-20674 (mb_decode_mimeheader does not handle separator).
+    (Yuya Hamada)
 
 - Phar:
   . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
