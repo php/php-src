@@ -392,10 +392,10 @@ static void php_mail_log_to_syslog(char *message) {
 }
 
 
-static void php_mail_log_to_file(const char *filename, const char *message, size_t message_size) {
+static void php_mail_log_to_file(const zend_string *filename, const char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
 	uint32_t flags = REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
-	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
+	php_stream *stream = php_stream_open_wrapper(ZSTR_VAL(filename), "a", flags, NULL);
 	if (stream) {
 		php_stream_write(stream, message, message_size);
 		php_stream_close(stream);
@@ -446,7 +446,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
-	const char *mail_log = INI_STR("mail.log");
+	const zend_string *mail_log = zend_ini_str(ZEND_STRL("mail.log"), false);
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
@@ -459,7 +459,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	}	\
 	return val;	\
 
-	if (mail_log && *mail_log) {
+	if (mail_log && ZSTR_LEN(mail_log)) {
 		char *logline;
 
 		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
@@ -468,7 +468,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 			php_mail_log_crlf_to_spaces(logline);
 		}
 
-		if (!strcmp(mail_log, "syslog")) {
+		if (zend_string_equals_literal(mail_log, "syslog")) {
 			php_mail_log_to_syslog(logline);
 		} else {
 			/* Add date when logging to file */
