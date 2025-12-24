@@ -265,19 +265,20 @@ PHPAPI zend_string *php_mail_build_headers(const HashTable *headers)
 /* {{{ Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL;
+	char *to=NULL;
 	char *subject=NULL;
+	zend_string *message;
 	zend_string *extra_cmd=NULL;
 	zend_string *headers_str = NULL;
 	HashTable *headers_ht = NULL;
-	size_t to_len, message_len;
+	size_t to_len;
 	size_t subject_len, i;
 	char *to_r, *subject_r;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_PATH(to, to_len)
 		Z_PARAM_PATH(subject, subject_len)
-		Z_PARAM_PATH(message, message_len)
+		Z_PARAM_PATH_STR(message)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR(headers_ht, headers_str)
 		Z_PARAM_PATH_STR(extra_cmd)
@@ -434,7 +435,7 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
-PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd)
+PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *message, const char *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
@@ -536,7 +537,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		char *tsm_errmsg = NULL;
 
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message) == FAILURE) {
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, ZSTR_VAL(message)) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
@@ -605,27 +606,27 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		
 		if (cr_lf_mode && zend_string_equals_literal(cr_lf_mode, "lf")) {
 			char *converted_message = NULL;
-			size_t msg_len = strlen(message);
+			size_t msg_len = ZSTR_LEN(message);
 			size_t new_len = 0;
 
 			if (msg_len > 0) {
 				for (size_t i = 0; i < msg_len - 1; ++i) {
-					if (message[i] == '\r' && message[i + 1] == '\n') {
+					if (ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
 						++new_len;
 					}
 				}
 
 				if (new_len == 0) {
-					fprintf(sendmail, "%s", message);
+					fprintf(sendmail, "%s", ZSTR_VAL(message));
 				} else {
 					converted_message = emalloc(msg_len - new_len + 1);
 					size_t j = 0;
 					for (size_t i = 0; i < msg_len; ++i) {
-						if (i < msg_len - 1 && message[i] == '\r' && message[i + 1] == '\n') {
+						if (i < msg_len - 1 && ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
 							converted_message[j++] = '\n';
 							++i; /* skip LF part */
 						} else {
-							converted_message[j++] = message[i];
+							converted_message[j++] = ZSTR_VAL(message)[i];
 						}
 					}
 
@@ -635,7 +636,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 				}
 			}
 		} else {
-			fprintf(sendmail, "%s", message);
+			fprintf(sendmail, "%s", ZSTR_VAL(message));
 		}
 
 		fprintf(sendmail, "%s", line_sep);
