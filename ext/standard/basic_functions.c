@@ -1341,11 +1341,7 @@ PHP_FUNCTION(error_log)
 		Z_PARAM_STR_OR_NULL(headers)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (_php_error_log((int) erropt, message, opt, headers) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(_php_error_log((int) erropt, message, opt, headers) == SUCCESS);
 }
 /* }}} */
 
@@ -2314,11 +2310,7 @@ PHP_FUNCTION(is_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_exists(SG(rfc1867_uploaded_files), path)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_hash_exists(SG(rfc1867_uploaded_files), path));
 }
 /* }}} */
 
