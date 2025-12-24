@@ -111,7 +111,7 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, const char *data,
                     const char *headers, char *headers_lc, char **error_message);
 static int MailConnect();
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
@@ -186,7 +186,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //*********************************************************************
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  const char *headers, const char *Subject, const char *mailTo, const char *data,
-			  char *mailCc, char *mailBcc)
+			  char *mailCc)
 {
 	int ret;
 	char *RPath = NULL;
@@ -279,7 +279,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -387,7 +387,7 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, const char *data,
 			 const char *headers, char *headers_lc, char **error_message)
 {
 	int res;
@@ -529,28 +529,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	/* Send mail to all Bcc rcpt's
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
-	if (mailBcc && *mailBcc) {
-		tempMailTo = estrdup(mailBcc);
-		/* Send mail to all rcpt's */
-		token = find_address(tempMailTo, &token_state);
-		while (token != NULL)
-		{
-			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if (!Post(PW32G(mail_buffer))) {
-				efree(tempMailTo);
-				return (FAILED_TO_SEND);
-			}
-			if ((res = Ack(&server_response)) != SUCCESS) {
-				SMTP_ERROR_RESPONSE(server_response);
-				efree(tempMailTo);
-				return (res);
-			}
-			token = find_address(NULL, &token_state);
-		}
-		efree(tempMailTo);
-	}
-	else if (headers) {
+	if (headers) {
 		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headers + 4 characters to jump over
