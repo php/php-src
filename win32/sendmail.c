@@ -63,7 +63,7 @@ char seps[] = " ,\t\n";
 char *php_mailer = "PHP 7 WIN32";
 
 /* Error messages */
-static char *ErrorMessages[] =
+static const char *ErrorMessages[] =
 {
 	"Success", /* 0 */
 	"Bad arguments from form", /* 1 */
@@ -328,7 +328,7 @@ PHPAPI void TSMClose(void)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-PHPAPI char *GetSMErrorText(int index)
+PHPAPI const char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
