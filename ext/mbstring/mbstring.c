@@ -2448,7 +2448,7 @@ PHP_FUNCTION(mb_strcut)
 		if (len > string.len - from) {
 			len = string.len - from;
 		}
-		RETURN_STR(zend_string_init_fast((const char*)(string.val + from), len & -char_len));
+		RETURN_STRINGL_FAST((const char*)(string.val + from), len & -char_len);
 	}
 
 	if (enc->mblen_table) {
@@ -2471,7 +2471,7 @@ PHP_FUNCTION(mb_strcut)
 			}
 			end = p;
 		}
-		RETURN_STR(zend_string_init_fast((const char*)start, end - start));
+		RETURN_STRINGL_FAST((const char*)start, end - start);
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
