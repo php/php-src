@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.3
 
-
+- Core:
+  . Fixed bug GH-20806 (preserve_none feature compatiblity with LTO).
+    (henderkes)
+  . Fixed bug GH-20767 (build failure with musttail/preserve_none feature
+    on macOs). (David Carlier)
 
 15 Jan 2026, PHP 8.5.2
 
