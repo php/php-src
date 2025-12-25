@@ -53,6 +53,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix error check for proc_open() command. (ndossche)
+  . Fix memory leak in mail() when header key is numeric. (Girgias)
 
 - URI:
   . Fixed bug GH-20771 (Assertion failure when getUnicodeHost() returns
