@@ -397,32 +397,33 @@ static void php_mail_log_to_file(const zend_string *filename, const char *messag
 }
 
 
-static int php_mail_detect_multiple_crlf(const zend_string *headers) {
+static bool php_mail_detect_multiple_crlf(const zend_string *headers) {
 	/* This function detects multiple/malformed multiple newlines. */
 
 	if (!headers || !ZSTR_LEN(headers)) {
-		return 0;
+		return false;
 	}
 
+	const char *end = ZSTR_VAL(headers) + ZSTR_LEN(headers);
 	const char *hdr = ZSTR_VAL(headers);
 	/* Should not have any newlines at the beginning. */
 	/* RFC 2822 2.2. Header Fields */
 	if (*hdr < 33 || *hdr > 126 || *hdr == ':') {
-		return 1;
+		return true;
 	}
 
-	while(*hdr) {
+	while (hdr < end) {
 		if (*hdr == '\r') {
 			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\0' || *(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
 				/* Malformed or multiple newlines. */
-				return 1;
+				return true;
 			} else {
 				hdr += 2;
 			}
 		} else if (*hdr == '\n') {
 			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || *(hdr+1) == '\n') {
 				/* Malformed or multiple newlines. */
-				return 1;
+				return true;
 			} else {
 				hdr += 2;
 			}
@@ -431,7 +432,7 @@ static int php_mail_detect_multiple_crlf(const zend_string *headers) {
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 
