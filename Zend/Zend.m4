@@ -200,6 +200,9 @@ darwin*)
       :
     ])
     ;;
+*)
+    ZEND_CHECK_PRESERVE_NONE
+    ;;
 esac
 
 ZEND_CHECK_CPUID_COUNT
