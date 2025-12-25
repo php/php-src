@@ -4588,3 +4588,50 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 }
 /* }}} */
+
+/* {{{ Given an Object ID, or object short or long name, return an associative
+   array containing any known OID, short name, and long name, or false if the
+   object is not known.
+*/
+PHP_FUNCTION(openssl_oid_lookup)
+{
+	zend_string * txt;
+	ASN1_OBJECT *obj;
+	char buf[1024];
+	int nid;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &txt) == FAILURE) {
+		return;
+	}
+
+	obj = OBJ_txt2obj(ZSTR_VAL(txt), 0);
+	if (obj == NULL) {
+		RETURN_FALSE;
+	}
+
+	OBJ_obj2txt(buf, sizeof(buf)-1, obj, 1);
+	if (*buf == '\0') {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_assoc_string(return_value, "oid", buf);
+
+	if ((nid = OBJ_obj2nid(obj)) != NID_undef) {
+		const char *l;
+		const char *s;
+
+		l = OBJ_nid2ln(nid);
+		if (l != NULL) {
+			add_assoc_string(return_value, "lname", (char *) l);
+		}
+
+		s = OBJ_nid2sn(nid);
+		if (s != NULL && (l == NULL || strcmp(s,l) != 0)) {
+			add_assoc_string(return_value, "sname", (char *) s);
+		}
+	}
+
+	ASN1_OBJECT_free(obj);
+}
+/* }}} */
