@@ -215,6 +215,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
 	{ZEND_STRL("mixed")},
+	{ZEND_STRL("resource")},
 	/* These are not usable as class names because they're proper tokens,
 	 * but they are here for class aliases. */
 	{ZEND_STRL("array")},
