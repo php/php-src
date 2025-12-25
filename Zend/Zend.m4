@@ -166,11 +166,42 @@ AC_CHECK_FUNC([sigsetjmp],,
     [AC_MSG_FAILURE([Required sigsetjmp not found.])],
     [#include <setjmp.h>])])
 
+
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
-ZEND_CHECK_PRESERVE_NONE
+
+case $host_os in
+darwin*)
+    dnl versions prior to this lead to compilation failure
+    min_apple_clang_train=1700.4.4.1
+
+    apple_line=`$CC --version 2>/dev/null | head -n 1`
+    echo "$apple_line" | grep -q "Apple clang" || apple_line=`$CC -v 2>&1 | head -n 1`
+
+    apple_train=`echo "$apple_line" | sed -n 's/.*(clang-\([0-9][0-9.]*\)).*/\1/p'`
+    have_preserve_none=yes
+
+    AS_IF([test -n "$apple_train"], [
+      AC_MSG_CHECKING([Apple clang build train >= $min_apple_clang_train])
+      AS_VERSION_COMPARE([$apple_train], [$min_apple_clang_train],
+        [have_preserve_none=no],
+        [],
+        []
+      )
+      AS_IF([test "x$have_preserve_none" = xyes],
+        [ZEND_CHECK_PRESERVE_NONE],
+        [AC_MSG_NOTICE([Skipping preserve_none])]
+      )
+    ], [
+      dnl Not Apple clang (could be Homebrew clang, GCC, etc.) -> keep enabled
+      ZEND_CHECK_PRESERVE_NONE
+      :
+    ])
+    ;;
+esac
+
 ZEND_CHECK_CPUID_COUNT
 
 AC_MSG_CHECKING([whether to enable thread safety])
