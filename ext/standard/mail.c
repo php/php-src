@@ -397,13 +397,14 @@ static void php_mail_log_to_file(const zend_string *filename, const char *messag
 }
 
 
-static int php_mail_detect_multiple_crlf(const char *hdr) {
+static int php_mail_detect_multiple_crlf(const zend_string *headers) {
 	/* This function detects multiple/malformed multiple newlines. */
 
-	if (!hdr || !strlen(hdr)) {
+	if (!headers || !ZSTR_LEN(headers)) {
 		return 0;
 	}
 
+	const char *hdr = ZSTR_VAL(headers);
 	/* Should not have any newlines at the beginning. */
 	/* RFC 2822 2.2. Header Fields */
 	if (*hdr < 33 || *hdr > 126 || *hdr == ':') {
@@ -441,24 +442,24 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	const zend_string *mail_log = zend_ini_str(ZEND_STRL("mail.log"), false);
-	const char *hdr = headers && ZSTR_LEN(headers) ? ZSTR_VAL(headers) : NULL;
-	char *ahdr = NULL;
 #if PHP_SIGCHILD
 	void (*sig_handler)(int) = NULL;
 #endif
 
 #define MAIL_RET(val) \
-	if (ahdr != NULL) {	\
-		efree(ahdr);	\
-	}	\
-	return val;	\
+	if (headers_with_x_php_header != NULL) { \
+		zend_string_release_ex(headers_with_x_php_header, false); \
+	} \
+	return val; \
 
 	if (mail_log && ZSTR_LEN(mail_log)) {
 		char *logline;
+		const char *hdr = headers ? ZSTR_VAL(headers) : "";
 
-		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "", subject);
+		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s -- Subject: %s",
+			zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr, subject);
 
-		if (hdr) {
+		if (headers && ZSTR_LEN(headers)) {
 			php_mail_log_crlf_to_spaces(logline);
 		}
 
@@ -486,7 +487,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 	}
 
 	if (EG(exception)) {
-		MAIL_RET(false);
+		return false;
 	}
 
 	const char *line_sep;
@@ -511,6 +512,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 		line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
 	}
 
+	zend_string *headers_with_x_php_header = NULL;
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
 		zend_string *f;
@@ -518,15 +520,17 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && ZSTR_LEN(headers)) {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, ZSTR_VAL(headers));
+			headers_with_x_php_header = strpprintf(0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s",
+				php_getuid(), ZSTR_VAL(f), line_sep, ZSTR_VAL(headers));
 		} else {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
+			headers_with_x_php_header = strpprintf(0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s",
+				php_getuid(), ZSTR_VAL(f));
 		}
-		hdr = ahdr;
 		zend_string_release_ex(f, 0);
+		headers = headers_with_x_php_header;
 	}
 
-	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
+	if (php_mail_detect_multiple_crlf(headers)) {
 		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
 		MAIL_RET(false);
 	}
@@ -537,7 +541,8 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 		char *tsm_errmsg = NULL;
 
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, ZSTR_VAL(message)) == FAILURE) {
+		int status = TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers ? ZSTR_VAL(headers) : NULL, subject, to, ZSTR_VAL(message));
+		if (status == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
@@ -598,8 +603,8 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 #endif
 		fprintf(sendmail, "To: %s%s", to, line_sep);
 		fprintf(sendmail, "Subject: %s%s", subject, line_sep);
-		if (hdr != NULL) {
-			fprintf(sendmail, "%s%s", hdr, line_sep);
+		if (headers && ZSTR_LEN(headers)) {
+			fprintf(sendmail, "%s%s", ZSTR_VAL(headers), line_sep);
 		}
 
 		fprintf(sendmail, "%s", line_sep);
