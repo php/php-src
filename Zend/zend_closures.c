@@ -21,6 +21,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_composed_callable.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_objects.h"
@@ -728,6 +729,14 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 }
 /* }}} */
 
+static zend_result zend_closure_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2) {
+	if (opcode != ZEND_ADD) {
+		return FAILURE;
+	}
+
+	return zend_composed_callable_new_from_pair(result, op1, op2);
+}
+
 void zend_register_closure_ce(void) /* {{{ */
 {
 	zend_ce_closure = register_class_Closure();
@@ -743,6 +752,7 @@ void zend_register_closure_ce(void) /* {{{ */
 	closure_handlers.get_debug_info = zend_closure_get_debug_info;
 	closure_handlers.get_closure = zend_closure_get_closure;
 	closure_handlers.get_gc = zend_closure_get_gc;
+	closure_handlers.do_operation = zend_closure_do_operation;
 }
 /* }}} */
 
