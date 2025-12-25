@@ -175,29 +175,19 @@ ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
 case $host_os in
 darwin*)
     dnl versions prior to this lead to compilation failure
-    min_apple_clang_train=1700.4.4.1
+    dnl Prefer __apple_build_version__ (reliable, numeric) when available.
+    dnl The known-good minimum corresponds to 17000404 (see PR discussion).
+    min_apple_build_version=17000404
+    apple_build_version=`echo | $CC -dM -E -x c - 2>/dev/null | sed -n 's/^#define __apple_build_version__ \([0-9][0-9]*\)$/\1/p'`
 
-    apple_line=`$CC --version 2>/dev/null | head -n 1`
-    echo "$apple_line" | grep -q "Apple clang" || apple_line=`$CC -v 2>&1 | head -n 1`
-
-    apple_train=`echo "$apple_line" | sed -n 's/.*(clang-\([0-9][0-9.]*\)).*/\1/p'`
-    have_preserve_none=yes
-
-    AS_IF([test -n "$apple_train"], [
-      AC_MSG_CHECKING([Apple clang build train >= $min_apple_clang_train])
-      AS_VERSION_COMPARE([$apple_train], [$min_apple_clang_train],
-        [have_preserve_none=no],
-        [],
-        []
-      )
-      AS_IF([test "x$have_preserve_none" = xyes],
-        [ZEND_CHECK_PRESERVE_NONE],
-        [AC_MSG_NOTICE([Skipping preserve_none])]
-      )
+    AS_IF([test -n "$apple_build_version"], [
+      AC_MSG_CHECKING([Apple clang __apple_build_version__ >= $min_apple_build_version])
+      AS_IF([test "$apple_build_version" -ge "$min_apple_build_version"], [
+        ZEND_CHECK_PRESERVE_NONE
+      ])
     ], [
       dnl Not Apple clang (could be Homebrew clang, GCC, etc.) -> keep enabled
       ZEND_CHECK_PRESERVE_NONE
-      :
     ])
     ;;
 *)
