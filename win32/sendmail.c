@@ -571,13 +571,11 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 				   which would look like "\r\n\r\n". */
 				memcpy(stripped_header + (pos1 - ZSTR_VAL(headers) - 4), pos2 + 2, strlen(pos2) - 2);
 			}
+		} else {
+			/* Simplify the code that we create a copy of stripped_header no matter if
+			   we actually strip something or not. So we've a single efree() later. */
+			stripped_header = estrndup(ZSTR_VAL(headers), ZSTR_LEN(headers));
 		}
-	}
-
-	/* Simplify the code that we create a copy of stripped_header no matter if
-	   we actually strip something or not. So we've a single efree() later. */
-	if (headers && !stripped_header) {
-		stripped_header = estrndup(ZSTR_VAL(headers), ZSTR_LEN(headers));
 	}
 
 	if (!Post("DATA\r\n")) {
