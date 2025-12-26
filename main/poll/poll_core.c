@@ -311,7 +311,7 @@ PHPAPI const char *php_poll_backend_name(php_poll_ctx *ctx)
 /* Get backend type */
 PHPAPI php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx)
 {
-	return ctx ? ctx->backend_type : PHP_POLL_BACKEND_AUTO;
+	return ctx && ctx->backend_ops ? ctx->backend_ops->type : PHP_POLL_BACKEND_AUTO;
 }
 
 /* Check edge-triggering support */
