@@ -35,29 +35,25 @@ final class Test2 extends Test1 {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 Test2::getParentFoo:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(42)
+0000 RETURN int(42)
 
 Test2::getParentBar:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(42)
+0000 RETURN int(42)
 
 Test2::getParentBaz:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(42)
+0000 RETURN int(42)

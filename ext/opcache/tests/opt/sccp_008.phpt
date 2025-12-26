@@ -22,14 +22,13 @@ function foo(int $x) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_008.php:1-11
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 foo:
-     ; (lines=9, args=1, vars=2, tmps=1)
+     ; (lines=8, args=1, vars=2, tmps=1)
      ; (after optimizer)
      ; %ssccp_008.php:2-9
 0000 CV0($x) = RECV 1
@@ -39,5 +38,4 @@ foo:
 0004 CV1($a) = QM_ASSIGN array(...)
 0005 T2 = FETCH_DIM_R CV1($a) int(1)
 0006 ECHO T2
-0007 DEFER_RUN
-0008 RETURN null
+0007 RETURN null

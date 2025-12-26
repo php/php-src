@@ -35,8 +35,7 @@ $_main:
 0003 INIT_FCALL 1 %d string("test")
 0004 SEND_VAL string("z") 1
 0005 DO_UCALL
-0006 DEFER_RUN
-0007 RETURN int(1)
+0006 RETURN int(1)
 
 test:
      ; (lines=%d, args=%d, vars=%d, tmps=%d)
@@ -58,8 +57,7 @@ test:
 0013 T1 = IN_ARRAY 1 CV0($v) array(...)
 0014 JMPZ T1 0016
 0015 ECHO string("True\n")
-0016 DEFER_RUN
-0017 RETURN null
+0016 RETURN null
 bool(true)
 bool(true)
 bool(true)

@@ -35,7 +35,7 @@ var_dump($res1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=19, args=0, vars=2, tmps=%d)
+     ; (lines=18, args=0, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:1-27
 0000 V2 = NEW 0 string("Other")
@@ -55,39 +55,35 @@ $_main:
 0014 INIT_FCALL 1 %d string("var_dump")
 0015 SEND_VAR CV1($res1) 1
 0016 DO_ICALL
-0017 DEFER_RUN
-0018 RETURN int(1)
+0017 RETURN int(1)
 LIVE RANGES:
      2: 0001 - 0002 (new)
      2: 0010 - 0011 (tmp/var)
 
 _test1:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:3-5
 0000 CV0($a) = RECV 1
 0001 T1 = ADD CV0($a) int(1)
 0002 VERIFY_RETURN_TYPE T1
-0003 DEFER_RUN
-0004 RETURN T1
+0003 RETURN T1
 
 Other::foo:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:8-10
 0000 CV0($a) = RECV 1
 0001 T1 = ADD CV0($a) CV0($a)
 0002 VERIFY_RETURN_TYPE T1
-0003 DEFER_RUN
-0004 RETURN T1
+0003 RETURN T1
 
 Other::bar:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:12-14
 0000 CV0($a) = RECV 1
 0001 T1 = SUB CV0($a) int(1)
 0002 VERIFY_RETURN_TYPE T1
-0003 DEFER_RUN
-0004 RETURN T1
+0003 RETURN T1
 int(11)

@@ -301,6 +301,8 @@ tmp-php.ini
 /.idea/
 /.vscode/
 /.zed/
+/.history/
+/.lh/
 
 # ------------------------------------------------------------------------------
 # Additional test build files

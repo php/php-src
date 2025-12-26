@@ -21,16 +21,14 @@ function foo(int $x) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_017.php:1-10
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 foo:
-     ; (lines=3, args=1, vars=1, tmps=0)
+     ; (lines=2, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %ssccp_017.php:2-8
 0000 CV0($x) = RECV 1
-0001 DEFER_RUN
-0002 RETURN int(5)
+0001 RETURN int(5)

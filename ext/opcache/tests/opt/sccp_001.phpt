@@ -20,15 +20,13 @@ function foo() {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_001.php:1-9
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 foo:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_001.php:2-7
-0000 DEFER_RUN
-0001 RETURN int(4)
+0000 RETURN int(4)

@@ -24,23 +24,20 @@ final class Test {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 Test::getInt:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DEFER_RUN
-0001 RETURN int(42)
+0000 RETURN int(42)
 
 Test::getInt2:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=2, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 V0 = QM_ASSIGN int(42)
-0001 DEFER_RUN
-0002 RETURN V0
+0001 RETURN V0

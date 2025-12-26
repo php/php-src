@@ -18,7 +18,7 @@ var_dump(!!$f === false);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=23, args=0, vars=1, tmps=%d)
+     ; (lines=22, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 2 %d string("random_int")
@@ -42,8 +42,7 @@ $_main:
 0018 T1 = BOOL_NOT CV0($f)
 0019 SEND_VAL T1 1
 0020 DO_ICALL
-0021 DEFER_RUN
-0022 RETURN int(1)
+0021 RETURN int(1)
 bool(false)
 bool(true)
 bool(true)

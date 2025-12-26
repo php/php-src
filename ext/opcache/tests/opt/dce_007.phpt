@@ -19,17 +19,15 @@ function esc($x) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_007.php:1-8
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 esc:
-     ; (lines=4, args=1, vars=2, tmps=0)
+     ; (lines=3, args=1, vars=2, tmps=0)
      ; (after optimizer)
      ; %sdce_007.php:2-6
 0000 CV0($x) = RECV 1
 0001 CV1($a) = INIT_ARRAY 1 (packed) CV0($x) NEXT
-0002 DEFER_RUN
-0003 RETURN CV1($a)
+0002 RETURN CV1($a)

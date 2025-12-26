@@ -23,7 +23,7 @@ var_dump($result);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=21, args=0, vars=2, tmps=1)
+     ; (lines=20, args=0, vars=2, tmps=1)
      ; (after optimizer)
      ; %s
 0000 ASSIGN CV0($text) string("Bienvenue chez nous")
@@ -45,6 +45,5 @@ $_main:
 0016 INIT_FCALL 1 %d string("var_dump")
 0017 SEND_VAR CV1($result) 1
 0018 DO_ICALL
-0019 DEFER_RUN
-0020 RETURN int(1)
+0019 RETURN int(1)
 string(2) "fr"

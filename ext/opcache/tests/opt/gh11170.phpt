@@ -39,7 +39,7 @@ test_and();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=6, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
+     ; (lines=5, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[1..1]
@@ -50,11 +50,10 @@ BB0:
 0001 DO_UCALL
 0002 INIT_FCALL 0 %d string("test_and")
 0003 DO_UCALL
-0004 DEFER_RUN
-0005 RETURN int(1)
+0004 RETURN int(1)
 
 test_or:
-     ; (lines=12, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
+     ; (lines=11, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[-20..-1]
@@ -97,11 +96,10 @@ BB3:
      #8.CV0($a) [long] RANGE[-27..-7] = Phi(#4.CV0($a) [long] RANGE[-27..-27], #6.CV0($a) [long] RANGE[-7..-7])
      #9.CV1($b) [long] RANGE[-20..-10] = Phi(#5.CV1($b) [long] RANGE[-20..-20], #7.CV1($b) [long] RANGE[-10..-10])
 0009 #10.T8 [long] RANGE[-20..-1] = BW_OR #8.CV0($a) [long] RANGE[-27..-7] #9.CV1($b) [long] RANGE[-20..-10]
-0010 DEFER_RUN
-0011 RETURN #10.T8 [long] RANGE[-20..-1]
+0010 RETURN #10.T8 [long] RANGE[-20..-1]
 
 test_and:
-     ; (lines=12, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
+     ; (lines=11, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[-28..-25]
@@ -144,5 +142,4 @@ BB3:
      #8.CV0($a) [long] RANGE[-12..-9] = Phi(#4.CV0($a) [long] RANGE[-12..-12], #6.CV0($a) [long] RANGE[-9..-9])
      #9.CV1($b) [long] RANGE[-27..-25] = Phi(#5.CV1($b) [long] RANGE[-27..-27], #7.CV1($b) [long] RANGE[-25..-25])
 0009 #10.T8 [long] RANGE[-28..-25] = BW_AND #8.CV0($a) [long] RANGE[-12..-9] #9.CV1($b) [long] RANGE[-27..-25]
-0010 DEFER_RUN
-0011 RETURN #10.T8 [long] RANGE[-28..-25]
+0010 RETURN #10.T8 [long] RANGE[-28..-25]

@@ -355,6 +355,9 @@ typedef struct _zend_oparray_context {
 /* Function has a return type                             |     |     |     */
 #define ZEND_ACC_HAS_RETURN_TYPE         (1 << 13) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Function uses `defer` blocks (user only)               |     |     |     */
+#define ZEND_ACC_HAS_DEFER               (1U << 30) /*    |  X  |     |     */
+/*                                                        |     |     |     */
 /* Function with variable number of arguments             |     |     |     */
 #define ZEND_ACC_VARIADIC                (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */

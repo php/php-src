@@ -31,30 +31,27 @@ test2();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=6, args=0, vars=0, tmps=0)
+     ; (lines=5, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 0 %d string("test")
 0001 DO_UCALL
 0002 INIT_FCALL 0 %d string("test2")
 0003 DO_UCALL
-0004 DEFER_RUN
-0005 RETURN int(1)
+0004 RETURN int(1)
 
 test:
-     ; (lines=3, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
 0000 ECHO string("No match\n")
-0001 DEFER_RUN
-0002 RETURN null
+0001 RETURN null
 
 test2:
-     ; (lines=3, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
 0000 ECHO string("No match\n")
-0001 DEFER_RUN
-0002 RETURN null
+0001 RETURN null
 No match
 No match

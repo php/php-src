@@ -35,7 +35,7 @@ Loop::test3();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=8, args=0, vars=0, tmps=0)
+     ; (lines=7, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_009.php:1-24
 0000 INIT_STATIC_METHOD_CALL 0 string("Loop") string("test")
@@ -44,32 +44,28 @@ $_main:
 0003 DO_UCALL
 0004 INIT_STATIC_METHOD_CALL 0 string("Loop") string("test3")
 0005 DO_UCALL
-0006 DEFER_RUN
-0007 RETURN int(1)
+0006 RETURN int(1)
 
 Loop::test:
-     ; (lines=4, args=0, vars=0, tmps=0)
+     ; (lines=3, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_009.php:4-10
 0000 ECHO string("Start\n")
 0001 ECHO string("Done\n")
-0002 DEFER_RUN
-0003 RETURN null
+0002 RETURN null
 
 Loop::test2:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_009.php:11-14
-0000 DEFER_RUN
-0001 RETURN null
+0000 RETURN null
 
 Loop::test3:
-     ; (lines=4, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %sdce_009.php:15-18
 0000 V0 = FE_RESET_RW array(...) 0001
 0001 FE_FREE V0
-0002 DEFER_RUN
-0003 RETURN null
+0002 RETURN null
 Start
 Done

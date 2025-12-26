@@ -20,18 +20,16 @@ function foo(int $x, int $y) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_004.php:1-9
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 foo:
-     ; (lines=5, args=2, vars=3, tmps=0)
+     ; (lines=4, args=2, vars=3, tmps=0)
      ; (after optimizer)
      ; %sdce_004.php:2-7
 0000 CV0($x) = RECV 1
 0001 CV1($y) = RECV 2
 0002 CV2($a) = QM_ASSIGN CV1($y)
-0003 DEFER_RUN
-0004 RETURN CV2($a)
+0003 RETURN CV2($a)

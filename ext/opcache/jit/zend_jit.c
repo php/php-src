@@ -2728,7 +2728,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_OP_DATA:
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
-				case ZEND_DEFER_RUN:
 					break;
 				case ZEND_MATCH:
 					/* We have to exit to the VM because the MATCH handler performs an N-way jump for

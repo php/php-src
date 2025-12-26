@@ -28,7 +28,7 @@ foreach (range('a', 'i') as $char) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=16, args=0, vars=1, tmps=2)
+     ; (lines=15, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 2 %d string("range")
@@ -45,33 +45,23 @@ $_main:
 0011 DO_ICALL
 0012 JMP 0005
 0013 FE_FREE V1
-0014 DEFER_RUN
-0015 RETURN int(1)
+0014 RETURN int(1)
 LIVE RANGES:
      1: 0005 - 0013 (loop)
 
 test:
-     ; (lines=16, args=1, vars=1, tmps=1)
+     ; (lines=9, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %s
 0000 CV0($char) = RECV 1
-0001 MATCH CV0($char) "a": 0003, "b": 0005, "c": 0005, "d": 0007, "e": 0009, "f": 0009, "g": 0011, "h": 0013, "i": 0013, default: 0002
+0001 MATCH CV0($char) "a": 0003, "b": 0004, "c": 0004, "d": 0005, "e": 0006, "f": 0006, "g": 0007, "h": 0008, "i": 0008, default: 0002
 0002 MATCH_ERROR CV0($char)
-0003 T1 = QM_ASSIGN string("a")
-0004 JMP 0014
-0005 T1 = QM_ASSIGN string("b, c")
-0006 JMP 0014
-0007 T1 = QM_ASSIGN string("d")
-0008 JMP 0014
-0009 T1 = QM_ASSIGN string("e, f")
-0010 JMP 0014
-0011 T1 = QM_ASSIGN string("g")
-0012 JMP 0014
-0013 T1 = QM_ASSIGN string("h, i")
-0014 DEFER_RUN
-0015 RETURN T1
-LIVE RANGES:
-     1: 0014 - 0015 (tmp/var)
+0003 RETURN string("a")
+0004 RETURN string("b, c")
+0005 RETURN string("d")
+0006 RETURN string("e, f")
+0007 RETURN string("g")
+0008 RETURN string("h, i")
 string(1) "a"
 string(4) "b, c"
 string(4) "b, c"

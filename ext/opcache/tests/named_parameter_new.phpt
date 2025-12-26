@@ -33,17 +33,16 @@ MyClass::new(bar: 1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=5, args=0, vars=0, tmps=%d)
+     ; (lines=4, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_STATIC_METHOD_CALL 1 string("MyClass") string("new")
 0001 SEND_VAL int(1) 1
 0002 DO_UCALL
-0003 DEFER_RUN
-0004 RETURN int(1)
+0003 RETURN int(1)
 
 MyClass::__construct:
-     ; (lines=8, args=2, vars=2, tmps=%d)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($foo) = RECV 1
@@ -52,11 +51,10 @@ MyClass::__construct:
 0003 OP_DATA CV0($foo)
 0004 ASSIGN_OBJ THIS string("bar")
 0005 OP_DATA CV1($bar)
-0006 DEFER_RUN
-0007 RETURN null
+0006 RETURN null
 
 MyClass::new:
-     ; (lines=11, args=1, vars=2, tmps=%d)
+     ; (lines=10, args=1, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($bar) = RECV 1
@@ -68,9 +66,7 @@ MyClass::new:
 0006 SEND_VAR CV1($engine) 1
 0007 SEND_VAR CV0($bar) 2
 0008 DO_FCALL
-0009 DEFER_RUN
-0010 RETURN V2
+0009 RETURN V2
 LIVE RANGES:
      2: 0002 - 0004 (new)
      2: 0006 - 0009 (new)
-     2: 0009 - 0010 (tmp/var)

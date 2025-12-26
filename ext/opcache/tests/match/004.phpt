@@ -34,7 +34,7 @@ foreach (range(0, 6) as $number) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=23, args=0, vars=1, tmps=2)
+     ; (lines=22, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %s.php:1-25
 0000 INIT_FCALL 2 %d string("range")
@@ -58,42 +58,27 @@ $_main:
 0018 DO_ICALL
 0019 JMP 0005
 0020 FE_FREE V1
-0021 DEFER_RUN
-0022 RETURN int(1)
+0021 RETURN int(1)
 LIVE RANGES:
      1: 0005 - 0020 (loop)
 
 test:
-     ; (lines=25, args=1, vars=1, tmps=1)
+     ; (lines=13, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %s.php:3-17
 0000 CV0($value) = RECV 1
-0001 MATCH CV0($value) 1: 0002, "1": 0004, 2: 0006, "2": 0008, 3: 0010, "3": 0012, 4: 0014, "4": 0016, 5: 0018, "5": 0020, default: 0022
-0002 T1 = QM_ASSIGN string("1 int")
-0003 JMP 0023
-0004 T1 = QM_ASSIGN string("1 string")
-0005 JMP 0023
-0006 T1 = QM_ASSIGN string("2 int")
-0007 JMP 0023
-0008 T1 = QM_ASSIGN string("2 string")
-0009 JMP 0023
-0010 T1 = QM_ASSIGN string("3 int")
-0011 JMP 0023
-0012 T1 = QM_ASSIGN string("3 string")
-0013 JMP 0023
-0014 T1 = QM_ASSIGN string("4 int")
-0015 JMP 0023
-0016 T1 = QM_ASSIGN string("4 string")
-0017 JMP 0023
-0018 T1 = QM_ASSIGN string("5 int")
-0019 JMP 0023
-0020 T1 = QM_ASSIGN string("5 string")
-0021 JMP 0023
-0022 T1 = QM_ASSIGN string("default")
-0023 DEFER_RUN
-0024 RETURN T1
-LIVE RANGES:
-     1: 0023 - 0024 (tmp/var)
+0001 MATCH CV0($value) 1: 0002, "1": 0003, 2: 0004, "2": 0005, 3: 0006, "3": 0007, 4: 0008, "4": 0009, 5: 0010, "5": 0011, default: 0012
+0002 RETURN string("1 int")
+0003 RETURN string("1 string")
+0004 RETURN string("2 int")
+0005 RETURN string("2 string")
+0006 RETURN string("3 int")
+0007 RETURN string("3 string")
+0008 RETURN string("4 int")
+0009 RETURN string("4 string")
+0010 RETURN string("5 int")
+0011 RETURN string("5 string")
+0012 RETURN string("default")
 string(7) "default"
 string(7) "default"
 string(5) "1 int"

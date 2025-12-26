@@ -2699,7 +2699,9 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 		zend_emit_return_type_check(NULL, return_info, true);
 	}
 
-	zend_emit_op(NULL, 212, NULL, NULL);
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_DEFER) {
+		zend_emit_op(NULL, ZEND_DEFER_RUN, NULL, NULL);
+	}
 
 	zn.op_type = IS_CONST;
 	if (return_one) {
@@ -5815,7 +5817,9 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
 	}
 
-	zend_emit_op(NULL, 212 /* ZEND_DEFER_RUN */, NULL, NULL);
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_DEFER) {
+		zend_emit_op(NULL, ZEND_DEFER_RUN, NULL, NULL);
+	}
 
 	uint32_t opnum_before_finally = get_next_op_number();
 
@@ -5846,6 +5850,7 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 
 static void zend_compile_defer(const zend_ast *ast) /* {{{ */
 {
+	CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_DEFER;
 	zend_ast *stmt_ast = ast->child[0];
 	zend_op *opline;
 	uint32_t jmp_opnum, defer_start_opnum, defer_end_opnum;

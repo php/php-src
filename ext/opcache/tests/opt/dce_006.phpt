@@ -21,14 +21,13 @@ function foo(int $x) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_006.php:1-10
-0000 DEFER_RUN
-0001 RETURN int(1)
+0000 RETURN int(1)
 
 foo:
-     ; (lines=8, args=1, vars=2, tmps=1)
+     ; (lines=7, args=1, vars=2, tmps=1)
      ; (after optimizer)
      ; %sdce_006.php:5-8
 0000 CV0($x) = RECV 1
@@ -37,14 +36,12 @@ foo:
 0003 CV1($a) = QM_ASSIGN V2
 0004 ASSIGN_OBJ CV1($a) string("foo")
 0005 OP_DATA CV0($x)
-0006 DEFER_RUN
-0007 RETURN null
+0006 RETURN null
 LIVE RANGES:
      2: 0002 - 0003 (new)
 
 A::__destruct:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_006.php:3-3
-0000 DEFER_RUN
-0001 RETURN null
+0000 RETURN null

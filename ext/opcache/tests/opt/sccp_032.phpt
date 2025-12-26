@@ -26,7 +26,7 @@ foreach (test() as $x) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=12, args=0, vars=1, tmps=2)
+     ; (lines=11, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %ssccp_032.php:1-15
 0000 INIT_FCALL 0 %d string("test")
@@ -39,13 +39,12 @@ $_main:
 0007 ECHO string("\n")
 0008 JMP 0003
 0009 FE_FREE V1
-0010 DEFER_RUN
-0011 RETURN int(1)
+0010 RETURN int(1)
 LIVE RANGES:
      1: 0003 - 0009 (loop)
 
 test:
-     ; (lines=6, args=0, vars=0, tmps=1)
+     ; (lines=5, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %ssccp_032.php:2-9
 0000 GENERATOR_CREATE

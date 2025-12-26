@@ -29,7 +29,7 @@ foreach (range(0, 10) as $char) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=16, args=0, vars=1, tmps=2)
+     ; (lines=15, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 2 %d string("range")
@@ -46,34 +46,23 @@ $_main:
 0011 DO_ICALL
 0012 JMP 0005
 0013 FE_FREE V1
-0014 DEFER_RUN
-0015 RETURN int(1)
+0014 RETURN int(1)
 LIVE RANGES:
      1: 0005 - 0013 (loop)
 
 test:
-     ; (lines=17, args=1, vars=1, tmps=1)
+     ; (lines=9, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %s
 0000 CV0($char) = RECV 1
-0001 MATCH CV0($char) 1: 0002, 2: 0004, 3: 0004, 4: 0006, 5: 0008, 6: 0008, 7: 0010, 8: 0012, 9: 0012, default: 0014
-0002 T1 = QM_ASSIGN string("1")
-0003 JMP 0015
-0004 T1 = QM_ASSIGN string("2, 3")
-0005 JMP 0015
-0006 T1 = QM_ASSIGN string("4")
-0007 JMP 0015
-0008 T1 = QM_ASSIGN string("5, 6")
-0009 JMP 0015
-0010 T1 = QM_ASSIGN string("7")
-0011 JMP 0015
-0012 T1 = QM_ASSIGN string("8, 9")
-0013 JMP 0015
-0014 T1 = QM_ASSIGN string("default")
-0015 DEFER_RUN
-0016 RETURN T1
-LIVE RANGES:
-     1: 0015 - 0016 (tmp/var)
+0001 MATCH CV0($char) 1: 0002, 2: 0003, 3: 0003, 4: 0004, 5: 0005, 6: 0005, 7: 0006, 8: 0007, 9: 0007, default: 0008
+0002 RETURN string("1")
+0003 RETURN string("2, 3")
+0004 RETURN string("4")
+0005 RETURN string("5, 6")
+0006 RETURN string("7")
+0007 RETURN string("8, 9")
+0008 RETURN string("default")
 string(7) "default"
 string(1) "1"
 string(4) "2, 3"
