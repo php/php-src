@@ -504,6 +504,14 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 		efree(tempMailTo);
 	}
 
+	if (!Post("DATA\r\n")) {
+		return (FAILED_TO_SEND);
+	}
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
+		return (res);
+	}
+
 	/* Send mail to all Bcc rcpt's
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
@@ -576,20 +584,6 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 			   we actually strip something or not. So we've a single efree() later. */
 			stripped_header = estrndup(ZSTR_VAL(headers), ZSTR_LEN(headers));
 		}
-	}
-
-	if (!Post("DATA\r\n")) {
-		if (stripped_header) {
-			efree(stripped_header);
-		}
-		return (FAILED_TO_SEND);
-	}
-	if ((res = Ack(&server_response)) != SUCCESS) {
-		SMTP_ERROR_RESPONSE(server_response);
-		if (stripped_header) {
-			efree(stripped_header);
-		}
-		return (res);
 	}
 
 	/* send message header */
