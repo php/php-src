@@ -66,6 +66,7 @@ static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_class_with_property_attribute;
 static zend_class_entry *zend_test_forbid_dynamic_call;
+static zend_class_entry *zend_test_box;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns_unlikely_compile_error_class;
 static zend_class_entry *zend_test_ns_not_unlikely_compile_error_class;
@@ -1347,6 +1348,13 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
+static ZEND_METHOD(ZendTestBox, setNull)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_NULL(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0));
+}
+
 static ZEND_METHOD(_ZendTestMagicCall, __call)
 {
 	zend_string *name;
@@ -1566,6 +1574,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
+
+	zend_test_box = register_class_ZendTestBox();
 
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns_unlikely_compile_error_class = register_class_ZendTestNS_UnlikelyCompileError();

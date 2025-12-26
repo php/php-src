@@ -89,6 +89,7 @@ char *get_token_type_name(int token_type)
 		case T_STATIC: return "T_STATIC";
 		case T_ABSTRACT: return "T_ABSTRACT";
 		case T_FINAL: return "T_FINAL";
+		case T_MUTATING: return "T_MUTATING";
 		case T_PRIVATE: return "T_PRIVATE";
 		case T_PROTECTED: return "T_PROTECTED";
 		case T_PUBLIC: return "T_PUBLIC";
@@ -102,6 +103,7 @@ char *get_token_type_name(int token_type)
 		case T_EMPTY: return "T_EMPTY";
 		case T_HALT_COMPILER: return "T_HALT_COMPILER";
 		case T_CLASS: return "T_CLASS";
+		case T_STRUCT: return "T_STRUCT";
 		case T_TRAIT: return "T_TRAIT";
 		case T_INTERFACE: return "T_INTERFACE";
 		case T_ENUM: return "T_ENUM";

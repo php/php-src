@@ -5177,6 +5177,8 @@ ZEND_API ZEND_COLD const char *zend_get_object_type_case(const zend_class_entry 
 		return upper_case ? "Interface" : "interface";
 	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
 		return upper_case ? "Enum" : "enum";
+	} else if (ce->ce_flags & ZEND_ACC_STRUCT) {
+		return upper_case ? "Struct" : "struct";
 	} else {
 		return upper_case ? "Class" : "class";
 	}

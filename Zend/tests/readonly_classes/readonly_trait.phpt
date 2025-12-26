@@ -9,4 +9,4 @@ readonly trait Foo
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "trait", expecting "abstract" or "final" or "readonly" or "class" in %s on line %d
+Parse error: syntax error, unexpected token "trait" in %s on line %d

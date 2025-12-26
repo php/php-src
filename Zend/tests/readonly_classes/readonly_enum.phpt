@@ -9,4 +9,4 @@ readonly enum Foo
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "enum", expecting "abstract" or "final" or "readonly" or "class" in %s on line %d
+Parse error: syntax error, unexpected token "enum" in %s on line %d

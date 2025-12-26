@@ -1011,9 +1011,10 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}
-			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM)) {
+			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_STRUCT))) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Enums are not compatible with %s",
+					"%s are not compatible with %s",
+					(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM) ? "Enums" : "Structs",
 					ZSTR_VAL(intern->std.ce->name));
 				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
