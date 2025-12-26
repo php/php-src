@@ -24,6 +24,11 @@ const PREG_OFFSET_CAPTURE = UNKNOWN;
 const PREG_UNMATCHED_AS_NULL = UNKNOWN;
 /**
  * @var int
+ * @cvalue PREG_REPLACE_COUNT_CHANGES
+ */
+const PREG_REPLACE_COUNT_CHANGES = UNKNOWN;
+/**
+ * @var int
  * @cvalue PREG_SPLIT_NO_EMPTY
  */
 const PREG_SPLIT_NO_EMPTY = UNKNOWN;
@@ -112,7 +117,7 @@ function preg_match_all(string $pattern, string $subject, &$matches = null, int 
  * @return string|array<int|string, string>|null
  * @frameless-function {"arity": 3}
  */
-function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
+function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 /**
  * @param int $count

@@ -671,7 +671,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	}
 
 	repl = zend_string_init(rep, strlen(rep), 0);
-	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
+	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt, 0);
 
 	zend_string_release_ex(repl, 0);
 	if (NULL == res) {

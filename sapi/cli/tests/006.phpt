@@ -44,11 +44,12 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
   }
 
-  - Constants [19] {
+  - Constants [20] {
     Constant [ <persistent> int PREG_PATTERN_ORDER ] { 1 }
     Constant [ <persistent> int PREG_SET_ORDER ] { 2 }
     Constant [ <persistent> int PREG_OFFSET_CAPTURE ] { 256 }
     Constant [ <persistent> int PREG_UNMATCHED_AS_NULL ] { 512 }
+    Constant [ <persistent> int PREG_REPLACE_COUNT_CHANGES ] { 1 }
     Constant [ <persistent> int PREG_SPLIT_NO_EMPTY ] { 1 }
     Constant [ <persistent> int PREG_SPLIT_DELIM_CAPTURE ] { 2 }
     Constant [ <persistent> int PREG_SPLIT_OFFSET_CAPTURE ] { 4 }
@@ -91,12 +92,13 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
     Function [ <internal:pcre> function preg_replace ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> array|string $pattern ]
         Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
