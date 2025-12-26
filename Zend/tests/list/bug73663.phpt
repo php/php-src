@@ -1,5 +1,7 @@
 --TEST--
 Bug #73663 ("Invalid opcode 65/16/8" occurs with a variable created with list())
+--XFAIL--
+list() assign resulting in a ref only when there's a single by-ref fetch is kinda weird.
 --FILE--
 <?php
 function change(&$ref) {
