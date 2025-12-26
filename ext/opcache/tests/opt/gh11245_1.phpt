@@ -19,16 +19,19 @@ switch (xx()) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=4, args=0, vars=1, tmps=1)
+     ; (lines=5, args=0, vars=1, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T1 = ISSET_ISEMPTY_CV (empty) CV0($xx)
 0001 JMPNZ T1 0003
-0002 RETURN null
-0003 RETURN int(1)
+0002 DEFER_RUN
+0003 RETURN null
+0003 DEFER_RUN
+0004 RETURN int(1)
 
 xx:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN string("somegarbage")
+0000 DEFER_RUN
+0001 RETURN string("somegarbage")

@@ -5815,11 +5815,11 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
 	}
 
+	zend_emit_op(NULL, 212 /* ZEND_DEFER_RUN */, NULL, NULL);
+
 	uint32_t opnum_before_finally = get_next_op_number();
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
-
-	zend_emit_op(NULL, 212, NULL, NULL);
 
 	/* Content of reference might have changed in finally, repeat type check. */
 	if (by_ref

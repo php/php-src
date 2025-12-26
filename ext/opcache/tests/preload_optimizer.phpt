@@ -17,27 +17,31 @@ echo foo();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=%d)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; $PRELOAD$:0-0
-0000 RETURN null
+0000 DEFER_RUN
+0001 RETURN null
 
 foo:
-     ; (lines=1, args=0, vars=0, tmps=%d)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spreload_optimizer.inc:3-5
-0000 RETURN int(42)
-
-$_main:
-     ; (lines=1, args=0, vars=0, tmps=%d)
-     ; (after optimizer)
-     ; %spreload_optimizer.inc:1-6
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 $_main:
      ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
+     ; %spreload_optimizer.inc:1-6
+0000 DEFER_RUN
+0001 RETURN int(1)
+
+$_main:
+     ; (lines=3, args=0, vars=0, tmps=%d)
+     ; (after optimizer)
      ; %spreload_optimizer.php:1-4
 0000 ECHO string("42")
-0001 RETURN int(1)
+0001 DEFER_RUN
+0002 RETURN int(1)
 42

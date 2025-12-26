@@ -56,7 +56,7 @@ var_dump(testStrstr3Third(false));
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=43, args=0, vars=0, tmps=%d)
+     ; (lines=44, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 1 %d string("var_dump")
@@ -101,49 +101,54 @@ $_main:
 0039 V0 = DO_UCALL
 0040 SEND_VAR V0 1
 0041 DO_ICALL
-0042 RETURN int(1)
+0042 DEFER_RUN
+0043 RETURN int(1)
 
 testTrim1:
-     ; (lines=4, args=1, vars=1, tmps=%d)
+     ; (lines=5, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = FRAMELESS_ICALL_1(trim) CV0($value)
 0002 ASSIGN CV0($value) T1
-0003 RETURN CV0($value)
+0003 DEFER_RUN
+0004 RETURN CV0($value)
 
 testMin2First:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=6, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = FRAMELESS_ICALL_2(min) CV0($value) int(100)
 0002 CV0($value) = QM_ASSIGN T1
 0003 VERIFY_RETURN_TYPE CV0($value)
-0004 RETURN CV0($value)
+0004 DEFER_RUN
+0005 RETURN CV0($value)
 
 testMin2Second:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=6, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = FRAMELESS_ICALL_2(min) int(100) CV0($value)
 0002 CV0($value) = QM_ASSIGN T1
 0003 VERIFY_RETURN_TYPE CV0($value)
-0004 RETURN CV0($value)
+0004 DEFER_RUN
+0005 RETURN CV0($value)
 
 testMin2_TMP:
-     ; (lines=5, args=1, vars=1, tmps=%d)
+     ; (lines=6, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
 0001 T1 = ADD CV0($value) int(1)
 0002 CV0($value) = FRAMELESS_ICALL_2(min) T1 int(100)
 0003 VERIFY_RETURN_TYPE CV0($value)
-0004 RETURN CV0($value)
+0004 DEFER_RUN
+0005 RETURN CV0($value)
 
 testStrstr3First:
-     ; (lines=6, args=1, vars=1, tmps=%d)
+     ; (lines=7, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
@@ -151,12 +156,13 @@ testStrstr3First:
 0002 OP_DATA bool(false)
 0003 ASSIGN CV0($value) T1
 0004 VERIFY_RETURN_TYPE CV0($value)
-0005 RETURN CV0($value)
+0005 DEFER_RUN
+0006 RETURN CV0($value)
 LIVE RANGES:
      1: 0002 - 0003 (tmp/var)
 
 testStrstr3Second:
-     ; (lines=6, args=1, vars=1, tmps=%d)
+     ; (lines=7, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
@@ -164,12 +170,13 @@ testStrstr3Second:
 0002 OP_DATA bool(false)
 0003 ASSIGN CV0($value) T1
 0004 VERIFY_RETURN_TYPE CV0($value)
-0005 RETURN CV0($value)
+0005 DEFER_RUN
+0006 RETURN CV0($value)
 LIVE RANGES:
      1: 0002 - 0003 (tmp/var)
 
 testStrstr3Third:
-     ; (lines=6, args=1, vars=1, tmps=%d)
+     ; (lines=7, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($value) = RECV 1
@@ -177,7 +184,8 @@ testStrstr3Third:
 0002 OP_DATA CV0($value)
 0003 CV0($value) = QM_ASSIGN T1
 0004 VERIFY_RETURN_TYPE CV0($value)
-0005 RETURN CV0($value)
+0005 DEFER_RUN
+0006 RETURN CV0($value)
 LIVE RANGES:
      1: 0002 - 0003 (tmp/var)
 string(3) "boo"

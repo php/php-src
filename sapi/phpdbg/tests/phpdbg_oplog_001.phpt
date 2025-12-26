@@ -28,7 +28,7 @@ prompt> halloarray(2) {
     [5]=>
     int(2)
     [8]=>
-    int(2)
+    int(4)
   }
 }
 [Script ended normally]

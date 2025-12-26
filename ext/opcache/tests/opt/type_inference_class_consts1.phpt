@@ -45,48 +45,55 @@ class Test1 {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 Test1::getSelfFoo:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 Test1::getSelfBar:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 Test1::getSelfBaz:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 Test1::getStaticFoo:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("FOO")
 0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
+0002 DEFER_RUN
+0003 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test1::getStaticBar:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 Test1::getStaticBaz:
-     ; (lines=2, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("BAZ")
-0001 RETURN T0
+0001 DEFER_RUN
+0002 RETURN T0

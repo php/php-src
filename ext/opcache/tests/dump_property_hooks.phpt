@@ -36,7 +36,7 @@ $a->prop = 41;
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=10, args=0, vars=1, tmps=%d)
+     ; (lines=11, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %sdump_property_hooks.php:1-22
 0000 V1 = NEW 0 string("A")
@@ -48,23 +48,26 @@ $_main:
 0006 DO_ICALL
 0007 ASSIGN_OBJ CV0($a) string("prop")
 0008 OP_DATA int(41)
-0009 RETURN int(1)
+0009 DEFER_RUN
+0010 RETURN int(1)
 LIVE RANGES:
      1: 0001 - 0002 (new)
 
 A::$prop::get:
-     ; (lines=1, args=0, vars=0, tmps=%d)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %sdump_property_hooks.php:5-8
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 A::$prop::set:
-     ; (lines=4, args=1, vars=1, tmps=%d)
+     ; (lines=5, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %sdump_property_hooks.php:9-13
 0000 CV0($value) = RECV 1
 0001 T1 = FAST_CONCAT string("Setting ") CV0($value)
 0002 ECHO T1
-0003 RETURN null
+0003 DEFER_RUN
+0004 RETURN null
 int(42)
 Setting 41

@@ -19,17 +19,19 @@ function foo(string $s1, string $s2, string $s3, string $s4) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %sdce_001.php:1-8
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 foo:
-     ; (lines=5, args=4, vars=4, tmps=0)
+     ; (lines=6, args=4, vars=4, tmps=0)
      ; (after optimizer)
      ; %sdce_001.php:2-6
 0000 CV0($s1) = RECV 1
 0001 CV1($s2) = RECV 2
 0002 CV2($s3) = RECV 3
 0003 CV3($s4) = RECV 4
-0004 RETURN int(0)
+0004 DEFER_RUN
+0005 RETURN int(0)

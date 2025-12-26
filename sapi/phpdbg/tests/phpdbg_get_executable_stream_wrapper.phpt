@@ -5,8 +5,12 @@ r
 q
 --EXPECTF--
 [Successful compilation of %s]
-prompt> array(1) {
+prompt> array(3) {
   [5]=>
+  int(0)
+  [6]=>
+  int(0)
+  [7]=>
   int(0)
 }
 [Script ended normally]

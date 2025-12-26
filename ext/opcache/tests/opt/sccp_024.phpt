@@ -24,13 +24,14 @@ class A {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_024.php:1-13
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 A::t:
-     ; (lines=10, args=1, vars=2, tmps=2)
+     ; (lines=11, args=1, vars=2, tmps=2)
      ; (after optimizer)
      ; %ssccp_024.php:3-10
 0000 CV0($obj) = RECV 1
@@ -42,4 +43,5 @@ A::t:
 0006 V3 = FETCH_CLASS (no-autoload) (silent) (exception) CV1($c)
 0007 T2 = INSTANCEOF CV0($obj) V3
 0008 ECHO T2
-0009 RETURN null
+0009 DEFER_RUN
+0010 RETURN null

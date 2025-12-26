@@ -46,60 +46,67 @@ class Test4 implements TestI {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=3, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
 0000 DECLARE_CLASS string("test4")
-0001 RETURN int(1)
+0001 DEFER_RUN
+0002 RETURN int(1)
 
 Test4::getSelfA:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (self) (exception) string("A")
 0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
+0002 DEFER_RUN
+0003 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test4::getSelfB:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (self) (exception) string("B")
 0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
+0002 DEFER_RUN
+0003 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test4::getStaticA:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("A")
 0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
+0002 DEFER_RUN
+0003 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test4::getStaticB:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("B")
 0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
+0002 DEFER_RUN
+0003 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test4::getTestIA:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)
 
 Test4::getTestIB:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(42)
+0000 DEFER_RUN
+0001 RETURN int(42)

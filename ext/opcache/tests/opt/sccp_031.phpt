@@ -24,16 +24,18 @@ function foo() {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %ssccp_031.php:1-13
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 foo:
-     ; (lines=4, args=0, vars=0, tmps=0)
+     ; (lines=5, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s_031.php:2-11
 0000 ECHO string("b")
 0001 ECHO string("c")
 0002 ECHO array(...)
-0003 RETURN null
+0003 DEFER_RUN
+0004 RETURN null

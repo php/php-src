@@ -27,13 +27,14 @@ function test2(object $obj) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 test:
-     ; (lines=10, args=0, vars=0, tmps=0)
+     ; (lines=11, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 1 %d string("var_dump")
@@ -45,10 +46,11 @@ test:
 0006 INIT_FCALL 1 %d string("var_dump")
 0007 SEND_VAL bool(true) 1
 0008 DO_ICALL
-0009 RETURN null
+0009 DEFER_RUN
+0010 RETURN null
 
 test2:
-     ; (lines=17, args=1, vars=1, tmps=1)
+     ; (lines=18, args=1, vars=1, tmps=1)
      ; (after optimizer)
      ; %s
 0000 CV0($obj) = RECV 1
@@ -67,4 +69,5 @@ test2:
 0013 T1 = ISSET_ISEMPTY_PROP_OBJ (empty) CV0($obj) string("foo")
 0014 SEND_VAL T1 1
 0015 DO_ICALL
-0016 RETURN null
+0016 DEFER_RUN
+0017 RETURN null

@@ -8219,6 +8219,13 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 	cleanup_unfinished_calls(execute_data, throw_op_num);
 
+	/* TODO: Execute defers before unwinding on exception */
+	if (EX(defer_stack)) {
+		efree(EX(defer_stack)->entries);
+		efree(EX(defer_stack));
+		EX(defer_stack) = NULL;
+	}
+
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
 		switch (throw_op->opcode) {
 			case ZEND_ADD_ARRAY_ELEMENT:

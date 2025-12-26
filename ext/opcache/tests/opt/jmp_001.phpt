@@ -18,16 +18,18 @@ function test() {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s:1-8
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 test:
-     ; (lines=4, args=0, vars=1, tmps=1)
+     ; (lines=5, args=0, vars=1, tmps=1)
      ; (after optimizer)
      ; %s:2-6
 0000 INIT_FCALL_BY_NAME 0 string("test2")
 0001 V1 = DO_FCALL_BY_NAME
 0002 CV0($var) = QM_ASSIGN V1
-0003 RETURN CV0($var)
+0003 DEFER_RUN
+0004 RETURN CV0($var)

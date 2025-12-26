@@ -14,12 +14,13 @@ echo substr('foo', 1, $foo ? 1 : 1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=3, args=0, vars=1, tmps=0)
+     ; (lines=4, args=0, vars=1, tmps=0)
      ; (after optimizer)
      ; %sct_eval_frameless_002.php:1-4
 0000 CHECK_VAR CV0($foo)
 0001 ECHO string("o")
-0002 RETURN int(1)
+0002 DEFER_RUN
+0003 RETURN int(1)
 
 Warning: Undefined variable $foo in %s on line %d
 o

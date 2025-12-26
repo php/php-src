@@ -40,17 +40,18 @@ function noScope(Test $test) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
+     ; (lines=2, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [long] RANGE[1..1]
 BB0:
      ; start exit lines=[0-0]
      ; level=0
-0000 RETURN int(1)
+0000 DEFER_RUN
+0001 RETURN int(1)
 
 noScope:
-     ; (lines=10, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
+     ; (lines=11, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -67,10 +68,11 @@ BB0:
 0006 #4.T3 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("private")
 0007 SEND_VAL #4.T3 [any] 3
 0008 DO_ICALL
-0009 RETURN null
+0009 DEFER_RUN
+0010 RETURN null
 
 Test::inTest:
-     ; (lines=9, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
+     ; (lines=10, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -85,10 +87,11 @@ BB0:
 0005 #2.T2 [double] = FETCH_OBJ_R THIS string("private")
 0006 SEND_VAL #2.T2 [double] 3
 0007 DO_ICALL
-0008 RETURN null
+0008 DEFER_RUN
+0009 RETURN null
 
 Test::inTestWithTest2:
-     ; (lines=10, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
+     ; (lines=11, args=1, vars=1, tmps=%d, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -105,10 +108,11 @@ BB0:
 0006 #4.T3 [double] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("private")
 0007 SEND_VAL #4.T3 [double] 3
 0008 DO_ICALL
-0009 RETURN null
+0009 DEFER_RUN
+0010 RETURN null
 
 Test2::inTest2:
-     ; (lines=9, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
+     ; (lines=10, args=0, vars=0, tmps=%d, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -123,4 +127,5 @@ BB0:
 0005 #2.T2 [array of [any, ref]] = FETCH_OBJ_R THIS string("private")
 0006 SEND_VAL #2.T2 [array of [any, ref]] 3
 0007 DO_ICALL
-0008 RETURN null
+0008 DEFER_RUN
+0009 RETURN null
