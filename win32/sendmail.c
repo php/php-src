@@ -32,6 +32,7 @@
 
 #include "php_win32_globals.h"
 
+#include "Zend/zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
@@ -114,7 +115,7 @@ static const char *ErrorMessages[] =
 static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
-static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
+static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
@@ -589,16 +590,17 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	}
 
 	/* send message header */
+	bool PostHeaderIsSuccessful = false;
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header ? ZSTR_VAL(stripped_header) : NULL);
+		PostHeaderIsSuccessful = PostHeader(RPath, "No Subject", mailTo, stripped_header);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header ? ZSTR_VAL(stripped_header) : NULL);
+		PostHeaderIsSuccessful = PostHeader(RPath, Subject, mailTo, stripped_header);
 	}
 	if (stripped_header) {
 		zend_string_release_ex(stripped_header, false);
 	}
-	if (res != SUCCESS) {
-		return (res);
+	if (!PostHeaderIsSuccessful) {
+		return FAILED_TO_SEND;
 	}
 
 	/* Escape \n. sequences
@@ -645,14 +647,6 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	return (SUCCESS);
 }
 
-static void addToHeader(char **header_buffer, const char *specifier, const char *string)
-{
-	size_t header_buffer_size = strlen(*header_buffer);
-	size_t total_size = header_buffer_size + strlen(specifier) + strlen(string) + 1;
-	*header_buffer = erealloc(*header_buffer, total_size);
-	snprintf(*header_buffer + header_buffer_size, total_size - header_buffer_size, specifier, string);
-}
-
 //*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
@@ -664,64 +658,58 @@ static void addToHeader(char **header_buffer, const char *specifier, const char 
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
+static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
 
-	int res;
-	char *header_buffer;
-	char *headers_lc = NULL;
-	size_t i;
+	zend_string *headers_lc = NULL;
+	smart_str combined_headers = {0};
 
 	if (xheaders) {
-		size_t headers_lc_len;
-
-		headers_lc = estrdup(xheaders);
-		headers_lc_len = strlen(headers_lc);
-
-		for (i = 0; i < headers_lc_len; i++) {
-			headers_lc[i] = tolower(headers_lc[i]);
-		}
+		headers_lc = zend_string_tolower(xheaders);
 	}
 
-	header_buffer = ecalloc(1, MAIL_BUFFER_SIZE);
-
-	if (!xheaders || !strstr(headers_lc, "date:")) {
+	if (!xheaders || !strstr(ZSTR_VAL(headers_lc), "date:")) {
 		time_t tNow = time(NULL);
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
-		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", ZSTR_VAL(dt));
+		smart_str_appends(&combined_headers, "Date: ");
+		smart_str_append(&combined_headers, dt);
+		smart_str_appends(&combined_headers, "\r\n");
 		zend_string_free(dt);
 	}
 
-	if (!headers_lc || !strstr(headers_lc, "from:")) {
-		addToHeader(&header_buffer, "From: %s\r\n", RPath);
+	if (!headers_lc || !strstr(ZSTR_VAL(headers_lc), "from:")) {
+		smart_str_appends(&combined_headers, "From: ");
+		smart_str_appends(&combined_headers, RPath);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
-	addToHeader(&header_buffer, "Subject: %s\r\n", Subject);
+	smart_str_appends(&combined_headers, "Subject: ");
+	smart_str_appends(&combined_headers, Subject);
+	smart_str_appends(&combined_headers, "\r\n");
 
 	/* Only add the To: field from the $to parameter if isn't in the custom headers */
-	if ((headers_lc && (!strstr(headers_lc, "\r\nto:") && (strncmp(headers_lc, "to:", 3) != 0))) || !headers_lc) {
-		addToHeader(&header_buffer, "To: %s\r\n", mailTo);
+	if (!headers_lc || (!strstr(ZSTR_VAL(headers_lc), "\r\nto:") && (strncmp(ZSTR_VAL(headers_lc), "to:", 3) != 0))) {
+		smart_str_appends(&combined_headers, "To: ");
+		smart_str_appends(&combined_headers, mailTo);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
 	if (xheaders) {
-		addToHeader(&header_buffer, "%s\r\n", xheaders);
+		smart_str_append(&combined_headers, xheaders);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
+	/* End of headers */
+	smart_str_appends(&combined_headers, "\r\n");
+	zend_string *combined_headers_str = smart_str_extract(&combined_headers);
 
 	if (headers_lc) {
-		efree(headers_lc);
-	}
-	if (!Post(header_buffer)) {
-		efree(header_buffer);
-		return (FAILED_TO_SEND);
-	}
-	efree(header_buffer);
-
-	if (!Post("\r\n")) {
-		return (FAILED_TO_SEND);
+		zend_string_release_ex(headers_lc, false);
 	}
 
-	return (SUCCESS);
+	bool header_post_status = Post(ZSTR_VAL(combined_headers_str));
+	zend_string_efree(combined_headers_str);
+	return header_post_status;
 }
 
 
