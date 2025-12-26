@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fix error check for proc_open() command. (ndossche)
   . Fixed bug GH-20582 (Heap Buffer Overflow in iptcembed). (ndossche)
 
+- Zlib:
+  . Fix OOB gzseek() causing assertion failure. (ndossche)
+
 18 Dec 2025, PHP 8.3.29
 
 - Core:
