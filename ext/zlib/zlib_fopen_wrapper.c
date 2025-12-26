@@ -95,7 +95,7 @@ static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zen
 		return -1;
 	}
 
-	off_t new_offset = gzseek(self->gz_file, offset, whence);
+	z_off_t new_offset = gzseek(self->gz_file, offset, whence);
 	if (new_offset < 0) {
 		return -1;
 	}
