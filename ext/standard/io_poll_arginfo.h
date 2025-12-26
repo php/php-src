@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2da72c26a7a62878ca8fb80cbe02c0f1887ee5f4 */
+ * Stub hash: 3e5663f992805d44dec43a7f2269fbcaec3f1228 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -138,6 +138,16 @@ static const zend_function_entry class_StreamPollHandle_methods[] = {
 	ZEND_FE_END
 };
 
+static zend_class_entry *register_class_Io_IoException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io", "IoException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_Io_Poll_Backend(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("Io\\Poll\\Backend", IS_UNDEF, class_Io_Poll_Backend_methods);
@@ -208,22 +218,174 @@ static zend_class_entry *register_class_Io_Poll_Context(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Io_Poll_PollException(zend_class_entry *class_entry_Io_Poll_Exception)
+static zend_class_entry *register_class_Io_Poll_PollException(zend_class_entry *class_entry_Io_IoException)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "PollException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_IoException, 0);
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_StreamPollHandle(zend_class_entry *class_entry_PollHandle)
+static zend_class_entry *register_class_Io_Poll_FailedPollOperationException(zend_class_entry *class_entry_Io_Poll_PollException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedPollOperationException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, ZEND_ACC_ABSTRACT);
+
+	zval const_ERROR_NONE_value;
+	ZVAL_LONG(&const_ERROR_NONE_value, PHP_POLL_ERROR_CODE_NONE);
+	zend_string *const_ERROR_NONE_name = zend_string_init_interned("ERROR_NONE", sizeof("ERROR_NONE") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NONE_name, &const_ERROR_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_NONE_name, true);
+
+	zval const_ERROR_SYSTEM_value;
+	ZVAL_LONG(&const_ERROR_SYSTEM_value, PHP_POLL_ERROR_CODE_SYSTEM);
+	zend_string *const_ERROR_SYSTEM_name = zend_string_init_interned("ERROR_SYSTEM", sizeof("ERROR_SYSTEM") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_SYSTEM_name, &const_ERROR_SYSTEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_SYSTEM_name, true);
+
+	zval const_ERROR_NOMEM_value;
+	ZVAL_LONG(&const_ERROR_NOMEM_value, PHP_POLL_ERROR_CODE_NOMEM);
+	zend_string *const_ERROR_NOMEM_name = zend_string_init_interned("ERROR_NOMEM", sizeof("ERROR_NOMEM") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOMEM_name, &const_ERROR_NOMEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_NOMEM_name, true);
+
+	zval const_ERROR_INVALID_value;
+	ZVAL_LONG(&const_ERROR_INVALID_value, PHP_POLL_ERROR_CODE_INVALID);
+	zend_string *const_ERROR_INVALID_name = zend_string_init_interned("ERROR_INVALID", sizeof("ERROR_INVALID") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_INVALID_name, &const_ERROR_INVALID_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_INVALID_name, true);
+
+	zval const_ERROR_EXISTS_value;
+	ZVAL_LONG(&const_ERROR_EXISTS_value, PHP_POLL_ERROR_CODE_EXISTS);
+	zend_string *const_ERROR_EXISTS_name = zend_string_init_interned("ERROR_EXISTS", sizeof("ERROR_EXISTS") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_EXISTS_name, &const_ERROR_EXISTS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_EXISTS_name, true);
+
+	zval const_ERROR_NOTFOUND_value;
+	ZVAL_LONG(&const_ERROR_NOTFOUND_value, PHP_POLL_ERROR_CODE_NOTFOUND);
+	zend_string *const_ERROR_NOTFOUND_name = zend_string_init_interned("ERROR_NOTFOUND", sizeof("ERROR_NOTFOUND") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOTFOUND_name, &const_ERROR_NOTFOUND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_NOTFOUND_name, true);
+
+	zval const_ERROR_TIMEOUT_value;
+	ZVAL_LONG(&const_ERROR_TIMEOUT_value, PHP_POLL_ERROR_CODE_TIMEOUT);
+	zend_string *const_ERROR_TIMEOUT_name = zend_string_init_interned("ERROR_TIMEOUT", sizeof("ERROR_TIMEOUT") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_TIMEOUT_name, &const_ERROR_TIMEOUT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_TIMEOUT_name, true);
+
+	zval const_ERROR_INTERRUPTED_value;
+	ZVAL_LONG(&const_ERROR_INTERRUPTED_value, PHP_POLL_ERROR_CODE_INTERRUPTED);
+	zend_string *const_ERROR_INTERRUPTED_name = zend_string_init_interned("ERROR_INTERRUPTED", sizeof("ERROR_INTERRUPTED") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_INTERRUPTED_name, &const_ERROR_INTERRUPTED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_INTERRUPTED_name, true);
+
+	zval const_ERROR_PERMISSION_value;
+	ZVAL_LONG(&const_ERROR_PERMISSION_value, PHP_POLL_ERROR_CODE_PERMISSION);
+	zend_string *const_ERROR_PERMISSION_name = zend_string_init_interned("ERROR_PERMISSION", sizeof("ERROR_PERMISSION") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_PERMISSION_name, &const_ERROR_PERMISSION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_PERMISSION_name, true);
+
+	zval const_ERROR_TOOBIG_value;
+	ZVAL_LONG(&const_ERROR_TOOBIG_value, PHP_POLL_ERROR_CODE_TOOBIG);
+	zend_string *const_ERROR_TOOBIG_name = zend_string_init_interned("ERROR_TOOBIG", sizeof("ERROR_TOOBIG") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_TOOBIG_name, &const_ERROR_TOOBIG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_TOOBIG_name, true);
+
+	zval const_ERROR_AGAIN_value;
+	ZVAL_LONG(&const_ERROR_AGAIN_value, PHP_POLL_ERROR_CODE_AGAIN);
+	zend_string *const_ERROR_AGAIN_name = zend_string_init_interned("ERROR_AGAIN", sizeof("ERROR_AGAIN") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_AGAIN_name, &const_ERROR_AGAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_AGAIN_name, true);
+
+	zval const_ERROR_NOSUPPORT_value;
+	ZVAL_LONG(&const_ERROR_NOSUPPORT_value, PHP_POLL_ERROR_CODE_NOSUPPORT);
+	zend_string *const_ERROR_NOSUPPORT_name = zend_string_init_interned("ERROR_NOSUPPORT", sizeof("ERROR_NOSUPPORT") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ERROR_NOSUPPORT_name, &const_ERROR_NOSUPPORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ERROR_NOSUPPORT_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_FailedContextInitializationException(zend_class_entry *class_entry_Io_Poll_FailedPollOperationException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedContextInitializationException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_FailedPollOperationException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_FailedHandleAddException(zend_class_entry *class_entry_Io_Poll_FailedPollOperationException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedHandleAddException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_FailedPollOperationException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_FailedWatcherModificationException(zend_class_entry *class_entry_Io_Poll_FailedPollOperationException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedWatcherModificationException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_FailedPollOperationException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_FailedPollWaitException(zend_class_entry *class_entry_Io_Poll_FailedPollOperationException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedPollWaitException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_FailedPollOperationException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_InactiveWatcherException(zend_class_entry *class_entry_Io_Poll_PollException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "InactiveWatcherException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_HandleAlreadyWatchedException(zend_class_entry *class_entry_Io_Poll_PollException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "HandleAlreadyWatchedException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_InvalidHandleException(zend_class_entry *class_entry_Io_Poll_PollException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "InvalidHandleException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_StreamPollHandle(zend_class_entry *class_entry_Io_Poll_Handle)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "StreamPollHandle", class_StreamPollHandle_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PollHandle, ZEND_ACC_FINAL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_Handle, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

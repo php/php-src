@@ -45,20 +45,34 @@ typedef enum {
 	PHP_POLL_BACKEND_WSAPOLL
 } php_poll_backend_type;
 
+/* Error code constants for exception codes */
+#define PHP_POLL_ERROR_CODE_NONE        0
+#define PHP_POLL_ERROR_CODE_SYSTEM      1
+#define PHP_POLL_ERROR_CODE_NOMEM       2
+#define PHP_POLL_ERROR_CODE_INVALID     3
+#define PHP_POLL_ERROR_CODE_EXISTS      4
+#define PHP_POLL_ERROR_CODE_NOTFOUND    5
+#define PHP_POLL_ERROR_CODE_TIMEOUT     6
+#define PHP_POLL_ERROR_CODE_INTERRUPTED 7
+#define PHP_POLL_ERROR_CODE_PERMISSION  8
+#define PHP_POLL_ERROR_CODE_TOOBIG      9
+#define PHP_POLL_ERROR_CODE_AGAIN       10
+#define PHP_POLL_ERROR_CODE_NOSUPPORT   11
+
 /* Error codes */
 typedef enum {
-	PHP_POLL_ERR_NONE,          /* No error */
-	PHP_POLL_ERR_SYSTEM,        /* Generic system error */
-	PHP_POLL_ERR_NOMEM,         /* Out of memory (ENOMEM) */
-	PHP_POLL_ERR_INVALID,       /* Invalid argument (EINVAL, EBADF) */
-	PHP_POLL_ERR_EXISTS,        /* Already exists (EEXIST) */
-	PHP_POLL_ERR_NOTFOUND,      /* Not found (ENOENT) */
-	PHP_POLL_ERR_TIMEOUT,       /* Operation timed out (ETIME, ETIMEDOUT) */
-	PHP_POLL_ERR_INTERRUPTED,   /* Interrupted by signal (EINTR) */
-	PHP_POLL_ERR_PERMISSION,    /* Permission denied (EACCES, EPERM) */
-	PHP_POLL_ERR_TOOBIG,        /* Too many resources (EMFILE, ENFILE) */
-	PHP_POLL_ERR_AGAIN,         /* Try again (EAGAIN, EWOULDBLOCK) */
-	PHP_POLL_ERR_NOSUPPORT,     /* Not supported (ENOSYS, EOPNOTSUPP) */
+	PHP_POLL_ERR_NONE        = PHP_POLL_ERROR_CODE_NONE,        /* No error */
+	PHP_POLL_ERR_SYSTEM      = PHP_POLL_ERROR_CODE_SYSTEM,      /* Generic system error */
+	PHP_POLL_ERR_NOMEM       = PHP_POLL_ERROR_CODE_NOMEM,       /* Out of memory (ENOMEM) */
+	PHP_POLL_ERR_INVALID     = PHP_POLL_ERROR_CODE_INVALID,     /* Invalid argument (EINVAL, EBADF) */
+	PHP_POLL_ERR_EXISTS      = PHP_POLL_ERROR_CODE_EXISTS,      /* Already exists (EEXIST) */
+	PHP_POLL_ERR_NOTFOUND    = PHP_POLL_ERROR_CODE_NOTFOUND,    /* Not found (ENOENT) */
+	PHP_POLL_ERR_TIMEOUT     = PHP_POLL_ERROR_CODE_TIMEOUT,     /* Operation timed out (ETIME, ETIMEDOUT) */
+	PHP_POLL_ERR_INTERRUPTED = PHP_POLL_ERROR_CODE_INTERRUPTED, /* Interrupted by signal (EINTR) */
+	PHP_POLL_ERR_PERMISSION  = PHP_POLL_ERROR_CODE_PERMISSION,  /* Permission denied (EACCES, EPERM) */
+	PHP_POLL_ERR_TOOBIG      = PHP_POLL_ERROR_CODE_TOOBIG,      /* Too many resources (EMFILE, ENFILE) */
+	PHP_POLL_ERR_AGAIN       = PHP_POLL_ERROR_CODE_AGAIN,       /* Try again (EAGAIN, EWOULDBLOCK) */
+	PHP_POLL_ERR_NOSUPPORT   = PHP_POLL_ERROR_CODE_NOSUPPORT,   /* Not supported (ENOSYS, EOPNOTSUPP) */
 } php_poll_error;
 
 /* clang-format on */
