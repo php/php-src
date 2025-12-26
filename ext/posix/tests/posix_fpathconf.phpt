@@ -20,11 +20,10 @@ $fd = fopen(__DIR__, "r");
 var_dump(posix_fpathconf($fd, POSIX_PC_PATH_MAX));
 fclose($fd);
 ?>
---EXPECTF--
-
-Warning: posix_fpathconf(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
-bool(false)
-bool(true)
-string(19) "Bad file descriptor"
-posix_fpathconf(): Argument #1 ($file_descriptor) must be of type int|resource, string given
-int(%d)
+--EXPECTREGEX--
+Warning: posix_fpathconf\(\): Argument #1 \(\$file_descriptor\) must be between 0 and \d+ in .+ on line \d+
+bool\(false\)
+bool\(true\)
+string\(\d+\) "Bad file (descriptor|number)"
+posix_fpathconf\(\): Argument #1 \(\$file_descriptor\) must be of type int\|resource, string given
+int\(\d+\)
