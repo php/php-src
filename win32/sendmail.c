@@ -112,7 +112,7 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
 static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
-                    const zend_string *headers, zend_string *headers_lc, char **error_message);
+                    zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
 static bool Post(LPCSTR msg);
@@ -387,14 +387,14 @@ static char *find_address(char *list, char **state)
 // History:
 //*********************************************************************
 static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
-			 const zend_string *headers, zend_string *headers_lc, char **error_message)
+			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
 	char *tempMailTo, *token, *token_state;
 	const char *pos1, *pos2;
 	char *server_response = NULL;
-	char *stripped_header  = NULL;
+	zend_string *stripped_header  = NULL;
 	zend_string *data_cln;
 
 	/* check for NULL parameters */
@@ -565,35 +565,37 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 
 			/* Now that we've identified that we've a Bcc list,
 			   remove it from the current header. */
-			stripped_header = ecalloc(1, ZSTR_LEN(headers));
 			/* headers = point to string start of header
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
 			   Because we've added +4 above for parsing the Emails
 			   we've to subtract them here. */
-			memcpy(stripped_header, ZSTR_VAL(headers), pos1 - ZSTR_VAL(headers) - 4);
+			size_t header_length_prior_to_bcc = pos1 - ZSTR_VAL(headers) - 4;
 			if (pos1 != pos2) {
 				/* if pos1 != pos2 , pos2 points to the rest of the headers.
 				   Since pos1 != pos2 if "\r\n" was found, we know those characters
 				   are there and so we jump over them (else we would generate a new header
 				   which would look like "\r\n\r\n". */
-				memcpy(stripped_header + (pos1 - ZSTR_VAL(headers) - 4), pos2 + 2, strlen(pos2) - 2);
+				stripped_header = zend_string_concat2(ZSTR_VAL(headers), header_length_prior_to_bcc, pos2 + 2, strlen(pos2) - 2);
+			} else {
+				stripped_header = zend_string_truncate(headers, header_length_prior_to_bcc, false);
+				ZSTR_VAL(stripped_header)[ZSTR_LEN(stripped_header)] = '\0';
 			}
 		} else {
 			/* Simplify the code that we create a copy of stripped_header no matter if
-			   we actually strip something or not. So we've a single efree() later. */
-			stripped_header = estrndup(ZSTR_VAL(headers), ZSTR_LEN(headers));
+			   we actually strip something or not. So we've a single zend_string_release() later. */
+			stripped_header = zend_string_copy(headers);
 		}
 	}
 
 	/* send message header */
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header ? ZSTR_VAL(stripped_header) : NULL);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header);
+		res = PostHeader(RPath, Subject, mailTo, stripped_header ? ZSTR_VAL(stripped_header) : NULL);
 	}
 	if (stripped_header) {
-		efree(stripped_header);
+		zend_string_release_ex(stripped_header, false);
 	}
 	if (res != SUCCESS) {
 		return (res);
