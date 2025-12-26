@@ -94,7 +94,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
 	smart_string buf = {0};
-	ptr = pathbuf = estrdup(ZSTR_VAL(new_value));
+	ptr = pathbuf = ZSTR_VAL(new_value);
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
@@ -103,13 +103,11 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 		}
 		char resolved_name[MAXPATHLEN + 1];
 		if (expand_filepath(ptr, resolved_name) == NULL) {
-			efree(pathbuf);
 			smart_string_free(&buf);
 			return FAILURE;
 		}
 		if (php_check_open_basedir_ex(resolved_name, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
-			efree(pathbuf);
 			smart_string_free(&buf);
 			return FAILURE;
 		}
@@ -119,7 +117,6 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 		smart_string_appends(&buf, resolved_name);
 		ptr = end;
 	}
-	efree(pathbuf);
 
 	/* Everything checks out, set it */
 	smart_string_0(&buf);
