@@ -242,38 +242,21 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 	ZEND_ASSERT(!zend_str_has_nul_byte(path));
 	ZEND_ASSERT(context != NULL);
 
-	/* determine if the file is a local file or remote URL */
-	const char *dummy;
 	php_stream_statbuf ssb;
-
-	const php_stream_wrapper *wrap = php_stream_locate_url_wrapper(ZSTR_VAL(path), &dummy, 0);
-	if (UNEXPECTED(wrap == NULL)) {
-		return NULL;
-	}
-
-#ifdef PHP_WIN32
 	if (php_stream_stat_path_ex(ZSTR_VAL(path), 0, &ssb, context) == SUCCESS) {
 		if (ssb.sb.st_mode & S_IFDIR) {
 			return "directory";
 		}
 	}
-#endif
 
 	php_stream *stream = php_stream_open_wrapper_ex(ZSTR_VAL(path), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		return NULL;
 	}
 
-	const char *ret_val = NULL;
-	if (php_stream_stat(stream, &ssb) == SUCCESS) {
-		if (ssb.sb.st_mode & S_IFDIR) {
-			ret_val = "directory";
-		} else {
-			ret_val = magic_stream(magic, stream);
-			if (UNEXPECTED(ret_val == NULL)) {
-				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-			}
-		}
+	const char *ret_val = magic_stream(magic, stream);
+	if (UNEXPECTED(ret_val == NULL)) {
+		php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 	}
 
 	php_stream_close(stream);
