@@ -13,8 +13,7 @@ var_dump(gztell($h));
 
 gzclose($h);
 ?>
---EXPECTF--
+--EXPECT--
 int(-1)
-php: %s: _php_stream_seek: Assertion `stream->position >= 0' failed.
-
-Termsig=6
+int(0)
+int(0)
