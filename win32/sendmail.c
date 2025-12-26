@@ -649,13 +649,12 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	return (SUCCESS);
 }
 
-static int addToHeader(char **header_buffer, const char *specifier, const char *string)
+static void addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
 	size_t header_buffer_size = strlen(*header_buffer);
 	size_t total_size = header_buffer_size + strlen(specifier) + strlen(string) + 1;
 	*header_buffer = erealloc(*header_buffer, total_size);
 	snprintf(*header_buffer + header_buffer_size, total_size - header_buffer_size, specifier, string);
-	return 1;
 }
 
 //*********************************************************************
@@ -701,24 +700,16 @@ static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char
 	}
 
 	if (!headers_lc || !strstr(headers_lc, "from:")) {
-		if (!addToHeader(&header_buffer, "From: %s\r\n", RPath)) {
-			goto PostHeader_outofmem;
-		}
+		addToHeader(&header_buffer, "From: %s\r\n", RPath);
 	}
-	if (!addToHeader(&header_buffer, "Subject: %s\r\n", Subject)) {
-		goto PostHeader_outofmem;
-	}
+	addToHeader(&header_buffer, "Subject: %s\r\n", Subject);
 
 	/* Only add the To: field from the $to parameter if isn't in the custom headers */
 	if ((headers_lc && (!strstr(headers_lc, "\r\nto:") && (strncmp(headers_lc, "to:", 3) != 0))) || !headers_lc) {
-		if (!addToHeader(&header_buffer, "To: %s\r\n", mailTo)) {
-			goto PostHeader_outofmem;
-		}
+		addToHeader(&header_buffer, "To: %s\r\n", mailTo);
 	}
 	if (xheaders) {
-		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
-			goto PostHeader_outofmem;
-		}
+		addToHeader(&header_buffer, "%s\r\n", xheaders);
 	}
 
 	if (headers_lc) {
@@ -735,12 +726,6 @@ static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char
 	}
 
 	return (SUCCESS);
-
-PostHeader_outofmem:
-	if (headers_lc) {
-		efree(headers_lc);
-	}
-	return OUT_OF_MEMORY;
 }
 
 
