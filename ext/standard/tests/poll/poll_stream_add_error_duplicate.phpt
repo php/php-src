@@ -11,7 +11,7 @@ pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket2_data")
 
 try {
     pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket2_data");
-} catch (Io\Poll\PollException $e) {
+} catch (Io\Poll\HandleAlreadyWatchedException $e) {
     echo "ERROR: " . $e->getMessage() . "\n";
 }
 ?>
