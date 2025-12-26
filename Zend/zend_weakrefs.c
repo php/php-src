@@ -125,7 +125,13 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 static void zend_weakref_unregister(zend_object *object, void *payload, bool weakref_free) {
 	zend_ulong obj_key = zend_object_to_weakref_key(object);
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
-	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
+
+	if (!tagged_ptr) {
+#if ZEND_DEBUG
+	ZEND_ASSERT("Weakref not registered?");
+#endif
+        return;
+    }
 
 	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
 	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
@@ -217,9 +223,10 @@ void zend_weakrefs_notify(zend_object *object) {
 #if ZEND_DEBUG
 	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
 #endif
-	if (tagged_ptr) {
-		zend_weakref_unref(object, tagged_ptr);
+	while (tagged_ptr) {
 		zend_hash_index_del(&EG(weakrefs), obj_key);
+		zend_weakref_unref(object, tagged_ptr);
+		tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
 	}
 }
 
