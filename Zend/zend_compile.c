@@ -2699,6 +2699,8 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 		zend_emit_return_type_check(NULL, return_info, true);
 	}
 
+	zend_emit_op(NULL, 212, NULL, NULL);
+
 	zn.op_type = IS_CONST;
 	if (return_one) {
 		ZVAL_LONG(&zn.u.constant, 1);
@@ -5817,6 +5819,8 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
 
+	zend_emit_op(NULL, 212, NULL, NULL);
+
 	/* Content of reference might have changed in finally, repeat type check. */
 	if (by_ref
 	 /* Check if any opcodes were emitted since the last return type check. */
@@ -5837,6 +5841,34 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 			opline->extended_value = ZEND_RETURNS_VALUE;
 		}
 	}
+}
+/* }}} */
+
+static void zend_compile_defer(const zend_ast *ast) /* {{{ */
+{
+	zend_ast *stmt_ast = ast->child[0];
+	zend_op *opline;
+	uint32_t jmp_opnum, defer_start_opnum, defer_end_opnum;
+	znode offset_node;
+
+	opline = zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
+	jmp_opnum = get_next_op_number() - 1;
+
+	defer_start_opnum = get_next_op_number();
+
+	zend_compile_stmt(stmt_ast);
+
+	opline = zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
+
+	defer_end_opnum = get_next_op_number();
+
+	zend_update_jump_target(jmp_opnum, defer_end_opnum);
+
+	offset_node.op_type = IS_CONST;
+	ZVAL_LONG(&offset_node.u.constant, defer_start_opnum);
+
+	opline = zend_emit_op(NULL, 211, &offset_node, NULL);
+	opline->extended_value = defer_end_opnum - defer_start_opnum;
 }
 /* }}} */
 
@@ -11800,6 +11832,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_RETURN:
 			zend_compile_return(ast);
+			break;
+		case ZEND_AST_DEFER:
+			zend_compile_defer(ast);
 			break;
 		case ZEND_AST_ECHO:
 			zend_compile_echo(ast);

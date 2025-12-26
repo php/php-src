@@ -339,6 +339,7 @@ static zend_always_inline void zend_vm_init_call_frame(zend_execute_data *call, 
 	Z_PTR(call->This) = object_or_called_scope;
 	ZEND_CALL_INFO(call) = call_info;
 	ZEND_CALL_NUM_ARGS(call) = num_args;
+	call->defer_stack = NULL;
 }
 
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)

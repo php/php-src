@@ -8348,6 +8348,78 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+ZEND_VM_HANDLER(211, ZEND_DEFER_PUSH, CONST, ANY)
+{
+	USE_OPLINE
+	uint32_t defer_opline_num;
+	uint32_t defer_length;
+
+	SAVE_OPLINE();
+
+	defer_opline_num = (uint32_t)Z_LVAL_P(RT_CONSTANT(opline, opline->op1));
+	defer_length = opline->extended_value;
+
+	if (!EX(defer_stack)) {
+		EX(defer_stack) = emalloc(sizeof(zend_defer_stack));
+		EX(defer_stack)->count = 0;
+		EX(defer_stack)->capacity = 4;
+		EX(defer_stack)->entries = emalloc(sizeof(zend_defer_entry) * 4);
+	}
+
+	zend_defer_stack *stack = EX(defer_stack);
+	if (stack->count >= stack->capacity) {
+		stack->capacity *= 2;
+		stack->entries = erealloc(stack->entries, sizeof(zend_defer_entry) * stack->capacity);
+	}
+
+	stack->entries[stack->count].opline_num = defer_opline_num;
+	stack->entries[stack->count].length = defer_length;
+	stack->count++;
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(212, ZEND_DEFER_RUN, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (EX(defer_stack) && EX(defer_stack)->count > 0) {
+		zend_defer_stack *stack = EX(defer_stack);
+
+		stack->count--;
+		zend_defer_entry *entry = &stack->entries[stack->count];
+
+		uint32_t defer_opline = entry->opline_num;
+		uint32_t defer_len = entry->length;
+
+		if (defer_opline >= EX(func)->op_array.last ||
+		    defer_opline + defer_len > EX(func)->op_array.last) {
+			zend_error_noreturn(E_ERROR, "Invalid defer opline number: %u (max: %u)",
+				defer_opline, EX(func)->op_array.last);
+		}
+
+		zend_op *defer_exit_jmp = &EX(func)->op_array.opcodes[defer_opline + defer_len - 1];
+
+		uint32_t return_opline;
+		if (stack->count > 0) {
+			return_opline = opline - EX(func)->op_array.opcodes;
+		} else {
+			return_opline = (opline - EX(func)->op_array.opcodes) + 1;
+
+			efree(stack->entries);
+			efree(stack);
+			EX(defer_stack) = NULL;
+		}
+
+		ZEND_SET_OP_JMP_ADDR(defer_exit_jmp, defer_exit_jmp->op1, &EX(func)->op_array.opcodes[return_opline]);
+
+		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[defer_opline]);
+		ZEND_VM_CONTINUE();
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, NUM)
 {
 	USE_OPLINE
