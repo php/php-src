@@ -2967,6 +2967,12 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	SAVE_OPLINE();
 #endif
 
+	if (UNEXPECTED(EX(defer_stack) != NULL)) {
+		efree(EX(defer_stack)->entries);
+		efree(EX(defer_stack));
+		EX(defer_stack) = NULL;
+	}
+
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
 		i_free_compiled_variables(execute_data);
@@ -8094,6 +8100,54 @@ ZEND_VM_HOT_HANDLER(0, ZEND_NOP, ANY, ANY)
 
 ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_catch_offset, uint32_t op_num)
 {
+	if ((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_DEFER) &&
+	    EX(defer_stack) && EX(defer_stack)->count > 0) {
+
+		zend_defer_stack *stack = EX(defer_stack);
+
+		if (EG(exception) && !stack->unwinding_exception) {
+			stack->unwinding_exception = EG(exception);
+		}
+
+		stack->count--;
+		zend_defer_entry *entry = &stack->entries[stack->count];
+		uint32_t defer_opline = entry->opline_num;
+		uint32_t defer_len = entry->length;
+
+		if (defer_opline < EX(func)->op_array.last &&
+		    defer_opline + defer_len <= EX(func)->op_array.last) {
+
+			EG(exception) = NULL;
+
+			zend_op *defer_exit_jmp = &EX(func)->op_array.opcodes[defer_opline + defer_len - 1];
+
+			uint32_t return_opline_num = op_num;
+
+			ZEND_SET_OP_JMP_ADDR(defer_exit_jmp, defer_exit_jmp->op1, &EX(func)->op_array.opcodes[return_opline_num]);
+
+			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[defer_opline]);
+			ZEND_VM_CONTINUE();
+		} else {
+			if (stack->count > 0) {
+				EG(exception) = stack->unwinding_exception;
+				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[op_num]);
+				ZEND_VM_CONTINUE();
+			} else {
+				EG(exception) = stack->unwinding_exception;
+				efree(stack->entries);
+				efree(stack);
+				EX(defer_stack) = NULL;
+			}
+		}
+	}
+
+	if (EX(defer_stack) && EX(defer_stack)->count == 0 && EX(defer_stack)->unwinding_exception) {
+		EG(exception) = EX(defer_stack)->unwinding_exception;
+		efree(EX(defer_stack)->entries);
+		efree(EX(defer_stack));
+		EX(defer_stack) = NULL;
+	}
+
 	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
 
@@ -8218,13 +8272,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	cleanup_unfinished_calls(execute_data, throw_op_num);
-
-	/* TODO: Execute defers before unwinding on exception */
-	if (EX(defer_stack)) {
-		efree(EX(defer_stack)->entries);
-		efree(EX(defer_stack));
-		EX(defer_stack) = NULL;
-	}
 
 	if (throw_op->result_type & (IS_VAR | IS_TMP_VAR)) {
 		switch (throw_op->opcode) {
@@ -8371,6 +8418,7 @@ ZEND_VM_HANDLER(211, ZEND_DEFER_PUSH, CONST, ANY)
 		EX(defer_stack)->count = 0;
 		EX(defer_stack)->capacity = 4;
 		EX(defer_stack)->entries = emalloc(sizeof(zend_defer_entry) * 4);
+		EX(defer_stack)->unwinding_exception = NULL;
 	}
 
 	zend_defer_stack *stack = EX(defer_stack);

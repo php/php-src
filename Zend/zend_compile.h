@@ -534,6 +534,7 @@ typedef struct _zend_defer_stack {
 	uint32_t count;
 	uint32_t capacity;
 	zend_defer_entry *entries;
+	zend_object *unwinding_exception;
 } zend_defer_stack;
 
 struct _zend_op_array {
