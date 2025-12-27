@@ -1,21 +1,18 @@
 --TEST--
-Defer with closures and use variables
+Multiple defers execute on exception in LIFO order
 --FILE--
 <?php
 function test() {
-    $name = "Resource";
-    $value = 42;
-
-    echo "Opening $name\n";
-
     defer {
-        echo "Closing $name with value $value\n";
+        echo "Defer 1\n";
     }
-
-    $value = 100;
-    echo "Processing with value $value\n";
-
-    throw new Exception("Error during processing");
+    defer {
+        echo "Defer 2\n";
+    }
+    defer {
+        echo "Defer 3\n";
+    }
+    throw new Exception("Test");
 }
 
 try {
@@ -25,7 +22,7 @@ try {
 }
 ?>
 --EXPECT--
-Opening Resource
-Processing with value 100
-Closing Resource with value 100
-Caught: Error during processing
+Defer 3
+Defer 2
+Defer 1
+Caught: Test

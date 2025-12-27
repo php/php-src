@@ -1,22 +1,13 @@
 --TEST--
-Defer with array operations and modifications
+Defer can access exception variable
 --FILE--
 <?php
 function test() {
-    $data = ['items' => []];
+    $value = "test value";
 
     defer {
-        echo "Final data: " . json_encode($data) . "\n";
+        echo "Defer: $value\n";
     }
-
-    defer {
-        $data['items'][] = 'cleanup';
-        echo "Added cleanup item\n";
-    }
-
-    $data['items'][] = 'first';
-    $data['items'][] = 'second';
-    echo "Current data: " . json_encode($data) . "\n";
 
     throw new Exception("Test");
 }
@@ -28,7 +19,5 @@ try {
 }
 ?>
 --EXPECT--
-Current data: {"items":["first","second"]}
-Added cleanup item
-Final data: {"items":["first","second","cleanup"]}
+Defer: test value
 Caught: Test

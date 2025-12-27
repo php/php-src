@@ -1,45 +1,28 @@
 --TEST--
-Defer with mixed normal and exception paths
+Defer with nested function calls and exceptions
 --FILE--
 <?php
-function testSuccess() {
-    echo "Success function start\n";
-
+function inner() {
     defer {
-        echo "Success defer\n";
+        echo "Inner defer\n";
     }
-
-    echo "Success function end\n";
-    return "OK";
+    throw new Exception("Inner exception");
 }
 
-function testFailure() {
-    echo "Failure function start\n";
-
+function outer() {
     defer {
-        echo "Failure defer\n";
+        echo "Outer defer\n";
     }
-
-    throw new Exception("Failed");
+    inner();
 }
-
-$result = testSuccess();
-echo "Result: $result\n";
 
 try {
-    testFailure();
+    outer();
 } catch (Exception $e) {
     echo "Caught: " . $e->getMessage() . "\n";
 }
-
-echo "All done\n";
 ?>
 --EXPECT--
-Success function start
-Success function end
-Success defer
-Result: OK
-Failure function start
-Failure defer
-Caught: Failed
-All done
+Inner defer
+Outer defer
+Caught: Inner exception

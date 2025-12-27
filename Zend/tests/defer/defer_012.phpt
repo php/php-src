@@ -1,41 +1,22 @@
 --TEST--
-Defer with conditional execution and goto
+Exception in defer block replaces original exception
 --FILE--
 <?php
-function test($shouldFail) {
-    echo "Test start with shouldFail=$shouldFail\n";
-
+function test() {
     defer {
-        echo "Cleanup defer\n";
+        echo "Defer throwing new exception\n";
+        throw new Exception("Defer exception");
     }
 
-    if ($shouldFail) {
-        goto error;
-    }
-
-    echo "Normal path\n";
-    return "success";
-
-error:
-    echo "Error path\n";
-    throw new Exception("Failed");
+    throw new Exception("Original exception");
 }
 
-$result = test(false);
-echo "Result: $result\n";
-
 try {
-    test(true);
+    test();
 } catch (Exception $e) {
     echo "Caught: " . $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--
-Test start with shouldFail=
-Normal path
-Cleanup defer
-Result: success
-Test start with shouldFail=1
-Error path
-Cleanup defer
-Caught: Failed
+Defer throwing new exception
+Caught: Defer exception

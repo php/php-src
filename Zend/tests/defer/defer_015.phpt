@@ -1,24 +1,30 @@
 --TEST--
-Defer basic exception that propagates
+Defer with conditional exception
 --FILE--
 <?php
-function test() {
-    echo "Start\n";
-
+function test($throw) {
     defer {
-        echo "Defer\n";
+        echo "Defer executed\n";
     }
 
-    throw new Exception("Test");
+    if ($throw) {
+        throw new Exception("Conditional exception");
+    }
+
+    echo "Normal execution\n";
 }
 
 try {
-    test();
+    test(false);
+    echo "---\n";
+    test(true);
 } catch (Exception $e) {
-    echo "Caught\n";
+    echo "Caught: " . $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--
-Start
-Defer
-Caught
+Normal execution
+Defer executed
+---
+Defer executed
+Caught: Conditional exception

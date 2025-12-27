@@ -2,25 +2,19 @@
 Defer executes on exception
 --FILE--
 <?php
-function test_defer_on_exception() {
-    echo "Start\n";
-
+function test() {
     defer {
-        echo "Cleanup executed\n";
+        echo "Defer executed\n";
     }
-
-    echo "Before throw\n";
-    throw new Exception("Test");
+    throw new Exception("Test exception");
 }
 
 try {
-    test_defer_on_exception();
+    test();
 } catch (Exception $e) {
     echo "Caught: " . $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--
-Start
-Before throw
-Cleanup executed
-Caught: Test
+Defer executed
+Caught: Test exception

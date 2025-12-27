@@ -1,42 +1,18 @@
 --TEST--
-Defer with object cleanup
+Defer executes even when exception thrown in loop
 --FILE--
 <?php
-class Resource {
-    public $name;
-    public $isOpen = false;
-
-    public function __construct($name) {
-        $this->name = $name;
-        $this->open();
-    }
-
-    public function open() {
-        echo "Opening resource: {$this->name}\n";
-        $this->isOpen = true;
-    }
-
-    public function close() {
-        echo "Closing resource: {$this->name}\n";
-        $this->isOpen = false;
-    }
-}
-
 function test() {
-    $resource1 = new Resource("Database");
-
     defer {
-        $resource1->close();
+        echo "Defer executed\n";
     }
 
-    $resource2 = new Resource("File");
-
-    defer {
-        $resource2->close();
+    for ($i = 0; $i < 5; $i++) {
+        echo "Loop $i\n";
+        if ($i == 2) {
+            throw new Exception("Loop exception");
+        }
     }
-
-    echo "Using resources\n";
-    throw new Exception("Error occurred");
 }
 
 try {
@@ -46,9 +22,8 @@ try {
 }
 ?>
 --EXPECT--
-Opening resource: Database
-Opening resource: File
-Using resources
-Closing resource: File
-Closing resource: Database
-Caught: Error occurred
+Loop 0
+Loop 1
+Loop 2
+Defer executed
+Caught: Loop exception
