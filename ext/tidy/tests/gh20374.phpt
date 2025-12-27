@@ -75,8 +75,6 @@ foreach ($values as $key => $value) {
 </body>
 </html>
 --- double overflow ---
-
-Warning: The float-string "1.2089258196146E+24" is not representable as an int, cast occurred in %s on line %d
 <html>
 <head>
 <title></title>

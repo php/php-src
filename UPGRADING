@@ -55,9 +55,8 @@ PHP 8.5 UPGRADE NOTES
   . Destructuring non-array values (other than NULL) using [] or list() now
     emits a warning.
     RFC: https://wiki.php.net/rfc/warnings-php-8-5#destructuring_non-array_values
-  . A warning is now emitted when casting floats (or strings that look like
-    floats) to int if they cannot be represented as one. This affects explicit
-    int casts and implicit int casts.
+  . A warning is now emitted when casting floats to int if they cannot be represented
+    as one. This affects explicit int casts and implicit int casts.
     RFC: https://wiki.php.net/rfc/warnings-php-8-5#casting_out_of_range_floats_to_int
   . A warning is now emitted when casting NAN to other types.
     RFC: https://wiki.php.net/rfc/warnings-php-8-5#coercing_nan_to_other_types
