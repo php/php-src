@@ -118,7 +118,7 @@ static int MailConnect();
 static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
-static unsigned long GetAddr(LPSTR szHost);
+static unsigned long GetAddr(const char *szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 
 /* This function is meant to unify the headers passed to to mail()
@@ -904,7 +904,7 @@ again:
 
 
 //*********************************************************************
-// Name:  unsigned long GetAddr (LPSTR szHost)
+// Name:  unsigned long GetAddr (const char *szHost)
 // Input:
 // Output:
 // Description: Given a string, it will return an IP address.
@@ -915,7 +915,7 @@ again:
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static unsigned long GetAddr(LPSTR szHost)
+static unsigned long GetAddr(const char *szHost)
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
