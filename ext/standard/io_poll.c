@@ -662,8 +662,7 @@ PHP_METHOD(Io_Poll_Context, __construct)
 	intern->ctx = php_poll_create(backend_type, 0);
 
 	if (!intern->ctx) {
-		php_io_poll_throw_failed_operation(php_io_poll_failed_context_init_class_entry,
-				"Failed to create polling context", PHP_POLL_ERR_NOMEM);
+		zend_argument_value_error(1, "must be available backend");
 		RETURN_THROWS();
 	}
 
