@@ -114,7 +114,7 @@ static const char *ErrorMessages[] =
 
 static int SendText(_In_ const char *host, const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
-static int MailConnect();
+static int MailConnect(_In_ const char *host);
 static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
@@ -391,15 +391,8 @@ static int SendText(_In_ const char *host, const char *RPath, const char *Subjec
 		return (BAD_MSG_DESTINATION);
 	*/
 
-	if (strlen(host) >= HOST_NAME_LEN) {
-		*error = BAD_MAIL_HOST;
-		return FAILURE;
-	} else {
-		strcpy(PW32G(mail_host), host);
-	}
-
 	/* attempt to connect with mail host */
-	res = MailConnect();
+	res = MailConnect(host);
 	if (res != 0) {
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
@@ -708,7 +701,7 @@ static bool PostHeader(const char *RPath, const char *Subject, const char *mailT
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int MailConnect()
+static int MailConnect(_In_ const char *host)
 {
 
 	int res, namelen;
@@ -764,7 +757,7 @@ return 0;
 	}
 
 	/* Resolve the servers IP */
-	unsigned long server_addr = GetAddr(PW32G(mail_host));
+	unsigned long server_addr = GetAddr(host);
 
 	portnum = (short) INI_INT("smtp_port");
 	if (!portnum) {
