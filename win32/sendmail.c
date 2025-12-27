@@ -115,6 +115,7 @@ static const char *ErrorMessages[] =
 static int SendText(_In_ const char *host, _In_ const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect(_In_ const char *host);
+static int PostHelo(char **error_message);
 static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
@@ -400,14 +401,9 @@ static int SendText(_In_ const char *host, _In_ const char *RPath, const char *S
 		return res;
 	}
 
-	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", PW32G(mail_local_host));
-
-	if (!Post(PW32G(mail_buffer))) {
-		return (FAILED_TO_SEND);
-	}
-	if ((res = Ack(&server_response)) != SUCCESS) {
-		SMTP_ERROR_RESPONSE(server_response);
-		return (res);
+	res = PostHelo(error_message);
+	if (res != SUCCESS) {
+		return res;
 	}
 
 	SMTP_SKIP_SPACE(RPath);
@@ -623,6 +619,69 @@ static int SendText(_In_ const char *host, _In_ const char *RPath, const char *S
 	return (SUCCESS);
 }
 
+static int PostHelo(char **error_message)
+{
+	size_t namelen;
+	struct hostent *ent;
+	IN_ADDR addr;
+#ifdef HAVE_IPV6
+	IN6_ADDR addr6;
+#endif
+	char mail_local_host[HOST_NAME_LEN];
+
+#if SENDMAIL_DEBUG
+	return 0;
+#endif
+
+	/* Get our own host name */
+	if (gethostname(mail_local_host, HOST_NAME_LEN)) {
+		return (FAILED_TO_GET_HOSTNAME);
+	}
+
+	ent = gethostbyname(mail_local_host);
+
+	if (!ent) {
+		return (FAILED_TO_GET_HOSTNAME);
+	}
+
+	namelen = strlen(ent->h_name);
+
+#ifdef HAVE_IPV6
+	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
+#else
+	if (inet_pton(AF_INET, ent->h_name, &addr) == 1)
+#endif
+	{
+		if (namelen + 2 >= HOST_NAME_LEN) {
+			return (FAILED_TO_GET_HOSTNAME);
+		}
+
+		strcpy(mail_local_host, "[");
+		strcpy(mail_local_host + 1, ent->h_name);
+		strcpy(mail_local_host + namelen + 1, "]");
+	} else {
+		if (namelen >= HOST_NAME_LEN) {
+			return (FAILED_TO_GET_HOSTNAME);
+		}
+
+		strcpy(mail_local_host, ent->h_name);
+	}
+
+	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", mail_local_host);
+
+	if (!Post(PW32G(mail_buffer))) {
+		return (FAILED_TO_SEND);
+	}
+
+	char *server_response = NULL;
+	int res = Ack(&server_response);
+	if (res != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
+		return (res);
+	}
+	return SUCCESS;
+}
+
 //*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
@@ -701,52 +760,9 @@ static bool PostHeader(const char *RPath, const char *Subject, const char *mailT
 static int MailConnect(_In_ const char *host)
 {
 
-	int res, namelen;
+	int res;
 	short portnum;
-	struct hostent *ent;
-	IN_ADDR addr;
-#ifdef HAVE_IPV6
-	IN6_ADDR addr6;
-#endif
 	SOCKADDR_IN sock_in;
-
-#if SENDMAIL_DEBUG
-return 0;
-#endif
-
-	/* Get our own host name */
-	if (gethostname(PW32G(mail_local_host), HOST_NAME_LEN)) {
-		return (FAILED_TO_GET_HOSTNAME);
-	}
-
-	ent = gethostbyname(PW32G(mail_local_host));
-
-	if (!ent) {
-		return (FAILED_TO_GET_HOSTNAME);
-	}
-
-	namelen = (int)strlen(ent->h_name);
-
-#ifdef HAVE_IPV6
-	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
-#else
-	if (inet_pton(AF_INET, ent->h_name, &addr) == 1)
-#endif
-	{
-		if (namelen + 2 >= HOST_NAME_LEN) {
-			return (FAILED_TO_GET_HOSTNAME);
-		}
-
-		strcpy(PW32G(mail_local_host), "[");
-		strcpy(PW32G(mail_local_host) + 1, ent->h_name);
-		strcpy(PW32G(mail_local_host) + namelen + 1, "]");
-	} else {
-		if (namelen >= HOST_NAME_LEN) {
-			return (FAILED_TO_GET_HOSTNAME);
-		}
-
-		strcpy(PW32G(mail_local_host), ent->h_name);
-	}
 
 	/* Create Socket */
 	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {

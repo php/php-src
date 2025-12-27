@@ -42,7 +42,6 @@ struct _php_win32_core_globals {
 
 	char   mail_buffer[MAIL_BUFFER_SIZE];
 	SOCKET mail_socket;
-	char   mail_local_host[HOST_NAME_LEN];
 };
 
 void php_win32_core_globals_ctor(void *vg);
