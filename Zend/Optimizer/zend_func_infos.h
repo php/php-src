@@ -596,6 +596,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_get_line", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_resolve_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_get_wrappers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("stream_get_errors", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("stream_get_transports", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #if defined(HAVE_GETTIMEOFDAY)
 	F1("uniqid", MAY_BE_STRING),
