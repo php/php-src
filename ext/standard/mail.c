@@ -154,10 +154,6 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 				case CONTAINS_NULL:
 					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
 					return;
-				default:
-					// fallback
-					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
-					return;
 			}
 			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
