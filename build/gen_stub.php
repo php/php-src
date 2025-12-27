@@ -4087,7 +4087,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|(\.\.\.)?\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -4109,7 +4109,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*(\.\.\.)?\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
