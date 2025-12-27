@@ -902,6 +902,11 @@ class mysqli
     public function real_escape_string(string $string): string {}
 
     /**
+     * @alias mysqli_quote_string
+     */
+    public function quote_string(string $string): string {}
+
+    /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
@@ -1541,6 +1546,8 @@ function mysqli_real_escape_string(mysqli $mysql, string $string): string {}
 
 /** @alias mysqli_real_escape_string */
 function mysqli_escape_string(mysqli $mysql, string $string): string {}
+
+function mysqli_quote_string(mysqli $mysql, string $string): string {}
 
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
