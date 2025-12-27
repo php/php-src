@@ -94,9 +94,14 @@ static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zen
 		php_error_docref(NULL, E_WARNING, "SEEK_END is not supported");
 		return -1;
 	}
-	*newoffs = gzseek(self->gz_file, offset, whence);
 
-	return (*newoffs < 0) ? -1 : 0;
+	z_off_t new_offset = gzseek(self->gz_file, offset, whence);
+	if (new_offset < 0) {
+		return -1;
+	}
+
+	*newoffs = new_offset;
+	return 0;
 }
 
 static int php_gziop_close(php_stream *stream, int close_handle)
