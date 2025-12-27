@@ -62,6 +62,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20771 (Assertion failure when getUnicodeHost() returns
     empty string). (ndossche)
 
+- Zlib:
+  . Fix OOB gzseek() causing assertion failure. (ndossche)
+
 18 Dec 2025, PHP 8.5.1
 
 - Core:
