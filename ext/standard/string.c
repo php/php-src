@@ -519,7 +519,7 @@ static inline zend_result php_charmask(const unsigned char *input, size_t len, c
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
- * what indicates which chars are to be trimmed. NULL->default (' \f\t\n\r\v\0')
+ * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
 static zend_always_inline zend_string *php_trim_int(zend_string *str, const char *what, size_t what_len, int mode)
 {
@@ -576,7 +576,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
 				unsigned char c = (unsigned char)*start;
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					start++;
 				} else {
 					break;
@@ -588,7 +588,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
 				unsigned char c = (unsigned char)*(end-1);
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					end--;
 				} else {
 					break;
@@ -611,7 +611,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
- * what indicates which chars are to be trimmed. NULL->default (' \f\t\n\r\v\0')
+ * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
 PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode)
 {
