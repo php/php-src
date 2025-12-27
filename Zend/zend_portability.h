@@ -338,10 +338,10 @@ char *alloca();
 
 
 #if !defined(__apple_build_version__) || (defined(__apple_build_version__) && __apple_build_version__ >= 17000404)
-#if __has_attribute(musttail)
-# define HAVE_MUSTTAIL
-# define ZEND_MUSTTAIL __attribute__((musttail))
-#endif
+# if __has_attribute(musttail)
+#  define HAVE_MUSTTAIL
+#  define ZEND_MUSTTAIL __attribute__((musttail))
+# endif
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
