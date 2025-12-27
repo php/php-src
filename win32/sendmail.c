@@ -219,7 +219,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
-		int found = 0;
+		bool found = false;
 		const char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
@@ -236,7 +236,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 				}
 			}
 
-			found = 1;
+			found = true;
 
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headers + 5 characters to jump over
