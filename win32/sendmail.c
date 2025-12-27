@@ -738,21 +738,14 @@ static int MailConnect()
 return 0;
 #endif
 
-	/* Create Socket */
-	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
-	}
-
 	/* Get our own host name */
 	if (gethostname(PW32G(mail_local_host), HOST_NAME_LEN)) {
-		closesocket(PW32G(mail_socket));
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
 	ent = gethostbyname(PW32G(mail_local_host));
 
 	if (!ent) {
-		closesocket(PW32G(mail_socket));
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
@@ -765,7 +758,6 @@ return 0;
 #endif
 	{
 		if (namelen + 2 >= HOST_NAME_LEN) {
-			closesocket(PW32G(mail_socket));
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
@@ -774,11 +766,15 @@ return 0;
 		strcpy(PW32G(mail_local_host) + namelen + 1, "]");
 	} else {
 		if (namelen >= HOST_NAME_LEN) {
-			closesocket(PW32G(mail_socket));
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
 		strcpy(PW32G(mail_local_host), ent->h_name);
+	}
+
+	/* Create Socket */
+	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
 	}
 
 	/* Resolve the servers IP */
