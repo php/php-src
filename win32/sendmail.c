@@ -112,7 +112,7 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(_In_ const char *host, const char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, _In_ const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect(_In_ const char *host);
 static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
@@ -258,9 +258,8 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 
 	 ret = SendText(host, RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
 	TSMClose();
-	if (RPath) {
-		efree(RPath);
-	}
+	efree(RPath);
+
 	if (headers) {
 		zend_string_release(headers_trim);
 		zend_string_release(headers_lc);
@@ -363,7 +362,7 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(_In_ const char *host, const char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, _In_ const char *RPath, const char *Subject, const char *mailTo, const char *data,
 			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
@@ -379,8 +378,6 @@ static int SendText(_In_ const char *host, const char *RPath, const char *Subjec
 		return (BAD_MSG_CONTENTS);
 	if (mailTo == NULL)
 		return (BAD_MSG_DESTINATION);
-	if (RPath == NULL)
-		return (BAD_MSG_RPATH);
 
 	/* simple checks for the mailto address */
 	/* have ampersand ? */
