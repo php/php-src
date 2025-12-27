@@ -782,12 +782,7 @@ return 0;
 	}
 
 	/* Resolve the servers IP */
-	/*
-	if (!isdigit(PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
-	{
-		return (FAILED_TO_RESOLVE_HOST);
-	}
-	*/
+	unsigned long server_addr = GetAddr(PW32G(mail_host));
 
 	portnum = (short) INI_INT("smtp_port");
 	if (!portnum) {
@@ -797,7 +792,7 @@ return 0;
 	/* Connect to server */
 	sock_in.sin_family = AF_INET;
 	sock_in.sin_port = htons(portnum);
-	sock_in.sin_addr.S_un.S_addr = GetAddr(PW32G(mail_host));
+	sock_in.sin_addr.S_un.S_addr = server_addr;
 
 	if (connect(PW32G(mail_socket), (LPSOCKADDR) & sock_in, sizeof(sock_in))) {
 		closesocket(PW32G(mail_socket));
