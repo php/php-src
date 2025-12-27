@@ -586,112 +586,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 		efree (sendmail_cmd);
 	}
 
-	if (sendmail) {
-		int ret;
-#ifndef PHP_WIN32
-		if (EACCES == errno) {
-			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
-			pclose(sendmail);
-#if PHP_SIGCHILD
-			/* Restore handler in case of error on Windows
-			   Not sure if this applicable on Win but just in case. */
-			if (sig_handler) {
-				signal(SIGCHLD, sig_handler);
-			}
-#endif
-			MAIL_RET(false);
-		}
-#endif
-		fprintf(sendmail, "To: %s%s", to, line_sep);
-		fprintf(sendmail, "Subject: %s%s", subject, line_sep);
-		if (headers && ZSTR_LEN(headers)) {
-			fprintf(sendmail, "%s%s", ZSTR_VAL(headers), line_sep);
-		}
-
-		fprintf(sendmail, "%s", line_sep);
-		
-		if (cr_lf_mode && zend_string_equals_literal(cr_lf_mode, "lf")) {
-			char *converted_message = NULL;
-			size_t msg_len = ZSTR_LEN(message);
-			size_t new_len = 0;
-
-			if (msg_len > 0) {
-				for (size_t i = 0; i < msg_len - 1; ++i) {
-					if (ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
-						++new_len;
-					}
-				}
-
-				if (new_len == 0) {
-					fprintf(sendmail, "%s", ZSTR_VAL(message));
-				} else {
-					converted_message = emalloc(msg_len - new_len + 1);
-					size_t j = 0;
-					for (size_t i = 0; i < msg_len; ++i) {
-						if (i < msg_len - 1 && ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
-							converted_message[j++] = '\n';
-							++i; /* skip LF part */
-						} else {
-							converted_message[j++] = ZSTR_VAL(message)[i];
-						}
-					}
-
-					converted_message[j] = '\0';
-					fprintf(sendmail, "%s", converted_message);
-					efree(converted_message);
-				}
-			}
-		} else {
-			fprintf(sendmail, "%s", ZSTR_VAL(message));
-		}
-
-		fprintf(sendmail, "%s", line_sep);
-#ifdef PHP_WIN32
-		ret = pclose(sendmail);
-
-#if PHP_SIGCHILD
-		if (sig_handler) {
-			signal(SIGCHLD, sig_handler);
-		}
-#endif
-#else
-		int wstatus = pclose(sendmail);
-#if PHP_SIGCHILD
-		if (sig_handler) {
-			signal(SIGCHLD, sig_handler);
-		}
-#endif
-		/* Determine the wait(2) exit status */
-		if (wstatus == -1) {
-			php_error_docref(NULL, E_WARNING, "Sendmail pclose failed %d (%s)", errno, strerror(errno));
-			MAIL_RET(false);
-		} else if (WIFSIGNALED(wstatus)) {
-			php_error_docref(NULL, E_WARNING, "Sendmail killed by signal %d (%s)", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
-			MAIL_RET(false);
-		} else {
-			if (WIFEXITED(wstatus)) {
-				ret = WEXITSTATUS(wstatus);
-			} else {
-				php_error_docref(NULL, E_WARNING, "Sendmail did not exit");
-				MAIL_RET(false);
-			}
-		}
-#endif
-
-#if defined(EX_TEMPFAIL)
-		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
-#elif defined(EX_OK)
-		if (ret != EX_OK)
-#else
-		if (ret != 0)
-#endif
-		{
-			php_error_docref(NULL, E_WARNING, "Sendmail exited with non-zero exit code %d", ret);
-			MAIL_RET(false);
-		} else {
-			MAIL_RET(true);
-		}
-	} else {
+	if (UNEXPECTED(!sendmail)) {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
 #if PHP_SIGCHILD
 		if (sig_handler) {
@@ -701,7 +596,111 @@ PHPAPI bool php_mail(const char *to, const char *subject, const zend_string *mes
 		MAIL_RET(false);
 	}
 
-	MAIL_RET(true); /* never reached */
+#ifndef PHP_WIN32
+	if (EACCES == errno) {
+		php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
+		pclose(sendmail);
+#if PHP_SIGCHILD
+		/* Restore handler in case of error on Windows
+		   Not sure if this applicable on Win but just in case. */
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);
+		}
+#endif
+		MAIL_RET(false);
+	}
+#endif
+	fprintf(sendmail, "To: %s%s", to, line_sep);
+	fprintf(sendmail, "Subject: %s%s", subject, line_sep);
+	if (headers && ZSTR_LEN(headers)) {
+		fprintf(sendmail, "%s%s", ZSTR_VAL(headers), line_sep);
+	}
+
+	fprintf(sendmail, "%s", line_sep);
+
+	if (cr_lf_mode && zend_string_equals_literal(cr_lf_mode, "lf")) {
+		char *converted_message = NULL;
+		size_t msg_len = ZSTR_LEN(message);
+		size_t new_len = 0;
+
+		if (msg_len > 0) {
+			for (size_t i = 0; i < msg_len - 1; ++i) {
+				if (ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
+					++new_len;
+				}
+			}
+
+			if (new_len == 0) {
+				fprintf(sendmail, "%s", ZSTR_VAL(message));
+			} else {
+				converted_message = emalloc(msg_len - new_len + 1);
+				size_t j = 0;
+				for (size_t i = 0; i < msg_len; ++i) {
+					if (i < msg_len - 1 && ZSTR_VAL(message)[i] == '\r' && ZSTR_VAL(message)[i + 1] == '\n') {
+						converted_message[j++] = '\n';
+						++i; /* skip LF part */
+					} else {
+						converted_message[j++] = ZSTR_VAL(message)[i];
+					}
+				}
+
+				converted_message[j] = '\0';
+				fprintf(sendmail, "%s", converted_message);
+				efree(converted_message);
+			}
+		}
+	} else {
+		fprintf(sendmail, "%s", ZSTR_VAL(message));
+	}
+
+	fprintf(sendmail, "%s", line_sep);
+
+	int ret;
+#ifdef PHP_WIN32
+	ret = pclose(sendmail);
+
+#if PHP_SIGCHILD
+	if (sig_handler) {
+		signal(SIGCHLD, sig_handler);
+	}
+#endif
+#else
+	int wstatus = pclose(sendmail);
+#if PHP_SIGCHILD
+	if (sig_handler) {
+		signal(SIGCHLD, sig_handler);
+	}
+#endif
+	/* Determine the wait(2) exit status */
+	if (wstatus == -1) {
+		php_error_docref(NULL, E_WARNING, "Sendmail pclose failed %d (%s)", errno, strerror(errno));
+		MAIL_RET(false);
+	} else if (WIFSIGNALED(wstatus)) {
+		php_error_docref(NULL, E_WARNING, "Sendmail killed by signal %d (%s)", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
+		MAIL_RET(false);
+	} else {
+		if (WIFEXITED(wstatus)) {
+			ret = WEXITSTATUS(wstatus);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Sendmail did not exit");
+			MAIL_RET(false);
+		}
+	}
+#endif
+
+#if defined(EX_TEMPFAIL)
+	if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
+#elif defined(EX_OK)
+	if (ret != EX_OK)
+#else
+	if (ret != 0)
+#endif
+	{
+		php_error_docref(NULL, E_WARNING, "Sendmail exited with non-zero exit code %d", ret);
+		MAIL_RET(false);
+	} else {
+		MAIL_RET(true);
+	}
 }
 /* }}} */
 
