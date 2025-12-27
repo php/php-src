@@ -112,7 +112,7 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(const char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
 static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
@@ -196,11 +196,6 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
 		return FAILURE;
-	} else if (strlen(host) >= HOST_NAME_LEN) {
-		*error = BAD_MAIL_HOST;
-		return FAILURE;
-	} else {
-		strcpy(PW32G(mail_host), host);
 	}
 
 	if (headers) {
@@ -261,39 +256,20 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 		}
 	}
 
-	/* attempt to connect with mail host */
-	*error = MailConnect();
-	if (*error != 0) {
-		if (RPath) {
-			efree(RPath);
-		}
-		if (headers) {
-			zend_string_release(headers_trim);
-			zend_string_release(headers_lc);
-		}
-		/* 128 is safe here, the specifier in snprintf isn't longer than that */
-		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
-		snprintf(*error_message, HOST_NAME_LEN + 128,
-			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
-			"and \"smtp_port\" setting in php.ini or use ini_set()",
-			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
-		return FAILURE;
-	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
-		TSMClose();
-		if (RPath) {
-			efree(RPath);
-		}
-		if (headers) {
-			zend_string_release(headers_trim);
-			zend_string_release(headers_lc);
-		}
-		if (ret != SUCCESS) {
-			*error = ret;
-			return FAILURE;
-		}
-		return SUCCESS;
+	 ret = SendText(host, RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
+	TSMClose();
+	if (RPath) {
+		efree(RPath);
 	}
+	if (headers) {
+		zend_string_release(headers_trim);
+		zend_string_release(headers_lc);
+	}
+	if (ret != SUCCESS) {
+		*error = ret;
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 
 //*********************************************************************
@@ -387,7 +363,7 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(const char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, const char *RPath, const char *Subject, const char *mailTo, const char *data,
 			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
@@ -415,19 +391,29 @@ static int SendText(const char *RPath, const char *Subject, const char *mailTo, 
 		return (BAD_MSG_DESTINATION);
 	*/
 
+	if (strlen(host) >= HOST_NAME_LEN) {
+		*error = BAD_MAIL_HOST;
+		return FAILURE;
+	} else {
+		strcpy(PW32G(mail_host), host);
+	}
+
+	/* attempt to connect with mail host */
+	res = MailConnect();
+	if (res != 0) {
+		/* 128 is safe here, the specifier in snprintf isn't longer than that */
+		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
+		snprintf(*error_message, HOST_NAME_LEN + 128,
+			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
+			"and \"smtp_port\" setting in php.ini or use ini_set()",
+			host, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
+		return res;
+	}
+
 	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", PW32G(mail_local_host));
 
-	/* in the beginning of the dialog */
-	/* attempt reconnect if the first Post fail */
 	if (!Post(PW32G(mail_buffer))) {
-		int err = MailConnect();
-		if (0 != err) {
-			return (FAILED_TO_SEND);
-		}
-
-		if (!Post(PW32G(mail_buffer))) {
-			return (FAILED_TO_SEND);
-		}
+		return (FAILED_TO_SEND);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
