@@ -112,14 +112,14 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
-static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
+static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(const char *szHost);
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
+static int FormatEmailAddress(char* Buf, const char* EmailAddress, const char* FormatString);
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
@@ -387,7 +387,7 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(const char *RPath, const char *Subject, const char *mailTo, const char *data,
 			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
@@ -658,7 +658,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
+static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
@@ -941,10 +941,10 @@ static unsigned long GetAddr(const char *szHost)
 } /* end GetAddr() */
 
 /* returns the contents of an angle-addr (caller needs to efree) or NULL */
-static char *get_angle_addr(char *address)
+static char *get_angle_addr(const char *address)
 {
 	bool in_quotes = 0;
-	char *p1 = address, *p2;
+	const char *p1 = address, *p2;
 
 	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {
 		if (*p1 == '\\' && in_quotes) {
@@ -994,7 +994,7 @@ static char *get_angle_addr(char *address)
 // Author/Date:  garretts 08/18/2009
 // History:
 //*********************************************************************
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
+static int FormatEmailAddress(char* Buf, const char* EmailAddress, const char* FormatString) {
 	char *tmpAddress;
 	int result;
 
