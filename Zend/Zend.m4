@@ -166,35 +166,11 @@ AC_CHECK_FUNC([sigsetjmp],,
     [AC_MSG_FAILURE([Required sigsetjmp not found.])],
     [#include <setjmp.h>])])
 
-
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
-
-case $host_os in
-darwin*)
-    dnl versions prior to this lead to compilation failure
-    dnl Prefer __apple_build_version__ (reliable, numeric) when available.
-    dnl The known-good minimum corresponds to 17000404 (see PR discussion).
-    min_apple_build_version=17000404
-    apple_build_version=`echo | $CC -dM -E -x c - 2>/dev/null | sed -n 's/^#define __apple_build_version__ \([0-9][0-9]*\)$/\1/p'`
-
-    AS_IF([test -n "$apple_build_version"], [
-      AC_MSG_CHECKING([Apple clang __apple_build_version__ >= $min_apple_build_version])
-      AS_IF([test "$apple_build_version" -ge "$min_apple_build_version"], [
-        ZEND_CHECK_PRESERVE_NONE
-      ])
-    ], [
-      dnl Not Apple clang (could be Homebrew clang, GCC, etc.) -> keep enabled
-      ZEND_CHECK_PRESERVE_NONE
-    ])
-    ;;
-*)
-    ZEND_CHECK_PRESERVE_NONE
-    ;;
-esac
-
+ZEND_CHECK_PRESERVE_NONE
 ZEND_CHECK_CPUID_COUNT
 
 AC_MSG_CHECKING([whether to enable thread safety])
@@ -500,6 +476,13 @@ AC_DEFUN([ZEND_CHECK_PRESERVE_NONE], [dnl
   AC_CACHE_CHECK([for preserve_none calling convention],
    [php_cv_preserve_none],
    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+
+#ifdef __apple_build_version__
+# if __apple_build_version__ < 17000404
+#  error This version of Apple Clang doesn't support preserve_none
+# endif
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 
