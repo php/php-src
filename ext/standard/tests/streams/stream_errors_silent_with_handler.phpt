@@ -7,14 +7,15 @@ $handler_called = false;
 
 $context = stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
-        'error_handler' => function($wrapper, $stream, $code, $message, $param) use (&$handler_called) {
+        'error_mode' => StreamErrorMode::Silent,
+        'error_handler' => function(StreamError $error) use (&$handler_called) {
             $handler_called = true;
             echo "Handler called\n";
-            echo "Wrapper: $wrapper\n";
-            echo "Code: $code\n";
-            echo "Message: $message\n";
-            echo "Param: " . ($param ?? 'null') . "\n";
+            echo "Wrapper: " . $error->wrapperName . "\n";
+            echo "Code: " . $error->code->name . "\n";
+            echo "Message: " . $error->message . "\n";
+            echo "Param: " . ($error->param ?? 'null') . "\n";
+            echo "Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
         }
     ]
 ]);
@@ -27,7 +28,8 @@ var_dump($handler_called);
 --EXPECT--
 Handler called
 Wrapper: PHP
-Code: 36
+Code: OpenFailed
 Message: Failed to open stream: operation failed
 Param: php://nonexistent
+Terminating: yes
 bool(true)
