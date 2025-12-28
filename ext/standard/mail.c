@@ -21,7 +21,6 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/basic_functions.h"
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
 
