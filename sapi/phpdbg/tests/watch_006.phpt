@@ -38,6 +38,7 @@ New value: 1
 prompt> [Breaking on watchpoint $b]
 Old value: 
 New value (reference): Array ([0] => 1)
+%A
 >00006: $a[0] = 2;
  00007: $a[1] = 3;
  00008: $c = [1];
