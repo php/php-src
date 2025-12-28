@@ -2,434 +2,65 @@
 
 /** @generate-class-entries static */
 
-class StreamException extends Exception
+enum StreamErrorCode: int
 {
-    protected ?string $wrapperName = null;
-    protected ?string $param = null;
+    // Error code cases registered in code
 
-    public function getParam(): ?string {}
-    public function getWrapperName(): ?string {}
+    public function isIoError(): bool {}
+    
+    public function isFileSystemError(): bool {}
+    
+    public function isWrapperError(): bool {}
+    
+    public function isFilterError(): bool {}
+    
+    public function isCastError(): bool {}
+    
+    public function isNetworkError(): bool {}
+    
+    public function isEncodingError(): bool {}
+    
+    public function isResourceError(): bool {}
+    
+    public function isLockError(): bool {}
+    
+    public function isUserspaceError(): bool {}
 }
 
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_MODE_ERROR
- */
-const STREAM_ERROR_MODE_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_MODE_EXCEPTION
- */
-const STREAM_ERROR_MODE_EXCEPTION = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_MODE_SILENT
- */
-const STREAM_ERROR_MODE_SILENT = UNKNOWN;
+enum StreamErrorMode
+{
+    case Error;
+    case Exception;
+    case Silent;
+}
 
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_STORE_AUTO
- */
-const STREAM_ERROR_STORE_AUTO = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_STORE_NONE
- */
-const STREAM_ERROR_STORE_NONE = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_STORE_NON_TERM
- */
-const STREAM_ERROR_STORE_NON_TERMINAL = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_STORE_TERMINAL
- */
-const STREAM_ERROR_STORE_TERMINAL = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_STREAM_ERROR_STORE_ALL
- */
-const STREAM_ERROR_STORE_ALL = UNKNOWN;
+enum StreamErrorStore
+{
+    case Auto;
+    case None;
+    case NonTerminal;
+    case Terminal;
+    case All;
+}
 
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NONE
- */
-const STREAM_ERROR_CODE_NONE = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_GENERIC
- */
-const STREAM_ERROR_CODE_GENERIC = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_READ_FAILED
- */
-const STREAM_ERROR_CODE_READ_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRITE_FAILED
- */
-const STREAM_ERROR_CODE_WRITE_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_SEEK_FAILED
- */
-const STREAM_ERROR_CODE_SEEK_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_FLUSH_FAILED
- */
-const STREAM_ERROR_CODE_FLUSH_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_TRUNCATE_FAILED
- */
-const STREAM_ERROR_CODE_TRUNCATE_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CONNECT_FAILED
- */
-const STREAM_ERROR_CODE_CONNECT_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_BIND_FAILED
- */
-const STREAM_ERROR_CODE_BIND_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_LISTEN_FAILED
- */
-const STREAM_ERROR_CODE_LISTEN_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NOT_WRITABLE
- */
-const STREAM_ERROR_CODE_NOT_WRITABLE = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NOT_READABLE
- */
-const STREAM_ERROR_CODE_NOT_READABLE = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_DISABLED
- */
-const STREAM_ERROR_CODE_DISABLED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NOT_FOUND
- */
-const STREAM_ERROR_CODE_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_PERMISSION_DENIED
- */
-const STREAM_ERROR_CODE_PERMISSION_DENIED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_ALREADY_EXISTS
- */
-const STREAM_ERROR_CODE_ALREADY_EXISTS = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_PATH
- */
-const STREAM_ERROR_CODE_INVALID_PATH = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_PATH_TOO_LONG
- */
-const STREAM_ERROR_CODE_PATH_TOO_LONG = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CREATE_FAILED
- */
-const STREAM_ERROR_CODE_CREATE_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_DUP_FAILED
- */
-const STREAM_ERROR_CODE_DUP_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_OPEN_FAILED
- */
-const STREAM_ERROR_CODE_OPEN_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_UNLINK_FAILED
- */
-const STREAM_ERROR_CODE_UNLINK_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_RENAME_FAILED
- */
-const STREAM_ERROR_CODE_RENAME_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_MKDIR_FAILED
- */
-const STREAM_ERROR_CODE_MKDIR_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_RMDIR_FAILED
- */
-const STREAM_ERROR_CODE_RMDIR_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_STAT_FAILED
- */
-const STREAM_ERROR_CODE_STAT_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_META_FAILED
- */
-const STREAM_ERROR_CODE_META_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CHMOD_FAILED
- */
-const STREAM_ERROR_CODE_CHMOD_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CHOWN_FAILED
- */
-const STREAM_ERROR_CODE_CHOWN_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_COPY_FAILED
- */
-const STREAM_ERROR_CODE_COPY_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_TOUCH_FAILED
- */
-const STREAM_ERROR_CODE_TOUCH_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_MODE
- */
-const STREAM_ERROR_CODE_INVALID_MODE = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_META
- */
-const STREAM_ERROR_CODE_INVALID_META = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_MODE_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_MODE_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_READONLY
- */
-const STREAM_ERROR_CODE_READONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_RECURSION_DETECTED
- */
-const STREAM_ERROR_CODE_RECURSION_DETECTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NOT_IMPLEMENTED
- */
-const STREAM_ERROR_CODE_NOT_IMPLEMENTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NO_OPENER
- */
-const STREAM_ERROR_CODE_NO_OPENER = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRAPPER_NOT_FOUND
- */
-const STREAM_ERROR_CODE_WRAPPER_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRAPPER_DISABLED
- */
-const STREAM_ERROR_CODE_WRAPPER_DISABLED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED
- */
-const STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED
- */
-const STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED
- */
-const STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED
- */
-const STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_FILTER_NOT_FOUND
- */
-const STREAM_ERROR_CODE_FILTER_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_FILTER_FAILED
- */
-const STREAM_ERROR_CODE_FILTER_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CAST_FAILED
- */
-const STREAM_ERROR_CODE_CAST_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_CAST_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_CAST_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_MAKE_SEEKABLE_FAILED
- */
-const STREAM_ERROR_CODE_MAKE_SEEKABLE_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_BUFFERED_DATA_LOST
- */
-const STREAM_ERROR_CODE_BUFFERED_DATA_LOST = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NETWORK_SEND_FAILED
- */
-const STREAM_ERROR_CODE_NETWORK_SEND_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_NETWORK_RECV_FAILED
- */
-const STREAM_ERROR_CODE_NETWORK_RECV_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_SSL_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_SSL_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_RESUMPTION_FAILED
- */
-const STREAM_ERROR_CODE_RESUMPTION_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG
- */
-const STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_OOB_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_OOB_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_PROTOCOL_ERROR
- */
-const STREAM_ERROR_CODE_PROTOCOL_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_URL
- */
-const STREAM_ERROR_CODE_INVALID_URL = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_RESPONSE
- */
-const STREAM_ERROR_CODE_INVALID_RESPONSE = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_HEADER
- */
-const STREAM_ERROR_CODE_INVALID_HEADER = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_PARAM
- */
-const STREAM_ERROR_CODE_INVALID_PARAM = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_REDIRECT_LIMIT
- */
-const STREAM_ERROR_CODE_REDIRECT_LIMIT = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_AUTH_FAILED
- */
-const STREAM_ERROR_CODE_AUTH_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_ARCHIVING_FAILED
- */
-const STREAM_ERROR_CODE_ARCHIVING_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_ENCODING_FAILED
- */
-const STREAM_ERROR_CODE_ENCODING_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_DECODING_FAILED
- */
-const STREAM_ERROR_CODE_DECODING_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_INVALID_FORMAT
- */
-const STREAM_ERROR_CODE_INVALID_FORMAT = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_ALLOCATION_FAILED
- */
-const STREAM_ERROR_CODE_ALLOCATION_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED
- */
-const STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_LOCK_FAILED
- */
-const STREAM_ERROR_CODE_LOCK_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_LOCK_NOT_SUPPORTED
- */
-const STREAM_ERROR_CODE_LOCK_NOT_SUPPORTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_USERSPACE_NOT_IMPLEMENTED
- */
-const STREAM_ERROR_CODE_USERSPACE_NOT_IMPLEMENTED = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN
- */
-const STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN = UNKNOWN;
-/**
- * @var int
- * @cvalue STREAM_ERROR_CODE_USERSPACE_CALL_FAILED
- */
-const STREAM_ERROR_CODE_USERSPACE_CALL_FAILED = UNKNOWN;
+final readonly class StreamError
+{
+    public StreamErrorCode $code;
+    public string $message;
+    public string $wrapperName;
+    public int $severity;
+    public bool $terminating;
+    public ?string $param;
+    public ?StreamError $next;
+
+    public function hasCode(StreamErrorCode $code): bool {}
+
+    public function count(): int {}
+}
+
+class StreamException extends Exception
+{
+    private ?StreamError $error = null;
+
+    public function getError(): ?StreamError {}
+}

@@ -5,7 +5,7 @@ Stream errors - error mode with standard error reporting
 
 $context = stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_ERROR,
+        'error_mode' => StreamErrorMode::Error,
     ]
 ]);
 

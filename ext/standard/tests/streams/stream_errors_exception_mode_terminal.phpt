@@ -5,7 +5,7 @@ Stream errors - exception mode for terminal errors
 
 $context = stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_EXCEPTION,
+        'error_mode' => StreamErrorMode::Exception,
     ]
 ]);
 
@@ -14,7 +14,12 @@ try {
 } catch (StreamException $e) {
     echo "Caught: " . $e->getMessage() . "\n";
     echo "Code: " . $e->getCode() . "\n";
-    echo "Wrapper: " . $e->getWrapperName() . "\n";
+    
+    $error = $e->getError();
+    if ($error) {
+        echo "Wrapper: " . $error->wrapperName . "\n";
+        echo "Error code name: " . $error->code->name . "\n";
+    }
 }
 
 ?>
@@ -22,3 +27,4 @@ try {
 Caught: Failed to open stream: operation failed
 Code: 36
 Wrapper: PHP
+Error code name: OpenFailed

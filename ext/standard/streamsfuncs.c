@@ -594,102 +594,25 @@ PHP_FUNCTION(stream_get_wrappers)
 }
 /* }}} */
 
-/* Helper function to convert error list to array */
-static void php_stream_errors_list_to_array(zend_llist *list, zval *return_value)
+/* Retrieves the last stored stream error */
+PHP_FUNCTION(stream_get_last_error)
 {
-	php_stream_error_entry **err_entry_p;
-	zend_llist_position pos;
-
-	for (err_entry_p = zend_llist_get_first_ex(list, &pos);
-			err_entry_p;
-			err_entry_p = zend_llist_get_next_ex(list, &pos)) {
-		php_stream_error_entry *entry = *err_entry_p;
-		zval error_array;
-		array_init(&error_array);
-
-		add_assoc_str(&error_array, "message", zend_string_copy(entry->message));
-		add_assoc_long(&error_array, "code", entry->code);
-		add_assoc_long(&error_array, "severity", entry->severity);
-		add_assoc_bool(&error_array, "terminal", entry->terminal);
-
-		if (entry->wrapper_name) {
-			add_assoc_string(&error_array, "wrapper", entry->wrapper_name);
-		}
-		if (entry->param) {
-			add_assoc_string(&error_array, "param", entry->param);
-		}
-		if (entry->docref) {
-			add_assoc_string(&error_array, "docref", entry->docref);
-		}
-
-		add_next_index_zval(return_value, &error_array);
-	}
-}
-
-/* Retrieves list of stored stream errors */
-PHP_FUNCTION(stream_get_errors)
-{
-	zval *subject = NULL;
-	php_stream *stream = NULL;
-	char *wrapper_name = NULL;
-	size_t wrapper_name_len = 0;
-	bool get_all_wrappers = false;
-
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(subject)
-	ZEND_PARSE_PARAMETERS_END();
-
-	/* Determine what we're querying for */
-	if (subject == NULL) {
-		/* No parameter - get all wrapper errors */
-		get_all_wrappers = true;
-	} else if (Z_TYPE_P(subject) == IS_RESOURCE) {
-		/* Stream resource - get errors for this stream */
-		php_stream_from_zval_no_verify(stream, subject);
-		if (stream == NULL) {
-			zend_argument_type_error(1, "must be a valid stream resource");
-			RETURN_THROWS();
-		}
-	} else if (Z_TYPE_P(subject) == IS_STRING) {
-		/* Wrapper name - get errors for this wrapper */
-		wrapper_name = Z_STRVAL_P(subject);
-		wrapper_name_len = Z_STRLEN_P(subject);
-	} else {
-		zend_argument_type_error(1, "must be a stream resource, string, or null");
-		RETURN_THROWS();
-	}
-
-	array_init(return_value);
-
-	/* Handle stream errors */
-	if (stream) {
-		if (stream->error_list) {
-			php_stream_errors_list_to_array(stream->error_list, return_value);
-		}
-	} else if (get_all_wrappers) {
-		/* Get errors from all wrappers */
-		if (FG(wrapper_stored_errors)) {
-			zend_string *key;
-			zval *val;
-			ZEND_HASH_FOREACH_STR_KEY_VAL(FG(wrapper_stored_errors), key, val) {
-				if (key) {
-					zend_llist *list = (zend_llist *) Z_PTR_P(val);
-					php_stream_errors_list_to_array(list, return_value);
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-	} else if (wrapper_name) {
-		/* Get errors for specific wrapper */
-		if (FG(wrapper_stored_errors)) {
-			zend_llist *list = zend_hash_str_find_ptr(
-					FG(wrapper_stored_errors), wrapper_name, wrapper_name_len);
-
-			if (list) {
-				php_stream_errors_list_to_array(list, return_value);
-			}
-		}
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
+    
+    /* Check if we have any stored errors */
+    if (!FG(stream_error_state).stored_errors) {
+        RETURN_NULL();
+    }
+    
+    /* Get the most recent stored error (head of list) */
+    php_stream_stored_error *stored = FG(stream_error_state).stored_errors;
+    
+    if (!stored->first_error) {
+        RETURN_NULL();
+    }
+    
+    /* Create StreamError object from the error chain */
+    php_stream_error_create_object(return_value, stored->first_error);
 }
 
 /* {{{ stream_select related functions */

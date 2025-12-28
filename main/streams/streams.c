@@ -1754,11 +1754,7 @@ void php_shutdown_stream_hashes(void)
 		FG(wrapper_logged_errors) = NULL;
 	}
 
-	if (FG(wrapper_stored_errors)) {
-		zend_hash_destroy(FG(wrapper_stored_errors));
-		efree(FG(wrapper_stored_errors));
-		FG(wrapper_stored_errors) = NULL;
-	}
+	php_stream_error_state_cleanup();
 }
 
 zend_result php_init_stream_wrappers(int module_number)
