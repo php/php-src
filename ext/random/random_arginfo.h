@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 416be19494555016195600e488d79f0dd35f2620 */
+ * Stub hash: 95f5c75800cabd2b39d5f7dc4ba65eb3046d62e4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -11,12 +11,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_srand arginfo_mt_srand
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_rand, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mt_rand arginfo_rand
+#define arginfo_rand arginfo_mt_rand
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_getrandmax, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -126,8 +126,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(lcg_value);
 ZEND_FUNCTION(mt_srand);
-ZEND_FUNCTION(rand);
 ZEND_FUNCTION(mt_rand);
+ZEND_FUNCTION(rand);
 ZEND_FUNCTION(mt_getrandmax);
 ZEND_FUNCTION(random_bytes);
 ZEND_FUNCTION(random_int);
@@ -158,8 +158,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("lcg_value", zif_lcg_value, arginfo_lcg_value, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mt_srand, arginfo_mt_srand)
 	ZEND_RAW_FENTRY("srand", zif_mt_srand, arginfo_srand, 0, NULL, NULL)
-	ZEND_FE(rand, arginfo_rand)
 	ZEND_FE(mt_rand, arginfo_mt_rand)
+	ZEND_FE(rand, arginfo_rand)
 	ZEND_RAW_FENTRY("mt_getrandmax", zif_mt_getrandmax, arginfo_mt_getrandmax, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("getrandmax", zif_mt_getrandmax, arginfo_getrandmax, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(random_bytes, arginfo_random_bytes)
