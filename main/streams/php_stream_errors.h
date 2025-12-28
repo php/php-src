@@ -35,7 +35,9 @@ BEGIN_EXTERN_C()
 #define PHP_STREAM_ERROR_STORE_ALL 4
 
 /* Maximum operation nesting depth */
-#define PHP_STREAM_ERROR_MAX_DEPTH 100
+#define PHP_STREAM_ERROR_MAX_DEPTH 1000
+/* Operations pool size to prevent extra allocations */
+#define PHP_STREAM_ERROR_OPERATION_POOL_SIZE 8
 
 /* Error code ranges */
 #define STREAM_ERROR_CODE_IO_START 10
@@ -194,11 +196,18 @@ typedef struct {
 	/* List of completed/stored operations (most recent first) */
 	php_stream_stored_error *stored_errors;
 	uint32_t stored_count;
+	/* Pre-allocated operation pool */
+	php_stream_error_operation operation_pool[PHP_STREAM_ERROR_OPERATION_POOL_SIZE];
+	/* Overflow operations (for deep nesting beyond pool size) */
+	php_stream_error_operation *overflow_operations;
+	uint32_t overflow_capacity;
 } php_stream_error_state;
 
 /* Error operation management */
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(php_stream_context *context);
 PHPAPI void php_stream_error_operation_end(php_stream_context *context);
+PHPAPI php_stream_error_operation *php_stream_error_operation_begin_for_stream(php_stream *stream);
+PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream);
 PHPAPI void php_stream_error_operation_abort(void);
 
 /* State cleanup function */
