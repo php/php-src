@@ -204,9 +204,8 @@ typedef struct {
 } php_stream_error_state;
 
 /* Error operation management */
-PHPAPI php_stream_error_operation *php_stream_error_operation_begin(php_stream_context *context);
+PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void);
 PHPAPI void php_stream_error_operation_end(php_stream_context *context);
-PHPAPI php_stream_error_operation *php_stream_error_operation_begin_for_stream(php_stream *stream);
 PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream);
 PHPAPI void php_stream_error_operation_abort(void);
 

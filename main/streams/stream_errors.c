@@ -197,7 +197,7 @@ PHPAPI void php_stream_error_state_cleanup(void)
 }
 /* Error operation stack management */
 
-PHPAPI php_stream_error_operation *php_stream_error_operation_begin(php_stream_context *context)
+PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
 
@@ -242,12 +242,6 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(php_stream_c
 	state->operation_depth++;
 
 	return op;
-}
-
-PHPAPI php_stream_error_operation *php_stream_error_operation_begin_for_stream(php_stream *stream)
-{
-	/* Don't fetch context yet - will be fetched in _end_for_stream if needed */
-	return php_stream_error_operation_begin(NULL);
 }
 
 static void php_stream_error_add(StreamErrorCode code, const char *wrapper_name,
