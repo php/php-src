@@ -20,6 +20,6 @@
 PHP_MINFO_FUNCTION(mail);
 
 PHPAPI zend_string *php_mail_build_headers(const HashTable *headers);
-PHPAPI extern bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd);
+PHPAPI extern bool php_mail(const char *to, const char *subject, const zend_string *message, const zend_string *headers, const zend_string *extra_cmd);
 
 #endif /* PHP_MAIL_H */
