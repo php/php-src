@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #69344 (PDO PgSQL Incorrect binding numeric array with gaps)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -5,12 +5,11 @@ PHP_ARG_WITH([gettext],
 
 if test "$PHP_GETTEXT" != "no"; then
   for i in $PHP_GETTEXT /usr/local /usr; do
-    test -r $i/include/libintl.h && GETTEXT_DIR=$i && break
+    AS_IF([test -r $i/include/libintl.h], [GETTEXT_DIR=$i; break;])
   done
 
-  if test -z "$GETTEXT_DIR"; then
-    AC_MSG_ERROR([Cannot locate header file libintl.h])
-  fi
+  AS_VAR_IF([GETTEXT_DIR],,
+    [AC_MSG_ERROR([Cannot locate header file libintl.h])])
 
   GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
   GETTEXT_INCDIR=$GETTEXT_DIR/include
@@ -24,6 +23,18 @@ if test "$PHP_GETTEXT" != "no"; then
     [AC_CHECK_LIB([c], [bindtextdomain], [
       GETTEXT_LIBS=
       GETTEXT_CHECK_IN_LIB=c
+
+      dnl If libintl.h is provided by libc, it's possible that libc is musl.
+      dnl The gettext family of functions under musl ignores the codeset
+      dnl suffix on directories like "en_US.UTF-8"; instead they look only
+      dnl in "en_US". To accommodate that, we symlink some test data from one
+      dnl to the other.
+      AC_MSG_NOTICE([symlinking en_US.UTF-8 messages to en_US in case you are on musl])
+      _linkdest="${srcdir%/}"/ext/gettext/tests/locale/en_US
+      AS_IF([test ! -e "${_linkdest}"],[
+        ln -s en_US.UTF-8 "${_linkdest}"
+      ])
+
       ],
       [AC_MSG_FAILURE([Unable to find required intl library for gettext.])])])
 
@@ -47,9 +58,8 @@ if test "$PHP_GETTEXT" != "no"; then
       [Define to 1 if you have the 'bind_textdomain_codeset' function.])])
   LDFLAGS=$O_LDFLAGS
 
-  if test -n "$GETTEXT_LIBS"; then
-    PHP_ADD_LIBRARY_WITH_PATH([$GETTEXT_LIBS],
+  AS_VAR_IF([GETTEXT_LIBS],,,
+    [PHP_ADD_LIBRARY_WITH_PATH([$GETTEXT_LIBS],
       [$GETTEXT_LIBDIR],
-      [GETTEXT_SHARED_LIBADD])
-  fi
+      [GETTEXT_SHARED_LIBADD])])
 fi

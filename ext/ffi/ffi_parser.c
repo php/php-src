@@ -2472,14 +2472,16 @@ _yy_state_2:
 
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 	zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;
+	zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;
 	sym = parse_specifier_qualifier_list(sym, &common_field_dcl);
+	base_field_dcl = common_field_dcl;
 	if (sym == YY__SEMICOLON || sym == YY__RBRACE) {
 		zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);
 	} else if (sym == YY__STAR || sym == YY_ID || sym == YY__LPAREN || sym == YY__COLON) {
 		sym = parse_struct_declarator(sym, struct_dcl, &common_field_dcl);
 		while (sym == YY__COMMA) {
 			sym = get_sym();
-			zend_ffi_dcl field_dcl = common_field_dcl;
+			zend_ffi_dcl field_dcl = base_field_dcl;
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &field_dcl);
 			}
@@ -2632,7 +2634,7 @@ static int parse_enumerator(int sym, zend_ffi_dcl *enum_dcl, int64_t *min, int64
 
 static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2648,7 +2650,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	} else {
 		yy_error_sym("unexpected", sym);
 	}
@@ -2661,7 +2663,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 
 static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2675,7 +2677,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	}
 	if (sym == YY__LBRACK || sym == YY__LPAREN) {
 		sym = parse_array_or_function_declarators(sym, dcl, &nested_dcl);
@@ -2686,7 +2688,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 
 static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2700,7 +2702,7 @@ static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **n
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	} else if (sym == YY_ID) {
 		sym = parse_ID(sym, name, name_len);
 	} else if (sym == YY__LBRACK || sym == YY__LPAREN || sym == YY__RPAREN || sym == YY__COMMA) {

@@ -346,7 +346,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	size_t new_vlen;
 
 	if (var->ptr >= var->end) {
-		return 0;
+		return false;
 	}
 
 	start = var->ptr + var->already_scanned;
@@ -354,7 +354,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	if (!vsep) {
 		if (!eof) {
 			var->already_scanned = var->end - var->ptr;
-			return 0;
+			return false;
 		} else {
 			vsep = var->end;
 		}
@@ -387,10 +387,10 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 
 	var->ptr = vsep + (vsep != var->end);
 	var->already_scanned = 0;
-	return 1;
+	return true;
 }
 
-static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
+static inline zend_result add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
 	uint64_t max_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 
@@ -527,7 +527,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = PG(arg_separator).input;
+			separator = ZSTR_VAL(PG(arg_separator).input);
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";
@@ -745,7 +745,7 @@ static inline void php_register_server_variables(void)
 	/* store request init time */
 	ZVAL_DOUBLE(&tmp, sapi_get_request_time());
 	php_register_variable_quick("REQUEST_TIME_FLOAT", sizeof("REQUEST_TIME_FLOAT")-1, &tmp, ht);
-	ZVAL_LONG(&tmp, zend_dval_to_lval(Z_DVAL(tmp)));
+	ZVAL_LONG(&tmp, zend_dval_to_lval_silent(Z_DVAL(tmp)));
 	php_register_variable_quick("REQUEST_TIME", sizeof("REQUEST_TIME")-1, &tmp, ht);
 }
 /* }}} */
@@ -782,13 +782,16 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 /* }}} */
 
 /* {{{ php_hash_environment */
-PHPAPI int php_hash_environment(void)
+PHPAPI zend_result php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
+	/* Register $argc and $argv for CLI SAPIs. $_SERVER['argc'] and $_SERVER['argv']
+	 * will be registered in php_auto_globals_create_server() which clears
+	 * PG(http_globals)[TRACK_VARS_SERVER] anyways, making registration at this point
+	 * useless.
+	 */
+	php_build_argv(NULL, NULL);
 	zend_activate_auto_globals();
-	if (PG(register_argc_argv)) {
-		php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
-	}
 	return SUCCESS;
 }
 /* }}} */
@@ -805,7 +808,7 @@ static bool php_auto_globals_create_get(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_GET]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_GET]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_post(zend_string *name)
@@ -824,7 +827,7 @@ static bool php_auto_globals_create_post(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_POST]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_POST]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_cookie(zend_string *name)
@@ -839,7 +842,7 @@ static bool php_auto_globals_create_cookie(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_COOKIE]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_COOKIE]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_files(zend_string *name)
@@ -851,7 +854,7 @@ static bool php_auto_globals_create_files(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_FILES]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 /* Ugly hack to fix HTTP_PROXY issue, see bug #72573 */
@@ -875,24 +878,24 @@ static bool php_auto_globals_create_server(zend_string *name)
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables();
 
-		if (PG(register_argc_argv)) {
-			if (SG(request_info).argc) {
-				zval *argc, *argv;
+		if (SG(request_info).argc) {
+			zval *argc, *argv;
 
-				if ((argc = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGC), 1)) != NULL &&
-					(argv = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL) {
-					Z_ADDREF_P(argv);
-					zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), argv);
-					zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGC), argc);
-				}
-			} else {
-				php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
+			if ((argc = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGC), 1)) != NULL &&
+				(argv = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL) {
+				Z_ADDREF_P(argv);
+				zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), argv);
+				zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGC), argc);
 			}
+		} else if (PG(register_argc_argv)) {
+			zend_error(E_DEPRECATED, "Deriving $_SERVER['argv'] from the query string is deprecated. Configure register_argc_argv=0 to turn this message off");
+			php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
 		}
 
 	} else {
 		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_SERVER]);
 		array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_hash_real_init_mixed(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	}
 
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
@@ -904,7 +907,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 	 * ignore this issue, as it would probably require larger changes. */
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_env(zend_string *name)
@@ -920,7 +923,7 @@ static bool php_auto_globals_create_env(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_ENV]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_request(zend_string *name)
@@ -964,7 +967,7 @@ static bool php_auto_globals_create_request(zend_string *name)
 	}
 
 	zend_hash_update(&EG(symbol_table), name, &form_variables);
-	return 0;
+	return false;
 }
 
 void php_startup_auto_globals(void)
@@ -972,7 +975,7 @@ void php_startup_auto_globals(void)
 	zend_register_auto_global(zend_string_init_interned("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
 	zend_register_auto_global(zend_string_init_interned("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
 	zend_register_auto_global(zend_string_init_interned("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
-	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER), PG(auto_globals_jit), php_auto_globals_create_server);
+	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER), PG(auto_globals_jit) && (SG(request_info).argc || !PG(register_argc_argv)), php_auto_globals_create_server);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV), PG(auto_globals_jit), php_auto_globals_create_env);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST), PG(auto_globals_jit), php_auto_globals_create_request);
 	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);

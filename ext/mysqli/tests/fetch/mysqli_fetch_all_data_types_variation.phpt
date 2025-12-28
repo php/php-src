@@ -4,6 +4,9 @@ mysqli_fetch_all() data types variation
 mysqli
 --SKIPIF--
 <?php
+if (getenv('GITHUB_ACTIONS') && str_starts_with(php_uname('m'), 'ppc')) {
+    die('skip Flaky on GitHub Actions PPC runner');
+}
 require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 mysqli_check_skip_test();
 ?>
@@ -43,8 +46,6 @@ function func_mysqli_fetch_all(
     $result = mysqli_query($link, "SELECT id, label FROM test_mysqli_fetch_all_data_types_variation");
     $tmp = mysqli_fetch_all($result, MYSQLI_BOTH);
     $row = $tmp[0];
-
-    $fields = mysqli_fetch_fields($result);
 
     if ($regexp_comparison) {
         if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
@@ -124,22 +125,27 @@ func_mysqli_fetch_all($link, $engine, "DECIMAL(10,2)", "99999999.99", "99999999.
 func_mysqli_fetch_all($link, $engine, "DECIMAL(10,2)", NULL, NULL, 400);
 
 // don't care about date() strict TZ warnings...
-func_mysqli_fetch_all($link, $engine, "DATE", @date('Y-m-d'), @date('Y-m-d'), 410);
-func_mysqli_fetch_all($link, $engine, "DATE NOT NULL", @date('Y-m-d'), @date('Y-m-d'), 420);
+$date = @date('Y-m-d');
+$datetime = @date('Y-m-d H:i:s');
+$time = @date('H:i:s');
+$year = @date('Y');
+
+func_mysqli_fetch_all($link, $engine, "DATE", $date, $date, 410);
+func_mysqli_fetch_all($link, $engine, "DATE NOT NULL", $date, $date, 420);
 func_mysqli_fetch_all($link, $engine, "DATE", NULL, NULL, 430);
 
-func_mysqli_fetch_all($link, $engine, "DATETIME", @date('Y-m-d H:i:s'), @date('Y-m-d H:i:s'), 440);
-func_mysqli_fetch_all($link, $engine, "DATETIME NOT NULL", @date('Y-m-d H:i:s'), @date('Y-m-d H:i:s'), 450);
+func_mysqli_fetch_all($link, $engine, "DATETIME", $datetime, $datetime, 440);
+func_mysqli_fetch_all($link, $engine, "DATETIME NOT NULL", $datetime, $datetime, 450);
 func_mysqli_fetch_all($link, $engine, "DATETIME", NULL, NULL, 460);
 
-func_mysqli_fetch_all($link, $engine, "TIMESTAMP", @date('Y-m-d H:i:s'), @date('Y-m-d H:i:s'), 470);
+func_mysqli_fetch_all($link, $engine, "TIMESTAMP", $datetime, $datetime, 470);
 
-func_mysqli_fetch_all($link, $engine, "TIME", @date('H:i:s'), @date('H:i:s'), 480);
-func_mysqli_fetch_all($link, $engine, "TIME NOT NULL", @date('H:i:s'), @date('H:i:s'), 490);
+func_mysqli_fetch_all($link, $engine, "TIME", $time, $time, 480);
+func_mysqli_fetch_all($link, $engine, "TIME NOT NULL", $time, $time, 490);
 func_mysqli_fetch_all($link, $engine, "TIME", NULL, NULL, 500);
 
-func_mysqli_fetch_all($link, $engine, "YEAR", @date('Y'), @date('Y'), 510);
-func_mysqli_fetch_all($link, $engine, "YEAR NOT NULL", @date('Y'), @date('Y'), 520);
+func_mysqli_fetch_all($link, $engine, "YEAR", $year, $year, 510);
+func_mysqli_fetch_all($link, $engine, "YEAR NOT NULL", $year, $year, 520);
 func_mysqli_fetch_all($link, $engine, "YEAR", NULL, NULL, 530);
 
 $string255 = func_mysqli_fetch_array_make_string(255);

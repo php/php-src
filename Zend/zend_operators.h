@@ -28,7 +28,20 @@
 #include <stdint.h>
 
 #ifdef HAVE_IEEEFP_H
-#include <ieeefp.h>
+/**
+ * On FreeBSD with ubsan/clang we get the following:
+ * `/usr/include/machine/ieeefp.h:161:17: runtime error: left shift of negative value -1`
+ * `SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/include/machine/ieeefp.h:161:17`
+ * ...
+ * `_newcw |= (~_m << FP_MSKS_OFF) & FP_MSKS_FLD;`
+**/
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute push (__attribute__((no_sanitize("undefined"))), apply_to=function)
+# endif
+# include <ieeefp.h>
+# if __has_feature(undefined_behavior_sanitizer) && defined(__FreeBSD__) && defined(__clang__)
+#  pragma clang attribute pop
+# endif
 #endif
 
 #include "zend_portability.h"
@@ -102,11 +115,29 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #endif
 
+ZEND_API void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d);
+ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type);
+
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
-	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+	if (UNEXPECTED(!zend_finite(d))) {
+		zend_oob_double_to_long_error(d);
+		return 0;
+	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
+		zend_oob_double_to_long_error(d);
+		return zend_dval_to_lval_slow(d);
+	}
+	return (zend_long)d;
+}
+
+static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
+{
+	if (UNEXPECTED(!zend_finite(d))) {
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		return zend_dval_to_lval_slow(d);
@@ -115,11 +146,13 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 }
 
 /* Used to convert a string float to integer during an (int) cast */
-static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
+static zend_always_inline zend_long zend_dval_to_lval_cap(double d, const zend_string *s)
 {
-	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+	if (UNEXPECTED(!zend_finite(d))) {
+		zend_oob_string_to_long_error(s);
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
+		zend_oob_string_to_long_error(s);
 		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
 	}
 	return (zend_long)d;
@@ -130,20 +163,16 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return (double)l == d;
 }
 
-ZEND_API void zend_incompatible_double_to_long_error(double d);
-ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
-
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
 	zend_long l = zend_dval_to_lval(d);
-	if (!zend_is_long_compatible(d, l)) {
+	if (!zend_is_long_compatible(d, l) && ZEND_DOUBLE_FITS_LONG(d)) {
 		zend_incompatible_double_to_long_error(d);
 	}
 	return l;
 }
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
-#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
 static zend_always_inline uint8_t is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data)
@@ -203,7 +232,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-#if defined(HAVE_MEMRCHR) && !defined(i386)
+#if defined(HAVE_MEMRCHR) && !defined(__i386__)
 	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */
 	return (const void*)memrchr(s, c, n);
 #else
@@ -361,22 +390,11 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 	return _try_convert_to_string(op);
 }
 
-/* Compatibility macros for 7.2 and below */
-#define _zval_get_long(op) zval_get_long(op)
-#define _zval_get_double(op) zval_get_double(op)
-#define _zval_get_string(op) zval_get_string(op)
-#define _zval_get_long_func(op) zval_get_long_func(op)
-#define _zval_get_double_func(op) zval_get_double_func(op)
-#define _zval_get_string_func(op) zval_get_string_func(op)
-
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
 ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op);
 ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op);
-
-#define zval_is_true(op) \
-	zend_is_true(op)
 
 static zend_always_inline bool i_zend_is_true(const zval *op)
 {
@@ -393,6 +411,9 @@ again:
 			}
 			break;
 		case IS_DOUBLE:
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(_IS_BOOL);
+			}
 			if (Z_DVAL_P(op)) {
 				result = 1;
 			}
@@ -484,10 +505,10 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-/** Deprecatd in favor of ZEND_STRTOL() */
+/** Deprecated in favor of ZEND_STRTOL() */
 ZEND_ATTRIBUTE_DEPRECATED ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
 
-/** Deprecatd in favor of ZEND_STRTOL() */
+/** Deprecated in favor of ZEND_STRTOL() */
 ZEND_ATTRIBUTE_DEPRECATED ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 #define convert_to_null_ex(zv) convert_to_null(zv)
@@ -566,6 +587,22 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		Z_LVAL_P(op1) = llresult;
 	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongAdd(Z_LVAL_P(op1), 1, &lresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongAdd(Z_LVAL_P(op1), 1, &llresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -624,6 +661,22 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #elif defined(PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 	long long llresult;
 	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), 1, &lresult)))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), 1, &llresult)))) {
 		/* switch to double */
 		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 	} else {
@@ -711,6 +764,20 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongAdd(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongAdd(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
 #else
 	/*
 	 * 'result' may alias with op1 or op2, so we need to
@@ -718,11 +785,13 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	 * have read the values of op1 and op2.
 	 */
 
+	zend_long sum = (zend_long) ((zend_ulong) Z_LVAL_P(op1) + (zend_ulong) Z_LVAL_P(op2));
+
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (sum & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 	} else {
-		ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
+		ZVAL_LONG(result, sum);
 	}
 #endif
 }
@@ -799,12 +868,34 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	} else {
 		ZVAL_LONG(result, llresult);
 	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(FAILED(LongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(FAILED(LongLongSub(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult)))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
 #else
-	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
+	/*
+	 * 'result' may alias with op1 or op2, so we need to
+	 * ensure that 'result' is not updated until after we
+	 * have read the values of op1 and op2.
+	 */
+
+	zend_long sub = (zend_long) ((zend_ulong) Z_LVAL_P(op1) - (zend_ulong) Z_LVAL_P(op2));
 
 	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (sub & LONG_SIGN_MASK))) {
 		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, sub);
 	}
 #endif
 }

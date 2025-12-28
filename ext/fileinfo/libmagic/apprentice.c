@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apprentice.c,v 1.342 2023/07/17 14:38:35 christos Exp $")
+FILE_RCSID("@(#)$File: apprentice.c,v 1.355 2024/11/25 22:31:53 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -109,17 +109,17 @@ struct magic_map {
 	uint32_t nmagic[MAGIC_SETS];
 };
 
-int file_formats[FILE_NAMES_SIZE];
-const size_t file_nformats = FILE_NAMES_SIZE;
-const char *file_names[FILE_NAMES_SIZE];
-const size_t file_nnames = FILE_NAMES_SIZE;
+file_private int file_formats[FILE_NAMES_SIZE];
+file_private const size_t file_nformats = FILE_NAMES_SIZE;
+file_protected const char *file_names[FILE_NAMES_SIZE];
+file_protected const size_t file_nnames = FILE_NAMES_SIZE;
 
 file_private int getvalue(struct magic_set *ms, struct magic *, const char **, int);
 file_private int hextoint(int);
 file_private const char *getstr(struct magic_set *, struct magic *, const char *,
     int);
 file_private int parse(struct magic_set *, struct magic_entry *, const char *,
-    size_t, int);
+    const char *, size_t, int);
 file_private void eatsize(const char **);
 file_private int apprentice_1(struct magic_set *, const char *, int);
 file_private ssize_t apprentice_magic_strength_1(const struct magic *);
@@ -342,7 +342,11 @@ get_standard_integer_type(const char *l, const char **t)
 {
 	int type;
 
-	if (isalpha(CAST(unsigned char, l[1]))) {
+	if (l[0] == '\0')
+		return FILE_INVALID;
+	if (l[1] == '\0')
+		return FILE_INVALID;
+	else if (isalpha(CAST(unsigned char, l[1]))) {
 		switch (l[1]) {
 		case 'C':
 			/* "dC" and "uC" */
@@ -489,7 +493,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 	map = apprentice_map(ms, fn);
 	if (map == NULL) {
 		if (ms->flags & MAGIC_CHECK)
-			file_magwarn(NULL, "using regular magic file `%s'", fn);
+			file_magwarn(ms, "using regular magic file `%s'", fn);
 		map = apprentice_load(ms, fn, action);
 		if (map == NULL)
 			return -1;
@@ -530,15 +534,9 @@ file_ms_free(struct magic_set *ms)
 		return;
 	for (i = 0; i < MAGIC_SETS; i++)
 		mlist_free(ms->mlist[i]);
-	if (ms->o.pbuf) {
-		efree(ms->o.pbuf);
-	}
-	if (ms->o.buf) {
-		efree(ms->o.buf);
-	}
-	if (ms->c.li) {
-		efree(ms->c.li);
-	}
+	efree(ms->o.pbuf);
+	efree(ms->o.buf);
+	efree(ms->c.li);
 #ifdef USE_C_LOCALE
 	freelocale(ms->c_lc_ctype);
 #endif
@@ -573,6 +571,7 @@ file_ms_alloc(int flags)
 		ms->mlist[i] = NULL;
 	ms->file = "unknown";
 	ms->line = 0;
+	ms->magwarn = 0;
 	ms->indir_max = FILE_INDIR_MAX;
 	ms->name_max = FILE_NAME_MAX;
 	ms->elf_shnum_max = FILE_ELF_SHNUM_MAX;
@@ -582,6 +581,7 @@ file_ms_alloc(int flags)
 	ms->regex_max = FILE_REGEX_MAX;
 	ms->bytes_max = FILE_BYTES_MAX;
 	ms->encoding_max = FILE_ENCODING_MAX;
+	ms->magwarn_max = FILE_MAGWARN_MAX;
 #ifdef USE_C_LOCALE
 	ms->c_lc_ctype = newlocale(LC_CTYPE_MASK, "C", 0);
 	assert(ms->c_lc_ctype != NULL);
@@ -615,10 +615,7 @@ apprentice_unmap(struct magic_map *map)
 file_private struct mlist *
 mlist_alloc(void)
 {
-	struct mlist *mlist;
-	if ((mlist = CAST(struct mlist *, ecalloc(1, sizeof(*mlist)))) == NULL) {
-		return NULL;
-	}
+	struct mlist *mlist = CAST(struct mlist *, ecalloc(1, sizeof(*mlist)));
 	mlist->next = mlist->prev = mlist;
 	return mlist;
 }
@@ -662,13 +659,13 @@ mlist_free(struct mlist *mlist)
 file_protected int
 file_apprentice(struct magic_set *ms, const char *fn, int action)
 {
-	char *p, *mfn;
+	char *p;
 	int fileerr, errs = -1;
-	size_t i, j;
+	size_t i;
 
 	(void)file_reset(ms, 0);
 
-/* XXX disabling default magic loading so the compiled in data is used */
+	/* XXX disabling default magic loading so the compiled in data is used */
 #if 0
 	if ((fn = magic_getpath(fn, action)) == NULL)
 		return -1;
@@ -676,36 +673,18 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 
 	init_file_tables();
 
+	for (i = 0; i < MAGIC_SETS; i++) {
+		mlist_free(ms->mlist[i]);
+		ms->mlist[i] = mlist_alloc();
+	}
+
 	if (fn == NULL)
 		fn = getenv("MAGIC");
 	if (fn == NULL) {
-		for (i = 0; i < MAGIC_SETS; i++) {
-			mlist_free(ms->mlist[i]);
-			if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-				file_oomem(ms, sizeof(*ms->mlist[i]));
-				return -1;
-			}
-		}
 		return apprentice_1(ms, fn, action);
 	}
 
-	if ((mfn = estrdup(fn)) == NULL) {
-		file_oomem(ms, strlen(fn));
-		return -1;
-	}
-
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-			file_oomem(ms, sizeof(*ms->mlist[0]));
-			for (j = 0; j < i; j++) {
-				mlist_free(ms->mlist[j]);
-				ms->mlist[j] = NULL;
-			}
-			efree(mfn);
-			return -1;
-		}
-	}
+	char *mfn = estrdup(fn); /* modified in loop */
 	fn = mfn;
 
 	while (fn) {
@@ -885,7 +864,7 @@ apprentice_magic_strength_1(const struct magic *m)
 	switch (m->type) {
 	case FILE_DEFAULT:	/* make sure this sorts last */
 		if (m->factor_op != FILE_FACTOR_OP_NONE) {
-			file_magwarn(NULL, "Usupported factor_op in default %d",
+			file_magwarn1("Unsupported factor_op in default %d",
 			    m->factor_op);
 		}
 		return 0;
@@ -1080,12 +1059,27 @@ apprentice_sort(const void *a, const void *b)
 	const struct magic_entry *mb = CAST(const struct magic_entry *, b);
 	size_t sa = file_magic_strength(ma->mp, ma->cont_count);
 	size_t sb = file_magic_strength(mb->mp, mb->cont_count);
-	if (sa == sb)
-		return 0;
-	else if (sa > sb)
-		return -1;
-	else
-		return 1;
+	if (sa == sb) {
+		struct magic mpa = *ma->mp;
+		struct magic mpb = *mb->mp;
+		mpa.lineno = mpb.lineno = 0;
+		int x = memcmp(&mpa, &mpb, sizeof(mpa));
+		if (x == 0) {
+			/* For PHP BC: don't warn */
+#if 0
+			// Don't warn for DER
+			if (mpa.type == FILE_DER)
+				return 0;
+			file_magwarn1("Duplicate magic entry `%s'",
+			    ma->mp->desc);
+			file_mdump(ma->mp);
+			file_mdump(mb->mp);
+#endif
+			return 0;
+		}
+		return x > 0 ? -1 : 1;
+	}
+	return sa > sb ? -1 : 1;
 }
 
 /*
@@ -1279,7 +1273,10 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
 	memset(&me, 0, sizeof(me));
 	/* read and parse this file */
-	for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &len)) != NULL; ms->line++) {
+	for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &len)) != NULL;
+		ms->line++) {
+		if (ms->magwarn >= ms->magwarn_max)
+			break;
 		if (len == 0) /* null line, garbage, etc */
 			continue;
 		if (line[len - 1] == '\n') {
@@ -1324,7 +1321,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 			/*FALLTHROUGH*/
 		default:
 		again:
-			switch (parse(ms, &me, line, lineno, action)) {
+			switch (parse(ms, &me, fn, line, lineno, action)) {
 			case 0:
 				continue;
 			case 1:
@@ -1961,8 +1958,8 @@ out:
  * parse one line from magic file, put into magic[index++] if valid
  */
 file_private int
-parse(struct magic_set *ms, struct magic_entry *me, const char *line,
-    size_t lineno, int action)
+parse(struct magic_set *ms, struct magic_entry *me, const char *file,
+    const char *line, size_t lineno, int action)
 {
 #ifdef ENABLE_CONDITIONALS
 	static uint32_t last_cont_level = 0;
@@ -2323,6 +2320,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 		}
 		break;
 	}
+
 	/*
 	 * Grab the value part, except for an 'x' reln.
 	 */
@@ -2347,8 +2345,12 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 		++l;
 		m->flag |= NOSPACE;
 	}
-	for (i = 0; (m->desc[i++] = *l++) != '\0' && i < sizeof(m->desc); )
+	for (i = 0; i < sizeof(m->desc) && (m->desc[i++] = *l++) != '\0';)
 		continue;
+	if (m->desc[0] == '\0') {
+		// Tuck in the filename for debugging.
+		strlcpy(m->desc + 1, file, sizeof(m->desc) - 1);
+	}
 	if (i == sizeof(m->desc)) {
 		m->desc[sizeof(m->desc) - 1] = '\0';
 		if (ms->flags & MAGIC_CHECK)
@@ -2502,7 +2504,7 @@ parse_apple(struct magic_set *ms, struct magic_entry *me, const char *line,
 {
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, apple)),
-	    sizeof(me->mp[0].apple), "APPLE", "!+-./?", 0);
+	    sizeof(me->mp[me->cont_count - 1].apple), "APPLE", "!+-./?", 0);
 }
 
 /*
@@ -2514,7 +2516,8 @@ parse_ext(struct magic_set *ms, struct magic_entry *me, const char *line,
 {
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, ext)),
-	    sizeof(me->mp[0].ext), "EXTENSION", ",!+-/@?_$&~", 0);
+	    sizeof(me->mp[me->cont_count - 1].ext), "EXTENSION", ",!+-/@?_$&~",
+	    0);
 	    /* & for b&w */
 	    /* ~ for journal~ */
 }
@@ -2529,7 +2532,8 @@ parse_mime(struct magic_set *ms, struct magic_entry *me, const char *line,
 {
 	return parse_extra(ms, me, line, len,
 	    CAST(off_t, offsetof(struct magic, mimetype)),
-	    sizeof(me->mp[0].mimetype), "MIME", "+-/.$?:{}", 1);
+	    sizeof(me->mp[me->cont_count - 1].mimetype), "MIME", "+-/.$?:{};=",
+	    1);
 }
 
 file_private int
@@ -3214,12 +3218,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 	php_stream *stream = NULL;
 	php_stream_statbuf st;
 
-
-
-	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
-		file_oomem(ms, sizeof(*map));
-		return NULL;
-	}
+	map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)));
 
 	if (fn == NULL) {
 		map->p = (void *)&php_magic_database;
@@ -3426,8 +3425,8 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 
 	/* Did not find .mgc, restore q */
 	if (p >= ext)
-		while (*q)
-			q++;
+		for (q = fn; *q; q++)
+			continue;
 
 	q++;
 	/* Compatibility with old code that looked in .mime */

@@ -34,6 +34,21 @@ const PHP_EXTRA_VERSION = UNKNOWN;
  * @cvalue PHP_VERSION_ID
  */
 const PHP_VERSION_ID = UNKNOWN;
+
+/**
+ * @var string
+ * @cvalue php_build_date
+ */
+const PHP_BUILD_DATE = UNKNOWN;
+
+#ifdef PHP_BUILD_PROVIDER
+/**
+ * @var string
+ * @cvalue PHP_BUILD_PROVIDER
+ */
+const PHP_BUILD_PROVIDER = UNKNOWN;
+#endif
+
 /**
  * @var bool
  * @cvalue PHP_ZTS

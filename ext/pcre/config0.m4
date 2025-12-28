@@ -28,7 +28,12 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
   AS_VAR_IF([PHP_PCRE_JIT], [no],,
     [AC_CACHE_CHECK([whether external PCRE2 library has JIT supported],
       [php_cv_have_pcre2_jit],
-      [AC_RUN_IFELSE([AC_LANG_SOURCE([
+      [
+        CFLAGS_SAVE=$CFLAGS
+        LIBS_SAVE=$LIBS
+        CFLAGS="$CFLAGS $PCRE2_CFLAGS"
+        LIBS="$LIBS $PCRE2_LIBS"
+        AC_RUN_IFELSE([AC_LANG_SOURCE([
           #include <pcre2.h>
           #include <stdlib.h>
           int main(void) {
@@ -42,7 +47,10 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
         [AS_CASE([$host_cpu],
           [arm*|i[[34567]]86|x86_64|mips*|powerpc*|sparc],
             [php_cv_have_pcre2_jit=yes],
-          [php_cv_have_pcre2_jit=no])])])
+          [php_cv_have_pcre2_jit=no])])
+        CFLAGS=$CFLAGS_SAVE
+        LIBS=$LIBS_SAVE
+      ])
     AS_VAR_IF([php_cv_have_pcre2_jit], [yes],
       [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])])
   ])
@@ -87,10 +95,16 @@ else
   "])
 
   AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
-    [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"],,
-    [-Werror])
+    [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"])
 
-  PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_PCRE_CFLAGS=m4_normalize(["
+    $PHP_PCRE_CFLAGS
+    -DHAVE_CONFIG_H
+    -DHAVE_MEMMOVE
+    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+    -I@ext_srcdir@/pcre2lib
+  "])
+
   AC_DEFINE([HAVE_BUNDLED_PCRE], [1],
     [Define to 1 if PHP uses the bundled PCRE library.])
   AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])

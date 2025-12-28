@@ -6,7 +6,6 @@ intl
 <?php if (version_compare(INTL_ICU_VERSION, '69.0') < 0) die('skip for ICU >= 69.0'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 var_dump(NumberFormatter::ROUND_CEILING);
 var_dump(NumberFormatter::ROUND_FLOOR);

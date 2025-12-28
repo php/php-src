@@ -29,7 +29,6 @@ $fp = fopen("xmltest.xml", "r");
 while ($data = fread($fp, 4096)) {
     xml_parse($xp, $data, feof($fp));
 }
-xml_parser_free($xp);
 
 ?>
 --EXPECT--

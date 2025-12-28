@@ -20,10 +20,14 @@ foreach ($values as $value) {
     var_dump(posix_strerror(posix_get_last_error()));
 }
 ?>
---EXPECT--
+--EXPECTF--
+
+Warning: posix_isatty(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
 string(19) "Bad file descriptor"
 bool(false)
 string(19) "Bad file descriptor"
+
+Warning: posix_isatty(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
 string(19) "Bad file descriptor"

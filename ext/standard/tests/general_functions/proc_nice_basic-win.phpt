@@ -11,6 +11,10 @@ if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 if (getenv('SKIP_SLOW_TESTS')) {
     die('skip: Slow test');
 }
+
+if (!shell_exec("where wmic 2>nul")) {
+    die('skip wmic not available');
+}
 ?>
 --FILE--
 <?php

@@ -10,16 +10,16 @@ $b = (object) 'b';
 $c = (object) 'c';
 
 $foo = new SplObjectStorage;
-$foo->attach($a);
-$foo->attach($b);
+$foo->offsetSet($a);
+$foo->offsetSet($b);
 
 $bar = new SplObjectStorage;
-$bar->attach($b);
-$bar->attach($c);
+$bar->offsetSet($b);
+$bar->offsetSet($c);
 
 $foo->removeAllExcept($bar);
-var_dump($foo->contains($a));
-var_dump($foo->contains($b));
+var_dump($foo->offsetExists($a));
+var_dump($foo->offsetExists($b));
 
 ?>
 --EXPECT--

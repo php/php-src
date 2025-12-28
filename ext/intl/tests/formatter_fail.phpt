@@ -12,8 +12,7 @@ function err($fmt) {
 }
 
 function print_exception($e) {
-    echo "\n" . get_class($e) . ": " . $e->getMessage()
-       . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+    echo "\n", $e::class, ": ", $e->getMessage(), "\n";
 }
 
 function crt($t, $l, $s) {
@@ -62,14 +61,14 @@ try {
 err($fmt);
 try {
     $fmt = numfmt_create();
-} catch (TypeError $e) {
+} catch (Throwable $e) {
     print_exception($e);
     $fmt = null;
 }
 err($fmt);
 try {
     $fmt = NumberFormatter::create();
-} catch (TypeError $e) {
+} catch (Throwable $e) {
     print_exception($e);
     $fmt = null;
 }
@@ -78,7 +77,7 @@ err($fmt);
 $fmt = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
 try {
     $fmt->__construct('en_US', NumberFormatter::DECIMAL);
-} catch (Error $e) {
+} catch (Throwable $e) {
     print_exception($e);
     $fmt = null;
 }
@@ -95,16 +94,16 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-ArgumentCountError: NumberFormatter::__construct() expects at least 2 arguments, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::__construct() expects at least 2 arguments, 0 given
 'U_ZERO_ERROR'
 
-ArgumentCountError: numfmt_create() expects at least 2 arguments, 0 given in %s on line %d
+ArgumentCountError: numfmt_create() expects at least 2 arguments, 0 given
 'U_ZERO_ERROR'
 
-ArgumentCountError: NumberFormatter::create() expects at least 2 arguments, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::create() expects at least 2 arguments, 0 given
 'U_ZERO_ERROR'
 
-Error: NumberFormatter object is already constructed in %s on line %d
+Error: NumberFormatter object is already constructed
 'U_ZERO_ERROR'
 
 Deprecated: NumberFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
@@ -119,30 +118,30 @@ Deprecated: numfmt_create(): Passing null to parameter #1 ($locale) of type stri
 
 Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
 
-ValueError: NumberFormatter::__construct(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+ValueError: NumberFormatter::__construct(): Argument #1 ($locale) "whatever" is invalid
 'U_ZERO_ERROR'
 
-ValueError: NumberFormatter::create(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+ValueError: NumberFormatter::create(): Argument #1 ($locale) "whatever" is invalid
 'U_ZERO_ERROR'
 
-ValueError: numfmt_create(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+ValueError: numfmt_create(): Argument #1 ($locale) "whatever" is invalid
 'U_ZERO_ERROR'
 
-TypeError: NumberFormatter::__construct(): Argument #1 ($locale) must be of type string, array given in %s on line %d
+TypeError: NumberFormatter::__construct(): Argument #1 ($locale) must be of type string, array given
 'U_ZERO_ERROR'
 
-TypeError: NumberFormatter::create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
+TypeError: NumberFormatter::create(): Argument #1 ($locale) must be of type string, array given
 'U_ZERO_ERROR'
 
-TypeError: numfmt_create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
+TypeError: numfmt_create(): Argument #1 ($locale) must be of type string, array given
 'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %s on line %d
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
+IntlException: NumberFormatter::__construct(): number formatter creation failed
+'NumberFormatter::__construct(): number formatter creation failed: U_UNSUPPORTED_ERROR'
+'NumberFormatter::create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
+'numfmt_create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-IntlException: Constructor failed in %s on line %d
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+IntlException: NumberFormatter::__construct(): number formatter creation failed
+'NumberFormatter::__construct(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+'NumberFormatter::create(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+'numfmt_create(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'

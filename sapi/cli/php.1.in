@@ -303,13 +303,6 @@ Version number
 .PD 1
 .B \-w
 Output source with stripped comments and whitespace
-.TP
-.PD 0
-.B \-\-zend\-extension \fIfile\fP
-.TP
-.PD 1
-.B \-z \fIfile\fP
-Load Zend extension
 .IR file
 .TP
 .IR args.\|.\|.

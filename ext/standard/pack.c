@@ -16,30 +16,9 @@
 
 #include "php.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#else
-#include <sys/param.h>
-#endif
-#include "pack.h"
-#ifdef HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
-#endif
-#endif
-#include "fsock.h"
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 
 #define INC_OUTPUTPOS(a,b) \
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
@@ -50,10 +29,23 @@
 	} \
 	outputpos += (a)*(b);
 
+typedef enum {
+	PHP_LITTLE_ENDIAN,
+	PHP_BIG_ENDIAN,
+} php_pack_endianness;
+
 #ifdef WORDS_BIGENDIAN
-#define MACHINE_LITTLE_ENDIAN 0
+# define MACHINE_LITTLE_ENDIAN 0
+# define PHP_MACHINE_ENDIAN PHP_BIG_ENDIAN
 #else
-#define MACHINE_LITTLE_ENDIAN 1
+# define MACHINE_LITTLE_ENDIAN 1
+# define PHP_MACHINE_ENDIAN PHP_LITTLE_ENDIAN
+#endif
+
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+# define PHP_LONG_BSWAP(u) ZEND_BYTES_SWAP64(u)
+#else
+# define PHP_LONG_BSWAP(u) ZEND_BYTES_SWAP32(u)
 #endif
 
 typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
@@ -62,41 +54,23 @@ typedef ZEND_SET_ALIGNED(1, uint64_t unaligned_uint64_t);
 typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
 typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
-/* Mapping of byte from char (8bit) to long for machine endian */
-static int byte_map[1];
-
-/* Mappings of bytes from int (machine dependent) to int for machine endian */
-static int int_map[sizeof(int)];
-
-/* Mappings of bytes from shorts (16bit) for all endian environments */
-static int machine_endian_short_map[2];
-static int big_endian_short_map[2];
-static int little_endian_short_map[2];
-
-/* Mappings of bytes from longs (32bit) for all endian environments */
-static int machine_endian_long_map[4];
-static int big_endian_long_map[4];
-static int little_endian_long_map[4];
-
-#if SIZEOF_ZEND_LONG > 4
-/* Mappings of bytes from quads (64bit) for all endian environments */
-static int machine_endian_longlong_map[8];
-static int big_endian_longlong_map[8];
-static int little_endian_longlong_map[8];
-#endif
-
 /* {{{ php_pack */
-static void php_pack(zval *val, size_t size, int *map, char *output)
+static void php_pack(const zval *val, size_t size, php_pack_endianness endianness, char *output)
 {
-	size_t i;
-	char *v;
+	zend_ulong zl = zval_get_long(val);
 
-	convert_to_long(val);
-	v = (char *) &Z_LVAL_P(val);
-
-	for (i = 0; i < size; i++) {
-		*output++ = v[map[i]];
+	if ((endianness == PHP_LITTLE_ENDIAN) != MACHINE_LITTLE_ENDIAN) {
+		zl = PHP_LONG_BSWAP(zl);
+#if MACHINE_LITTLE_ENDIAN
+		zl >>= (sizeof(zl) - size) * 8;
+#endif
+	} else {
+#if !MACHINE_LITTLE_ENDIAN
+		zl <<= (sizeof(zl) - size) * 8;
+#endif
 	}
+
+	memcpy(output, (const char *) &zl, size);
 }
 /* }}} */
 
@@ -108,10 +82,7 @@ ZEND_ATTRIBUTE_CONST static inline uint16_t php_pack_reverse_int16(uint16_t arg)
 /* {{{ php_pack_reverse_int32 */
 ZEND_ATTRIBUTE_CONST static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
-	uint32_t result;
-	result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);
-
-	return result;
+	return ZEND_BYTES_SWAP32(arg);
 }
 /* }}} */
 
@@ -274,7 +245,7 @@ PHP_FUNCTION(pack)
 		}
 
 		/* Handle special arg '*' for all codes and check argv overflows */
-		switch ((int) code) {
+		switch (code) {
 			/* Never uses any args */
 			case 'x':
 			case 'X':
@@ -380,13 +351,13 @@ too_few_args:
 
 	/* Calculate output length and upper bound while processing*/
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'h':
 			case 'H':
-				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
+				INC_OUTPUTPOS((arg / 2) + (arg % 2),1)	/* 4 bit per arg */
 				break;
 
 			case 'a':
@@ -463,10 +434,10 @@ too_few_args:
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'a':
 			case 'A':
 			case 'Z': {
@@ -529,7 +500,7 @@ too_few_args:
 			case 'c':
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 1, byte_map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[currentarg++], 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
 					outputpos++;
 				}
 				break;
@@ -538,16 +509,16 @@ too_few_args:
 			case 'S':
 			case 'n':
 			case 'v': {
-				int *map = machine_endian_short_map;
+				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
 				if (code == 'n') {
-					map = big_endian_short_map;
+					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'v') {
-					map = little_endian_short_map;
+					endianness = PHP_LITTLE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 2, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[currentarg++], 2, endianness, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 2;
 				}
 				break;
@@ -556,7 +527,7 @@ too_few_args:
 			case 'i':
 			case 'I':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], sizeof(int), int_map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[currentarg++], sizeof(int), PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
@@ -565,16 +536,16 @@ too_few_args:
 			case 'L':
 			case 'N':
 			case 'V': {
-				int *map = machine_endian_long_map;
+				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
 				if (code == 'N') {
-					map = big_endian_long_map;
+					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'V') {
-					map = little_endian_long_map;
+					endianness = PHP_LITTLE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 4, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[currentarg++], 4, endianness, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 4;
 				}
 				break;
@@ -585,16 +556,16 @@ too_few_args:
 			case 'Q':
 			case 'J':
 			case 'P': {
-				int *map = machine_endian_longlong_map;
+				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
 				if (code == 'J') {
-					map = big_endian_longlong_map;
+					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'P') {
-					map = little_endian_longlong_map;
+					endianness = PHP_LITTLE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 8, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[currentarg++], 8, endianness, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 8;
 				}
 				break;
@@ -632,7 +603,7 @@ too_few_args:
 
 			case 'd': {
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -642,7 +613,7 @@ too_few_args:
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -652,7 +623,7 @@ too_few_args:
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(0, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -737,7 +708,6 @@ PHP_FUNCTION(unpack)
 
 	while (formatlen-- > 0) {
 		char type = *(format++);
-		char c;
 		int repetitions = 1, argb;
 		char *name;
 		int namelen;
@@ -745,7 +715,7 @@ PHP_FUNCTION(unpack)
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
-			c = *format;
+			char c = *format;
 
 			if (c >= '0' && c <= '9') {
 				errno = 0;
@@ -784,7 +754,7 @@ PHP_FUNCTION(unpack)
 		if (namelen > 200)
 			namelen = 200;
 
-		switch ((int) type) {
+		switch (type) {
 			/* Never use any input */
 			case 'X':
 				size = -1;
@@ -885,12 +855,15 @@ PHP_FUNCTION(unpack)
 			if ((inputpos + size) <= inputlen) {
 
 				zend_string* real_name;
+				zend_long long_key = 0;
 				zval val;
 
-				if (repetitions == 1 && namelen > 0) {
+				if (namelen == 0) {
+					real_name = NULL;
+					long_key = i + 1;
+				} else if (repetitions == 1) {
 					/* Use a part of the formatarg argument directly as the name. */
 					real_name = zend_string_init_fast(name, namelen);
-
 				} else {
 					/* Need to add the 1-based element number to the name */
 					char buf[MAX_LENGTH_OF_LONG + 1];
@@ -899,7 +872,7 @@ PHP_FUNCTION(unpack)
 					real_name = zend_string_concat2(name, namelen, res, digits);
 				}
 
-				switch ((int) type) {
+				switch (type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
 						zend_long len = inputlen - inputpos;	/* Remaining string */
@@ -912,12 +885,10 @@ PHP_FUNCTION(unpack)
 						size = len;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					case 'A': {
 						/* A will strip any trailing whitespace */
-						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
 						zend_long len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -929,23 +900,21 @@ PHP_FUNCTION(unpack)
 
 						/* Remove trailing white space and nulls chars from unpacked data */
 						while (--len >= 0) {
-							if (input[inputpos + len] != padn
-								&& input[inputpos + len] != pads
-								&& input[inputpos + len] != padt
-								&& input[inputpos + len] != padc
-								&& input[inputpos + len] != padl
+							if (input[inputpos + len] != '\0'
+								&& input[inputpos + len] != ' '
+								&& input[inputpos + len] != '\t'
+								&& input[inputpos + len] != '\r'
+								&& input[inputpos + len] != '\n'
 							)
 								break;
 						}
 
 						ZVAL_STRINGL(&val, &input[inputpos], len + 1);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
 					case 'Z': {
 						/* Z will strip everything after the first null character */
-						char pad = '\0';
 						zend_long s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
@@ -958,13 +927,12 @@ PHP_FUNCTION(unpack)
 
 						/* Remove everything after the first null */
 						for (s=0 ; s < len ; s++) {
-							if (input[inputpos + s] == pad)
+							if (input[inputpos + s] == '\0')
 								break;
 						}
 						len = s;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -976,6 +944,15 @@ PHP_FUNCTION(unpack)
 						int first = 1;
 						zend_string *buf;
 						zend_long ipos, opos;
+
+
+						if (size > INT_MAX / 2) {
+							if (real_name) {
+								zend_string_release_ex(real_name, false);
+							}
+							zend_argument_value_error(1, "repeater must be less than or equal to %d", INT_MAX / 2);
+							RETURN_THROWS();
+						}
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {
@@ -1009,7 +986,6 @@ PHP_FUNCTION(unpack)
 						ZSTR_VAL(buf)[len] = '\0';
 
 						ZVAL_STR(&val, buf);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1019,7 +995,6 @@ PHP_FUNCTION(unpack)
 						zend_long v = (type == 'c') ? (int8_t) x : x;
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1039,7 +1014,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1055,7 +1029,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1075,8 +1048,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
-
 						break;
 					}
 
@@ -1097,7 +1068,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 #endif
@@ -1117,7 +1087,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1136,13 +1105,12 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
 					case 'x':
 						/* Do nothing with input, just skip it */
-						break;
+						goto no_output;
 
 					case 'X':
 						if (inputpos < size) {
@@ -1153,7 +1121,7 @@ PHP_FUNCTION(unpack)
 								php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
-						break;
+						goto no_output;
 
 					case '@':
 						if (repetitions <= inputlen) {
@@ -1163,10 +1131,19 @@ PHP_FUNCTION(unpack)
 						}
 
 						i = repetitions - 1;	/* Done, break out of for loop */
-						break;
+						goto no_output;
 				}
 
-				zend_string_release(real_name);
+				if (real_name) {
+					zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
+				} else {
+					zend_hash_index_update(Z_ARRVAL_P(return_value), long_key, &val);
+				}
+
+no_output:
+				if (real_name) {
+					zend_string_release_ex(real_name, false);
+				}
 
 				inputpos += size;
 				if (inputpos < 0) {
@@ -1190,129 +1167,5 @@ PHP_FUNCTION(unpack)
 			format++;
 		}
 	}
-}
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(pack)
-{
-	int i;
-
-	if (MACHINE_LITTLE_ENDIAN) {
-		/* Where to get lo to hi bytes from */
-		byte_map[0] = 0;
-
-		for (i = 0; i < (int)sizeof(int); i++) {
-			int_map[i] = i;
-		}
-
-		machine_endian_short_map[0] = 0;
-		machine_endian_short_map[1] = 1;
-		big_endian_short_map[0] = 1;
-		big_endian_short_map[1] = 0;
-		little_endian_short_map[0] = 0;
-		little_endian_short_map[1] = 1;
-
-		machine_endian_long_map[0] = 0;
-		machine_endian_long_map[1] = 1;
-		machine_endian_long_map[2] = 2;
-		machine_endian_long_map[3] = 3;
-		big_endian_long_map[0] = 3;
-		big_endian_long_map[1] = 2;
-		big_endian_long_map[2] = 1;
-		big_endian_long_map[3] = 0;
-		little_endian_long_map[0] = 0;
-		little_endian_long_map[1] = 1;
-		little_endian_long_map[2] = 2;
-		little_endian_long_map[3] = 3;
-
-#if SIZEOF_ZEND_LONG > 4
-		machine_endian_longlong_map[0] = 0;
-		machine_endian_longlong_map[1] = 1;
-		machine_endian_longlong_map[2] = 2;
-		machine_endian_longlong_map[3] = 3;
-		machine_endian_longlong_map[4] = 4;
-		machine_endian_longlong_map[5] = 5;
-		machine_endian_longlong_map[6] = 6;
-		machine_endian_longlong_map[7] = 7;
-		big_endian_longlong_map[0] = 7;
-		big_endian_longlong_map[1] = 6;
-		big_endian_longlong_map[2] = 5;
-		big_endian_longlong_map[3] = 4;
-		big_endian_longlong_map[4] = 3;
-		big_endian_longlong_map[5] = 2;
-		big_endian_longlong_map[6] = 1;
-		big_endian_longlong_map[7] = 0;
-		little_endian_longlong_map[0] = 0;
-		little_endian_longlong_map[1] = 1;
-		little_endian_longlong_map[2] = 2;
-		little_endian_longlong_map[3] = 3;
-		little_endian_longlong_map[4] = 4;
-		little_endian_longlong_map[5] = 5;
-		little_endian_longlong_map[6] = 6;
-		little_endian_longlong_map[7] = 7;
-#endif
-	}
-	else {
-		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
-
-		/* Where to get hi to lo bytes from */
-		byte_map[0] = size - 1;
-
-		for (i = 0; i < (int)sizeof(int); i++) {
-			int_map[i] = size - (sizeof(int) - i);
-		}
-
-		machine_endian_short_map[0] = size - 2;
-		machine_endian_short_map[1] = size - 1;
-		big_endian_short_map[0] = size - 2;
-		big_endian_short_map[1] = size - 1;
-		little_endian_short_map[0] = size - 1;
-		little_endian_short_map[1] = size - 2;
-
-		machine_endian_long_map[0] = size - 4;
-		machine_endian_long_map[1] = size - 3;
-		machine_endian_long_map[2] = size - 2;
-		machine_endian_long_map[3] = size - 1;
-		big_endian_long_map[0] = size - 4;
-		big_endian_long_map[1] = size - 3;
-		big_endian_long_map[2] = size - 2;
-		big_endian_long_map[3] = size - 1;
-		little_endian_long_map[0] = size - 1;
-		little_endian_long_map[1] = size - 2;
-		little_endian_long_map[2] = size - 3;
-		little_endian_long_map[3] = size - 4;
-
-#if SIZEOF_ZEND_LONG > 4
-		machine_endian_longlong_map[0] = size - 8;
-		machine_endian_longlong_map[1] = size - 7;
-		machine_endian_longlong_map[2] = size - 6;
-		machine_endian_longlong_map[3] = size - 5;
-		machine_endian_longlong_map[4] = size - 4;
-		machine_endian_longlong_map[5] = size - 3;
-		machine_endian_longlong_map[6] = size - 2;
-		machine_endian_longlong_map[7] = size - 1;
-		big_endian_longlong_map[0] = size - 8;
-		big_endian_longlong_map[1] = size - 7;
-		big_endian_longlong_map[2] = size - 6;
-		big_endian_longlong_map[3] = size - 5;
-		big_endian_longlong_map[4] = size - 4;
-		big_endian_longlong_map[5] = size - 3;
-		big_endian_longlong_map[6] = size - 2;
-		big_endian_longlong_map[7] = size - 1;
-		little_endian_longlong_map[0] = size - 1;
-		little_endian_longlong_map[1] = size - 2;
-		little_endian_longlong_map[2] = size - 3;
-		little_endian_longlong_map[3] = size - 4;
-		little_endian_longlong_map[4] = size - 5;
-		little_endian_longlong_map[5] = size - 6;
-		little_endian_longlong_map[6] = size - 7;
-		little_endian_longlong_map[7] = size - 8;
-#endif
-	}
-
-	return SUCCESS;
 }
 /* }}} */

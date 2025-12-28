@@ -10,10 +10,6 @@ Test array_unshift() function : usage variations - assoc. array with diff. keys 
 
 echo "*** Testing array_unshift() : associative array with different keys ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -52,12 +48,12 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(@$unset_var => "hello", $fp => 'resource'),
+       array($fp => 'resource'),
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
              $fp => 'resource', 133 => "int",
-             @$unset_var => "unset", $heredoc => "heredoc")
+             $heredoc => "heredoc")
 );
 
 // loop through the various elements of $arrays to test array_unshift()
@@ -265,31 +261,27 @@ array(5) {
   string(6) "string"
 }
 -- Iteration 8 --
-int(3)
-array(3) {
+int(2)
+array(2) {
   [0]=>
   int(10)
-  [""]=>
-  string(5) "hello"
   [1]=>
   string(8) "resource"
 }
-int(5)
-array(5) {
+int(4)
+array(4) {
   [0]=>
   int(10)
   [1]=>
   string(5) "hello"
   [2]=>
   string(5) "world"
-  [""]=>
-  string(5) "hello"
   [3]=>
   string(8) "resource"
 }
 -- Iteration 9 --
-int(7)
-array(7) {
+int(6)
+array(6) {
   [0]=>
   int(10)
   ["hello"]=>
@@ -300,13 +292,11 @@ array(7) {
   string(8) "resource"
   [2]=>
   string(3) "int"
-  [""]=>
-  string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }
-int(9)
-array(9) {
+int(8)
+array(8) {
   [0]=>
   int(10)
   [1]=>
@@ -321,8 +311,6 @@ array(9) {
   string(8) "resource"
   [4]=>
   string(3) "int"
-  [""]=>
-  string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }

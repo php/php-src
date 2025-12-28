@@ -680,18 +680,20 @@ void gdImagePaletteCopy (gdImagePtr to, gdImagePtr from)
  *  the second call!)  The code is simplified from that in the article,
  *  as we know that gd images always start at (0,0)
  */
+/* 2.0.26, TBB: we now have to respect a clipping rectangle, it won't
+	necessarily start at 0. */
 
-static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
+static int clip_1d(int *x0, int *y0, int *x1, int *y1, int mindim, int maxdim) {
 	double m;      /* gradient of line */
 
-	if (*x0 < 0) {  /* start of line is left of window */
-		if(*x1 < 0) { /* as is the end, so the line never cuts the window */
+	if (*x0 < mindim) {  /* start of line is left of window */
+		if(*x1 < mindim) { /* as is the end, so the line never cuts the window */
 			return 0;
 		}
 		m = (*y1 - *y0)/(double)(*x1 - *x0); /* calculate the slope of the line */
 		/* adjust x0 to be on the left boundary (ie to be zero), and y0 to match */
-		*y0 -= (int)(m * *x0);
-		*x0 = 0;
+		*y0 -= (int)(m * (*x0 - mindim));
+		*x0 = mindim;
 		/* now, perhaps, adjust the far end of the line as well */
 		if (*x1 > maxdim) {
 			*y1 += (int)(m * (maxdim - *x1));
@@ -707,9 +709,9 @@ static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
 		*y0 += (int)(m * (maxdim - *x0)); /* adjust so point is on the right boundary */
 		*x0 = maxdim;
 		/* now, perhaps, adjust the end of the line */
-		if (*x1 < 0) {
-			*y1 -= (int)(m * *x1);
-			*x1 = 0;
+		if (*x1 < mindim) {
+			*y1 -= (int)(m * (*x1 - mindim));
+			*x1 = mindim;
 		}
 		return 1;
 	}
@@ -720,10 +722,10 @@ static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
 		*x1 = maxdim;
 		return 1;
 	}
-	if (*x1 < 0) { /* other end is outside to the left */
+	if (*x1 < mindim) { /* other end is outside to the left */
 		m = (*y1 - *y0)/(double)(*x1 - *x0);  /* calculate the slope of the line */
-		*y1 -= (int)(m * *x1);
-		*x1 = 0;
+		*y1 -= (int)(m * (*x1 - mindim));
+		*x1 = mindim;
 		return 1;
 	}
 	/* only get here if both points are inside the window */
@@ -930,7 +932,9 @@ static int gdImageTileGet (gdImagePtr im, int x, int y)
 	srcy = y % gdImageSY(im->tile);
 	p = gdImageGetPixel(im->tile, srcx, srcy);
 
-	if (im->trueColor) {
+	if (p == im->tile->transparent) {
+		tileColor = im->transparent;
+	} else if (im->trueColor) {
 		if (im->tile->trueColor) {
 			tileColor = p;
 		} else {
@@ -967,6 +971,90 @@ void gdImageAABlend (gdImagePtr im)
 }
 
 static void _gdImageFilledHRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+
+gdImagePtr gdImageClone (gdImagePtr src) {
+	gdImagePtr dst;
+	register int i, x;
+
+	if (src->trueColor) {
+		dst = gdImageCreateTrueColor(src->sx , src->sy);
+	} else {
+		dst = gdImageCreate(src->sx , src->sy);
+	}
+
+	if (dst == NULL) {
+		return NULL;
+	}
+
+	if (src->trueColor == 0) {
+		dst->colorsTotal = src->colorsTotal;
+		for (i = 0; i < gdMaxColors; i++) {
+			dst->red[i]   = src->red[i];
+			dst->green[i] = src->green[i];
+			dst->blue[i]  = src->blue[i];
+			dst->alpha[i] = src->alpha[i];
+			dst->open[i]  = src->open[i];
+		}
+		for (i = 0; i < src->sy; i++) {
+			for (x = 0; x < src->sx; x++) {
+				dst->pixels[i][x] = src->pixels[i][x];
+			}
+		}
+	} else {
+		for (i = 0; i < src->sy; i++) {
+			for (x = 0; x < src->sx; x++) {
+				dst->tpixels[i][x] = src->tpixels[i][x];
+			}
+		}
+	}
+
+	dst->interlace   = src->interlace;
+
+	dst->alphaBlendingFlag = src->alphaBlendingFlag;
+	dst->saveAlphaFlag     = src->saveAlphaFlag;
+	dst->AA                = src->AA;
+	dst->AA_color          = src->AA_color;
+	dst->AA_dont_blend     = src->AA_dont_blend;
+
+	dst->cx1 = src->cx1;
+	dst->cy1 = src->cy1;
+	dst->cx2 = src->cx2;
+	dst->cy2 = src->cy2;
+
+	dst->res_x = src->res_x;
+	dst->res_y = src->res_y;
+
+	dst->interpolation_id = src->interpolation_id;
+	dst->interpolation    = src->interpolation;
+
+	if (src->brush) {
+		dst->brush = gdImageClone(src->brush);
+	}
+
+	if (src->tile) {
+		dst->tile = gdImageClone(src->tile);
+	}
+
+	if (src->style) {
+		gdImageSetStyle(dst, src->style, src->styleLength);
+		dst->stylePos = src->stylePos;
+	}
+
+	for (i = 0; i < gdMaxColors; i++) {
+		dst->brushColorMap[i] = src->brushColorMap[i];
+		dst->tileColorMap[i] = src->tileColorMap[i];
+	}
+
+	if (src->polyAllocated > 0 && overflow2(sizeof(int), src->polyAllocated) == 0) {
+		dst->polyInts = gdMalloc (sizeof (int) * src->polyAllocated);
+		dst->polyAllocated = src->polyAllocated;
+		for (i = 0; i < src->polyAllocated; i++) {
+			dst->polyInts[i] = src->polyInts[i];
+		}
+	}
+
+	return dst;
+}
 
 static void gdImageHLine(gdImagePtr im, int y, int x1, int x2, int col)
 {
@@ -1023,11 +1111,16 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		gdImageAALine(im, x1, y1, x2, y2, im->AA_color);
 		return;
 	}
+	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no
+	   points need to be drawn. 2.0.26, TBB: clip to edges of clipping
+	   rectangle. We were getting away with this because gdImageSetPixel
+	   is used for actual drawing, but this is still more efficient and opens
+	   the way to skip per-pixel bounds checking in the future. */
 
-	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
+	if (clip_1d (&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
 		return;
-	}
+	if (clip_1d (&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
+		return;
 
 	dx = abs (x2 - x1);
 	dy = abs (y2 - y1);
@@ -1215,10 +1308,11 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 		return;
 	}
 
-	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
-	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
+	/* TBB: use the clipping rectangle */
+	if (clip_1d (&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
 		return;
-	}
+	if (clip_1d (&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
+		return;
 
 	dx = x2 - x1;
 	dy = y2 - y1;
@@ -1932,6 +2026,14 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		goto done;
 	}
 
+	if(overflow2(im->sy, im->sx)) {
+		return;
+	}
+
+	if(overflow2(sizeof(struct seg), ((im->sy * im->sx) / 4))) {
+		return;
+	}
+
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
 
@@ -1979,13 +2081,13 @@ done:
 
 static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
-	int i, l, x1, x2, dy;
+	int l, x1, x2, dy;
 	int oc;   /* old pixel value */
 	int wx2,wy2;
 	/* stack of filled segments */
 	struct seg *stack;
 	struct seg *sp;
-	char **pts;
+	char *pts;
 
 	if (!im->tile) {
 		return;
@@ -1995,10 +2097,15 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 
 	nc =  gdImageTileGet(im,x,y);
 
-	pts = (char **) ecalloc(im->sy + 1, sizeof(char *));
-	for (i = 0; i < im->sy + 1; i++) {
-		pts[i] = (char *) ecalloc(im->sx + 1, sizeof(char));
+	if(overflow2(im->sy, im->sx)) {
+		return;
 	}
+
+	if(overflow2(sizeof(struct seg), ((im->sy * im->sx) / 4))) {
+		return;
+	}
+
+	pts = (char *) ecalloc(im->sy * im->sx, sizeof(char));
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
@@ -2011,9 +2118,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
  	FILL_PUSH(y+1, x, x, -1);
 	while (sp>stack) {
 		FILL_POP(y, x1, x2, dy);
-		for (x=x1; x>=0 && (!pts[y][x] && gdImageGetPixel(im,x,y)==oc); x--) {
+		for (x=x1; x>=0 && (!pts[y + x*wy2] && gdImageGetPixel(im,x,y)==oc); x--) {
 			nc = gdImageTileGet(im,x,y);
-			pts[y][x] = 1;
+			pts[y + x*wy2] = 1;
 			gdImageSetPixel(im,x, y, nc);
 		}
 		if (x>=x1) {
@@ -2027,9 +2134,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 		}
 		x = x1+1;
 		do {
-			for(; x<wx2 && (!pts[y][x] && gdImageGetPixel(im,x, y)==oc); x++) {
+			for(; x<wx2 && (!pts[y + x*wy2] && gdImageGetPixel(im,x, y)==oc); x++) {
 				nc = gdImageTileGet(im,x,y);
-				pts[y][x] = 1;
+				pts[y + x * wy2] = 1;
 				gdImageSetPixel(im, x, y, nc);
 			}
 			FILL_PUSH(y, l, x-1, dy);
@@ -2038,13 +2145,9 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
 skip:
-			for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+			for(x++; x<=x2 && (pts[y + x*wy2] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
-	}
-
-	for(i = 0; i < im->sy + 1; i++) {
-		efree(pts[i]);
 	}
 
 	efree(pts);
@@ -2631,8 +2734,6 @@ void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 }
 
-int gdCompareInt (const void *a, const void *b);
-
 /* THANKS to Kirsten Schulz for the polygon fixes! */
 
 /* The intersection finding technique of this code could be improved
@@ -2644,6 +2745,8 @@ int gdCompareInt (const void *a, const void *b);
 void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	int i;
+	int j;
+	int index;
 	int y;
 	int miny, maxy, pmaxy;
 	int x1, y1;
@@ -2704,13 +2807,13 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 	pmaxy = maxy;
 	/* 2.0.16: Optimization by Ilia Chipitsine -- don't waste time offscreen */
-	if (miny < 0) {
-		miny = 0;
+	/* 2.0.26: clipping rectangle is even better */
+	if (miny < im->cy1) {
+		miny = im->cy1;
 	}
-	if (maxy >= gdImageSY(im)) {
-		maxy = gdImageSY(im) - 1;
+	if (maxy > im->cy2) {
+		maxy = im->cy2;
 	}
-
 	/* Fix in 1.3: count a vertex only once */
 	for (y = miny; y <= maxy; y++) {
 		/*1.4           int interLast = 0; */
@@ -2748,8 +2851,21 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 				im->polyInts[ints++] = x2;
 			}
 		}
-		qsort(im->polyInts, ints, sizeof(int), gdCompareInt);
-
+		/*
+		  2.0.26: polygons pretty much always have less than 100 points,
+		  and most of the time they have considerably less. For such trivial
+		  cases, insertion sort is a good choice. Also a good choice for
+		  future implementations that may wish to indirect through a table.
+		*/
+		for (i = 1; (i < ints); i++) {
+			index = im->polyInts[i];
+			j = i;
+			while ((j > 0) && (im->polyInts[j - 1] > index)) {
+				im->polyInts[j] = im->polyInts[j - 1];
+				j--;
+			}
+			im->polyInts[j] = index;
+		}
 		for (i = 0; i < ints - 1; i += 2) {
 			gdImageLine(im, im->polyInts[i], y, im->polyInts[i + 1], y, fill_color);
 		}
@@ -2759,11 +2875,6 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	if (c == gdAntiAliased) {
 		gdImagePolygon(im, p, n, c);
 	}
-}
-
-int gdCompareInt (const void *a, const void *b)
-{
-	return (*(const int *) a) - (*(const int *) b);
 }
 
 void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
@@ -3076,7 +3187,11 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		const unsigned int sy = gdImageSY(src);
 		const unsigned int sx = gdImageSX(src);
 
-		src->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
+		// Note: do not revert back to gdMalloc() below ; reason here,
+		// due to a bug with a certain memory_limit INI value treshold,
+		// imagepalettetotruecolor crashes with even unrelated ZendMM allocations.
+		// See GH-17772 for a use case.
+		src->tpixels = (int **) gdCalloc(sy, sizeof(int *));
 		if (src->tpixels == NULL) {
 			return 0;
 		}

@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
  */
 
-
-
 #include "fuzzer.h"
 
 #include "Zend/zend.h"
@@ -31,13 +29,14 @@
 #include "ext/json/php_json_parser.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	char *data = malloc(Size+1);
-	memcpy(data, Data, Size);
-	data[Size] = '\0';
 
-	if (fuzzer_request_startup() == FAILURE) {
+	if (fuzzer_request_startup() == FAILURE){
 		return 0;
 	}
+
+	char *data = malloc(Size + 1);
+	memcpy(data, Data, Size);
+	data[Size] = '\0';
 
 	for (int option = 0; option <=1; ++option) {
 		zval result;

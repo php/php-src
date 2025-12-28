@@ -55,7 +55,7 @@ ZEND_GET_MODULE(php_gettext)
 		zend_argument_value_error(_arg_num, "is too long"); \
 		RETURN_THROWS(); \
 	} else if (domain_len == 0) { \
-		zend_argument_value_error(_arg_num, "cannot be empty"); \
+		zend_argument_must_not_be_empty_error(_arg_num); \
 		RETURN_THROWS(); \
 	}
 
@@ -180,23 +180,27 @@ PHP_FUNCTION(dcgettext)
 PHP_FUNCTION(bindtextdomain)
 {
 	zend_string *domain, *dir = NULL;
-	char *retval, dir_name[MAXPATHLEN];
+	char *retval, dir_name[MAXPATHLEN], *btd_result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(domain)
+		Z_PARAM_PATH_STR(domain)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(dir)
+		Z_PARAM_PATH_STR_OR_NULL(dir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	if (dir == NULL) {
-		RETURN_STRING(bindtextdomain(ZSTR_VAL(domain), NULL));
+		btd_result = bindtextdomain(ZSTR_VAL(domain), NULL);
+		if (btd_result == NULL) {
+			/* POSIX-compliant implementations can return
+			 * NULL if an error occurred. On musl you will
+			 * also get NULL if the domain is not yet
+			 * bound, because musl has no default directory
+			 * to return in that case. */
+			 RETURN_FALSE;
+		}
+		RETURN_STRING(btd_result);
 	}
 
 	if (ZSTR_LEN(dir) != 0 && !zend_string_equals_literal(dir, "0")) {
@@ -311,11 +315,6 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
-
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	retval = bind_textdomain_codeset(ZSTR_VAL(domain), codeset ? ZSTR_VAL(codeset) : NULL);
 

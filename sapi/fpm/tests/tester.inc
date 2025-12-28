@@ -47,7 +47,7 @@ class Tester
         self::FILE_EXT_LOG_ERR,
         self::FILE_EXT_LOG_SLOW,
         self::FILE_EXT_PID,
-        'src.php',
+        '*src.php',
         'ini',
         'skip.ini',
         '*.sock',
@@ -106,6 +106,11 @@ class Tester
      * @var string
      */
     private string $fileName;
+
+    /**
+     * @var string
+     */
+    private ?string $sourceFile = null;
 
     /**
      * @var resource
@@ -297,18 +302,6 @@ class Tester
     }
 
     /**
-     * Skip if running on Travis.
-     *
-     * @param $message
-     */
-    static public function skipIfTravis($message)
-    {
-        if (getenv("TRAVIS")) {
-            die('skip Travis: ' . $message);
-        }
-    }
-
-    /**
      * Skip if not running as root.
      */
     static public function skipIfNotRoot()
@@ -401,11 +394,15 @@ class Tester
         ?bool $debug = null,
         string $clientTransport = 'stream'
     ) {
-        $this->configTemplate  = $configTemplate;
-        $this->code            = $code;
-        $this->options         = $options;
-        $this->fileName        = $fileName ?: self::getCallerFileName();
-        $this->debug           = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->configTemplate = $configTemplate;
+        $this->code           = $code;
+        $this->options        = $options;
+        $this->fileName       = $fileName ?: self::getCallerFileName();
+        if (($debugFilter = getenv('TEST_FPM_DEBUG_FILTER')) !== false) {
+            $this->debug = str_contains(basename($this->fileName), $debugFilter);
+        } else {
+            $this->debug = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        }
         $this->logReader       = new LogReader($this->debug);
         $this->logTool         = new LogTool($this->logReader, $this->debug);
         $this->clientTransport = $clientTransport;
@@ -543,7 +540,7 @@ class Tester
             $cmd[] = '-d' . $iniEntryName . '=' . $iniEntryValue;
         }
 
-        if (getenv('TEST_FPM_RUN_AS_ROOT')) {
+        if ($envVars['TEST_FPM_RUN_AS_ROOT'] ?? getenv('TEST_FPM_RUN_AS_ROOT')) {
             $cmd[] = '--allow-to-run-as-root';
         }
         $cmd = array_merge($cmd, $extraArgs);
@@ -850,6 +847,7 @@ class Tester
         int $readLimit = -1,
         int $writeDelay = 0,
         ?string $method = null,
+        ?array $params = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
@@ -859,7 +857,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
+        $params = $params ?? $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
         $this->trace('Request params', $params);
 
         try {
@@ -931,6 +929,7 @@ class Tester
                         $requestData['headers'] ?? [],
                         $requestData['uri'] ?? null
                     );
+                    $this->trace('Request params', $params);
 
                     if (isset($requestData['delay'])) {
                         usleep($requestData['delay']);
@@ -1489,21 +1488,27 @@ class Tester
     /**
      * Create a source code file.
      *
+     * @param string $nameSuffix
      * @return string
      */
-    public function makeSourceFile(): string
+    public function makeSourceFile(string $nameSuffix = ''): string
     {
-        return $this->makeFile('src.php', $this->code, overwrite: false);
+        if (is_null($this->sourceFile)) {
+            $this->sourceFile = $this->makeFile($nameSuffix . 'src.php', $this->code, overwrite: false);
+        }
+
+        return $this->sourceFile;
     }
 
     /**
      * Create a source file and script name.
      *
+     * @param string $nameSuffix
      * @return string[]
      */
-    public function createSourceFileAndScriptName(): array
+    public function createSourceFileAndScriptName(string $nameSuffix = ''): array
     {
-        $sourceFile = $this->makeFile('src.php', $this->code, overwrite: false);
+        $sourceFile = $this->makeSourceFile($nameSuffix);
 
         return [$sourceFile, '/' . basename($sourceFile)];
     }

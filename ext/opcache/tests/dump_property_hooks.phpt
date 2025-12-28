@@ -6,6 +6,12 @@ opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows') {
+    die('skip Windows emits additional DECLARE_CLASS_DELAYED opcode');
+}
+?>
 --FILE--
 <?php
 

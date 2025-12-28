@@ -62,9 +62,9 @@ array (
   4 => 'd',
 )
 d6bee42a771449205344c0938ad4f035
-explode(): Argument #1 ($separator) cannot be empty
-explode(): Argument #1 ($separator) cannot be empty
-explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) must not be empty
+explode(): Argument #1 ($separator) must not be empty
+explode(): Argument #1 ($separator) must not be empty
 array(1) {
   [0]=>
   string(0) ""
@@ -79,7 +79,7 @@ array(1) {
   [0]=>
   string(0) ""
 }
-explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) must not be empty
 array(1) {
   [0]=>
   string(3) "acb"

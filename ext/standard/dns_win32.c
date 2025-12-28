@@ -23,23 +23,6 @@
 
 #include "php_dns.h"
 
-#define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
-
-#define PHP_DNS_A      0x00000001
-#define PHP_DNS_NS     0x00000002
-#define PHP_DNS_CNAME  0x00000010
-#define PHP_DNS_SOA    0x00000020
-#define PHP_DNS_PTR    0x00000800
-#define PHP_DNS_HINFO  0x00001000
-#define PHP_DNS_MX     0x00004000
-#define PHP_DNS_TXT    0x00008000
-#define PHP_DNS_A6     0x01000000
-#define PHP_DNS_SRV    0x02000000
-#define PHP_DNS_NAPTR  0x04000000
-#define PHP_DNS_AAAA   0x08000000
-#define PHP_DNS_ANY    0x10000000
-#define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
-
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
 	char *hostname;
@@ -49,7 +32,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -103,12 +86,12 @@ PHP_FUNCTION(dns_check_record)
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S", &hostname, &hostname_len, &rectype) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|S", &hostname, &hostname_len, &rectype) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -277,7 +260,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 
 				for(i=0; i < 8; i++) {
 					if (out[i] != 0) {
-						if (tp > (uint8_t *)buf) {
+						if (tp > buf) {
 							in_v6_break = 0;
 							tp[0] = ':';
 							tp++;
@@ -358,9 +341,9 @@ PHP_FUNCTION(dns_get_record)
 	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
-	bool raw = 0;
+	bool raw = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		RETURN_THROWS();
 	}

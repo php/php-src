@@ -5,7 +5,6 @@ PHP_ARG_WITH([libxml],
   [yes])
 
 if test "$PHP_LIBXML" != "no"; then
-
   dnl This extension can not be build as shared
   ext_shared=no
 
@@ -13,7 +12,7 @@ if test "$PHP_LIBXML" != "no"; then
     AC_DEFINE([HAVE_LIBXML], [1],
       [Define to 1 if the PHP extension 'libxml' is available.])
     PHP_NEW_EXTENSION([libxml],
-      [libxml.c mime_sniff.c],
+      [libxml.c mime_sniff.c image_svg.c],
       [$ext_shared],,
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_INSTALL_HEADERS([ext/libxml], [php_libxml.h])

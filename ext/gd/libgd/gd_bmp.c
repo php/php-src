@@ -40,6 +40,8 @@ static int bmp_read_4bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 static int bmp_read_8bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp_hdr_t *header);
 static int bmp_read_rle(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info);
 
+static int _gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression);
+
 #define BMP_DEBUG(s)
 
 static int gdBMPPutWord(gdIOCtx *out, int w)
@@ -68,8 +70,10 @@ void * gdImageBmpPtr(gdImagePtr im, int *size, int compression)
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
 	if (out == NULL) return NULL;
-	gdImageBmpCtx(im, out, compression);
-	rv = gdDPExtractData(out, size);
+	if (!_gdImageBmpCtx(im, out, compression))
+		rv = gdDPExtractData(out, size);
+	else
+		rv = NULL;
 	out->gd_free(out);
 	return rv;
 }
@@ -90,12 +94,17 @@ void gdImageBmp(gdImagePtr im, FILE *outFile, int compression)
 */
 void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 {
+	_gdImageBmpCtx(im, out, compression);
+}
+
+static int _gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression){
 	int bitmap_size = 0, info_size, total_size, padding;
 	int i, row, xpos, pixel;
 	int error = 0;
 	unsigned char *uncompressed_row = NULL, *uncompressed_row_start = NULL;
 	FILE *tmpfile_for_compression = NULL;
 	gdIOCtxPtr out_original = NULL;
+	int ret = 1;
 
 	/* No compression if its true colour or we don't support seek */
 	if (im->trueColor) {
@@ -273,6 +282,7 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 		out_original = NULL;
 	}
 
+	ret = 0;
 cleanup:
 	if (tmpfile_for_compression) {
 #ifdef _WIN32
@@ -286,7 +296,7 @@ cleanup:
 	if (out_original) {
 		out_original->gd_free(out_original);
 	}
-	return;
+	return ret;
 }
 
 static int compress_row(unsigned char *row, int length)
@@ -350,9 +360,7 @@ static int compress_row(unsigned char *row, int length)
 	}
 
 	if (compressed_run) {
-		if (rle_type == BMP_RLE_TYPE_RLE) {
-			compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
-		}
+		compressed_length += build_rle_packet(row, rle_type, compressed_run, uncompressed_row);
 	}
 
 	gdFree(uncompressed_start);

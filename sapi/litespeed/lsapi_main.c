@@ -591,7 +591,7 @@ static int sapi_lsapi_activate(void)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.9",
+    "LiteSpeed V8.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1272,11 +1272,7 @@ static int cli_main( int argc, char * argv[] )
                 break;
             case 'v':
                 if (php_request_startup() != FAILURE) {
-#if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+                    php_print_version(&sapi_module);
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();
 #else
@@ -1398,6 +1394,8 @@ void start_children( int children )
             pid = fork();
             switch( pid ) {
             case 0: /* children process */
+
+                php_child_init();
 
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
@@ -1682,11 +1680,11 @@ PHP_FUNCTION(litespeed_response_headers)
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
     if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	    RETURN_THROWS();
+    }
 
-    if (!&SG(sapi_headers).headers) {
-        RETURN_FALSE;
+    if (!zend_llist_count(&SG(sapi_headers).headers)) {
+	    RETURN_FALSE;
     }
     array_init(return_value);
 

@@ -39,31 +39,13 @@ enum mysqli_status {
 };
 
 typedef struct {
-	char		*val;
-	zend_ulong		buflen;
-	zend_ulong		output_len;
-	zend_ulong		type;
-} VAR_BUFFER;
-
-typedef struct {
-	unsigned int	var_cnt;
-	VAR_BUFFER		*buf;
-	zval			*vars;
-	my_bool			*is_null;
-} BIND_BUFFER;
-
-typedef struct {
 	MYSQL_STMT	*stmt;
-	BIND_BUFFER	param;
-	BIND_BUFFER	result;
 	char		*query;
 } MY_STMT;
 
 typedef struct {
 	MYSQL			*mysql;
 	zend_string		*hash_key;
-	zval			li_read;
-	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	bool		persistent;
 	int				async_result_fetch_type;
@@ -99,8 +81,8 @@ struct st_mysqli_warning {
 typedef struct _mysqli_property_entry {
 	const char *pname;
 	size_t pname_length;
-	int (*r_func)(mysqli_object *obj, zval *retval, bool quiet);
-	int (*w_func)(mysqli_object *obj, zval *value);
+	zend_result (*r_func)(mysqli_object *obj, zval *retval, bool quiet);
+	zend_result (*w_func)(mysqli_object *obj, zval *value);
 } mysqli_property_entry;
 
 typedef struct {
@@ -177,7 +159,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
@@ -192,7 +174,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	}\
 }
 
-#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
@@ -208,7 +190,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), (__check)); \
 	if (!(__ptr)->mysql) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(Z_OBJCE_P(__id)->name)); \
 		RETURN_THROWS(); \
@@ -217,7 +199,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), (__check)); \
 	ZEND_ASSERT((__ptr)->stmt && "Missing statement?"); \
 }
 
@@ -236,21 +218,21 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
+	unsigned short      		default_port;
+	bool				allow_persistent;
+	bool				allow_local_infile;
+	char				*default_host;
+	char				*default_user;
+	char				*default_pw;
+	char				*default_socket;
+	char				*local_infile_directory;
+	char				*error_msg;
 	zend_long			num_links;
 	zend_long			max_links;
 	zend_long 			num_active_persistent;
 	zend_long 			num_inactive_persistent;
 	zend_long			max_persistent;
-	bool				allow_persistent;
-	zend_ulong			default_port;
-	char				*default_host;
-	char				*default_user;
-	char				*default_pw;
-	char				*default_socket;
-	bool				allow_local_infile;
-	char				*local_infile_directory;
 	zend_long			error_no;
-	char				*error_msg;
 	zend_long			report_mode;
 	bool 				rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)

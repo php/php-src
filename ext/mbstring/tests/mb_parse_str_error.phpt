@@ -2,9 +2,10 @@
 mb_parse_str() error handling
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-mb_internal_encoding('UTF-8');
 
 $queries = array(
   "\x80\x80\x80",

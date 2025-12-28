@@ -19,15 +19,17 @@ var_dump(isset($s[$o2]));
 var_dump(empty($s[$o2]));
 $s[$o2] = null;
 var_dump($s[$o2] ?? new stdClass());
-echo "check isset/empty/contains for null. offsetExists returns true as long as the entry is there.\n";
+echo "check isset/empty/contains/offsetExists for null. offsetExists returns true as long as the entry is there.\n";
 var_dump(isset($s[$o2]));
 var_dump(empty($s[$o2]));
 var_dump($s->contains($o2));
-echo "check isset/empty/contains for false.\n";
+var_dump($s->offsetExists($o2));
+echo "check isset/empty/contains/offsetExists for false.\n";
 $s[$o2] = false;
 var_dump(isset($s[$o2]));
 var_dump(empty($s[$o2]));
 var_dump($s->contains($o2));
+var_dump($s->offsetExists($o2));
 try {
     $s['invalid'] = 123;
 } catch (Error $e) {
@@ -56,18 +58,24 @@ bool(false)
 bool(true)
 object(stdClass)#4 (0) {
 }
-check isset/empty/contains for null. offsetExists returns true as long as the entry is there.
+check isset/empty/contains/offsetExists for null. offsetExists returns true as long as the entry is there.
 bool(true)
 bool(true)
+
+Deprecated: Method SplObjectStorage::contains() is deprecated since 8.5, use method SplObjectStorage::offsetExists() instead in %s on line %d
 bool(true)
-check isset/empty/contains for false.
 bool(true)
+check isset/empty/contains/offsetExists for false.
+bool(true)
+bool(true)
+
+Deprecated: Method SplObjectStorage::contains() is deprecated since 8.5, use method SplObjectStorage::offsetExists() instead in %s on line %d
 bool(true)
 bool(true)
 TypeError: SplObjectStorage::offsetSet(): Argument #1 ($object) must be of type object, string given
 TypeError: SplObjectStorage::offsetExists(): Argument #1 ($object) must be of type object, string given
 
-Notice: Indirect modification of overloaded element of SplObjectStorage has no effect in %s on line 38
+Notice: Indirect modification of overloaded element of SplObjectStorage has no effect in %s on line %d
 object(SplObjectStorage)#1 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {

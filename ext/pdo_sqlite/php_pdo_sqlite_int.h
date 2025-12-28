@@ -30,7 +30,7 @@ struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
 	int argc;
-	const char *funcname;
+	zend_string *funcname;
 
 	/* accelerated callback references */
 	zend_fcall_info_cache func;
@@ -41,7 +41,7 @@ struct pdo_sqlite_func {
 struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
-	const char *name;
+	zend_string *name;
 	zend_fcall_info_cache callback;
 };
 
@@ -50,6 +50,8 @@ typedef struct {
 	pdo_sqlite_error_info einfo;
 	struct pdo_sqlite_func *funcs;
 	struct pdo_sqlite_collation *collations;
+	zend_fcall_info_cache authorizer_fcc;
+	enum pdo_sqlite_transaction_mode transaction_mode;
 } pdo_sqlite_db_handle;
 
 typedef struct {
@@ -72,7 +74,10 @@ extern const struct pdo_stmt_methods sqlite_stmt_methods;
 enum {
 	PDO_SQLITE_ATTR_OPEN_FLAGS = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_SQLITE_ATTR_READONLY_STATEMENT,
-	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
+	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES,
+	PDO_SQLITE_ATTR_BUSY_STATEMENT,
+	PDO_SQLITE_ATTR_EXPLAIN_STATEMENT,
+	PDO_SQLITE_ATTR_TRANSACTION_MODE
 };
 
 typedef int pdo_sqlite_create_collation_callback(void*, int, const void*, int, const void*);

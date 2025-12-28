@@ -32,7 +32,7 @@ header_list=
 olddir=$(pwd)
 
 # Go to project root.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../" && pwd -P)" || exit
 
 module_ptrs="$(echo $extensions | $AWK -f ./build/order_by_dep.awk)"
 

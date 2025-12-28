@@ -102,6 +102,9 @@ static zend_result php_ini_on_update_tags(zend_ini_entry *entry, zend_string *ne
 
 static PHP_INI_MH(OnUpdateSessionTags)
 {
+	if (!zend_string_starts_with_literal(new_value, "a=href,area=href,frame=src,form=")) {
+		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.trans_sid_tags INI setting is deprecated");
+	}
 	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
@@ -152,6 +155,9 @@ static zend_result php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *n
 
 static PHP_INI_MH(OnUpdateSessionHosts)
 {
+	if (ZSTR_LEN(new_value) != 0) {
+		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.trans_sid_hosts INI setting is deprecated");
+	}
 	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
@@ -182,7 +188,7 @@ alphadash = ([a-zA-Z] | "-");
 #define YYLIMIT q
 #define YYMARKER r
 
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator, int type)
+static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const zend_string *separator, int type)
 {
 	php_url *url_parts;
 
@@ -265,7 +271,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	smart_str_appendc(dest, '?');
 	if (url_parts->query) {
 		smart_str_appends(dest, ZSTR_VAL(url_parts->query));
-		smart_str_appends(dest, separator);
+		smart_str_append(dest, separator);
 		smart_str_append_smart_str(dest, url_app);
 	} else {
 		smart_str_append_smart_str(dest, url_app);
@@ -695,7 +701,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 				len = UINT_MAX;
 		}
 		*handled_output_len = len;
-	} else if (ZSTR_LEN(url_state->url_app.s) == 0) {
+	} else {
 		url_adapt_state_ex_t *ctx = url_state;
 		if (ctx->buf.s && ZSTR_LEN(ctx->buf.s)) {
 			smart_str_append(&ctx->result, ctx->buf.s);
@@ -709,8 +715,6 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 		} else {
 			*handled_output = estrndup(output, *handled_output_len = output_len);
 		}
-	} else {
-		*handled_output = NULL;
 	}
 }
 
@@ -751,7 +755,7 @@ static inline void php_url_scanner_add_var_impl(const char *name, size_t name_le
 	}
 
 	if (url_state->url_app.s && ZSTR_LEN(url_state->url_app.s) != 0) {
-		smart_str_appends(&url_state->url_app, PG(arg_separator).output);
+		smart_str_append(&url_state->url_app, PG(arg_separator).output);
 	}
 
 	if (encode) {
@@ -896,9 +900,9 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 	/* Get end of url var */
 	limit = ZSTR_VAL(url_state->url_app.s) + ZSTR_LEN(url_state->url_app.s);
 	end = start + ZSTR_LEN(url_app.s);
-	separator_len = strlen(PG(arg_separator).output);
+	separator_len = ZSTR_LEN(PG(arg_separator).output);
 	while (end < limit) {
-		if (!memcmp(end, PG(arg_separator).output, separator_len)) {
+		if (!memcmp(end, ZSTR_VAL(PG(arg_separator).output), separator_len)) {
 			end += separator_len;
 			sep_removed = 1;
 			break;
@@ -912,8 +916,8 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 	}
 	/* Check preceding separator */
 	if (!sep_removed
-		&& (size_t)(start - PG(arg_separator).output) >= separator_len
-		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {
+		&& (size_t)(start - ZSTR_VAL(PG(arg_separator).output)) >= separator_len
+		&& !memcmp(start - separator_len, ZSTR_VAL(PG(arg_separator).output), separator_len)) {
 		start -= separator_len;
 	}
 	/* Remove partially */

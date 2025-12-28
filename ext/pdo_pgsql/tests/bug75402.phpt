@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #75402 Possible Memory Leak using PDO::CURSOR_SCROLL option
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

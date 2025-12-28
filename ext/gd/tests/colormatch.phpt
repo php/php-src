@@ -15,8 +15,6 @@ try {
 }
 
 echo "ok\n";
-
-imagedestroy($im);
 ?>
 --EXPECT--
 imagecolormatch(): Argument #2 ($image2) must have at least one color

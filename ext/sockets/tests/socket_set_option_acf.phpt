@@ -21,17 +21,16 @@ if (!$socket) {
 }
 try {
 	var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ACCEPTFILTER, 1));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 socket_listen($socket);
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ACCEPTFILTER, "httpready"));
 var_dump(socket_get_option( $socket, SOL_SOCKET, SO_ACCEPTFILTER));
 socket_close($socket);
 ?>
---EXPECTF--
-Warning: socket_set_option(): Invalid filter argument type in %s on line %d
-bool(false)
+--EXPECT--
+TypeError: socket_set_option(): Argument #4 ($value) must be of type string when argument #3 ($option) is SO_ACCEPTFILTER, int given
 bool(true)
 array(1) {
   ["af_name"]=>

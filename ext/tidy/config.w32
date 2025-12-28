@@ -21,6 +21,7 @@ if (PHP_TIDY != "no") {
 		AC_DEFINE('HAVE_TIDY_H', 1, "Define to 1 if you have the <tidy.h> header file.")
 		AC_DEFINE('HAVE_TIDYOPTGETDOC', 1, "Define to 1 if Tidy library has the 'tidyOptGetDoc' function.")
 		AC_DEFINE('HAVE_TIDYRELEASEDATE', 1, "Define to 1 if Tidy library has the 'tidyReleaseDate' function.")
+		AC_DEFINE('HAVE_TIDYOPTGETCATEGORY', 1, "Define to 1 if Tidy library has the 'tidyOptGetCategory' function and supports the 'TidyInternalCategory' enumeration.")
 		ADD_FLAG('CFLAGS_TIDY', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 		if (!PHP_TIDY_SHARED) {
 			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");

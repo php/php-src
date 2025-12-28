@@ -72,5 +72,5 @@ array(26) {
   ["blocks"]=>
   int(%i)
 }
-fstat(): supplied resource is not a valid stream resource
+fstat(): Argument #1 ($stream) must be an open stream resource
 Done

@@ -131,8 +131,10 @@ static void _php_cal_info(int cal, zval *ret)
 	calendar = &cal_conversion_table[cal];
 	array_init(ret);
 
-	array_init(&months);
-	array_init(&smonths);
+	array_init_size(&months, calendar->num_months + 1);
+	array_init_size(&smonths, calendar->num_months + 1);
+	zend_hash_real_init_packed(Z_ARRVAL(months));
+	zend_hash_real_init_packed(Z_ARRVAL(smonths));
 
 	for (i = 1; i <= calendar->num_months; i++) {
 		add_index_string(&months, i, calendar->month_name_long[i]);
@@ -160,7 +162,8 @@ PHP_FUNCTION(cal_info)
 		int i;
 		zval val;
 
-		array_init(return_value);
+		array_init_size(return_value, CAL_NUM_CALS);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 		for (i = 0; i < CAL_NUM_CALS; i++) {
 			_php_cal_info(i, &val);
@@ -191,6 +194,16 @@ PHP_FUNCTION(cal_days_in_month)
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
 		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(year > INT32_MAX - 1)) {
+		zend_argument_value_error(3, "must be less than %d", INT32_MAX - 1);
 		RETURN_THROWS();
 	}
 
@@ -236,6 +249,21 @@ PHP_FUNCTION(cal_to_jd)
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
 		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(day))) {
+		zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(year > INT32_MAX - 1)) {
+		zend_argument_value_error(4, "must be less than %d", INT32_MAX - 1);
 		RETURN_THROWS();
 	}
 
@@ -398,7 +426,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 		n -= 400;
 	}
 
-/* meot (hundreads) case */
+/* meot (hundreds) case */
 	if (n >= 100) {
 		*p = alef_bet[18 + n / 100];
 		p++;
@@ -452,7 +480,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 PHP_FUNCTION(jdtojewish)
 {
 	zend_long julday, fl = 0;
-	bool heb   = 0;
+	bool heb = false;
 	int year, month, day;
 	char *dayp, *yearp;
 
@@ -487,6 +515,11 @@ PHP_FUNCTION(jewishtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(year)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
 

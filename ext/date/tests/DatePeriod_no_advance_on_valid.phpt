@@ -3,8 +3,8 @@ Date Period iterators do not advance on valid()
 --FILE--
 <?php
 
-$start = DateTime::createFromFormat('Y-m-d', '2022-01-01');
-$end = DateTime::createFromFormat('Y-m-d', '2022-01-04');
+$start = DateTime::createFromFormat('Y-m-d H:i:s', '2022-01-01 00:00:00');
+$end = DateTime::createFromFormat('Y-m-d H:i:s', '2022-01-04 00:00:00');
 $interval = DateInterval::createFromDateString('1 day');
 $period = new DatePeriod($start, $interval, $end);
 $iterator = $period->getIterator();

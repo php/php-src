@@ -32,6 +32,7 @@
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
+#include "main/php_main.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
@@ -93,7 +94,7 @@ typedef cpuset_t *cpu_set_t;
 #elif defined(HAVE_PSET_BIND)
 #include <sys/pset.h>
 typedef psetid_t cpu_set_t;
- #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, (p <= 0 ? getpid() : p), &m)
+ #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, p, &m)
  #define sched_setaffinity(p, c, m) pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL)
  #define PCNTL_CPUSET(mask) mask
  #define PCNTL_CPU_ISSET(i, mask) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
@@ -125,8 +126,18 @@ typedef psetid_t cpu_set_t;
 #include <pthread/qos.h>
 #endif
 
-#ifdef HAVE_PIDFD_OPEN
-#include <sys/syscall.h>
+#if defined(__linux__) && defined(HAVE_SYSCALL)
+#  include <sys/syscall.h>
+#  if defined(HAVE_DECL_SYS_WAITID) && HAVE_DECL_SYS_WAITID == 1
+#    define HAVE_LINUX_RAW_SYSCALL_WAITID 1
+#  endif
+#  if defined(HAVE_DECL_SYS_PIDFD_OPEN) && HAVE_DECL_SYS_PIDFD_OPEN == 1
+#    define HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN 1
+#  endif
+#endif
+
+#if defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_FORKX
@@ -153,7 +164,7 @@ zend_module_entry pcntl_module_entry = {
 	"pcntl",
 	ext_functions,
 	PHP_MINIT(pcntl),
-	PHP_MSHUTDOWN(pcntl),
+	NULL,
 	PHP_RINIT(pcntl),
 	PHP_RSHUTDOWN(pcntl),
 	PHP_MINFO(pcntl),
@@ -217,11 +228,6 @@ PHP_MINIT_FUNCTION(pcntl)
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
 
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(pcntl)
-{
 	return SUCCESS;
 }
 
@@ -292,7 +298,7 @@ PHP_FUNCTION(pcntl_fork)
 
 		}
 	} else if (id == 0) {
-		zend_max_execution_timer_init();
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -406,19 +412,49 @@ PHP_FUNCTION(pcntl_waitid)
 	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
+	zval *z_rusage = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(0, 4)
+	siginfo_t siginfo;
+	int status;
+
+	ZEND_PARSE_PARAMETERS_START(0, 5)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(idtype)
 		Z_PARAM_LONG_OR_NULL(id, id_is_null)
 		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
+		Z_PARAM_ZVAL(z_rusage)
 	ZEND_PARSE_PARAMETERS_END();
 
 	errno = 0;
-	siginfo_t siginfo;
+	memset(&siginfo, 0, sizeof(siginfo_t));
 
-	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#if defined(HAVE_WAIT6) || defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+	if (z_rusage) {
+		z_rusage = zend_try_array_init(z_rusage);
+		if (!z_rusage) {
+			RETURN_THROWS();
+		}
+		struct rusage rusage;
+# if defined(HAVE_WAIT6) /* FreeBSD */
+		struct __wrusage wrusage;
+		memset(&wrusage, 0, sizeof(struct __wrusage));
+		pid_t pid = wait6((idtype_t) idtype, (id_t) id, &status, (int) options, &wrusage, &siginfo);
+		status = pid > 0 ? 0 : pid;
+		memcpy(&rusage, &wrusage.wru_self, sizeof(struct rusage));
+# else /* Linux */
+		memset(&rusage, 0, sizeof(struct rusage));
+		status = syscall(SYS_waitid, (idtype_t) idtype, (id_t) id, &siginfo, (int) options, &rusage);
+# endif
+		if (status == 0) {
+			PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
+		}
+	} else { /* POSIX */
+		status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+	}
+#else /* POSIX */
+	status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#endif
 
 	if (status == -1) {
 		PCNTL_G(last_error) = errno;
@@ -625,44 +661,44 @@ PHP_FUNCTION(pcntl_wstopsig)
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
-	zval *args = NULL, *envs = NULL;
+	zval *args = NULL;
+	HashTable *env_vars_ht = NULL;
 	zval *element;
-	HashTable *args_hash, *envs_hash;
-	int argc = 0, argi = 0;
-	int envc = 0, envi = 0;
 	char **argv = NULL, **envp = NULL;
-	char **current_arg, **pair;
-	size_t pair_length;
-	zend_string *key;
 	char *path;
 	size_t path_len;
-	zend_ulong key_num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(path, path_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(args)
-		Z_PARAM_ARRAY(envs)
+		Z_PARAM_ARRAY_HT(env_vars_ht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (args != NULL) {
+		// TODO Check array is a list?
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
-		args_hash = Z_ARRVAL_P(args);
-		argc = zend_hash_num_elements(args_hash);
+		const HashTable *args_ht = Z_ARRVAL_P(args);
+		uint32_t argc = zend_hash_num_elements(args_ht);
 
+		/* We want a NULL terminated array of char* with the first entry being the path,
+		 * followed by the arguments */
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
-		*argv = path;
-		current_arg = argv+1;
-		ZEND_HASH_FOREACH_VAL(args_hash, element) {
-			if (argi >= argc) break;
+		argv[0] = path;
+		char **current_arg = argv+1;
+		ZEND_HASH_FOREACH_VAL(args_ht, element) {
 			if (!try_convert_to_string(element)) {
+				efree(argv);
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(element))) {
+				zend_argument_value_error(2, "individual argument must not contain null bytes");
 				efree(argv);
 				RETURN_THROWS();
 			}
 
 			*current_arg = Z_STRVAL_P(element);
-			argi++;
 			current_arg++;
 		} ZEND_HASH_FOREACH_END();
 		*current_arg = NULL;
@@ -672,39 +708,51 @@ PHP_FUNCTION(pcntl_exec)
 		argv[1] = NULL;
 	}
 
-	if ( ZEND_NUM_ARGS() == 3 ) {
+	if (env_vars_ht != NULL) {
 		/* Build environment pair list */
-		SEPARATE_ARRAY(envs);
-		envs_hash = Z_ARRVAL_P(envs);
-		envc = zend_hash_num_elements(envs_hash);
+		char **pair;
+		zend_ulong key_num;
+		zend_string *key;
 
-		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
-		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
-			if (envi >= envc) break;
+		/* We want a NULL terminated array of char* */
+		size_t envp_len = zend_hash_num_elements(env_vars_ht) + 1;
+		pair = envp = safe_emalloc(envp_len, sizeof(char *), 0);
+		memset(envp, 0, sizeof(char *) * envp_len);
+		ZEND_HASH_FOREACH_KEY_VAL(env_vars_ht, key_num, key, element) {
+			zend_string *element_str = zval_try_get_string(element);
+			if (element_str == NULL) {
+				goto cleanup_env_vars;
+			}
+
+			if (zend_str_has_nul_byte(element_str)) {
+				zend_argument_value_error(3, "value for environment variable must not contain null bytes");
+				zend_string_release_ex(element_str, false);
+				goto cleanup_env_vars;
+			}
+
+			/* putenv() allows integer environment variables */
 			if (!key) {
-				key = zend_long_to_str(key_num);
+				key = zend_long_to_str((zend_long) key_num);
 			} else {
+				if (zend_str_has_nul_byte(key)) {
+					zend_argument_value_error(3, "name for environment variable must not contain null bytes");
+					zend_string_release_ex(element_str, false);
+					goto cleanup_env_vars;
+				}
 				zend_string_addref(key);
 			}
 
-			if (!try_convert_to_string(element)) {
-				zend_string_release(key);
-				efree(argv);
-				efree(envp);
-				RETURN_THROWS();
-			}
-
 			/* Length of element + equal sign + length of key + null */
-			ZEND_ASSERT(Z_STRLEN_P(element) < SIZE_MAX && ZSTR_LEN(key) < SIZE_MAX);
-			*pair = safe_emalloc(Z_STRLEN_P(element) + 1, sizeof(char), ZSTR_LEN(key) + 1);
-			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
-			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-			strlcat(*pair, "=", pair_length);
-			strlcat(*pair, Z_STRVAL_P(element), pair_length);
+			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
+			/* Copy key=element + final null byte into buffer */
+			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
+			(*pair)[ZSTR_LEN(key)] = '=';
+			/* Copy null byte */
+			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
 
 			/* Cleanup */
-			zend_string_release_ex(key, 0);
-			envi++;
+			zend_string_release_ex(key, false);
+			zend_string_release_ex(element_str, false);
 			pair++;
 		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
@@ -714,6 +762,7 @@ PHP_FUNCTION(pcntl_exec)
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 
+cleanup_env_vars:
 		/* Cleanup */
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
 		efree(envp);
@@ -860,7 +909,7 @@ static bool php_pcntl_set_user_signal_infos(
 	bool allow_empty_signal_array
 ) {
 	if (!allow_empty_signal_array && zend_hash_num_elements(user_signals) == 0) {
-		zend_argument_value_error(arg_num, "cannot be empty");
+		zend_argument_must_not_be_empty_error(arg_num);
 		return false;
 	}
 
@@ -873,7 +922,7 @@ static bool php_pcntl_set_user_signal_infos(
 
 	zval *user_signal_no;
 	ZEND_HASH_FOREACH_VAL(user_signals, user_signal_no) {
-		bool failed = true;
+		bool failed;
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
@@ -947,6 +996,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			RETURN_THROWS();
 		}
 
+		zend_hash_real_init_packed(Z_ARRVAL_P(user_old_set));
 		for (unsigned int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
 			if (sigismember(&old_set, signal_no) != 1) {
 				continue;
@@ -1306,7 +1356,7 @@ static void pcntl_signal_handler(int signo)
 		PCNTL_G(head) = psig;
 	}
 	PCNTL_G(tail) = psig;
-	PCNTL_G(pending_signals) = 1;
+	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
 		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
@@ -1337,7 +1387,7 @@ void pcntl_signal_dispatch(void)
 	zend_fiber_switch_block();
 
 	/* Prevent reentrant handler calls */
-	PCNTL_G(processing_signal_queue) = 1;
+	PCNTL_G(processing_signal_queue) = true;
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
@@ -1346,7 +1396,6 @@ void pcntl_signal_dispatch(void)
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
-				ZVAL_NULL(&retval);
 				ZVAL_LONG(&params[0], queue->signo);
 #ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
@@ -1356,7 +1405,6 @@ void pcntl_signal_dispatch(void)
 #endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
-				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -1371,10 +1419,10 @@ void pcntl_signal_dispatch(void)
 		queue = next;
 	}
 
-	PCNTL_G(pending_signals) = 0;
+	PCNTL_G(pending_signals) = false;
 
 	/* Re-enable queue */
-	PCNTL_G(processing_signal_queue) = 0;
+	PCNTL_G(processing_signal_queue) = false;
 
 	/* Re-enable fiber switching */
 	zend_fiber_switch_unblock();
@@ -1512,6 +1560,8 @@ PHP_FUNCTION(pcntl_rfork)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1555,6 +1605,8 @@ PHP_FUNCTION(pcntl_forkx)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1562,7 +1614,7 @@ PHP_FUNCTION(pcntl_forkx)
 #endif
 /* }}} */
 
-#ifdef HAVE_PIDFD_OPEN
+#ifdef HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN
 // The `pidfd_open` syscall is available since 5.3
 // and `setns` since 3.0.
 PHP_FUNCTION(pcntl_setns)
@@ -1671,6 +1723,7 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 
 	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (zend_ulong i = 0; i < maxcpus; i ++) {
 		if (PCNTL_CPU_ISSET(i, mask)) {
@@ -1693,8 +1746,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		Z_PARAM_ARRAY(hmask)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Why are the arguments optional?
 	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -1717,9 +1771,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 				cpu = (zend_long)tmp;
 			} else {
-				zend_string *wcpu = zval_get_string_func(ncpu);
-				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
-				zend_string_release(wcpu);
+				zend_argument_type_error(2, "value must be of type int|string, %s given", zend_zval_value_name(ncpu));
 				PCNTL_CPU_DESTROY(mask);
 				RETURN_THROWS();
 			}

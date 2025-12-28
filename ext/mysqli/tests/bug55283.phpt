@@ -43,8 +43,6 @@ $link->close();
 --FILE--
 <?php
     require_once 'connect.inc';
-    $db1 = new mysqli();
-
 
     $flags = MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT;
 

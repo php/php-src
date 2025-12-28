@@ -145,10 +145,10 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED &&            \
 		(YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW))) {\
 		zend_ini_copy_typed_value(ini_lval, type, str, len);       \
-		Z_EXTRA_P(ini_lval) = 0;                                   \
 	} else {                                                       \
 		zend_ini_copy_value(ini_lval, str, len);                   \
 	}                                                              \
+	Z_EXTRA_P(ini_lval) = 0;                                       \
 	return type;                                                   \
 }
 
@@ -230,7 +230,7 @@ void shutdown_ini_scanner(void)
 /* }}} */
 
 /* {{{ zend_ini_scanner_get_lineno() */
-ZEND_COLD int zend_ini_scanner_get_lineno(void)
+ZEND_COLD uint32_t zend_ini_scanner_get_lineno(void)
 {
 	return SCNG(lineno);
 }
@@ -352,16 +352,16 @@ restart:
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM [0-9]+
-DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
+DNUM ([0-9]*[.][0-9]+)|([0-9]+[.][0-9]*)
 NUMBER [-]?{LNUM}|{DNUM}
 ANY_CHAR (.|[\n\t])
 NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
-LABEL_CHAR [^=\n\r\t;&|^$~(){}!"\[\]\x00]
+LABEL_CHAR [^=\n\r\t;&|^$~(){}!"[\]\x00]
 LABEL ({LABEL_CHAR}+)
-TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
+TOKENS [:,.[\]"'()&|^+-/*=%$!~<>?@{}]
 OPERATORS [&|^~()!]
 DOLLAR_CURLY "${"
 

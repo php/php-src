@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 30ed66d5e97f6615a461d39f40f85a18ba618711 */
+ * Stub hash: f9ba28767b256dbcea087a65aa4bb5f5b509d6f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -28,33 +28,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_cursor, 0, 1, MAY_BE_STRING
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_SQLDATASOURCES)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_data_source, 0, 2, MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, fetch_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 #define arginfo_odbc_exec arginfo_odbc_prepare
 
 #define arginfo_odbc_do arginfo_odbc_prepare
 
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_into, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_INFO(1, array)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
@@ -95,11 +89,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_num_rows, 0, 1, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 ZEND_END_ARG_INFO()
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_next_result, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 #define arginfo_odbc_num_fields arginfo_odbc_num_rows
 
@@ -176,7 +168,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_primarykeys, 0, 4, Odbc
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_procedurecolumns, 0, 1, Odbc\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
@@ -184,18 +175,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_procedurecolumns, 0, 1,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, procedure, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, column, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_procedures, 0, 1, Odbc\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, catalog, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, procedure, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_foreignkeys, 0, 7, Odbc\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, pk_catalog, IS_STRING, 1)
@@ -205,7 +192,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_foreignkeys, 0, 7, Odbc
 	ZEND_ARG_TYPE_INFO(0, fk_schema, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, fk_table, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_specialcolumns, 0, 7, Odbc\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
@@ -226,16 +212,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_statistics, 0, 6, Odbc\
 	ZEND_ARG_TYPE_INFO(0, accuracy, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_tableprivileges, 0, 4, Odbc\\Result, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
-	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_odbc_tableprivileges arginfo_odbc_primarykeys
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_columnprivileges, 0, 5, Odbc\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, odbc, Odbc\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, catalog, IS_STRING, 1)
@@ -243,7 +221,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_columnprivileges, 0, 5,
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_is_quoted, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -261,16 +238,10 @@ ZEND_FUNCTION(odbc_longreadlen);
 ZEND_FUNCTION(odbc_prepare);
 ZEND_FUNCTION(odbc_execute);
 ZEND_FUNCTION(odbc_cursor);
-#if defined(HAVE_SQLDATASOURCES)
 ZEND_FUNCTION(odbc_data_source);
-#endif
 ZEND_FUNCTION(odbc_exec);
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_FUNCTION(odbc_fetch_object);
-#endif
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_FUNCTION(odbc_fetch_array);
-#endif
 ZEND_FUNCTION(odbc_fetch_into);
 ZEND_FUNCTION(odbc_fetch_row);
 ZEND_FUNCTION(odbc_result);
@@ -280,9 +251,7 @@ ZEND_FUNCTION(odbc_connect);
 ZEND_FUNCTION(odbc_pconnect);
 ZEND_FUNCTION(odbc_close);
 ZEND_FUNCTION(odbc_num_rows);
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 ZEND_FUNCTION(odbc_next_result);
-#endif
 ZEND_FUNCTION(odbc_num_fields);
 ZEND_FUNCTION(odbc_field_name);
 ZEND_FUNCTION(odbc_field_type);
@@ -299,23 +268,13 @@ ZEND_FUNCTION(odbc_tables);
 ZEND_FUNCTION(odbc_columns);
 ZEND_FUNCTION(odbc_gettypeinfo);
 ZEND_FUNCTION(odbc_primarykeys);
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_procedurecolumns);
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_procedures);
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_foreignkeys);
-#endif
 ZEND_FUNCTION(odbc_specialcolumns);
 ZEND_FUNCTION(odbc_statistics);
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_tableprivileges);
-#endif
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_columnprivileges);
-#endif
 ZEND_FUNCTION(odbc_connection_string_is_quoted);
 ZEND_FUNCTION(odbc_connection_string_should_quote);
 ZEND_FUNCTION(odbc_connection_string_quote);
@@ -327,17 +286,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_prepare, arginfo_odbc_prepare)
 	ZEND_FE(odbc_execute, arginfo_odbc_execute)
 	ZEND_FE(odbc_cursor, arginfo_odbc_cursor)
-#if defined(HAVE_SQLDATASOURCES)
 	ZEND_FE(odbc_data_source, arginfo_odbc_data_source)
-#endif
 	ZEND_FE(odbc_exec, arginfo_odbc_exec)
 	ZEND_RAW_FENTRY("odbc_do", zif_odbc_exec, arginfo_odbc_do, 0, NULL, NULL)
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 	ZEND_FE(odbc_fetch_object, arginfo_odbc_fetch_object)
-#endif
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 	ZEND_FE(odbc_fetch_array, arginfo_odbc_fetch_array)
-#endif
 	ZEND_FE(odbc_fetch_into, arginfo_odbc_fetch_into)
 	ZEND_FE(odbc_fetch_row, arginfo_odbc_fetch_row)
 	ZEND_FE(odbc_result, arginfo_odbc_result)
@@ -347,9 +300,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_pconnect, arginfo_odbc_pconnect)
 	ZEND_FE(odbc_close, arginfo_odbc_close)
 	ZEND_FE(odbc_num_rows, arginfo_odbc_num_rows)
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 	ZEND_FE(odbc_next_result, arginfo_odbc_next_result)
-#endif
 	ZEND_FE(odbc_num_fields, arginfo_odbc_num_fields)
 	ZEND_FE(odbc_field_name, arginfo_odbc_field_name)
 	ZEND_FE(odbc_field_type, arginfo_odbc_field_type)
@@ -367,34 +318,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_columns, arginfo_odbc_columns)
 	ZEND_FE(odbc_gettypeinfo, arginfo_odbc_gettypeinfo)
 	ZEND_FE(odbc_primarykeys, arginfo_odbc_primarykeys)
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_procedurecolumns, arginfo_odbc_procedurecolumns)
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_procedures, arginfo_odbc_procedures)
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_foreignkeys, arginfo_odbc_foreignkeys)
-#endif
 	ZEND_FE(odbc_specialcolumns, arginfo_odbc_specialcolumns)
 	ZEND_FE(odbc_statistics, arginfo_odbc_statistics)
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_tableprivileges, arginfo_odbc_tableprivileges)
-#endif
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_columnprivileges, arginfo_odbc_columnprivileges)
-#endif
 	ZEND_FE(odbc_connection_string_is_quoted, arginfo_odbc_connection_string_is_quoted)
 	ZEND_FE(odbc_connection_string_should_quote, arginfo_odbc_connection_string_should_quote)
 	ZEND_FE(odbc_connection_string_quote, arginfo_odbc_connection_string_quote)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Odbc_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Odbc_Result_methods[] = {
 	ZEND_FE_END
 };
 
@@ -440,64 +373,27 @@ static void register_odbc_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SQL_DATE", SQL_DATE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQL_TIME", SQL_TIME, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQL_TIMESTAMP", SQL_TIMESTAMP, CONST_PERSISTENT);
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_TYPE_DATE", SQL_TYPE_DATE, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_TYPE_TIME", SQL_TYPE_TIME, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_TYPE_TIMESTAMP", SQL_TYPE_TIMESTAMP, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_WCHAR", SQL_WCHAR, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_WVARCHAR", SQL_WVARCHAR, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_WLONGVARCHAR", SQL_WLONGVARCHAR, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_BEST_ROWID", SQL_BEST_ROWID, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_ROWVER", SQL_ROWVER, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_SCOPE_CURROW", SQL_SCOPE_CURROW, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_SCOPE_TRANSACTION", SQL_SCOPE_TRANSACTION, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_SCOPE_SESSION", SQL_SCOPE_SESSION, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_NO_NULLS", SQL_NO_NULLS, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_NULLABLE", SQL_NULLABLE, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_INDEX_UNIQUE", SQL_INDEX_UNIQUE, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_INDEX_ALL", SQL_INDEX_ALL, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_ENSURE", SQL_ENSURE, CONST_PERSISTENT);
-#endif
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 	REGISTER_LONG_CONSTANT("SQL_QUICK", SQL_QUICK, CONST_PERSISTENT);
-#endif
 
 
-	zend_attribute *attribute_Deprecated_func_odbc_result_all_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_result_all", sizeof("odbc_result_all") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
-	zval attribute_Deprecated_func_odbc_result_all_0_arg0;
-	zend_string *attribute_Deprecated_func_odbc_result_all_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_odbc_result_all_0_arg0, attribute_Deprecated_func_odbc_result_all_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_odbc_result_all_0->args[0].value, &attribute_Deprecated_func_odbc_result_all_0_arg0);
+	zend_attribute *attribute_Deprecated_func_odbc_result_all_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_result_all", sizeof("odbc_result_all") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_odbc_result_all_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_odbc_result_all_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_connect", sizeof("odbc_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
@@ -509,9 +405,8 @@ static zend_class_entry *register_class_Odbc_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Connection", class_Odbc_Connection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -520,9 +415,8 @@ static zend_class_entry *register_class_Odbc_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Result", class_Odbc_Result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Result", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

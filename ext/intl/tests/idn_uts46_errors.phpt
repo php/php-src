@@ -9,7 +9,6 @@ intl
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 echo "=> PHP level errors", "\n";
 
 echo "bad variant:", "\n";
@@ -48,7 +47,7 @@ var_dump($foo["errors"]==IDNA_ERROR_CONTEXTJ);
 bad variant:
 ValueError: idn_to_ascii(): Argument #2 ($flags) must be INTL_IDNA_VARIANT_UTS46
 empty domain:
-ValueError: idn_to_ascii(): Argument #1 ($domain) cannot be empty
+ValueError: idn_to_ascii(): Argument #1 ($domain) must not be empty
 with error, but no details arg:
 bool(false)
 with error, with details arg:

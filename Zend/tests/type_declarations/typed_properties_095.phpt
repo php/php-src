@@ -75,6 +75,8 @@ object(_ZendTestClass)#1 (3) {
   uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
   uninitialized(int)
+  ["finalProp"]=>
+  uninitialized(int)
   ["dnfProperty"]=>
   uninitialized(Iterator|(Traversable&Countable))
 }
@@ -92,6 +94,8 @@ object(Test)#4 (3) {
   ["classIntersectionProp"]=>
   uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
+  uninitialized(int)
+  ["finalProp"]=>
   uninitialized(int)
   ["dnfProperty"]=>
   uninitialized(Iterator|(Traversable&Countable))

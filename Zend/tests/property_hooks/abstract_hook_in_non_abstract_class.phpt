@@ -12,4 +12,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Class Test contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Test::$prop::get) in %s on line %d
+Fatal error: Class Test contains 1 abstract method and must therefore be declared abstract or implement the remaining method (Test::$prop::get) in %s on line %d

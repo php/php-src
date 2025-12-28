@@ -98,23 +98,23 @@ string(87) "Decrement on type null has no effect, this will change in the next m
 NULL
 Empty string
 POST INC
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(0) ""
 POST DEC
 string(54) "Decrement on empty string is deprecated as non-numeric"
 string(0) ""
 PRE INC
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(1) "1"
 PRE DEC
 string(54) "Decrement on empty string is deprecated as non-numeric"
 int(-1)
 Non fill ASCII (only ++)
 POST INC
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(4) " ad "
 PRE INC
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(4) " ad "
 Bool
 POST INC

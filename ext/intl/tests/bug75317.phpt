@@ -1,5 +1,5 @@
 --TEST--
-Bug #75317 (UConverter::setDestinationEncoding changes source instead of destinatination)
+Bug #75317 (UConverter::setDestinationEncoding changes source instead of destination)
 --EXTENSIONS--
 intl
 --FILE--

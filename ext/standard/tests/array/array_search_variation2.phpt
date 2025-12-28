@@ -15,7 +15,7 @@ $misc_array = array (
   0 =>"-.08",
   "e" =>"5",
   "y" =>NULL,
-  NULL =>"",
+  '' =>"",
   0,
   TRUE,
   FALSE,

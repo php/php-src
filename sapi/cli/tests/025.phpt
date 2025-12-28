@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 <?php
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
-$output = `$php -n -i`;
+$output = shell_exec("$php -n -i");
 var_dump(str_contains($output, "extension_dir => "));
 
 ?>

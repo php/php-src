@@ -307,7 +307,7 @@ PHPDBG_INFO(literal) /* {{{ */
 	bool in_executor = PHPDBG_G(in_execution) && EG(current_execute_data) && EG(current_execute_data)->func;
 	if (in_executor || PHPDBG_G(ops)) {
 		zend_op_array *ops = in_executor ? &EG(current_execute_data)->func->op_array : PHPDBG_G(ops);
-		int literal = 0, count = ops->last_literal - 1;
+		uint32_t literal = 0, count = ops->last_literal - 1;
 
 		if (ops->function_name) {
 			if (ops->scope) {
@@ -374,7 +374,11 @@ PHPDBG_INFO(memory) /* {{{ */
 static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
 {
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
-	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
+	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface"
+		: (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class"
+		: (ce->ce_flags & ZEND_ACC_ENUM) ? "Enum"
+		: (ce->ce_flags & ZEND_ACC_TRAIT) ? "Trait"
+		: "Class";
 
 	phpdbg_writeln("%s %s %.*s (%d)", visibility, type, (int) ZSTR_LEN(ce->name), ZSTR_VAL(ce->name), zend_hash_num_elements(&ce->function_table));
 } /* }}} */
@@ -399,27 +403,29 @@ PHPDBG_INFO(classes) /* {{{ */
 	phpdbg_notice("User Classes (%d)", zend_hash_num_elements(&classes));
 
 	/* once added, assume that classes are stable... until shutdown. */
-	ZEND_HASH_PACKED_FOREACH_PTR(&classes, ce) {
-		phpdbg_print_class_name(ce);
+	if (HT_IS_INITIALIZED(&classes)) {
+		ZEND_HASH_PACKED_FOREACH_PTR(&classes, ce) {
+			phpdbg_print_class_name(ce);
 
-		if (ce->parent) {
-			if (ce->ce_flags & ZEND_ACC_LINKED) {
-				zend_class_entry *pce = ce->parent;
-				do {
-					phpdbg_out("|-------- ");
-					phpdbg_print_class_name(pce);
-				} while ((pce = pce->parent));
-			} else {
-				phpdbg_writeln("|-------- User Class %s (not yet linked because declaration for parent was not encountered when declaring the class)", ZSTR_VAL(ce->parent_name));
+			if (ce->parent) {
+				if (ce->ce_flags & ZEND_ACC_LINKED) {
+					zend_class_entry *pce = ce->parent;
+					do {
+						phpdbg_out("|-------- ");
+						phpdbg_print_class_name(pce);
+					} while ((pce = pce->parent));
+				} else {
+					phpdbg_writeln("|-------- User Class %s (not yet linked because declaration for parent was not encountered when declaring the class)", ZSTR_VAL(ce->parent_name));
+				}
 			}
-		}
 
-		if (ce->info.user.filename) {
-			phpdbg_writeln("|---- in %s on line %u", ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
-		} else {
-			phpdbg_writeln("|---- no source code");
-		}
-	} ZEND_HASH_FOREACH_END();
+			if (ce->info.user.filename) {
+				phpdbg_writeln("|---- in %s on line %u", ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			} else {
+				phpdbg_writeln("|---- no source code");
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	zend_hash_destroy(&classes);
 
@@ -445,17 +451,19 @@ PHPDBG_INFO(funcs) /* {{{ */
 
 	phpdbg_notice("User Functions (%d)", zend_hash_num_elements(&functions));
 
-	ZEND_HASH_PACKED_FOREACH_PTR(&functions, zf) {
-		zend_op_array *op_array = &zf->op_array;
+	if (HT_IS_INITIALIZED(&functions)) {
+		ZEND_HASH_PACKED_FOREACH_PTR(&functions, zf) {
+			zend_op_array *op_array = &zf->op_array;
 
-		phpdbg_write("|-------- %s", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}");
+			phpdbg_write("|-------- %s", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}");
 
-		if (op_array->filename) {
-			phpdbg_writeln(" in %s on line %d", ZSTR_VAL(op_array->filename), op_array->line_start);
-		} else {
-			phpdbg_writeln(" (no source code)");
-		}
-	} ZEND_HASH_FOREACH_END();
+			if (op_array->filename) {
+				phpdbg_writeln(" in %s on line %d", ZSTR_VAL(op_array->filename), op_array->line_start);
+			} else {
+				phpdbg_writeln(" (no source code)");
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	zend_hash_destroy(&functions);
 

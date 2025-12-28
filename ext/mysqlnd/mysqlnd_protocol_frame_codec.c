@@ -355,9 +355,6 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 				DBG_RETURN(FAIL);
 			}
 			pfc->data->compressed_envelope_packet_no++;
-#ifdef MYSQLND_DUMP_HEADER_N_BODY
-			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (zend_ulong) net_payload_size);
-#endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
 			pfc->data->m.read_compressed_packet_from_stream_and_fill_read_buffer(pfc, vio, net_payload_size, conn_stats, error_info);
 

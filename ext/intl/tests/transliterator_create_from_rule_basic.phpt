@@ -4,7 +4,6 @@ Transliterator::createFromRules (basic)
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $rules = <<<RULES
 α <> y;

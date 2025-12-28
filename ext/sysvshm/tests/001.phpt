@@ -35,7 +35,7 @@ var_dump(ftok(__FILE__,"q"));
 echo "Done\n";
 ?>
 --EXPECTF--
-ftok(): Argument #1 ($filename) cannot be empty
+ftok(): Argument #1 ($filename) must not be empty
 ftok(): Argument #2 ($project_id) must be a single character
 ftok(): Argument #2 ($project_id) must be a single character
 

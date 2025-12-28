@@ -2,6 +2,8 @@
 Test mb_substr() function : usage variations - pass different integers to $length arg
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 /*
@@ -9,8 +11,6 @@ mbstring
  */
 
 echo "*** Testing mb_substr() : usage variations ***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = '+Is an English string'; //21 chars
 

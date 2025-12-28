@@ -29,7 +29,9 @@ extern "C" {
 # endif
 /* Only supported is little endian for any arch on Windows,
    so just fake the same for all. */
-# define __ORDER_LITTLE_ENDIAN__ 1
+# ifndef __ORDER_LITTLE_ENDIAN__
+#  define __ORDER_LITTLE_ENDIAN__ 1
+# endif
 # define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 # ifndef __has_builtin
 #  define __has_builtin(arg) (0)
@@ -152,19 +154,27 @@ typedef enum _ir_type {
 } ir_type;
 
 #ifdef IR_64
-# define IR_SIZE_T     IR_U64
-# define IR_SSIZE_T    IR_I64
-# define IR_UINTPTR_T  IR_U64
-# define IR_INTPTR_T   IR_I64
-# define IR_C_UINTPTR  IR_U64
-# define IR_C_INTPTR   IR_I64
+# define IR_SIZE_T          IR_U64
+# define IR_SSIZE_T         IR_I64
+# define IR_UINTPTR_T       IR_U64
+# define IR_INTPTR_T        IR_I64
+# define IR_C_UINTPTR       IR_U64
+# define IR_C_INTPTR        IR_I64
+# define ir_const_size_t    ir_const_u64
+# define ir_const_ssize_t   ir_const_i64
+# define ir_const_uintptr_t ir_const_u64
+# define ir_const_intptr_t  ir_const_i64
 #else
-# define IR_SIZE_T     IR_U32
-# define IR_SSIZE_T    IR_I32
-# define IR_UINTPTR_T  IR_U32
-# define IR_INTPTR_T   IR_I32
-# define IR_C_UINTPTR  IR_U32
-# define IR_C_INTPTR   IR_I32
+# define IR_SIZE_T          IR_U32
+# define IR_SSIZE_T         IR_I32
+# define IR_UINTPTR_T       IR_U32
+# define IR_INTPTR_T        IR_I32
+# define IR_C_UINTPTR       IR_U32
+# define IR_C_INTPTR        IR_I32
+# define ir_const_size_t    ir_const_u32
+# define ir_const_ssize_t   ir_const_i32
+# define ir_const_uintptr_t ir_const_u32
+# define ir_const_intptr_t  ir_const_i32
 #endif
 
 /* List of IR opcodes
@@ -206,6 +216,7 @@ typedef enum _ir_type {
  * prb - branch probability 1-99 (0 - unspecified): (IF_TRUE, IF_FALSE, CASE_VAL, CASE_DEFAULT)
  * opt - optional number
  * pro - function prototype
+ * lbl - label used as value (a reference to constant): (BEGIN)
  *
  * The order of IR opcodes is carefully selected for efficient folding.
  * - foldable instruction go first
@@ -247,6 +258,8 @@ typedef enum _ir_type {
 	_(UGE,          d2,   def, def, ___) /* unsigned greater or equal   */ \
 	_(ULE,          d2,   def, def, ___) /* unsigned less or equal      */ \
 	_(UGT,          d2,   def, def, ___) /* unsigned greater            */ \
+	_(ORDERED,      d2,   def, def, ___) /* both operands are not NAN   */ \
+	_(UNORDERED,    d2,   def, def, ___) /* one of operands is NAN      */ \
 	\
 	/* arithmetic ops                                                   */ \
 	_(ADD,          d2C,  def, def, ___) /* addition                    */ \
@@ -295,10 +308,13 @@ typedef enum _ir_type {
 	_(COND,	        d3,   def, def, def) /* op1 ? op2 : op3             */ \
 	\
 	/* data-flow and miscellaneous ops                                  */ \
+	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
+	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	_(PHI,          pN,   reg, def, def) /* SSA Phi function            */ \
 	_(COPY,         d1X1, def, opt, ___) /* COPY (last foldable op)     */ \
 	_(PI,           p2,   reg, def, ___) /* e-SSA Pi constraint ???     */ \
-	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
+	_(ARGVAL,       d1X2, def, num, num) /* pass struct arg by value    */ \
+	                                     /* (op2 - size, op3 - align)   */ \
 	/* (USE, RENAME)                                                    */ \
 	\
 	/* data ops                                                         */ \
@@ -307,6 +323,7 @@ typedef enum _ir_type {
 	_(FUNC_ADDR,    r0,   ___, ___, ___) /* constant func ref           */ \
 	_(FUNC,         r0,   ___, ___, ___) /* constant func ref           */ \
 	_(SYM,          r0,   ___, ___, ___) /* constant symbol ref         */ \
+	_(LABEL,        r0,   ___, ___, ___) /* label address ref           */ \
 	_(STR,          r0,   ___, ___, ___) /* constant str ref            */ \
 	\
 	/* call ops                                                         */ \
@@ -318,13 +335,16 @@ typedef enum _ir_type {
 	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
 	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
 	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
-	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
+	_(VLOAD_v,      l2,   src, var, ___) /* volatile variant of VLOAD   */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
+	_(VSTORE_v,     s3,   src, var, def) /* volatile variant of VSTORE  */ \
 	_(RLOAD,        l1X2, src, num, opt) /* load value from register    */ \
 	_(RSTORE,       s2X1, src, def, num) /* store value into register   */ \
 	_(LOAD,         l2,   src, ref, ___) /* load from memory            */ \
+	_(LOAD_v,       l2,   src, ref, ___) /* volatile variant of VLOAD   */ \
 	_(STORE,        s3,   src, ref, def) /* store to memory             */ \
+	_(STORE_v,      s3,   src, ref, def) /* volatile variant of VSTORE  */ \
 	_(TLS,          l1X2, src, num, num) /* thread local variable       */ \
 	_(TRAP,         x1,   src, ___, ___) /* DebugBreak                  */ \
 	/* memory reference ops (A, H, U, S, TMP, STR, NEW, X, V) ???       */ \
@@ -333,7 +353,8 @@ typedef enum _ir_type {
 	_(VA_START,     x2,   src, def, ___) /* va_start(va_list)           */ \
 	_(VA_END,       x2,   src, def, ___) /* va_end(va_list)             */ \
 	_(VA_COPY,      x3,   src, def, def) /* va_copy(dst, stc)           */ \
-	_(VA_ARG,       x2,   src, def, ___) /* va_arg(va_list)             */ \
+	_(VA_ARG,       x2X1, src, def, opt) /* va_arg(va_list)             */ \
+	                                     /* op3 - (size<<3)+log2(align) */ \
 	\
 	/* guards                                                           */ \
 	_(GUARD,        c3,   src, def, def) /* IF without second successor */ \
@@ -345,10 +366,11 @@ typedef enum _ir_type {
 	/* control-flow nodes                                               */ \
 	_(START,        S0X1, ret, ___, ___) /* function start              */ \
 	_(ENTRY,        S1X1, src, num, ___) /* entry with a fake src edge  */ \
-	_(BEGIN,        S1,   src, ___, ___) /* block start                 */ \
+	_(BEGIN,        S1X1, src, lbl, ___) /* block start, optional &&lbl */ \
 	_(IF_TRUE,      S1X1, src, prb, ___) /* IF TRUE proj.               */ \
 	_(IF_FALSE,     S1X1, src, prb, ___) /* IF FALSE proj.              */ \
 	_(CASE_VAL,     S2X1, src, def, prb) /* switch proj.                */ \
+	_(CASE_RANGE,   S3,   src, def, def) /* switch proj.                */ \
 	_(CASE_DEFAULT, S1X1, src, prb, ___) /* switch proj.                */ \
 	_(MERGE,        SN,   src, src, src) /* control merge               */ \
 	_(LOOP_BEGIN,   SN,   src, src, src) /* loop start                  */ \
@@ -356,8 +378,9 @@ typedef enum _ir_type {
 	_(LOOP_END,     E1,   src, ___, ___) /* loop end                    */ \
 	_(IF,           E2,   src, def, ___) /* conditional control split   */ \
 	_(SWITCH,       E2,   src, def, ___) /* multi-way control split     */ \
+	_(IGOTO,        E2,   src, def, ___) /* computed goto (internal)    */ \
+	_(IJMP,         T2X1, src, def, ret) /* computed goto (terminating) */ \
 	_(RETURN,       T2X1, src, def, ret) /* function return             */ \
-	_(IJMP,         T2X1, src, def, ret) /* computed goto               */ \
 	_(UNREACHABLE,  T1X2, src, ___, ret) /* unreachable (tailcall, etc) */ \
 	\
 	/* deoptimization helper                                            */ \
@@ -384,6 +407,13 @@ typedef enum _ir_op {
 #define IR_OPTX(op, type, n) ((uint32_t)(op) | ((uint32_t)(type) << IR_OPT_TYPE_SHIFT) | ((uint32_t)(n) << IR_OPT_INPUTS_SHIFT))
 #define IR_OPT_TYPE(opt)     (((opt) & IR_OPT_TYPE_MASK) >> IR_OPT_TYPE_SHIFT)
 
+/* "opt" modifiers */
+#define IR_COPY_HARD         (1<<0)
+
+#define IR_VA_ARG_SIZE(op3)  (((uint32_t)(op3) >> 3))
+#define IR_VA_ARG_ALIGN(op3) (1U << ((uint32_t)(op3) & 0x7))
+#define IR_VA_ARG_OP3(s, a)  (((s) << 3) | ir_ntzl(a))
+
 /* IR References */
 typedef int32_t ir_ref;
 
@@ -399,8 +429,10 @@ typedef int32_t ir_ref;
 #define IR_CONSTS_LIMIT_MIN (-(IR_TRUE - 1))
 #define IR_INSNS_LIMIT_MIN (IR_UNUSED + 1)
 
+/* ADDR_MEMBER is neccessary to workaround MSVC C preprocessor bug */
 #ifndef IR_64
-# define ADDR_MEMBER            uintptr_t                  addr;
+# define ADDR_MEMBER            uintptr_t                  addr; \
+								void                      *ptr;
 #else
 # define ADDR_MEMBER
 #endif
@@ -410,6 +442,7 @@ typedef union _ir_val {
 	int64_t                            i64;
 #ifdef IR_64
 	uintptr_t                          addr;
+	void                              *ptr;
 #endif
 	IR_STRUCT_LOHI(
 		union {
@@ -464,6 +497,7 @@ typedef struct _ir_insn {
 		},
 		union {
 			ir_ref                     op1;
+			ir_ref                     ref;
 			ir_ref                     prev_const;
 		}
 	);
@@ -513,6 +547,9 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_EXTERN              (1<<5)
 #define IR_CONST               (1<<6)
 
+#define IR_CONST_FUNC          (1<<6)
+#define IR_PURE_FUNC           (1<<7)
+
 #define IR_INITIALIZED         (1<<7) /* sym data flag: constant or an initialized variable */
 #define IR_CONST_STRING        (1<<8) /* sym data flag: constant string */
 
@@ -528,11 +565,12 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_OPT_INLINE          (1<<16)
 #define IR_OPT_FOLDING         (1<<17)
 #define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<19)
-#define IR_GEN_NATIVE          (1<<20)
-#define IR_GEN_CODE            (1<<21) /* C or LLVM */
+#define IR_OPT_MEM2SSA         (1<<19)
+#define IR_OPT_CODEGEN         (1<<20)
+#define IR_GEN_NATIVE          (1<<21)
+#define IR_GEN_CODE            (1<<22) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<22) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<23) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -567,12 +605,22 @@ typedef struct _ir_code_buffer {
 	void *pos;
 } ir_code_buffer;
 
+typedef struct {
+	int   size;
+	int   align;
+	int   offset;
+} ir_value_param;
+
+#define IR_CONST_HASH_SIZE 64
+
 struct _ir_ctx {
 	ir_insn           *ir_base;                 /* two directional array - instructions grow down, constants grow up */
 	ir_ref             insns_count;             /* number of instructions stored in instructions buffer */
 	ir_ref             insns_limit;             /* size of allocated instructions buffer (it's extended when overflow) */
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
+	uintptr_t          const_hash_mask;
+	ir_ref            *const_hash;
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
 	uint32_t           flags2;                  /* IR context private flags (see IR_* defines in ir_private.h) */
 	ir_type            ret_type;                /* Function return type */
@@ -580,6 +628,7 @@ struct _ir_ctx {
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
 	ir_ref             fold_cse_limit;          /* CSE finds identical insns backward from "insn_count" to "fold_cse_limit" */
 	ir_insn            fold_insn;               /* temporary storage for folding engine */
+	ir_value_param    *value_params;            /* information about "by-val" struct parameters */
 	ir_hashtab        *binding;
 	ir_use_list       *use_lists;               /* def->use lists for each instruction */
 	ir_ref            *use_edges;               /* the actual uses: use = ctx->use_edges[ctx->use_lists[def].refs + n] */
@@ -616,7 +665,6 @@ struct _ir_ctx {
 		ir_ref         vars;                    /* list of VARs (used by register allocator) */
 	};
 	ir_snapshot_create_t   snapshot_create;
-	int32_t            stack_frame_alignment;
 	int32_t            stack_frame_size;        /* spill stack frame size (used by register allocator and code generator) */
 	int32_t            call_stack_size;         /* stack for parameter passing (used by register allocator and code generator) */
 	uint64_t           used_preserved_regs;
@@ -639,7 +687,7 @@ struct _ir_ctx {
 	ir_loader         *loader;
 	ir_strtab          strtab;
 	ir_ref             prev_insn_chain[IR_LAST_FOLDABLE_OP + 1];
-	ir_ref             prev_const_chain[IR_LAST_TYPE];
+	ir_ref             _const_hash[IR_CONST_HASH_SIZE];
 };
 
 /* Basic IR Construction API (implementation in ir.c) */
@@ -666,6 +714,7 @@ ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_ref proto);
 ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, ir_ref proto);
 ir_ref ir_const_sym(ir_ctx *ctx, ir_ref str);
 ir_ref ir_const_str(ir_ctx *ctx, ir_ref str);
+ir_ref ir_const_label(ir_ctx *ctx, ir_ref str);
 
 ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t c);
 
@@ -704,6 +753,7 @@ ir_ref ir_emit3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_emit_N(ir_ctx *ctx, uint32_t opt, int32_t count);
 void   ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val);
+ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
 
 IR_ALWAYS_INLINE void ir_set_op1(ir_ctx *ctx, ir_ref ref, ir_ref val)
 {
@@ -732,6 +782,18 @@ IR_ALWAYS_INLINE void ir_insn_set_op(ir_insn *insn, int32_t n, ir_ref val)
 	*p = val;
 }
 
+IR_ALWAYS_INLINE uint32_t ir_insn_find_op(const ir_insn *insn, ir_ref val)
+{
+	int i, n = insn->inputs_count;
+
+	for (i = 1; i <= n; i++) {
+		if (ir_insn_op(insn, i) == val) {
+			return i;
+		}
+	}
+	return 0;
+}
+
 ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_fold0(ir_ctx *ctx, uint32_t opt);
@@ -741,18 +803,23 @@ ir_ref ir_fold3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos);
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name);
+
+/* IR Binding */
 ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def);
+ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref);
 
 /* Def -> Use lists */
 void ir_build_def_use_lists(ir_ctx *ctx);
 
+/* SSA Construction */
+int ir_mem2ssa(ir_ctx *ctx);
+
 /* CFG - Control Flow Graph (implementation in ir_cfg.c) */
 int ir_build_cfg(ir_ctx *ctx);
-int ir_remove_unreachable_blocks(ir_ctx *ctx);
 int ir_build_dominators_tree(ir_ctx *ctx);
 int ir_find_loops(ir_ctx *ctx);
 int ir_schedule_blocks(ir_ctx *ctx);
-void ir_build_prev_refs(ir_ctx *ctx);
+void ir_reset_cfg(ir_ctx *ctx);
 
 /* SCCP - Sparse Conditional Constant Propagation (implementation in ir_sccp.c) */
 int ir_sccp(ir_ctx *ctx);
@@ -821,6 +888,9 @@ void ir_gdb_unregister_all(void);
 bool ir_gdb_present(void);
 
 /* IR load API (implementation in ir_load.c) */
+#define IR_RESOLVE_SYM_ADD_THUNK (1<<0)
+#define IR_RESOLVE_SYM_SILENT    (1<<1)
+
 struct _ir_loader {
 	uint32_t default_func_flags;
 	bool (*init_module)       (ir_loader *loader, const char *name, const char *filename, const char *target);
@@ -837,9 +907,10 @@ struct _ir_loader {
 	bool (*sym_data_end)      (ir_loader *loader, uint32_t flags);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
-	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, uint32_t flags);
 	bool (*has_sym)           (ir_loader *loader, const char *name);
 	bool (*add_sym)           (ir_loader *loader, const char *name, void *addr);
+	bool (*add_label)         (ir_loader *loader, const char *name, void *addr);
 };
 
 void ir_loader_init(void);
@@ -851,13 +922,15 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
-#define IR_SAVE_CFG       (1<<0) /* add info about CFG */
-#define IR_SAVE_CFG_MAP   (1<<1) /* add info about CFG block assignment */
-#define IR_SAVE_USE_LISTS (1<<2) /* add info about def->use lists */
-#define IR_SAVE_RULES     (1<<3) /* add info about selected code-generation rules */
-#define IR_SAVE_REGS      (1<<4) /* add info about selected registers */
+#define IR_SAVE_CFG        (1<<0) /* add info about CFG */
+#define IR_SAVE_CFG_MAP    (1<<1) /* add info about CFG block assignment */
+#define IR_SAVE_USE_LISTS  (1<<2) /* add info about def->use lists */
+#define IR_SAVE_RULES      (1<<3) /* add info about selected code-generation rules */
+#define IR_SAVE_REGS       (1<<4) /* add info about selected registers */
+#define IR_SAVE_SAFE_NAMES (1<<5) /* add '@' prefix to symbol names */
 
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
+void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
 void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
@@ -924,7 +997,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 		}
 
 		return ir_emit_code(ctx, size);
-	} else if (opt_level == 1 || opt_level == 2) {
+	} else if (opt_level > 0) {
 		if (!(ctx->flags & IR_OPT_FOLDING)) {
 			// IR_ASSERT(0 && "IR_OPT_FOLDING must be set in ir_init() for -O1 and -O2");
 			return NULL;
@@ -933,14 +1006,29 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 
 		ir_build_def_use_lists(ctx);
 
-		if (opt_level == 2
-		 && !ir_sccp(ctx)) {
-			return NULL;
+		if (ctx->flags & IR_OPT_MEM2SSA) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)
+			 || !ir_mem2ssa(ctx)) {
+				return NULL;
+			}
+			ir_reset_cfg(ctx);
 		}
 
-		if (!ir_build_cfg(ctx)
-		 || !ir_build_dominators_tree(ctx)
-		 || !ir_find_loops(ctx)
+		if (opt_level > 1) {
+			if (!ir_sccp(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ctx->cfg_blocks) {
+			if (!ir_build_cfg(ctx)
+			 || !ir_build_dominators_tree(ctx)) {
+				return NULL;
+			}
+		}
+
+		if (!ir_find_loops(ctx)
 		 || !ir_gcm(ctx)
 		 || !ir_schedule(ctx)
 		 || !ir_match(ctx)
@@ -964,6 +1052,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 #define IR_ERROR_UNSUPPORTED_CODE_RULE           3
 #define IR_ERROR_LINK                            4
 #define IR_ERROR_ENCODE                          5
+#define IR_ERROR_TOO_LARGE                       6
 
 /* IR Memmory Allocation */
 #ifndef ir_mem_malloc

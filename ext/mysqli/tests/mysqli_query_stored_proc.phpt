@@ -107,8 +107,7 @@ END;')) {
         if (!$res = mysqli_query($link, 'SELECT @version as _vers'))
             printf("[014] Cannot fetch user variable, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-        if (!$row = mysqli_fetch_assoc($res) ||
-                $row['_vers'] == 'unknown')
+        if (!($row = mysqli_fetch_assoc($res)) || $row['_vers'] == 'unknown')
             printf("[015] Results seem wrong, got %s, [%d] %s\n",
                 $row['_vers'],
                 mysqli_errno($link), mysqli_error($link));
@@ -135,8 +134,7 @@ END;')) {
         if (!$res = mysqli_query($link, 'SELECT @version as _vers'))
             printf("[021] Cannot fetch user variable, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-        if (!$row = mysqli_fetch_assoc($res) ||
-                $row['_vers'] == 'myversion')
+        if (!($row = mysqli_fetch_assoc($res)) || $row['_vers'] !== 'myversion')
             printf("[022] Results seem wrong, got %s, [%d] %s\n",
                 $row['_vers'],
                 mysqli_errno($link), mysqli_error($link));

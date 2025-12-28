@@ -412,13 +412,12 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
 
-	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
+	if (Z_TYPE(retval) == IS_UNDEF) {
 		result = FAILURE;
 	} else {
 		switch(Z_TYPE(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
-			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
 			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
@@ -478,6 +477,10 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 	if (!(class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)
 			&& (!class_type->__serialize || !class_type->__unserialize)) {
 		zend_error(E_DEPRECATED, "%s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary)", ZSTR_VAL(class_type->name));
+		if (EG(exception)) {
+			zend_exception_uncaught_error(
+				"During inheritance of %s, while implementing Serializable", ZSTR_VAL(class_type->name));
+		}
 	}
 	return SUCCESS;
 }
@@ -493,7 +496,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
 	intern->iter = NULL;
-	intern->rewind_called = 0;
+	intern->rewind_called = false;
 	return &intern->std;
 }
 
@@ -534,7 +537,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
-		intern->rewind_called = 1;
+		intern->rewind_called = true;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception))) {
@@ -627,7 +630,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
-	intern->rewind_called = 1;
+	intern->rewind_called = true;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */

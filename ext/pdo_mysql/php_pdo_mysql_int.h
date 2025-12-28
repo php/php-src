@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifndef PHP_PDO_MYSQL_INT_H
 #define PHP_PDO_MYSQL_INT_H
 
@@ -76,7 +78,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 	/* dummy member so we get at least one member in the struct
 	 * and avoids build errors.
 	 */
-	void *dummymemmber;
+	void *dummymember;
 #endif
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 
@@ -165,7 +167,6 @@ enum {
 	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
 #endif
 	PDO_MYSQL_ATTR_COMPRESS,
-	PDO_MYSQL_ATTR_DIRECT_QUERY,
 	PDO_MYSQL_ATTR_FOUND_ROWS,
 	PDO_MYSQL_ATTR_IGNORE_SPACE,
 	PDO_MYSQL_ATTR_SSL_KEY,

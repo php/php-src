@@ -1,6 +1,6 @@
 // vim:ft=javascript
 
-ARG_ENABLE("com-dotnet", "COM and .Net support", "yes");
+ARG_ENABLE("com-dotnet", "COM and .Net support", "yes,shared");
 
 if (PHP_COM_DOTNET == "yes") {
 	CHECK_LIB('oleaut32.lib', 'com_dotnet');
@@ -10,4 +10,5 @@ if (PHP_COM_DOTNET == "yes") {
 		null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	AC_DEFINE('HAVE_COM_DOTNET', 1, "Define to 1 if the PHP extension 'com_dotnet' is available.");
 	CHECK_HEADER_ADD_INCLUDE('mscoree.h', 'CFLAGS_COM_DOTNET');
+	ADD_MAKEFILE_FRAGMENT();
 }

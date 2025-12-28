@@ -9,7 +9,7 @@ $b = new SplObjectStorage();
 for ($i = 10000; $i > 0; $i--) {
         $object = new StdClass();
             $a[] = $object;
-            $b->attach($object);
+            $b->offsetSet($object);
 }
 
 $c = serialize(array($a, $b));

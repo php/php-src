@@ -5,11 +5,6 @@ PHP_ARG_WITH([pdo-sqlite],
   [$PHP_PDO])
 
 if test "$PHP_PDO_SQLITE" != "no"; then
-
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   PHP_CHECK_PDO_INCLUDES
 
   PHP_SETUP_SQLITE([PDO_SQLITE_SHARED_LIBADD])

@@ -104,6 +104,8 @@ Since: DOM Level 3
 */
 zend_result dom_entity_actual_encoding_read(dom_object *obj, zval *retval)
 {
+	PHP_DOM_DEPRECATED_PROPERTY("Property DOMEntity::$actualEncoding is deprecated");
+
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }
@@ -117,6 +119,8 @@ Since: DOM Level 3
 */
 zend_result dom_entity_encoding_read(dom_object *obj, zval *retval)
 {
+	PHP_DOM_DEPRECATED_PROPERTY("Property DOMEntity::$encoding is deprecated");
+
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }
@@ -130,6 +134,8 @@ Since: DOM Level 3
 */
 zend_result dom_entity_version_read(dom_object *obj, zval *retval)
 {
+	PHP_DOM_DEPRECATED_PROPERTY("Property DOMEntity::$version is deprecated");
+
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }

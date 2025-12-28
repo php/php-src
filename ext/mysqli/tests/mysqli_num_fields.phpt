@@ -10,7 +10,7 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    function func_test_mysqli_num_fields($link, $query, $expected, $offset, $test_free = false) {
+    function func_test_mysqli_num_fields(mysqli $link, string $query, int $expected, int $offset) {
 
         if (!($res = mysqli_query($link, $query))) {
             printf("[%03d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
@@ -34,7 +34,7 @@ require_once 'skipifconnectfailure.inc';
     func_test_mysqli_num_fields($link, "SELECT 1 AS a", 1, 5);
     func_test_mysqli_num_fields($link, "SELECT id, label FROM test", 2, 10);
     func_test_mysqli_num_fields($link, "SELECT 1 AS a, NULL AS b, 'foo' AS c", 3, 15);
-    func_test_mysqli_num_fields($link, "SELECT id FROM test", 1, 20, true);
+    func_test_mysqli_num_fields($link, "SELECT id FROM test", 1, 20);
 
     mysqli_close($link);
 

@@ -134,10 +134,24 @@ static zend_always_inline void zend_get_gc_buffer_add_zval(
 
 static zend_always_inline void zend_get_gc_buffer_add_obj(
 		zend_get_gc_buffer *gc_buffer, zend_object *obj) {
+	ZEND_ASSERT(obj != NULL);
+
 	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
 		zend_get_gc_buffer_grow(gc_buffer);
 	}
 	ZVAL_OBJ(gc_buffer->cur, obj);
+	gc_buffer->cur++;
+}
+
+static zend_always_inline void zend_get_gc_buffer_add_ht(
+		zend_get_gc_buffer *gc_buffer, HashTable *ht) {
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		return;
+	}
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_ARR(gc_buffer->cur, ht);
 	gc_buffer->cur++;
 }
 

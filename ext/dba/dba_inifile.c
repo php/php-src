@@ -127,7 +127,7 @@ DBA_DELETE_FUNC(inifile)
 {
 	inifile *dba = info->dbf;
 	int res;
-	bool found = 0;
+	bool found = false;
 	key_type ini_key;
 
 	if (!key) {

@@ -35,8 +35,6 @@ typedef struct _php_com_dotnet_object {
 
 	ITypeInfo *typeinfo;
 
-	zend_class_entry *ce;
-
    	/* associated event sink */
 	IDispatch *sink_dispatch;
 	GUID sink_id;
@@ -76,6 +74,7 @@ extern zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
 
 /* com_saproxy.c */
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type);
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
 void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 extern zend_object_handlers php_com_saproxy_handlers;

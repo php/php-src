@@ -7,10 +7,6 @@ PHP_ARG_WITH([pdo-pgsql],
     the libpq paths.])])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   PHP_SETUP_PGSQL([PDO_PGSQL_SHARED_LIBADD],,, [$PHP_PDO_PGSQL])
   PHP_SUBST([PDO_PGSQL_SHARED_LIBADD])
 
@@ -20,6 +16,12 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
     [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1],
       [Define to 1 if libpq has the 'PQresultMemorySize' function (PostgreSQL 12
+      or later).])],,
+    [$PGSQL_LIBS])
+
+  PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
+    [AC_DEFINE([HAVE_PQCLOSEPREPARED], [1],
+      [Define to 1 if libpq has the 'PQclosePrepared' function (PostgreSQL 17
       or later).])],,
     [$PGSQL_LIBS])
 

@@ -18,6 +18,9 @@
 #define PHP_PDO_H
 
 #include "zend.h"
+#include "Zend/zend_compile.h"
+#include "Zend/zend_API.h"
+#include "Zend/zend_attributes.h"
 
 PHPAPI extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry
@@ -50,8 +53,47 @@ PHP_MINIT_FUNCTION(pdo);
 PHP_MSHUTDOWN_FUNCTION(pdo);
 PHP_MINFO_FUNCTION(pdo);
 
-#define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
+static inline void pdo_declare_deprecated_class_constant_long(
+		zend_class_entry *ce, const char *name, zend_long value,
+		zend_string *since, const char *message) {
+
+	zval zvalue;
+	ZVAL_LONG(&zvalue, value);
+
+	zend_string *name_str = zend_string_init_interned(name, strlen(name), true);
+
+	zend_class_constant *constant = zend_declare_class_constant_ex(
+			ce, name_str, &zvalue,
+			ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
+
+	zend_attribute *attr = zend_add_class_constant_attribute(ce, constant,
+			ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED),
+			1 + (message != NULL));
+
+	attr->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR(&attr->args[0].value, since);
+
+	if (message) {
+		zend_string *message_str = zend_string_init_interned(message, strlen(message), true);
+
+		attr->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+		ZVAL_STR(&attr->args[1].value, message_str);
+	}
+}
+
+/* Declare a constant deprecated in 8.5 */
+#define REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_85(const_name, value) 													\
+	pdo_declare_deprecated_class_constant_long(php_pdo_get_dbh_ce(), \
+			const_name, (zend_long)value, \
+			ZSTR_KNOWN(ZEND_STR_8_DOT_5), NULL)
+
+/* Declare one of the constants deprecated in https://wiki.php.net/rfc/deprecations_php_8_5
+ * "Deprecate driver specific PDO constants and methods" */
+#define REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(name, old_prefix, new_prefix, value) \
+	pdo_declare_deprecated_class_constant_long(php_pdo_get_dbh_ce(), \
+			old_prefix name, (zend_long)value, \
+			ZSTR_KNOWN(ZEND_STR_8_DOT_5), \
+			"use " new_prefix name " instead")
 
 #define LONG_CONST(c) (zend_long) c
 

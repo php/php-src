@@ -17,7 +17,6 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
     mysqli_close($link);
 } else {
     die(sprintf("skip Requires character set latin1 or latin2\n"));
-    mysqli_close($link);
 }
 ?>
 --FILE--

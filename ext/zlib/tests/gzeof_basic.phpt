@@ -7,7 +7,7 @@ zlib
 // note that gzeof is an alias to gzeof. parameter checking tests will be
 // the same as gzeof
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 
 echo "-- test 1 --\n";
 $h = gzopen($f, 'r');

@@ -3,13 +3,13 @@ mb_parse_str() with multiple candidate encodings
 --EXTENSIONS--
 mbstring
 --INI--
+internal_encoding=UTF-8
 mbstring.http_input=UTF-8,SJIS,EUC-JP,ISO-8859-1,ISO-2022-JP
 --FILE--
 <?php
 // The encoding of the input strings will be guessed, from the list specified
 // via mbstring.http_input
 // All of them will be converted to UTF-8
-mb_internal_encoding('UTF-8');
 
 $queries = array(
   // UTF-8

@@ -1,0 +1,12 @@
+EXTENSION("uri", "php_uri.c php_uri_common.c uri_parser_rfc3986.c uri_parser_whatwg.c uri_parser_php_parse_url.c", false /* never shared */, "/I ext/lexbor /I ext/uri/uriparser/include /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+AC_DEFINE("URI_ENABLE_ANSI", 1, "Define to 1 for enabling ANSI support of uriparser.")
+AC_DEFINE("URI_NO_UNICODE", 1, "Define to 1 for disabling unicode support of uriparser.")
+ADD_FLAG("CFLAGS_URI", "/D URI_STATIC_BUILD");
+
+ADD_EXTENSION_DEP('uri', 'lexbor');
+ADD_SOURCES("ext/uri/uriparser/src", "UriCommon.c UriCompare.c UriCopy.c UriEscape.c UriFile.c UriIp4.c UriIp4Base.c \
+    UriMemory.c UriNormalize.c UriNormalizeBase.c UriParse.c UriParseBase.c UriQuery.c UriRecompose.c UriResolve.c \
+    UriSetFragment.c UriSetHostAuto.c UriSetHostCommon.c UriSetHostIp4.c UriSetHostIp6.c UriSetHostIpFuture.c UriSetHostRegName.c \
+    UriSetPath.c UriSetPort.c UriSetQuery.c UriSetScheme.c UriSetUserInfo.c UriShorten.c UriVersion.c", "uri");
+PHP_INSTALL_HEADERS("ext/uri", "php_uri.h php_uri_common.h uri_parser_rfc3986.h uri_parser_whatwg.h uri_parser_php_parse_url.h uriparser/src uriparser/include");

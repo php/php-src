@@ -22,8 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20230901
-#define PHP_HAVE_STREAMS
+#define PHP_API_VERSION 20250926
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
 
@@ -109,13 +108,6 @@ typedef int pid_t;
 # endif
 #endif
 
-#if PHP_DEBUG
-#undef NDEBUG
-#else
-#ifndef NDEBUG
-#define NDEBUG
-#endif
-#endif
 #include <assert.h>
 
 #ifdef HAVE_UNIX_H
@@ -225,14 +217,6 @@ typedef unsigned int socklen_t;
 
 #include <limits.h>
 
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (- LONG_MAX - 1)
-#endif
-
 #ifndef INT_MAX
 #define INT_MAX 2147483647
 #endif
@@ -279,6 +263,8 @@ END_EXTERN_C()
 #define php_sleep sleep
 extern char **environ;
 #endif	/* ifndef PHP_WIN32 */
+
+extern const char php_build_date[];
 
 #ifdef PHP_PWRITE_64
 ssize_t pwrite(int, void *, size_t, off64_t);

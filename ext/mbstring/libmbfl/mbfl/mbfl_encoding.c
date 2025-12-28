@@ -31,7 +31,7 @@
 #include "libmbfl/config.h"
 
 #ifdef HAVE_STRINGS_H
-	/* For strcasecmp */
+	/* For strncasecmp */
 	#include <strings.h>
 #endif
 
@@ -53,13 +53,6 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 #include "filters/mbfilter_singlebyte.h"
-
-#ifndef HAVE_STRCASECMP
-#ifdef HAVE_STRICMP
-#define strcasecmp stricmp
-#endif
-#endif
-
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_base64,
@@ -349,7 +342,7 @@ const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len)
 	/* search MIME charset name */
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
 		if ((*encoding)->mime_name) {
-			if (strcasecmp((*encoding)->mime_name, name) == 0) {
+			if (strncasecmp((*encoding)->mime_name, name, name_len) == 0 && (*encoding)->mime_name[name_len] == '\0') {
 				return *encoding;
 			}
 		}
@@ -359,7 +352,7 @@ const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len)
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
 		if ((*encoding)->aliases) {
 			for (const char **alias = (*encoding)->aliases; *alias; alias++) {
-				if (strcasecmp(*alias, name) == 0) {
+				if (strncasecmp(name, *alias, name_len) == 0 && (*alias)[name_len] == '\0') {
 					return *encoding;
 				}
 			}

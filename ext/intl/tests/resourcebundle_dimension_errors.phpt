@@ -57,5 +57,5 @@ Error: Cannot use object of type ResourceBundle as array
 string(7) "default"
 TypeError: Cannot access offset of type float on ResourceBundle
 TypeError: Cannot access offset of type stdClass on ResourceBundle
-ValueError: Offset cannot be empty
+ValueError: Offset must not be empty
 ValueError: Index must be between -2147483648 and 2147483647

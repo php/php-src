@@ -25,6 +25,10 @@
 # include <pthread.h>
 #endif
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 typedef struct _zend_call_stack {
@@ -38,7 +42,7 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack);
 
 /** Returns an approximation of the current stack position */
 static zend_always_inline void *zend_call_stack_position(void) {
-#ifdef ZEND_WIN32
+#ifdef _MSC_VER
 	return _AddressOfReturnAddress();
 #elif defined(PHP_HAVE_BUILTIN_FRAME_ADDRESS)
 	return __builtin_frame_address(0);

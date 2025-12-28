@@ -13,8 +13,10 @@ curl_share_close($sh);
 var_dump($sh);
 
 ?>
---EXPECT--
+--EXPECTF--
 object(CurlShareHandle)#1 (0) {
 }
+
+Deprecated: Function curl_share_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 object(CurlShareHandle)#1 (0) {
 }

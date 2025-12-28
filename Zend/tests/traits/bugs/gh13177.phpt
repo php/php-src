@@ -1,5 +1,11 @@
 --TEST--
 GH-13177 (PHP 8.3.2: final private constructor not allowed when used in trait)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && version_compare(PHP_VERSION, '8.4', '<')) {
+    die("xfail fails on Windows Server 2022 and newer.");
+}
+?>
 --FILE--
 <?php
 

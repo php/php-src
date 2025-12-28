@@ -61,7 +61,7 @@ string(13) "-//FOO/ENTITY"
 string(32) "http://example.com/fooentity.ent"
 array(4) {
   ["directory"]=>
-  string(%d) "%s"
+  %r(NULL|string\(%d\) "%s")%r
   ["intSubName"]=>
   string(3) "foo"
   ["extSubURI"]=>

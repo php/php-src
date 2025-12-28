@@ -26,8 +26,12 @@ var_dump(test::$pri);
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -f "$filename"`);
-var_dump(`$php -n -f "wrong"`);
+var_dump(shell_exec(<<<SHELL
+$php -n -f "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -f "wrong"
+SHELL));
 
 @unlink($filename);
 

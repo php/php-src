@@ -126,6 +126,15 @@
 # define TIMELIB_BREAK_INTENTIONALLY_MISSING
 #endif
 
+#if defined(__has_builtin)
+# if __has_builtin(__builtin_saddll_overflow)
+#  define TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW 1
+# endif
+#endif
+
+#ifndef TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW
+# define TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW 0
+#endif
 struct _ttinfo
 {
 	int32_t      offset;

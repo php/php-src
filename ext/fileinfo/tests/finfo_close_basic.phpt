@@ -23,6 +23,8 @@ unset( $finfo );
 *** Testing finfo_close() : basic functionality ***
 object(finfo)#%d (0) {
 }
+
+Deprecated: Function finfo_close() is deprecated since 8.5, as finfo objects are freed automatically in %s on line %d
 bool(true)
 object(finfo)#%d (%d) {
 }

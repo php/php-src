@@ -183,7 +183,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
 				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
 			}
 			break;
@@ -300,7 +300,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt && conn->current_result) {
-						mnd_efree(conn->current_result);
+						conn->current_result->m.free_result(conn->current_result, TRUE);
 						conn->current_result = NULL;
 					}
 					DBG_ERR("Error occurred while reading metadata");

@@ -22,10 +22,16 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 int(9223372036854775807)
+
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(-9223372036854775808)
+
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(-9223372036854775808)
+
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(0)
 int(-9223372036854775808)
 int(-9223372036854775808)

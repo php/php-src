@@ -47,7 +47,7 @@ const php_hash_ops php_hash_md4_ops = {
 	1
 };
 
-static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
+static hash_spec_result php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
 
 const php_hash_ops php_hash_md2_ops = {
 	"md2",
@@ -356,15 +356,15 @@ PHP_HASH_API void PHP_MD2Final(unsigned char output[16], PHP_MD2_CTX *context)
 	memcpy(output, context->state, 16);
 }
 
-static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+static hash_spec_result php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
 	PHP_MD2_CTX *ctx = (PHP_MD2_CTX *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_MD2_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_MD2_SPEC)) == HASH_SPEC_SUCCESS
 		&& (unsigned char) ctx->in_buffer < sizeof(ctx->buffer)) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }

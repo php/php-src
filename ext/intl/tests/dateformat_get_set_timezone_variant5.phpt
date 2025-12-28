@@ -2,13 +2,11 @@
 IntlDateFormatter: get/setTimeZone()
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '55.1') < 0) die('skip for ICU >= 55.1'); ?>
+--INI--
+intl.default_locale=pt_PT
+date.timezone=Atlantic/Azores
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", 'Atlantic/Azores');
 
 $ts = strtotime('2012-01-01 00:00:00 UTC');
 

@@ -17,6 +17,7 @@ if test "$PHP_POSIX" = "yes"; then
     eaccess
     getgrgid_r
     getgroups
+    getlogin
     getpgid
     getrlimit
     getsid
@@ -43,7 +44,9 @@ if test "$PHP_POSIX" = "yes"; then
 
 dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
 dnl (first argument is not validated and has different error).
-  AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep -q "^musl"],[],
+  PHP_C_STANDARD_LIBRARY
+  AS_VAR_IF([php_cv_c_standard_library], [musl],
+    [],
     [AC_CHECK_FUNCS([pathconf fpathconf])])
 
   AC_CACHE_CHECK([for working ttyname_r() implementation],

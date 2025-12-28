@@ -18,6 +18,7 @@ $stderr = fopen('php://stderr', 'r');
 
 ob_start(function ($buffer) use ($stdout) {
     fwrite($stdout, $buffer);
+	return '';
 }, 1);
 
 print "STDIN:\n";

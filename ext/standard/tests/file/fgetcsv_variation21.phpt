@@ -48,7 +48,7 @@ $loop_counter = 1;
 
     // read the line which is a blank line to see the working of fgetcsv
     $fp_pos = ftell($file_handle);
-    var_dump( fgetcsv($file_handle, 1024, '+') );
+    var_dump( fgetcsv($file_handle, 1024, '+', escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

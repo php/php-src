@@ -35,6 +35,8 @@ static inline dom_token_list_object *php_dom_token_list_from_dom_obj(dom_object 
 	return (dom_token_list_object *)((char *) obj - XtOffsetOf(dom_token_list_object, dom));
 }
 
+void dom_ordered_set_parser(HashTable *token_set, const char *position, bool to_lowercase);
+bool dom_ordered_set_all_contained(HashTable *token_set, const char *value, bool to_lowercase);
 void dom_token_list_ctor(dom_token_list_object *intern, dom_object *element_obj);
 void dom_token_list_free_obj(zend_object *object);
 zval *dom_token_list_read_dimension(zend_object *object, zval *offset, int type, zval *rv);

@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #69362 (PDO-pgsql fails to connect if password contains a leading single quote)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

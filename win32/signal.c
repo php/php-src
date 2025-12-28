@@ -68,8 +68,27 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
 	zend_interrupt_function = orig_interrupt_function;
 	orig_interrupt_function = NULL;
 	vm_interrupt_flag = NULL;
-	ZVAL_UNDEF(&ctrl_handler);
 }/*}}}*/
+
+PHP_WINUTIL_API void php_win32_signal_ctrl_handler_request_shutdown(void)
+{
+	/* Must be initialized and in main thread */
+	if (!vm_interrupt_flag) {
+		return;
+	}
+#ifdef ZTS
+	if (!tsrm_is_main_thread()) {
+		return;
+	}
+#endif
+
+	/* The ctrl_handler must be cleared between requests, otherwise we can crash
+	 * due to accessing a previous request's memory. */
+	if (!Z_ISUNDEF(ctrl_handler)) {
+		zval_ptr_dtor(&ctrl_handler);
+		ZVAL_UNDEF(&ctrl_handler);
+	}
+}
 
 static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 {/*{{{*/
@@ -125,7 +144,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor_nogc(&ctrl_handler);
+	zval_ptr_dtor(&ctrl_handler);
 	ZVAL_COPY(&ctrl_handler, &fci.function_name);
 
 	RETURN_TRUE;

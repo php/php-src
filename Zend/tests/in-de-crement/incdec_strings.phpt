@@ -57,11 +57,11 @@ foreach ($values as $value) {
 Using increment:
 Initial value:string(0) ""
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) "1"
 Initial value:string(1) " "
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(1)
@@ -70,20 +70,28 @@ Result value:float(16.5)
 Initial value:string(4) "1e10"
 Result value:float(10000000001)
 Initial value:string(4) "199A"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(4) "199B"
 Initial value:string(4) "A199"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(4) "A200"
 Initial value:string(4) "199Z"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(4) "200A"
 Initial value:string(4) "Z199"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(4) "Z200"
 Initial value:string(11) "Hello world"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(11) "Hello worle"
 Initial value:string(4) "🐘"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(4) "🐘"
 Using decrement:
 Initial value:string(0) ""

@@ -1,3 +1,5 @@
+/* interface header; needs to be installed; FIXME rename? */
+
 #ifndef incl_PHP_GMP_INT_H
 #define incl_PHP_GMP_INT_H
 

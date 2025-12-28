@@ -13,7 +13,7 @@ $clientCertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug69215-client.pem.tmp';
 $serverCertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug69215-server.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -24,14 +24,14 @@ $serverCode = <<<'CODE'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     stream_socket_accept($server, 30);
 CODE;
 $serverCode = sprintf($serverCode, $serverCertFile, $caCertFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -40,8 +40,6 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => true,
         'peer_name' => 'bug69215-server',
     ]]);
-
-    phpt_wait();
 
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 CODE;

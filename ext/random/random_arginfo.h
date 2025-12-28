@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fad14b8b8abaf9f33d7837ba8f6190c5d10ff63f */
+ * Stub hash: 416be19494555016195600e488d79f0dd35f2620 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -160,8 +160,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("srand", zif_mt_srand, arginfo_srand, 0, NULL, NULL)
 	ZEND_FE(rand, arginfo_rand)
 	ZEND_FE(mt_rand, arginfo_mt_rand)
-	ZEND_FE(mt_getrandmax, arginfo_mt_getrandmax)
-	ZEND_RAW_FENTRY("getrandmax", zif_mt_getrandmax, arginfo_getrandmax, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("mt_getrandmax", zif_mt_getrandmax, arginfo_mt_getrandmax, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getrandmax", zif_mt_getrandmax, arginfo_getrandmax, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(random_bytes, arginfo_random_bytes)
 	ZEND_FE(random_int, arginfo_random_int)
 	ZEND_FE_END
@@ -207,10 +207,6 @@ static const zend_function_entry class_Random_Engine_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, nextInt, arginfo_class_Random_Randomizer_nextInt, ZEND_ACC_PUBLIC)
@@ -227,39 +223,25 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_BrokenRandomEngineError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_random_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_MT_RAND_PHP = REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
-	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_lcg_value_0_arg0;
-	zend_string *attribute_Deprecated_func_lcg_value_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg0, attribute_Deprecated_func_lcg_value_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_lcg_value_0->args[0].value, &attribute_Deprecated_func_lcg_value_0_arg0);
+	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func_lcg_value_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_lcg_value_0_arg1;
 	zend_string *attribute_Deprecated_func_lcg_value_0_arg1_str = zend_string_init("use \\Random\\Randomizer::getFloat() instead", strlen("use \\Random\\Randomizer::getFloat() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg1, attribute_Deprecated_func_lcg_value_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_lcg_value_0->args[1].value, &attribute_Deprecated_func_lcg_value_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0->args[1].value, attribute_Deprecated_func_lcg_value_0_arg1_str);
 	attribute_Deprecated_func_lcg_value_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_MT_RAND_PHP_0 = zend_add_global_constant_attribute(const_MT_RAND_PHP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_MT_RAND_PHP_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_MT_RAND_PHP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str = zend_string_init("as it uses a biased non-standard variant of Mt19937", strlen("as it uses a biased non-standard variant of Mt19937"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_MT_RAND_PHP_0->args[1].value, attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str);
+	attribute_Deprecated_const_MT_RAND_PHP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)
@@ -267,8 +249,7 @@ static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Mt19937", class_Random_Engine_Mt19937_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -279,8 +260,7 @@ static zend_class_entry *register_class_Random_Engine_PcgOneseq128XslRr64(zend_c
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "PcgOneseq128XslRr64", class_Random_Engine_PcgOneseq128XslRr64_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -291,8 +271,7 @@ static zend_class_entry *register_class_Random_Engine_Xoshiro256StarStar(zend_cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Xoshiro256StarStar", class_Random_Engine_Xoshiro256StarStar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -303,8 +282,7 @@ static zend_class_entry *register_class_Random_Engine_Secure(zend_class_entry *c
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Secure", class_Random_Engine_Secure_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Random_CryptoSafeEngine);
 
 	return class_entry;
@@ -324,7 +302,7 @@ static zend_class_entry *register_class_Random_CryptoSafeEngine(zend_class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", class_Random_CryptoSafeEngine_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
@@ -336,22 +314,21 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "Randomizer", class_Random_Randomizer_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zval property_engine_default_value;
 	ZVAL_UNDEF(&property_engine_default_value);
-	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
+	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, true);
 	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
-	zend_string_release(property_engine_name);
+	zend_string_release_ex(property_engine_name, true);
 
 	return class_entry;
 }
 
 static zend_class_entry *register_class_Random_IntervalBoundary(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
 
@@ -368,9 +345,8 @@ static zend_class_entry *register_class_Random_RandomError(zend_class_entry *cla
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", class_Random_RandomError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -379,9 +355,8 @@ static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_clas
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", class_Random_BrokenRandomEngineError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Random_RandomError);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Random_RandomError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -390,9 +365,8 @@ static zend_class_entry *register_class_Random_RandomException(zend_class_entry 
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", class_Random_RandomException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }

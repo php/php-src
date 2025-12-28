@@ -340,7 +340,7 @@ PHP_FUNCTION(sodium_crypto_secretbox)
 		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_SECRETBOX_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_secretbox_MACBYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_secretbox_MACBYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -754,7 +754,7 @@ PHP_FUNCTION(sodium_crypto_box)
 	}
 	secretkey = keypair;
 	publickey = keypair + crypto_box_SECRETKEYBYTES;
-	if (SIZE_MAX - msg_len <= crypto_box_MACBYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_box_MACBYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -833,7 +833,7 @@ PHP_FUNCTION(sodium_crypto_box_seal)
 		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_BOX_PUBLICKEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_box_SEALBYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_box_SEALBYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -1068,7 +1068,7 @@ PHP_FUNCTION(sodium_crypto_sign)
 		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_SIGN_SECRETKEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_sign_BYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_sign_BYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(sodium_crypto_sign)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (msg_signed_real_len >= SIZE_MAX || msg_signed_real_len > msg_signed_len) {
+	if (msg_signed_real_len >= ZSTR_MAX_LEN || msg_signed_real_len > msg_signed_len) {
 		zend_string_efree(msg_signed);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -1113,18 +1113,18 @@ PHP_FUNCTION(sodium_crypto_sign_open)
 		RETURN_THROWS();
 	}
 	msg_len = msg_signed_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
-	msg = zend_string_alloc((size_t) msg_len, 0);
+	msg = zend_string_alloc(msg_len, 0);
 	if (crypto_sign_open((unsigned char *) ZSTR_VAL(msg), &msg_real_len,
 						 msg_signed, (unsigned long long) msg_signed_len,
 						 publickey) != 0) {
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_signed_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_signed_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -1222,7 +1222,7 @@ PHP_FUNCTION(sodium_crypto_stream)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (ciphertext_len <= 0 || ciphertext_len >= SIZE_MAX) {
+	if (ciphertext_len <= 0 || ciphertext_len >= ZSTR_MAX_LEN) {
 		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
@@ -1302,7 +1302,7 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (ciphertext_len <= 0 || ciphertext_len >= SIZE_MAX) {
+	if (ciphertext_len <= 0 || ciphertext_len >= ZSTR_MAX_LEN) {
 		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
@@ -1619,7 +1619,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (hash_len <= 0 || hash_len >= SIZE_MAX || hash_len > 0x1fffffffe0ULL) {
+	if (hash_len <= 0 || hash_len >= ZSTR_MAX_LEN || hash_len > 0x1fffffffe0ULL) {
 		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
@@ -1774,7 +1774,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_AES256GCM_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_aes256gcm_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_aes256gcm_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -1792,7 +1792,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -1842,11 +1842,11 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 		RETURN_THROWS();
 	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
-	msg = zend_string_alloc((size_t) msg_len, 0);
+	msg = zend_string_alloc(msg_len, 0);
 	if (crypto_aead_aes256gcm_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
@@ -1854,7 +1854,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -1897,12 +1897,12 @@ PHP_FUNCTION(sodium_crypto_aead_aegis128l_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_aegis128l_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_aegis128l_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
 	ciphertext_len = msg_len + crypto_aead_aegis128l_ABYTES;
-	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
+	ciphertext = zend_string_alloc(ciphertext_len, 0);
 	if (crypto_aead_aegis128l_encrypt
 		((unsigned char *) ZSTR_VAL(ciphertext), &ciphertext_real_len, msg,
 		 (unsigned long long) msg_len,
@@ -1911,7 +1911,7 @@ PHP_FUNCTION(sodium_crypto_aead_aegis128l_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -1957,11 +1957,11 @@ PHP_FUNCTION(sodium_crypto_aead_aegis128l_decrypt)
 		RETURN_FALSE;
 	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
-	msg = zend_string_alloc((size_t) msg_len, 0);
+	msg = zend_string_alloc(msg_len, 0);
 	if (crypto_aead_aegis128l_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
@@ -1969,7 +1969,7 @@ PHP_FUNCTION(sodium_crypto_aead_aegis128l_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2012,12 +2012,12 @@ PHP_FUNCTION(sodium_crypto_aead_aegis256_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_AEGIS256_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_aegis256_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_aegis256_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
 	ciphertext_len = msg_len + crypto_aead_aegis256_ABYTES;
-	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
+	ciphertext = zend_string_alloc(ciphertext_len, 0);
 	if (crypto_aead_aegis256_encrypt
 		((unsigned char *) ZSTR_VAL(ciphertext), &ciphertext_real_len, msg,
 		 (unsigned long long) msg_len,
@@ -2026,7 +2026,7 @@ PHP_FUNCTION(sodium_crypto_aead_aegis256_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -2072,11 +2072,11 @@ PHP_FUNCTION(sodium_crypto_aead_aegis256_decrypt)
 		RETURN_FALSE;
 	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
-	msg = zend_string_alloc((size_t) msg_len, 0);
+	msg = zend_string_alloc(msg_len, 0);
 	if (crypto_aead_aegis256_decrypt
 		((unsigned char *) ZSTR_VAL(msg), &msg_real_len, NULL,
 		 ciphertext, (unsigned long long) ciphertext_len,
@@ -2084,7 +2084,7 @@ PHP_FUNCTION(sodium_crypto_aead_aegis256_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2126,12 +2126,12 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_chacha20poly1305_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_chacha20poly1305_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
 	ciphertext_len = msg_len + crypto_aead_chacha20poly1305_ABYTES;
-	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
+	ciphertext = zend_string_alloc(ciphertext_len, 0);
 	if (crypto_aead_chacha20poly1305_encrypt
 		((unsigned char *) ZSTR_VAL(ciphertext), &ciphertext_real_len, msg,
 		 (unsigned long long) msg_len,
@@ -2140,7 +2140,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -2186,7 +2186,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt)
 		RETURN_FALSE;
 	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2198,7 +2198,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2239,7 +2239,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_chacha20poly1305_IETF_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_chacha20poly1305_IETF_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2257,7 +2257,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -2300,7 +2300,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 		RETURN_THROWS();
 	}
 	msg_len = ciphertext_len;
-	if (msg_len >= SIZE_MAX) {
+	if (msg_len >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2320,7 +2320,7 @@ PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2362,7 +2362,7 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (SIZE_MAX - msg_len <= crypto_aead_xchacha20poly1305_IETF_ABYTES) {
+	if (ZSTR_MAX_LEN - msg_len <= crypto_aead_xchacha20poly1305_IETF_ABYTES) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2376,7 +2376,7 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (ciphertext_real_len <= 0U || ciphertext_real_len >= SIZE_MAX ||
+	if (ciphertext_real_len <= 0U || ciphertext_real_len >= ZSTR_MAX_LEN ||
 		ciphertext_real_len > ciphertext_len) {
 		zend_string_efree(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
@@ -2422,7 +2422,7 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 		RETURN_FALSE;
 	}
 	msg_len = ciphertext_len;
-	if (msg_len - crypto_aead_xchacha20poly1305_IETF_ABYTES >= SIZE_MAX) {
+	if (msg_len - crypto_aead_xchacha20poly1305_IETF_ABYTES >= ZSTR_MAX_LEN) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2439,7 +2439,7 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2463,12 +2463,12 @@ PHP_FUNCTION(sodium_bin2hex)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (bin_len >= SIZE_MAX / 2U) {
+	if (bin_len >= ZSTR_MAX_LEN / 2U) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
 	hex_len = bin_len * 2U;
-	hex = zend_string_alloc((size_t) hex_len, 0);
+	hex = zend_string_alloc(hex_len, 0);
 	sodium_bin2hex(ZSTR_VAL(hex), hex_len + 1U, bin, bin_len);
 	ZSTR_VAL(hex)[hex_len] = 0;
 
@@ -2501,7 +2501,7 @@ PHP_FUNCTION(sodium_hex2bin)
 		zend_argument_error(sodium_exception_ce, 1, "must be a valid hexadecimal string");
 		RETURN_THROWS();
 	}
-	if (bin_real_len >= SIZE_MAX || bin_real_len > bin_len) {
+	if (bin_real_len >= ZSTR_MAX_LEN || bin_real_len > bin_len) {
 		zend_string_efree(bin);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -2530,7 +2530,7 @@ PHP_FUNCTION(sodium_bin2base64)
 		zend_argument_error(sodium_exception_ce, 2, "must be a valid base64 variant identifier");
 		RETURN_THROWS();
 	}
-	if (bin_len >= SIZE_MAX / 4U * 3U - 3U - 1U) {
+	if (bin_len >= ZSTR_MAX_LEN / 4U * 3U - 3U - 1U) {
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
 	}
@@ -2573,7 +2573,7 @@ PHP_FUNCTION(sodium_base642bin)
 		zend_argument_error(sodium_exception_ce, 1, "must be a valid base64 string");
 		RETURN_THROWS();
 	}
-	if (bin_real_len >= SIZE_MAX || bin_real_len > bin_len) {
+	if (bin_real_len >= ZSTR_MAX_LEN || bin_real_len > bin_len) {
 		zend_string_efree(bin);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -3201,7 +3201,7 @@ PHP_FUNCTION(sodium_crypto_kdf_derive_from_key)
 		zend_argument_error(sodium_exception_ce, 1, "must be greater than or equal to SODIUM_CRYPTO_KDF_BYTES_MIN");
 		RETURN_THROWS();
 	}
-	if (subkey_len > crypto_kdf_BYTES_MAX || subkey_len > SIZE_MAX) {
+	if (subkey_len > crypto_kdf_BYTES_MAX || subkey_len > ZSTR_MAX_LEN) {
 		zend_argument_error(sodium_exception_ce, 1, "must be less than or equal to SODIUM_CRYPTO_KDF_BYTES_MAX");
 		RETURN_THROWS();
 	}
@@ -3457,7 +3457,7 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
 		RETURN_THROWS();
 	}
 	if (msg_len > crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX ||
-		msg_len > SIZE_MAX - crypto_secretstream_xchacha20poly1305_ABYTES) {
+		msg_len > ZSTR_MAX_LEN - crypto_secretstream_xchacha20poly1305_ABYTES) {
 		zend_argument_error(sodium_exception_ce, 2, "must be at most SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX bytes long");
 		RETURN_THROWS();
 	}
@@ -3466,7 +3466,7 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
 		RETURN_THROWS();
 	}
 	c_len = msg_len + crypto_secretstream_xchacha20poly1305_ABYTES;
-	c = zend_string_alloc((size_t) c_len, 0);
+	c = zend_string_alloc(c_len, 0);
 	if (crypto_secretstream_xchacha20poly1305_push
 		((void *) state, (unsigned char *) ZSTR_VAL(c), &c_real_len,
 		 msg, (unsigned long long) msg_len, ad, (unsigned long long) ad_len,
@@ -3475,7 +3475,7 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	if (c_real_len <= 0U || c_real_len >= SIZE_MAX || c_real_len > c_len) {
+	if (c_real_len <= 0U || c_real_len >= ZSTR_MAX_LEN || c_real_len > c_len) {
 		zend_string_efree(c);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();
@@ -3559,7 +3559,7 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_pull)
 		zend_string_efree(msg);
 		RETURN_FALSE;
 	}
-	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+	if (msg_real_len >= ZSTR_MAX_LEN || msg_real_len > msg_len) {
 		zend_string_efree(msg);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		RETURN_THROWS();

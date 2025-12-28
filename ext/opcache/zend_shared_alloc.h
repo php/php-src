@@ -72,6 +72,7 @@
 #define SUCCESSFULLY_REATTACHED 4
 #define ALLOC_FAIL_MAPPING      8
 #define ALLOC_FALLBACK          9
+#define NO_SHM_BACKEND          10
 
 typedef struct _zend_shared_segment {
     size_t  size;
@@ -119,7 +120,7 @@ typedef struct _zend_smm_shared_globals {
 	size_t                     reserved_size;
 } zend_smm_shared_globals;
 
-extern zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API extern zend_smm_shared_globals *smm_shared_globals;
 
 #define ZSMMG(element)		(smm_shared_globals->element)
 

@@ -15,8 +15,8 @@ MySQLPDOTest::skip();
     $table = 'pdo_mysql_prepare_native_column';
     MySQLPDOTest::createTestTable($table, $db);
 
-    $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-    if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+    $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+    if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
         printf("[002] Unable to turn off emulated prepared statements\n");
 
     $stmt = $db->prepare("SELECT :param FROM {$table} ORDER BY id ASC LIMIT 1");

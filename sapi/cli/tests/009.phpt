@@ -9,8 +9,12 @@ readline
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -a -r "echo hello;"`);
-var_dump(`$php -n -r "echo hello;" -a`);
+var_dump(shell_exec(<<<SHELL
+$php -n -a -r "echo hello;"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo hello;" -a
+SHELL));
 
 echo "Done\n";
 ?>

@@ -156,123 +156,122 @@ static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval const_DONE_value;
 	ZVAL_LONG(&const_DONE_value, BreakIterator::DONE);
-	zend_string *const_DONE_name = zend_string_init_interned("DONE", sizeof("DONE") - 1, 1);
+	zend_string *const_DONE_name = zend_string_init_interned("DONE", sizeof("DONE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DONE_name, &const_DONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DONE_name);
+	zend_string_release_ex(const_DONE_name, true);
 
 	zval const_WORD_NONE_value;
 	ZVAL_LONG(&const_WORD_NONE_value, UBRK_WORD_NONE);
-	zend_string *const_WORD_NONE_name = zend_string_init_interned("WORD_NONE", sizeof("WORD_NONE") - 1, 1);
+	zend_string *const_WORD_NONE_name = zend_string_init_interned("WORD_NONE", sizeof("WORD_NONE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_NONE_name, &const_WORD_NONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_NONE_name);
+	zend_string_release_ex(const_WORD_NONE_name, true);
 
 	zval const_WORD_NONE_LIMIT_value;
 	ZVAL_LONG(&const_WORD_NONE_LIMIT_value, UBRK_WORD_NONE_LIMIT);
-	zend_string *const_WORD_NONE_LIMIT_name = zend_string_init_interned("WORD_NONE_LIMIT", sizeof("WORD_NONE_LIMIT") - 1, 1);
+	zend_string *const_WORD_NONE_LIMIT_name = zend_string_init_interned("WORD_NONE_LIMIT", sizeof("WORD_NONE_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_NONE_LIMIT_name, &const_WORD_NONE_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_NONE_LIMIT_name);
+	zend_string_release_ex(const_WORD_NONE_LIMIT_name, true);
 
 	zval const_WORD_NUMBER_value;
 	ZVAL_LONG(&const_WORD_NUMBER_value, UBRK_WORD_NUMBER);
-	zend_string *const_WORD_NUMBER_name = zend_string_init_interned("WORD_NUMBER", sizeof("WORD_NUMBER") - 1, 1);
+	zend_string *const_WORD_NUMBER_name = zend_string_init_interned("WORD_NUMBER", sizeof("WORD_NUMBER") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_NUMBER_name, &const_WORD_NUMBER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_NUMBER_name);
+	zend_string_release_ex(const_WORD_NUMBER_name, true);
 
 	zval const_WORD_NUMBER_LIMIT_value;
 	ZVAL_LONG(&const_WORD_NUMBER_LIMIT_value, UBRK_WORD_NUMBER_LIMIT);
-	zend_string *const_WORD_NUMBER_LIMIT_name = zend_string_init_interned("WORD_NUMBER_LIMIT", sizeof("WORD_NUMBER_LIMIT") - 1, 1);
+	zend_string *const_WORD_NUMBER_LIMIT_name = zend_string_init_interned("WORD_NUMBER_LIMIT", sizeof("WORD_NUMBER_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_NUMBER_LIMIT_name, &const_WORD_NUMBER_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_NUMBER_LIMIT_name);
+	zend_string_release_ex(const_WORD_NUMBER_LIMIT_name, true);
 
 	zval const_WORD_LETTER_value;
 	ZVAL_LONG(&const_WORD_LETTER_value, UBRK_WORD_LETTER);
-	zend_string *const_WORD_LETTER_name = zend_string_init_interned("WORD_LETTER", sizeof("WORD_LETTER") - 1, 1);
+	zend_string *const_WORD_LETTER_name = zend_string_init_interned("WORD_LETTER", sizeof("WORD_LETTER") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_LETTER_name, &const_WORD_LETTER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_LETTER_name);
+	zend_string_release_ex(const_WORD_LETTER_name, true);
 
 	zval const_WORD_LETTER_LIMIT_value;
 	ZVAL_LONG(&const_WORD_LETTER_LIMIT_value, UBRK_WORD_LETTER_LIMIT);
-	zend_string *const_WORD_LETTER_LIMIT_name = zend_string_init_interned("WORD_LETTER_LIMIT", sizeof("WORD_LETTER_LIMIT") - 1, 1);
+	zend_string *const_WORD_LETTER_LIMIT_name = zend_string_init_interned("WORD_LETTER_LIMIT", sizeof("WORD_LETTER_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_LETTER_LIMIT_name, &const_WORD_LETTER_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_LETTER_LIMIT_name);
+	zend_string_release_ex(const_WORD_LETTER_LIMIT_name, true);
 
 	zval const_WORD_KANA_value;
 	ZVAL_LONG(&const_WORD_KANA_value, UBRK_WORD_KANA);
-	zend_string *const_WORD_KANA_name = zend_string_init_interned("WORD_KANA", sizeof("WORD_KANA") - 1, 1);
+	zend_string *const_WORD_KANA_name = zend_string_init_interned("WORD_KANA", sizeof("WORD_KANA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_KANA_name, &const_WORD_KANA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_KANA_name);
+	zend_string_release_ex(const_WORD_KANA_name, true);
 
 	zval const_WORD_KANA_LIMIT_value;
 	ZVAL_LONG(&const_WORD_KANA_LIMIT_value, UBRK_WORD_KANA_LIMIT);
-	zend_string *const_WORD_KANA_LIMIT_name = zend_string_init_interned("WORD_KANA_LIMIT", sizeof("WORD_KANA_LIMIT") - 1, 1);
+	zend_string *const_WORD_KANA_LIMIT_name = zend_string_init_interned("WORD_KANA_LIMIT", sizeof("WORD_KANA_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_KANA_LIMIT_name, &const_WORD_KANA_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_KANA_LIMIT_name);
+	zend_string_release_ex(const_WORD_KANA_LIMIT_name, true);
 
 	zval const_WORD_IDEO_value;
 	ZVAL_LONG(&const_WORD_IDEO_value, UBRK_WORD_IDEO);
-	zend_string *const_WORD_IDEO_name = zend_string_init_interned("WORD_IDEO", sizeof("WORD_IDEO") - 1, 1);
+	zend_string *const_WORD_IDEO_name = zend_string_init_interned("WORD_IDEO", sizeof("WORD_IDEO") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_IDEO_name, &const_WORD_IDEO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_IDEO_name);
+	zend_string_release_ex(const_WORD_IDEO_name, true);
 
 	zval const_WORD_IDEO_LIMIT_value;
 	ZVAL_LONG(&const_WORD_IDEO_LIMIT_value, UBRK_WORD_IDEO_LIMIT);
-	zend_string *const_WORD_IDEO_LIMIT_name = zend_string_init_interned("WORD_IDEO_LIMIT", sizeof("WORD_IDEO_LIMIT") - 1, 1);
+	zend_string *const_WORD_IDEO_LIMIT_name = zend_string_init_interned("WORD_IDEO_LIMIT", sizeof("WORD_IDEO_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WORD_IDEO_LIMIT_name, &const_WORD_IDEO_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_WORD_IDEO_LIMIT_name);
+	zend_string_release_ex(const_WORD_IDEO_LIMIT_name, true);
 
 	zval const_LINE_SOFT_value;
 	ZVAL_LONG(&const_LINE_SOFT_value, UBRK_LINE_SOFT);
-	zend_string *const_LINE_SOFT_name = zend_string_init_interned("LINE_SOFT", sizeof("LINE_SOFT") - 1, 1);
+	zend_string *const_LINE_SOFT_name = zend_string_init_interned("LINE_SOFT", sizeof("LINE_SOFT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_LINE_SOFT_name, &const_LINE_SOFT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_LINE_SOFT_name);
+	zend_string_release_ex(const_LINE_SOFT_name, true);
 
 	zval const_LINE_SOFT_LIMIT_value;
 	ZVAL_LONG(&const_LINE_SOFT_LIMIT_value, UBRK_LINE_SOFT_LIMIT);
-	zend_string *const_LINE_SOFT_LIMIT_name = zend_string_init_interned("LINE_SOFT_LIMIT", sizeof("LINE_SOFT_LIMIT") - 1, 1);
+	zend_string *const_LINE_SOFT_LIMIT_name = zend_string_init_interned("LINE_SOFT_LIMIT", sizeof("LINE_SOFT_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_LINE_SOFT_LIMIT_name, &const_LINE_SOFT_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_LINE_SOFT_LIMIT_name);
+	zend_string_release_ex(const_LINE_SOFT_LIMIT_name, true);
 
 	zval const_LINE_HARD_value;
 	ZVAL_LONG(&const_LINE_HARD_value, UBRK_LINE_HARD);
-	zend_string *const_LINE_HARD_name = zend_string_init_interned("LINE_HARD", sizeof("LINE_HARD") - 1, 1);
+	zend_string *const_LINE_HARD_name = zend_string_init_interned("LINE_HARD", sizeof("LINE_HARD") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_LINE_HARD_name, &const_LINE_HARD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_LINE_HARD_name);
+	zend_string_release_ex(const_LINE_HARD_name, true);
 
 	zval const_LINE_HARD_LIMIT_value;
 	ZVAL_LONG(&const_LINE_HARD_LIMIT_value, UBRK_LINE_HARD_LIMIT);
-	zend_string *const_LINE_HARD_LIMIT_name = zend_string_init_interned("LINE_HARD_LIMIT", sizeof("LINE_HARD_LIMIT") - 1, 1);
+	zend_string *const_LINE_HARD_LIMIT_name = zend_string_init_interned("LINE_HARD_LIMIT", sizeof("LINE_HARD_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_LINE_HARD_LIMIT_name, &const_LINE_HARD_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_LINE_HARD_LIMIT_name);
+	zend_string_release_ex(const_LINE_HARD_LIMIT_name, true);
 
 	zval const_SENTENCE_TERM_value;
 	ZVAL_LONG(&const_SENTENCE_TERM_value, UBRK_SENTENCE_TERM);
-	zend_string *const_SENTENCE_TERM_name = zend_string_init_interned("SENTENCE_TERM", sizeof("SENTENCE_TERM") - 1, 1);
+	zend_string *const_SENTENCE_TERM_name = zend_string_init_interned("SENTENCE_TERM", sizeof("SENTENCE_TERM") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SENTENCE_TERM_name, &const_SENTENCE_TERM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_SENTENCE_TERM_name);
+	zend_string_release_ex(const_SENTENCE_TERM_name, true);
 
 	zval const_SENTENCE_TERM_LIMIT_value;
 	ZVAL_LONG(&const_SENTENCE_TERM_LIMIT_value, UBRK_SENTENCE_TERM_LIMIT);
-	zend_string *const_SENTENCE_TERM_LIMIT_name = zend_string_init_interned("SENTENCE_TERM_LIMIT", sizeof("SENTENCE_TERM_LIMIT") - 1, 1);
+	zend_string *const_SENTENCE_TERM_LIMIT_name = zend_string_init_interned("SENTENCE_TERM_LIMIT", sizeof("SENTENCE_TERM_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SENTENCE_TERM_LIMIT_name, &const_SENTENCE_TERM_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_SENTENCE_TERM_LIMIT_name);
+	zend_string_release_ex(const_SENTENCE_TERM_LIMIT_name, true);
 
 	zval const_SENTENCE_SEP_value;
 	ZVAL_LONG(&const_SENTENCE_SEP_value, UBRK_SENTENCE_SEP);
-	zend_string *const_SENTENCE_SEP_name = zend_string_init_interned("SENTENCE_SEP", sizeof("SENTENCE_SEP") - 1, 1);
+	zend_string *const_SENTENCE_SEP_name = zend_string_init_interned("SENTENCE_SEP", sizeof("SENTENCE_SEP") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SENTENCE_SEP_name, &const_SENTENCE_SEP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_SENTENCE_SEP_name);
+	zend_string_release_ex(const_SENTENCE_SEP_name, true);
 
 	zval const_SENTENCE_SEP_LIMIT_value;
 	ZVAL_LONG(&const_SENTENCE_SEP_LIMIT_value, UBRK_SENTENCE_SEP_LIMIT);
-	zend_string *const_SENTENCE_SEP_LIMIT_name = zend_string_init_interned("SENTENCE_SEP_LIMIT", sizeof("SENTENCE_SEP_LIMIT") - 1, 1);
+	zend_string *const_SENTENCE_SEP_LIMIT_name = zend_string_init_interned("SENTENCE_SEP_LIMIT", sizeof("SENTENCE_SEP_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SENTENCE_SEP_LIMIT_name, &const_SENTENCE_SEP_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_SENTENCE_SEP_LIMIT_name);
+	zend_string_release_ex(const_SENTENCE_SEP_LIMIT_name, true);
 
 	return class_entry;
 }
@@ -282,8 +281,7 @@ static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator", class_IntlRuleBasedBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -293,8 +291,7 @@ static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator", class_IntlCodePointBreakIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

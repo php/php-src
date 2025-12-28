@@ -80,14 +80,12 @@ require_once 'skipifconnectfailure.inc';
         $id = null;
         if (!mysqli_stmt_bind_param($stmt, "i" . $bind_type, $id, $bind_value)) {
             printf("[%04d] [%d] %s\n", $offset + 3, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
 
         for ($id = 1; $id < 4; $id++) {
             if (!mysqli_stmt_execute($stmt)) {
                 printf("[%04d] [%d] %s\n", $offset + 3 + $id, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                mysqli_stmt_close($stmt);
                 return false;
             }
         }
@@ -97,37 +95,28 @@ require_once 'skipifconnectfailure.inc';
 
         if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test")) {
             printf("[%04d] [%d] %s\n", $offset + 7, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
 
         if (!mysqli_stmt_execute($stmt)) {
             printf("[%04d] [%d] %s\n", $offset + 8, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
-
-        $result = mysqli_stmt_result_metadata($stmt);
 
         $bind_res = null;
         if (!mysqli_stmt_bind_result($stmt, $id, $bind_res)) {
             printf("[%04d] [%d] %s\n", $offset + 9, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
         $num = 0;
-        $fields = mysqli_fetch_fields($result);
 
         while (mysqli_stmt_fetch($stmt)) {
-            if (!gettype($bind_res)=="unicode") {
-                if ($bind_res !== $bind_value && (!$type_hint || ($type_hint !== gettype($bind_res)))) {
-                    printf("[%04d] [%d] Expecting %s/'%s' [type hint = %s], got %s/'%s'\n",
-                        $offset + 10, $num,
-                        gettype($bind_value), $bind_value, $type_hint,
-                        gettype($bind_res), $bind_res);
-                        mysqli_stmt_close($stmt);
-                        return false;
-                }
+            if ($bind_res !== $bind_value && (!$type_hint || ($type_hint !== gettype($bind_res)))) {
+                printf("[%04d] [%d] Expecting %s/'%s' [type hint = %s], got %s/'%s'\n",
+                    $offset + 10, $num,
+                    gettype($bind_value), $bind_value, $type_hint,
+                    gettype($bind_res), $bind_res);
+                    return false;
             }
             $num++;
         }
@@ -135,11 +124,9 @@ require_once 'skipifconnectfailure.inc';
         if ($num != 3) {
             printf("[%04d] [%d] %s, expecting 3 results, got only %d results\n",
                 $offset + 11, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt), $num);
-            mysqli_stmt_close($stmt);
             return false;
         }
 
-        mysqli_stmt_close($stmt);
         return true;
     }
 
@@ -193,26 +180,20 @@ require_once 'skipifconnectfailure.inc';
     func_mysqli_stmt_bind_result($link, $engine, "i", "BIGINT UNSIGNED", 1, 1800);
     func_mysqli_stmt_bind_result($link, $engine, "i", "BIGINT", -1 * PHP_INT_MAX + 1, 1820);
     func_mysqli_stmt_bind_result($link, $engine, "i", "BIGINT UNSIGNED", PHP_INT_MAX, 1840);
-    func_mysqli_stmt_bind_result($link, $engine, "s", "BIGINT UNSIGNED", "18446744073709551615", 1860);
-    func_mysqli_stmt_bind_result($link, $engine, "s", "BIGINT", "-9223372036854775808", 1880);
 
-    func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT", -9223372036854775808 - 1.1, 600);
+    func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT", -9237.21, 600);
     func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT", NULL, 620);
-    func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT UNSIGNED", 18446744073709551615 + 1.1, 640);
+    func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT UNSIGNED", 18467.5, 640);
     func_mysqli_stmt_bind_result($link, $engine, "d", "FLOAT UNSIGNED ", NULL, 660);
 
     // Yes, we need the temporary variable. The PHP casting will foul us otherwise.
-    $tmp = strval('-99999999.99');
-    func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2)", $tmp, 680, "string");
+    func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2)", '-99999999.99', 680, "double");
     func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2)", NULL, 700);
-    $tmp = strval('99999999.99');
-    func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", $tmp , 720, "string");
+    func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", '99999999.99' , 720, "double");
     func_mysqli_stmt_bind_result($link, $engine, "d", "DOUBLE(10,2) UNSIGNED", NULL, 740);
-    $tmp = strval('-99999999.99');
-    func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", $tmp, 760, "string");
+    func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", '-99999999.99', 760, "string");
     func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", NULL, 780);
-    $tmp = strval('99999999.99');
-    func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", $tmp, 800, "string");
+    func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", '99999999.99', 800, "string");
     func_mysqli_stmt_bind_result($link, $engine, "d", "DECIMAL(10,2)", NULL, 820);
 
     // don't care about date() strict TZ warnings...
@@ -231,8 +212,8 @@ require_once 'skipifconnectfailure.inc';
     func_mysqli_stmt_bind_result($link, $engine, "s", "TIME", NULL, 1020);
 
     $tmp = intval(@date('Y'));
-    func_mysqli_stmt_bind_result($link, $engine, "s", "YEAR", $tmp, 1040, "integer");
-    func_mysqli_stmt_bind_result($link, $engine, "s", "YEAR NOT NULL", $tmp, 1060, "integer");
+    func_mysqli_stmt_bind_result($link, $engine, "s", "YEAR", $tmp, 1040, "string"); // YEAR is a string with implicit display width of 4
+    func_mysqli_stmt_bind_result($link, $engine, "s", "YEAR NOT NULL", $tmp, 1060, "string");
     func_mysqli_stmt_bind_result($link, $engine, "s", "YEAR", NULL, 1080);
 
     $string255 = func_mysqli_stmt_bind_make_string(255);
@@ -284,7 +265,7 @@ require_once 'skipifconnectfailure.inc';
     func_mysqli_stmt_bind_result($link, $engine, "s", "SET('a', 'b')", NULL, 1760, 'string');
 
     if (mysqli_get_server_version($link) >= 50600)
-        func_mysqli_stmt_bind_result($link, $engine, "s", "TIME", "13:31:34.123456", 1770, "13:31:34");
+        func_mysqli_stmt_bind_result($link, $engine, "s", "TIME(6)", "13:31:34.123456", 1770);
 
     $stmt = mysqli_stmt_init($link);
     if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1000, 'z')"))
@@ -294,7 +275,7 @@ require_once 'skipifconnectfailure.inc';
     try {
         mysqli_stmt_bind_result($stmt, $id);
     } catch (\ArgumentCountError $e) {
-        $e->getMessage() . \PHP_EOL;
+        echo $e->getMessage() . \PHP_EOL;
     }
 
     mysqli_stmt_close($stmt);
@@ -312,4 +293,5 @@ Number of bind variables doesn't match number of fields in prepared statement
 Number of bind variables doesn't match number of fields in prepared statement
 int(1)
 %s(1) "a"
+Number of bind variables doesn't match number of fields in prepared statement
 done!

@@ -82,7 +82,7 @@ PHP_METHOD(Pdo_Sqlite, loadExtension)
 	}
 
 	if (extension_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -332,6 +332,36 @@ PHP_METHOD(Pdo_Sqlite, openBlob)
 	}
 }
 
+PHP_METHOD(Pdo_Sqlite, setAuthorizer)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(free_fcc);
+	pdo_sqlite_db_handle *db_handle = (pdo_sqlite_db_handle *) dbh->driver_data;
+
+	/* Clear previously set callback */
+	if (ZEND_FCC_INITIALIZED(db_handle->authorizer_fcc)) {
+		zend_fcc_dtor(&db_handle->authorizer_fcc);
+	}
+
+	/* Only enable userland authorizer if argument is not NULL */
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_fcc_dup(&db_handle->authorizer_fcc, &fcc);
+	}
+
+	return;
+
+free_fcc:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
+}
+
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
@@ -346,24 +376,20 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 
 	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
+	zval_ptr_dtor(&zargs[0]);
+	zval_ptr_dtor(&zargs[1]);
+
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
-			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
+			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
 				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
 			zend_string_release(func_name);
+			zval_ptr_dtor(&retval);
 			return FAILURE;
 		}
-		if (Z_LVAL(retval) > 0) {
-			ret = 1;
-		} else if (Z_LVAL(retval) < 0) {
-			ret = -1;
-		}
-		zval_ptr_dtor(&retval);
+		ret = ZEND_NORMALIZE_BOOL(Z_LVAL(retval));
 	}
-
-	zval_ptr_dtor(&zargs[0]);
-	zval_ptr_dtor(&zargs[1]);
 
 	return ret;
 }
@@ -378,19 +404,22 @@ PHP_METHOD(Pdo_Sqlite, createCollation)
 	pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite_collation_callback);
 }
 
+#define REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "SQLITE_", "Pdo\\Sqlite::", value)
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
 #ifdef SQLITE_DETERMINISTIC
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_DETERMINISTIC", (zend_long)SQLITE_DETERMINISTIC);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("DETERMINISTIC", (zend_long)SQLITE_DETERMINISTIC);
 #endif
 
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_OPEN_FLAGS", (zend_long)PDO_SQLITE_ATTR_OPEN_FLAGS);
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_READONLY", (zend_long)SQLITE_OPEN_READONLY);
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_READWRITE", (zend_long)SQLITE_OPEN_READWRITE);
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_CREATE", (zend_long)SQLITE_OPEN_CREATE);
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
-	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_OPEN_FLAGS", (zend_long)PDO_SQLITE_ATTR_OPEN_FLAGS);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("OPEN_READONLY", (zend_long)SQLITE_OPEN_READONLY);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("OPEN_READWRITE", (zend_long)SQLITE_OPEN_READWRITE);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("OPEN_CREATE", (zend_long)SQLITE_OPEN_CREATE);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
+	REGISTER_PDO_SQLITE_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
 
 	pdosqlite_ce = register_class_Pdo_Sqlite(pdo_dbh_ce);
 	pdosqlite_ce->create_object = pdo_dbh_new;

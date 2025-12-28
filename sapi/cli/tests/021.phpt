@@ -31,7 +31,7 @@ $script = "#!$php -n\n".
 file_put_contents($filename, $script);
 chmod($filename, 0777);
 
-echo `$filename`;
+echo shell_exec($filename);
 
 echo "\nDone\n";
 ?>

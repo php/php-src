@@ -9,7 +9,7 @@ EOS;
 $stream = fopen('php://memory', 'w+');
 fwrite($stream, $contents);
 rewind($stream);
-while (($data = fgetcsv($stream)) !== false) {
+while (($data = fgetcsv($stream, escape: "\\")) !== false) {
     var_dump($data);
 }
 fclose($stream);

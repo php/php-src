@@ -37,6 +37,7 @@ zend_result dom_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval);
 zend_result dom_document_encoding_read(dom_object *obj, zval *retval);
+zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval);
 zend_result dom_document_standalone_read(dom_object *obj, zval *retval);
 zend_result dom_document_standalone_write(dom_object *obj, zval *newval);
@@ -57,8 +58,8 @@ zend_result dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 zend_result dom_document_preserve_whitespace_write(dom_object *obj, zval *newval);
 zend_result dom_document_recover_read(dom_object *obj, zval *retval);
 zend_result dom_document_recover_write(dom_object *obj, zval *newval);
-zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval);
-zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval);
+zend_result dom_document_substitute_entities_read(dom_object *obj, zval *retval);
+zend_result dom_document_substitute_entities_write(dom_object *obj, zval *newval);
 
 /* html5 document properties */
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *retval);
@@ -85,6 +86,8 @@ zend_result dom_element_id_write(dom_object *obj, zval *newval);
 zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_write(dom_object *obj, zval *newval);
+zend_result dom_element_outer_html_read(dom_object *obj, zval *retval);
+zend_result dom_element_outer_html_write(dom_object *obj, zval *newval);
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval);
 zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval);
 zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval);
@@ -106,6 +109,7 @@ zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
 /* parent node properties */
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval);

@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #33876 (PDO misquotes/miscasts bool(false))
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

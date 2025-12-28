@@ -83,8 +83,8 @@ MySQLPDOTest::skip();
     }
 
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch to emulated prepared statements, test will fail\n");
 
         try {
@@ -161,7 +161,7 @@ $db = MySQLPDOTest::factory();
 $db->query('DROP TABLE IF EXISTS test_prepare_emulated_anonymous_placeholder');
 ?>
 --EXPECTF--
-PDO::prepare(): Argument #1 ($query) cannot be empty
+PDO::prepare(): Argument #1 ($query) must not be empty
 array(1) {
   [0]=>
   array(1) {

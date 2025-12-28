@@ -36,7 +36,7 @@ if (!have_innodb($link))
 
     /* note that there is no savepoint my... */
     if (false !== ($tmp = mysqli_release_savepoint($link, 'my')))
-        printf("[010] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
+        printf("[010] Got %s - [%d] %s\n", $tmp, mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, 'INSERT INTO test(id) VALUES (1)'))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -46,13 +46,13 @@ if (!have_innodb($link))
         printf("[012] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
     if (true !== ($tmp = mysqli_savepoint($link, 'my')))
-        printf("[013] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
+        printf("[013] Got %s - [%d] %s\n", $tmp, mysqli_errno($link), mysqli_error($link));
 
     $res = mysqli_query($link, "SELECT * FROM test");
     var_dump($res->fetch_assoc());
 
     if (true !== ($tmp = mysqli_release_savepoint($link, 'my')))
-        printf("[014] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
+        printf("[014] Got %s - [%d] %s\n", $tmp, mysqli_errno($link), mysqli_error($link));
 
     print "done!";
 ?>
@@ -61,7 +61,7 @@ if (!have_innodb($link))
 require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_release_savepoint(): Argument #2 ($name) cannot be empty
+mysqli_release_savepoint(): Argument #2 ($name) must not be empty
 array(1) {
   ["id"]=>
   string(1) "1"

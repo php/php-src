@@ -13,11 +13,16 @@ function run_bcmath_tests(
         foreach ($firstTerms as $firstTerm) {
             echo "Number \"$firstTerm\" (scale $scale)\n";
             foreach ($secondTerms as $secondTerm) {
+                try {
+                    $ret = $bcmath_function($firstTerm, $secondTerm, $scale);
+                } catch (Throwable $e) {
+                    $ret = $e->getMessage();
+                }
                 echo $firstTerm,
                     " $symbol ",
                     str_pad($secondTerm, STRING_PADDING),
                     " = ",
-                    $bcmath_function($firstTerm, $secondTerm, $scale),
+                    $ret,
                     "\n";
             }
             echo "\n";

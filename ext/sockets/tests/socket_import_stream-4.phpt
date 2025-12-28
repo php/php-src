@@ -4,8 +4,7 @@ socket_import_stream: effects of closing
 sockets
 --SKIPIF--
 <?php
-
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+if (PHP_OS_FAMILY === 'Windows') {
   die("skip Not Valid for Windows");
 }
 ?>
@@ -16,7 +15,7 @@ function test($stream, $sock) {
     if ($stream !== null) {
         echo "stream_set_blocking ";
         try {
-            print_r(stream_set_blocking($stream, 0));
+            print_r(stream_set_blocking($stream, false));
         } catch (Error $e) {
             echo get_class($e), ": ", $e->getMessage(), "\n";
         }
@@ -89,7 +88,7 @@ stream_set_blocking 1
 
 
 close stream
-stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): Argument #1 ($stream) must be an open stream resource
 
 socket_set_block 
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
@@ -100,7 +99,7 @@ Warning: socket_get_option(): Unable to retrieve socket option [%d]: %s in %s on
 
 
 close socket
-stream_set_blocking TypeError: stream_set_blocking(): supplied resource is not a valid stream resource
+stream_set_blocking TypeError: stream_set_blocking(): Argument #1 ($stream) must be an open stream resource
 
 socket_set_block Error: socket_set_block(): Argument #1 ($socket) has already been closed
 

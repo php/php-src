@@ -13,11 +13,13 @@ var_dump(get_defined_constants(true)["user"]);
 
 ?>
 --EXPECT--
-array(4) {
+array(5) {
   ["ZEND_TEST_DEPRECATED"]=>
   int(42)
   ["ZEND_CONSTANT_A"]=>
   string(6) "global"
+  ["ZEND_TEST_ATTRIBUTED_CONSTANT"]=>
+  int(42)
   ["ZendTestNS2\ZEND_CONSTANT_A"]=>
   string(10) "namespaced"
   ["ZendTestNS2\ZendSubNS\ZEND_CONSTANT_A"]=>

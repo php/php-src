@@ -500,13 +500,14 @@ typedef struct _ir_gdbjit_descriptor {
 	struct _ir_gdbjit_code_entry *first_entry;
 } ir_gdbjit_descriptor;
 
+#ifdef IR_EXTERNAL_GDB_ENTRY
+extern ir_gdbjit_descriptor __jit_debug_descriptor;
+void __jit_debug_register_code(void);
+#else
 ir_gdbjit_descriptor __jit_debug_descriptor = {
 	1, IR_GDBJIT_NOACTION, NULL, NULL
 };
 
-#ifdef IR_EXTERNAL_GDB_ENTRY
-void __jit_debug_register_code(void);
-#else
 IR_NEVER_INLINE void __jit_debug_register_code(void)
 {
 	__asm__ __volatile__("");

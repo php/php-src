@@ -30,4 +30,4 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bug_71863"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-%AUnknown column 'owner_id' in 'where clause'
+%AUnknown column 'owner_id' in '%r(WHERE|where clause)%r'

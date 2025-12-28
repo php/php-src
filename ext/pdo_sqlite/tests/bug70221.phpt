@@ -16,5 +16,6 @@ unset($db);
 $dbfile = __DIR__ . '/test.sqlite';
 unlink($dbfile);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 Everything is fine, no exceptions here

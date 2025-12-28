@@ -230,22 +230,20 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_cwd_activate(void) /* {{{ */
+CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
-	return 0;
 }
 /* }}} */
 
-CWD_API int virtual_cwd_deactivate(void) /* {{{ */
+CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
 		CWDG(cwd).cwd = NULL;
 	}
-	return 0;
 }
 /* }}} */
 
@@ -526,18 +524,18 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			(i + 1 == len && path[i] == '.')) {
 			/* remove double slashes and '.' */
 			len = EXPECTED(i > 0) ? i - 1 : 0;
-			is_dir = 1;
+			is_dir = true;
 			continue;
 		} else if (i + 2 == len && path[i] == '.' && path[i+1] == '.') {
 			/* remove '..' and previous directory */
-			is_dir = 1;
+			is_dir = true;
 			if (link_is_dir) {
 				*link_is_dir = 1;
 			}
 			if (i <= start + 1) {
 				return start ? start : len;
 			}
-			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL);
+			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, true, NULL);
 			if (j > start && j != (size_t)-1) {
 				j--;
 				assert(i < MAXPATHLEN);
@@ -950,7 +948,8 @@ retry_reparse_tag_cloud:
 				j = start;
 			} else {
 				/* some leading directories may be inaccessible */
-				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL);
+				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, true,
+						    NULL);
 				if (j > start && j != (size_t)-1) {
 					path[j++] = DEFAULT_SLASH;
 				}
@@ -1140,7 +1139,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
-	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
+	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, false, NULL);
 
 	if (path_length == (size_t)-1) {
 #ifdef ZEND_WIN32

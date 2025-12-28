@@ -17,9 +17,9 @@
 #include "php_hash.h"
 #include "php_hash_xxhash.h"
 
-static int php_hash_xxh32_unserialize(
+static hash_spec_result php_hash_xxh32_unserialize(
 		php_hashcontext_object *hash, zend_long magic, const zval *zv);
-static int php_hash_xxh64_unserialize(
+static hash_spec_result php_hash_xxh64_unserialize(
 		php_hashcontext_object *hash, zend_long magic, const zval *zv);
 
 const php_hash_ops php_hash_xxh32_ops = {
@@ -69,24 +69,24 @@ PHP_HASH_API void PHP_XXH32Final(unsigned char digest[4], PHP_XXH32_CTX *ctx)
 	XXH32_canonicalFromHash((XXH32_canonical_t*)digest, XXH32_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH32Copy(const php_hash_ops *ops, const PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
 }
 
-static int php_hash_xxh32_unserialize(
+static hash_spec_result php_hash_xxh32_unserialize(
 		php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
 	PHP_XXH32_CTX *ctx = (PHP_XXH32_CTX *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH32_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH32_SPEC)) == HASH_SPEC_SUCCESS
 		&& ctx->s.memsize < 16) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 const php_hash_ops php_hash_xxh64_ops = {
@@ -134,7 +134,7 @@ PHP_HASH_API void PHP_XXH64Final(unsigned char digest[8], PHP_XXH64_CTX *ctx)
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH64_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH64Copy(const php_hash_ops *ops, PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH64Copy(const php_hash_ops *ops, const PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -158,7 +158,7 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
 typedef XXH_errorcode (*xxh3_reset_with_seed_func_t)(XXH3_state_t*, XXH64_hash_t);
 
-zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
+static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
 		xxh3_reset_with_seed_func_t func_init_seed, xxh3_reset_with_secret_func_t func_init_secret, const char* algo_name)
 {
 	memset(&ctx->s, 0, sizeof ctx->s);
@@ -183,7 +183,7 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			return;
 		} else if (_secret) {
 			if (IS_STRING != Z_TYPE_P(_secret)) {
-				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
+				php_error_docref(NULL, E_DEPRECATED, "Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
 			}
 			zend_string *secret_string = zval_try_get_string(_secret);
 			if (UNEXPECTED(!secret_string)) {
@@ -225,24 +225,24 @@ PHP_HASH_API void PHP_XXH3_64_Final(unsigned char digest[8], PHP_XXH3_64_CTX *ct
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH3_64bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_64_Copy(const php_hash_ops *ops, const PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
 }
 
-static int php_hash_xxh64_unserialize(
+static hash_spec_result php_hash_xxh64_unserialize(
 		php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
 	PHP_XXH64_CTX *ctx = (PHP_XXH64_CTX *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH64_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH64_SPEC)) == HASH_SPEC_SUCCESS
 		&& ctx->s.memsize < 32) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 const php_hash_ops php_hash_xxh3_128_ops = {
@@ -275,7 +275,7 @@ PHP_HASH_API void PHP_XXH3_128_Final(unsigned char digest[16], PHP_XXH3_128_CTX 
 	XXH128_canonicalFromHash((XXH128_canonical_t*)digest, XXH3_128bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_128_Copy(const php_hash_ops *ops, PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_128_Copy(const php_hash_ops *ops, const PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;

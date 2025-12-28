@@ -42,6 +42,7 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
+#include "zend_lazy_objects.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -87,7 +88,7 @@ struct _zend_compiler_globals {
 
 	zend_string *compiled_filename;
 
-	int zend_lineno;
+	uint32_t zend_lineno;
 
 	zend_op_array *active_op_array;
 
@@ -153,6 +154,9 @@ struct _zend_compiler_globals {
 
 	uint32_t rtd_key_counter;
 
+	void *internal_run_time_cache;
+	uint32_t internal_run_time_cache_size;
+
 	zend_stack short_circuiting_opnums;
 #ifdef ZTS
 	uint32_t copied_functions_count;
@@ -178,6 +182,10 @@ struct _zend_executor_globals {
 	JMP_BUF *bailout;
 
 	int error_reporting;
+
+	bool fatal_error_backtrace_on;
+	zval last_fatal_error_backtrace;
+
 	int exit_status;
 
 	HashTable *function_table;	/* function symbol table */
@@ -190,13 +198,13 @@ struct _zend_executor_globals {
 	size_t         vm_stack_page_size;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
+	const zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
 	zend_execute_data *current_observed_frame;
 
-	int ticks_count;
+	uint32_t ticks_count;
 
 	zend_long precision;
 
@@ -246,6 +254,7 @@ struct _zend_executor_globals {
 	zend_ini_entry *error_reporting_ini_entry;
 
 	zend_objects_store objects_store;
+	zend_lazy_objects_store lazy_objects_store;
 	zend_object *exception, *prev_exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
@@ -286,7 +295,8 @@ struct _zend_executor_globals {
 	size_t fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
-	 * in addition to being processed as usual. */
+	 * and their processing is delayed until zend_emit_recorded_errors()
+	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
 	uint32_t num_errors;
 	zend_error_info **errors;
@@ -308,6 +318,8 @@ struct _zend_executor_globals {
 #endif
 
 	zend_strtod_state strtod_state;
+
+	HashTable callable_convert_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -331,7 +343,7 @@ struct _zend_ini_scanner_globals {
 	zend_stack state_stack;
 
 	zend_string *filename;
-	int lineno;
+	uint32_t lineno;
 
 	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;

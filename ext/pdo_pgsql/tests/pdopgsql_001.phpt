@@ -1,7 +1,6 @@
 --TEST--
 Pdo\Pgsql subclass basic
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -40,8 +40,6 @@ require_once 'skipifconnectfailure.inc';
 
     // let's ignore upper limits for LONGBLOB (2^32) ...
     // maximum packet size up to which we test is 10M
-    $tmp = '';
-    $blob = '';
     $tmp = str_repeat('a', 1024);
 
     $limit = min(floor($max_allowed_packet / 1024 / 2), 10240);

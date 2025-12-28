@@ -15,7 +15,6 @@
 */
 
 #include "php.h"
-#include "basic_functions.h"
 #include "crc32.h"
 #include "crc32_x86.h"
 
@@ -129,7 +128,7 @@ PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
+PHPAPI zend_result php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];

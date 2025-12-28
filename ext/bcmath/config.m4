@@ -13,6 +13,7 @@ if test "$PHP_BCMATH" != "no"; then
       libbcmath/src/divmod.c
       libbcmath/src/doaddsub.c
       libbcmath/src/floor_or_ceil.c
+      libbcmath/src/long2num.c
       libbcmath/src/init.c
       libbcmath/src/int2num.c
       libbcmath/src/nearzero.c

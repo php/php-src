@@ -40,8 +40,6 @@ foreach (['pub', 'prot', 'priv', 'final1', 'final2', 'final3'] as $method) {
 ?>
 --EXPECTF--
 Warning: Private methods cannot be final as they are never overridden by other classes in %s on line %d
-
-Warning: Private methods cannot be final as they are never overridden by other classes in %s on line %d
 --- Method: pub ---
 bool(true)
 bool(true)

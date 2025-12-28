@@ -96,7 +96,6 @@ const MYSQLI_CLIENT_NO_SCHEMA = UNKNOWN;
  * @cvalue CLIENT_FOUND_ROWS
  */
 const MYSQLI_CLIENT_FOUND_ROWS = UNKNOWN;
-#ifdef CLIENT_SSL_VERIFY_SERVER_CERT
 /**
  * @var int
  * @cvalue CLIENT_SSL_VERIFY_SERVER_CERT
@@ -107,7 +106,6 @@ const MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
  * @cvalue CLIENT_SSL_DONT_VERIFY_SERVER_CERT
  */
 const MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT = UNKNOWN;
-#endif
 /**
  * @var int
  * @cvalue CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS
@@ -139,6 +137,7 @@ const MYSQLI_ASYNC = UNKNOWN;
  * @var int
  * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
  */
+#[\Deprecated(since: '8.4', message: 'as the mysqli_store_result() parameter is unused since 8.1')]
 const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
 
 /* for mysqli_fetch_assoc */
@@ -180,21 +179,6 @@ const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
  * @cvalue CURSOR_TYPE_READ_ONLY
  */
 const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_FOR_UPDATE
- */
-const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_SCROLLABLE
- */
-const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
-/**
- * @var int
- * @cvalue STMT_ATTR_PREFETCH_ROWS
- */
-const MYSQLI_STMT_ATTR_PREFETCH_ROWS = UNKNOWN;
 
 /* column information */
 /**
@@ -406,21 +390,19 @@ const MYSQLI_TYPE_STRING = UNKNOWN;
 const MYSQLI_TYPE_CHAR = UNKNOWN;
 /**
  * @var int
- * @cvalue FIELD_TYPE_INTERVAL
- */
-const MYSQLI_TYPE_INTERVAL = UNKNOWN;
-/**
- * @var int
  * @cvalue FIELD_TYPE_GEOMETRY
  */
 const MYSQLI_TYPE_GEOMETRY = UNKNOWN;
-#ifdef FIELD_TYPE_JSON
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_VECTOR
+ */
+const MYSQLI_TYPE_VECTOR = UNKNOWN;
 /**
  * @var int
  * @cvalue FIELD_TYPE_JSON
  */
 const MYSQLI_TYPE_JSON = UNKNOWN;
-#endif
 /**
  * @var int
  * @cvalue FIELD_TYPE_NEWDECIMAL
@@ -441,17 +423,15 @@ const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQL_NO_DATA
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_NO_DATA = UNKNOWN;
-#ifdef MYSQL_DATA_TRUNCATED
 /**
  * @var int
  * @cvalue MYSQL_DATA_TRUNCATED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_DATA_TRUNCATED = UNKNOWN;
-#endif
 
 /* reporting */
 /**
@@ -489,84 +469,88 @@ const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_QUERY_NO_GOOD_INDEX_USED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_QUERY_NO_INDEX_USED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
-#ifdef SERVER_QUERY_WAS_SLOW
 /**
  * @var int
  * @cvalue SERVER_QUERY_WAS_SLOW
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
-#endif
-#ifdef SERVER_PS_OUT_PARAMS
 /**
  * @var int
  * @cvalue SERVER_PS_OUT_PARAMS
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
-#endif
 
 /**
  * @var int
  * @cvalue REFRESH_GRANT
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_GRANT = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_LOG
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_LOG = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_TABLES
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_TABLES = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_HOSTS
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_HOSTS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_STATUS
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_STATUS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_THREADS
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_THREADS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_REPLICA = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_SLAVE = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_MASTER
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_MASTER = UNKNOWN;
-#ifdef REFRESH_BACKUP_LOG
 /**
  * @var int
  * @cvalue REFRESH_BACKUP_LOG
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
-#endif
 
 /**
  * @var int
@@ -605,10 +589,7 @@ const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 
-/**
- * @var bool
- * @deprecated
- */
+#[\Deprecated(since: '8.2', message: 'as it is always false')]
 const MYSQLI_IS_MARIADB = false;
 
 final class mysqli_driver
@@ -1399,6 +1380,7 @@ function mysqli_error_list(mysqli $mysql): array {}
 function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 /** @alias mysqli_stmt_execute */
+#[\Deprecated(since: '8.5', message: "use mysqli_stmt_execute() instead")]
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}
@@ -1537,7 +1519,7 @@ function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
 
-function mysqli_report(int $flags): bool {}
+function mysqli_report(int $flags): true {}
 
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}

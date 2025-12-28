@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([sysvmsg],
 
 if test "$PHP_SYSVMSG" != "no"; then
   AC_CHECK_HEADER([sys/msg.h],,
-    [AC_MSG_FAILURE(m4_normalize([
+    [AC_MSG_FAILURE(m4_text_wrap([
       Cannot enable System V IPC support. Required <sys/msg.h> header file not
       found.
     ]))])

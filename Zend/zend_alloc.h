@@ -220,6 +220,7 @@ ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
+ZEND_API void refresh_memory_manager(void);
 ZEND_API bool is_zend_mm(void);
 ZEND_API bool is_zend_ptr(const void *ptr);
 
@@ -315,6 +316,8 @@ struct _zend_mm_storage {
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
+
+ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap);
 
 /*
 

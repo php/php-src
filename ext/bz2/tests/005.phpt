@@ -11,10 +11,6 @@ Getting lost within myself
 Nothing matters no one else";
 
 var_dump(bzcompress(1,1,1));
-var_dump(bzcompress($string, 100));
-var_dump(bzcompress($string, 100, -1));
-var_dump(bzcompress($string, 100, 1000));
-var_dump(bzcompress($string, -1, 1));
 
 $data = bzcompress($string);
 $data2 = bzcompress($string, 1, 10);
@@ -22,12 +18,12 @@ $data2 = bzcompress($string, 1, 10);
 $data3 = $data2;
 $data3[3] = 0;
 
-var_dump(bzdecompress(1,1));
+var_dump(bzdecompress(1, true));
 var_dump(bzdecompress($data3));
-var_dump(bzdecompress($data3,1));
+var_dump(bzdecompress($data3, true));
 
-var_dump(bzdecompress($data, 0));
-var_dump(bzdecompress($data, 1));
+var_dump(bzdecompress($data, false));
+var_dump(bzdecompress($data, true));
 var_dump(bzdecompress($data));
 var_dump(bzdecompress($data2));
 
@@ -35,10 +31,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(%d) "BZ%a"
-int(-2)
-int(-2)
-int(-2)
-int(-2)
 int(-5)
 int(-5)
 int(-5)

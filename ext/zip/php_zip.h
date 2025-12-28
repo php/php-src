@@ -39,7 +39,7 @@ extern zend_module_entry zip_module_entry;
 /* Additionnal flags not from libzip */
 #define ZIP_FL_OPEN_FILE_NOW (1u<<30)
 
-#define PHP_ZIP_VERSION "1.22.3"
+#define PHP_ZIP_VERSION "1.22.7"
 
 #ifdef HAVE_LIBZIP_VERSION
 #define LIBZIP_VERSION_STR zip_libzip_version()
@@ -60,12 +60,15 @@ typedef zip_rsrc * zip_rsrc_ptr;
 typedef struct _ze_zip_read_rsrc {
 	struct zip_file *zf;
 	struct zip_stat sb;
+	/* Used to check if the zip resource still exists,
+	 * without holding a reference. This works because the IDs are unique. */
+	zend_long zip_rsrc_handle;
 } zip_read_rsrc;
 
 /* Extends zend object */
 typedef struct _ze_zip_object {
 	struct zip *za;
-	char **buffers;
+	zend_string **buffers;
 	HashTable *prop_handler;
 	char *filename;
 	int filename_len;
@@ -74,10 +77,10 @@ typedef struct _ze_zip_object {
 	int err_zip;
 	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
-	zval progress_callback;
+	zend_fcall_info_cache progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
-	zval cancel_callback;
+	zend_fcall_info_cache cancel_callback;
 #endif
 	zend_object zo;
 } ze_zip_object;

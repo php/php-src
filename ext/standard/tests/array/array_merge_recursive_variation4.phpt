@@ -9,10 +9,6 @@ Test array_merge_recursive() function : usage variations - associative array wit
 
 echo "*** Testing array_merge_recursive() : assoc. array with diff. keys to \$arr1 argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -41,7 +37,7 @@ $arrays = array (
        array("hello", $heredoc => array("heredoc", 'string'), "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(@$unset_var => array("unset"), $fp => 'resource', 11, "hello")
+/*8*/ array($fp => 'resource', 11, "hello")
 );
 
 // initialise the second array
@@ -292,12 +288,7 @@ array(7) {
 }
 -- Iteration 6 --
 -- With default argument --
-array(4) {
-  [""]=>
-  array(1) {
-    [0]=>
-    string(5) "unset"
-  }
+array(3) {
   [0]=>
   string(8) "resource"
   [1]=>
@@ -306,12 +297,7 @@ array(4) {
   string(5) "hello"
 }
 -- With more arguments --
-array(8) {
-  [""]=>
-  array(1) {
-    [0]=>
-    string(5) "unset"
-  }
+array(7) {
   [0]=>
   string(8) "resource"
   [1]=>

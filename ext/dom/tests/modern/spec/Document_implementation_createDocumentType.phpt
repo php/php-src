@@ -25,7 +25,7 @@ foreach ($test_matrix as $test_item) {
 
 ?>
 --EXPECT--
-object(Dom\DocumentType)#3 (23) {
+object(Dom\DocumentType)#3 (19) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -38,12 +38,14 @@ object(Dom\DocumentType)#3 (23) {
   string(6) "system"
   ["internalSubset"]=>
   NULL
-  ["nodeName"]=>
-  string(5) "qname"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(5) "qname"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -58,17 +60,7 @@ object(Dom\DocumentType)#3 (23) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
   string(0) ""
@@ -76,7 +68,7 @@ object(Dom\DocumentType)#3 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "system">
 
-object(Dom\DocumentType)#2 (23) {
+object(Dom\DocumentType)#2 (19) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -89,12 +81,14 @@ object(Dom\DocumentType)#2 (23) {
   string(0) ""
   ["internalSubset"]=>
   NULL
-  ["nodeName"]=>
-  string(5) "qname"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(5) "qname"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -109,17 +103,7 @@ object(Dom\DocumentType)#2 (23) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
   string(0) ""
@@ -127,7 +111,7 @@ object(Dom\DocumentType)#2 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "">
 
-object(Dom\DocumentType)#1 (23) {
+object(Dom\DocumentType)#1 (19) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -140,12 +124,14 @@ object(Dom\DocumentType)#1 (23) {
   string(6) "system"
   ["internalSubset"]=>
   NULL
-  ["nodeName"]=>
-  string(5) "qname"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(5) "qname"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -160,17 +146,7 @@ object(Dom\DocumentType)#1 (23) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
   string(0) ""
@@ -178,7 +154,7 @@ object(Dom\DocumentType)#1 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname SYSTEM "system">
 
-object(Dom\DocumentType)#4 (23) {
+object(Dom\DocumentType)#4 (19) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -191,12 +167,14 @@ object(Dom\DocumentType)#4 (23) {
   string(0) ""
   ["internalSubset"]=>
   NULL
-  ["nodeName"]=>
-  string(5) "qname"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(5) "qname"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -211,17 +189,7 @@ object(Dom\DocumentType)#4 (23) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
   string(0) ""

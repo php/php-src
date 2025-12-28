@@ -67,7 +67,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 /* {{{ typedef enum php_iconv_err_t */
 typedef enum _php_iconv_err_t {
-	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
+	PHP_ICONV_ERR_SUCCESS           = 0,
 	PHP_ICONV_ERR_CONVERTER         = 1,
 	PHP_ICONV_ERR_WRONG_CHARSET     = 2,
 	PHP_ICONV_ERR_TOO_BIG           = 3,

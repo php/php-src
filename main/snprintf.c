@@ -613,19 +613,11 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					break;
 				case 'j':
 					fmt++;
-#if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 't':
 					fmt++;
-#if SIZEOF_PTRDIFF_T
 					modifier = LM_PTRDIFF_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 'p':
 				{
@@ -689,16 +681,12 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -721,27 +709,19 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
-#if SIZEOF_SSIZE_T
 								i_num = (int64_t) va_arg(ap, ssize_t);
-#else
-								i_num = (int64_t) va_arg(ap, size_t);
-#endif
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:
 								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
-#if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
 								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
-#endif
-#if SIZEOF_PTRDIFF_T
 							case LM_PTRDIFF_T:
 								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
-#endif
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -778,16 +758,12 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -817,16 +793,12 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);

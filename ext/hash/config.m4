@@ -1,6 +1,6 @@
 PHP_ARG_WITH([mhash],
   [for mhash support],
-  [AS_HELP_STRING([[--with-mhash]],
+  [AS_HELP_STRING([--with-mhash],
     [Include mhash support])])
 
 AS_VAR_IF([PHP_MHASH], [no],, [
@@ -23,15 +23,14 @@ AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
     dnl Add -Wno-implicit-fallthrough flag as it happens on 32 bit builds
     AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
-      [PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -Wno-implicit-fallthrough"],,
-      [-Werror])
+      [PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -Wno-implicit-fallthrough"])
   ],[
     AC_MSG_RESULT([yes])
     SHA3_DIR="sha3/generic64lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c"
-  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded"
 ])
 
 PHP_NEW_EXTENSION([hash], m4_normalize([
@@ -58,7 +57,7 @@ PHP_NEW_EXTENSION([hash], m4_normalize([
     murmur/PMurHash128.c
   ]),
   [no],,
-  [$PHP_HASH_CFLAGS])
+  [$PHP_HASH_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([

@@ -1,7 +1,6 @@
 --TEST--
 Pdo\Pgsql::setNoticeCallback() use F ZPP for trampoline callback and does not leak
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

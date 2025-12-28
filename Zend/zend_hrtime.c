@@ -27,13 +27,15 @@
 # include <time.h>
 # include <string.h>
 
+ZEND_API clockid_t zend_hrtime_posix_clock_id = CLOCK_MONOTONIC;
+
 #elif ZEND_HRTIME_PLATFORM_WINDOWS
 
 # define WIN32_LEAN_AND_MEAN
 
 ZEND_API double zend_hrtime_timer_scale = .0;
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 # include <mach/mach_time.h>
 # include <string.h>
@@ -62,9 +64,28 @@ void zend_startup_hrtime(void)
 		zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 	}
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 	mach_timebase_info(&zend_hrtime_timerlib_info);
+
+#elif ZEND_HRTIME_PLATFORM_POSIX
+
+	struct timespec ts;
+
+#ifdef CLOCK_MONOTONIC_RAW
+	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC_RAW, &ts))) {
+		zend_hrtime_posix_clock_id = CLOCK_MONOTONIC_RAW;
+		return;
+	}
+#endif
+
+	if (EXPECTED(0 == clock_gettime(zend_hrtime_posix_clock_id, &ts))) {
+		return;
+	}
+
+	// zend_error mechanism is not initialized at that point
+	fprintf(stderr, "No working CLOCK_MONOTONIC* found, this should never happen\n");
+	abort();
 
 #endif
 }

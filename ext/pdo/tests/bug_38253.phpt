@@ -28,6 +28,11 @@ $stmt = $pdo->prepare ("SELECT * FROM test38253");
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
+$pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_INTO);
+$stmt = $pdo->prepare ("SELECT * FROM test38253");
+$stmt->execute();
+var_dump($stmt->fetch());
+
 ?>
 --CLEAN--
 <?php
@@ -38,12 +43,17 @@ PDOTest::dropTableIfExists($db, "test38253");
 --EXPECTF--
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch class specified in %s on line %d
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 array(0) {
 }
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch function specified in %s on line %d
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 array(0) {
 }
+
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: No fetch-into object specified. in %s on line %d
+
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error in %s on line %d
+bool(false)

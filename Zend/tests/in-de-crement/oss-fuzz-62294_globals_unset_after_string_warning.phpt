@@ -31,8 +31,8 @@ PRE DEC
 Decrement on non-numeric string has no effect and is deprecated
 string(1) " "
 POST INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) " "
 PRE INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) " "

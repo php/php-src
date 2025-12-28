@@ -173,8 +173,7 @@ class IntlException extends Exception
 
 /* calendar */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_create_instance($timezone = null, ?string $locale = null): ?IntlCalendar {}
+function intlcal_create_instance(IntlTimeZone|DateTimeZone|string|null $timezone = null, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, bool $onlyCommon): IntlIterator|false {}
 
@@ -194,8 +193,7 @@ function intlcal_set_time(IntlCalendar $calendar, float $timestamp): bool {}
 
 function intlcal_add(IntlCalendar $calendar, int $field, int $value): bool {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_set_time_zone(IntlCalendar $calendar, $timezone): bool {}
+function intlcal_set_time_zone(IntlCalendar $calendar, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
@@ -328,12 +326,11 @@ function intl_error_name(int $errorCode): string {}
 
 /* dateformat */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
 function datefmt_create(
     ?string $locale,
     int $dateType = IntlDateFormatter::FULL,
     int $timeType = IntlDateFormatter::FULL,
-    $timezone = null,
+    IntlTimeZone|DateTimeZone|string|null $timezone = null,
     IntlCalendar|int|null $calendar = null,
     ?string $pattern = null
 ): ?IntlDateFormatter {}
@@ -352,8 +349,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 
@@ -431,21 +427,23 @@ function numfmt_get_error_message(NumberFormatter $formatter): string {}
 
 function grapheme_strlen(string $string): int|false|null {}
 
-function grapheme_strpos(string $haystack, string $needle, int $offset = 0): int|false {}
+function grapheme_strpos(string $haystack, string $needle, int $offset = 0, string $locale = ""): int|false {}
 
-function grapheme_stripos(string $haystack, string $needle, int $offset = 0): int|false {}
+function grapheme_stripos(string $haystack, string $needle, int $offset = 0, string $locale = ""): int|false {}
 
-function grapheme_strrpos(string $haystack, string $needle, int $offset = 0): int|false {}
+function grapheme_strrpos(string $haystack, string $needle, int $offset = 0, string $locale = ""): int|false {}
 
-function grapheme_strripos(string $haystack, string $needle, int $offset = 0): int|false {}
+function grapheme_strripos(string $haystack, string $needle, int $offset = 0, string $locale = ""): int|false {}
 
-function grapheme_substr(string $string, int $offset, ?int $length = null): string|false {}
+function grapheme_substr(string $string, int $offset, ?int $length = null, string $locale = ""): string|false {}
 
-function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = false): string|false {}
+function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = ""): string|false {}
 
-function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false): string|false {}
+function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = ""): string|false {}
 
 function grapheme_str_split(string $string, int $length = 1): array|false {}
+
+function grapheme_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1, string $locale = ""): int|false {}
 
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
@@ -501,6 +499,12 @@ function locale_lookup(array $languageTag, string $locale, bool $canonicalize = 
 
 function locale_accept_from_http(string $header): string|false {}
 
+function locale_is_right_to_left(string $locale): bool {}
+
+function locale_add_likely_subtags(string $locale): string|false {}
+
+function locale_minimize_subtags(string $locale): string|false {}
+
 /* msgformat */
 
 function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
@@ -537,9 +541,7 @@ function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): s
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 function normalizer_get_raw_decomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
-#endif
 
 /* resourceboundle */
 
@@ -565,8 +567,7 @@ function intltz_count_equivalent_ids(string $timezoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
-/** @param IntlTimeZone|string|int|float|null $countryOrRawOffset */
-function intltz_create_enumeration($countryOrRawOffset = null): IntlIterator|false {}
+function intltz_create_enumeration(string|int|null $countryOrRawOffset = null): IntlIterator|false {}
 
 function intltz_create_time_zone(string $timezoneId): ?IntlTimeZone {}
 
@@ -605,11 +606,9 @@ function intltz_get_tz_data_version(): string|false {}
 
 function intltz_get_unknown(): IntlTimeZone {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 function intltz_get_windows_id(string $timezoneId): string|false {}
 
 function intltz_get_id_for_windows_id(string $timezoneId, ?string $region = null): string|false {}
-#endif
 
 function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): bool {}
 
@@ -637,6 +636,6 @@ function transliterator_create_inverse(Transliterator $transliterator): ?Transli
 
 function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $start = 0, int $end = -1): string|false {}
 
-function transliterator_get_error_code(Transliterator $transliterator): int|false {}
+function transliterator_get_error_code(Transliterator $transliterator): int {}
 
-function transliterator_get_error_message(Transliterator $transliterator): string|false {}
+function transliterator_get_error_message(Transliterator $transliterator): string {}

@@ -181,17 +181,18 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
-			oldstr = rl_line_buffer;
+			oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
 			if (value) {
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-#if !defined(PHP_WIN32) && !HAVE_LIBEDIT
+#if !defined(PHP_WIN32) && !defined(HAVE_LIBEDIT)
 				if (!rl_line_buffer) {
 					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
 				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
 					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
-					oldstr = rl_line_buffer;
+					free(oldstr);
+					oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
 				}
 				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 #else
@@ -208,6 +209,7 @@ PHP_FUNCTION(readline_info)
 #endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
+			free(oldstr);
 		} else if (zend_string_equals_literal_ci(what, "point")) {
 			RETVAL_LONG(rl_point);
 #ifndef PHP_WIN32
@@ -453,19 +455,14 @@ static void _readline_string_zval(zval *ret, const char *str)
 	}
 }
 
-static void _readline_long_zval(zval *ret, long l)
-{
-	ZVAL_LONG(ret, l);
-}
-
 char **php_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
-	_readline_long_zval(&params[1], start);
-	_readline_long_zval(&params[2], end);
+	ZVAL_LONG(&params[1], start);
+	ZVAL_LONG(&params[2], end);
 
 	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
@@ -476,13 +473,14 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 				/* libedit will read matches[2] */
 				matches = calloc(3, sizeof(char *));
 				if (!matches) {
-					return NULL;
+					goto out;
 				}
 				matches[0] = strdup("");
 			}
 		}
 	}
 
+out:
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 

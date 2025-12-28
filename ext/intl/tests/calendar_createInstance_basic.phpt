@@ -2,12 +2,11 @@
 IntlCalendar::createInstance() basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 $cal = IntlCalendar::createInstance();
 print_R($cal->getTimeZone());

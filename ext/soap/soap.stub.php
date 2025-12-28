@@ -44,8 +44,8 @@ namespace {
     /**
      * @var int
      * @cvalue SOAP_FUNCTIONS_ALL
-     * @deprecated since 8.4
      */
+    #[\Deprecated(since: '8.4', message: 'as enabling all functions is a possible security concern')]
     const SOAP_FUNCTIONS_ALL = UNKNOWN;
 
     /**
@@ -477,8 +477,9 @@ namespace {
         public mixed $detail = null;
         public ?string $_name = null;
         public mixed $headerfault = null;
+        public string $lang = "";
 
-        public function __construct(array|string|null $code, string $string, ?string $actor = null, mixed $details = null, ?string $name = null, mixed $headerFault = null) {}
+        public function __construct(array|string|null $code, string $string, ?string $actor = null, mixed $details = null, ?string $name = null, mixed $headerFault = null, string $lang = "") {}
 
         public function __toString(): string {}
     }
@@ -502,7 +503,7 @@ namespace {
         public function __construct(?string $wsdl, array $options = []) {}
 
         /** @tentative-return-type */
-        public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = ""): void {}
+        public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = "", string $lang = ""): void {}
 
         /** @tentative-return-type */
         public function addSoapHeader(SoapHeader $header): void {}
@@ -527,6 +528,8 @@ namespace {
 
         /** @tentative-return-type */
         public function handle(?string $request = null): void {}
+
+        public function __getLastResponse(): ?string {}
     }
 
     class SoapClient
@@ -602,7 +605,7 @@ namespace {
         public function __getLastResponseHeaders(): ?string {}
 
         /** @tentative-return-type */
-        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string {}
+        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = null): ?string {}
 
         /** @tentative-return-type */
         public function __setCookie(string $name, ?string $value = null): void {}

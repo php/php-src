@@ -26,23 +26,23 @@ echo dba_fetch("key1", $db_file1), "\n";
 echo "Test 2\n";
 $db_file2 = dba_popen($db_filename, 'n', 'flatfile');
 if ($db_file1 === $db_file2) {
-    echo "resources are the same\n";
+    echo "objects are the same\n";
 } else {
-    echo "resources are different\n";
+    echo "object are different\n";
 }
 
 
-echo "Test 3 - fetch both rows from second resource\n";
+echo "Test 3 - fetch both rows from second object\n";
 dba_insert("key2", "This is a test insert 2", $db_file2);
 echo dba_fetch("key1", $db_file2), "\n";
 echo dba_fetch("key2", $db_file2), "\n";
 
 
-echo "Test 4 - fetch both rows from first resource\n";
+echo "Test 4 - fetch both rows from first object\n";
 echo dba_fetch("key1", $db_file1), "\n";
 echo dba_fetch("key2", $db_file1), "\n";
 
-echo "Test 5 - close 2nd resource\n";
+echo "Test 5 - close 2nd object\n";
 dba_close($db_file2);
 var_dump($db_file1);
 try {
@@ -51,7 +51,7 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-echo "Test 6 - query after closing 2nd resource\n";
+echo "Test 6 - query after closing 2nd object\n";
 echo dba_fetch("key1", $db_file1), "\n";
 echo dba_fetch("key2", $db_file1), "\n";
 
@@ -65,17 +65,17 @@ database handler: db4
 Test 1
 This is a test insert 1
 Test 2
-resources are different
-Test 3 - fetch both rows from second resource
+objects are different
+Test 3 - fetch both rows from second object
 This is a test insert 1
 This is a test insert 2
-Test 4 - fetch both rows from first resource
+Test 4 - fetch both rows from first object
 This is a test insert 1
 This is a test insert 2
-Test 5 - close 2nd resource
+Test 5 - close 2nd object
 object(Dba\Connection)#%d (%d) {
 }
 DBA connection has already been closed
-Test 6 - query after closing 2nd resource
+Test 6 - query after closing 2nd object
 This is a test insert 1
 This is a test insert 2

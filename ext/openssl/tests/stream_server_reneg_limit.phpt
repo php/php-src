@@ -99,7 +99,7 @@ $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey('stream_security_level', $certFile);
 
 include 'ServerClientTestCase.inc';
-ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
+ServerClientTestCase::getInstance()->run($serverCode, $clientCode, false);
 ?>
 --CLEAN--
 <?php

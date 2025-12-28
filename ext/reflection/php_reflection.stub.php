@@ -146,22 +146,16 @@ final class ReflectionGenerator
 {
     public function __construct(Generator $generator) {}
 
-    /** @tentative-return-type */
     public function getExecutingLine(): int {}
 
-    /** @tentative-return-type */
     public function getExecutingFile(): string {}
 
-    /** @tentative-return-type */
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 
-    /** @tentative-return-type */
     public function getFunction(): ReflectionFunctionAbstract {}
 
-    /** @tentative-return-type */
     public function getThis(): ?object {}
 
-    /** @tentative-return-type */
     public function getExecutingGenerator(): Generator {}
 
     public function isClosed(): bool {}
@@ -232,6 +226,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function hasPrototype(): bool {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.1")]
     public function setAccessible(bool $accessible): void {}
 }
 
@@ -249,6 +244,12 @@ class ReflectionClass implements Reflector
     public const int IS_FINAL = UNKNOWN;
     /** @cvalue ZEND_ACC_READONLY_CLASS */
     public const int IS_READONLY = UNKNOWN;
+
+    /** @cvalue ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE */
+    public const int SKIP_INITIALIZATION_ON_SERIALIZE = UNKNOWN;
+
+    /** @cvalue ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR */
+    public const int SKIP_DESTRUCTOR = UNKNOWN;
 
     public string $name;
 
@@ -370,6 +371,22 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function newInstanceArgs(array $args = []): ?object {}
 
+    public function newLazyGhost(callable $initializer, int $options = 0): object {}
+
+    public function newLazyProxy(callable $factory, int $options = 0): object {}
+
+    public function resetAsLazyGhost(object $object, callable $initializer, int $options = 0): void {}
+
+    public function resetAsLazyProxy(object $object, callable $factory, int $options = 0): void {}
+
+    public function initializeLazyObject(object $object): object {}
+
+    public function isUninitializedLazyObject(object $object): bool {}
+
+    public function markLazyObjectAsInitialized(object $object): object {}
+
+    public function getLazyInitializer(object $object): ?callable {}
+
     /** @tentative-return-type */
     public function getParentClass(): ReflectionClass|false {}
 
@@ -444,6 +461,14 @@ class ReflectionProperty implements Reflector
     public const int IS_PRIVATE = UNKNOWN;
     /** @cvalue ZEND_ACC_ABSTRACT */
     public const int IS_ABSTRACT = UNKNOWN;
+    /** @cvalue ZEND_ACC_PROTECTED_SET */
+    public const int IS_PROTECTED_SET = UNKNOWN;
+    /** @cvalue ZEND_ACC_PRIVATE_SET */
+    public const int IS_PRIVATE_SET = UNKNOWN;
+    /** @cvalue ZEND_ACC_VIRTUAL */
+    public const int IS_VIRTUAL = UNKNOWN;
+    /** @cvalue ZEND_ACC_FINAL */
+    public const int IS_FINAL = UNKNOWN;
 
     public string $name;
     public string $class;
@@ -458,6 +483,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getName(): string {}
 
+    public function getMangledName(): string {}
+
     /** @tentative-return-type */
     public function getValue(?object $object = null): mixed {}
 
@@ -467,6 +494,12 @@ class ReflectionProperty implements Reflector
     public function getRawValue(object $object): mixed {}
 
     public function setRawValue(object $object, mixed $value): void {}
+
+    public function setRawValueWithoutLazyInitialization(object $object, mixed $value): void {}
+
+    public function skipLazyInitialization(object $object): void {}
+
+    public function isLazy(object $object): bool {}
 
     /** @tentative-return-type */
     public function isInitialized(?object $object = null): bool {}
@@ -480,6 +513,10 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isPrivateSet(): bool {}
+
+    public function isProtectedSet(): bool {}
+
     /** @tentative-return-type */
     public function isStatic(): bool {}
 
@@ -487,6 +524,8 @@ class ReflectionProperty implements Reflector
 
     /** @tentative-return-type */
     public function isDefault(): bool {}
+
+    public function isDynamic(): bool {}
 
     public function isAbstract(): bool {}
 
@@ -504,6 +543,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment(): string|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.1")]
     public function setAccessible(bool $accessible): void {}
 
     /** @tentative-return-type */
@@ -521,10 +561,16 @@ class ReflectionProperty implements Reflector
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
+    public function hasHooks(): bool {}
+
     /** @return array<string, ReflectionMethod> */
     public function getHooks(): array {}
 
+    public function hasHook(PropertyHookType $type): bool {}
+
     public function getHook(PropertyHookType $type): ?ReflectionMethod {}
+
+    public function isFinal(): bool {}
 }
 
 /** @not-serializable */
@@ -858,7 +904,7 @@ final class ReflectionFiber
  * @strict-properties
  * @not-serializable
  */
-final class ReflectionConstant implements Reflector
+class ReflectionConstant implements Reflector
 {
     public string $name;
 
@@ -874,5 +920,13 @@ final class ReflectionConstant implements Reflector
 
     public function isDeprecated(): bool {}
 
+    public function getFileName(): string|false {}
+
+    public function getExtension(): ?ReflectionExtension {}
+
+    public function getExtensionName(): string|false {}
+
     public function __toString(): string {}
+
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }

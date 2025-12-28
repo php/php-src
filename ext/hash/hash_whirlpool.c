@@ -429,20 +429,20 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
     ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
-static int php_whirlpool_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+static hash_spec_result php_whirlpool_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
     PHP_WHIRLPOOL_CTX *ctx = (PHP_WHIRLPOOL_CTX *) hash->context;
-    int r = FAILURE;
+    hash_spec_result r = HASH_SPEC_FAILURE;
     if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-        && (r = php_hash_unserialize_spec(hash, zv, PHP_WHIRLPOOL_SPEC)) == SUCCESS
+        && (r = php_hash_unserialize_spec(hash, zv, PHP_WHIRLPOOL_SPEC)) == HASH_SPEC_SUCCESS
         && ctx->buffer.pos >= 0
         && ctx->buffer.pos < (int) sizeof(ctx->buffer.data)
         && ctx->buffer.bits >= ctx->buffer.pos * 8
         && ctx->buffer.bits < ctx->buffer.pos * 8 + 8) {
-        return SUCCESS;
-    } else {
-        return r != SUCCESS ? r : -2000;
+        return HASH_SPEC_SUCCESS;
     }
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 const php_hash_ops php_hash_whirlpool_ops = {

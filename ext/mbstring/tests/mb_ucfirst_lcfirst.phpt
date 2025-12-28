@@ -2,9 +2,10 @@
 mb_ucfirst(), mb_lcfirst functions tests
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-mb_internal_encoding("UTF-8");
 
 function test_ascii_mb_ucfirst() {
 	for ($i = 0; $i < 128; $i++) {

@@ -26,10 +26,7 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   test "[$]$1" = "no" && $1=yes
 ])dnl
 
-AS_VAR_IF([CFLAGS],, [auto_cflags=1])
-
-abs_srcdir=`(cd $srcdir && pwd)`
-abs_builddir=`pwd`
+PHP_INIT_BUILD_SYSTEM
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
@@ -56,16 +53,14 @@ PHP_ARG_WITH([php-config],,
 
 dnl For BC.
 PHP_CONFIG=$PHP_PHP_CONFIG
-prefix=`$PHP_CONFIG --prefix 2>/dev/null`
-phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
-INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
-EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
-PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
+prefix=$($PHP_CONFIG --prefix 2>/dev/null)
+phpincludedir=$($PHP_CONFIG --include-dir 2>/dev/null)
+INCLUDES=$($PHP_CONFIG --includes 2>/dev/null)
+EXTENSION_DIR=$($PHP_CONFIG --extension-dir 2>/dev/null)
+PHP_EXECUTABLE=$($PHP_CONFIG --php-binary 2>/dev/null)
 
 AS_VAR_IF([prefix],,
   [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
-
-PHP_INIT_BUILD_SYSTEM
 
 AC_MSG_CHECKING([for PHP prefix])
 AC_MSG_RESULT([$prefix])
@@ -109,11 +104,7 @@ dnl Discard optimization flags when debugging is enabled.
 AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
-  changequote({,})
-  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  changequote([,])
+  PHP_REMOVE_OPTIMIZATION_FLAGS
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
@@ -135,9 +126,6 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
 
 dnl Always shared.
 PHP_BUILD_SHARED
-
-dnl Required programs.
-PHP_PROG_AWK
 
 PHP_HELP_SEPARATOR([Extension:])
 PHP_CONFIGURE_PART([Configuring extension])

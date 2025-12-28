@@ -2,9 +2,10 @@
 mb_trim() function tests
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-mb_internal_encoding("UTF-8");
 
 echo "== Copy from trim ==\n";
 var_dump('ABC' ===  mb_trim('ABC'));

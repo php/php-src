@@ -186,6 +186,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 			free(random_prefix_w);
 			efree(random_prefix);
 			efree(new_state.cwd);
+			free(opened_path);
 			return -1;
 		}
 		assert(strlen(opened_path) == opened_path_len);

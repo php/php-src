@@ -1,3 +1,4 @@
+*.dep
 *.lo
 *.la
 .libs
@@ -5,16 +6,20 @@ acinclude.m4
 aclocal.m4
 autom4te.cache
 build
+config.cache
 config.guess
 config.h
 config.h.in
 config.log
 config.nice
+config.nice.bat
 config.status
 config.sub
 configure
 configure.ac
+configure.bat
 configure.in
+configure.js
 include
 install-sh
 libtool
@@ -39,3 +44,4 @@ tests/**/*.sh
 tests/**/*.db
 tests/**/*.mem
 tmp-php.ini
+*~

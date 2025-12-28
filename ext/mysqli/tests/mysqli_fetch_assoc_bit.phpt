@@ -4,9 +4,8 @@ mysqli_fetch_assoc() - BIT
 mysqli
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-require_once 'table.inc';
+require_once __DIR__ . '/test_setup/test_helpers.inc';;
+$link = mysqli_connect_or_skip();
 if (mysqli_get_server_version($link) < 50003)
     // b'001' syntax not supported before 5.0.3
     die("skip Syntax used for test not supported with MySQL Server before 5.0.3");
@@ -39,7 +38,6 @@ if (mysqli_get_server_version($link) < 50003)
             $max_value = 1;
         else
             $max_value = pow(2, $bits) - 1;
-        $tests = 0;
         if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
             !mysqli_query($link, $sql = sprintf('CREATE TABLE test(id BIGINT, bit_value BIT(%d) NOT NULL, bit_null BIT(%d) DEFAULT NULL) ENGINE="%s"', $bits, $bits, $engine)))
             printf("[002 - %d] [%d] %s\n",$bits, mysqli_errno($link), mysqli_error($link));

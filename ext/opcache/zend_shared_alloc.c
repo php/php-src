@@ -53,7 +53,7 @@
 static const zend_shared_memory_handlers *g_shared_alloc_handler = NULL;
 static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
-zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API zend_smm_shared_globals *smm_shared_globals;
 
 #ifndef ZEND_WIN32
 #ifdef ZTS
@@ -115,7 +115,9 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
-	fchmod(lock_file, 0666);
+	if (fchmod(lock_file, 0666) == -1) {
+		zend_accel_error(ACCEL_LOG_WARNING, "Unable to change opcache lock file permissions in %s: %s (%d)", lockfile_path, strerror(errno), errno);
+	}
 
 	val = fcntl(lock_file, F_GETFD, 0);
 	val |= FD_CLOEXEC;
@@ -227,6 +229,9 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
+		if (handler_table->name == NULL) {
+			return NO_SHM_BACKEND;
+		}
 		for (he = handler_table; he->name; he++) {
 			res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
 			if (res) {
@@ -366,11 +371,15 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 
 void *zend_shared_alloc(size_t size)
 {
-	ZEND_ASSERT(ZCG(locked));
-
 	int i;
 	size_t block_size = ZEND_ALIGNED_SIZE(size);
 
+#if 1
+	if (!ZCG(locked)) {
+		ZEND_ASSERT(0 && "Shared memory lock not obtained");
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
+	}
+#endif
 	if (block_size > ZSMMG(shared_free)) { /* No hope to find a big-enough block */
 		SHARED_ALLOC_FAILED();
 		return NULL;

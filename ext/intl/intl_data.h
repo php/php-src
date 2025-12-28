@@ -48,7 +48,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, (err) );							\
     if( U_FAILURE((err)) )													\
     {																		\
-        intl_error_set_custom_msg( NULL, msg, 0 );				\
+        intl_error_set_custom_msg( NULL, msg);				\
         RETURN_FALSE;														\
     }
 
@@ -57,7 +57,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, (err) );             \
     if( U_FAILURE((err)) )                          \
     {                                   \
-        intl_error_set_custom_msg( NULL, msg, 0 );        \
+        intl_error_set_custom_msg( NULL, msg);        \
         RETURN_NULL();                           \
     }
 
@@ -67,7 +67,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );	\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg);	\
         RETURN_FALSE;										\
     }
 
@@ -76,7 +76,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg);				\
         RETVAL_FALSE;																\
         goto label;																	\
     }
@@ -86,7 +86,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg);				\
         zval_ptr_dtor(return_value);												\
         RETURN_NULL();																\
     }
@@ -96,7 +96,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg);				\
         return FAILURE;																\
     }
 
@@ -117,7 +117,7 @@ typedef struct _intl_data {
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
 		char *_msg; \
 		spprintf(&_msg, 0, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);			\
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg, 1); 								\
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg); \
 		efree(_msg); \
 		RETURN_NULL();																	\
 	}
@@ -126,7 +126,7 @@ typedef struct _intl_data {
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
 		char *_msg; \
 		spprintf(&_msg, 0, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);			\
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg, 1); 								\
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg); 								\
 		efree(_msg); \
 		return FAILURE;																	\
 	}

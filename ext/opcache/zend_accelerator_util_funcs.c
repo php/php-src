@@ -27,10 +27,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_observer.h"
 
-#ifdef __SSE2__
-/* For SSE2 adler32 */
-#include <immintrin.h>
-#endif
+#include "zend_simd.h"
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
@@ -50,7 +47,7 @@ zend_persistent_script* create_persistent_script(void)
 	return persistent_script;
 }
 
-void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
+void free_persistent_script(zend_persistent_script *persistent_script, bool destroy_elements)
 {
 	if (!destroy_elements) {
 		/* Both the keys and values have been transferred into the global tables.
@@ -66,16 +63,6 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 
 	if (persistent_script->script.filename) {
 		zend_string_release_ex(persistent_script->script.filename, 0);
-	}
-
-	if (persistent_script->warnings) {
-		for (uint32_t i = 0; i < persistent_script->num_warnings; i++) {
-			zend_error_info *info = persistent_script->warnings[i];
-			zend_string_release(info->filename);
-			zend_string_release(info->message);
-			efree(info);
-		}
-		efree(persistent_script->warnings);
 	}
 
 	zend_accel_free_delayed_early_binding_list(persistent_script);
@@ -118,7 +105,7 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 {
 	Bucket *p, *end;
 	HashTable *dst;
-	zend_string *filename;
+	const zend_string *filename;
 	dtor_func_t orig_dtor;
 	zend_class_entry *ce;
 
@@ -145,10 +132,10 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	src->pDestructor = orig_dtor;
 }
 
-static zend_always_inline void _zend_accel_function_hash_copy(HashTable *target, HashTable *source, bool call_observers)
+static zend_always_inline void _zend_accel_function_hash_copy(HashTable *target, const HashTable *source, bool call_observers)
 {
 	zend_function *function1, *function2;
-	Bucket *p, *end;
+	const Bucket *p, *end;
 	zval *t;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
@@ -175,32 +162,32 @@ failure:
 	function2 = Z_PTR_P(t);
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(function1->op_array.filename);
-	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
+	CG(zend_lineno) = function1->op_array.line_start;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error_noreturn(E_ERROR, "Cannot redeclare function %s() (previously declared in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
-				   (int)function2->op_array.opcodes[0].lineno);
+				   (int)function2->op_array.line_start);
 	} else {
 		zend_error_noreturn(E_ERROR, "Cannot redeclare function %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
-static zend_always_inline void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void zend_accel_function_hash_copy(HashTable *target, const HashTable *source)
 {
-	_zend_accel_function_hash_copy(target, source, 0);
+	_zend_accel_function_hash_copy(target, source, false);
 }
 
-static zend_never_inline void zend_accel_function_hash_copy_notify(HashTable *target, HashTable *source)
+static zend_never_inline void zend_accel_function_hash_copy_notify(HashTable *target, const HashTable *source)
 {
-	_zend_accel_function_hash_copy(target, source, 1);
+	_zend_accel_function_hash_copy(target, source, true);
 }
 
-static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, HashTable *source, bool call_observers)
+static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, const HashTable *source, bool call_observers)
 {
-	Bucket *p, *end;
-	zval *t;
+	const Bucket *p, *end;
+	const zval *t;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
 	p = source->arData;
@@ -222,7 +209,7 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, Ha
 				 * value. */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
-				zend_class_entry *ce1 = Z_PTR(p->val);
+				const zend_class_entry *ce1 = Z_PTR(p->val);
 				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
 					CG(in_compilation) = 1;
 					zend_set_compiled_filename(ce1->info.user.filename);
@@ -248,25 +235,25 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, Ha
 	target->nInternalPointer = 0;
 }
 
-static zend_always_inline void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void zend_accel_class_hash_copy(HashTable *target, const HashTable *source)
 {
-	_zend_accel_class_hash_copy(target, source, 0);
+	_zend_accel_class_hash_copy(target, source, false);
 }
 
-static zend_never_inline void zend_accel_class_hash_copy_notify(HashTable *target, HashTable *source)
+static zend_never_inline void zend_accel_class_hash_copy_notify(HashTable *target, const HashTable *source)
 {
-	_zend_accel_class_hash_copy(target, source, 1);
+	_zend_accel_class_hash_copy(target, source, true);
 }
 
 void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script)
 {
-	zend_op_array *op_array = &persistent_script->script.main_op_array;
+	const zend_op_array *op_array = &persistent_script->script.main_op_array;
 	if (!(op_array->fn_flags & ZEND_ACC_EARLY_BINDING)) {
 		return;
 	}
 
-	zend_op *end = op_array->opcodes + op_array->last;
-	for (zend_op *opline = op_array->opcodes; opline < end; opline++) {
+	const zend_op *end = op_array->opcodes + op_array->last;
+	for (const zend_op *opline = op_array->opcodes; opline < end; opline++) {
 		if (opline->opcode == ZEND_DECLARE_CLASS_DELAYED) {
 			persistent_script->num_early_bindings++;
 		}
@@ -277,7 +264,7 @@ void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persist
 
 	for (zend_op *opline = op_array->opcodes; opline < end; opline++) {
 		if (opline->opcode == ZEND_DECLARE_CLASS_DELAYED) {
-			zval *lcname = RT_CONSTANT(opline, opline->op1);
+			const zval *lcname = RT_CONSTANT(opline, opline->op1);
 			early_binding->lcname = zend_string_copy(Z_STR_P(lcname));
 			early_binding->rtd_key = zend_string_copy(Z_STR_P(lcname + 1));
 			early_binding->lc_parent_name =
@@ -288,19 +275,19 @@ void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persist
 	}
 }
 
-void zend_accel_finalize_delayed_early_binding_list(zend_persistent_script *persistent_script)
+void zend_accel_finalize_delayed_early_binding_list(const zend_persistent_script *persistent_script)
 {
 	if (!persistent_script->num_early_bindings) {
 		return;
 	}
 
 	zend_early_binding *early_binding = persistent_script->early_bindings;
-	zend_early_binding *early_binding_end = early_binding + persistent_script->num_early_bindings;
-	zend_op_array *op_array = &persistent_script->script.main_op_array;
-	zend_op *opline_end = op_array->opcodes + op_array->last;
+	const zend_early_binding *early_binding_end = early_binding + persistent_script->num_early_bindings;
+	const zend_op_array *op_array = &persistent_script->script.main_op_array;
+	const zend_op *opline_end = op_array->opcodes + op_array->last;
 	for (zend_op *opline = op_array->opcodes; opline < opline_end; opline++) {
 		if (opline->opcode == ZEND_DECLARE_CLASS_DELAYED) {
-			zend_string *rtd_key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
+			const zend_string *rtd_key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
 			/* Skip early_binding entries that don't match, maybe their DECLARE_CLASS_DELAYED
 			 * was optimized away. */
 			while (!zend_string_equals(early_binding->rtd_key, rtd_key)) {
@@ -323,7 +310,7 @@ void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persiste
 {
 	if (persistent_script->num_early_bindings) {
 		for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
-			zend_early_binding *early_binding = &persistent_script->early_bindings[i];
+			const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
 			zend_string_release(early_binding->lcname);
 			zend_string_release(early_binding->rtd_key);
 			zend_string_release(early_binding->lc_parent_name);
@@ -335,7 +322,7 @@ void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persiste
 }
 
 static void zend_accel_do_delayed_early_binding(
-		zend_persistent_script *persistent_script, zend_op_array *op_array)
+		const zend_persistent_script *persistent_script, zend_op_array *op_array)
 {
 	ZEND_ASSERT(!ZEND_MAP_PTR(op_array->run_time_cache));
 	ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
@@ -349,7 +336,7 @@ static void zend_accel_do_delayed_early_binding(
 	CG(compiled_filename) = persistent_script->script.filename;
 	CG(in_compilation) = 1;
 	for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
-		zend_early_binding *early_binding = &persistent_script->early_bindings[i];
+		const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
 		zend_class_entry *ce = zend_hash_find_ex_ptr(EG(class_table), early_binding->lcname, 1);
 		if (!ce) {
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
@@ -371,7 +358,7 @@ static void zend_accel_do_delayed_early_binding(
 	CG(in_compilation) = orig_in_compilation;
 }
 
-zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
+zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, bool from_shared_memory)
 {
 	zend_op_array *op_array;
 
@@ -461,12 +448,12 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_SCALAR_DO8(buf, i)     ADLER32_SCALAR_DO4(buf, i); ADLER32_SCALAR_DO4(buf, i + 4);
 #define ADLER32_SCALAR_DO16(buf)       ADLER32_SCALAR_DO8(buf, 0); ADLER32_SCALAR_DO8(buf, 8);
 
-static zend_always_inline void adler32_do16_loop(unsigned char *buf, unsigned char *end, unsigned int *s1_out, unsigned int *s2_out)
+static zend_always_inline void adler32_do16_loop(unsigned char *buf, const unsigned char *end, unsigned int *s1_out, unsigned int *s2_out)
 {
 	unsigned int s1 = *s1_out;
 	unsigned int s2 = *s2_out;
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	const __m128i zero = _mm_setzero_si128();
 
 	__m128i accumulate_s2 = zero;

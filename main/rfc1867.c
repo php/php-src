@@ -319,8 +319,8 @@ static char *next_line(multipart_buffer *self)
 		}
 		/* return entire buffer as a partial line */
 		line[self->bufsize] = 0;
-		self->buf_begin = ptr;
 		self->bytes_in_buffer = 0;
+		/* Let fill_buffer() handle the reset of self->buf_begin */
 	}
 
 	return line;
@@ -742,6 +742,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		boundary_len = boundary_end-boundary;
 	}
 
+	/* Boundaries larger than FILLUNIT-strlen("\r\n--") characters lead to
+	 * erroneous parsing */
+	if (boundary_len > FILLUNIT-strlen("\r\n--")) {
+		sapi_module.sapi_error(E_WARNING, "Boundary too large in multipart/form-data POST data");
+		return;
+	}
+
 	/* Initialize the buffer */
 	mbuff = multipart_buffer_new(boundary, boundary_len);
 
@@ -1041,7 +1048,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					if (wlen == (size_t)-1) {
 						/* write failed */
 #if DEBUG_FILE_UPLOAD
-						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", strerror(errno));
+						char errstr[256];
+						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 #endif
 						cancel_upload = PHP_UPLOAD_ERROR_F;
 					} else if (wlen < blen) {

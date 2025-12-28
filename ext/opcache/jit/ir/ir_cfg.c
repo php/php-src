@@ -8,6 +8,8 @@
 #include "ir.h"
 #include "ir_private.h"
 
+static int ir_remove_unreachable_blocks(ir_ctx *ctx);
+
 IR_ALWAYS_INLINE void _ir_add_successors(const ir_ctx *ctx, ir_ref ref, ir_worklist *worklist)
 {
 	ir_use_list *use_list = &ctx->use_lists[ref];
@@ -57,9 +59,72 @@ IR_ALWAYS_INLINE void _ir_add_predecessors(const ir_insn *insn, ir_worklist *wor
 	}
 }
 
+void ir_reset_cfg(ir_ctx *ctx)
+{
+	ctx->cfg_blocks_count = 0;
+	ctx->cfg_edges_count = 0;
+	if (ctx->cfg_blocks) {
+		ir_mem_free(ctx->cfg_blocks);
+		ctx->cfg_blocks = NULL;
+		if (ctx->cfg_edges) {
+			ir_mem_free(ctx->cfg_edges);
+			ctx->cfg_edges = NULL;
+		}
+		if (ctx->cfg_map) {
+			ir_mem_free(ctx->cfg_map);
+			ctx->cfg_map = NULL;
+		}
+	}
+}
+
+static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t *_blocks, ir_block *blocks, uint32_t bb_count)
+{
+	uint32_t b, count = 0;
+	ir_block *bb = blocks + 1;
+	ir_insn *insn;
+	ir_ref i, j, n, *ops, input;
+
+	for (b = 1; b <= bb_count; b++, bb++) {
+		bb->successors = count;
+		count += ctx->use_lists[bb->end].count;
+		bb->successors_count = 0;
+		bb->predecessors = count;
+		insn = &ctx->ir_base[bb->start];
+		if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
+			n = insn->inputs_count;
+			ops = insn->ops;
+			for (i = 1, j = 1; i <= n; i++) {
+				input = ops[i];
+				if (_blocks[input]) {
+					if (i != j) {
+						ops[j] = ops[i];
+					}
+					j++;
+				} else if (input > 0) {
+					ir_use_list_remove_one(ctx, input, bb->start);
+				}
+			}
+			j--;
+			if (j != n) {
+				if (j == 1) {
+					insn->op = IR_BEGIN;
+				}
+				insn->inputs_count = j;
+				bb->predecessors_count = j;
+				j++;
+				for (;j <= n; j++) {
+					ops[j] = IR_UNUSED;
+				}
+			}
+		}
+		count += bb->predecessors_count;
+	}
+	return count;
+}
+
 int ir_build_cfg(ir_ctx *ctx)
 {
-	ir_ref n, *p, ref, start, end, next;
+	ir_ref n, *p, ref, start, end;
 	uint32_t b;
 	ir_insn *insn;
 	ir_worklist worklist;
@@ -72,7 +137,7 @@ int ir_build_cfg(ir_ctx *ctx)
 	uint32_t len = ir_bitset_len(ctx->insns_count);
 	ir_bitset bb_starts = ir_mem_calloc(len * 2, IR_BITSET_BITS / 8);
 	ir_bitset bb_leaks = bb_starts + len;
-	_blocks = ir_mem_calloc(ctx->insns_count, sizeof(uint32_t));
+	_blocks = ir_mem_calloc(ctx->insns_limit, sizeof(uint32_t));
 	ir_worklist_init(&worklist, ctx->insns_count);
 
 	/* First try to perform backward DFS search starting from "stop" nodes */
@@ -97,7 +162,7 @@ int ir_build_cfg(ir_ctx *ctx)
 		/* Some successors of IF and SWITCH nodes may be inaccessible by backward DFS */
 		use_list = &ctx->use_lists[end];
 		n = use_list->count;
-		if (n > 1) {
+		if (n > 1 || (n == 1 && (ir_op_flags[insn->op] & IR_OP_FLAG_TERMINATOR) != 0)) {
 			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				/* Remember possible inaccessible successors */
 				ir_bitset_incl(bb_leaks, *p);
@@ -145,18 +210,8 @@ int ir_build_cfg(ir_ctx *ctx)
 			start = ref;
 			/* Skip control nodes untill BB end */
 			while (1) {
-				use_list = &ctx->use_lists[ref];
-				n = use_list->count;
-				next = IR_UNUSED;
-				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-					next = *p;
-					insn = &ctx->ir_base[next];
-					if ((ir_op_flags[insn->op] & IR_OP_FLAG_CONTROL) && insn->op1 == ref) {
-						break;
-					}
-				}
-				IR_ASSERT(next != IR_UNUSED);
-				ref = next;
+				ref = ir_next_control(ctx, ref);
+				insn = &ctx->ir_base[ref];
 				if (IR_IS_BB_END(insn->op)) {
 					break;
 				}
@@ -189,7 +244,6 @@ int ir_build_cfg(ir_ctx *ctx)
 		_blocks[start] = b;
 		_blocks[end] = b;
 		IR_ASSERT(IR_IS_BB_START(insn->op));
-		IR_ASSERT(end > start);
 		bb->start = start;
 		bb->end = end;
 		bb->successors = count;
@@ -229,7 +283,10 @@ int ir_build_cfg(ir_ctx *ctx)
 		bb++;
 	} IR_BITSET_FOREACH_END();
 	bb_count = b - 1;
-	IR_ASSERT(count == edges_count * 2);
+	if (UNEXPECTED(count != edges_count * 2)) {
+		count = ir_cfg_remove_dead_inputs(ctx, _blocks, blocks, bb_count);
+		IR_ASSERT(count != edges_count * 2);
+	}
 	ir_mem_free(bb_starts);
 
 	/* Create an array of successor/predecessors control edges */
@@ -245,6 +302,7 @@ int ir_build_cfg(ir_ctx *ctx)
 				IR_ASSERT(ref);
 				ir_ref pred_b = _blocks[ref];
 				ir_block *pred_bb = &blocks[pred_b];
+				IR_ASSERT(pred_b > 0);
 				*q = pred_b;
 				edges[pred_bb->successors + pred_bb->successors_count++] = b;
 			}
@@ -317,7 +375,7 @@ static void ir_remove_predecessor(ir_ctx *ctx, ir_block *bb, uint32_t from)
 
 static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 {
-	ir_ref i, j, n, k, *p, use;
+	ir_ref i, j, n, k, *p, *q, use;
 	ir_insn *use_insn;
 	ir_use_list *use_list;
 	ir_bitset life_inputs;
@@ -339,12 +397,16 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		}
 	}
 	i--;
+	for (j = i + 1; j <= n; j++) {
+		ir_insn_set_op(insn, j, IR_UNUSED);
+	}
 	if (i == 1) {
 		insn->op = IR_BEGIN;
 		insn->inputs_count = 1;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			n++;
+			for (k = use_list->count, p = q = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -356,23 +418,39 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 						if (ir_bitset_in(life_inputs, j - 1)) {
 							use_insn->op1 = ir_insn_op(use_insn, j);
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
 					}
 					use_insn->op = IR_COPY;
-					use_insn->op2 = IR_UNUSED;
-					use_insn->op3 = IR_UNUSED;
-					ir_use_list_remove_all(ctx, merge, use);
+					use_insn->inputs_count = 1;
+					for (j = 2; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
+					}
+					continue;
 				}
+
+				/*compact use list */
+				if (p != q){
+					*q = use;
+				}
+				q++;
+			}
+
+			if (p != q) {
+				use_list->count -= (p - q);
+				do {
+					*q = IR_UNUSED; /* clenu-op the removed tail */
+					q++;
+				} while (p != q);
 			}
 		}
 	} else {
 		insn->inputs_count = i;
 
-		n++;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
-			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+			n++;
+			for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
 				use = *p;
 				use_insn = &ctx->ir_base[use];
 				if (use_insn->op == IR_PHI) {
@@ -387,8 +465,12 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 							}
 							i++;
 						} else if (input > 0) {
-							ir_use_list_remove_all(ctx, input, use);
+							ir_use_list_remove_one(ctx, input, use);
 						}
+					}
+					use_insn->inputs_count = i - 1;
+					for (j = i; j <= n; j++) {
+						ir_insn_set_op(use_insn, j, IR_UNUSED);
 					}
 				}
 			}
@@ -399,7 +481,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 }
 
 /* CFG constructed after SCCP pass doesn't have unreachable BBs, otherwise they should be removed */
-int ir_remove_unreachable_blocks(ir_ctx *ctx)
+static int ir_remove_unreachable_blocks(ir_ctx *ctx)
 {
 	uint32_t b, *p, i;
 	uint32_t unreachable_count = 0;
@@ -500,7 +582,6 @@ int ir_remove_unreachable_blocks(ir_ctx *ctx)
 	return 1;
 }
 
-#if 0
 static void compute_postnum(const ir_ctx *ctx, uint32_t *cur, uint32_t b)
 {
 	uint32_t i, *p;
@@ -524,34 +605,42 @@ static void compute_postnum(const ir_ctx *ctx, uint32_t *cur, uint32_t b)
 
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
-int ir_build_dominators_tree(ir_ctx *ctx)
+static IR_NEVER_INLINE int ir_build_dominators_tree_slow(ir_ctx *ctx)
 {
 	uint32_t blocks_count, b, postnum;
 	ir_block *blocks, *bb;
 	uint32_t *edges;
 	bool changed;
 
+	blocks = ctx->cfg_blocks;
+	edges  = ctx->cfg_edges;
+	blocks_count = ctx->cfg_blocks_count;
+
+	/* Clear the dominators tree */
+	for (b = 0, bb = &blocks[0]; b <= blocks_count; b++, bb++) {
+		bb->idom = 0;
+		bb->dom_depth = 0;
+		bb->dom_child = 0;
+		bb->dom_next_child = 0;
+	}
+
 	ctx->flags2 &= ~IR_NO_LOOPS;
 
 	postnum = 1;
 	compute_postnum(ctx, &postnum, 1);
 
-	/* Find immediate dominators */
-	blocks = ctx->cfg_blocks;
-	edges  = ctx->cfg_edges;
-	blocks_count = ctx->cfg_blocks_count;
+	/* Find immediate dominators by iterative fixed-point algorithm */
 	blocks[1].idom = 1;
 	do {
 		changed = 0;
 		/* Iterating in Reverse Post Order */
 		for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
 			IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
+			IR_ASSERT(bb->predecessors_count > 0);
 			if (bb->predecessors_count == 1) {
 				uint32_t pred_b = edges[bb->predecessors];
 
-				if (blocks[pred_b].idom <= 0) {
-					//IR_ASSERT("Wrong blocks order: BB is before its single predecessor");
-				} else if (bb->idom != pred_b) {
+				if (blocks[pred_b].idom > 0 && bb->idom != pred_b) {
 					bb->idom = pred_b;
 					changed = 1;
 				}
@@ -597,39 +686,38 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 			}
 		}
 	} while (changed);
+
+	/* Build dominators tree */
 	blocks[1].idom = 0;
 	blocks[1].dom_depth = 0;
 
-	/* Construct dominators tree */
+	/* Construct children lists sorted by block number */
+	for (b = blocks_count, bb = &blocks[b]; b >= 2; b--, bb--) {
+		ir_block *idom_bb = &blocks[bb->idom];
+		bb->dom_depth = 0;
+		bb->dom_next_child = idom_bb->dom_child;
+		idom_bb->dom_child = b;
+	}
+
+	/* Recalculate dom_depth for all blocks */
 	for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
-		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
-		if (bb->idom > 0) {
-			ir_block *idom_bb = &blocks[bb->idom];
-
-			bb->dom_depth = idom_bb->dom_depth + 1;
-			/* Sort by block number to traverse children in pre-order */
-			if (idom_bb->dom_child == 0) {
-				idom_bb->dom_child = b;
-			} else if (b < idom_bb->dom_child) {
-				bb->dom_next_child = idom_bb->dom_child;
-				idom_bb->dom_child = b;
+		uint32_t idom = bb->idom;
+		uint32_t dom_depth = 0;
+		while (idom) {
+			dom_depth++;
+			if (blocks[idom].dom_depth > 0) {
+				dom_depth += blocks[idom].dom_depth;
+				break;
 			} else {
-				int child = idom_bb->dom_child;
-				ir_block *child_bb = &blocks[child];
-
-				while (child_bb->dom_next_child > 0 && b > child_bb->dom_next_child) {
-					child = child_bb->dom_next_child;
-					child_bb = &blocks[child];
-				}
-				bb->dom_next_child = child_bb->dom_next_child;
-				child_bb->dom_next_child = b;
+				idom = blocks[idom].idom;
 			}
 		}
+		bb->dom_depth = dom_depth;
 	}
 
 	return 1;
 }
-#else
+
 /* A single pass modification of "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy, that relays on IR block ordering.
  * It may fallback to the general slow fixed-point algorithm.  */
@@ -661,10 +749,15 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		uint32_t idom = *p;
 		ir_block *idom_bb;
 
-		if (UNEXPECTED(idom > b)) {
+		if (UNEXPECTED(idom >= b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
-			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
+//			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
+			if (UNEXPECTED(k <= 1)) {
+slow_case:
+				ir_list_free(&worklist);
+				return ir_build_dominators_tree_slow(ctx);
+			}
 			ir_list_push(&worklist, idom);
 			while (1) {
 				k--;
@@ -673,7 +766,9 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 				if (idom < b) {
 					break;
 				}
-				IR_ASSERT(k > 0);
+				if (UNEXPECTED(k == 0)) {
+					goto slow_case;
+				}
 				ir_list_push(&worklist, idom);
 			}
 		}
@@ -701,25 +796,14 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		}
 		bb->idom = idom;
 		idom_bb = &blocks[idom];
-
 		bb->dom_depth = idom_bb->dom_depth + 1;
-		/* Sort by block number to traverse children in pre-order */
-		if (idom_bb->dom_child == 0) {
-			idom_bb->dom_child = b;
-		} else if (b < idom_bb->dom_child) {
-			bb->dom_next_child = idom_bb->dom_child;
-			idom_bb->dom_child = b;
-		} else {
-			int child = idom_bb->dom_child;
-			ir_block *child_bb = &blocks[child];
+	}
 
-			while (child_bb->dom_next_child > 0 && b > child_bb->dom_next_child) {
-				child = child_bb->dom_next_child;
-				child_bb = &blocks[child];
-			}
-			bb->dom_next_child = child_bb->dom_next_child;
-			child_bb->dom_next_child = b;
-		}
+	/* Construct children lists sorted by block number */
+	for (b = blocks_count, bb = &blocks[b]; b >= 2; b--, bb--) {
+		ir_block *idom_bb = &blocks[bb->idom];
+		bb->dom_next_child = idom_bb->dom_child;
+		idom_bb->dom_child = b;
 	}
 
 	blocks[1].idom = 0;
@@ -736,11 +820,14 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 			succ_b = ctx->cfg_edges[bb->successors];
 			if (bb->successors_count != 1) {
 				/* LOOP_END/END may be linked with the following ENTRY by a fake edge */
-				IR_ASSERT(bb->successors_count == 2);
-				if (blocks[succ_b].flags & IR_BB_ENTRY) {
+				if (bb->successors_count != 2) {
+					complete = 0;
+					break;
+				} else if (blocks[succ_b].flags & IR_BB_ENTRY) {
 					succ_b = ctx->cfg_edges[bb->successors + 1];
-				} else {
-					IR_ASSERT(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY);
+				} else if (!(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY)) {
+					complete = 0;
+					break;
 				}
 			}
 			dom_depth = blocks[succ_b].dom_depth;;
@@ -838,28 +925,17 @@ static int ir_build_dominators_tree_iterative(ir_ctx *ctx)
 		ir_block *idom_bb = &blocks[idom];
 
 		bb->dom_depth = idom_bb->dom_depth + 1;
-		/* Sort by block number to traverse children in pre-order */
-		if (idom_bb->dom_child == 0) {
-			idom_bb->dom_child = b;
-		} else if (b < idom_bb->dom_child) {
-			bb->dom_next_child = idom_bb->dom_child;
-			idom_bb->dom_child = b;
-		} else {
-			int child = idom_bb->dom_child;
-			ir_block *child_bb = &blocks[child];
+	}
 
-			while (child_bb->dom_next_child > 0 && b > child_bb->dom_next_child) {
-				child = child_bb->dom_next_child;
-				child_bb = &blocks[child];
-			}
-			bb->dom_next_child = child_bb->dom_next_child;
-			child_bb->dom_next_child = b;
-		}
+	/* Construct children lists sorted by block number */
+	for (b = blocks_count, bb = &blocks[b]; b >= 2; b--, bb--) {
+		ir_block *idom_bb = &blocks[bb->idom];
+		bb->dom_next_child = idom_bb->dom_child;
+		idom_bb->dom_child = b;
 	}
 
 	return 1;
 }
-#endif
 
 static bool ir_dominates(const ir_block *blocks, uint32_t b1, uint32_t b2)
 {
@@ -875,7 +951,7 @@ static bool ir_dominates(const ir_block *blocks, uint32_t b1, uint32_t b2)
 
 int ir_find_loops(ir_ctx *ctx)
 {
-	uint32_t i, j, n, count;
+	uint32_t b, j, n, count;
 	uint32_t *entry_times, *exit_times, *sorted_blocks, time = 1;
 	ir_block *blocks = ctx->cfg_blocks;
 	uint32_t *edges = ctx->cfg_edges;
@@ -900,13 +976,13 @@ int ir_find_loops(ir_ctx *ctx)
 		int child;
 
 next:
-		i = ir_worklist_peek(&work);
-		if (!entry_times[i]) {
-			entry_times[i] = time++;
+		b = ir_worklist_peek(&work);
+		if (!entry_times[b]) {
+			entry_times[b] = time++;
 		}
 
-		/* Visit blocks immediately dominated by i. */
-		bb = &blocks[i];
+		/* Visit blocks immediately dominated by "b". */
+		bb = &blocks[b];
 		for (child = bb->dom_child; child > 0; child = blocks[child].dom_next_child) {
 			if (ir_worklist_push(&work, child)) {
 				goto next;
@@ -916,17 +992,17 @@ next:
 		/* Visit join edges. */
 		if (bb->successors_count) {
 			uint32_t *p = edges + bb->successors;
-			for (j = 0; j < bb->successors_count; j++,p++) {
+			for (j = 0; j < bb->successors_count; j++, p++) {
 				uint32_t succ = *p;
 
-				if (blocks[succ].idom == i) {
+				if (blocks[succ].idom == b) {
 					continue;
 				} else if (ir_worklist_push(&work, succ)) {
 					goto next;
 				}
 			}
 		}
-		exit_times[i] = time++;
+		exit_times[b] = time++;
 		ir_worklist_pop(&work);
 	}
 
@@ -935,7 +1011,7 @@ next:
 	j = 1;
 	n = 2;
 	while (j != n) {
-		i = j;
+		uint32_t i = j;
 		j = n;
 		for (; i < j; i++) {
 			int child;
@@ -947,9 +1023,82 @@ next:
 	count = n;
 
 	/* Identify loops. See Sreedhar et al, "Identifying Loops Using DJ Graphs". */
+	uint32_t prev_dom_depth = blocks[sorted_blocks[n - 1]].dom_depth;
+	uint32_t prev_irreducible = 0;
 	while (n > 1) {
-		i = sorted_blocks[--n];
-		ir_block *bb = &blocks[i];
+		b = sorted_blocks[--n];
+		ir_block *bb = &blocks[b];
+
+		IR_ASSERT(bb->dom_depth <= prev_dom_depth);
+		if (UNEXPECTED(prev_irreducible) && bb->dom_depth != prev_dom_depth) {
+			/* process delyed irreducible loops */
+			do {
+				b = sorted_blocks[prev_irreducible];
+				bb = &blocks[b];
+				if ((bb->flags & IR_BB_IRREDUCIBLE_LOOP) && !bb->loop_depth) {
+					/* process irreducible loop */
+					uint32_t hdr = b;
+
+					bb->loop_depth = 1;
+					if (ctx->ir_base[bb->start].op == IR_MERGE) {
+						ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
+					}
+
+					/* find the closing edge(s) of the irreucible loop */
+					IR_ASSERT(bb->predecessors_count > 1);
+					uint32_t *p = &edges[bb->predecessors];
+					j = bb->predecessors_count;
+					do {
+						uint32_t pred = *p;
+
+						if (entry_times[pred] > entry_times[b] && exit_times[pred] < exit_times[b]) {
+							if (!ir_worklist_len(&work)) {
+								ir_bitset_clear(work.visited, ir_bitset_len(ir_worklist_capasity(&work)));
+							}
+							blocks[pred].loop_header = 0; /* support for merged loops */
+							ir_worklist_push(&work, pred);
+						}
+						p++;
+					} while (--j);
+					if (ir_worklist_len(&work) == 0) continue;
+
+					/* collect members of the irreducible loop */
+					while (ir_worklist_len(&work)) {
+						b = ir_worklist_pop(&work);
+						if (b != hdr) {
+							ir_block *bb = &blocks[b];
+							bb->loop_header = hdr;
+							if (bb->predecessors_count) {
+								uint32_t *p = &edges[bb->predecessors];
+								uint32_t n = bb->predecessors_count;
+								do {
+									uint32_t pred = *p;
+									while (blocks[pred].loop_header > 0) {
+										pred = blocks[pred].loop_header;
+									}
+									if (pred != hdr) {
+										if (entry_times[pred] > entry_times[hdr] && exit_times[pred] < exit_times[hdr]) {
+											/* "pred" is a descendant of "hdr" */
+											ir_worklist_push(&work, pred);
+										} else {
+											/* another entry to the irreducible loop */
+											bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
+											if (ctx->ir_base[bb->start].op == IR_MERGE) {
+												ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
+											}
+										}
+									}
+									p++;
+								} while (--n);
+							}
+						}
+					}
+				}
+			} while (--prev_irreducible != n);
+			prev_irreducible = 0;
+			b = sorted_blocks[n];
+			bb = &blocks[b];
+		}
 
 		if (bb->predecessors_count > 1) {
 			bool irreducible = 0;
@@ -964,7 +1113,7 @@ next:
 				if (bb->idom != pred) {
 					/* In a loop back-edge (back-join edge), the successor dominates
 					   the predecessor.  */
-					if (ir_dominates(blocks, i, pred)) {
+					if (ir_dominates(blocks, b, pred)) {
 						if (!ir_worklist_len(&work)) {
 							ir_bitset_clear(work.visited, ir_bitset_len(ir_worklist_capasity(&work)));
 						}
@@ -973,8 +1122,9 @@ next:
 					} else {
 						/* Otherwise it's a cross-join edge.  See if it's a branch
 						   to an ancestor on the DJ spanning tree.  */
-						if (entry_times[pred] > entry_times[i] && exit_times[pred] < exit_times[i]) {
+						if (entry_times[pred] > entry_times[b] && exit_times[pred] < exit_times[b]) {
 							irreducible = 1;
+							break;
 						}
 					}
 				}
@@ -982,46 +1132,56 @@ next:
 			} while (--j);
 
 			if (UNEXPECTED(irreducible)) {
-				// TODO: Support for irreducible loops ???
-				bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
-				ctx->flags2 |= IR_IRREDUCIBLE_CFG;
-				while (ir_worklist_len(&work)) {
-					ir_worklist_pop(&work);
+				bb->flags |= IR_BB_LOOP_HEADER | IR_BB_IRREDUCIBLE_LOOP;
+				ctx->flags2 |= IR_CFG_HAS_LOOPS | IR_IRREDUCIBLE_CFG;
+				/* Remember the position of the first irreducible loop to process all the irreducible loops
+				 * after the reducible loops with the same dominator tree depth
+				 */
+				if (!prev_irreducible) {
+					prev_irreducible = n;
+					prev_dom_depth = bb->dom_depth;
 				}
+				ir_list_clear(&work.l);
 			} else if (ir_worklist_len(&work)) {
+				/* collect members of the reducible loop */
+				uint32_t hdr = b;
+
 				bb->flags |= IR_BB_LOOP_HEADER;
 				ctx->flags2 |= IR_CFG_HAS_LOOPS;
 				bb->loop_depth = 1;
+				if (ctx->ir_base[bb->start].op == IR_MERGE) {
+					ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
+				}
 				while (ir_worklist_len(&work)) {
-					j = ir_worklist_pop(&work);
-					while (blocks[j].loop_header > 0) {
-						j = blocks[j].loop_header;
-					}
-					if (j != i) {
-						ir_block *bb = &blocks[j];
-						if (bb->idom == 0 && j != 1) {
-							/* Ignore blocks that are unreachable or only abnormally reachable. */
-							continue;
-						}
-						bb->loop_header = i;
+					b = ir_worklist_pop(&work);
+					if (b != hdr) {
+						ir_block *bb = &blocks[b];
+						bb->loop_header = hdr;
 						if (bb->predecessors_count) {
 							uint32_t *p = &edges[bb->predecessors];
-							j = bb->predecessors_count;
+							uint32_t n = bb->predecessors_count;
 							do {
-								ir_worklist_push(&work, *p);
+								uint32_t pred = *p;
+								while (blocks[pred].loop_header > 0) {
+									pred = blocks[pred].loop_header;
+								}
+								if (pred != hdr) {
+									ir_worklist_push(&work, pred);
+								}
 								p++;
-							} while (--j);
+							} while (--n);
 						}
 					}
 				}
 			}
 		}
 	}
+	IR_ASSERT(!prev_irreducible);
 
 	if (ctx->flags2 & IR_CFG_HAS_LOOPS) {
 		for (n = 1; n < count; n++) {
-			i = sorted_blocks[n];
-			ir_block *bb = &blocks[i];
+			b = sorted_blocks[n];
+			ir_block *bb = &blocks[b];
 			if (bb->loop_header > 0) {
 				ir_block *loop = &blocks[bb->loop_header];
 				uint32_t loop_depth = loop->loop_depth;
@@ -1032,6 +1192,20 @@ next:
 				bb->loop_depth = loop_depth;
 				if (bb->flags & (IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) {
 					loop->flags |= IR_BB_LOOP_WITH_ENTRY;
+					if (loop_depth > 1) {
+						/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
+						bb = &blocks[loop->loop_header];
+						while (1) {
+							if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
+								break;
+							}
+							bb->flags |= IR_BB_LOOP_WITH_ENTRY;
+							if (bb->loop_depth == 1) {
+								break;
+							}
+							bb = &blocks[loop->loop_header];
+						}
+					}
 				}
 			}
 		}
@@ -1292,7 +1466,7 @@ restart:
 						goto restart;
 					}
 				} else if (b != predecessor && ctx->cfg_blocks[predecessor].loop_header != b) {
-					ir_dump_cfg(ctx, stderr);
+					/* not a loop back-edge */
 					IR_ASSERT(b == predecessor || ctx->cfg_blocks[predecessor].loop_header == b);
 				}
 			}

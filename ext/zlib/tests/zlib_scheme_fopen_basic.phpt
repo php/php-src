@@ -4,7 +4,7 @@ Test compress.zlib:// scheme with the fopen
 zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 $h = fopen($srcFile, 'r');
 fpassthru($h);

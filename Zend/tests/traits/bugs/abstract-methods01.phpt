@@ -16,4 +16,4 @@ $test = new TraitsTest();
 $test->hello();
 ?>
 --EXPECTF--
-Fatal error: Class %s contains %d abstract method and must therefore be declared abstract or implement the remaining methods (%s) in %s on line %d
+Fatal error: Class %s contains %d abstract method and must therefore be declared abstract or implement the remaining method (%s) in %s on line %d

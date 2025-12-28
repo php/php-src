@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #69752 (memory leak with closeCursor)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

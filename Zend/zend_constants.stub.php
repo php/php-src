@@ -71,7 +71,9 @@ const E_USER_NOTICE = UNKNOWN;
 /**
  * @var int
  * @cvalue E_STRICT
+ * @todo Remove in PHP 9.0
  */
+#[\Deprecated(since: '8.4', message: 'the error level was removed')]
 const E_STRICT = UNKNOWN;
 
 /**
@@ -119,20 +121,23 @@ const ZEND_THREAD_SAFE = UNKNOWN;
  */
 const ZEND_DEBUG_BUILD = UNKNOWN;
 
+/**
+ * @var string
+ * @cvalue zend_vm_kind_name[ZEND_VM_KIND]
+ */
+const ZEND_VM_KIND = UNKNOWN;
+
 /* Special constants true/false/null.  */
 
 /**
- * @var bool
  * @undocumentable
  */
 const TRUE = true;
 /**
- * @var bool
  * @undocumentable
  */
 const FALSE = false;
 /**
- * @var null
  * @undocumentable
  */
 const NULL = null;

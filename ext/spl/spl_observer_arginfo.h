@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a846c9dd240b6f0666cd5e805abfacabe360cf4c */
+ * Stub hash: 9dfd8bcf8946cbee550c9a46da07c424c3505408 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -185,9 +185,9 @@ static const zend_function_entry class_SplSubject_methods[] = {
 };
 
 static const zend_function_entry class_SplObjectStorage_methods[] = {
-	ZEND_ME(SplObjectStorage, attach, arginfo_class_SplObjectStorage_attach, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplObjectStorage, detach, arginfo_class_SplObjectStorage_detach, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplObjectStorage, contains, arginfo_class_SplObjectStorage_contains, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplObjectStorage, attach, arginfo_class_SplObjectStorage_attach, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(SplObjectStorage, detach, arginfo_class_SplObjectStorage_detach, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(SplObjectStorage, contains, arginfo_class_SplObjectStorage_contains, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(SplObjectStorage, addAll, arginfo_class_SplObjectStorage_addAll, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, removeAll, arginfo_class_SplObjectStorage_removeAll, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, removeAllExcept, arginfo_class_SplObjectStorage_removeAllExcept, ZEND_ACC_PUBLIC)
@@ -255,8 +255,30 @@ static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
+
+
+	zend_attribute *attribute_Deprecated_func_attach_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "attach", sizeof("attach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_attach_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_attach_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_attach_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetSet() instead", strlen("use method SplObjectStorage::offsetSet() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_attach_0->args[1].value, attribute_Deprecated_func_attach_0_arg1_str);
+	attribute_Deprecated_func_attach_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_detach_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "detach", sizeof("detach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_detach_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_detach_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_detach_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetUnset() instead", strlen("use method SplObjectStorage::offsetUnset() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_detach_0->args[1].value, attribute_Deprecated_func_detach_0_arg1_str);
+	attribute_Deprecated_func_detach_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_contains_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "contains", sizeof("contains") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_contains_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_contains_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_contains_0_arg1_str = zend_string_init("use method SplObjectStorage::offsetExists() instead", strlen("use method SplObjectStorage::offsetExists() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_contains_0->args[1].value, attribute_Deprecated_func_contains_0_arg1_str);
+	attribute_Deprecated_func_contains_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -266,32 +288,32 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "MultipleIterator", class_MultipleIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	zval const_MIT_NEED_ANY_value;
 	ZVAL_LONG(&const_MIT_NEED_ANY_value, MIT_NEED_ANY);
-	zend_string *const_MIT_NEED_ANY_name = zend_string_init_interned("MIT_NEED_ANY", sizeof("MIT_NEED_ANY") - 1, 1);
+	zend_string *const_MIT_NEED_ANY_name = zend_string_init_interned("MIT_NEED_ANY", sizeof("MIT_NEED_ANY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_MIT_NEED_ANY_name);
+	zend_string_release_ex(const_MIT_NEED_ANY_name, true);
 
 	zval const_MIT_NEED_ALL_value;
 	ZVAL_LONG(&const_MIT_NEED_ALL_value, MIT_NEED_ALL);
-	zend_string *const_MIT_NEED_ALL_name = zend_string_init_interned("MIT_NEED_ALL", sizeof("MIT_NEED_ALL") - 1, 1);
+	zend_string *const_MIT_NEED_ALL_name = zend_string_init_interned("MIT_NEED_ALL", sizeof("MIT_NEED_ALL") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_MIT_NEED_ALL_name);
+	zend_string_release_ex(const_MIT_NEED_ALL_name, true);
 
 	zval const_MIT_KEYS_NUMERIC_value;
 	ZVAL_LONG(&const_MIT_KEYS_NUMERIC_value, MIT_KEYS_NUMERIC);
-	zend_string *const_MIT_KEYS_NUMERIC_name = zend_string_init_interned("MIT_KEYS_NUMERIC", sizeof("MIT_KEYS_NUMERIC") - 1, 1);
+	zend_string *const_MIT_KEYS_NUMERIC_name = zend_string_init_interned("MIT_KEYS_NUMERIC", sizeof("MIT_KEYS_NUMERIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_MIT_KEYS_NUMERIC_name);
+	zend_string_release_ex(const_MIT_KEYS_NUMERIC_name, true);
 
 	zval const_MIT_KEYS_ASSOC_value;
 	ZVAL_LONG(&const_MIT_KEYS_ASSOC_value, MIT_KEYS_ASSOC);
-	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, 1);
+	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_MIT_KEYS_ASSOC_name);
+	zend_string_release_ex(const_MIT_KEYS_ASSOC_name, true);
 
 	return class_entry;
 }

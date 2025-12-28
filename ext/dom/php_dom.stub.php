@@ -147,9 +147,9 @@ namespace
 
     /**
      * @var int
-     * @deprecated is no longer used since 8.4
      * @cvalue PHP_ERR
      */
+    #[\Deprecated(since: '8.4', message: 'as it is no longer used')]
     const DOM_PHP_ERR = UNKNOWN;
     /**
      * @var int
@@ -234,22 +234,40 @@ namespace
 
     class DOMDocumentType extends DOMNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $name;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DOMNamedNodeMap $entities;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DOMNamedNodeMap $notations;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $publicId;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $systemId;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $internalSubset;
     }
 
@@ -298,55 +316,103 @@ namespace
         public const int DOCUMENT_POSITION_CONTAINED_BY = 0x10;
         public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $nodeName;
 
+        /** @virtual */
         public ?string $nodeValue;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $nodeType;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $parentNode;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $parentElement;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DOMNodeList $childNodes;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $firstChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $lastChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $previousSibling;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $nextSibling;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNamedNodeMap $attributes;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public bool $isConnected;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMDocument $ownerDocument;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $namespaceURI;
 
+        /** @virtual */
         public string $prefix;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $localName;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $baseURI;
 
+        /** @virtual */
         public string $textContent;
 
         /** @return DOMNode|false */
@@ -415,34 +481,64 @@ namespace
 
     class DOMNameSpaceNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $nodeName;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $nodeValue;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $nodeType;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $prefix;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $localName;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $namespaceURI;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public bool $isConnected;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMDocument $ownerDocument;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMNode $parentNode;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $parentElement;
 
         /** @implementation-alias DOMNode::__sleep */
@@ -466,13 +562,22 @@ namespace
 
     class DOMDocumentFragment extends DOMNode implements DOMParentNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $firstElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $lastElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $childElementCount;
 
         public function __construct() {}
@@ -501,7 +606,10 @@ namespace
 
     class DOMNodeList implements IteratorAggregate, Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @tentative-return-type */
@@ -515,15 +623,25 @@ namespace
 
     class DOMCharacterData extends DOMNode implements DOMChildNode
     {
+        /** @virtual */
         public string $data;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $previousElementSibling;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $nextElementSibling;
 
         /** @tentative-return-type */
@@ -565,19 +683,32 @@ namespace
 
     class DOMAttr extends DOMNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $name;
 
-        /** @readonly */
-        public bool $specified = true;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public bool $specified;
 
+        /** @virtual */
         public string $value;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $ownerElement;
 
-        /** @readonly */
-        public mixed $schemaTypeInfo = null;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public mixed $schemaTypeInfo;
 
         public function __construct(string $name, string $value = "") {}
 
@@ -587,29 +718,52 @@ namespace
 
     class DOMElement extends DOMNode implements \DOMParentNode, \DOMChildNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $tagName;
 
+        /** @virtual */
         public string $className;
 
+        /** @virtual */
         public string $id;
 
-        /** @readonly */
-        public mixed $schemaTypeInfo = null;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public mixed $schemaTypeInfo;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $firstElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $lastElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $childElementCount;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $previousElementSibling;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $nextElementSibling;
 
         public function __construct(string $qualifiedName, ?string $value = null, string $namespace = "") {}
@@ -699,63 +853,99 @@ namespace
 
     class DOMDocument extends DOMNode implements DOMParentNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMDocumentType $doctype;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DOMImplementation $implementation;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $documentElement;
 
         /**
          * @readonly
          * @deprecated
+         * @virtual
          */
         public ?string $actualEncoding;
 
+        /** @virtual */
         public ?string $encoding;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $xmlEncoding;
 
+        /** @virtual */
         public bool $standalone;
 
+        /** @virtual */
         public bool $xmlStandalone;
 
+        /** @virtual */
         public ?string $version;
 
+        /** @virtual */
         public ?string $xmlVersion;
 
+        /** @virtual */
         public bool $strictErrorChecking;
 
+        /** @virtual */
         public ?string $documentURI;
 
         /**
          * @readonly
          * @deprecated
+         * @virtual
          */
         public mixed $config;
 
+        /** @virtual */
         public bool $formatOutput;
 
+        /** @virtual */
         public bool $validateOnParse;
 
+        /** @virtual */
         public bool $resolveExternals;
 
+        /** @virtual */
         public bool $preserveWhiteSpace;
 
+        /** @virtual */
         public bool $recover;
 
+        /** @virtual */
         public bool $substituteEntities;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $firstElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DOMElement $lastElementChild;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $childElementCount;
 
         public function __construct(string $version = "1.0", string $encoding = "") {}
@@ -823,7 +1013,6 @@ namespace
         /** @tentative-return-type */
         public function save(string $filename, int $options = 0): int|false {}
 
-#ifdef LIBXML_HTML_ENABLED
         /** @tentative-return-type */
         public function loadHTML(string $source, int $options = 0): bool {}
 
@@ -835,7 +1024,6 @@ namespace
 
         /** @tentative-return-type */
         public function saveHTMLFile(string $filename): int|false {}
-#endif
 
         /** @tentative-return-type */
         public function saveXML(?DOMNode $node = null, int $options = 0): string|false {}
@@ -891,7 +1079,10 @@ namespace
 
     class DOMText extends DOMCharacterData
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $wholeText;
 
         public function __construct(string $data = "") {}
@@ -911,7 +1102,10 @@ namespace
 
     class DOMNamedNodeMap implements IteratorAggregate, Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @tentative-return-type */
@@ -931,32 +1125,44 @@ namespace
 
     class DOMEntity extends DOMNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $publicId;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $systemId;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $notationName;
 
         /**
          * @readonly
          * @deprecated
+         * @virtual
          */
-        public ?string $actualEncoding = null;
+        public ?string $actualEncoding;
 
         /**
          * @readonly
          * @deprecated
+         * @virtual
          */
-        public ?string $encoding = null;
+        public ?string $encoding;
 
         /**
          * @readonly
          * @deprecated
+         * @virtual
          */
-        public ?string $version = null;
+        public ?string $version;
     }
 
     class DOMEntityReference extends DOMNode
@@ -966,18 +1172,28 @@ namespace
 
     class DOMNotation extends DOMNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $publicId;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $systemId;
     }
 
     class DOMProcessingInstruction extends DOMNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $target;
 
+        /** @virtual */
         public string $data;
 
         public function __construct(string $name, string $value = "") {}
@@ -987,9 +1203,13 @@ namespace
     /** @not-serializable */
     class DOMXPath
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DOMDocument $document;
 
+        /** @virtual */
         public bool $registerNodeNamespaces;
 
         public function __construct(DOMDocument $document, bool $registerNodeNS = true) {}
@@ -1012,7 +1232,7 @@ namespace
     }
 #endif
 
-    function dom_import_simplexml(object $node): DOMElement {}
+    function dom_import_simplexml(object $node): DOMAttr|DOMElement {}
 }
 
 namespace Dom
@@ -1135,39 +1355,77 @@ namespace Dom
     {
         private final function __construct() {}
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $nodeType;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $nodeName;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $baseURI;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public bool $isConnected;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Document $ownerDocument;
 
         /** @implementation-alias DOMNode::getRootNode */
         public function getRootNode(array $options = []): Node {}
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Node $parentNode;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $parentElement;
         /** @implementation-alias DOMNode::hasChildNodes */
         public function hasChildNodes(): bool {}
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public NodeList $childNodes;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Node $firstChild;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Node $lastChild;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Node $previousSibling;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Node $nextSibling;
 
+        /** @virtual */
         public ?string $nodeValue;
+        /** @virtual */
         public ?string $textContent;
         /** @implementation-alias DOMNode::normalize */
         public function normalize(): void {}
@@ -1213,7 +1471,10 @@ namespace Dom
 
     class NodeList implements \IteratorAggregate, \Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @implementation-alias DOMNodeList::count */
@@ -1228,7 +1489,10 @@ namespace Dom
 
     class NamedNodeMap implements \IteratorAggregate, \Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @implementation-alias DOMNamedNodeMap::item */
@@ -1247,7 +1511,10 @@ namespace Dom
 
     class DtdNamedNodeMap implements \IteratorAggregate, \Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @implementation-alias DOMNamedNodeMap::item */
@@ -1266,7 +1533,10 @@ namespace Dom
 
     class HTMLCollection implements \IteratorAggregate, \Countable
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
 
         /** @implementation-alias DOMNodeList::item */
@@ -1291,23 +1561,70 @@ namespace Dom
 
     class Element extends Node implements ParentNode, ChildNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $namespaceURI;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $prefix;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $localName;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $tagName;
 
+        /**
+         * @readonly
+         */
+        public HTMLCollection $children;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $firstElementChild;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $lastElementChild;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public int $childElementCount;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $previousElementSibling;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $nextElementSibling;
+
+        /** @virtual */
         public string $id;
+        /** @virtual */
         public string $className;
         /** @readonly */
         public TokenList $classList;
 
         /** @implementation-alias DOMNode::hasAttributes */
         public function hasAttributes(): bool {}
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public NamedNodeMap $attributes;
         /** @implementation-alias DOMElement::getAttributeNames */
         public function getAttributeNames(): array {}
@@ -1340,20 +1657,11 @@ namespace Dom
 
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+        public function getElementsByClassName(string $classNames): HTMLCollection {}
 
         public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
         public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
-
-        /** @readonly */
-        public ?Element $firstElementChild;
-        /** @readonly */
-        public ?Element $lastElementChild;
-        /** @readonly */
-        public int $childElementCount;
-        /** @readonly */
-        public ?Element $previousElementSibling;
-        /** @readonly */
-        public ?Element $nextElementSibling;
+        public function insertAdjacentHTML(AdjacentPosition $where, string $string): void {}
 
         /** @implementation-alias DOMElement::setIdAttribute */
         public function setIdAttribute(string $qualifiedName, bool $isId): void {}
@@ -1381,8 +1689,13 @@ namespace Dom
         public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
 
+        /** @virtual */
         public string $innerHTML;
 
+        /** @virtual */
+        public string $outerHTML;
+
+        /** @virtual */
         public string $substitutedNodeValue;
 
         /** @return list<NamespaceInfo> */
@@ -1400,21 +1713,40 @@ namespace Dom
 
     class Attr extends Node
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $namespaceURI;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $prefix;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $localName;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $name;
+        /** @virtual */
         public string $value;
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $ownerElement;
 
-        /** @readonly */
-        public bool $specified = true;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public bool $specified;
 
         /** @implementation-alias DOMAttr::isId */
         public function isId(): bool {}
@@ -1425,13 +1757,23 @@ namespace Dom
 
     class CharacterData extends Node implements ChildNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $previousElementSibling;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $nextElementSibling;
 
+        /** @virtual */
         public string $data;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
         /** @implementation-alias DOMCharacterData::substringData */
         public function substringData(int $offset, int $count): string {}
@@ -1456,7 +1798,10 @@ namespace Dom
 
         /** @implementation-alias DOMText::splitText */
         public function splitText(int $offset): Text {}
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $wholeText;
     }
 
@@ -1464,7 +1809,10 @@ namespace Dom
 
     class ProcessingInstruction extends CharacterData
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $target;
     }
 
@@ -1475,17 +1823,35 @@ namespace Dom
 
     class DocumentType extends Node implements ChildNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $name;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DtdNamedNodeMap $entities;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public DtdNamedNodeMap $notations;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $publicId;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $systemId;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $internalSubset;
 
         /** @implementation-alias DOMElement::remove */
@@ -1500,11 +1866,24 @@ namespace Dom
 
     class DocumentFragment extends Node implements ParentNode
     {
-        /** @readonly */
+        /**
+         * @readonly
+         */
+        public HTMLCollection $children;
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $firstElementChild;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $lastElementChild;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $childElementCount;
 
         /** @implementation-alias DOMDocumentFragment::appendXML */
@@ -1524,11 +1903,20 @@ namespace Dom
 
     class Entity extends Node
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $publicId;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $systemId;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?string $notationName;
     }
 
@@ -1536,30 +1924,69 @@ namespace Dom
 
     class Notation extends Node
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $publicId;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $systemId;
     }
 
     abstract class Document extends Node implements ParentNode
     {
-        /** @readonly */
-        public Implementation $implementation;
-        public string $URL;
-        public string $documentURI;
-        public string $characterSet;
-        public string $charset;
-        public string $inputEncoding;
+        /**
+         * @readonly
+         */
+        public HTMLCollection $children;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $firstElementChild;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public ?Element $lastElementChild;
+        /**
+         * @readonly
+         * @virtual
+         */
+        public int $childElementCount;
 
         /** @readonly */
+        public Implementation $implementation;
+        /** @virtual */
+        public string $URL;
+        /** @virtual */
+        public string $documentURI;
+        /** @virtual */
+        public string $characterSet;
+        /** @virtual */
+        public string $charset;
+        /** @virtual */
+        public string $inputEncoding;
+
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?DocumentType $doctype;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?Element $documentElement;
         /** @implementation-alias Dom\Element::getElementsByTagName */
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         /** @implementation-alias Dom\Element::getElementsByTagNameNS */
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+        /** @implementation-alias Dom\Element::getElementsByClassName */
+        public function getElementsByClassName(string $classNames): HTMLCollection {}
 
         public function createElement(string $localName): Element {}
         public function createElementNS(?string $namespace, string $qualifiedName): Element {}
@@ -1580,13 +2007,6 @@ namespace Dom
         public function createAttribute(string $localName): Attr {}
         /** @implementation-alias DOMDocument::createAttributeNS */
         public function createAttributeNS(?string $namespace, string $qualifiedName): Attr {}
-
-        /** @readonly */
-        public ?Element $firstElementChild;
-        /** @readonly */
-        public ?Element $lastElementChild;
-        /** @readonly */
-        public int $childElementCount;
 
         /** @implementation-alias DOMDocument::getElementById */
         public function getElementById(string $elementId): ?Element {}
@@ -1618,9 +2038,14 @@ namespace Dom
         /** @implementation-alias Dom\Element::querySelectorAll */
         public function querySelectorAll(string $selectors): NodeList {}
 
+        /** @virtual */
         public ?HTMLElement $body;
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public ?HTMLElement $head;
+        /** @virtual */
         public string $title;
     }
 
@@ -1655,13 +2080,19 @@ namespace Dom
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public string $xmlEncoding;
 
+        /** @virtual */
         public bool $xmlStandalone;
 
+        /** @virtual */
         public string $xmlVersion;
 
+        /** @virtual */
         public bool $formatOutput;
 
         /** @implementation-alias DOMDocument::createEntityReference */
@@ -1682,12 +2113,15 @@ namespace Dom
      * @not-serializable
      * @strict-properties
      */
-    final class TokenList implements IteratorAggregate, Countable
+    final class TokenList implements \IteratorAggregate, \Countable
     {
         /** @implementation-alias Dom\Node::__construct */
         private function __construct() {}
 
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public int $length;
         public function item(int $index): ?string {}
         public function contains(string $token): bool {}
@@ -1696,6 +2130,7 @@ namespace Dom
         public function toggle(string $token, ?bool $force = null): bool {}
         public function replace(string $token, string $newToken): bool {}
         public function supports(string $token): bool {}
+        /** @virtual */
         public string $value;
 
         public function count(): int {}
@@ -1721,9 +2156,13 @@ namespace Dom
     /** @not-serializable */
     final class XPath
     {
-        /** @readonly */
+        /**
+         * @readonly
+         * @virtual
+         */
         public Document $document;
 
+        /** @virtual */
         public bool $registerNodeNamespaces;
 
         public function __construct(Document $document, bool $registerNodeNS = true) {}
@@ -1746,5 +2185,5 @@ namespace Dom
     }
 #endif
 
-    function import_simplexml(object $node): Element {}
+    function import_simplexml(object $node): Attr|Element {}
 }

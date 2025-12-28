@@ -118,11 +118,7 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = NULL;
-#endif
-
-#if PHP_SIGCHILD
-	sig_handler = signal (SIGCHLD, SIG_DFL);
+	void (*sig_handler)(int) = signal(SIGCHLD, SIG_DFL);
 #endif
 
 #ifdef PHP_WIN32
@@ -203,13 +199,12 @@ err:
 
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
-	char *cmd;
-	size_t cmd_len;
+	zend_string *cmd;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, (mode ? 2 : 3))
-		Z_PARAM_STRING(cmd, cmd_len)
+		Z_PARAM_PATH_STR(cmd)
 		Z_PARAM_OPTIONAL
 		if (!mode) {
 			Z_PARAM_ZVAL(ret_array)
@@ -217,17 +212,13 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		Z_PARAM_ZVAL(ret_code)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!cmd_len) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-	if (strlen(cmd) != cmd_len) {
-		zend_argument_value_error(1, "must not contain any null bytes");
+	if (UNEXPECTED(!ZSTR_LEN(cmd))) {
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
 	if (!ret_array) {
-		ret = php_exec(mode, cmd, NULL, return_value);
+		ret = php_exec(mode, ZSTR_VAL(cmd), NULL, return_value);
 	} else {
 		if (Z_TYPE_P(Z_REFVAL_P(ret_array)) == IS_ARRAY) {
 			ZVAL_DEREF(ret_array);
@@ -239,7 +230,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 			}
 		}
 
-		ret = php_exec(2, cmd, ret_array, return_value);
+		ret = php_exec(2, ZSTR_VAL(cmd), ret_array, return_value);
 	}
 	if (ret_code) {
 		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret);
@@ -272,8 +263,7 @@ PHP_FUNCTION(passthru)
    Escape all chars that could possibly be used to
    break out of a shell command
 
-   This function emalloc's a string and returns the pointer.
-   Remember to efree it when done with it.
+   This function returns an owned zend_string, remember to release it when done.
 
    *NOT* safe for binary strings
 */
@@ -285,7 +275,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 	char *p = NULL;
 #endif
 
-	ZEND_ASSERT(ZSTR_LEN(unescaped_cmd) == strlen(ZSTR_VAL(unescaped_cmd)) && "Must be a binary safe string");
+	ZEND_ASSERT(!zend_str_has_nul_byte(unescaped_cmd) && "Must be a binary safe string");
 	size_t l = ZSTR_LEN(unescaped_cmd);
 	const char *str = ZSTR_VAL(unescaped_cmd);
 
@@ -392,7 +382,7 @@ PHPAPI zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
 	size_t x, y = 0;
 	zend_string *cmd;
 
-	ZEND_ASSERT(ZSTR_LEN(unescaped_arg) == strlen(ZSTR_VAL(unescaped_arg)) && "Must be a binary safe string");
+	ZEND_ASSERT(!zend_str_has_nul_byte(unescaped_arg) && "Must be a binary safe string");
 	size_t l = ZSTR_LEN(unescaped_arg);
 	const char *str = ZSTR_VAL(unescaped_arg);
 
@@ -514,15 +504,11 @@ PHP_FUNCTION(shell_exec)
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_PATH(command, command_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-	if (strlen(command) != command_len) {
-		zend_argument_value_error(1, "must not contain any null bytes");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

@@ -21,15 +21,29 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#include "Zend/zend_portability.h"
+
 #define ZEND_VM_SPEC		1
 #define ZEND_VM_LINES		0
 #define ZEND_VM_KIND_CALL	1
 #define ZEND_VM_KIND_SWITCH	2
 #define ZEND_VM_KIND_GOTO	3
 #define ZEND_VM_KIND_HYBRID	4
+#define ZEND_VM_KIND_TAILCALL	5
+static const char *const zend_vm_kind_name[] = {
+    NULL,
+    "ZEND_VM_KIND_CALL",
+    "ZEND_VM_KIND_SWITCH",
+    "ZEND_VM_KIND_GOTO",
+    "ZEND_VM_KIND_HYBRID",
+    "ZEND_VM_KIND_TAILCALL",
+};
+#if 0
 /* HYBRID requires support for computed GOTO and global register variables*/
-#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
+#elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
 # define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
+#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))
+# define ZEND_VM_KIND		ZEND_VM_KIND_TAILCALL
 #else
 # define ZEND_VM_KIND		ZEND_VM_KIND_CALL
 #endif
@@ -38,6 +52,30 @@
 # if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))
 #  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48
 # endif
+#endif
+
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#endif
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
+
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
+typedef const void* zend_vm_opcode_handler_t;
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_FUNC_CCONV *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+#elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
+typedef int zend_vm_opcode_handler_t;
+#elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO
+typedef const void* zend_vm_opcode_handler_t;
+#else
+# error
 #endif
 
 #define ZEND_VM_OP_SPEC          0x00000001
@@ -161,7 +199,6 @@ END_EXTERN_C()
 #define ZEND_UNSET_OBJ                       76
 #define ZEND_FE_RESET_R                      77
 #define ZEND_FE_FETCH_R                      78
-#define ZEND_EXIT                            79
 #define ZEND_FETCH_R                         80
 #define ZEND_FETCH_DIM_R                     81
 #define ZEND_FETCH_OBJ_R                     82
@@ -292,7 +329,8 @@ END_EXTERN_C()
 #define ZEND_FRAMELESS_ICALL_3              207
 #define ZEND_JMP_FRAMELESS                  208
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
+#define ZEND_DECLARE_ATTRIBUTED_CONST       210
 
-#define ZEND_VM_LAST_OPCODE                 209
+#define ZEND_VM_LAST_OPCODE                 210
 
 #endif

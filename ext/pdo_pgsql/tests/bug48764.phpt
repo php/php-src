@@ -1,7 +1,6 @@
 --TEST--
 Bug #48764 (PDO_pgsql::query always uses implicit prepared statements if v3 proto available)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

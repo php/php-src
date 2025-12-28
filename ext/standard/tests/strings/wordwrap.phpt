@@ -53,4 +53,4 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-wordwrap(): Argument #3 ($break) cannot be empty
+wordwrap(): Argument #3 ($break) must not be empty

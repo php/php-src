@@ -16,7 +16,6 @@
 
 #include "php.h"
 #include "php_pdo_driver.h"
-#include "php_pdo_int.h"
 #include "pdo_sql_parser.h"
 
 static int default_scanner(pdo_scanner_t *s)
@@ -301,6 +300,12 @@ safe:
 							}
 
 							plc->quoted = stmt->dbh->methods->quoter(stmt->dbh, buf, param_type);
+							if (plc->quoted == NULL) {
+								/* bork */
+								ret = -1;
+								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								goto clean_up;
+							}
 						}
 					}
 

@@ -95,7 +95,7 @@ b\13apple\0\
 b\14no_check_compress\0\
 b\15no_check_tar\0\
 b\16no_check_soft\0\
-b\17no_check_sapptype\0\
+b\17no_check_apptype\0\
 b\20no_check_elf\0\
 b\21no_check_text\0\
 b\22no_check_cdf\0\
@@ -115,7 +115,7 @@ b\31transp_compression\0\
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
 
-#define MAGIC_VERSION		545	/* This implementation */
+#define MAGIC_VERSION		546	/* This implementation */
 
 
 #ifdef __cplusplus

@@ -16,12 +16,11 @@ fi
 
 if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   for i in $PHP_READLINE /usr/local /usr; do
-    test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
+    AS_IF([test -f $i/include/readline/readline.h], [READLINE_DIR=$i; break;])
   done
 
-  if test -z "$READLINE_DIR"; then
-    AC_MSG_ERROR([Please reinstall readline - I cannot find readline.h])
-  fi
+  AS_VAR_IF([READLINE_DIR],,
+    [AC_MSG_ERROR([Please reinstall readline - I cannot find readline.h])])
 
   PHP_ADD_INCLUDE([$READLINE_DIR/include])
 
@@ -88,9 +87,13 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     [Define to 1 if readline extension uses the 'readline' library.])
 
 elif test "$PHP_LIBEDIT" != "no"; then
-  if test "$PHP_LIBEDIT" != "yes"; then
-    AC_MSG_WARN([libedit directory ignored, rely on pkg-config])
-  fi
+  AS_VAR_IF([PHP_LIBEDIT], [yes],,
+    [AC_MSG_WARN(m4_text_wrap([
+      The libedit directory argument is not supported anymore, rely on
+      pkg-config. Replace '--with-libedit=$PHP_LIBEDIT' with '--with-libedit'
+      and use environment variables 'PKG_CONFIG_PATH', 'EDIT_LIBS', or
+      'EDIT_CFLAGS'.
+    ]))])
 
   PKG_CHECK_MODULES([EDIT], [libedit])
   PHP_EVAL_LIBLINE([$EDIT_LIBS], [READLINE_SHARED_LIBADD])

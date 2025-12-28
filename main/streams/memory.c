@@ -66,6 +66,7 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (count) {
 		ZEND_ASSERT(buf != NULL);
 		memcpy(ZSTR_VAL(ms->data) + ms->fpos, (char*) buf, count);
+		ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 		ms->fpos += count;
 	}
 	return count;
@@ -135,10 +136,12 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					ms->fpos = ms->fpos + offset;
 					*newoffs = ms->fpos;
 					stream->eof = 0;
+					stream->fatal_error = 0;
 					return 0;
 				}
 			} else {
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				ms->fpos = ms->fpos + offset;
 				*newoffs = ms->fpos;
 				return 0;
@@ -152,6 +155,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				ms->fpos = offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				return 0;
 			}
 		case SEEK_END:
@@ -159,6 +163,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				return 0;
 			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
 				ms->fpos = 0;
@@ -168,6 +173,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				return 0;
 			}
 		default:
@@ -241,6 +247,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						size_t old_size = ZSTR_LEN(ms->data);
 						ms->data = zend_string_realloc(ms->data, newsize, 0);
 						memset(ZSTR_VAL(ms->data) + old_size, 0, newsize - old_size);
+						ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}

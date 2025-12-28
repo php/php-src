@@ -96,12 +96,35 @@ static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_en
 	return obj;
 }
 
-static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend_object *obj, zval *slot);
+
+/* Use when 'slot' was obtained directly from obj->properties_table, or when
+ * 'obj' can not be lazy. Otherwise, use zend_get_property_info_for_slot(). */
+static inline zend_property_info *zend_get_property_info_for_slot_self(zend_object *obj, zval *slot)
 {
 	zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
 	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
-	return table[prop_num];
+	if (table[prop_num]) {
+		return table[prop_num];
+	} else {
+		return zend_get_property_info_for_slot_slow(obj, slot);
+	}
+}
+
+static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	if (UNEXPECTED(zend_object_is_lazy_proxy(obj))) {
+		return zend_lazy_object_get_property_info_for_slot(obj, slot);
+	}
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
+	if (table[prop_num]) {
+		return table[prop_num];
+	} else {
+		return zend_get_property_info_for_slot_slow(obj, slot);
+	}
 }
 
 /* Helper for cases where we're only interested in property info of typed properties. */
@@ -114,5 +137,16 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
+{
+	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
+		&& fn->common.scope != scope
+		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)
+			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))) {
+		return false;
+	}
+
+	return true;
+}
 
 #endif /* ZEND_OBJECTS_H */

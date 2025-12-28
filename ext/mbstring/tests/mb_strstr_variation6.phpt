@@ -2,11 +2,11 @@
 Test mb_strstr() function : variation - case sensitivity
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 echo "*** Testing mb_strstr() : variation ***\n";
-
-mb_internal_encoding('UTF-8');
 
 //ascii
 $string_ascii = 'abcdef';

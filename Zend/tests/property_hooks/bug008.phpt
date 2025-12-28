@@ -18,7 +18,7 @@ $foo->bar = 'bar';
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Property Foo::$bar is read-only in %s:%d
+Fatal error: Uncaught Error: Cannot write to get-only virtual property Foo::$bar in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

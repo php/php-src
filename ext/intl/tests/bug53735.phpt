@@ -2,8 +2,6 @@
 Bug #53735 NumberFormatter returns NaN when converting float point
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 

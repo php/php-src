@@ -133,7 +133,10 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS([cpuid.h])
+AC_CHECK_HEADERS(m4_normalize([
+  cpuid.h
+  libproc.h
+]))
 
 dnl Check for library functions.
 AC_CHECK_FUNCS(m4_normalize([
@@ -146,7 +149,13 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_get_stackaddr_np
   pthread_getattr_np
   pthread_stackseg_np
+  strnlen
 ]))
+
+AC_CHECK_DECL([clock_gettime_nsec_np],
+  [AC_DEFINE([HAVE_CLOCK_GETTIME_NSEC_NP], [1],
+    [Define to 1 if you have the declaration of 'clock_gettime_nsec_np'.])],,
+  [#include <time.h>])
 
 dnl
 dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
@@ -161,6 +170,7 @@ ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
+ZEND_CHECK_PRESERVE_NONE
 ZEND_CHECK_CPUID_COUNT
 
 AC_MSG_CHECKING([whether to enable thread safety])
@@ -184,28 +194,21 @@ AS_VAR_IF([GCC], [yes],
 
 dnl Check if compiler supports -Wno-clobbered (only GCC).
 AX_CHECK_COMPILE_FLAG([-Wno-clobbered],
-  [CFLAGS="-Wno-clobbered $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-Wno-clobbered $CFLAGS"])
 dnl Check for support for implicit fallthrough level 1, also add after previous
 dnl CFLAGS as level 3 is enabled in -Wextra.
 AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough=1],
-  [CFLAGS="$CFLAGS -Wimplicit-fallthrough=1"],,
-  [-Werror])
+  [CFLAGS="$CFLAGS -Wimplicit-fallthrough=1"])
 AX_CHECK_COMPILE_FLAG([-Wduplicated-cond],
-  [CFLAGS="-Wduplicated-cond $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-Wduplicated-cond $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wlogical-op],
-  [CFLAGS="-Wlogical-op $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-Wlogical-op $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wformat-truncation],
-  [CFLAGS="-Wformat-truncation $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-Wformat-truncation $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes],
-  [CFLAGS="-Wstrict-prototypes $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-Wstrict-prototypes $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-fno-common],
-  [CFLAGS="-fno-common $CFLAGS"],,
-  [-Werror])
+  [CFLAGS="-fno-common $CFLAGS"])
 
 ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
@@ -223,11 +226,17 @@ AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([dnl
 #include <stdint.h>
 
+#ifdef __has_builtin
+# if __has_builtin(__builtin_frame_address)
+#  define builtin_frame_address __builtin_frame_address(0)
+# endif
+#endif
+
 int (*volatile f)(uintptr_t);
 
 int stack_grows_downwards(uintptr_t arg) {
-#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
-  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;
@@ -237,8 +246,8 @@ int stack_grows_downwards(uintptr_t arg) {
 }
 
 int main(void) {
-#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
-  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;
@@ -455,4 +464,112 @@ AS_VAR_IF([ZEND_MAX_EXECUTION_TIMERS], [yes],
 
 AC_MSG_CHECKING([whether to enable Zend max execution timers])
 AC_MSG_RESULT([$ZEND_MAX_EXECUTION_TIMERS])
+])
+
+dnl
+dnl ZEND_CHECK_PRESERVE_NONE
+dnl
+dnl Check if the preserve_none calling convention is supported and matches our
+dnl expectations.
+dnl
+AC_DEFUN([ZEND_CHECK_PRESERVE_NONE], [dnl
+  AC_CACHE_CHECK([for preserve_none calling convention],
+   [php_cv_preserve_none],
+   [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdio.h>
+#include <stdint.h>
+
+const char * const1 = "str1";
+const char * const2 = "str2";
+const char * const3 = "str3";
+uint64_t key = UINT64_C(0x9d7f71d2bd296364);
+
+uintptr_t _a = 0;
+uintptr_t _b = 0;
+
+uintptr_t __attribute__((preserve_none)) fun(uintptr_t a, uintptr_t b) {
+	_a = a;
+	_b = b;
+	return (uintptr_t)const3;
+}
+
+uintptr_t __attribute__((preserve_none)) test(void) {
+	uintptr_t ret;
+
+#if defined(__x86_64__)
+	__asm__ __volatile__(
+		/* XORing to make it unlikely the value exists in any other register */
+		"movq %1, %%r12\n"
+		"xorq %3, %%r12\n"
+		"movq %2, %%r13\n"
+		"xorq %3, %%r13\n"
+		"xorq %%rax, %%rax\n"
+#if defined(__APPLE__)
+		"call _fun\n"
+#else
+		"call fun\n"
+#endif
+		: "=a" (ret)
+		: "r" (const1), "r" (const2), "r" (key)
+		: "r12", "r13"
+	);
+#elif defined(__aarch64__)
+	__asm__ __volatile__(
+		/* XORing to make it unlikely the value exists in any other register */
+		"eor    x20, %1, %3\n"
+		"eor    x21, %2, %3\n"
+		"eor    x0, x0, x0\n"
+#if defined(__APPLE__)
+		"bl     _fun\n"
+#else
+		"bl     fun\n"
+#endif
+		"mov    %0, x0\n"
+		: "=r" (ret)
+		: "r" (const1), "r" (const2), "r" (key)
+		: "x0", "x21", "x22", "x30"
+	);
+#else
+# error
+#endif
+
+	return ret;
+}
+
+int main(void) {
+
+	/* JIT is making the following expectations about preserve_none:
+	 * - The registers used for integer args 1 and 2
+	 * - The register used for a single integer return value
+	 *
+	 * We check these expectations here:
+	 */
+
+	uintptr_t ret = test();
+
+	if (_a != ((uintptr_t)const1 ^ key)) {
+		fprintf(stderr, "arg1 mismatch\n");
+		return 1;
+	}
+	if (_b != ((uintptr_t)const2 ^ key)) {
+		fprintf(stderr, "arg2 mismatch\n");
+		return 2;
+	}
+	if (ret != (uintptr_t)const3) {
+		fprintf(stderr, "ret mismatch\n");
+		return 3;
+	}
+
+	fprintf(stderr, "OK\n");
+
+	return 0;
+}]])],
+    [php_cv_preserve_none=yes],
+    [php_cv_preserve_none=no],
+    [php_cv_preserve_none=no])
+  ])
+  AS_VAR_IF([php_cv_preserve_none], [yes], [
+    AC_DEFINE([HAVE_PRESERVE_NONE], [1],
+      [Define to 1 if you have preserve_none support.])
+  ])
 ])

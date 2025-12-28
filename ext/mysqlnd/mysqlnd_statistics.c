@@ -214,8 +214,8 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const bool persistent)
 {
-	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
-	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
+	size_t size = zend_safe_address_guarded(statistic_count, sizeof(*(*stats)->values), sizeof(**stats));
+	*stats = pecalloc(1, size, persistent);
 	(*stats)->count = statistic_count;
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
@@ -231,7 +231,6 @@ mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
-	pefree(stats->values, persistent);
 	/* mnd_free will reference LOCK_access and crash...*/
 	pefree(stats, persistent);
 }

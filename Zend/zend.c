@@ -38,6 +38,8 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_hrtime.h"
+#include "zend_enum.h"
+#include "zend_closures.h"
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
@@ -94,6 +96,7 @@ ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 ZEND_API zend_result (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
+ZEND_API void (*zend_accel_schedule_restart_hook)(int reason) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
@@ -259,6 +262,7 @@ static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	STD_ZEND_INI_BOOLEAN("fatal_error_backtraces",			"1",	ZEND_INI_ALL,       OnUpdateBool, fatal_error_backtrace_on,      zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
 	ZEND_INI_ENTRY3_EX("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled, NULL, NULL, NULL, zend_gc_enabled_displayer_cb)
 	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
@@ -273,7 +277,7 @@ ZEND_INI_BEGIN()
 #ifdef ZEND_CHECK_STACK_LIMIT
 	/* The maximum allowed call stack size. 0: auto detect, -1: no limit. For fibers, this is fiber.stack_size. */
 	STD_ZEND_INI_ENTRY("zend.max_allowed_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateMaxAllowedStackSize,	max_allowed_stack_size,		zend_executor_globals,	executor_globals)
-	/* Substracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
+	/* Subtracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
 	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
 #endif
 
@@ -551,7 +555,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
-			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
+			print_hash(buf, Z_ARRVAL_P(expr), indent, false);
 			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
@@ -581,12 +585,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
-					print_hash(buf, (HashTable*) &zend_empty_array, indent, 1);
+					print_hash(buf, (HashTable*) &zend_empty_array, indent, true);
 					break;
 				}
 
 				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
-				print_hash(buf, properties, indent, 1);
+				print_hash(buf, properties, indent, true);
 				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
@@ -639,7 +643,7 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 /* }}} */
 
 #ifdef ZTS
-static bool short_tags_default      = 1;
+static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define short_tags_default			1
@@ -711,6 +715,7 @@ static void auto_global_copy_ctor(zval *zv) /* {{{ */
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	compiler_globals->compiled_filename = NULL;
+	compiler_globals->zend_lineno = 0;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
@@ -735,14 +740,16 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	compiler_globals->map_ptr_size = 0;
 	compiler_globals->map_ptr_last = global_map_ptr_last;
-	if (compiler_globals->map_ptr_last) {
+	compiler_globals->internal_run_time_cache = NULL;
+	if (compiler_globals->map_ptr_last || zend_map_ptr_static_size) {
 		/* Allocate map_ptr table */
 		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
-		void *base = pemalloc(compiler_globals->map_ptr_size * sizeof(void*), 1);
+		void *base = pemalloc((zend_map_ptr_static_size + compiler_globals->map_ptr_size) * sizeof(void*), 1);
 		compiler_globals->map_ptr_real_base = base;
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
-		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
+		memset(base, 0, (zend_map_ptr_static_size + compiler_globals->map_ptr_last) * sizeof(void*));
 	}
+	zend_init_internal_run_time_cache();
 }
 /* }}} */
 
@@ -785,6 +792,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
 	}
+	if (compiler_globals->internal_run_time_cache) {
+		pefree(compiler_globals->internal_run_time_cache, 1);
+		compiler_globals->internal_run_time_cache = NULL;
+	}
 }
 /* }}} */
 
@@ -797,6 +808,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_init_call_trampoline_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->capture_warnings_during_sccp = 0;
+	executor_globals->user_error_handler_error_reporting = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	executor_globals->in_autoload = NULL;
@@ -807,7 +819,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->saved_fpu_cw = 0;
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
-	executor_globals->active = 0;
+	executor_globals->active = false;
 	executor_globals->bailout = NULL;
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;
@@ -823,6 +835,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->record_errors = false;
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
+	executor_globals->filename_override = NULL;
+	executor_globals->lineno_override = -1;
 #ifdef ZEND_CHECK_STACK_LIMIT
 	executor_globals->stack_limit = (void*)0;
 	executor_globals->stack_base = (void*)0;
@@ -898,7 +912,7 @@ static bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	/* While we keep registering $GLOBALS as an auto-global, we do not create an
 	 * actual variable for it. Access to it handled specially by the compiler. */
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -1014,7 +1028,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	executor_globals = ts_resource(executor_globals_id);
 
 	compiler_globals_dtor(compiler_globals);
-	compiler_globals->in_compilation = 0;
+	compiler_globals->in_compilation = false;
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 
@@ -1038,8 +1052,11 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(fatal_error_backtrace_on) = false;
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
+	zend_object_handlers_startup();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
@@ -1063,6 +1080,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
+
+    zend_enum_startup();
+    zend_closure_startup();
 }
 /* }}} */
 
@@ -1115,6 +1135,10 @@ zend_result zend_post_startup(void) /* {{{ */
 	}
 	compiler_globals->map_ptr_real_base = NULL;
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
+	if (compiler_globals->internal_run_time_cache) {
+		pefree(compiler_globals->internal_run_time_cache, 1);
+	}
+	compiler_globals->internal_run_time_cache = NULL;
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals_ctor(compiler_globals);
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
@@ -1197,7 +1221,14 @@ void zend_shutdown(void) /* {{{ */
 		CG(script_encoding_list) = NULL;
 		CG(script_encoding_list_size) = 0;
 	}
+	if (CG(internal_run_time_cache)) {
+		pefree(CG(internal_run_time_cache), 1);
+		CG(internal_run_time_cache) = NULL;
+	}
 #endif
+	zend_map_ptr_static_last = 0;
+	zend_map_ptr_static_size = 0;
+
 	zend_destroy_rsrc_list_dtors();
 
 	zend_unload_modules();
@@ -1250,9 +1281,10 @@ ZEND_API size_t zend_get_page_size(void)
 	SYSTEM_INFO system_info;
 	GetSystemInfo(&system_info);
 	return system_info.dwPageSize;
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__APPLE__)
 	/* This returns the value obtained from
-	 * the auxv vector, avoiding a syscall. */
+	 * the auxv vector, avoiding a
+	 * syscall (on FreeBSD)/function call (on macOS). */
 	return getpagesize();
 #else
 	return (size_t) sysconf(_SC_PAGESIZE);
@@ -1297,9 +1329,9 @@ ZEND_API void zend_activate(void) /* {{{ */
 	init_executor();
 	startup_scanner();
 	if (CG(map_ptr_last)) {
-		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
+		memset((void **)CG(map_ptr_real_base) + zend_map_ptr_static_size, 0, CG(map_ptr_last) * sizeof(void*));
 	}
-	zend_init_internal_run_time_cache();
+	zend_reset_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */
@@ -1410,7 +1442,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zval retval;
 	zval orig_user_error_handler;
 	bool in_compilation;
-	zend_class_entry *saved_class_entry;
+	zend_class_entry *saved_class_entry = NULL;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
@@ -1427,6 +1459,29 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		return;
 	}
 
+	/* Emit any delayed error before handling fatal error */
+	if ((type & E_FATAL_ERRORS) && !(type & E_DONT_BAIL) && EG(num_errors)) {
+		uint32_t num_errors = EG(num_errors);
+		zend_error_info **errors = EG(errors);
+		EG(num_errors) = 0;
+		EG(errors) = NULL;
+
+		bool orig_record_errors = EG(record_errors);
+		EG(record_errors) = false;
+
+		/* Disable user error handler before emitting delayed errors, as
+		 * it's unsafe to execute user code after a fatal error. */
+		int orig_user_error_handler_error_reporting = EG(user_error_handler_error_reporting);
+		EG(user_error_handler_error_reporting) = 0;
+
+		zend_emit_recorded_errors_ex(num_errors, errors);
+
+		EG(user_error_handler_error_reporting) = orig_user_error_handler_error_reporting;
+		EG(record_errors) = orig_record_errors;
+		EG(num_errors) = num_errors;
+		EG(errors) = errors;
+	}
+
 	if (EG(record_errors)) {
 		zend_error_info *info = emalloc(sizeof(zend_error_info));
 		info->type = type;
@@ -1439,16 +1494,23 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		EG(num_errors)++;
 		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
 		EG(errors)[EG(num_errors)-1] = info;
+
+		/* Do not process non-fatal recorded error */
+		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
+			return;
+		}
 	}
+
+	// Always clear the last backtrace.
+	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
-		zend_execute_data *ex;
-		const zend_op *opline;
-
 		if (type & E_FATAL_ERRORS) {
-			ex = EG(current_execute_data);
-			opline = NULL;
+			zend_execute_data *ex = EG(current_execute_data);
+			const zend_op *opline = NULL;
+
 			while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 				ex = ex->prev_execute_data;
 			}
@@ -1462,6 +1524,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				ex->opline = opline;
 			}
 		}
+	} else if (EG(fatal_error_backtrace_on) && (type & E_FATAL_ERRORS)) {
+		zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	}
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);
@@ -1589,7 +1653,6 @@ static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint
 		case E_COMPILE_WARNING:
 		case E_ERROR:
 		case E_NOTICE:
-		case E_STRICT:
 		case E_DEPRECATED:
 		case E_WARNING:
 		case E_USER_ERROR:
@@ -1722,13 +1785,18 @@ ZEND_API void zend_begin_record_errors(void)
 	EG(errors) = NULL;
 }
 
+ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors)
+{
+	for (uint32_t i = 0; i < num_errors; i++) {
+		zend_error_info *error = errors[i];
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	}
+}
+
 ZEND_API void zend_emit_recorded_errors(void)
 {
 	EG(record_errors) = false;
-	for (uint32_t i = 0; i < EG(num_errors); i++) {
-		zend_error_info *error = EG(errors)[i];
-		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
-	}
+	zend_emit_recorded_errors_ex(EG(num_errors), EG(errors));
 }
 
 ZEND_API void zend_free_recorded_errors(void)
@@ -1984,6 +2052,9 @@ void free_estring(char **str_p) /* {{{ */
 }
 /* }}} */
 
+ZEND_API size_t zend_map_ptr_static_size;
+ZEND_API size_t zend_map_ptr_static_last;
+
 ZEND_API void zend_map_ptr_reset(void)
 {
 	CG(map_ptr_last) = global_map_ptr_last;
@@ -1996,12 +2067,33 @@ ZEND_API void *zend_map_ptr_new(void)
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
-		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), (zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 	}
-	ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
+	ptr = (void**)CG(map_ptr_real_base) + zend_map_ptr_static_size + CG(map_ptr_last);
 	*ptr = NULL;
 	CG(map_ptr_last)++;
+	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
+}
+
+ZEND_API void *zend_map_ptr_new_static(void)
+{
+	void **ptr;
+
+	if (zend_map_ptr_static_last >= zend_map_ptr_static_size) {
+		zend_map_ptr_static_size += 4096;
+		/* Grow map_ptr table */
+		void *new_base = pemalloc((zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
+		if (CG(map_ptr_real_base)) {
+			memcpy((void **)new_base + 4096, CG(map_ptr_real_base), (CG(map_ptr_last) + zend_map_ptr_static_size - 4096) * sizeof(void *));
+			pefree(CG(map_ptr_real_base), 1);
+		}
+		CG(map_ptr_real_base) = new_base;
+		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(new_base);
+	}
+	ptr = (void**)CG(map_ptr_real_base) + (zend_map_ptr_static_last & 4095);
+	*ptr = NULL;
+	zend_map_ptr_static_last++;
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
 }
 
@@ -2013,10 +2105,10 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		if (last >= CG(map_ptr_size)) {
 			/* Grow map_ptr table */
 			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);
-			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), (zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
 			CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 		}
-		ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
+		ptr = (void**)CG(map_ptr_real_base) + zend_map_ptr_static_size + CG(map_ptr_last);
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
 		CG(map_ptr_last) = last;
 	}
@@ -2034,8 +2126,8 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 		return;
 	}
 
-	if (zend_string_equals_literal_ci(type_name, "self")
-			|| zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF))
+			|| zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return;
 	}
 

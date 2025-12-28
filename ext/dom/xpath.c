@@ -22,8 +22,9 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "namespace_compat.h"
-#include "private_data.h"
+#include "internal_helpers.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -178,6 +179,11 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 		docp = (xmlDocPtr) ctx->doc;
 	}
 
+	if (UNEXPECTED(!docp)) {
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
 	return SUCCESS;
 }
@@ -225,15 +231,6 @@ PHP_METHOD(DOMXPath, registerNamespace)
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
-}
-/* }}} */
-
-static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
-{
-	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
-
-	ZVAL_COPY_VALUE(&mapptr->baseobj_zv, baseobj);
-	mapptr->nodetype = DOM_NODESET;
 }
 /* }}} */
 
@@ -329,6 +326,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		{
 			xmlNodeSetPtr nodesetp;
 			zval retval;
+			bool release_array = false;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 				array_init_size(&retval, nodesetp->nodeNr);
@@ -353,7 +351,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 						xmlNsPtr original = (xmlNsPtr) node;
 
 						/* Make sure parent dom object exists, so we can take an extra reference. */
-						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
 						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -363,12 +361,18 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 					}
 					add_next_index_zval(&retval, &child);
 				}
+				release_array = true;
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
+
+			object_init_ex(return_value, dom_get_nodelist_ce(modern));
 			nodeobj = Z_DOMOBJ_P(return_value);
-			dom_xpath_iter(&retval, nodeobj);
+			dom_nnodemap_object *mapptr = nodeobj->ptr;
+
+			mapptr->array = Z_ARR(retval);
+			mapptr->release_array = release_array;
+			mapptr->handler = &php_dom_obj_map_nodeset;
 			break;
 		}
 
@@ -493,14 +497,14 @@ PHP_METHOD(DOMXPath, quote) {
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '\'';
 		ZSTR_VAL(output)[input_len + 2] = '\0';
-		RETURN_STR(output);
+		RETURN_NEW_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
 		ZSTR_VAL(output)[0] = '"';
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '"';
 		ZSTR_VAL(output)[input_len + 2] = '\0';
-		RETURN_STR(output);
+		RETURN_NEW_STR(output);
 	} else {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
@@ -521,8 +525,8 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
-		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
-		RETURN_STR(smart_str_extract(&output));
+		ZSTR_VAL(output.s)[ZSTR_LEN(output.s) - 1] = ')';
+		RETURN_NEW_STR(smart_str_extract(&output));
 	}
 }
 /* }}} */

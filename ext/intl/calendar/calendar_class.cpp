@@ -71,7 +71,7 @@ U_CFUNC void calendar_object_construct(zval *object,
 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
 	assert(co->ucal == NULL);
-	co->ucal = (Calendar*)calendar;
+	co->ucal = calendar;
 }
 
 /* {{{ clone handler for Calendar */
@@ -234,9 +234,7 @@ static void Calendar_objects_free(zend_object *object)
 /* {{{ Calendar_object_create */
 static zend_object *Calendar_object_create(zend_class_entry *ce)
 {
-	Calendar_object*	intern;
-
-	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	Calendar_object* intern = (Calendar_object*)zend_object_alloc(sizeof(Calendar_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);

@@ -41,6 +41,7 @@ if test "$PHP_FILEINFO" != "no"; then
     [$ext_shared],,
     [-I@ext_srcdir@/libmagic])
   PHP_ADD_BUILD_DIR([$ext_builddir/libmagic])
+  PHP_ADD_EXTENSION_DEP(fileinfo, pcre)
 
   AC_CHECK_FUNCS([utimes strndup])
 

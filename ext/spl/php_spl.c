@@ -66,7 +66,7 @@ PHP_FUNCTION(class_parents)
 {
 	zval *obj;
 	zend_class_entry *parent_class, *ce;
-	bool autoload = 1;
+	bool autoload = true;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -99,7 +99,7 @@ PHP_FUNCTION(class_parents)
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
-	bool autoload = 1;
+	bool autoload = true;
 	zend_class_entry *ce;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
@@ -128,7 +128,7 @@ PHP_FUNCTION(class_implements)
 PHP_FUNCTION(class_uses)
 {
 	zval *obj;
-	bool autoload = 1;
+	bool autoload = true;
 	zend_class_entry *ce;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
@@ -213,12 +213,10 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
-/* {{{ Return an array containing the names of all clsses and interfaces defined in SPL */
+/* {{{ Return an array containing the names of all classes and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -528,7 +526,7 @@ PHP_FUNCTION(spl_autoload_register)
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		if (!fcc.function_handler) {
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
+			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
@@ -582,6 +580,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Using spl_autoload_call() as a callback for spl_autoload_unregister() is deprecated,"
+			" to remove all registered autoloaders, call spl_autoload_unregister()"
+			" for all values returned from spl_autoload_functions()");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		if (spl_autoload_functions) {
 			/* Don't destroy the hash table, as we might be iterating over it right now. */
 			zend_hash_clean(spl_autoload_functions);
@@ -591,7 +596,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (!fcc.function_handler) {
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-		 * with it outselves. It is important that it is not refetched on every call,
+		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
 		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}
@@ -612,9 +617,7 @@ PHP_FUNCTION(spl_autoload_functions)
 {
 	autoload_func_info *alfi;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	if (spl_autoload_functions) {

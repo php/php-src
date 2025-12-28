@@ -1,5 +1,5 @@
 --TEST--
-Dynamic class name in new is not supported
+Dynamic class name in new is supported
 --FILE--
 <?php
 

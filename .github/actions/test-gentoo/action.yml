@@ -1,0 +1,34 @@
+name: Test
+inputs:
+  runTestsParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        # XXX: Set up other database tests?
+        # XXX: These tests are not running containerized
+        export MYSQL_TEST_USER=ci
+        export MYSQL_TEST_PASSWD=ci
+        if [[ -z "$PDO_MYSQL_TEST_DSN" ]]; then
+          export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        fi
+        export PDO_MYSQL_TEST_USER=ci
+        export PDO_MYSQL_TEST_PASS=ci
+        export PGSQL_TEST_CONNSTR="host=localhost dbname=test port=5432 user=ci password=ci"
+        if [[ -z "$PDO_PGSQL_TEST_DSN" ]]; then
+          export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=ci password=ci"
+        fi
+        # Slow tests criteron is doubled because this runner isn't as fast as others
+        export SKIP_IO_CAPTURE_TESTS=1
+        export STACK_LIMIT_DEFAULTS_CHECK=1
+        sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -j$(nproc) \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
+          --show-diff \
+          --show-slow 2000 \
+          --set-timeout 120

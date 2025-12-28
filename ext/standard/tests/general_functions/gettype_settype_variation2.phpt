@@ -274,6 +274,7 @@ int(1)
 string(7) "integer"
 -- Iteration 20 --
 string(6) "string"
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -304,6 +305,7 @@ int(1)
 string(7) "integer"
 -- Iteration 26 --
 string(6) "string"
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -424,11 +426,13 @@ int(2147483647)
 string(7) "integer"
 -- Iteration 50 --
 string(6) "double"
+2: The float 2147483649 is not representable as an int, cast occurred
 bool(true)
 int(-2147483647)
 string(7) "integer"
 -- Iteration 51 --
 string(6) "double"
+2: The float 1232147483649 is not representable as an int, cast occurred
 bool(true)
 int(-508130303)
 string(7) "integer"
@@ -439,6 +443,7 @@ int(85)
 string(7) "integer"
 -- Iteration 53 --
 string(6) "double"
+2: The float 1058513956921 is not representable as an int, cast occurred
 bool(true)
 int(1952002105)
 string(7) "integer"
@@ -459,6 +464,7 @@ int(-365)
 string(7) "integer"
 -- Iteration 57 --
 string(6) "double"
+2: The float 80561044571754 is not representable as an int, cast occurred
 bool(true)
 int(343000682)
 string(7) "integer"
@@ -669,6 +675,7 @@ int(1)
 string(7) "integer"
 -- Iteration 20 --
 string(6) "string"
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -699,6 +706,7 @@ int(1)
 string(7) "integer"
 -- Iteration 26 --
 string(6) "string"
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -819,11 +827,13 @@ int(2147483647)
 string(7) "integer"
 -- Iteration 50 --
 string(6) "double"
+2: The float 2147483649 is not representable as an int, cast occurred
 bool(true)
 int(-2147483647)
 string(7) "integer"
 -- Iteration 51 --
 string(6) "double"
+2: The float 1232147483649 is not representable as an int, cast occurred
 bool(true)
 int(-508130303)
 string(7) "integer"
@@ -834,6 +844,7 @@ int(85)
 string(7) "integer"
 -- Iteration 53 --
 string(6) "double"
+2: The float 1058513956921 is not representable as an int, cast occurred
 bool(true)
 int(1952002105)
 string(7) "integer"
@@ -854,6 +865,7 @@ int(-365)
 string(7) "integer"
 -- Iteration 57 --
 string(6) "double"
+2: The float 80561044571754 is not representable as an int, cast occurred
 bool(true)
 int(343000682)
 string(7) "integer"

@@ -41,6 +41,11 @@ static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 		einfo = &S->einfo;
 	}
 
+	/* If we don't have a driver error do not populate the info array */
+	if (strlen(einfo->last_err_msg) == 0) {
+		return;
+	}
+
 	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
 				einfo->last_err_msg,
 				einfo->what, (long) einfo->last_error,
@@ -527,14 +532,12 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 		use_direct = 1;
 
-		size_t db_len = strlen(dbh->data_source);
-		bool use_uid_arg = dbh->username != NULL && !php_memnistr(dbh->data_source, "uid=", strlen("uid="), dbh->data_source + db_len);
-		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + db_len);
+		bool use_uid_arg = dbh->username != NULL && !php_memnistr(dbh->data_source, "uid=", strlen("uid="), dbh->data_source + dbh->data_source_len);
+		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + dbh->data_source_len);
 
 		if (use_uid_arg || use_pwd_arg) {
-			char *db = (char*) emalloc(db_len + 1);
-			strcpy(db, dbh->data_source);
-			char *db_end = db + db_len;
+			char *db = (char*) estrndup(dbh->data_source, dbh->data_source_len);
+			char *db_end = db + dbh->data_source_len;
 			db_end--;
 			if ((unsigned char)*(db_end) == ';') {
 				*db_end = '\0';
@@ -588,6 +591,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
+			dbh->data_source_len = strlen(dsn);
 			if (uid && should_quote_uid) {
 				efree(uid);
 			}
@@ -597,7 +601,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			efree(db);
 		}
 
-		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, strlen(dbh->data_source),
+		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, dbh->data_source_len,
 				dsnbuf, sizeof(dsnbuf)-1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 	}
 	if (!use_direct) {

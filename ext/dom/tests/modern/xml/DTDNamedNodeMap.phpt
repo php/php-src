@@ -26,7 +26,7 @@ var_dump($doctype->notations["GIF"]);
 
 ?>
 --EXPECTF--
-object(Dom\DocumentType)#2 (24) {
+object(Dom\DocumentType)#2 (20) {
   ["name"]=>
   string(4) "root"
   ["entities"]=>
@@ -41,12 +41,16 @@ object(Dom\DocumentType)#2 (24) {
   string(105) "<!ENTITY test "entity is only for test purposes">
 <!ENTITY myimage PUBLIC "-" "mypicture.gif" NDATA GIF>
 "
-  ["nodeName"]=>
-  string(4) "root"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(4) "root"
+  ["baseURI"]=>
+  string(%d) "%s"
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
   ["parentElement"]=>
@@ -61,20 +65,8 @@ object(Dom\DocumentType)#2 (24) {
   NULL
   ["nextSibling"]=>
   string(22) "(object value omitted)"
-  ["attributes"]=>
+  ["nodeValue"]=>
   NULL
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
-  string(%d) "%s"
   ["textContent"]=>
   NULL
 }

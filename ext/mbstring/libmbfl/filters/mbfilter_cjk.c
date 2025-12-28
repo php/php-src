@@ -21,15 +21,15 @@
  * This macro converts uppercase ASCII values to Regional Indicator codepoints */
 #define NFLAGS(c) (0x1F1A5+((unsigned int)(c)))
 
-static const char nflags_s[10][2] = {"CN", "DE", "ES", "FR", "GB", "IT", "JP", "KR", "RU", "US"};
+static const char nflags_s[10][2] ZEND_NONSTRING = {"CN", "DE", "ES", "FR", "GB", "IT", "JP", "KR", "RU", "US"};
 static const int nflags_code_kddi[10] = { 0x2549, 0x2546, 0x24C0, 0x2545, 0x2548, 0x2547, 0x2750, 0x254A, 0x24C1, 0x27F7 };
 static const int nflags_code_sb[10] = { 0x2B0A, 0x2B05, 0x2B08, 0x2B04, 0x2B07, 0x2B06, 0x2B02, 0x2B0B, 0x2B09, 0x2B03 };
 
 #define EMIT_KEYPAD_EMOJI(c) do { *snd = (c); return 0x20E3; } while(0)
 #define EMIT_FLAG_EMOJI(country) do { *snd = NFLAGS((country)[0]); return NFLAGS((country)[1]); } while(0)
 
-static const char nflags_kddi[6][2] = {"FR", "DE", "IT", "GB", "CN", "KR"};
-static const char nflags_sb[10][2] = {"JP", "US", "FR", "DE", "IT", "GB", "ES", "RU", "CN", "KR"};
+static const char nflags_kddi[6][2] ZEND_NONSTRING = {"FR", "DE", "IT", "GB", "CN", "KR"};
+static const char nflags_sb[10][2] ZEND_NONSTRING = {"JP", "US", "FR", "DE", "IT", "GB", "ES", "RU", "CN", "KR"};
 
 /* number -> (ku*94)+ten value for telephone keypad character */
 #define DOCOMO_KEYPAD(n) ((n) == 0 ? 0x296F : (0x2965 + (n)))

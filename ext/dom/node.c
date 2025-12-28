@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "namespace_compat.h"
 #include "private_data.h"
 #include "internal_helpers.h"
@@ -51,6 +52,13 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep, b
 	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
 		ret = dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
 	} else {
+		if (name_len == 1) {
+			if (uppercase) {
+				return ZSTR_CHAR(zend_toupper_ascii(*nodep->name));
+			} else {
+				return ZSTR_CHAR((zend_uchar) *nodep->name);
+			}
+		}
 		ret = zend_string_init((const char *) nodep->name, name_len, false);
 	}
 	if (uppercase) {
@@ -88,7 +96,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 			uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_ATTRIBUTE_NODE:
-			ZVAL_NEW_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
+			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
 			break;
 		case XML_NAMESPACE_DECL: {
 			xmlNsPtr ns = nodep->ns;
@@ -102,11 +110,17 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		}
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
+			if (nodep->name) {
+				ZVAL_STRING(retval, (const char *) nodep->name);
+			} else {
+				ZVAL_EMPTY_STRING(retval);
+			}
+			break;
 		case XML_PI_NODE:
 		case XML_ENTITY_DECL:
 		case XML_ENTITY_REF_NODE:
 		case XML_NOTATION_NODE:
-			ZVAL_STRING(retval, (char *) nodep->name);
+			ZVAL_STRING(retval, (const char *) nodep->name);
 			break;
 		case XML_CDATA_SECTION_NODE:
 			ZVAL_STRING(retval, "#cdata-section");
@@ -133,7 +147,6 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ nodeValue	string
-readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Modern spec URL: https://dom.spec.whatwg.org/#dom-node-nodevalue
 Since:
@@ -180,8 +193,8 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	/* Cannot fail because the type is either null or a string. */
-	zend_string *str = zval_get_string(newval);
+	/* Type is ?string */
+	zend_string *str = Z_TYPE_P(newval) == IS_NULL ? ZSTR_EMPTY_ALLOC() : Z_STR_P(newval);
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
@@ -208,7 +221,6 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 
 	php_libxml_invalidate_node_list_cache(obj->document);
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -282,9 +294,9 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	php_dom_create_iterator(retval, DOM_NODELIST, php_dom_follow_spec_intern(obj));
+	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, 0, NULL, 0);
+	php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
 
 	return SUCCESS;
 }
@@ -416,9 +428,9 @@ zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE) {
-		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
+		object_init_ex(retval, dom_get_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 		dom_object *intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, 0, NULL, 0);
+		php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_attributes);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -630,7 +642,7 @@ zend_result dom_node_local_name_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
-		ZVAL_STRING(retval, (char *) (nodep->name));
+		ZVAL_STRING_FAST(retval, (const char *) (nodep->name));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -671,7 +683,6 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ textContent	string
-readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Modern spec URL: https://dom.spec.whatwg.org/#dom-node-textcontent
 Since: DOM Level 3
@@ -742,11 +753,68 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
+/* Returns true if the node had the same document reference, false otherwise. */
+static bool dom_set_document_ref_obj_single(xmlNodePtr node, php_libxml_ref_obj *document)
+{
+	dom_object *childobj = php_dom_object_get_data(node);
+	if (!childobj) {
+		return true;
+	}
+	if (!childobj->document) {
+		childobj->document = document;
+		document->refcount++;
+		return true;
+	}
+	return false;
+}
+
+void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document)
+{
+	ZEND_ASSERT(document != NULL);
+
+	dom_set_document_ref_obj_single((xmlNodePtr) attr, document);
+	for (xmlNodePtr attr_child = attr->children; attr_child; attr_child = attr_child->next) {
+		dom_set_document_ref_obj_single(attr_child, document);
+	}
+}
+
+static bool dom_set_document_ref_pointers_node(xmlNodePtr node, php_libxml_ref_obj *document)
+{
+	ZEND_ASSERT(document != NULL);
+
+	if (!dom_set_document_ref_obj_single(node, document)) {
+		return false;
+	}
+
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			dom_set_document_ref_pointers_attr(attr, document);
+		}
+	}
+
+	return true;
+}
+
+void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document)
+{
+	if (!document) {
+		return;
+	}
+
+	if (!dom_set_document_ref_pointers_node(node, document)) {
+		return;
+	}
+
+	xmlNodePtr base = node;
+	node = node->children;
+	while (node != NULL && dom_set_document_ref_pointers_node(node, document)) {
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
 static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
 {
-	xmlNodePtr newchild, node;
-
-	newchild = fragment->children;
+	xmlNodePtr newchild = fragment->children;
 
 	if (newchild) {
 		if (prevsib == NULL) {
@@ -762,17 +830,10 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 			nextsib->prev = fragment->last;
 		}
 
-		node = newchild;
+		/* Assign parent node pointer */
+		xmlNodePtr node = newchild;
 		while (node != NULL) {
 			node->parent = nodep;
-			if (node->doc != nodep->doc) {
-				xmlSetTreeDoc(node, nodep->doc);
-				dom_object *childobj = node->_private;
-				if (childobj != NULL) {
-					childobj->document = intern->document;
-					php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
-				}
-			}
 			if (node == fragment->last) {
 				break;
 			}
@@ -787,6 +848,50 @@ static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlN
 }
 /* }}} */
 
+static bool dom_node_check_legacy_insertion_validity(xmlNodePtr parentp, xmlNodePtr child, bool stricterror, bool warn_empty_fragment)
+{
+	if (dom_node_is_read_only(parentp) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		return false;
+	}
+
+	if (dom_hierarchy(parentp, child) == FAILURE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
+	if (child->doc != parentp->doc && child->doc != NULL) {
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
+		return false;
+	}
+
+	if (warn_empty_fragment && child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		/* TODO Drop Warning? */
+		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
+		return false;
+	}
+
+	/* In old DOM only text nodes and entity nodes can be added as children to attributes. */
+	if (parentp->type == XML_ATTRIBUTE_NODE && child->type != XML_TEXT_NODE && child->type != XML_ENTITY_REF_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+	/* Attributes must be in elements. */
+	if (child->type == XML_ATTRIBUTE_NODE && parentp->type != XML_ELEMENT_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
+	/* Documents can never be a child. */
+	if (child->type == XML_DOCUMENT_NODE || child->type == XML_HTML_DOCUMENT_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return false;
+	}
+
+	return true;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
@@ -799,53 +904,34 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	xmlNodePtr new_child = NULL;
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(parentp) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+	if (!dom_node_check_legacy_insertion_validity(parentp, child, stricterror, true)) {
 		RETURN_FALSE;
 	}
 
-	if (dom_hierarchy(parentp, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->doc != parentp->doc && child->doc != NULL) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		/* TODO Drop Warning? */
-		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
-		RETURN_FALSE;
-	}
-
-	if (child->doc == NULL && parentp->doc != NULL) {
-		childobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
-	}
-
-	php_libxml_invalidate_node_list_cache(intern->document);
-
+	xmlNodePtr refp = NULL;
 	if (ref != NULL) {
-		xmlNodePtr refp;
 		dom_object *refpobj;
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+	}
 
+	if (child->doc == NULL && parentp->doc != NULL) {
+		xmlSetTreeDoc(child, parentp->doc);
+		dom_set_document_ref_pointers(child, intern->document);
+	}
+
+	php_libxml_invalidate_node_list_cache(intern->document);
+
+	if (ref != NULL) {
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
 
 		if (child->type == XML_TEXT_NODE && (refp->type == XML_TEXT_NODE ||
 			(refp->prev != NULL && refp->prev->type == XML_TEXT_NODE))) {
-			if (child->doc == NULL) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
 			new_child = child;
 			new_child->parent = refp->parent;
 			new_child->next = refp;
@@ -897,9 +983,6 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 		}
 		if (child->type == XML_TEXT_NODE && parentp->last != NULL && parentp->last->type == XML_TEXT_NODE) {
 			child->parent = parentp;
-			if (child->doc == NULL) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
 			new_child = child;
 			if (parentp->children == NULL) {
 				parentp->children = child;
@@ -1125,13 +1208,13 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			RETURN_FALSE;
 		}
 
-		if (dom_node_is_read_only(nodep) == SUCCESS ||
-			(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
-			php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		if (!dom_node_check_legacy_insertion_validity(nodep, newchild, stricterror, false)) {
 			RETURN_FALSE;
 		}
 
-		if (dom_hierarchy(nodep, newchild) == FAILURE) {
+		/* This is already disallowed by libxml, but we should check it here to avoid
+		 * breaking assumptions and assertions. */
+		if ((oldchild->type == XML_ATTRIBUTE_NODE) != (newchild->type == XML_ATTRIBUTE_NODE)) {
 			php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 			RETURN_FALSE;
 		}
@@ -1140,6 +1223,11 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+	}
+
+	if (newchild->doc == NULL && nodep->doc != NULL) {
+		xmlSetTreeDoc(newchild, nodep->doc);
+		dom_set_document_ref_pointers(newchild, intern->document);
 	}
 
 	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
@@ -1158,11 +1246,6 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
 		bool replacedoctype = (intSubset == (xmlDtd *) oldchild);
 
-		if (newchild->doc == NULL && nodep->doc != NULL) {
-			xmlSetTreeDoc(newchild, nodep->doc);
-			newchildobj->document = intern->document;
-			php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
-		}
 		xmlReplaceNode(oldchild, newchild);
 		if (!modern) {
 			dom_reconcile_ns(nodep->doc, newchild);
@@ -1211,8 +1294,8 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		RETURN_FALSE;
 	}
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(nodep) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		RETURN_FALSE;
 	}
@@ -1247,31 +1330,13 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (dom_hierarchy(nodep, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (!(child->doc == NULL || child->doc == nodep->doc)) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-		RETURN_FALSE;
-	}
-
-	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
-		/* TODO Drop Warning? */
-		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
+	if (!dom_node_check_legacy_insertion_validity(nodep, child, stricterror, true)) {
 		RETURN_FALSE;
 	}
 
 	if (child->doc == NULL && nodep->doc != NULL) {
-		childobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
+		xmlSetTreeDoc(child, nodep->doc);
+		dom_set_document_ref_pointers(child, intern->document);
 	}
 
 	if (child->parent != NULL){
@@ -1280,9 +1345,6 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 
 	if (child->type == XML_TEXT_NODE && nodep->last != NULL && nodep->last->type == XML_TEXT_NODE) {
 		child->parent = nodep;
-		if (child->doc == NULL) {
-			xmlSetTreeDoc(child, nodep->doc);
-		}
 		new_child = child;
 		if (nodep->children == NULL) {
 			nodep->children = child;
@@ -1408,7 +1470,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	zval *id;
 	xmlNode *n, *node;
 	dom_object *intern;
-	bool recursive = 0;
+	bool recursive = false;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
@@ -1816,8 +1878,7 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			case XML_DOCUMENT_FRAG_NODE:
 			case XML_DOCUMENT_TYPE_NODE:
 			case XML_DTD_NODE:
-				RETURN_NULL();
-				break;
+				return;
 			default:
 				lookupp = nodep->parent;
 		}
@@ -1836,8 +1897,6 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			}
 		}
 	}
-
-	RETURN_NULL();
 }
 
 PHP_METHOD(DOMNode, lookupPrefix)
@@ -2003,16 +2062,14 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			prefix = NULL;
 		}
 		const char *ns_uri = dom_locate_a_namespace(nodep, prefix);
-		if (ns_uri == NULL) {
-			RETURN_NULL();
-		} else {
+		if (ns_uri != NULL) {
 			RETURN_STRING(ns_uri);
 		}
 	} else {
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 			if (nodep == NULL) {
-				RETURN_NULL();
+				return;
 			}
 		}
 
@@ -2021,10 +2078,99 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 			RETURN_STRING((char *) nsptr->href);
 		}
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
+
+static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
+{
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+				if (!ns) {
+					return;
+				}
+
+				zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+				if (Z_ISNULL_P(zv)) {
+					ZVAL_LONG(zv, 1);
+				} else {
+					Z_LVAL_P(zv)++;
+				}
+
+				bool should_free;
+				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
+
+				memset(ns, 0, sizeof(*ns));
+				ns->type = XML_LOCAL_NAMESPACE;
+				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
+				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+				ns->next = node->nsDef;
+				node->nsDef = ns;
+
+				ns->_private = attr;
+				if (attr->prev) {
+					attr->prev = attr->next;
+				} else {
+					node->properties = attr->next;
+				}
+				if (attr->next) {
+					attr->next->prev = attr->prev;
+				}
+			}
+		}
+
+		/* The default namespace is handled separately from the other namespaces in C14N.
+		 * The default namespace is explicitly looked up while the other namespaces are
+		 * deduplicated and compared to a list of visible namespaces. */
+		if (node->ns && !node->ns->prefix) {
+			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
+			 * can return the current namespace. */
+			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
+			node->ns = xmlSearchNs(node->doc, node, NULL);
+		}
+	}
+}
+
+static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
+{
+	dom_relink_ns_decls_element(links, root);
+
+	xmlNodePtr base = root;
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		dom_relink_ns_decls_element(links, node);
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
+static void dom_unlink_ns_decls(HashTable *links)
+{
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
+		if (h & 1) {
+			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
+			node->ns = Z_PTR_P(data);
+		} else {
+			xmlNodePtr node = (xmlNodePtr) h;
+			while (Z_LVAL_P(data)-- > 0) {
+				xmlNsPtr ns = node->nsDef;
+				node->nsDef = ns->next;
+
+				xmlAttrPtr attr = ns->_private;
+				if (attr->prev) {
+					attr->prev->next = attr;
+				} else {
+					node->properties = attr;
+				}
+				if (attr->next) {
+					attr->next->prev = attr;
+				}
+
+				xmlFreeNs(ns);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
 
 static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
 {
@@ -2071,7 +2217,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(),
-			"s|bba!a!", &file, &file_len, &exclusive,
+			"p|bba!a!", &file, &file_len, &exclusive,
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -2081,7 +2227,23 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 	docp = nodep->doc;
 
-	if (! docp) {
+	HashTable links;
+	bool modern = php_dom_follow_spec_node(nodep);
+	if (modern) {
+		xmlNodePtr root = nodep;
+		while (root->parent) {
+			root = root->parent;
+		}
+
+		if (UNEXPECTED(root->type != XML_DOCUMENT_NODE && root->type != XML_HTML_DOCUMENT_NODE)) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Canonicalization can only happen on nodes attached to a document.", /* strict */ true);
+			RETURN_THROWS();
+		}
+
+		zend_hash_init(&links, 0, NULL, NULL, false);
+		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+	} else if (!docp) {
+		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");
 		RETURN_THROWS();
 	}
@@ -2103,12 +2265,12 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");
-			RETURN_THROWS();
+			goto clean_links;
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_value_name(tmp));
-			RETURN_THROWS();
+			goto clean_links;
 		}
 		xquery = Z_STRVAL_P(tmp);
 
@@ -2140,7 +2302,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			}
 			xmlXPathFreeContext(ctxp);
 			zend_throw_error(NULL, "XPath query did not return a nodeset");
-			RETURN_THROWS();
+			goto clean_links;
 		}
 	}
 
@@ -2209,6 +2371,12 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			RETURN_LONG(bytes);
 		}
 	}
+
+clean_links:
+	if (modern) {
+		dom_unlink_ns_decls(&links);
+		zend_hash_destroy(&links);
+	}
 }
 /* }}} */
 
@@ -2232,13 +2400,12 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
-	char *value;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	value = (char *) xmlGetNodePath(nodep);
+	char *value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
 		/* This is only possible when an invalid argument is passed (e.g. namespace declaration, but that's not the case for this call site),
 		 * or on allocation failure. So in other words, this only happens on allocation failure. */
@@ -2246,7 +2413,6 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);
 		xmlFree(value);
@@ -2366,7 +2532,7 @@ PHP_METHOD(DOMNode, getRootNode)
 }
 /* }}} */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2023-07-24)
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2024-11-17)
 Since:
 */
 
@@ -2553,7 +2719,7 @@ PHP_METHOD(Dom_Node, compareDocumentPosition)
 
 PHP_METHOD(Dom_Node, __construct)
 {
-	ZEND_UNREACHABLE();
+	zend_throw_error(NULL, "Cannot directly construct %s, use document methods instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 }
 
 PHP_METHOD(DOMNode, __sleep)

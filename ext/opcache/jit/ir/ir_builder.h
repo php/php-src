@@ -461,7 +461,7 @@ extern "C" {
 #define ir_COND_A(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_ADDR),   (_op1), (_op2), (_op3))
 #define ir_COND_C(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_CHAR),   (_op1), (_op2), (_op3))
 #define ir_COND_I8(_op1, _op2, _op3)      ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I8),     (_op1), (_op2), (_op3))
-#define ir_COND_I16(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COMD, IR_I16),    (_op1), (_op2), (_op3))
+#define ir_COND_I16(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I16),    (_op1), (_op2), (_op3))
 #define ir_COND_I32(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I32),    (_op1), (_op2), (_op3))
 #define ir_COND_I64(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_I64),    (_op1), (_op2), (_op3))
 #define ir_COND_D(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_DOUBLE), (_op1), (_op2), (_op3))
@@ -490,20 +490,20 @@ extern "C" {
 #define ir_ADD_OFFSET(_addr, _offset)     _ir_ADD_OFFSET(_ir_CTX, (_addr), (_offset))
 
 /* Unfoldable variant of COPY */
-#define ir_HARD_COPY(_type, _op1)         ir_BINARY_OP(IR_COPY, (_type), (_op1), 1)
-#define ir_HARD_COPY_B(_op1)              ir_BINARY_OP_B(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U8(_op1)             ir_BINARY_OP_U8(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U16(_op1)            ir_BINARY_OP_U16(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U32(_op1)            ir_BINARY_OP_U32(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U64(_op1)            ir_BINARY_OP_U64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_A(_op1)              ir_BINARY_OP_A(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_C(_op1)              ir_BINARY_OP_C(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I8(_op1)             ir_BINARY_OP_I8(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I16(_op1)            ir_BINARY_OP_I16(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I32(_op1)            ir_BINARY_OP_I32(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I64(_op1)            ir_BINARY_OP_I64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_D(_op1)              ir_BINARY_OP_D(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_F(_op1)              ir_BINARY_OP_F(IR_COPY, (_op1), 1)
+#define ir_HARD_COPY(_type, _op1)         ir_emit2(_ir_CTX, IR_OPT(IR_COPY, (_type)), (_op1), IR_COPY_HARD)
+#define ir_HARD_COPY_B(_op1)              ir_HARD_COPY(IR_BOOL, _op1)
+#define ir_HARD_COPY_U8(_op1)             ir_HARD_COPY(IR_U8, _op1)
+#define ir_HARD_COPY_U16(_op1)            ir_HARD_COPY(IR_U16, _op1)
+#define ir_HARD_COPY_U32(_op1)            ir_HARD_COPY(IR_U32, _op1)
+#define ir_HARD_COPY_U64(_op1)            ir_HARD_COPY(IR_U64, _op1)
+#define ir_HARD_COPY_A(_op1)              ir_HARD_COPY(IR_ADDR, _op1)
+#define ir_HARD_COPY_C(_op1)              ir_HARD_COPY(IR_CHAR, _op1)
+#define ir_HARD_COPY_I8(_op1)             ir_HARD_COPY(IR_I8, _op1)
+#define ir_HARD_COPY_I16(_op1)            ir_HARD_COPY(IR_I16, _op1)
+#define ir_HARD_COPY_I32(_op1)            ir_HARD_COPY(IR_I32, _op1)
+#define ir_HARD_COPY_I64(_op1)            ir_HARD_COPY(IR_I64, _op1)
+#define ir_HARD_COPY_D(_op1)              ir_HARD_COPY(IR_DOUBLE, _op1)
+#define ir_HARD_COPY_F(_op1)              ir_HARD_COPY(IR_FLOAT, _op1)
 
 #define ir_PARAM(_type, _name, _num)      _ir_PARAM(_ir_CTX, (_type), (_name), (_num))
 #define ir_VAR(_type, _name)              _ir_VAR(_ir_CTX, (_type), (_name))
@@ -514,6 +514,7 @@ extern "C" {
 #define ir_CALL_3(type, func, a1, a2, a3)          _ir_CALL_3(_ir_CTX, type, func, a1, a2, a3)
 #define ir_CALL_4(type, func, a1, a2, a3, a4)      _ir_CALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
 #define ir_CALL_5(type, func, a1, a2, a3, a4, a5)  _ir_CALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_CALL_6(type, func, a, b, c, d, e, f)    _ir_CALL_6(_ir_CTX, type, func, a, b, c, d, e, f)
 #define ir_CALL_N(type, func, count, args)         _ir_CALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_TAILCALL(type, func)                       _ir_TAILCALL(_ir_CTX, type, func)
@@ -522,11 +523,12 @@ extern "C" {
 #define ir_TAILCALL_3(type, func, a1, a2, a3)         _ir_TAILCALL_3(_ir_CTX, type, func, a1, a2, a3)
 #define ir_TAILCALL_4(type, func, a1, a2, a3, a4)     _ir_TAILCALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
 #define ir_TAILCALL_5(type, func, a1, a2, a3, a4, a5) _ir_TAILCALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_TAILCALL_6(type, func, a, b, c, d, e, f)   _ir_TAILCALL_6(_ir_CTX, type, func, a, b, c, d, e, f)
 #define ir_TAILCALL_N(type, func, count, args)        _ir_TAILCALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
 #define ir_AFREE(_size)                   _ir_AFREE(_ir_CTX, (_size))
-#define ir_VADDR(_var)                    ir_emit1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
+#define ir_VADDR(_var)                    ir_fold1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
 #define ir_VLOAD(_type, _var)             _ir_VLOAD(_ir_CTX, (_type), (_var))
 #define ir_VLOAD_B(_var)                  _ir_VLOAD(_ir_CTX, IR_BOOL, (_var))
 #define ir_VLOAD_U8(_var)                 _ir_VLOAD(_ir_CTX, IR_U8, (_var))
@@ -542,6 +544,8 @@ extern "C" {
 #define ir_VLOAD_D(_var)                  _ir_VLOAD(_ir_CTX, IR_DOUBLE, (_var))
 #define ir_VLOAD_F(_var)                  _ir_VLOAD(_ir_CTX, IR_FLOAT, (_var))
 #define ir_VSTORE(_var, _val)             _ir_VSTORE(_ir_CTX, (_var), (_val))
+#define ir_VLOAD_v(_type, _var)           _ir_VLOAD_v(_ir_CTX, (_type), (_var))
+#define ir_VSTORE_v(_var, _val)           _ir_VSTORE_v(_ir_CTX, (_var), (_val))
 #define ir_RLOAD(_type, _reg)             _ir_RLOAD(_ir_CTX, (_type), (_reg))
 #define ir_RLOAD_B(_reg)                  _ir_RLOAD(_ir_CTX, IR_BOOL, (_reg))
 #define ir_RLOAD_U8(_reg)                 _ir_RLOAD(_ir_CTX, IR_U8, (_reg))
@@ -572,6 +576,8 @@ extern "C" {
 #define ir_LOAD_D(_addr)                  _ir_LOAD(_ir_CTX, IR_DOUBLE, (_addr))
 #define ir_LOAD_F(_addr)                  _ir_LOAD(_ir_CTX, IR_FLOAT, (_addr))
 #define ir_STORE(_addr, _val)             _ir_STORE(_ir_CTX, (_addr), (_val))
+#define ir_LOAD_v(_type, _addr)           _ir_LOAD_v(_ir_CTX, (_type), (_addr))
+#define ir_STORE_v(_addr, _val)           _ir_STORE_v(_ir_CTX, (_addr), (_val))
 #define ir_TLS(_index, _offset)           _ir_TLS(_ir_CTX, (_index), (_offset))
 #define ir_TRAP()                         do {_ir_CTX->control = ir_emit1(_ir_CTX, IR_TRAP, _ir_CTX->control);} while (0)
 
@@ -584,6 +590,7 @@ extern "C" {
 #define ir_VA_END(_list)                  _ir_VA_END(_ir_CTX, _list)
 #define ir_VA_COPY(_dst, _src)            _ir_VA_COPY(_ir_CTX, _dst, _src)
 #define ir_VA_ARG(_list, _type)           _ir_VA_ARG(_ir_CTX, _type, _list)
+#define ir_VA_ARG_EX(_list, _type, s, a)  _ir_VA_ARG_EX(_ir_CTX, _type, _list, s, a)
 
 #define ir_START()                        _ir_START(_ir_CTX)
 #define ir_ENTRY(_src, _num)              _ir_ENTRY(_ir_CTX, (_src), (_num))
@@ -601,8 +608,10 @@ extern "C" {
 #define ir_LOOP_END()                     _ir_LOOP_END(_ir_CTX)
 #define ir_SWITCH(_val)                   _ir_SWITCH(_ir_CTX, (_val))
 #define ir_CASE_VAL(_switch, _val)        _ir_CASE_VAL(_ir_CTX, (_switch), (_val))
+#define ir_CASE_RANGE(_switch, _v1, _v2)  _ir_CASE_RANGE(_ir_CTX, (_switch), (_v1), (_v2))
 #define ir_CASE_DEFAULT(_switch)          _ir_CASE_DEFAULT(_ir_CTX, (_switch))
 #define ir_RETURN(_val)                   _ir_RETURN(_ir_CTX, (_val))
+#define ir_IGOTO(_addr)                   _ir_IGOTO(_ir_CTX, (_addr))
 #define ir_IJMP(_addr)                    _ir_IJMP(_ir_CTX, (_addr))
 #define ir_UNREACHABLE()                  _ir_UNREACHABLE(_ir_CTX)
 
@@ -636,6 +645,7 @@ ir_ref _ir_CALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref ar
 ir_ref _ir_CALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 ir_ref _ir_CALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 ir_ref _ir_CALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+ir_ref _ir_CALL_6(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5, ir_ref atg6);
 ir_ref _ir_CALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 void   _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func);
 void   _ir_TAILCALL_1(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1);
@@ -643,19 +653,25 @@ void   _ir_TAILCALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_re
 void   _ir_TAILCALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 void   _ir_TAILCALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 void   _ir_TAILCALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+void   _ir_TAILCALL_6(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5, ir_ref arg6);
 ir_ref _ir_TAILCALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 ir_ref _ir_ALLOCA(ir_ctx *ctx, ir_ref size);
 void   _ir_AFREE(ir_ctx *ctx, ir_ref size);
 ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var);
 void   _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val);
+ir_ref _ir_VLOAD_v(ir_ctx *ctx, ir_type type, ir_ref var);
+void   _ir_VSTORE_v(ir_ctx *ctx, ir_ref var, ir_ref val);
 ir_ref _ir_RLOAD(ir_ctx *ctx, ir_type type, ir_ref reg);
 void   _ir_RSTORE(ir_ctx *ctx, ir_ref reg, ir_ref val);
 ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr);
 void   _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val);
+ir_ref _ir_LOAD_v(ir_ctx *ctx, ir_type type, ir_ref addr);
+void   _ir_STORE_v(ir_ctx *ctx, ir_ref addr, ir_ref val);
 void   _ir_VA_START(ir_ctx *ctx, ir_ref list);
 void   _ir_VA_END(ir_ctx *ctx, ir_ref list);
 void   _ir_VA_COPY(ir_ctx *ctx, ir_ref dst, ir_ref src);
 ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list);
+ir_ref _ir_VA_ARG_EX(ir_ctx *ctx, ir_type type, ir_ref list, size_t size, size_t align);
 void   _ir_START(ir_ctx *ctx);
 void   _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num);
 void   _ir_BEGIN(ir_ctx *ctx, ir_ref src);
@@ -678,8 +694,10 @@ ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset);
 void   _ir_UNREACHABLE(ir_ctx *ctx);
 ir_ref _ir_SWITCH(ir_ctx *ctx, ir_ref val);
 void   _ir_CASE_VAL(ir_ctx *ctx, ir_ref switch_ref, ir_ref val);
+void   _ir_CASE_RANGE(ir_ctx *ctx, ir_ref switch_ref, ir_ref v1, ir_ref v2);
 void   _ir_CASE_DEFAULT(ir_ctx *ctx, ir_ref switch_ref);
 void   _ir_RETURN(ir_ctx *ctx, ir_ref val);
+ir_ref _ir_IGOTO(ir_ctx *ctx, ir_ref addr);
 void   _ir_IJMP(ir_ctx *ctx, ir_ref addr);
 void   _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr);
 void   _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr);

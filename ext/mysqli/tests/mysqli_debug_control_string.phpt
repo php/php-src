@@ -31,7 +31,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
             return false;
         }
 
-        if (!$res = mysqli_query($link, 'SELECT * FROM test')) {
+        if (false === mysqli_query($link, 'SELECT * FROM test')) {
             printf("[%03d][control string '%s'] [%d] %s.\n",
                 $offset + 2,
                 $control_string,

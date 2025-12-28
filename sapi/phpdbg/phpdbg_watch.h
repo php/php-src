@@ -115,9 +115,9 @@ void phpdbg_destroy_watchpoints(void);
 void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
-int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);
+zend_result phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);
 #else
-int phpdbg_watchpoint_segfault_handler(void *addr);
+zend_result phpdbg_watchpoint_segfault_handler(void *addr);
 #endif
 
 void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch);

@@ -8,81 +8,83 @@ if test "$PHP_INTL" != "no"; then
   PHP_SUBST([INTL_SHARED_LIBADD])
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION([intl], m4_normalize([
-      collator/collator_attr.c
-      collator/collator_class.c
-      collator/collator_compare.c
-      collator/collator_convert.c
-      collator/collator_create.c
-      collator/collator_error.c
-      collator/collator_is_numeric.c
-      collator/collator_locale.c
-      collator/collator_sort.c
-      common/common_error.c
-      converter/converter.c
-      dateformat/dateformat_attr.c
-      dateformat/dateformat_class.c
-      dateformat/dateformat_data.c
-      dateformat/dateformat_format.c
-      dateformat/dateformat_parse.c
-      dateformat/dateformat.c
-      formatter/formatter_attr.c
-      formatter/formatter_class.c
-      formatter/formatter_data.c
-      formatter/formatter_format.c
-      formatter/formatter_main.c
-      formatter/formatter_parse.c
-      grapheme/grapheme_string.c
-      grapheme/grapheme_util.c
-      idn/idn.c
       intl_convert.c
       intl_error.c
-      locale/locale_class.c
-      locale/locale_methods.c
-      locale/locale.c
-      msgformat/msgformat_attr.c
-      msgformat/msgformat_class.c
-      msgformat/msgformat_data.c
-      msgformat/msgformat_format.c
-      msgformat/msgformat_parse.c
-      msgformat/msgformat.c
-      normalizer/normalizer_class.c
-      normalizer/normalizer_normalize.c
       php_intl.c
-      resourcebundle/resourcebundle_class.c
-      resourcebundle/resourcebundle_iterator.c
-      resourcebundle/resourcebundle.c
-      spoofchecker/spoofchecker_class.c
-      spoofchecker/spoofchecker_create.c
-      spoofchecker/spoofchecker_main.c
-      transliterator/transliterator_class.c
-      transliterator/transliterator_methods.c
-      uchar/uchar.c
     ]),
     [$ext_shared],,
     [$INTL_COMMON_FLAGS],
     [cxx])
 
   PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
+    collator/collator_attr.cpp \
+    collator/collator_class.cpp \
+    collator/collator_compare.cpp \
+    collator/collator_convert.cpp \
+    collator/collator_create.cpp \
+    collator/collator_error.cpp \
+    collator/collator_is_numeric.cpp \
+    collator/collator_locale.cpp \
+    collator/collator_sort.cpp \
     common/common_enum.cpp \
     common/common_date.cpp \
-    dateformat/dateformat_format_object.cpp \
-    dateformat/dateformat_create.cpp \
+    common/common_error.cpp \
+    dateformat/dateformat_class.cpp \
+    converter/converter.cpp \
+    dateformat/dateformat.cpp \
+    dateformat/dateformat_attr.cpp \
     dateformat/dateformat_attrcpp.cpp \
+    dateformat/dateformat_create.cpp \
+    dateformat/dateformat_data.cpp \
+    dateformat/dateformat_format.cpp \
+    dateformat/dateformat_format_object.cpp \
     dateformat/dateformat_helpers.cpp \
+    dateformat/dateformat_parse.cpp \
     dateformat/datepatterngenerator_class.cpp \
     dateformat/datepatterngenerator_methods.cpp \
+    formatter/formatter_class.cpp \
+    grapheme/grapheme_string.cpp \
+    grapheme/grapheme_util.cpp \
     msgformat/msgformat_helpers.cpp \
+    rangeformatter/rangeformatter_class.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \
     calendar/calendar_class.cpp \
     calendar/calendar_methods.cpp \
     calendar/gregoriancalendar_methods.cpp \
+    formatter/formatter_attr.cpp \
+    formatter/formatter_data.cpp \
+    formatter/formatter_format.cpp \
+    formatter/formatter_main.cpp \
+    formatter/formatter_parse.cpp \
+    msgformat/msgformat_attr.cpp \
+    msgformat/msgformat_class.cpp \
+    msgformat/msgformat_data.cpp \
+    msgformat/msgformat_format.cpp \
+    msgformat/msgformat_parse.cpp \
+    msgformat/msgformat.cpp \
+    normalizer/normalizer_class.cpp \
+    normalizer/normalizer_normalize.cpp \
     breakiterator/breakiterator_class.cpp \
     breakiterator/breakiterator_iterators.cpp \
     breakiterator/breakiterator_methods.cpp \
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
-    breakiterator/codepointiterator_methods.cpp"
+    breakiterator/codepointiterator_methods.cpp \
+    listformatter/listformatter_class.cpp \
+    transliterator/transliterator_class.cpp \
+    transliterator/transliterator_methods.cpp \
+    idn/idn.cpp \
+    locale/locale_class.cpp \
+    locale/locale_methods.cpp \
+    locale/locale.cpp \
+    resourcebundle/resourcebundle_class.cpp \
+    resourcebundle/resourcebundle_iterator.cpp \
+    resourcebundle/resourcebundle.cpp \
+    spoofchecker/spoofchecker_class.cpp \
+    spoofchecker/spoofchecker_create.cpp \
+    spoofchecker/spoofchecker_main.cpp \
+    uchar/uchar.cpp"
 
   PHP_REQUIRE_CXX()
 
@@ -108,7 +110,7 @@ if test "$PHP_INTL" != "no"; then
       [shared_objects_intl],
       [yes])])
 
-  PHP_ADD_BUILD_DIR(m4_normalize([
+  PHP_ADD_BUILD_DIR([
     $ext_builddir/breakiterator
     $ext_builddir/calendar
     $ext_builddir/collator
@@ -119,12 +121,16 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/grapheme
     $ext_builddir/idn
     $ext_builddir/locale
+    $ext_builddir/listformatter
     $ext_builddir/msgformat
     $ext_builddir/normalizer
+    $ext_builddir/rangeformatter
     $ext_builddir/resourcebundle
     $ext_builddir/spoofchecker
     $ext_builddir/timezone
     $ext_builddir/transliterator
     $ext_builddir/uchar
-  ]))
+  ])
+
+  PHP_ADD_EXTENSION_DEP(intl, date)
 fi

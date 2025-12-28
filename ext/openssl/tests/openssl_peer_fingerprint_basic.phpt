@@ -12,14 +12,14 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic.pem.
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'openssl_peer_fingerprint_basic-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
@@ -28,7 +28,7 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $peerName = 'openssl_peer_fingerprint_basic';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer'       => true,
@@ -36,8 +36,6 @@ $clientCode = <<<'CODE'
         'capture_peer_cert' => true,
         'peer_name'         => '%s',
     ]]);
-
-    phpt_wait();
 
     stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '%s');
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
@@ -75,6 +73,6 @@ Warning: stream_socket_client(): peer_fingerprint match failure in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:%d (Unknown error) in %s on line %d
 bool(false)
 resource(%d) of type (stream)

@@ -29,7 +29,7 @@ copy(__DIR__ . '/sni_server_uk_cert.pem', $baseDir . '/sni_server_uk_cert.pem');
 $serverCodeTemplate = <<<'CODE'
     ini_set('log_errors', 'On');
     ini_set('open_basedir',  __DIR__ . '/gh9310');
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -37,13 +37,13 @@ $serverCodeTemplate = <<<'CODE'
     ]]);
 
     $sock = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($sock);
 
     $link = stream_socket_accept($sock);
 CODE;
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
 
     $clientCtx = stream_context_create(['ssl' => [
@@ -51,7 +51,6 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => false
     ]]);
 
-    phpt_wait();
     @stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
 CODE;
 
@@ -65,8 +64,8 @@ $sniServerCodeV1 = <<<'CODE'
         ]
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     stream_socket_accept($server);
 CODE;
@@ -84,8 +83,8 @@ $sniServerCodeV2 = <<<'CODE'
         ]
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     stream_socket_accept($server);
 CODE;
@@ -103,8 +102,8 @@ $sniServerCodeV3 = <<<'CODE'
         ]
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     stream_socket_accept($server);
 CODE;
@@ -115,11 +114,9 @@ $sniClientCodeTemplate = <<<'CODE'
         'cafile' => __DIR__ . '/sni_server_ca.pem',
     ];
 
-    phpt_wait();
-
     $ctxArr['peer_name'] = '%s';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
-    @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
 
 $serverCode = sprintf($serverCodeTemplate, $baseDirCertFile . "\0test", $baseDirPkFile);

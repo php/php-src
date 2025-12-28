@@ -41,9 +41,12 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 	efree(elem); \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem) if ((elem) && !--SPL_LLIST_RC(elem)) { \
+#define SPL_LLIST_CHECK_DELREF_EX(elem, on_free) if ((elem) && !--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
+	on_free \
 }
+
+#define SPL_LLIST_CHECK_DELREF(elem) SPL_LLIST_CHECK_DELREF_EX(elem, ;)
 
 #define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
 #define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
@@ -508,9 +511,7 @@ PHP_METHOD(SplDoublyLinkedList, pop)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_pop(intern->llist, return_value);
@@ -527,9 +528,7 @@ PHP_METHOD(SplDoublyLinkedList, shift)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_shift(intern->llist, return_value);
@@ -547,9 +546,7 @@ PHP_METHOD(SplDoublyLinkedList, top)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	value = spl_ptr_llist_last(intern->llist);
@@ -569,9 +566,7 @@ PHP_METHOD(SplDoublyLinkedList, bottom)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	value  = spl_ptr_llist_first(intern->llist);
@@ -591,9 +586,7 @@ PHP_METHOD(SplDoublyLinkedList, count)
 	zend_long count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	count = spl_ptr_llist_count(intern->llist);
 	RETURN_LONG(count);
@@ -605,9 +598,7 @@ PHP_METHOD(SplDoublyLinkedList, isEmpty)
 {
 	zend_long count;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_object_count_elements(Z_OBJ_P(ZEND_THIS), &count);
 	RETURN_BOOL(count == 0);
@@ -643,9 +634,7 @@ PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -699,7 +688,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 PHP_METHOD(SplDoublyLinkedList, offsetSet)
 {
 	zend_long index;
-	bool index_is_null = 1;
+	bool index_is_null = true;
 	zval *value;
 	spl_dllist_object *intern;
 
@@ -726,8 +715,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 		if (element != NULL) {
 			/* the element is replaced, delref the old one as in
 			 * SplDoublyLinkedList::pop() */
-			zval_ptr_dtor(&element->data);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, &element->data);
 			ZVAL_COPY(&element->data, value);
+			zval_ptr_dtor(&garbage);
 		} else {
 			zval_ptr_dtor(value);
 			zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
@@ -759,7 +750,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		/* connect the neightbors */
+		/* connect the neighbors */
 		if (element->prev) {
 			element->prev->next = element->next;
 		}
@@ -909,9 +900,7 @@ PHP_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->traverse_position);
 }
@@ -922,9 +911,7 @@ PHP_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO);
 }
@@ -935,9 +922,7 @@ PHP_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
@@ -948,9 +933,7 @@ PHP_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
 }
@@ -961,9 +944,7 @@ PHP_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
@@ -975,9 +956,7 @@ PHP_METHOD(SplDoublyLinkedList, current)
 	spl_dllist_object     *intern  = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
@@ -996,9 +975,7 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 	zval                   flags;
 	php_serialize_data_t   var_hash;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
@@ -1011,7 +988,11 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
+		SPL_LLIST_CHECK_ADDREF(next);
+
 		php_var_serialize(&buf, &current->data, &var_hash);
+
+		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 
 		current = next;
 	}
@@ -1090,9 +1071,7 @@ PHP_METHOD(SplDoublyLinkedList, __serialize)
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1196,9 +1175,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 /* {{{ */
 PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_ARR(spl_dllist_object_get_debug_info(Z_OBJ_P(ZEND_THIS)));
 } /* }}} */

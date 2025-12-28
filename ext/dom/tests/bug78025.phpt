@@ -6,9 +6,8 @@ dom
 <?php
 $htm = "<!DOCTYPE><html></html>";
 $dom = new DOMDocument;
-$dom->loadHTML($htm);
+$dom->loadHTML($htm, LIBXML_NOERROR);
 var_dump($dom->doctype->name);
 ?>
 --EXPECTF--
-Warning: DOMDocument::loadHTML(): htmlParseDocTypeDecl : no DOCTYPE name ! in Entity, line: 1 in %s on line %d
 string(0) ""

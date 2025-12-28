@@ -37,10 +37,8 @@ foreach ($interpolations as $name => $interpolation) {
   $t = imagecolorallocatealpha($img, 0, 0, 0, 127);
   $imgr = imagerotate($img, -5, $t);
   $results[$name] = array('x' => imagesx($imgr), 'y' => imagesy($imgr));
-  imagedestroy($imgr);
 }
 
-imagedestroy($img);
 print_r($results);
 ?>
 --EXPECT--

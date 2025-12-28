@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
+#include "internal_helpers.h"
 #include <libxml/parserInternals.h>
 
 static void xpath_callbacks_entry_dtor(zval *zv)
@@ -192,7 +193,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 	if (callable_ht) {
 		zend_string *key;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(callable_ht, key, entry) {
-			zend_fcall_info_cache* fcc = emalloc(sizeof(zend_fcall_info));
+			zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 			char *error;
 			if (!zend_is_callable_ex(entry, NULL, 0, NULL, fcc, &error)) {
 				zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
@@ -205,14 +206,16 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 			ZVAL_PTR(&registered_value, fcc);
 
 			if (!key) {
-				zend_string *str = zval_try_get_string(entry);
+				zend_string *tmp_str;
+				zend_string *str = zval_try_get_tmp_string(entry, &tmp_str);
 				if (str && php_dom_xpath_is_callback_name_valid_and_throw(str, name_validation, true)) {
 					zend_hash_update(&ns->functions, str, &registered_value);
 					if (register_func) {
 						register_func(ctxt, namespace, str);
 					}
-					zend_string_release_ex(str, false);
+					zend_tmp_string_release(tmp_str);
 				} else {
+					zend_tmp_string_release(tmp_str);
 					zend_fcc_dtor(fcc);
 					efree(fcc);
 					return FAILURE;
@@ -235,7 +238,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 			zend_argument_value_error(1, "must be a valid callback name");
 			return FAILURE;
 		}
-		zend_fcall_info_cache* fcc = emalloc(sizeof(zend_fcall_info));
+		zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 		char *error;
 		zval tmp;
 		ZVAL_STR(&tmp, name);
@@ -263,7 +266,7 @@ static php_dom_xpath_callback_ns *php_dom_xpath_callbacks_ensure_ns(php_dom_xpat
 {
 	if (ns == NULL) {
 		if (!registry->php_ns) {
-			registry->php_ns = emalloc(sizeof(php_dom_xpath_callback_ns));
+			registry->php_ns = emalloc(sizeof(*registry->php_ns));
 			php_dom_xpath_callback_ns_ctor(registry->php_ns);
 		}
 		return registry->php_ns;
@@ -274,7 +277,7 @@ static php_dom_xpath_callback_ns *php_dom_xpath_callbacks_ensure_ns(php_dom_xpat
 		}
 		php_dom_xpath_callback_ns *namespace = zend_hash_find_ptr(registry->namespaces, ns);
 		if (namespace == NULL) {
-			namespace = emalloc(sizeof(php_dom_xpath_callback_ns));
+			namespace = emalloc(sizeof(*namespace));
 			php_dom_xpath_callback_ns_ctor(namespace);
 			zend_hash_add_new_ptr(registry->namespaces, ns, namespace);
 		}
@@ -295,7 +298,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_single_method_handler(
 	}
 
 	php_dom_xpath_callback_ns *namespace = php_dom_xpath_callbacks_ensure_ns(registry, ns);
-	zend_fcall_info_cache* allocated_fcc = emalloc(sizeof(zend_fcall_info));
+	zend_fcall_info_cache* allocated_fcc = emalloc(sizeof(*allocated_fcc));
 	zend_fcc_dup(allocated_fcc, fcc);
 
 	zval registered_value;
@@ -350,7 +353,7 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 								xmlNsPtr original = (xmlNsPtr) node;
 
 								/* Make sure parent dom object exists, so we can take an extra reference. */
-								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+								zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 								php_dom_create_object(nsparent, &parent_zval, intern);
 								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -425,7 +428,8 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	}
 
 	if (Z_TYPE(callback_retval) != IS_UNDEF) {
-		if (Z_TYPE(callback_retval) == IS_OBJECT && instanceof_function(Z_OBJCE(callback_retval), dom_node_class_entry)) {
+		if (Z_TYPE(callback_retval) == IS_OBJECT
+		 && (instanceof_function(Z_OBJCE(callback_retval), dom_get_node_ce(php_dom_follow_spec_node((const xmlNode *) ctxt->context->doc))))) {
 			xmlNode *nodep;
 			dom_object *obj;
 			if (xpath_callbacks->node_list == NULL) {
@@ -439,13 +443,14 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
 		} else if (Z_TYPE(callback_retval) == IS_OBJECT) {
-			zend_type_error("Only objects that are instances of DOMNode can be converted to an XPath expression");
+			zend_type_error("Only objects that are instances of DOM nodes can be converted to an XPath expression");
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
-			zend_string *str = zval_get_string(&callback_retval);
+			zend_string *tmp_str;
+			zend_string *str = zval_get_tmp_string(&callback_retval, &tmp_str);
 			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
-			zend_string_release_ex(str, 0);
+			zend_tmp_string_release(tmp_str);
 		}
 		zval_ptr_dtor(&callback_retval);
 	}

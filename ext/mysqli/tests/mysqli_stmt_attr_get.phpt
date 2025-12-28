@@ -11,9 +11,8 @@ require_once 'skipifconnectfailure.inc';
     require 'table.inc';
 
     $valid_attr = array(
-        "max_length" => MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH,
-        "cursor_type" => MYSQLI_STMT_ATTR_CURSOR_TYPE,
-        "prefetch_rows" => MYSQLI_STMT_ATTR_PREFETCH_ROWS,
+        MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH,
+        MYSQLI_STMT_ATTR_CURSOR_TYPE,
     );
 
     $stmt = mysqli_stmt_init($link);
@@ -25,17 +24,17 @@ require_once 'skipifconnectfailure.inc';
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    foreach ($valid_attr as $k => $attr) {
-        /* This can't happen anymore as it only returns int */
-        if (false === ($tmp = mysqli_stmt_attr_get($stmt, $attr))) {
-            printf("[006] Expecting any type, but not boolean/false, got %s/%s for attribute %s/%s\n",
-                gettype($tmp), $tmp, $k, $attr);
+    foreach ($valid_attr as $attr) {
+        try {
+            mysqli_stmt_attr_get($stmt, $attr);
+        } catch (Throwable $exception) {
+            echo $exception->getMessage() . "\n";
         }
     }
 
     $stmt->close();
 
-    foreach ($valid_attr as $k => $attr) {
+    foreach ($valid_attr as $attr) {
         try {
             mysqli_stmt_attr_get($stmt, $attr);
         } catch (Throwable $exception) {
@@ -51,8 +50,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_stmt_attr_get(): Argument #2 ($attribute) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
-mysqli_stmt object is already closed
+mysqli_stmt_attr_get(): Argument #2 ($attribute) must be either MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
 done!

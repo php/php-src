@@ -68,12 +68,12 @@ mysqli
     printf("\nClass variables:\n");
     $variables = array_keys(get_class_vars(get_class($stmt)));
     sort($variables);
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nObject variables:\n");
     $variables = array_keys(get_object_vars($stmt));
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
 printf("\nMagic, magic properties:\n");

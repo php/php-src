@@ -6,7 +6,6 @@ zend_test
 --FILE--
 <?php
 
-require_once 'utils.inc';
 $h = <<<'EOD'
 void (*bug_gh9090_void_none_ptr)();
 void (*bug_gh9090_void_int_char_ptr)(int, char *);
@@ -19,15 +18,7 @@ void bug_gh9090_void_int_char(int i, char *s);
 void bug_gh9090_void_int_char_var(int i, char *fmt, ...);
 EOD;
 
-if (PHP_OS_FAMILY !== 'Windows') {
-    $ffi = FFI::cdef($h);
-} else {
-    try {
-        $ffi = FFI::cdef($h, 'php_zend_test.dll');
-    } catch (FFI\Exception $ex) {
-        $ffi = FFI::cdef($h, ffi_get_php_dll_name());
-    }
-}
+$ffi = FFI::cdef($h);
 
 $func_ptrs = [
     'bug_gh9090_void_none_ptr',

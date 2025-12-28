@@ -72,22 +72,21 @@ U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 
 U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
-	zval		*zv_timezone	= NULL;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 	char	        *locale_str	= NULL;
 	size_t		locale_len      = 0;
-	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(zv_timezone)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
-		"intlcal_create_instance");
-	if (timeZone == NULL) {
+	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+	if (timeZone == nullptr) {
 		RETURN_NULL();
 	}
 
@@ -99,7 +98,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 		Locale::createFromName(locale_str), status);
 	if (UNEXPECTED(cal == NULL)) {
 		delete timeZone;
-		intl_error_set(NULL, status, "Error creating ICU Calendar object", 0);
+		intl_error_set(NULL, status, "Error creating ICU Calendar object");
 		RETURN_NULL();
 	}
 
@@ -179,8 +178,8 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 		Locale::createFromName(locale), (UBool)commonly_used,
 		status);
 	if (se == NULL) {
-		intl_error_set(NULL, status, "intlcal_get_keyword_values_for_locale: "
-			"error calling underlying method", 0);
+		intl_error_set(NULL, status,
+			"error calling underlying method");
 		RETURN_FALSE;
 	}
 
@@ -252,8 +251,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	UDate result = co->ucal->getTime(CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_time: error calling ICU Calendar::getTime");
+	INTL_METHOD_CHECK_STATUS(co, "error calling ICU Calendar::getTime");
 
 	RETURN_DOUBLE((double)result);
 }
@@ -293,31 +291,33 @@ U_CFUNC PHP_FUNCTION(intlcal_add)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	co->ucal->add((UCalendarDateFields)field, (int32_t)amount, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_add: Call to underlying method failed");
+	INTL_METHOD_CHECK_STATUS(co, "Call to underlying method failed");
 
 	RETURN_TRUE;
 }
 
+/* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 {
-	zval			*zv_timezone;
-	TimeZone		*timeZone;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
 	CALENDAR_METHOD_INIT_VARS;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Oz!", &object, Calendar_ce_ptr, &zv_timezone) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(object, Calendar_ce_ptr)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (zv_timezone == NULL) {
+	if (timezone_object == nullptr && timezone_string == nullptr) {
 		RETURN_TRUE; /* the method does nothing if passed null */
 	}
 
-	timeZone = timezone_process_timezone_argument(zv_timezone,
-			CALENDAR_ERROR_P(co), "intlcal_set_time_zone");
-	if (timeZone == NULL) {
+	TimeZone *timeZone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}
 
@@ -326,6 +326,34 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	RETURN_TRUE;
 }
 
+U_CFUNC PHP_METHOD(IntlCalendar, setTimeZone)
+{
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
+	CALENDAR_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object = ZEND_THIS;
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	if (timezone_object == nullptr && timezone_string == nullptr) {
+		RETURN_TRUE; /* the method does nothing if passed null */
+	}
+
+	TimeZone *timeZone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+	if (timeZone == nullptr) {
+		RETURN_FALSE;
+	}
+
+	co->ucal->adoptTimeZone(timeZone);
+
+	RETURN_TRUE;
+}
 
 static void _php_intlcal_before_after(
 		UBool (Calendar::*func)(const Calendar&, UErrorCode&) const,
@@ -350,7 +378,7 @@ static void _php_intlcal_before_after(
 	}
 
 	UBool res = (co->ucal->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_before/after: Error calling ICU method");
+	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
 	RETURN_BOOL((int)res);
 }
@@ -490,7 +518,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 
 	co->ucal->roll((UCalendarDateFields)field, (int32_t)value, CALENDAR_ERROR_CODE(co));
 
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_roll: Error calling ICU Calendar::roll");
+	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU Calendar::roll");
 
 	RETURN_TRUE;
 }
@@ -536,8 +564,7 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 
 	int32_t result = co->ucal->fieldDifference((UDate)when,
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_field_difference: Call to ICU method has failed");
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
 }
@@ -570,8 +597,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 
 	int32_t result = co->ucal->getDayOfWeekType(
 		(UCalendarDaysOfWeek)dow, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_day_of_week_type: Call to ICU method has failed");
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
 }
@@ -588,8 +614,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	int32_t result = co->ucal->getFirstDayOfWeek(CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_first_day_of_week: Call to ICU method has failed");
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
 }
@@ -647,8 +672,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 
 	Locale locale = co->ucal->getLocale((ULocDataLocaleType)locale_type,
 		CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_locale: Call to ICU method has failed");
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_STRING(locale.getName());
 }
@@ -671,8 +695,8 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	uint8_t result = co->ucal->getMinimalDaysInFirstWeek();
-	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_first_day_of_week: Call to ICU method has failed"); /* TODO Is it really a failure? */
+	/* TODO Is it really a failure? */
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
 }
@@ -697,7 +721,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 	TimeZone *tz = co->ucal->getTimeZone().clone();
 	if (UNEXPECTED(tz == NULL)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_MEMORY_ALLOCATION_ERROR,
-			"intlcal_get_time_zone: could not clone TimeZone", 0);
+			"could not clone TimeZone");
 		RETURN_FALSE;
 	}
 
@@ -734,8 +758,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 
 	int32_t res = co->ucal->getWeekendTransition((UCalendarDaysOfWeek)dow,
 		CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_get_weekend_transition: "
-		"Error calling ICU method");
+	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
 	RETURN_LONG((zend_long)res);
 }
@@ -752,8 +775,7 @@ U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	UBool ret = co->ucal->inDaylightTime(CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_in_daylight_time: "
-		"Error calling ICU method");
+	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
 	RETURN_BOOL((int)ret);
 }
@@ -829,8 +851,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 		RETURN_BOOL((int)co->ucal->isWeekend());
 	} else {
 		UBool ret = co->ucal->isWeekend((UDate)date, CALENDAR_ERROR_CODE(co));
-		INTL_METHOD_CHECK_STATUS(co, "intlcal_is_weekend: "
-			"Error calling ICU method");
+		INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 		RETURN_BOOL((int)ret);
 	}
 }
@@ -915,7 +936,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	}
 
 	UBool result = co->ucal->equals(*other_co->ucal, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlcal_equals: error calling ICU Calendar::equals");
+	INTL_METHOD_CHECK_STATUS(co, "error calling ICU Calendar::equals");
 
 	RETURN_BOOL((int)result);
 }
@@ -1028,16 +1049,14 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	datetime = php_date_obj_from_obj(date_obj);
 	if (!datetime->time) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_from_date_time: DateTime object is unconstructed",
-			0);
+			"DateTime object is unconstructed");
 		goto error;
 	}
 
 	zend_call_method_with_0_params(date_obj, php_date_get_date_ce(), NULL, "gettimestamp", &zv_timestamp);
 	if (Z_TYPE(zv_timestamp) != IS_LONG) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_from_date_time: bad DateTime; call to "
-			"DateTime::getTimestamp() failed", 0);
+			"bad DateTime; call to DateTime::getTimestamp() failed");
 		zval_ptr_dtor(&zv_timestamp);
 		goto error;
 	}
@@ -1046,7 +1065,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		timeZone = TimeZone::getGMT()->clone();
 	} else {
 		timeZone = timezone_convert_datetimezone(datetime->time->zone_type,
-			datetime, 1, NULL, "intlcal_from_date_time");
+			datetime, 1, NULL);
 		if (timeZone == NULL) {
 			goto error;
 		}
@@ -1060,16 +1079,16 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		Locale::createFromName(locale_str), status);
 	if (UNEXPECTED(cal == NULL)) {
 		delete timeZone;
-		intl_error_set(NULL, status, "intlcal_from_date_time: "
-				"error creating ICU Calendar object", 0);
+		intl_error_set(NULL, status,
+			"error creating ICU Calendar object");
 		goto error;
 	}
 	cal->setTime(((UDate)Z_LVAL(zv_timestamp)) * 1000., status);
     if (U_FAILURE(status)) {
 		/* time zone was adopted by cal; should not be deleted here */
 		delete cal;
-		intl_error_set(NULL, status, "intlcal_from_date_time: "
-				"error creating ICU Calendar::setTime()", 0);
+		intl_error_set(NULL, status,
+				"error creating ICU Calendar::setTime()");
         goto error;
     }
 
@@ -1105,8 +1124,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	if (UNEXPECTED(date > (double)U_INT64_MAX || date < (double)U_INT64_MIN)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_to_date_time: The calendar date is out of the "
-			"range for a 64-bit integer", 0);
+			"The calendar date is out of the range for a 64-bit integer");
 		RETURN_FALSE;
 	}
 
@@ -1119,7 +1137,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	/* Now get the time zone */
 	const TimeZone& tz = co->ucal->getTimeZone();
 	zval *timezone_zval = timezone_convert_to_datetimezone(
-		&tz, CALENDAR_ERROR_P(co), "intlcal_to_date_time", &tmp);
+		&tz, CALENDAR_ERROR_P(co), &tmp);
 	if (timezone_zval == NULL) {
 		zval_ptr_dtor(&ts_zval);
 		RETURN_FALSE;
@@ -1146,8 +1164,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 			&retval, timezone_zval);
 	if (Z_ISUNDEF(retval) || Z_TYPE(retval) == IS_FALSE) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_to_date_time: call to DateTime::setTimeZone has failed",
-			1);
+			"call to DateTime::setTimeZone has failed");
 		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 		goto error;

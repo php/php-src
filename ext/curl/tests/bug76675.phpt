@@ -42,7 +42,6 @@ do {
             if ($handle !== null) {
                 $transfers--;
                 curl_multi_remove_handle($mh, $handle);
-                curl_close($handle);
             }
         }
     } while ($info);

@@ -25,12 +25,14 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_weakrefs.h"
+#include "zend_lazy_objects.h"
 
 static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT;
 	object->ce = ce;
+	object->extra_flags = 0;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
 	zend_objects_store_put(object);
@@ -46,14 +48,8 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 	_zend_object_std_init(object, ce);
 }
 
-ZEND_API void zend_object_std_dtor(zend_object *object)
+void zend_object_dtor_dynamic_properties(zend_object *object)
 {
-	zval *p, *end;
-
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
-		zend_weakrefs_notify(object);
-	}
-
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
 			if (EXPECTED(GC_DELREF(object->properties) == 0)
@@ -62,20 +58,41 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			}
 		}
 	}
+}
+
+void zend_object_dtor_property(zend_object *object, zval *p)
+{
+	if (Z_REFCOUNTED_P(p)) {
+		if (UNEXPECTED(Z_ISREF_P(p)) &&
+				(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
+			zend_property_info *prop_info = zend_get_property_info_for_slot_self(object, p);
+			if (ZEND_TYPE_IS_SET(prop_info->type)) {
+				ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+			}
+		}
+		i_zval_ptr_dtor(p);
+	}
+}
+
+ZEND_API void zend_object_std_dtor(zend_object *object)
+{
+	zval *p, *end;
+
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
+	}
+
+	if (UNEXPECTED(zend_object_is_lazy(object))) {
+		zend_lazy_object_del_info(object);
+	}
+
+	zend_object_dtor_dynamic_properties(object);
+
 	p = object->properties_table;
 	if (EXPECTED(object->ce->default_properties_count)) {
 		end = p + object->ce->default_properties_count;
 		do {
-			if (Z_REFCOUNTED_P(p)) {
-				if (UNEXPECTED(Z_ISREF_P(p)) &&
-						(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
-					zend_property_info *prop_info = zend_get_property_info_for_slot(object, p);
-					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-					}
-				}
-				i_zval_ptr_dtor(p);
-			}
+			zend_object_dtor_property(object, p);
 			p++;
 		} while (p != end);
 	}
@@ -99,52 +116,32 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
+		if (UNEXPECTED(zend_object_is_lazy(object))) {
+			return;
+		}
+
 		zend_object *old_exception;
-		const zend_op *old_opline_before_exception;
+		const zend_op *old_opline_before_exception = NULL;
 
-		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-				/* Ensure that if we're calling a private function, we're allowed to do so.
-				 */
-				if (EG(current_execute_data)) {
-					zend_class_entry *scope = zend_get_executed_scope();
-
-					if (object->ce != scope) {
-						zend_throw_error(NULL,
-							"Call to private %s::__destruct() from %s%s",
-							ZSTR_VAL(object->ce->name),
-							scope ? "scope " : "global scope",
-							scope ? ZSTR_VAL(scope->name) : ""
-						);
-						return;
-					}
-				} else {
-					zend_error(E_WARNING,
-						"Call to private %s::__destruct() from global scope during shutdown ignored",
-						ZSTR_VAL(object->ce->name));
+		if (destructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+			if (EG(current_execute_data)) {
+				zend_class_entry *scope = zend_get_executed_scope();
+				/* Ensure that if we're calling a protected or private function, we're allowed to do so. */
+				ZEND_ASSERT(!(destructor->common.fn_flags & ZEND_ACC_PUBLIC));
+				if (!zend_check_method_accessible(destructor, scope)) {
+					zend_throw_error(NULL,
+						"Call to %s %s::__destruct() from %s%s",
+						zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name),
+						scope ? "scope " : "global scope",
+						scope ? ZSTR_VAL(scope->name) : ""
+					);
 					return;
 				}
 			} else {
-				/* Ensure that if we're calling a protected function, we're allowed to do so.
-				 */
-				if (EG(current_execute_data)) {
-					zend_class_entry *scope = zend_get_executed_scope();
-
-					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
-						zend_throw_error(NULL,
-							"Call to protected %s::__destruct() from %s%s",
-							ZSTR_VAL(object->ce->name),
-							scope ? "scope " : "global scope",
-							scope ? ZSTR_VAL(scope->name) : ""
-						);
-						return;
-					}
-				} else {
-					zend_error(E_WARNING,
-						"Call to protected %s::__destruct() from global scope during shutdown ignored",
-						ZSTR_VAL(object->ce->name));
-					return;
-				}
+				zend_error(E_WARNING,
+					"Call to %s %s::__destruct() from global scope during shutdown ignored",
+					zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name));
+				return;
 			}
 		}
 
@@ -159,13 +156,15 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			if (EG(exception) == object) {
 				zend_error_noreturn(E_CORE_ERROR, "Attempt to destruct pending exception");
 			} else {
-				if (EG(current_execute_data)
-				 && EG(current_execute_data)->func
-				 && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
-					zend_rethrow_exception(EG(current_execute_data));
+				if (EG(current_execute_data)) {
+					if (EG(current_execute_data)->func
+					 && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+						zend_rethrow_exception(EG(current_execute_data));
+					}
+					EG(current_execute_data)->opline = EG(opline_before_exception);
+					old_opline_before_exception = EG(opline_before_exception);
 				}
 				old_exception = EG(exception);
-				old_opline_before_exception = EG(opline_before_exception);
 				EG(exception) = NULL;
 			}
 		}
@@ -173,7 +172,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		zend_call_known_instance_method_with_0_params(destructor, object, NULL);
 
 		if (old_exception) {
-			EG(opline_before_exception) = old_opline_before_exception;
+			if (EG(current_execute_data)) {
+				EG(current_execute_data)->opline = EG(exception_op);
+				EG(opline_before_exception) = old_opline_before_exception;
+			}
 			if (EG(exception)) {
 				zend_exception_set_previous(EG(exception), old_exception);
 			} else {
@@ -212,7 +214,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
-				zend_property_info *prop_info = zend_get_property_info_for_slot(new_object, dst);
+				zend_property_info *prop_info = zend_get_property_info_for_slot_self(new_object, dst);
 				if (ZEND_TYPE_IS_SET(prop_info->type)) {
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
 				}
@@ -267,7 +269,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (has_clone_method) {
-		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
@@ -277,14 +278,62 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
 			}
 		}
-
-		OBJ_RELEASE(new_object);
 	}
+}
+
+ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const zend_class_entry *scope, const HashTable *properties)
+{
+	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+
+	if (EXPECTED(!EG(exception))) {
+		/* Unlock readonly properties once more. */
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+			}
+		}
+
+		const zend_class_entry *old_scope = EG(fake_scope);
+
+		EG(fake_scope) = scope;
+
+		ZEND_HASH_FOREACH_KEY_VAL(properties, zend_ulong num_key, zend_string *key, zval *val) {
+			if (UNEXPECTED(Z_ISREF_P(val))) {
+				if (Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				} else {
+					zend_throw_error(NULL, "Cannot assign by reference when cloning with updated properties");
+					break;
+				}
+			}
+
+			if (UNEXPECTED(key == NULL)) {
+				key = zend_long_to_str(num_key);
+				new_object->handlers->write_property(new_object, key, val, NULL);
+				zend_string_release_ex(key, false);
+			} else {
+				new_object->handlers->write_property(new_object, key, val, NULL);
+			}
+
+			if (UNEXPECTED(EG(exception))) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		EG(fake_scope) = old_scope;
+	}
+
+	return new_object;
 }
 
 ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 {
 	zend_object *new_object;
+
+	if (UNEXPECTED(zend_object_is_lazy(old_object))) {
+		return zend_lazy_object_clone(old_object);
+	}
 
 	/* assume that create isn't overwritten, so when clone depends on the
 	 * overwritten one then it must itself be overwritten */

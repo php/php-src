@@ -35,7 +35,7 @@ ZEND_TLS const struct php_win32_cp *orig_in_cp = NULL;
 
 #include "cp_enc_map.c"
 
-__forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	wchar_t *ret;
 	int ret_len, tmp_len;
@@ -241,7 +241,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 }/*}}}*/
 #undef ASCII_FAIL_RETURN
 
-__forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	int r;
 	int target_len, tmp_len;
@@ -306,7 +306,7 @@ PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, const wchar_t* in, 
 }/*}}}*/
 
 /* This is only usable after the startup phase*/
-__forceinline static char *php_win32_cp_get_enc(void)
+zend_always_inline static char *php_win32_cp_get_enc(void)
 {/*{{{*/
 	char *enc = NULL;
 	const zend_encoding *zenc;
@@ -610,7 +610,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		cp = php_win32_cp_set_by_id((DWORD)id);
 	}
 	if (!cp) {
-		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
+		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage " ZEND_LONG_FMT, id);
 		RETURN_FALSE;
 	}
 

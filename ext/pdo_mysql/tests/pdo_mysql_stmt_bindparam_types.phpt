@@ -14,9 +14,9 @@ MySQLPDOTest::skip();
 
     function pdo_mysql_stmt_bindparam_types_do($db, $offset, $native, $sql_type, $value) {
             if ($native)
-                $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
+                $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
             else
-                $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
+                $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
 
             $sql = sprintf('CREATE TABLE test_stmt_bindparam_types(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
             if ((!$stmt = $db->prepare($sql)) || (!$stmt->execute()))

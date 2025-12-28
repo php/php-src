@@ -70,14 +70,14 @@ require_once 'skipifconnectfailure.inc';
             return false;
         }
 
-        if (!$mysqli->query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
+        if (!$mysqli->query(sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
                 // don't bail, engine might not support the datatype
                 return false;
         }
 
         if (is_null($php_value)) {
             if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-                printf("[%04d] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
+                printf("[%04d] [%d] %s - %s\n", $offset + 1, $mysqli->errno, $mysqli->error, $sql);
                 return false;
             }
         } else {
@@ -88,7 +88,7 @@ require_once 'skipifconnectfailure.inc';
                 }
             } else {
                 if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
-                    printf("[%04di] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
+                    printf("[%04di] [%d] %s - %s\n", $offset + 1, $mysqli->errno, $mysqli->error, $sql);
                     return false;
                 }
             }
@@ -103,27 +103,25 @@ require_once 'skipifconnectfailure.inc';
             printf("[%04d] [%d] %s\n", $offset + 3, $mysqli->errno, $mysqli->error);
             return false;
         }
-        $fields = mysqli_fetch_fields($res);
 
-        if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
-            if ($regexp_comparison) {
-                if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
-                    printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value, $regexp_comparison,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $mysqli->errno, $mysqli->error);
+        if ($regexp_comparison) {
+            if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
+                printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value, $regexp_comparison,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $mysqli->errno, $mysqli->error);
+                return false;
+            }
+        } else {
+            if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
+                printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $mysqli->errno, $mysqli->error);
                     return false;
-                }
-            } else {
-                if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
-                    printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $mysqli->errno, $mysqli->error);
-                        return false;
-                }
             }
         }
+
         return true;
     }
 

@@ -12,8 +12,12 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -nd max_execution_time=111 -r 'var_dump(ini_get("max_execution_time"));'`);
-var_dump(`$php -nd max_execution_time=500 -r 'var_dump(ini_get("max_execution_time"));'`);
+var_dump(shell_exec(<<<SHELL
+$php -nd max_execution_time=111 -r 'var_dump(ini_get("max_execution_time"));'
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -nd max_execution_time=500 -r 'var_dump(ini_get("max_execution_time"));'
+SHELL));
 
 ?>
 --EXPECT--

@@ -15,6 +15,6 @@ try {
 }
 
 ?>
---EXPECT--
-DatePeriod::__construct(): Recurrence count must be greater than 0
-DatePeriod::__construct(): Recurrence count must be greater than 0
+--EXPECTF--
+DatePeriod::__construct(): Recurrence count must be greater or equal to 1 and lower than %d
+DatePeriod::__construct(): Recurrence count must be greater or equal to 1 and lower than %d

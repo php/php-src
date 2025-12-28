@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed; FIXME but unfortunately is */
+
 #ifndef ZEND_STRTOD_INT_H
 #define ZEND_STRTOD_INT_H
 

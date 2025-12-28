@@ -11,14 +11,14 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'streams_crypto_method.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     $client = @stream_socket_accept($server);
     if ($client) {
@@ -39,7 +39,7 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "https://127.0.0.1:64321/";
+    $serverUri = "https://{{ ADDR }}/";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
@@ -47,7 +47,6 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => false
     ]]);
 
-    phpt_wait();
     echo file_get_contents($serverUri, false, $clientCtx);
 CODE;
 

@@ -15,8 +15,8 @@ if test "$PHP_CURL" != "no"; then
   AC_MSG_RESULT([$CURL_SSL])
 
   AS_IF([test "x$PHP_THREAD_SAFETY" = xyes && test "x$CURL_SSL" = xyes],
-    [AC_CACHE_CHECK([whether libcurl is linked against old OpenSSL < 1.1],
-      [php_cv_lib_curl_ssl], [
+    [AC_CACHE_CHECK([whether libcurl is linked against a supported OpenSSL version],
+      [php_cv_lib_curl_ssl_supported], [
       save_LIBS=$LIBS
       save_CFLAGS=$CFLAGS
       LIBS="$LIBS $CURL_SHARED_LIBADD"
@@ -34,17 +34,14 @@ if test "$PHP_CURL" != "no"; then
 
     while(*ptr == ' ') ++ptr;
     int major, minor;
-    if (sscanf(ptr, "OpenSSL/%d", &major) == 1) {
-      if (major >= 3) {
-        /* OpenSSL version 3 or later */
-        return 4;
-      }
-    }
     if (sscanf(ptr, "OpenSSL/%d.%d", &major, &minor) == 2) {
-      if (major > 1 || (major == 1 && minor >= 1)) {
-        /* OpenSSL version 1.1 or later */
+      /* Check for 1.1.1+ (including 1.1.1a, 1.1.1b, etc.) */
+      if ((major > 1) || (major == 1 && minor == 1 && strncmp(ptr + 12, "1", 1) == 0)) {
+        /* OpenSSL 1.1.1+ - supported */
         return 3;
       }
+      /* OpenSSL 1.1.0 and earlier - unsupported */
+      return 0;
     }
     if (strncasecmp(ptr, "OpenSSL", sizeof("OpenSSL")-1) == 0) {
       /* Old OpenSSL version */
@@ -56,18 +53,15 @@ if test "$PHP_CURL" != "no"; then
   /* No SSL support */
   return 1;
 ])],
-      [php_cv_lib_curl_ssl=yes],
-      [php_cv_lib_curl_ssl=no],
-      [php_cv_lib_curl_ssl=no])
+      [php_cv_lib_curl_ssl_supported=no],
+      [php_cv_lib_curl_ssl_supported=yes],
+      [php_cv_lib_curl_ssl_supported=yes])
       LIBS=$save_LIBS
       CFLAGS=$save_CFLAGS
     ])
 
-    AS_VAR_IF([php_cv_lib_curl_ssl], [yes], [
-      AC_DEFINE([HAVE_CURL_OLD_OPENSSL], [1],
-        [Define to 1 if libcurl is linked against old OpenSSL < 1.1.])
-      PHP_SETUP_OPENSSL([CURL_SHARED_LIBADD],
-        [AC_CHECK_HEADERS([openssl/crypto.h])])
+    AS_VAR_IF([php_cv_lib_curl_ssl_supported], [no], [
+      AC_MSG_ERROR([libcurl is linked against an unsupported OpenSSL version. OpenSSL 1.1.1 or later is required.])
     ])
   ])
 

@@ -13,8 +13,8 @@ namespace {
     /**
      * @var string
      * @cvalue pgsql_libpq_version
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'as it is the same as PGSQL_LIBPQ_VERSION')]
     const PGSQL_LIBPQ_VERSION_STR = UNKNOWN;
 
     /* For connection option */
@@ -508,6 +508,9 @@ namespace {
      */
     function pg_jit(?PgSql\Connection $connection = null): array {}
 
+#ifdef HAVE_PG_SERVICE
+    function pg_service(?PgSql\Connection $connection = null): string {}
+#endif
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
@@ -847,7 +850,7 @@ namespace {
      */
     function pg_copy_to(PgSql\Connection $connection, string $table_name, string $separator = "\t", string $null_as = "\\\\N"): array|false {}
 
-    function pg_copy_from(PgSql\Connection $connection, string $table_name, array $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
+    function pg_copy_from(PgSql\Connection $connection, string $table_name, array|Traversable $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
 
     /**
      * @param PgSql\Connection|string $connection
@@ -968,7 +971,10 @@ namespace {
     function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
 
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
-    function pg_set_chunked_rows_size(Pgsql\Connection $connection, int $size): bool {}
+    function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
+#endif
+#ifdef HAVE_PG_CLOSE_STMT
+    function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): PgSql\Result|false {}
 #endif
 }
 

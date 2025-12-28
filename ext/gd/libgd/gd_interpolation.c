@@ -62,19 +62,25 @@ TODO:
 #include "gdhelpers.h"
 #include "gd_intern.h"
 
-#ifdef _MSC_VER
-# pragma optimize("t", on)
-# include <emmintrin.h>
-#endif
-
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#endif
-#define MIN3(a,b,c) ((a)<(b)?(MIN(a,c)):(MIN(b,c)))
-#ifndef MAX
-#define MAX(a,b) ((a)<(b)?(b):(a))
-#endif
-#define MAX3(a,b,c) ((a)<(b)?(MAX(b,c)):(MAX(a,c)))
+static gdImagePtr gdImageScaleBilinear(gdImagePtr im,
+                                       const unsigned int new_width,
+                                       const unsigned int new_height);
+static gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src,
+                                           const unsigned int width,
+                                           const unsigned int height);
+static gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im,
+                                               const unsigned int width, const unsigned int height);
+static gdImagePtr gdImageScaleTwoPass(const gdImagePtr pOrigImage,
+                                      const unsigned int uOrigWidth,
+                                      const unsigned int uOrigHeight,
+                                      const unsigned int uNewWidth,
+                                      const unsigned int uNewHeight);
+static gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src,
+                                                const float degrees,
+                                                const int bgColor);
+static gdImagePtr gdImageRotateGeneric(gdImagePtr src,
+                                       const float degrees,
+                                       const int bgColor);
 
 /* only used here, let do a generic fixed point integers later if required by other
    part of GD */
@@ -117,28 +123,29 @@ typedef struct
 } LineContribType;
 
 /* Each core filter has its own radius */
-#define DEFAULT_FILTER_BICUBIC				3.0
-#define DEFAULT_FILTER_BOX					0.5
-#define DEFAULT_FILTER_GENERALIZED_CUBIC	0.5
-#define DEFAULT_FILTER_RADIUS				1.0
-#define DEFAULT_LANCZOS8_RADIUS				8.0
-#define DEFAULT_LANCZOS3_RADIUS				3.0
-#define DEFAULT_HERMITE_RADIUS				1.0
-#define DEFAULT_BOX_RADIUS					0.5
-#define DEFAULT_TRIANGLE_RADIUS				1.0
-#define DEFAULT_BELL_RADIUS					1.5
-#define DEFAULT_CUBICSPLINE_RADIUS			2.0
-#define DEFAULT_MITCHELL_RADIUS				2.0
-#define DEFAULT_COSINE_RADIUS				1.0
-#define DEFAULT_CATMULLROM_RADIUS			2.0
-#define DEFAULT_QUADRATIC_RADIUS			1.5
-#define DEFAULT_QUADRATICBSPLINE_RADIUS		1.5
-#define DEFAULT_CUBICCONVOLUTION_RADIUS		3.0
-#define DEFAULT_GAUSSIAN_RADIUS				1.0
-#define DEFAULT_HANNING_RADIUS				1.0
-#define DEFAULT_HAMMING_RADIUS				1.0
-#define DEFAULT_SINC_RADIUS					1.0
-#define DEFAULT_WELSH_RADIUS				1.0
+#define DEFAULT_FILTER_LINEAR 				1.0f
+#define DEFAULT_FILTER_BICUBIC				3.0f
+#define DEFAULT_FILTER_BOX					0.5f
+#define DEFAULT_FILTER_GENERALIZED_CUBIC	0.5f
+#define DEFAULT_FILTER_RADIUS				1.0f
+#define DEFAULT_LANCZOS8_RADIUS				8.0f
+#define DEFAULT_LANCZOS3_RADIUS				3.0f
+#define DEFAULT_HERMITE_RADIUS				1.0f
+#define DEFAULT_BOX_RADIUS					0.5f
+#define DEFAULT_TRIANGLE_RADIUS				1.0f
+#define DEFAULT_BELL_RADIUS					1.5f
+#define DEFAULT_CUBICSPLINE_RADIUS			2.0f
+#define DEFAULT_MITCHELL_RADIUS				2.0f
+#define DEFAULT_COSINE_RADIUS				1.0f
+#define DEFAULT_CATMULLROM_RADIUS			2.0f
+#define DEFAULT_QUADRATIC_RADIUS			1.5f
+#define DEFAULT_QUADRATICBSPLINE_RADIUS		1.5f
+#define DEFAULT_CUBICCONVOLUTION_RADIUS		3.0f
+#define DEFAULT_GAUSSIAN_RADIUS				1.0f
+#define DEFAULT_HANNING_RADIUS				1.0f
+#define DEFAULT_HAMMING_RADIUS				1.0f
+#define DEFAULT_SINC_RADIUS					1.0f
+#define DEFAULT_WELSH_RADIUS				1.0f
 
 enum GD_RESIZE_FILTER_TYPE{
 	FILTER_DEFAULT          = 0,
@@ -312,6 +319,14 @@ static double filter_bessel(const double x)
 static double filter_blackman(const double x)
 {
 	return (0.42f+0.5f*(double)cos(M_PI*x)+0.08f*(double)cos(2.0f*M_PI*x));
+}
+
+double filter_linear(const double x) {
+	double ax = fabs(x);
+	if (ax < 1.0f) {
+		return (1.0f - ax);
+	}
+	return 0.0f;
 }
 
 /**
@@ -614,6 +629,9 @@ static double filter_welsh(const double x)
 }
 #endif
 
+
+/* keep it for future usage for affine copy over an existing image, targetting fix for 2.2.2 */
+#if 0 
 /* Copied from upstream's libgd */
 static inline int _color_blend (const int dst, const int src)
 {
@@ -646,6 +664,7 @@ static inline int _color_blend (const int dst, const int src)
 		}
 	}
 }
+#endif
 
 static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, const int bgColor)
 {
@@ -738,8 +757,8 @@ static int getPixelInterpolateWeight(gdImagePtr im, const double x, const double
  */
 int getPixelInterpolated(gdImagePtr im, const double x, const double y, const int bgColor)
 {
-	const int xi=(int)((x) < 0 ? x - 1: x);
-	const int yi=(int)((y) < 0 ? y - 1: y);
+	const int xi=(int)(x);
+	const int yi=(int)(y);
 	int yii;
 	int i;
 	double kernel, kernel_cache_y;
@@ -747,7 +766,7 @@ int getPixelInterpolated(gdImagePtr im, const double x, const double y, const in
 	double new_r = 0.0f, new_g = 0.0f, new_b = 0.0f, new_a = 0.0f;
 
 	/* These methods use special implementations */
-	if (im->interpolation_id == GD_BILINEAR_FIXED || im->interpolation_id == GD_BICUBIC_FIXED || im->interpolation_id == GD_NEAREST_NEIGHBOUR) {
+	if (im->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		return -1;
 	}
 
@@ -919,6 +938,32 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	return res;
 }
 
+/* Convert a double to an unsigned char, rounding to the nearest
+ * integer and clamping the result between 0 and max.  The absolute
+ * value of clr must be less than the maximum value of an unsigned
+ * short. */
+static inline unsigned char
+uchar_clamp(double clr, unsigned char max) {
+	unsigned short result;
+
+	//assert(fabs(clr) <= SHRT_MAX);
+
+	/* Casting a negative float to an unsigned short is undefined.
+	 * However, casting a float to a signed truncates toward zero and
+	 * casting a negative signed value to an unsigned of the same size
+	 * results in a bit-identical value (assuming twos-complement
+	 * arithmetic).	 This is what we want: all legal negative values
+	 * for clr will be greater than 255. */
+
+	/* Convert and clamp. */
+	result = (unsigned short)(short)(clr + 0.5);
+	if (result > max) {
+		result = (clr < 0) ? 0 : max;
+	}/* if */
+
+	return result;
+}/* uchar_clamp*/
+
 static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImagePtr dst, unsigned int dst_width, unsigned int row, LineContribType *contrib)
 {
     int *p_src_row = pSrc->tpixels[row];
@@ -926,20 +971,22 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 	unsigned int x;
 
     for (x = 0; x < dst_width; x++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+	    double r = 0, g = 0, b = 0, a = 0;
         const int left = contrib->ContribRow[x].Left;
         const int right = contrib->ContribRow[x].Right;
-		int i;
+	int i;
 
-		/* Accumulate each channel */
-        for (i = left; i <= right; i++) {
-			const int left_channel = i - left;
-            r += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i])));
-            g += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i])));
-            b += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i])));
-			a += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i])));
-        }
-        p_dst_row[x] = gdTrueColorAlpha(r, g, b, a);
+	/* Accumulate each channel */
+	for (i = left; i <= right; i++) {
+		const int left_channel = i - left;
+		r += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i]));
+		g += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i]));
+		b += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i]));
+		a += contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetAlpha(p_src_row[i]));
+	}
+	p_dst_row[x] = gdTrueColorAlpha(uchar_clamp(r, 0xFF), uchar_clamp(g, 0xFF),
+									uchar_clamp(b, 0xFF),
+									uchar_clamp(a, 0x7F)); /* alpha is 0..127 */
     }
 }
 
@@ -972,7 +1019,7 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 {
 	unsigned int y;
 	for (y = 0; y < dst_height; y++) {
-		register unsigned char r = 0, g = 0, b = 0, a = 0;
+		double r = 0, g = 0, b = 0, a = 0;
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
 		int i;
@@ -981,12 +1028,14 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 		for (i = iLeft; i <= iRight; i++) {
 			const int pCurSrc = pSrc->tpixels[i][uCol];
 			const int i_iLeft = i - iLeft;
-			r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
-			g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
-			b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
-			a += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc)));
+			r += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc));
+			g += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc));
+			b += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc));
+			a += contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc));
 		}
-		pRes->tpixels[y][uCol] = gdTrueColorAlpha(r, g, b, a);
+		pRes->tpixels[y][uCol] = gdTrueColorAlpha(uchar_clamp(r, 0xFF), uchar_clamp(g, 0xFF),
+												  uchar_clamp(b, 0xFF),
+												  uchar_clamp(a, 0x7F)); /* alpha is 0..127 */
 	}
 }
 
@@ -1015,15 +1064,12 @@ static inline int _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_wi
 	return 1;
 }
 
-gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
+static gdImagePtr
+gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
 {
 	gdImagePtr tmp_im;
 	gdImagePtr dst;
 	int scale_pass_res;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	/* Convert to truecolor if it isn't; this code requires it. */
 	if (!src->trueColor) {
@@ -1064,7 +1110,8 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 	Integer only implementation, good to have for common usages like pre scale very large
 	images before using another interpolation methods for the last step.
 */
-gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height)
+static gdImagePtr
+gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height)
 {
 	const unsigned long new_width = MAX(1, width);
 	const unsigned long new_height = MAX(1, height);
@@ -1077,10 +1124,6 @@ gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width,
 	unsigned long  dst_offset_x;
 	unsigned long  dst_offset_y = 0;
 	unsigned int i;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	dst_img = gdImageCreateTrueColor(new_width, new_height);
 
@@ -1134,10 +1177,6 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
 	long i;
 	gdImagePtr new_img;
 	const int transparent = im->transparent;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (new_img == NULL) {
@@ -1236,10 +1275,6 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	long i;
 	gdImagePtr new_img;
 
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
-
 	new_img = gdImageCreateTrueColor(new_width, new_height);
 	if (!new_img){
 		return NULL;
@@ -1310,7 +1345,8 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	return new_img;
 }
 
-gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
+static gdImagePtr
+gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
 {
 	if (im->trueColor) {
 		return gdImageScaleBilinearTC(im, new_width, new_height);
@@ -1319,7 +1355,8 @@ gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, con
 	}
 }
 
-gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height)
+static gdImagePtr
+gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height)
 {
 	const long new_width = MAX(1, width);
 	const long new_height = MAX(1, height);
@@ -1337,10 +1374,6 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
 	unsigned int dst_offset_x;
 	unsigned int dst_offset_y = 0;
 	long i;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	/* impact perf a bit, but not that much. Implementation for palette
 	   images can be done at a later point.
@@ -1556,6 +1589,9 @@ gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, cons
 		return NULL;
 	}
 
+	if (new_width == gdImageSX(src) && new_height == gdImageSY(src)) {
+		return gdImageClone(src);
+	}
 	switch (src->interpolation_id) {
 		/*Special cases, optimized implementations */
 		case GD_NEAREST_NEIGHBOUR:
@@ -1563,10 +1599,12 @@ gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, cons
 			break;
 
 		case GD_BILINEAR_FIXED:
+		case GD_LINEAR:
 			im_scaled = gdImageScaleBilinear(src, new_width, new_height);
 			break;
 
 		case GD_BICUBIC_FIXED:
+		case GD_BICUBIC:
 			im_scaled = gdImageScaleBicubicFixed(src, new_width, new_height);
 			break;
 
@@ -1598,7 +1636,8 @@ static int gdRotatedImageSize(gdImagePtr src, const float angle, gdRectPtr bbox)
     return GD_TRUE;
 }
 
-gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
 	const int src_w  = gdImageSX(src);
@@ -1619,10 +1658,6 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
     gdRotatedImageSize(src, degrees, &bbox);
     new_width = bbox.width;
     new_height = bbox.height;
-
-	if (new_width == 0 || new_height == 0) {
-		return NULL;
-	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {
@@ -1655,7 +1690,8 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	return dst;
 }
 
-gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
+static gdImagePtr
+gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
 	const int src_w  = gdImageSX(src);
@@ -1673,15 +1709,12 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	int new_width, new_height;
 	gdRect bbox;
 
-	const gdFixed f_slop_y = f_sin;
-	const gdFixed f_slop_x = f_cos;
-	const gdFixed f_slop = f_slop_x > 0 && f_slop_y > 0 ?
-							(f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y))
-						: 0;
-
-
 	if (bgColor < 0) {
 		return NULL;
+	}
+
+	if (src->interpolation == NULL) {
+		gdImageSetInterpolationMethod(src, GD_DEFAULT);
 	}
 
     gdRotatedImageSize(src, degrees, &bbox);
@@ -1705,398 +1738,12 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			long m = gd_fxtoi(f_m);
 			long n = gd_fxtoi(f_n);
 
-			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
+			if (m < -1 || n < -1 || m >= src_h || n >= src_w ) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
-			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				register int c = getPixelInterpolated(src, n, m, bgColor);
-				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
-
-				dst->tpixels[dst_offset_y][dst_offset_x++] = _color_blend(bgColor, c);
 			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, n, m, bgColor);
+				dst->tpixels[dst_offset_y][dst_offset_x++] = getPixelInterpolated(src, gd_fxtod(f_n), gd_fxtod(f_m), bgColor);
 			}
 		}
-		dst_offset_y++;
-	}
-	return dst;
-}
-
-gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor)
-{
-	float _angle = (float)((- degrees / 180.0f) * M_PI);
-	const unsigned int src_w = gdImageSX(src);
-	const unsigned int src_h = gdImageSY(src);
-	unsigned int new_width, new_height;
-	const gdFixed f_0_5 = gd_ftofx(0.5f);
-	const gdFixed f_H = gd_itofx(src_h/2);
-	const gdFixed f_W = gd_itofx(src_w/2);
-	const gdFixed f_cos = gd_ftofx(cos(-_angle));
-	const gdFixed f_sin = gd_ftofx(sin(-_angle));
-	const gdFixed f_1 = gd_itofx(1);
-	unsigned int i;
-	unsigned int dst_offset_x;
-	unsigned int dst_offset_y = 0;
-	unsigned int src_offset_x, src_offset_y;
-	gdImagePtr dst;
-	gdRect bbox;
-
-	gdRotatedImageSize(src, degrees, &bbox);
-
-	new_width = bbox.width;
-	new_height = bbox.height;
-
-	dst = gdImageCreateTrueColor(new_width, new_height);
-	if (dst == NULL) {
-		return NULL;
-	}
-	dst->saveAlphaFlag = 1;
-
-	for (i = 0; i < new_height; i++) {
-		unsigned int j;
-		dst_offset_x = 0;
-
-		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
-			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
-			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
-			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
-			const int m = gd_fxtoi(f_m);
-			const int n = gd_fxtoi(f_n);
-
-			if ((m >= 0) && (m < src_h - 1) && (n >= 0) && (n < src_w - 1)) {
-				const gdFixed f_f = f_m - gd_itofx(m);
-				const gdFixed f_g = f_n - gd_itofx(n);
-				const gdFixed f_w1 = gd_mulfx(f_1-f_f, f_1-f_g);
-				const gdFixed f_w2 = gd_mulfx(f_1-f_f, f_g);
-				const gdFixed f_w3 = gd_mulfx(f_f, f_1-f_g);
-				const gdFixed f_w4 = gd_mulfx(f_f, f_g);
-
-				if (m < src_h-1) {
-					src_offset_x = n;
-					src_offset_y = m + 1;
-				}
-
-				if (!((n >= src_w-1) || (m >= src_h-1))) {
-					src_offset_x = n + 1;
-					src_offset_y = m + 1;
-				}
-				{
-					const int pixel1 = src->tpixels[src_offset_y][src_offset_x];
-					register int pixel2, pixel3, pixel4;
-
-					if (src_offset_y + 1 >= src_h) {
-						pixel2 = pixel1;
-						pixel3 = pixel1;
-						pixel4 = pixel1;
-					} else if (src_offset_x + 1 >= src_w) {
-						pixel2 = pixel1;
-						pixel3 = pixel1;
-						pixel4 = pixel1;
-					} else {
-					    pixel2 = src->tpixels[src_offset_y][src_offset_x + 1];
-						pixel3 = src->tpixels[src_offset_y + 1][src_offset_x];
-						pixel4 = src->tpixels[src_offset_y + 1][src_offset_x + 1];
-					}
-					{
-						const gdFixed f_r1 = gd_itofx(gdTrueColorGetRed(pixel1));
-						const gdFixed f_r2 = gd_itofx(gdTrueColorGetRed(pixel2));
-						const gdFixed f_r3 = gd_itofx(gdTrueColorGetRed(pixel3));
-						const gdFixed f_r4 = gd_itofx(gdTrueColorGetRed(pixel4));
-						const gdFixed f_g1 = gd_itofx(gdTrueColorGetGreen(pixel1));
-						const gdFixed f_g2 = gd_itofx(gdTrueColorGetGreen(pixel2));
-						const gdFixed f_g3 = gd_itofx(gdTrueColorGetGreen(pixel3));
-						const gdFixed f_g4 = gd_itofx(gdTrueColorGetGreen(pixel4));
-						const gdFixed f_b1 = gd_itofx(gdTrueColorGetBlue(pixel1));
-						const gdFixed f_b2 = gd_itofx(gdTrueColorGetBlue(pixel2));
-						const gdFixed f_b3 = gd_itofx(gdTrueColorGetBlue(pixel3));
-						const gdFixed f_b4 = gd_itofx(gdTrueColorGetBlue(pixel4));
-						const gdFixed f_a1 = gd_itofx(gdTrueColorGetAlpha(pixel1));
-						const gdFixed f_a2 = gd_itofx(gdTrueColorGetAlpha(pixel2));
-						const gdFixed f_a3 = gd_itofx(gdTrueColorGetAlpha(pixel3));
-						const gdFixed f_a4 = gd_itofx(gdTrueColorGetAlpha(pixel4));
-						const gdFixed f_red = gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4);
-						const gdFixed f_green = gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4);
-						const gdFixed f_blue = gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4);
-						const gdFixed f_alpha = gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4);
-
-						const unsigned char red   = (unsigned char) CLAMP(gd_fxtoi(f_red),   0, 255);
-						const unsigned char green = (unsigned char) CLAMP(gd_fxtoi(f_green), 0, 255);
-						const unsigned char blue  = (unsigned char) CLAMP(gd_fxtoi(f_blue),  0, 255);
-						const unsigned char alpha = (unsigned char) CLAMP(gd_fxtoi(f_alpha), 0, 127);
-
-						dst->tpixels[dst_offset_y][dst_offset_x++] = gdTrueColorAlpha(red, green, blue, alpha);
-					}
-				}
-			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
-			}
-		}
-		dst_offset_y++;
-	}
-	return dst;
-}
-
-gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor)
-{
-	const float _angle = (float)((- degrees / 180.0f) * M_PI);
-	const int src_w = gdImageSX(src);
-	const int src_h = gdImageSY(src);
-	unsigned int new_width, new_height;
-	const gdFixed f_0_5 = gd_ftofx(0.5f);
-	const gdFixed f_H = gd_itofx(src_h/2);
-	const gdFixed f_W = gd_itofx(src_w/2);
-	const gdFixed f_cos = gd_ftofx(cos(-_angle));
-	const gdFixed f_sin = gd_ftofx(sin(-_angle));
-	const gdFixed f_1 = gd_itofx(1);
-	const gdFixed f_2 = gd_itofx(2);
-	const gdFixed f_4 = gd_itofx(4);
-	const gdFixed f_6 = gd_itofx(6);
-	const gdFixed f_gama = gd_ftofx(1.04f);
-
-	unsigned int dst_offset_x;
-	unsigned int dst_offset_y = 0;
-	unsigned int i;
-	gdImagePtr dst;
-	gdRect bbox;
-
-	gdRotatedImageSize(src, degrees, &bbox);
-	new_width = bbox.width;
-	new_height = bbox.height;
-	dst = gdImageCreateTrueColor(new_width, new_height);
-
-	if (dst == NULL) {
-		return NULL;
-	}
-	dst->saveAlphaFlag = 1;
-
-	for (i=0; i < new_height; i++) {
-		unsigned int j;
-		dst_offset_x = 0;
-
-		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
-			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
-			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
-			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
-			const int m = gd_fxtoi(f_m);
-			const int n = gd_fxtoi(f_n);
-
-			if ((m > 0) && (m < src_h - 1) && (n > 0) && (n < src_w-1)) {
-				const gdFixed f_f = f_m - gd_itofx(m);
-				const gdFixed f_g = f_n - gd_itofx(n);
-				unsigned int src_offset_x[16], src_offset_y[16];
-				unsigned char red, green, blue, alpha;
-				gdFixed f_red=0, f_green=0, f_blue=0, f_alpha=0;
-				int k;
-
-				if ((m < 1) || (n < 1)) {
-					src_offset_x[0] = n;
-					src_offset_y[0] = m;
-				} else {
-					src_offset_x[0] = n - 1;
-					src_offset_y[0] = m;
-				}
-
-				src_offset_x[1] = n;
-				src_offset_y[1] = m;
-
-				if ((m < 1) || (n >= src_w-1)) {
-					src_offset_x[2] = - 1;
-					src_offset_y[2] = - 1;
-				} else {
-					src_offset_x[2] = n + 1;
-					src_offset_y[2] = m ;
-				}
-
-				if ((m < 1) || (n >= src_w-2)) {
-					src_offset_x[3] = - 1;
-					src_offset_y[3] = - 1;
-				} else {
-					src_offset_x[3] = n + 1 + 1;
-					src_offset_y[3] = m ;
-				}
-
-				if (n < 1) {
-					src_offset_x[4] = - 1;
-					src_offset_y[4] = - 1;
-				} else {
-					src_offset_x[4] = n - 1;
-					src_offset_y[4] = m;
-				}
-
-				src_offset_x[5] = n;
-				src_offset_y[5] = m;
-				if (n >= src_w-1) {
-					src_offset_x[6] = - 1;
-					src_offset_y[6] = - 1;
-				} else {
-					src_offset_x[6] = n + 1;
-					src_offset_y[6] = m;
-				}
-
-				if (n >= src_w-2) {
-					src_offset_x[7] = - 1;
-					src_offset_y[7] = - 1;
-				} else {
-					src_offset_x[7] = n + 1 + 1;
-					src_offset_y[7] = m;
-				}
-
-				if ((m >= src_h-1) || (n < 1)) {
-					src_offset_x[8] = - 1;
-					src_offset_y[8] = - 1;
-				} else {
-					src_offset_x[8] = n - 1;
-					src_offset_y[8] = m;
-				}
-
-				if (m >= src_h-1) {
-					src_offset_x[9] = - 1;
-					src_offset_y[9] = - 1;
-				} else {
-					src_offset_x[9] = n;
-					src_offset_y[9] = m;
-				}
-
-				if ((m >= src_h-1) || (n >= src_w-1)) {
-					src_offset_x[10] = - 1;
-					src_offset_y[10] = - 1;
-				} else {
-					src_offset_x[10] = n + 1;
-					src_offset_y[10] = m;
-				}
-
-				if ((m >= src_h-1) || (n >= src_w-2)) {
-					src_offset_x[11] = - 1;
-					src_offset_y[11] = - 1;
-				} else {
-					src_offset_x[11] = n + 1 + 1;
-					src_offset_y[11] = m;
-				}
-
-				if ((m >= src_h-2) || (n < 1)) {
-					src_offset_x[12] = - 1;
-					src_offset_y[12] = - 1;
-				} else {
-					src_offset_x[12] = n - 1;
-					src_offset_y[12] = m;
-				}
-
-				if (m >= src_h-2) {
-					src_offset_x[13] = - 1;
-					src_offset_y[13] = - 1;
-				} else {
-					src_offset_x[13] = n;
-					src_offset_y[13] = m;
-				}
-
-				if ((m >= src_h-2) || (n >= src_w - 1)) {
-					src_offset_x[14] = - 1;
-					src_offset_y[14] = - 1;
-				} else {
-					src_offset_x[14] = n + 1;
-					src_offset_y[14] = m;
-				}
-
-				if ((m >= src_h-2) || (n >= src_w-2)) {
-					src_offset_x[15] = - 1;
-					src_offset_y[15] = - 1;
-				} else {
-					src_offset_x[15] = n  + 1 + 1;
-					src_offset_y[15] = m;
-				}
-
-				for (k=-1; k<3; k++) {
-					const gdFixed f = gd_itofx(k)-f_f;
-					const gdFixed f_fm1 = f - f_1;
-					const gdFixed f_fp1 = f + f_1;
-					const gdFixed f_fp2 = f + f_2;
-					gdFixed f_a = 0, f_b = 0,f_c = 0, f_d = 0;
-					gdFixed f_RY;
-					int l;
-
-					if (f_fp2 > 0) {
-						f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
-					}
-
-					if (f_fp1 > 0) {
-						f_b = gd_mulfx(f_fp1,gd_mulfx(f_fp1,f_fp1));
-					}
-
-					if (f > 0) {
-						f_c = gd_mulfx(f,gd_mulfx(f,f));
-					}
-
-					if (f_fm1 > 0) {
-						f_d = gd_mulfx(f_fm1,gd_mulfx(f_fm1,f_fm1));
-					}
-					f_RY = gd_divfx((f_a-gd_mulfx(f_4,f_b)+gd_mulfx(f_6,f_c)-gd_mulfx(f_4,f_d)),f_6);
-
-					for (l=-1;  l< 3; l++) {
-						const gdFixed f = gd_itofx(l) - f_g;
-						const gdFixed f_fm1 = f - f_1;
-						const gdFixed f_fp1 = f + f_1;
-						const gdFixed f_fp2 = f + f_2;
-						gdFixed f_a = 0, f_b = 0, f_c = 0, f_d = 0;
-						gdFixed f_RX, f_R;
-						const int _k = ((k + 1) * 4) + (l + 1);
-						register gdFixed f_rs, f_gs, f_bs, f_as;
-						register int c;
-
-						if (f_fp2 > 0) {
-							f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
-						}
-
-						if (f_fp1 > 0) {
-							f_b = gd_mulfx(f_fp1,gd_mulfx(f_fp1,f_fp1));
-						}
-
-						if (f > 0) {
-							f_c = gd_mulfx(f,gd_mulfx(f,f));
-						}
-
-						if (f_fm1 > 0) {
-							f_d = gd_mulfx(f_fm1,gd_mulfx(f_fm1,f_fm1));
-						}
-
-						f_RX = gd_divfx((f_a - gd_mulfx(f_4, f_b) + gd_mulfx(f_6, f_c) - gd_mulfx(f_4, f_d)), f_6);
-						f_R = gd_mulfx(f_RY, f_RX);
-
-						if ((src_offset_x[_k] <= 0) || (src_offset_y[_k] <= 0) || (src_offset_y[_k] >= src_h) || (src_offset_x[_k] >= src_w)) {
-							c = bgColor;
-						} else if ((src_offset_x[_k] <= 1) || (src_offset_y[_k] <= 1) || (src_offset_y[_k] >= (int)src_h - 1) || (src_offset_x[_k] >= (int)src_w - 1)) {
-							gdFixed f_127 = gd_itofx(127);
-							c = src->tpixels[src_offset_y[_k]][src_offset_x[_k]];
-							c = c | (( (int) (gd_fxtof(gd_mulfx(f_R, f_127)) + 50.5f)) << 24);
-							c = _color_blend(bgColor, c);
-						} else {
-							c = src->tpixels[src_offset_y[_k]][src_offset_x[_k]];
-						}
-
-						f_rs = gd_itofx(gdTrueColorGetRed(c));
-						f_gs = gd_itofx(gdTrueColorGetGreen(c));
-						f_bs = gd_itofx(gdTrueColorGetBlue(c));
-						f_as = gd_itofx(gdTrueColorGetAlpha(c));
-
-						f_red   += gd_mulfx(f_rs, f_R);
-						f_green += gd_mulfx(f_gs, f_R);
-						f_blue  += gd_mulfx(f_bs, f_R);
-						f_alpha += gd_mulfx(f_as, f_R);
-					}
-				}
-
-				red   = (unsigned char) CLAMP(gd_fxtoi(gd_mulfx(f_red, f_gama)),   0, 255);
-				green = (unsigned char) CLAMP(gd_fxtoi(gd_mulfx(f_green, f_gama)), 0, 255);
-				blue  = (unsigned char) CLAMP(gd_fxtoi(gd_mulfx(f_blue, f_gama)),  0, 255);
-				alpha = (unsigned char) CLAMP(gd_fxtoi(gd_mulfx(f_alpha, f_gama)), 0, 127);
-
-				dst->tpixels[dst_offset_y][dst_offset_x] =  gdTrueColorAlpha(red, green, blue, alpha);
-			} else {
-				dst->tpixels[dst_offset_y][dst_offset_x] =  bgColor;
-			}
-			dst_offset_x++;
-		}
-
 		dst_offset_y++;
 	}
 	return dst;
@@ -2158,13 +1805,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 			break;
 
 		case GD_BILINEAR_FIXED:
-			return gdImageRotateBilinear(src, angle, bgcolor);
-			break;
-
 		case GD_BICUBIC_FIXED:
-			return gdImageRotateBicubicFixed(src, angle, bgcolor);
-			break;
-
 		default:
 			return gdImageRotateGeneric(src, angle, bgcolor);
 	}
@@ -2452,24 +2093,24 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 	}
 
 	switch (id) {
-		case GD_DEFAULT:
-			id = GD_BILINEAR_FIXED;
-			ZEND_FALLTHROUGH;
-		/* Optimized versions */
-		case GD_BILINEAR_FIXED:
-		case GD_BICUBIC_FIXED:
 		case GD_NEAREST_NEIGHBOUR:
 		case GD_WEIGHTED4:
 			im->interpolation = NULL;
 			break;
 
 		/* generic versions*/
+		/* GD_BILINEAR_FIXED and GD_BICUBIC_FIXED are kept for BC reasons */
+		case GD_BILINEAR_FIXED:
+		case GD_LINEAR:
+			im->interpolation = filter_linear;
+			break;
 		case GD_BELL:
 			im->interpolation = filter_bell;
 			break;
 		case GD_BESSEL:
 			im->interpolation = filter_bessel;
 			break;
+		case GD_BICUBIC_FIXED:
 		case GD_BICUBIC:
 			im->interpolation = filter_bicubic;
 			break;
@@ -2515,10 +2156,13 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 		case GD_TRIANGLE:
 			im->interpolation = filter_triangle;
 			break;
+		case GD_DEFAULT:
+			id = GD_LINEAR;
+			im->interpolation = filter_linear;
+			break;
 
 		default:
 			return 0;
-			break;
 	}
 	im->interpolation_id = id;
 	return 1;

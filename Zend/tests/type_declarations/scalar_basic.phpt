@@ -194,6 +194,7 @@ string(0) ""
 string(%d) "%d"
 
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to string on line %d
 string(3) "NAN"
 
 *** Trying bool(true)
@@ -247,6 +248,7 @@ bool(false)
 bool(true)
 
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to bool on line %d
 bool(true)
 
 *** Trying bool(true)

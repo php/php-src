@@ -19,12 +19,10 @@ require_once 'skipifconnectfailure.inc';
     if (!$thread_id = mysqli_thread_id($link))
         printf("[004] Cannot determine thread id, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $tmp = mysqli_kill($link, $thread_id);
-    if (!is_bool($tmp))
-        printf("[005] Expecting boolean/any, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_kill($link, $thread_id);
 
     if ($res = mysqli_query($link, "SELECT id FROM test LIMIT 1"))
-        pintf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
+        printf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
 
     var_dump($error = mysqli_error($link));
     if (!is_string($error) || ('' === $error))

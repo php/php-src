@@ -22,8 +22,10 @@
 
 #include <stdint.h>
 
+#include "zend_hash.h"
 #include "zend_types.h"
 #include "zend_property_hooks.h"
+#include "zend_lazy_objects.h"
 
 struct _zend_property_info;
 
@@ -178,6 +180,7 @@ typedef void (*zend_object_free_obj_t)(zend_object *object);
 typedef void (*zend_object_dtor_obj_t)(zend_object *object);
 
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
+typedef zend_object* (*zend_object_clone_obj_with_t)(zend_object *object, const zend_class_entry *scope, const HashTable *properties);
 
 /* Get class name for display in var_dump and other debugging functions.
  * Must be defined and must return a non-NULL value. */
@@ -207,6 +210,7 @@ struct _zend_object_handlers {
 	zend_object_free_obj_t					free_obj;             /* required */
 	zend_object_dtor_obj_t					dtor_obj;             /* required */
 	zend_object_clone_obj_t					clone_obj;            /* optional */
+	zend_object_clone_obj_with_t			clone_obj_with;       /* optional */
 	zend_object_read_property_t				read_property;        /* required */
 	zend_object_write_property_t			write_property;       /* required */
 	zend_object_read_dimension_t			read_dimension;       /* required */
@@ -244,13 +248,14 @@ extern const ZEND_API zend_object_handlers std_object_handlers;
 #define ZEND_PROPERTY_EXISTS    0x2          /* Property exists */
 
 ZEND_API void zend_class_init_statics(zend_class_entry *ce);
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
+ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
+ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
+ZEND_API HashTable *zend_get_properties_no_lazy_init(zend_object *zobj);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
 ZEND_API zend_result zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
@@ -269,16 +274,35 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 /* Use zend_std_get_properties_ex() */
 ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope);
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_function *fbc);
 
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
+	if (UNEXPECTED(zend_lazy_object_must_init(object))) {
+		return zend_lazy_object_get_properties(object);
+	}
 	if (!object->properties) {
 		return rebuild_object_properties_internal(object);
 	}
 	return object->properties;
 }
 
+/* Implements the fast path for array cast */
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
+
+#define ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(object) (            \
+		/* We can use zend_std_build_object_properties_array() for objects     \
+		 * without properties ht and with standard handlers */                 \
+		Z_OBJ_P(object)->properties == NULL                                    \
+		&& Z_OBJ_HT_P(object)->get_properties_for == NULL                      \
+		&& Z_OBJ_HT_P(object)->get_properties == zend_std_get_properties       \
+		/* For initialized proxies we need to forward to the real instance */  \
+		&& (                                                                   \
+			!zend_object_is_lazy_proxy(Z_OBJ_P(object))                        \
+			|| !zend_lazy_object_initialized(Z_OBJ_P(object))                  \
+		)                                                                      \
+)
 
 /* Handler for objects that cannot be meaningfully compared.
  * Only objects with the same identity will be considered equal. */
@@ -288,9 +312,7 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 
 ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
-ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static);
-
-ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(const zend_function *fbc, zend_string *method_name);
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
@@ -310,14 +332,19 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name);
 
+ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
+
+void zend_object_handlers_startup(void);
+
 #define zend_release_properties(ht) do { \
-	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \
-		zend_array_destroy(ht); \
+	if (ht) { \
+		zend_array_release(ht); \
 	} \
 } while (0)
 
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
+			EG(trampoline).common.attributes = NULL; \
 			EG(trampoline).common.function_name = NULL; \
 		} else { \
 			efree(func); \

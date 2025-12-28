@@ -725,7 +725,7 @@ static int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
  * This macro converts uppercase ASCII values to Regional Indicator codepoints */
 #define NFLAGS(c) (0x1F1A5+(int)(c))
 
-static const char nflags_s[10][2] = {"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"};
+static const char nflags_s[10][2] ZEND_NONSTRING = {"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"};
 static const int nflags_code_kddi[10] = { 0x2549, 0x2546, 0x24C0, 0x2545, 0x2548, 0x2547, 0x2750, 0x254A, 0x24C1, 0x27F7 };
 static const int nflags_code_sb[10] = { 0x2B0A, 0x2B05, 0x2B08, 0x2B04, 0x2B07, 0x2B06, 0x2B02, 0x2B0B, 0x2B09, 0x2B03 };
 

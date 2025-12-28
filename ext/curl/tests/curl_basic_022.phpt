@@ -11,10 +11,10 @@ curl_setopt($ch, CURLOPT_COOKIELIST, 'Set-Cookie: C2=v2; expires=Thu, 31-Dec-203
 var_dump(curl_getinfo($ch, CURLINFO_COOKIELIST));
 
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(38) ".php.net	TRUE	/	FALSE	2145916799	C1	v1"
+  string(38) ".php.net	TRUE	/	FALSE	%d	C1	v1"
   [1]=>
-  string(38) ".php.net	TRUE	/	FALSE	2145916799	C2	v2"
+  string(38) ".php.net	TRUE	/	FALSE	%d	C2	v2"
 }

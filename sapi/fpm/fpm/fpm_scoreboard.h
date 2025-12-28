@@ -18,6 +18,8 @@
 #define FPM_SCOREBOARD_LOCK_HANG 0
 #define FPM_SCOREBOARD_LOCK_NOHANG 1
 
+#define FPM_SCOREBOARD_SPINLOCK_MAX_RETRIES 50000
+
 struct fpm_scoreboard_proc_s {
 	union {
 		atomic_t lock;
@@ -32,11 +34,11 @@ struct fpm_scoreboard_proc_s {
 	struct timeval duration;
 	time_t accepted_epoch;
 	struct timeval tv;
-	char request_uri[128];
-	char query_string[512];
+	char request_uri[512];
+	char query_string[2048];
 	char request_method[16];
 	size_t content_length; /* used with POST only */
-	char script_filename[256];
+	char script_filename[512];
 	char auth_user[32];
 #ifdef HAVE_TIMES
 	struct tms cpu_accepted;
@@ -52,6 +54,8 @@ struct fpm_scoreboard_s {
 		atomic_t lock;
 		char dummy[16];
 	};
+	atomic_t writer_active;
+	unsigned int reader_count;
 	char pool[32];
 	int pm;
 	time_t start_epoch;
@@ -66,6 +70,7 @@ struct fpm_scoreboard_s {
 	unsigned int nprocs;
 	int free_proc;
 	unsigned long int slow_rq;
+	size_t memory_peak;
 	struct fpm_scoreboard_s *shared;
 	struct fpm_scoreboard_proc_s procs[] ZEND_ELEMENT_COUNT(nprocs);
 };
@@ -74,8 +79,8 @@ int fpm_scoreboard_init_main(void);
 int fpm_scoreboard_init_child(struct fpm_worker_pool_s *wp);
 
 void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard);
-void fpm_scoreboard_update_commit(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard);
-void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard);
+void fpm_scoreboard_update_commit(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, size_t memory_max, int action, struct fpm_scoreboard_s *scoreboard);
+void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, size_t memory_max, int action, struct fpm_scoreboard_s *scoreboard);
 
 struct fpm_scoreboard_s *fpm_scoreboard_get(void);
 struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *scoreboard, int child_index);

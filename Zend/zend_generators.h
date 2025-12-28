@@ -101,7 +101,6 @@ static const uint8_t ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const uint8_t ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const uint8_t ZEND_GENERATOR_DO_INIT           = 0x8;
 static const uint8_t ZEND_GENERATOR_IN_FIBER          = 0x10;
-static const uint8_t ZEND_GENERATOR_DTOR_VISITED      = 0x20;
 
 void zend_register_generator_ce(void);
 ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution);
@@ -134,6 +133,8 @@ static zend_always_inline zend_generator *zend_generator_get_current(zend_genera
 
 	return zend_generator_update_current(generator);
 }
+
+HashTable *zend_generator_frame_gc(zend_get_gc_buffer *gc_buffer, zend_generator *generator);
 
 END_EXTERN_C()
 

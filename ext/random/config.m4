@@ -13,6 +13,11 @@ AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h],,, [dnl
 ])
 
 dnl
+dnl Mostly for non Linux systems
+dnl
+AC_CHECK_FUNCS([getrandom])
+
+dnl
 dnl Setup extension
 dnl
 PHP_NEW_EXTENSION([random], m4_normalize([

@@ -62,6 +62,18 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    printf("%9999999999999999999999.f\n", $f);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    printf("%.9999999999999999999999f\n", $f);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 float(1.2345678901234567)
@@ -95,4 +107,6 @@ foo
 Precision must be an integer
 Precision must be between -1 and 2147483647
 Precision -1 is only supported for %g, %G, %h and %H
-Width must be greater than zero and less than 2147483647
+Width must be between 0 and 2147483647
+Width must be between 0 and 2147483647
+Precision must be between 0 and 2147483647

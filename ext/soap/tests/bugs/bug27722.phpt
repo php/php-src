@@ -2,8 +2,6 @@
 Bug #27722 (Segfault on schema without targetNamespace)
 --EXTENSIONS--
 soap
---GET--
-wsdl
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

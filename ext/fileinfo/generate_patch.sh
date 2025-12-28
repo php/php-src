@@ -1,9 +1,9 @@
 #!/bin/sh
 
-VERSION=5.45
+VERSION=5.46
 
 # Go to fileinfo extension directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)" || exit
 
 if [ ! -d libmagic.orig ]; then
   mkdir libmagic.orig

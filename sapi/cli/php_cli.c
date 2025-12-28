@@ -115,7 +115,6 @@ PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 
 static const char HARDCODED_INI[] =
 	"html_errors=0\n"
-	"register_argc_argv=1\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"max_execution_time=0\n"
@@ -148,7 +147,6 @@ const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{10,  1, "rf"},
 	{10,  1, "rfunction"},
 	{11,  1, "rc"},
@@ -159,7 +157,7 @@ const opt_struct OPTIONS[] = {
 	{13,  1, "rzendextension"},
 	{14,  1, "ri"},
 	{14,  1, "rextinfo"},
-	{15,  0, "ini"},
+	{15,  2, "ini"},
 	/* Internal testing option -- may be changed or removed without notice,
 	 * including in patch releases. */
 	{16,  1, "repeat"},
@@ -221,6 +219,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
+#ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
@@ -238,6 +237,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 
 	return ret != -1;
 }
+#endif
 
 PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
 {
@@ -392,9 +392,9 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 }
 /* }}} */
 
-static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, NULL);
+	return php_module_startup(sapi_module_ptr, NULL);
 }
 /* }}} */
 
@@ -494,18 +494,21 @@ static void php_cli_usage(char *argv0)
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"\n"
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
 				"  --ini            Show configuration file names\n"
+				"  --ini=diff       Show INI entries that differ from the built-in default\n"
 				"\n"
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
 				"  --re <name>      Show information about extension <name>.\n"
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
+				"\n"
+				"  --repeat <count> Repeat script execution <count> times.\n"
+				"                   For internal purposes only.\n"
 				"\n"
 				, prog, prog, prog, prog, prog, prog, prog);
 }
@@ -585,6 +588,14 @@ BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 #endif
 /*}}}*/
 
+static int zend_ini_entry_cmp(Bucket *a, Bucket *b)
+{
+	zend_ini_entry *A = Z_PTR(a->val);
+	zend_ini_entry *B = Z_PTR(b->val);
+
+	return zend_binary_strcasecmp(ZSTR_VAL(A->name), ZSTR_LEN(A->name), ZSTR_VAL(B->name), ZSTR_LEN(B->name));
+}
+
 static int do_cli(int argc, char **argv) /* {{{ */
 {
 	int c;
@@ -625,28 +636,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s",
-					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
-#ifdef ZTS
-					"ZTS"
-#else
-					"NTS"
-#endif
-#ifdef PHP_BUILD_COMPILER
-					" " PHP_BUILD_COMPILER
-#endif
-#ifdef PHP_BUILD_ARCH
-					" " PHP_BUILD_ARCH
-#endif
-#if ZEND_DEBUG
-					" DEBUG"
-#endif
-#ifdef HAVE_GCOV
-					" GCOV"
-#endif
-					,
-					get_zend_version()
-				);
+				php_print_version(&cli_sapi_module);
 				sapi_deactivate();
 				goto out;
 
@@ -808,9 +798,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				context.mode = PHP_CLI_MODE_STRIP;
 				break;
 
-			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
-				break;
 			case 'H':
 				hide_argv = true;
 				break;
@@ -835,7 +822,15 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				reflection_what = php_optarg;
 				break;
 			case 15:
-				context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				if (php_optarg) {
+					if (strcmp(php_optarg, "diff") == 0) {
+						context.mode = PHP_CLI_MODE_SHOW_INI_DIFF;
+					} else {
+						param_error = "Unknown argument for --ini\n";
+					}
+				} else {
+					context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				}
 				break;
 			case 16:
 				num_repeats = atoi(php_optarg);
@@ -851,16 +846,16 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			goto err;
 		}
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
+#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && defined(HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 		if (!interactive) {
 		/* The -a option was not passed. If there is no file, it could
 		 	still make sense to run interactively. The presence of a file
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||
-					argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
+					(argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
 					context.mode != PHP_CLI_MODE_PROCESS_STDIN &&
-					strcmp(argv[php_optind-1],"--")
+					strcmp(argv[php_optind-1],"--"))
 				);
 		}
 #endif
@@ -972,11 +967,11 @@ do_repeat:
 			break;
 		case PHP_CLI_MODE_HIGHLIGHT:
 			{
-				zend_syntax_highlighter_ini syntax_highlighter_ini;
+				zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 				if (open_file_for_scanning(&file_handle) == SUCCESS) {
-					php_get_highlight_struct(&syntax_highlighter_ini);
-					zend_highlight(&syntax_highlighter_ini);
+					php_get_highlight_struct(&default_syntax_highlighter_ini);
+					zend_highlight(&default_syntax_highlighter_ini);
 				}
 				goto out;
 			}
@@ -1066,6 +1061,7 @@ do_repeat:
 				object_init_ex(&ref, pce);
 
 				memset(&execute_data, 0, sizeof(zend_execute_data));
+				execute_data.func = (zend_function *) &zend_pass_function;
 				EG(current_execute_data) = &execute_data;
 				zend_call_known_instance_method_with_1_params(
 					pce->constructor, Z_OBJ(ref), NULL, &arg);
@@ -1109,10 +1105,46 @@ do_repeat:
 
 		case PHP_CLI_MODE_SHOW_INI_CONFIG:
 			{
-				zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
-				zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
-				zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
+				zend_printf("Configuration File (php.ini) Path: \"%s\"\n", PHP_CONFIG_FILE_PATH);
+				if (php_ini_opened_path) {
+					zend_printf("Loaded Configuration File:         \"%s\"\n", php_ini_opened_path);
+				} else {
+					zend_printf("Loaded Configuration File:         (none)\n");
+				}
+				if (php_ini_scanned_path) {
+					zend_printf("Scan for additional .ini files in: \"%s\"\n", php_ini_scanned_path);
+				} else {
+					zend_printf("Scan for additional .ini files in: (none)\n");
+				}
 				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
+				break;
+			}
+		case PHP_CLI_MODE_SHOW_INI_DIFF:
+			{
+				zend_printf("Non-default INI settings:\n");
+				zend_ini_entry *ini_entry;
+				HashTable *sorted = zend_array_dup(EG(ini_directives));
+				zend_array_sort(sorted, zend_ini_entry_cmp, 1);
+				ZEND_HASH_PACKED_FOREACH_PTR(sorted, ini_entry) {
+					if (ini_entry->value == NULL && ini_entry->def->value == NULL) {
+						continue;
+					}
+					if (ini_entry->value != NULL && ini_entry->def->value != NULL && zend_string_equals_cstr(ini_entry->value, ini_entry->def->value, ini_entry->def->value_length)) {
+						continue;
+					}
+
+					zend_printf(
+						"%s: %s%s%s -> %s%s%s\n",
+						ZSTR_VAL(ini_entry->name),
+						ini_entry->def->value ? "\"" : "",
+						ini_entry->def->value ? ini_entry->def->value : "(none)",
+						ini_entry->def->value ? "\"" : "",
+						ini_entry->value ? "\"" : "",
+						ini_entry->value ? ZSTR_VAL(ini_entry->value) : "(none)",
+						ini_entry->value ? "\"" : ""
+					);
+				} ZEND_HASH_FOREACH_END();
+				zend_array_destroy(sorted);
 				break;
 			}
 		}
@@ -1175,7 +1207,7 @@ int main(int argc, char *argv[])
 	char *ini_path_override = NULL;
 	struct php_ini_builder ini_builder;
 	int ini_ignore = 0;
-	sapi_module_struct *sapi_module = &cli_sapi_module;
+	sapi_module_struct *sapi_module_ptr = &cli_sapi_module;
 
 	/*
 	 * Do not move this initialization. It needs to happen before argv is used
@@ -1254,7 +1286,7 @@ int main(int argc, char *argv[])
 				break;
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			case 'S':
-				sapi_module = &cli_server_sapi_module;
+				sapi_module_ptr = &cli_server_sapi_module;
 				cli_server_sapi_module.additional_functions = server_additional_functions;
 				break;
 #endif
@@ -1267,7 +1299,7 @@ int main(int argc, char *argv[])
 				exit_status = 1;
 				goto out;
 			case 'i': case 'v': case 'm':
-				sapi_module = &cli_sapi_module;
+				sapi_module_ptr = &cli_sapi_module;
 				goto exit_loop;
 			case 'e': /* enable extended info output */
 				use_extended_info = 1;
@@ -1276,25 +1308,25 @@ int main(int argc, char *argv[])
 	}
 exit_loop:
 
-	sapi_module->ini_defaults = sapi_cli_ini_defaults;
-	sapi_module->php_ini_path_override = ini_path_override;
-	sapi_module->phpinfo_as_text = 1;
-	sapi_module->php_ini_ignore_cwd = 1;
-	sapi_startup(sapi_module);
+	sapi_module_ptr->ini_defaults = sapi_cli_ini_defaults;
+	sapi_module_ptr->php_ini_path_override = ini_path_override;
+	sapi_module_ptr->phpinfo_as_text = 1;
+	sapi_module_ptr->php_ini_ignore_cwd = 1;
+	sapi_startup(sapi_module_ptr);
 	sapi_started = 1;
 
-	sapi_module->php_ini_ignore = ini_ignore;
+	sapi_module_ptr->php_ini_ignore = ini_ignore;
 
-	sapi_module->executable_location = argv[0];
+	sapi_module_ptr->executable_location = argv[0];
 
-	if (sapi_module == &cli_sapi_module) {
+	if (sapi_module_ptr == &cli_sapi_module) {
 		php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
 	}
 
-	sapi_module->ini_entries = php_ini_builder_finish(&ini_builder);
+	sapi_module_ptr->ini_entries = php_ini_builder_finish(&ini_builder);
 
 	/* startup after we get the above ini override so we get things right */
-	if (sapi_module->startup(sapi_module) == FAILURE) {
+	if (sapi_module_ptr->startup(sapi_module_ptr) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
 		 * since we cannot check if EG(ini_directives) has been initialized
 		 * because the executor's constructor does not set initialize it.
@@ -1325,7 +1357,7 @@ exit_loop:
 
 	zend_first_try {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
-		if (sapi_module == &cli_sapi_module) {
+		if (sapi_module_ptr == &cli_sapi_module) {
 #endif
 			exit_status = do_cli(argc, argv);
 #ifndef PHP_CLI_WIN32_NO_CONSOLE

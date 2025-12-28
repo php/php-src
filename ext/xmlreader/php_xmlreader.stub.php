@@ -99,32 +99,46 @@ class XMLReader
     public const int SUBST_ENTITIES = UNKNOWN;
 
 
+    /** @virtual */
     public int $attributeCount;
 
+    /** @virtual */
     public string $baseURI;
 
+    /** @virtual */
     public int $depth;
 
+    /** @virtual */
     public bool $hasAttributes;
 
+    /** @virtual */
     public bool $hasValue;
 
+    /** @virtual */
     public bool $isDefault;
 
+    /** @virtual */
     public bool $isEmptyElement;
 
+    /** @virtual */
     public string $localName;
 
+    /** @virtual */
     public string $name;
 
+    /** @virtual */
     public string $namespaceURI;
 
+    /** @virtual */
     public int $nodeType;
 
+    /** @virtual */
     public string $prefix;
 
+    /** @virtual */
     public string $value;
 
+    /** @virtual */
     public string $xmlLang;
 
     /** @tentative-return-type */

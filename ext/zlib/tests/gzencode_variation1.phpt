@@ -9,15 +9,13 @@ if( substr(PHP_OS, 0, 3) == "WIN" ) {
    die("skip.. Do not run on Windows");
 }
 
-
-
 if (PHP_OS == "Darwin") {
     print "skip - OS is encoded in headers, tested header is non Darwin";
 }
 ?>
 --FILE--
 <?php
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzencode() : variation ***\n";
 

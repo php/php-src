@@ -218,8 +218,8 @@ typedef struct _ir_tmp_reg {
 		int8_t  reg;
 	};
 	uint8_t     type;
-	uint8_t     start;
-	uint8_t     end;
+	int8_t      start;
+	int8_t      end;
 } ir_tmp_reg;
 
 struct _ir_target_constraints {

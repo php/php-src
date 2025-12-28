@@ -24,13 +24,20 @@ $numbers = [
     NAN,
 ];
 
+function safe_to_string(int|float $number): string {
+    if (is_nan($number)) {
+        return 'NAN';
+    }
+    return $number;
+}
+
 foreach ($numbers as $base) {
     foreach ($numbers as $exp) {
-        print str_pad($base, 4, " ", STR_PAD_LEFT) .
-            " ** " .
-            str_pad($exp, 4) .
-            " = " .
-            fpow($base, $exp) .
+        echo str_pad(safe_to_string($base), 4, " ", STR_PAD_LEFT),
+            " ** ",
+            str_pad(safe_to_string($exp), 4),
+            " = ",
+            safe_to_string(fpow($base, $exp)),
             PHP_EOL;
     }
 }

@@ -5,7 +5,6 @@ PHP_ARG_ENABLE([pdo],
   [yes])
 
 if test "$PHP_PDO" != "no"; then
-
   dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
   PHP_PDO=yes
 
@@ -17,7 +16,6 @@ if test "$PHP_PDO" != "no"; then
     pdo_sql_parser.h
     php_pdo_driver.h
     php_pdo_error.h
-    php_pdo_int.h
     php_pdo.h
   ]))
   PHP_ADD_MAKEFILE_FRAGMENT

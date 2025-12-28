@@ -84,7 +84,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 					"Cannot execute queries while other unbuffered queries are active.  "
 					"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 					"is only ever going to run against mysql, you may enable query "
-					"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+					"buffering by setting the Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY attribute.",
 					dbh->is_persistent);
 			}
 		} else if (einfo->errcode == 2057) {
@@ -308,24 +308,30 @@ static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0;
+	bool use_national_character_set = false;
+	bool use_binary = false;
 	size_t quotedlen;
 
-	if (H->assume_national_character_set_strings) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-		use_national_character_set = 1;
-	}
-	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-		use_national_character_set = 0;
+	if ((paramtype & PDO_PARAM_LOB) == PDO_PARAM_LOB) {
+		use_binary = true;
+	} else {
+		if (H->assume_national_character_set_strings) {
+			use_national_character_set = true;
+		}
+		if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
+			use_national_character_set = true;
+		}
+		if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
+			use_national_character_set = false;
+		}
 	}
 
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("unquoted=%.*s", (int)ZSTR_LEN(unquoted), ZSTR_VAL(unquoted));
 
-	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0), false);
+	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted),
+		3 + (use_national_character_set ? 1 : 0) + (use_binary ? 7 : 0), false);
 	char *quoted = ZSTR_VAL(quoted_str);
 
 	if (use_national_character_set) {
@@ -334,6 +340,11 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 		quoted[1] = '\'';
 
 		++quotedlen; /* N prefix */
+	} else if (use_binary) {
+		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 8, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
+		memcpy(quoted, "_binary'", 8);
+
+		quotedlen += 7; /* _binary prefix */
 	} else {
 		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
 		quoted[0] = '\'';
@@ -443,7 +454,6 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(true);
 
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			if (!pdo_get_bool_param(&bval, val)) {
 				PDO_DBG_RETURN(false);
@@ -544,7 +554,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_EMULATE_PREPARES:
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
@@ -750,8 +759,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
-		H->emulate_prepare = pdo_attr_lval(driver_options,
-			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare);
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 

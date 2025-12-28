@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e0d2498c10cba72adb97504fd13e178e090de2cd */
+ * Stub hash: 6dceb619736a3de55b84609a9e3aeb13405bbfde */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -22,7 +22,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_disable_entity_loader, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, disable, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, resolver_function, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
@@ -47,10 +47,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("libxml_disable_entity_loader", zif_libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
 	ZEND_FE(libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LibXMLError_methods[] = {
 	ZEND_FE_END
 };
 
@@ -91,16 +87,11 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL", XML_ERR_FATAL, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0;
-	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0);
+	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1;
 	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str = zend_string_init("as external entity loading is disabled by default", strlen("as external entity loading is disabled by default"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].value, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str);
 	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
@@ -108,44 +99,36 @@ static zend_class_entry *register_class_LibXMLError(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "LibXMLError", class_LibXMLError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_level_default_value;
 	ZVAL_UNDEF(&property_level_default_value);
-	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, 1);
+	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, true);
 	zend_declare_typed_property(class_entry, property_level_name, &property_level_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_level_name);
+	zend_string_release_ex(property_level_name, true);
 
 	zval property_code_default_value;
 	ZVAL_UNDEF(&property_code_default_value);
-	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
-	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_code_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CODE), &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
-	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, true);
 	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_column_name);
+	zend_string_release_ex(property_column_name, true);
 
 	zval property_message_default_value;
 	ZVAL_UNDEF(&property_message_default_value);
-	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
-	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_message_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_MESSAGE), &property_message_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_file_default_value;
 	ZVAL_UNDEF(&property_file_default_value);
-	zend_string *property_file_name = zend_string_init("file", sizeof("file") - 1, 1);
-	zend_declare_typed_property(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_file_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_FILE), &property_file_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_line_default_value;
 	ZVAL_UNDEF(&property_line_default_value);
-	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_line_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
 	return class_entry;
 }

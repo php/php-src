@@ -27,7 +27,7 @@
 #include <lexbor/encoding/encoding.h>
 
 /* This file implements the HTML 5 serialization algorithm.
- * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-12-14)
+ * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2024-12-11)
  */
 
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
@@ -42,7 +42,9 @@ static zend_result dom_html5_serialize_doctype(dom_html5_serialize_context *ctx,
 static zend_result dom_html5_serialize_comment(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	TRY(ctx->write_string_len(ctx->application_data, "<!--", strlen("<!--")));
-	TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	if (node->content) {
+		TRY(ctx->write_string(ctx->application_data, (const char*) node->content));
+	}
 	return ctx->write_string_len(ctx->application_data, "-->", strlen("-->"));
 }
 
@@ -131,8 +133,12 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
-	if (node->parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(node->parent, php_dom_ns_is_html_magic_token)) {
-		const xmlNode *parent = node->parent;
+	if (!node->content) {
+		return SUCCESS;
+	}
+
+	const xmlNode *parent = node->parent;
+	if (parent != NULL && parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(parent, php_dom_ns_is_html_magic_token)) {
 		size_t name_length = strlen((const char *) parent->name);
 		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
 		 * However, the user agent (PHP) does not support (JS) scripting.
@@ -365,7 +371,9 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 		children = node->children;
 	}
 
-	/* Step 4 */
+	/* Step 4 concerns shadow roots, but we don't have these, so skip. */
+
+	/* Step 5 */
 	return dom_html5_serialize_node(ctx, children, node);
 }
 

@@ -8,7 +8,7 @@ class A {
 }
 
 class B extends A {
-    public $prop {
+    public $prop = 42 {
         get {
             yield parent::$prop::get() + 1;
             yield parent::$prop::get() + 2;

@@ -2,9 +2,10 @@
 mb_output_handler() and mbstring.http_output_conv_mimetypes (1)
 --EXTENSIONS--
 mbstring
+--INI--
+output_encoding=EUC-JP
 --FILE--
 <?php
-mb_http_output("EUC-JP");
 header("Content-Type: text/html");
 ob_start();
 ob_start('mb_output_handler');

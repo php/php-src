@@ -115,8 +115,8 @@ ZEND_API void zend_observer_shutdown(void)
 
 static void zend_observer_fcall_install(zend_execute_data *execute_data)
 {
-	zend_llist *list = &zend_observers_fcall_list;
-	zend_function *function = execute_data->func;
+	const zend_llist *list = &zend_observers_fcall_list;
+	const zend_function *function = execute_data->func;
 
 	ZEND_ASSERT(RUN_TIME_CACHE(&function->common));
 	zend_observer_fcall_begin_handler *begin_handlers = ZEND_OBSERVER_DATA(function), *begin_handlers_start = begin_handlers;
@@ -126,7 +126,7 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
 	*end_handlers = ZEND_OBSERVER_NOT_OBSERVED;
 	bool has_handlers = false;
 
-	for (zend_llist_element *element = list->head; element; element = element->next) {
+	for (const zend_llist_element *element = list->head; element; element = element->next) {
 		zend_observer_fcall_init init;
 		memcpy(&init, element->data, sizeof init);
 		zend_observer_fcall_handlers handlers = init(execute_data);
@@ -157,7 +157,7 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
  * the previous next handler is now at the place where the current handler was.
  * Hence, the next handler executed will be the one after the next handler.
  * Callees must thus invoke the next handler themselves, with the same arguments they were passed. */
-static bool zend_observer_remove_handler(void **first_handler, void *old_handler, void **next_handler) {
+static bool zend_observer_remove_handler(void **first_handler, const void *old_handler, void **next_handler) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 
 	void **last_handler = first_handler + registered_observers - 1;
@@ -179,7 +179,7 @@ static bool zend_observer_remove_handler(void **first_handler, void *old_handler
 	return false;
 }
 
-ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin) {
+ZEND_API void zend_observer_add_begin_handler(const zend_function *function, zend_observer_fcall_begin_handler begin) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 	zend_observer_fcall_begin_handler *first_handler = ZEND_OBSERVER_DATA(function), *last_handler = first_handler + registered_observers - 1;
 	if (*first_handler == ZEND_OBSERVER_NOT_OBSERVED || *first_handler == ZEND_OBSERVER_NONE_OBSERVED) {
@@ -196,7 +196,7 @@ ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_obse
 	}
 }
 
-ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next) {
+ZEND_API bool zend_observer_remove_begin_handler(const zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next) {
 	void **begin_handlers = (void **)ZEND_OBSERVER_DATA(function);
 	if (zend_observer_remove_handler(begin_handlers, begin, (void**)next)) {
 		// Ensure invariant: ZEND_OBSERVER_NONE_OBSERVED in begin_handlers if both are not observed
@@ -211,7 +211,7 @@ ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_o
 	return false;
 }
 
-ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end) {
+ZEND_API void zend_observer_add_end_handler(const zend_function *function, zend_observer_fcall_end_handler end) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 	void **begin_handler = (void **)ZEND_OBSERVER_DATA(function);
 	zend_observer_fcall_end_handler *end_handler = (zend_observer_fcall_end_handler *)begin_handler + registered_observers;
@@ -226,7 +226,7 @@ ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observ
 	*end_handler = end;
 }
 
-ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next) {
+ZEND_API bool zend_observer_remove_end_handler(const zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 	void **begin_handlers = (void **)ZEND_OBSERVER_DATA(function);
 	void **end_handlers = begin_handlers + registered_observers;
@@ -241,7 +241,7 @@ ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_obs
 }
 
 static inline zend_execute_data **prev_observed_frame(zend_execute_data *execute_data) {
-	zend_function *func = EX(func);
+	const zend_function *func = EX(func);
 	ZEND_ASSERT(func);
 	return (zend_execute_data **)&Z_PTR_P(EX_VAR_NUM((ZEND_USER_CODE(func->type) ? func->op_array.last_var : ZEND_CALL_NUM_ARGS(execute_data)) + func->common.T - 1));
 }
@@ -256,7 +256,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *handler)
 {
-	zend_observer_fcall_begin_handler *possible_handlers_end = handler + zend_observers_fcall_list.count;
+	const zend_observer_fcall_begin_handler *possible_handlers_end = handler + zend_observers_fcall_list.count;
 
 	if (!*handler) {
 		zend_observer_fcall_install(execute_data);
@@ -265,7 +265,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_da
 		}
 	}
 
-	zend_observer_fcall_end_handler *end_handler = (zend_observer_fcall_end_handler *)possible_handlers_end;
+	const zend_observer_fcall_end_handler *end_handler = (const zend_observer_fcall_end_handler *)possible_handlers_end;
 	if (*end_handler != ZEND_OBSERVER_NOT_OBSERVED) {
 		*prev_observed_frame(execute_data) = EG(current_observed_frame);
 		EG(current_observed_frame) = execute_data;
@@ -294,7 +294,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute
 }
 
 static inline void call_end_observers(zend_execute_data *execute_data, zval *return_value) {
-	zend_function *func = EX(func);
+	const zend_function *func = EX(func);
 	ZEND_ASSERT(func);
 
 	zend_observer_fcall_end_handler *handler = (zend_observer_fcall_end_handler *)ZEND_OBSERVER_DATA(func) + zend_observers_fcall_list.count;
@@ -340,7 +340,7 @@ ZEND_API void ZEND_FASTCALL _zend_observer_function_declared_notify(zend_op_arra
 		return;
 	}
 
-	for (zend_llist_element *element = zend_observer_function_declared_callbacks.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_function_declared_callbacks.head; element; element = element->next) {
 		zend_observer_function_declared_cb callback = *(zend_observer_function_declared_cb *) (element->data);
 		callback(op_array, name);
 	}
@@ -358,7 +358,7 @@ ZEND_API void ZEND_FASTCALL _zend_observer_class_linked_notify(zend_class_entry 
 		return;
 	}
 
-	for (zend_llist_element *element = zend_observer_class_linked_callbacks.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_class_linked_callbacks.head; element; element = element->next) {
 		zend_observer_class_linked_cb callback = *(zend_observer_class_linked_cb *) (element->data);
 		callback(ce, name);
 	}
@@ -372,7 +372,7 @@ ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 
 ZEND_API void _zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
-	for (zend_llist_element *element = zend_observer_error_callbacks.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_error_callbacks.head; element; element = element->next) {
 		zend_observer_error_cb callback = *(zend_observer_error_cb *) (element->data);
 		callback(type, error_filename, error_lineno, message);
 	}
@@ -395,12 +395,11 @@ ZEND_API void zend_observer_fiber_destroy_register(zend_observer_fiber_destroy_h
 
 ZEND_API void ZEND_FASTCALL zend_observer_fiber_init_notify(zend_fiber_context *initializing)
 {
-	zend_llist_element *element;
 	zend_observer_fiber_init_handler callback;
 
 	initializing->top_observed_frame = NULL;
 
-	for (element = zend_observer_fiber_init.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_fiber_init.head; element; element = element->next) {
 		callback = *(zend_observer_fiber_init_handler *) element->data;
 		callback(initializing);
 	}
@@ -408,14 +407,13 @@ ZEND_API void ZEND_FASTCALL zend_observer_fiber_init_notify(zend_fiber_context *
 
 ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context *from, zend_fiber_context *to)
 {
-	zend_llist_element *element;
 	zend_observer_fiber_switch_handler callback;
 
 	if (from->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_observer_fcall_end_all(); // fiber is either finished (call will do nothing) or has bailed out
 	}
 
-	for (element = zend_observer_fiber_switch.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_fiber_switch.head; element; element = element->next) {
 		callback = *(zend_observer_fiber_switch_handler *) element->data;
 		callback(from, to);
 	}
@@ -426,10 +424,9 @@ ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context
 
 ZEND_API void ZEND_FASTCALL zend_observer_fiber_destroy_notify(zend_fiber_context *destroying)
 {
-	zend_llist_element *element;
 	zend_observer_fiber_destroy_handler callback;
 
-	for (element = zend_observer_fiber_destroy.head; element; element = element->next) {
+	for (const zend_llist_element *element = zend_observer_fiber_destroy.head; element; element = element->next) {
 		callback = *(zend_observer_fiber_destroy_handler *) element->data;
 		callback(destroying);
 	}

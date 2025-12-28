@@ -2,6 +2,8 @@
 Test mb_strtoupper() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 /*
@@ -10,7 +12,6 @@ mbstring
 
 echo "*** Testing mb_strtoupper() : basic functionality ***\n";
 
-mb_internal_encoding('utf-8');
 $ascii_lower = 'abcdefghijklmnopqrstuvwxyz';
 $ascii_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $greek_lower = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');

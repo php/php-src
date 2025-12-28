@@ -18,22 +18,19 @@ if test "$PHP_PHAR" != "no"; then
     ]),
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
   AC_MSG_CHECKING([for phar openssl support])
-  if test "$PHP_OPENSSL_SHARED" = "yes"; then
-    AC_MSG_RESULT([no (shared openssl)])
-  else
-    if test "$PHP_OPENSSL" = "yes"; then
+  AS_VAR_IF([PHP_OPENSSL_SHARED], [yes],
+    [AC_MSG_RESULT([no (shared openssl)])],
+    [AS_VAR_IF([PHP_OPENSSL], [yes], [
       AC_MSG_RESULT([yes])
-      AC_DEFINE(PHAR_HAVE_OPENSSL,1,[ ])
-    else
-      AC_MSG_RESULT([no])
-    fi
-  fi
+      AC_DEFINE([PHAR_HAVE_OPENSSL], [1],
+        [Define to 1 if phar extension has native OpenSSL support.])
+    ], [AC_MSG_RESULT([no])])])
+
   PHP_ADD_EXTENSION_DEP(phar, hash)
   PHP_ADD_EXTENSION_DEP(phar, spl)
   PHP_ADD_MAKEFILE_FRAGMENT
-
-  PHP_INSTALL_HEADERS([ext/phar], [php_phar.h])
 
   AC_CONFIG_FILES([
     $ext_dir/phar.1

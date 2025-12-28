@@ -6,6 +6,7 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.4](https://wiki.php.net/todo/php84)
 - [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
@@ -17,14 +18,14 @@ PHP on the fourth Thursday of November each year. Following the GA release, we
 publish patch-level releases every four weeks, with at least one release
 candidate (RC) published two weeks before each patch-level release.
 
-Each major and minor version undergoes a 24-week pre-release cycle before GA
-release. The pre-release cycle begins on the second Thursday of June with the
-first alpha release of the new major/minor version. The pre-release cycle
-consists of at least:
+Each major and minor version undergoes a 20-week pre-release cycle before GA
+release. The pre-release cycle begins on the second Thursday of July with the
+first alpha release of the new major/minor version (usually; count back from the
+GA release date). The pre-release cycle consists of at least:
 
 - 3 alpha releases
 - 3 beta releases
-- 6 release candidates
+- 4 release candidates
 
 Feature freeze for the next major/minor occurs with the first beta release.
 
@@ -54,7 +55,6 @@ releases.
 
 3. Ensure that the relevant tests on CI are green.
 
-   - https://travis-ci.com/github/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
@@ -74,7 +74,7 @@ releases.
    > When you are unsure about anything, ask a previous RM before proceeding.
    > Ideally, make sure a previous RM is available to answer questions during
    > the first few releases of your version. For the steps related to the
-   > `web-php`, `web-qa`, and `web-php-distributions` repositories, try to have
+   > `web-php` and `web-php-distributions` repositories, try to have
    > someone from the webmaster team on hand.
 
 5. Verify the tags to be extra sure everything was tagged properly.
@@ -95,6 +95,13 @@ releases.
     `~/.gitconfig` to set the proper `user.name`, `user.email`, and
     `user.signingKey` values to use with your local PHP repositories. See
     [Conditional Includes For Git Config][] for more information.
+
+11. Any time you see a placeholder like `php-X.Y.ZRCn`, the `RCn` is not always
+    a release candidate number. The placeholder could also represent any of:
+    * php-8.4.0alpha1 (initial alpha version)
+    * php-8.4.0beta2 (one of the beta versions)
+    * php-8.4.0 (initial GA)
+    * php-8.4.9 (periodic bugfix or security release)
 
 
 ## Packaging a non-stable release (alpha/beta/RC)
@@ -163,6 +170,9 @@ slightly different steps. We'll call attention where the steps differ.
    `main/php_version.h`, `Zend/zend.h`, `configure.ac`, and possibly
    `NEWS`.
 
+   The date for NEWS should be the date of the announcement (Thursday),
+   *not* the date of the tagging (Tuesday).
+
    For examples, see [Update versions for PHP 8.1.0beta3][] (for a pre-GA
    example) or [Update versions for PHP 8.1.6RC1][] along with
    [Update NEWS for PHP 8.1.6RC1][] (for a post-GA example).
@@ -200,8 +210,8 @@ slightly different steps. We'll call attention where the steps differ.
    > Do *not* bump the API versions after RC1.
 
 5. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
@@ -209,7 +219,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -217,7 +227,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -247,8 +257,11 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
-   ``` 
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.0 alpha2"
+   ```
+
+   The NEWS is updated at the *start* of the cycle for the next tag, e.g.
+   [Update NEWS for PHP 8.2.0 alpha2][] was sent as part of tagging 8.2.0 alpha **1**.
 
    🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
@@ -258,7 +271,7 @@ slightly different steps. We'll call attention where the steps differ.
    For example, if the RC is `8.2.1RC1` then the version numbers in the version
    branch should be bumped to `8.2.2-dev`. We do this regardless of whether we
    build a new RC to make sure `version_compare()` works correctly. See
-   [Bump for 8.1.8-dev][] for a real example.
+   [PHP 8.3 is now for PHP 8.3.21-dev][] commit for a real example.
 
    Commit the changes to the version branch.
 
@@ -283,7 +296,8 @@ slightly different steps. We'll call attention where the steps differ.
     ```shell
     git push upstream php-X.Y.ZRCn # tag name
     git push upstream PHP-X.Y.Z    # patch-level version branch (post-GA only)
-    git push upstream PHP-X.Y      # version branch
+    git push upstream PHP-X.Y      # version branch (post-branch creation only)
+    git push upstream master       # version branch (pre-branch creation only)
     ```
 
     > 🚨 **Attention** \
@@ -291,6 +305,11 @@ slightly different steps. We'll call attention where the steps differ.
     > tags you might not wish to push.
     >
     > Local-only release branches should not be pushed!
+
+    Do not forget to merge up PHP-X.Y all the way to master. When resolving
+    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
+    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
+    master after the merge resulting in the conflicts.
 
 11. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
@@ -321,7 +340,7 @@ slightly different steps. We'll call attention where the steps differ.
     downloads.php.net.
 
     ```shell
-    scp php-X.Y.ZRCn.tar.* downloads.php.net:~/public_html/
+    scp php-X.Y.ZRCn.tar.* downloads.internal.php.net:~/public_html/
     ```
 
     > 💬 **Hint** \
@@ -355,11 +374,14 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Announcing a non-stable release (alpha/beta/RC)
 
-1. Switch to your local clone of the `web-qa` repository and update the
+1. Switch to your local clone of the `web-php` repository and update the
    information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
    Follow the documentation in the file for editing the QA release information.
-   See also [Announce 8.1.0RC3][] and [8.1.6RC1][] for examples.
+
+   > 🚨 **Attention** \
+   > **For pre-GA releases only,** don't commit yet, because you need to add an
+   > announcement with the release. After updating `$QA_RELEASES`, skip to step 2 below.
 
    Add, commit, and push your changes, when finished.
 
@@ -404,6 +426,15 @@ slightly different steps. We'll call attention where the steps differ.
    text slightly to indicate progression through the pre-release cycle. For
    example, here are all the news posts for the pre-GA releases of PHP 8.1.0:
 
+   > 💬 **Hint** \
+   > If you are going to base your language on one of these old announcements,
+   > remember that
+   > * `qa.php.net` has been replaced with https://www.php.net/release-candidates.php
+   > * `bugs.php.net` has been replaced with GitHub issues, use
+   >    `https://github.com/php/php-src/issues/new?template=bug_report.yml`
+   >   to link directly to the form for creating a new bug report.
+   > * Since 8.4 there have only been 4 release candidates for PHP X.Y.0, rather than 6.
+
    * [Announce 8.1.0alpha1](https://github.com/php/web-php/commit/57b9675c8d8550493289fa1fba77427c93cdd472)
    * [Announce 8.1.0alpha2](https://github.com/php/web-php/commit/cec044fc0763f5cfa77d0e79479f8b6279023570)
    * [Announce 8.1.0alpha3](https://github.com/php/web-php/commit/5c480765f444a3fddfd575e01fe0be3fcfdde05b)
@@ -427,7 +458,7 @@ slightly different steps. We'll call attention where the steps differ.
    > When a version is in its post-GA phase, we do not post news entries for
    > non-stable releases.
 
-3. Wait for the web and qa sites to update with the new information before
+3. Wait for the php site to update with the new information before
    sending announcements. This could take up to an hour.
 
 4. Send *separate* announcement emails to:
@@ -442,6 +473,15 @@ slightly different steps. We'll call attention where the steps differ.
    build.
 
    Here are a few examples of non-stable release announcement emails:
+
+   > 💬 **Hint** \
+   > If you are going to base your language on one of these old announcements,
+   > remember that
+   > * `qa.php.net` has been replaced with https://www.php.net/release-candidates.php
+   > * `bugs.php.net` has been replaced with GitHub issues, use
+   >    `https://github.com/php/php-src/issues/new?template=bug_report.yml`
+   >   to link directly to the form for creating a new bug report.
+   > * Since 8.4 there have only been 4 release candidates for PHP X.Y.0, rather than 6.
 
    * [PHP 8.1.0alpha1 is available for testing](https://news-web.php.net/php.qa/69043)
    * [PHP 8.1.0beta3 available for testing](https://news-web.php.net/php.qa/69079)
@@ -460,9 +500,16 @@ slightly different steps. We'll call attention where the steps differ.
    > report any potential bugs that should be fixed before the upcoming GA
    > release.
 
-5. 🔶 **For pre-GA *RCs* only,** coordinate with the social media team (i.e.,
-   Derick) to post a tweet with the RC release announcement and link to the news
-   entry on php.net. ([@official_php](https://twitter.com/official_php))
+5. 🔶 **For alphas, betas, and *pre-GA* RCs,** coordinate with the
+   social media team (i.e., Derick and Sergey) to post a toot containing the
+   release announcement and link to the news entry on php.net.
+   You can send a PR to [toot-together](https://github.com/derickr/toot-together/)
+   with highlights from the NEWS file yourself, if you want.
+
+   * [Announce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
+   * [Announce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
+
+   We post to [@php@fosstodon.org](https://fosstodon.org/@php).
 
 
 ## Packaging a stable release
@@ -515,8 +562,8 @@ slightly different steps. We'll call attention where the steps differ.
    an example.
 
 6. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
@@ -524,7 +571,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -532,7 +579,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -712,6 +759,15 @@ slightly different steps. We'll call attention where the steps differ.
    ```shell
    ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
    ```
+8. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
+
+   The array probably contains information about the RC released two weeks ago
+   in preparation for the current release. Since the current release is now GA,
+   it's time to remove the RC build from the release candidates page.
+
+   It is sufficient to set the `number` property for the release to `0` to
+   stop displaying the RC build on the release candidates page. You may also remove the
+   sha256 hashes for the RC tarballs, but it's not necessary.
 
 9. Review all the changes in `web-php`, commit, and push them.
 
@@ -724,27 +780,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    See [Announce PHP 8.1.6][] for an example commit.
 
-10. Switch to your local clone of the `web-qa` repository and update the
-   information in the `$QA_RELEASES` array in `include/release-qa.php`.
-
-   The array probably contains information about the RC released two weeks ago
-   in preparation for the current release. Since the current release is now GA,
-   it's time to remove the RC build from the QA website.
-
-   It is sufficient to set the `number` property for the release to `0` to
-   stop displaying the RC build on the QA website. You may also remove the
-   sha256 hashes for the RC tarballs, but it's not necessary. For an example,
-   see [PHP 8.1.6 released][].
-
-   Add, commit, and push your changes, when finished.
-
-   ```shell
-   git add -p
-   git commit --gpg-sign=YOURKEYID -m "PHP X.Y.Z released"
-   git push upstream master
-   ```
-
-11. 🚨 **Before sending announcement emails, check to make sure the websites have
+10. 🚨 **Before sending announcement emails, check to make sure the websites have
    synced.**
 
    * Make sure the tarballs are available from, e.g.,
@@ -756,8 +792,8 @@ slightly different steps. We'll call attention where the steps differ.
      e.g., https://www.php.net/ChangeLog-8.php
    * Is there a release page for the new version?
      e.g., `https://www.php.net/releases/X_Y_Z.php`
-   * Does the RC for this version still appear on the QA home page?
-     https://qa.php.net
+   * Does the RC for this version still appear on the Release Candidate Builds page?
+     https://www.php.net/release-candidates.php
 
    Keep in mind it may take up to an hour for the websites to sync.
 
@@ -842,25 +878,37 @@ If you choose to create a patch-level release, follow these steps:
    mailinglist.
 
 
-## Feature freeze
+## Soft feature freeze
 
-A major/minor version [feature freeze][] occurs with the first beta release.
-Specifically, it occurs when the first beta release is packaged, which means the
-feature freeze occurs two days before the first beta release.
+A major/minor version soft feature freeze occurs with the first beta release.
+This is a soft feature freeze because features can still be merged with RM
+approval.
 
-The feature freeze for `php-src` means that we will not accept any new features
-after the date of the feature freeze. For any RFCs to be included in the new
-version, they should be discussed and have the voting polls closed no later than
-the feature freeze date. However, this does not mean the new feature must have a
-complete implementation by this date.
-
-Following the feature freeze, the focus of work for the new version will be on
-fixing bugs, writing tests, and completing/polishing all accepted features.
+For any RFCs to be included in the new release, they should be discussed and
+have their voting polls closed no later than when the first beta is released.
+However, this does not mean the new feature must have a complete implementation
+by this date. Such implementation can be merged only with RM approval and must
+be done before the hard feature freeze.
 
 As a courtesy to the community, the release managers should remind others about
-the upcoming feature freeze by posting reminders to internals@lists.php.net at
-4-weeks, 3-weeks, 2-weeks, and 1-week prior to the feature freeze. This is a
-recommendation and the intervals may vary based on work load.
+the upcoming soft feature freeze by posting reminders to
+internals@lists.php.net at 5 weeks, 4 weeks, 3 weeks, 2 weeks, and 1 week prior
+to this feature freeze. This is a recommendation and the intervals may vary
+based on workload. The reminder should also contain a note with dates for
+the last allowed RFC to start voting.
+
+## Hard feature freeze
+
+A major/minor version hard [feature freeze][] occurs with the first RC release.
+Specifically, it occurs when the first RC release is packaged, which means the
+hard feature freeze occurs two days before the first RC release.
+
+The hard feature freeze for php-src means that we will not accept any new
+features after the date of the hard feature freeze.
+
+Following the hard feature freeze, the focus of work for the new version will
+be on fixing bugs, writing tests, and preparing documentation for all accepted
+features.
 
 
 ## Forking a new version branch
@@ -982,21 +1030,27 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Request membership to the
+1. Fill out [the form](https://www.php.net/git-php.php)
+   to get a PHP account (if you don't already have one).
+
+2. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Subscribe to the php-announce@lists.php.net mailing list by emailing
-   php-announce+subscribe@lists.php.net
+3. Make sure you are subscribed to all of the mailing lists that you will need to send
+   announcements to, since you cannot post to the lists otherwise:
 
-3. Email systems@php.net to get setup for access to downloads.php.net, to be
+   * internals@lists.php.net (email internals+subscribe@lists.php.net)
+   * php-announce@lists.php.net (email php-announce+subscribe@lists.php.net)
+   * php-general@lists.php.net (email php-general+subscribe@lists.php.net)
+   * php-qa@lists.php.net (email php-qa+subscribe@lists.php.net)
+
+4. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to
    the moderators for php-announce@lists.php.net so you are able to moderate
    your release announcements.
 
    Provide the following information in a single email:
 
-   - Preferred Unix username (will also become part of location to download RCs,
-     such as `https://downloads.php.net/~derick/`).
    - An SSH public key, preferably a new unique one for PHP systems and
      projects.
    - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
@@ -1017,7 +1071,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-4. Create a [GPG key][] for your @php.net address.
+5. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1082,11 +1136,10 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-5. Make sure you have the following repositories cloned locally:
+6. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php
-   * https://github.com/php/web-qa
    * https://github.com/php/web-php-distributions
 
 
@@ -1099,15 +1152,12 @@ volunteers to begin the selection process for the next release managers.
 [Prepare for PHP 8.1.0RC1]: https://github.com/php/php-src/commit/5764414eb8900ae98020a3c20693f4fb793efa99
 [Update NEWS for PHP 8.2.0 alpha2]: https://github.com/php/php-src/commit/418f7211f71658d79d934861be20f277db96fe2c
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
-[Bump for 8.1.8-dev]: https://github.com/php/php-src/commit/3b6ee1eb19c14c3339ebfcf5c967065a9f828971
+[PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
-[Announce 8.1.0RC3]: https://github.com/php/web-qa/commit/f264b711fd3827803b79bbb342959eae57ea502b
-[8.1.6RC1]: https://github.com/php/web-qa/commit/e6d61ad7a9d8be0b1cd159af29f3b9cbdde33384
 [merged upwards as usual]: https://wiki.php.net/vcs/gitworkflow
 [Update versions for PHP 8.1.7]: https://github.com/php/php-src/commit/d35e577a1bd0b35b9386cea97cddc73fd98eed6d
 [Update NEWS for PHP 8.1.7]: https://github.com/php/php-src/commit/b241f07f52ca9f87bf52be81817f475e6e727439
 [Announce PHP 8.1.6]: https://github.com/php/web-php/commit/9f796a96c65f07e45845ec248933bfb0010b94a9
-[PHP 8.1.6 released]: https://github.com/php/web-qa/commit/bff725f8373cf6fd9d97ba62a8517b19721a4c2e
 [feature freeze]: https://en.wikipedia.org/wiki/Freeze_(software_engineering)
 [Prepare for PHP 8.2]: https://github.com/php/php-src/commit/1c33ddb5e5598c5385c4c965992c6e031fd00dd6
 [Prepare for PHP 8.2 (bis)]: https://github.com/php/php-src/commit/a93e12f8a6dfc23e334339317c97aa35356db821

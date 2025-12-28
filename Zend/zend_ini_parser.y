@@ -205,7 +205,7 @@ static ZEND_COLD void ini_error(const char *msg)
 		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
 
-		sprintf(error_buf, "%s in %s on line %d\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
+		sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
 	} else {
 		error_buf = estrdup("Invalid configuration directive\n");
 	}
@@ -353,7 +353,7 @@ static void normalize_value(zval *zv)
 %left '|' '&' '^'
 %precedence '~' '!'
 
-%destructor { zval_ini_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL cfg_var_ref constant_literal constant_string encapsed_list expr option_offset section_string_or_value string_or_value var_string_list var_string_list_section
+%destructor { zval_ini_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL cfg_var_ref constant_literal constant_string encapsed_list expr fallback option_offset section_string_or_value string_or_value var_string_list var_string_list_section
 
 %%
 

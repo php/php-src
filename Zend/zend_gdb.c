@@ -109,7 +109,7 @@ ZEND_API void zend_gdb_unregister_all(void)
 
 ZEND_API bool zend_gdb_present(void)
 {
-	bool ret = 0;
+	bool ret = false;
 #if defined(__linux__) /* netbsd while having this procfs part, does not hold the tracer pid */
 	int fd = open("/proc/self/status", O_RDONLY);
 
@@ -133,7 +133,7 @@ ZEND_API bool zend_gdb_present(void)
 					snprintf(buf, sizeof(buf), "/proc/%d/exe", (int)pid);
 					if (readlink(buf, out, sizeof(out) - 1) > 0) {
 						if (strstr(out, "gdb")) {
-							ret = 1;
+							ret = true;
 						}
 					}
 				}

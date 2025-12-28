@@ -249,22 +249,19 @@ PHP_FUNCTION(apache_setenv)
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
+	bool walk_to_top = false;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 3) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 
@@ -284,22 +281,19 @@ PHP_FUNCTION(apache_getenv)
 	char *variable;
 	size_t variable_len;
 	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 2) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 

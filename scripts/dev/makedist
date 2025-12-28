@@ -23,7 +23,7 @@ if [[ $($tar --version) == *"bsdtar"* ]]; then
 fi
 
 # Go to project root directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
 
 # Process options and arguments.
 while :; do

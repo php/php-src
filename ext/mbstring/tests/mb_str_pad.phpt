@@ -9,27 +9,27 @@ echo "--- Error conditions ---\n";
 try {
     var_dump(mb_str_pad('▶▶', 6, '', STR_PAD_RIGHT));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(mb_str_pad('▶▶', 6, '', STR_PAD_LEFT));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(mb_str_pad('▶▶', 6, '', STR_PAD_BOTH));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(mb_str_pad('▶▶', 6, ' ', 123456));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    var_dump(mb_str_pad('▶▶', 6, ' ', STR_PAD_BOTH, 'unexisting'));
+    var_dump(mb_str_pad('▶▶', 6, ' ', STR_PAD_BOTH, 'non-existing'));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "--- Simple ASCII strings ---\n";
@@ -87,11 +87,11 @@ foreach ($tests as $encoding => $test) {
 ?>
 --EXPECT--
 --- Error conditions ---
-string(66) "mb_str_pad(): Argument #3 ($pad_string) must be a non-empty string"
-string(66) "mb_str_pad(): Argument #3 ($pad_string) must be a non-empty string"
-string(66) "mb_str_pad(): Argument #3 ($pad_string) must be a non-empty string"
-string(90) "mb_str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH"
-string(82) "mb_str_pad(): Argument #5 ($encoding) must be a valid encoding, "unexisting" given"
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: mb_str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH
+ValueError: mb_str_pad(): Argument #5 ($encoding) must be a valid encoding, "non-existing" given
 --- Simple ASCII strings ---
 string(7) "+Hello+"
 string(10) "+-World+-+"

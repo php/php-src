@@ -21,6 +21,10 @@
 // Fix build on Windows/old versions of ICU
 #include <stdio.h>
 
+extern "C" {
+#include <zend_attributes.h>
+}
+
 #include "common_enum.h"
 #include "common_arginfo.h"
 
@@ -35,25 +39,8 @@ zend_object_handlers IntlIterator_handlers;
 void zoi_with_current_dtor(zend_object_iterator *iter)
 {
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
-
-	if (!Z_ISUNDEF(zoiwc->wrapping_obj)) {
-		/* we have to copy the pointer because zoiwc->wrapping_obj may be
-		 * changed midway the execution of zval_ptr_dtor() */
-		zval *zwo = &zoiwc->wrapping_obj;
-
-		/* object is still here, we can rely on it to call this again and
-		 * destroy this object */
-		zval_ptr_dtor(zwo);
-	} else {
-		/* Object not here anymore (we've been called by the object free handler)
-		 * Note that the iterator wrapper objects (that also depend on this
-		 * structure) call this function earlier, in the destruction phase, which
-		 * precedes the object free phase. Therefore there's no risk on this
-		 * function being called by the iterator wrapper destructor function and
-		 * not finding the memory of this iterator allocated anymore. */
-		iter->funcs->invalidate_current(iter);
-		zoiwc->destroy_it(iter);
-	}
+	zval_ptr_dtor(&zoiwc->wrapping_obj);
+	ZVAL_UNDEF(&zoiwc->wrapping_obj);
 }
 
 U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter)
@@ -91,11 +78,18 @@ static void string_enum_current_move_forward(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error fetching next iteration element", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error fetching next iteration element");
 	} else if (result) {
 		ZVAL_STRINGL(&zoi_iter->current, result, result_length);
 	} //else we've reached the end of the enum, nothing more is required
+}
+
+HashTable *zoi_with_current_get_gc(zend_object_iterator *iter, zval **table, int *n)
+{
+	zoi_with_current *zoiwc = reinterpret_cast<zoi_with_current*>(iter);
+	*table = &zoiwc->wrapping_obj;
+	*n = 1;
+	return nullptr;
 }
 
 static void string_enum_rewind(zend_object_iterator *iter)
@@ -114,8 +108,7 @@ static void string_enum_rewind(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error resetting enumeration", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error resetting enumeration");
 	} else {
 		iter->funcs->move_forward(iter);
 	}
@@ -134,7 +127,7 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	string_enum_current_move_forward,
 	string_enum_rewind,
 	zoi_with_current_invalidate_current,
-	NULL, /* get_gc */
+	zoi_with_current_get_gc,
 };
 
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
@@ -148,22 +141,45 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
 	((zoi_with_current*)ii->iterator)->destroy_it = string_enum_destroy_it;
-	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
+}
+
+static void IntlIterator_objects_dtor(zend_object *object)
+{
+	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
+	if (ii->iterator) {
+		((zoi_with_current*)ii->iterator)->destroy_it(ii->iterator);
+		OBJ_RELEASE(&ii->iterator->std);
+		ii->iterator = NULL;
+	}
 }
 
 static void IntlIterator_objects_free(zend_object *object)
 {
 	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 
-	if (ii->iterator) {
-		zval *wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
-		ZVAL_UNDEF(wrapping_objp);
-		zend_iterator_dtor(ii->iterator);
-	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii));
 
 	zend_object_std_dtor(&ii->zo);
+}
+
+static HashTable *IntlIterator_object_get_gc(zend_object *obj, zval **table, int *n)
+{
+	IntlIterator_object *ii = php_intl_iterator_fetch_object(obj);
+	if (ii->iterator) {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_obj(gc_buffer, &ii->iterator->std);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+	} else {
+		*table = nullptr;
+		*n = 0;
+	}
+	if (obj->properties == nullptr && obj->ce->default_properties_count == 0) {
+		return nullptr;
+	} else {
+		return zend_std_get_properties(obj);
+	}
 }
 
 static zend_object_iterator *IntlIterator_get_iterator(
@@ -190,9 +206,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 
 static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 {
-	IntlIterator_object	*intern;
-
-	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	IntlIterator_object	*intern = (IntlIterator_object*)zend_object_alloc(sizeof(IntlIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);
@@ -256,7 +270,7 @@ PHP_METHOD(IntlIterator, rewind)
 		ii->iterator->funcs->rewind(ii->iterator);
 	} else {
 		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
-			"IntlIterator::rewind: rewind not supported", 0);
+			"rewind not supported");
 	}
 }
 
@@ -282,7 +296,9 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
+	IntlIterator_handlers.dtor_obj = IntlIterator_objects_dtor;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
+	IntlIterator_handlers.get_gc = IntlIterator_object_get_gc;
 
 	register_common_symbols(module_number);
 }

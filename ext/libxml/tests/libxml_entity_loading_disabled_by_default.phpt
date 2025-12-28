@@ -30,7 +30,6 @@ function parseXML2($xml) {
 function parseXML3($xml) {
   $p = xml_parser_create();
   xml_parse_into_struct($p, $xml, $vals, $index);
-  xml_parser_free($p);
   return var_export($vals, true);
 }
 

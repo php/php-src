@@ -72,47 +72,17 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
-/*
- * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
- * The array is generated starting with the smaller digits.
- * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
- *
- * Multiply and add these groups of numbers to perform multiplication fast.
- * How much to shift the digits when adding values can be calculated from the index of the array.
- */
-static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+static inline void bc_standard_vector_mul(
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
-	size_t i;
-	const char *n1end = n1->n_value + n1len - 1;
-	const char *n2end = n2->n_value + n2len - 1;
-	size_t prodlen = n1len + n2len;
-
-	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-
-	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
-	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
-	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
-	 */
-	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
-
-	BC_VECTOR *n1_vector = buf;
-	BC_VECTOR *n2_vector = buf + n1_arr_size;
-	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
-
-	for (i = 0; i < prod_arr_size; i++) {
+	for (size_t i = 0; i < prod_arr_size; i++) {
 		prod_vector[i] = 0;
 	}
 
-	/* Convert to BC_VECTOR[] */
-	bc_convert_to_vector(n1_vector, n1end, n1len);
-	bc_convert_to_vector(n2_vector, n2end, n2len);
-
 	/* Multiplication and addition */
 	size_t count = 0;
-	for (i = 0; i < n1_arr_size; i++) {
+	for (size_t i = 0; i < n1_arr_size; i++) {
 		/*
 		 * This calculation adds the result multiple times to the array entries.
 		 * When multiplying large numbers of digits, there is a possibility of
@@ -133,39 +103,60 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * However, the last digit does nothing.
 	 */
 	bc_mul_carry_calc(prod_vector, prod_arr_size);
+}
+
+/*
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
+ * The array is generated starting with the smaller digits.
+ * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
+ *
+ * Multiply and add these groups of numbers to perform multiplication fast.
+ * How much to shift the digits when adding values can be calculated from the index of the array.
+ */
+static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+{
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
+	size_t prodlen = n1len + n2len;
+
+	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
+	size_t n2_arr_size = BC_ARR_SIZE_FROM_LEN(n2len);
+	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
+
+	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
+	size_t allocation_arr_size = n1_arr_size + n2_arr_size + prod_arr_size;
+
+	BC_VECTOR *n1_vector;
+	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
+		n1_vector = stack_vectors;
+	} else {
+		/*
+		 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+		 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+		 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
+		 */
+		n1_vector = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+	}
+	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
+	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
+
+	/* Convert to BC_VECTOR[] */
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+	bc_convert_to_vector(n2_vector, n2end, n2len);
+
+	/* Do multiply */
+	bc_standard_vector_mul(n1_vector, n1_arr_size, n2_vector, n2_arr_size, prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
-	i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
+	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
 
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
+	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
+		efree(n1_vector);
 	}
-
-	efree(buf);
 }
-
-/* The multiply routine.  N2 times N1 is put int PROD with the scale of
-   the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
-   */
 
 bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 {
@@ -191,6 +182,22 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	_bc_rm_leading_zeros(prod);
 	if (bc_is_zero(prod)) {
 		prod->n_sign = PLUS;
+		prod->n_scale = 0;
 	}
 	return prod;
+}
+
+void bc_multiply_vector(
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size)
+{
+	if (n1_arr_size == 1 && n2_arr_size == 1) {
+		prod_vector[0] = *n1_vector * *n2_vector;
+		if (prod_arr_size == 2) {
+			prod_vector[1] = prod_vector[0] / BC_VECTOR_BOUNDARY_NUM;
+			prod_vector[0] %= BC_VECTOR_BOUNDARY_NUM;
+		}
+	} else {
+		bc_standard_vector_mul(n1_vector, n1_arr_size, n2_vector, n2_arr_size, prod_vector, prod_arr_size);
+	}
 }

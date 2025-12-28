@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-setcookie(): Argument #1 ($name) cannot be empty
+setcookie(): Argument #1 ($name) must not be empty

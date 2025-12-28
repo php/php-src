@@ -19,8 +19,8 @@
 #include "url.h"
 #include "SAPI.h"
 #include "zend_exceptions.h"
-#include "ext/spl/spl_exceptions.h"
 #include "basic_functions.h"
+#include "zend_enum.h"
 
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	int encoding_type, zend_ulong index_int,
@@ -37,14 +37,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append(form_str, key_prefix);
 	}
 	if (index_string) {
-		zend_string *encoded_key;
-		if (encoding_type == PHP_QUERY_RFC3986) {
-			encoded_key = php_raw_url_encode(index_string, index_string_len);
-		} else {
-			encoded_key = php_url_encode(index_string, index_string_len);
-		}
-		smart_str_append(form_str, encoded_key);
-		zend_string_free(encoded_key);
+		php_url_encode_to_smart_str(form_str, index_string, index_string_len, encoding_type == PHP_QUERY_RFC3986);
 	} else {
 		/* Numeric key */
 		if (num_prefix) {
@@ -57,32 +50,18 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	}
 	smart_str_appendc(form_str, '=');
 
+try_again:
 	switch (Z_TYPE_P(scalar)) {
-		case IS_STRING: {
-			zend_string *encoded_data;
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			} else {
-				encoded_data = php_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			}
-			smart_str_append(form_str, encoded_data);
-			zend_string_free(encoded_data);
+		case IS_STRING:
+			php_url_encode_to_smart_str(form_str, Z_STRVAL_P(scalar), Z_STRLEN_P(scalar), encoding_type == PHP_QUERY_RFC3986);
 			break;
-		}
 		case IS_LONG:
 			smart_str_append_long(form_str, Z_LVAL_P(scalar));
 			break;
 		case IS_DOUBLE: {
-			zend_string *encoded_data;
 			zend_string *tmp = zend_double_to_str(Z_DVAL_P(scalar));
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			} else {
-				encoded_data = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			}
-			smart_str_append(form_str, encoded_data);
+			php_url_encode_to_smart_str(form_str, ZSTR_VAL(tmp), ZSTR_LEN(tmp), encoding_type == PHP_QUERY_RFC3986);
 			zend_string_free(tmp);
-			zend_string_free(encoded_data);
 			break;
 		}
 		case IS_FALSE:
@@ -91,9 +70,26 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		case IS_TRUE:
 			smart_str_appendc(form_str, '1');
 			break;
+		case IS_OBJECT:
+			ZEND_ASSERT(Z_OBJCE_P(scalar)->ce_flags & ZEND_ACC_ENUM);
+			if (Z_OBJCE_P(scalar)->enum_backing_type == IS_UNDEF) {
+				zend_value_error("Unbacked enum %s cannot be converted to a string", ZSTR_VAL(Z_OBJCE_P(scalar)->name));
+				return;
+			}
+			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
+			goto try_again;
 		/* All possible types are either handled here or previously */
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+}
+
+static zend_always_inline bool php_url_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
 }
 
 /* {{{ php_url_encode_hash */
@@ -114,22 +110,28 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		return;
 	}
 
+	/* Very deeply structured data could trigger a stack overflow, even without recursion. */
+	if (UNEXPECTED(php_url_check_stack_limit())) {
+		zend_throw_error(NULL, "Maximum call stack size reached.");
+		return;
+	}
+
 	if (!arg_sep) {
-		arg_sep = zend_ini_str("arg_separator.output", strlen("arg_separator.output"), false);
+		arg_sep = PG(arg_separator).output;
 		if (ZSTR_LEN(arg_sep) == 0) {
 			arg_sep = ZSTR_CHAR('&');
 		}
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */
@@ -155,7 +157,9 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		}
 
 		ZVAL_DEREF(zdata);
-		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
+		if (Z_TYPE_P(zdata) == IS_ARRAY
+		 || (Z_TYPE_P(zdata) == IS_OBJECT
+		  && !(Z_OBJCE_P(zdata)->ce_flags & ZEND_ACC_ENUM))) {
 			zend_string *new_prefix;
 			if (key) {
 				zend_string *encoded_key;
@@ -170,7 +174,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", strlen("%5B"));
 				}
-				zend_string_release_ex(encoded_key, false);
+				zend_string_efree(encoded_key);
 			} else { /* is integer index */
 				char *index_int_as_str;
 				size_t index_int_as_str_len;
@@ -199,7 +203,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			GC_TRY_PROTECT_RECURSION(ht);
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, new_prefix, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
 			GC_TRY_UNPROTECT_RECURSION(ht);
-			zend_string_release_ex(new_prefix, false);
+			zend_string_efree(new_prefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;
@@ -233,6 +237,11 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_STR_OR_NULL(arg_sep)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(Z_TYPE_P(formdata) == IS_OBJECT && (Z_OBJCE_P(formdata)->ce_flags & ZEND_ACC_ENUM))) {
+		zend_argument_type_error(1, "must not be an enum, %s given", zend_zval_value_name(formdata));
+		RETURN_THROWS();
+	}
 
 	php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, /* key_prefix */ NULL, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type);
 
@@ -338,7 +347,7 @@ PHP_FUNCTION(request_parse_body)
 
 	sapi_read_post_data();
 	if (!SG(request_info).post_entry) {
-		zend_throw_error(spl_ce_InvalidArgumentException, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		zend_throw_error(zend_ce_request_parse_body_exception, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
 		goto exit;
 	}
 

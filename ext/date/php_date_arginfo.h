@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 41c7662745d19808dd4550b37cd1b9f2aa94d75b */
+ * Stub hash: 8556e1b5f05ae9f78200f05f01d9f8e815cba49d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -175,7 +175,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_transitions_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "2147483647")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_location_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -436,7 +436,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTimeZone_getTransitions, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "2147483647")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone_getLocation arginfo_class_DateTime_getLastErrors
@@ -675,7 +675,7 @@ static const zend_function_entry class_DateTimeInterface_methods[] = {
 	ZEND_RAW_FENTRY("getTimestamp", NULL, arginfo_class_DateTimeInterface_getTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("getMicrosecond", NULL, arginfo_class_DateTimeInterface_getMicrosecond, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("diff", NULL, arginfo_class_DateTimeInterface_diff, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("__wakeup", NULL, arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("__wakeup", NULL, arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("__serialize", NULL, arginfo_class_DateTimeInterface___serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("__unserialize", NULL, arginfo_class_DateTimeInterface___unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
@@ -685,7 +685,7 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME(DateTime, __construct, arginfo_class_DateTime___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTime, __serialize, arginfo_class_DateTime___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTime, __unserialize, arginfo_class_DateTime___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTime, __wakeup, arginfo_class_DateTime___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, __wakeup, arginfo_class_DateTime___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(DateTime, __set_state, arginfo_class_DateTime___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTime, createFromImmutable, arginfo_class_DateTime_createFromImmutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTime, createFromInterface, arginfo_class_DateTime_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -714,7 +714,7 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, __construct, arginfo_class_DateTimeImmutable___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __serialize, arginfo_class_DateTimeImmutable___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __unserialize, arginfo_class_DateTimeImmutable___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, __wakeup, arginfo_class_DateTimeImmutable___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, __wakeup, arginfo_class_DateTimeImmutable___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(DateTimeImmutable, __set_state, arginfo_class_DateTimeImmutable___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_RAW_FENTRY("createFromFormat", zif_date_create_immutable_from_format, arginfo_class_DateTimeImmutable_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_ME(DateTimeImmutable, createFromTimestamp, arginfo_class_DateTimeImmutable_createFromTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -725,15 +725,15 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_RAW_FENTRY("getTimestamp", zif_date_timestamp_get, arginfo_class_DateTimeImmutable_getTimestamp, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getMicrosecond", zim_DateTime_getMicrosecond, arginfo_class_DateTimeImmutable_getMicrosecond, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("diff", zif_date_diff, arginfo_class_DateTimeImmutable_diff, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(DateTimeImmutable, modify, arginfo_class_DateTimeImmutable_modify, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, add, arginfo_class_DateTimeImmutable_add, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, sub, arginfo_class_DateTimeImmutable_sub, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setTimezone, arginfo_class_DateTimeImmutable_setTimezone, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setTime, arginfo_class_DateTimeImmutable_setTime, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setDate, arginfo_class_DateTimeImmutable_setDate, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setISODate, arginfo_class_DateTimeImmutable_setISODate, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setTimestamp, arginfo_class_DateTimeImmutable_setTimestamp, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeImmutable, setMicrosecond, arginfo_class_DateTimeImmutable_setMicrosecond, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, modify, arginfo_class_DateTimeImmutable_modify, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, add, arginfo_class_DateTimeImmutable_add, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, sub, arginfo_class_DateTimeImmutable_sub, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setTimezone, arginfo_class_DateTimeImmutable_setTimezone, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setTime, arginfo_class_DateTimeImmutable_setTime, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setDate, arginfo_class_DateTimeImmutable_setDate, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setISODate, arginfo_class_DateTimeImmutable_setISODate, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setTimestamp, arginfo_class_DateTimeImmutable_setTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(DateTimeImmutable, setMicrosecond, arginfo_class_DateTimeImmutable_setMicrosecond, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(DateTimeImmutable, createFromMutable, arginfo_class_DateTimeImmutable_createFromMutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTimeImmutable, createFromInterface, arginfo_class_DateTimeImmutable_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
@@ -749,7 +749,7 @@ static const zend_function_entry class_DateTimeZone_methods[] = {
 	ZEND_RAW_FENTRY("listIdentifiers", zif_timezone_identifiers_list, arginfo_class_DateTimeZone_listIdentifiers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_ME(DateTimeZone, __serialize, arginfo_class_DateTimeZone___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeZone, __unserialize, arginfo_class_DateTimeZone___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateTimeZone, __wakeup, arginfo_class_DateTimeZone___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeZone, __wakeup, arginfo_class_DateTimeZone___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(DateTimeZone, __set_state, arginfo_class_DateTimeZone___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
@@ -760,7 +760,7 @@ static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_RAW_FENTRY("format", zif_date_interval_format, arginfo_class_DateInterval_format, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(DateInterval, __serialize, arginfo_class_DateInterval___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __unserialize, arginfo_class_DateInterval___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(DateInterval, __wakeup, arginfo_class_DateInterval___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateInterval, __wakeup, arginfo_class_DateInterval___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(DateInterval, __set_state, arginfo_class_DateInterval___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
@@ -774,45 +774,9 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_ME(DatePeriod, getRecurrences, arginfo_class_DatePeriod_getRecurrences, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __serialize, arginfo_class_DatePeriod___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __unserialize, arginfo_class_DatePeriod___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(DatePeriod, __wakeup, arginfo_class_DatePeriod___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(DatePeriod, __wakeup, arginfo_class_DatePeriod___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(DatePeriod, __set_state, arginfo_class_DatePeriod___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, getIterator, arginfo_class_DatePeriod_getIterator, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateObjectError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateRangeError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateInvalidTimeZoneException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateInvalidOperationException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedStringException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedIntervalStringException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedPeriodStringException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -834,7 +798,7 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC1036, "D, d M y H:i:s O") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC1123, "D, d M Y H:i:s O") == 0);
-	REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_PERSISTENT);
+	zend_constant *const_DATE_RFC7231 = REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_PERSISTENT | CONST_DEPRECATED);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC7231, "D, d M Y H:i:s \\G\\M\\T") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC2822, "D, d M Y H:i:s O") == 0);
@@ -844,58 +808,62 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC3339_EXTENDED, "Y-m-d\\TH:i:s.vP") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RSS", DATE_FORMAT_RFC1123, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C", DATE_FORMAT_RFC3339, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_STRING = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_DOUBLE = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
-	zend_attribute *attribute_Deprecated_func_strftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strftime", sizeof("strftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_strftime_0_arg0;
-	zend_string *attribute_Deprecated_func_strftime_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strftime_0_arg0, attribute_Deprecated_func_strftime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strftime_0->args[0].value, &attribute_Deprecated_func_strftime_0_arg0);
+	zend_attribute *attribute_Deprecated_func_strftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strftime", sizeof("strftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_strftime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_strftime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_strftime_0_arg1;
 	zend_string *attribute_Deprecated_func_strftime_0_arg1_str = zend_string_init("use IntlDateFormatter::format() instead", strlen("use IntlDateFormatter::format() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strftime_0_arg1, attribute_Deprecated_func_strftime_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strftime_0->args[1].value, &attribute_Deprecated_func_strftime_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_strftime_0->args[1].value, attribute_Deprecated_func_strftime_0_arg1_str);
 	attribute_Deprecated_func_strftime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_gmstrftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "gmstrftime", sizeof("gmstrftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_gmstrftime_0_arg0;
-	zend_string *attribute_Deprecated_func_gmstrftime_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0_arg0, attribute_Deprecated_func_gmstrftime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_gmstrftime_0->args[0].value, &attribute_Deprecated_func_gmstrftime_0_arg0);
+	zend_attribute *attribute_Deprecated_func_gmstrftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "gmstrftime", sizeof("gmstrftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_gmstrftime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_gmstrftime_0_arg1;
-	zend_string *attribute_Deprecated_func_gmstrftime_0_arg1_str = zend_string_init("use IntlDateFormatter::format() instead", strlen("use IntlDateFormatter::format() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0_arg1, attribute_Deprecated_func_gmstrftime_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_gmstrftime_0->args[1].value, &attribute_Deprecated_func_gmstrftime_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_gmstrftime_0->args[1].value, attribute_Deprecated_func_strftime_0_arg1_str);
 	attribute_Deprecated_func_gmstrftime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_date_sunrise_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunrise", sizeof("date_sunrise") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_date_sunrise_0_arg0;
-	zend_string *attribute_Deprecated_func_date_sunrise_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0_arg0, attribute_Deprecated_func_date_sunrise_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunrise_0->args[0].value, &attribute_Deprecated_func_date_sunrise_0_arg0);
+	zend_attribute *attribute_Deprecated_func_date_sunrise_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunrise", sizeof("date_sunrise") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_date_sunrise_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_date_sunrise_0_arg1;
 	zend_string *attribute_Deprecated_func_date_sunrise_0_arg1_str = zend_string_init("use date_sun_info() instead", strlen("use date_sun_info() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0_arg1, attribute_Deprecated_func_date_sunrise_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunrise_0->args[1].value, &attribute_Deprecated_func_date_sunrise_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0->args[1].value, attribute_Deprecated_func_date_sunrise_0_arg1_str);
 	attribute_Deprecated_func_date_sunrise_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_date_sunset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunset", sizeof("date_sunset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
-	zval attribute_Deprecated_func_date_sunset_0_arg0;
-	zend_string *attribute_Deprecated_func_date_sunset_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg0, attribute_Deprecated_func_date_sunset_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[0].value, &attribute_Deprecated_func_date_sunset_0_arg0);
+	zend_attribute *attribute_Deprecated_func_date_sunset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunset", sizeof("date_sunset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_date_sunset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_date_sunset_0_arg1;
-	zend_string *attribute_Deprecated_func_date_sunset_0_arg1_str = zend_string_init("use date_sun_info() instead", strlen("use date_sun_info() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg1, attribute_Deprecated_func_date_sunset_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[1].value, &attribute_Deprecated_func_date_sunset_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_date_sunset_0->args[1].value, attribute_Deprecated_func_date_sunrise_0_arg1_str);
 	attribute_Deprecated_func_date_sunset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_DATE_RFC7231_0 = zend_add_global_constant_attribute(const_DATE_RFC7231, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_DATE_RFC7231_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_DATE_RFC7231_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_DATE_RFC7231_0_arg1_str = zend_string_init("as this format ignores the associated timezone and always uses GMT", strlen("as this format ignores the associated timezone and always uses GMT"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DATE_RFC7231_0->args[1].value, attribute_Deprecated_const_DATE_RFC7231_0_arg1_str);
+	attribute_Deprecated_const_DATE_RFC7231_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_TIMESTAMP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
+	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
+	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
+	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
+	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_DOUBLE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
+	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
+	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_DateTimeInterface(void)
@@ -908,100 +876,116 @@ static zend_class_entry *register_class_DateTimeInterface(void)
 	zval const_ATOM_value;
 	zend_string *const_ATOM_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_ATOM_value, const_ATOM_value_str);
-	zend_string *const_ATOM_name = zend_string_init_interned("ATOM", sizeof("ATOM") - 1, 1);
+	zend_string *const_ATOM_name = zend_string_init_interned("ATOM", sizeof("ATOM") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATOM_name, &const_ATOM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_ATOM_name);
+	zend_string_release_ex(const_ATOM_name, true);
 
 	zval const_COOKIE_value;
 	zend_string *const_COOKIE_value_str = zend_string_init(DATE_FORMAT_COOKIE, strlen(DATE_FORMAT_COOKIE), 1);
 	ZVAL_STR(&const_COOKIE_value, const_COOKIE_value_str);
-	zend_string *const_COOKIE_name = zend_string_init_interned("COOKIE", sizeof("COOKIE") - 1, 1);
+	zend_string *const_COOKIE_name = zend_string_init_interned("COOKIE", sizeof("COOKIE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_COOKIE_name, &const_COOKIE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_COOKIE_name);
+	zend_string_release_ex(const_COOKIE_name, true);
 
 	zval const_ISO8601_value;
 	zend_string *const_ISO8601_value_str = zend_string_init(DATE_FORMAT_ISO8601, strlen(DATE_FORMAT_ISO8601), 1);
 	ZVAL_STR(&const_ISO8601_value, const_ISO8601_value_str);
-	zend_string *const_ISO8601_name = zend_string_init_interned("ISO8601", sizeof("ISO8601") - 1, 1);
+	zend_string *const_ISO8601_name = zend_string_init_interned("ISO8601", sizeof("ISO8601") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ISO8601_name, &const_ISO8601_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_ISO8601_name);
+	zend_string_release_ex(const_ISO8601_name, true);
 
 	zval const_ISO8601_EXPANDED_value;
 	zend_string *const_ISO8601_EXPANDED_value_str = zend_string_init(DATE_FORMAT_ISO8601_EXPANDED, strlen(DATE_FORMAT_ISO8601_EXPANDED), 1);
 	ZVAL_STR(&const_ISO8601_EXPANDED_value, const_ISO8601_EXPANDED_value_str);
-	zend_string *const_ISO8601_EXPANDED_name = zend_string_init_interned("ISO8601_EXPANDED", sizeof("ISO8601_EXPANDED") - 1, 1);
+	zend_string *const_ISO8601_EXPANDED_name = zend_string_init_interned("ISO8601_EXPANDED", sizeof("ISO8601_EXPANDED") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ISO8601_EXPANDED_name, &const_ISO8601_EXPANDED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_ISO8601_EXPANDED_name);
+	zend_string_release_ex(const_ISO8601_EXPANDED_name, true);
 
 	zval const_RFC822_value;
 	zend_string *const_RFC822_value_str = zend_string_init(DATE_FORMAT_RFC822, strlen(DATE_FORMAT_RFC822), 1);
 	ZVAL_STR(&const_RFC822_value, const_RFC822_value_str);
-	zend_string *const_RFC822_name = zend_string_init_interned("RFC822", sizeof("RFC822") - 1, 1);
+	zend_string *const_RFC822_name = zend_string_init_interned("RFC822", sizeof("RFC822") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC822_name, &const_RFC822_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC822_name);
+	zend_string_release_ex(const_RFC822_name, true);
 
 	zval const_RFC850_value;
 	zend_string *const_RFC850_value_str = zend_string_init(DATE_FORMAT_RFC850, strlen(DATE_FORMAT_RFC850), 1);
 	ZVAL_STR(&const_RFC850_value, const_RFC850_value_str);
-	zend_string *const_RFC850_name = zend_string_init_interned("RFC850", sizeof("RFC850") - 1, 1);
+	zend_string *const_RFC850_name = zend_string_init_interned("RFC850", sizeof("RFC850") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC850_name, &const_RFC850_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC850_name);
+	zend_string_release_ex(const_RFC850_name, true);
 
 	zval const_RFC1036_value;
 	zend_string *const_RFC1036_value_str = zend_string_init(DATE_FORMAT_RFC1036, strlen(DATE_FORMAT_RFC1036), 1);
 	ZVAL_STR(&const_RFC1036_value, const_RFC1036_value_str);
-	zend_string *const_RFC1036_name = zend_string_init_interned("RFC1036", sizeof("RFC1036") - 1, 1);
+	zend_string *const_RFC1036_name = zend_string_init_interned("RFC1036", sizeof("RFC1036") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC1036_name, &const_RFC1036_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC1036_name);
+	zend_string_release_ex(const_RFC1036_name, true);
 
 	zval const_RFC1123_value;
 	zend_string *const_RFC1123_value_str = zend_string_init(DATE_FORMAT_RFC1123, strlen(DATE_FORMAT_RFC1123), 1);
 	ZVAL_STR(&const_RFC1123_value, const_RFC1123_value_str);
-	zend_string *const_RFC1123_name = zend_string_init_interned("RFC1123", sizeof("RFC1123") - 1, 1);
+	zend_string *const_RFC1123_name = zend_string_init_interned("RFC1123", sizeof("RFC1123") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC1123_name, &const_RFC1123_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC1123_name);
+	zend_string_release_ex(const_RFC1123_name, true);
 
 	zval const_RFC7231_value;
 	zend_string *const_RFC7231_value_str = zend_string_init(DATE_FORMAT_RFC7231, strlen(DATE_FORMAT_RFC7231), 1);
 	ZVAL_STR(&const_RFC7231_value, const_RFC7231_value_str);
-	zend_string *const_RFC7231_name = zend_string_init_interned("RFC7231", sizeof("RFC7231") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_RFC7231_name, &const_RFC7231_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC7231_name);
+	zend_string *const_RFC7231_name = zend_string_init_interned("RFC7231", sizeof("RFC7231") - 1, true);
+	zend_class_constant *const_RFC7231 = zend_declare_typed_class_constant(class_entry, const_RFC7231_name, &const_RFC7231_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(const_RFC7231_name, true);
 
 	zval const_RFC2822_value;
 	zend_string *const_RFC2822_value_str = zend_string_init(DATE_FORMAT_RFC2822, strlen(DATE_FORMAT_RFC2822), 1);
 	ZVAL_STR(&const_RFC2822_value, const_RFC2822_value_str);
-	zend_string *const_RFC2822_name = zend_string_init_interned("RFC2822", sizeof("RFC2822") - 1, 1);
+	zend_string *const_RFC2822_name = zend_string_init_interned("RFC2822", sizeof("RFC2822") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC2822_name, &const_RFC2822_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC2822_name);
+	zend_string_release_ex(const_RFC2822_name, true);
 
 	zval const_RFC3339_value;
 	zend_string *const_RFC3339_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_RFC3339_value, const_RFC3339_value_str);
-	zend_string *const_RFC3339_name = zend_string_init_interned("RFC3339", sizeof("RFC3339") - 1, 1);
+	zend_string *const_RFC3339_name = zend_string_init_interned("RFC3339", sizeof("RFC3339") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC3339_name, &const_RFC3339_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC3339_name);
+	zend_string_release_ex(const_RFC3339_name, true);
 
 	zval const_RFC3339_EXTENDED_value;
 	zend_string *const_RFC3339_EXTENDED_value_str = zend_string_init(DATE_FORMAT_RFC3339_EXTENDED, strlen(DATE_FORMAT_RFC3339_EXTENDED), 1);
 	ZVAL_STR(&const_RFC3339_EXTENDED_value, const_RFC3339_EXTENDED_value_str);
-	zend_string *const_RFC3339_EXTENDED_name = zend_string_init_interned("RFC3339_EXTENDED", sizeof("RFC3339_EXTENDED") - 1, 1);
+	zend_string *const_RFC3339_EXTENDED_name = zend_string_init_interned("RFC3339_EXTENDED", sizeof("RFC3339_EXTENDED") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RFC3339_EXTENDED_name, &const_RFC3339_EXTENDED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RFC3339_EXTENDED_name);
+	zend_string_release_ex(const_RFC3339_EXTENDED_name, true);
 
 	zval const_RSS_value;
 	zend_string *const_RSS_value_str = zend_string_init(DATE_FORMAT_RFC1123, strlen(DATE_FORMAT_RFC1123), 1);
 	ZVAL_STR(&const_RSS_value, const_RSS_value_str);
-	zend_string *const_RSS_name = zend_string_init_interned("RSS", sizeof("RSS") - 1, 1);
+	zend_string *const_RSS_name = zend_string_init_interned("RSS", sizeof("RSS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RSS_name, &const_RSS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_RSS_name);
+	zend_string_release_ex(const_RSS_name, true);
 
 	zval const_W3C_value;
 	zend_string *const_W3C_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_W3C_value, const_W3C_value_str);
-	zend_string *const_W3C_name = zend_string_init_interned("W3C", sizeof("W3C") - 1, 1);
+	zend_string *const_W3C_name = zend_string_init_interned("W3C", sizeof("W3C") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_W3C_name, &const_W3C_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_W3C_name);
+	zend_string_release_ex(const_W3C_name, true);
+
+
+	zend_attribute *attribute_Deprecated_const_RFC7231_0 = zend_add_class_constant_attribute(class_entry, const_RFC7231, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_RFC7231_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_RFC7231_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_RFC7231_0_arg1_str = zend_string_init("as this format ignores the associated timezone and always uses GMT", strlen("as this format ignores the associated timezone and always uses GMT"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_RFC7231_0->args[1].value, attribute_Deprecated_const_RFC7231_0_arg1_str);
+	attribute_Deprecated_const_RFC7231_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1011,8 +995,16 @@ static zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_D
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateTime", class_DateTime_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_DateTimeInterface);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1022,8 +1014,79 @@ static zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateTimeImmutable", class_DateTimeImmutable_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_DateTimeInterface);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_modify_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_modify_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "modify", sizeof("modify") - 1), attribute_name_NoDiscard_func_modify_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_modify_0, true);
+	zend_string *attribute_NoDiscard_func_modify_0_arg0_str = zend_string_init("as DateTimeImmutable::modify() does not modify the object itself", strlen("as DateTimeImmutable::modify() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_modify_0->args[0].value, attribute_NoDiscard_func_modify_0_arg0_str);
+	attribute_NoDiscard_func_modify_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_add_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_add_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "add", sizeof("add") - 1), attribute_name_NoDiscard_func_add_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_add_0, true);
+	zend_string *attribute_NoDiscard_func_add_0_arg0_str = zend_string_init("as DateTimeImmutable::add() does not modify the object itself", strlen("as DateTimeImmutable::add() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_add_0->args[0].value, attribute_NoDiscard_func_add_0_arg0_str);
+	attribute_NoDiscard_func_add_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_sub_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_sub_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sub", sizeof("sub") - 1), attribute_name_NoDiscard_func_sub_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_sub_0, true);
+	zend_string *attribute_NoDiscard_func_sub_0_arg0_str = zend_string_init("as DateTimeImmutable::sub() does not modify the object itself", strlen("as DateTimeImmutable::sub() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_sub_0->args[0].value, attribute_NoDiscard_func_sub_0_arg0_str);
+	attribute_NoDiscard_func_sub_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_settimezone_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_settimezone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimezone", sizeof("settimezone") - 1), attribute_name_NoDiscard_func_settimezone_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_settimezone_0, true);
+	zend_string *attribute_NoDiscard_func_settimezone_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimezone() does not modify the object itself", strlen("as DateTimeImmutable::setTimezone() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_settimezone_0->args[0].value, attribute_NoDiscard_func_settimezone_0_arg0_str);
+	attribute_NoDiscard_func_settimezone_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_settime_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_settime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settime", sizeof("settime") - 1), attribute_name_NoDiscard_func_settime_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_settime_0, true);
+	zend_string *attribute_NoDiscard_func_settime_0_arg0_str = zend_string_init("as DateTimeImmutable::setTime() does not modify the object itself", strlen("as DateTimeImmutable::setTime() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_settime_0->args[0].value, attribute_NoDiscard_func_settime_0_arg0_str);
+	attribute_NoDiscard_func_settime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_setdate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_setdate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setdate", sizeof("setdate") - 1), attribute_name_NoDiscard_func_setdate_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_setdate_0, true);
+	zend_string *attribute_NoDiscard_func_setdate_0_arg0_str = zend_string_init("as DateTimeImmutable::setDate() does not modify the object itself", strlen("as DateTimeImmutable::setDate() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_setdate_0->args[0].value, attribute_NoDiscard_func_setdate_0_arg0_str);
+	attribute_NoDiscard_func_setdate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_setisodate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_setisodate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setisodate", sizeof("setisodate") - 1), attribute_name_NoDiscard_func_setisodate_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_setisodate_0, true);
+	zend_string *attribute_NoDiscard_func_setisodate_0_arg0_str = zend_string_init("as DateTimeImmutable::setISODate() does not modify the object itself", strlen("as DateTimeImmutable::setISODate() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_setisodate_0->args[0].value, attribute_NoDiscard_func_setisodate_0_arg0_str);
+	attribute_NoDiscard_func_setisodate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_settimestamp_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_settimestamp_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimestamp", sizeof("settimestamp") - 1), attribute_name_NoDiscard_func_settimestamp_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_settimestamp_0, true);
+	zend_string *attribute_NoDiscard_func_settimestamp_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimestamp() does not modify the object itself", strlen("as DateTimeImmutable::setTimestamp() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_settimestamp_0->args[0].value, attribute_NoDiscard_func_settimestamp_0_arg0_str);
+	attribute_NoDiscard_func_settimestamp_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_string *attribute_name_NoDiscard_func_setmicrosecond_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
+	zend_attribute *attribute_NoDiscard_func_setmicrosecond_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setmicrosecond", sizeof("setmicrosecond") - 1), attribute_name_NoDiscard_func_setmicrosecond_0, 1);
+	zend_string_release_ex(attribute_name_NoDiscard_func_setmicrosecond_0, true);
+	zend_string *attribute_NoDiscard_func_setmicrosecond_0_arg0_str = zend_string_init("as DateTimeImmutable::setMicrosecond() does not modify the object itself", strlen("as DateTimeImmutable::setMicrosecond() does not modify the object itself"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_setmicrosecond_0->args[0].value, attribute_NoDiscard_func_setmicrosecond_0_arg0_str);
+	attribute_NoDiscard_func_setmicrosecond_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1033,91 +1096,99 @@ static zend_class_entry *register_class_DateTimeZone(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateTimeZone", class_DateTimeZone_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_AFRICA_value;
 	ZVAL_LONG(&const_AFRICA_value, PHP_DATE_TIMEZONE_GROUP_AFRICA);
-	zend_string *const_AFRICA_name = zend_string_init_interned("AFRICA", sizeof("AFRICA") - 1, 1);
+	zend_string *const_AFRICA_name = zend_string_init_interned("AFRICA", sizeof("AFRICA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_AFRICA_name, &const_AFRICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_AFRICA_name);
+	zend_string_release_ex(const_AFRICA_name, true);
 
 	zval const_AMERICA_value;
 	ZVAL_LONG(&const_AMERICA_value, PHP_DATE_TIMEZONE_GROUP_AMERICA);
-	zend_string *const_AMERICA_name = zend_string_init_interned("AMERICA", sizeof("AMERICA") - 1, 1);
+	zend_string *const_AMERICA_name = zend_string_init_interned("AMERICA", sizeof("AMERICA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_AMERICA_name, &const_AMERICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_AMERICA_name);
+	zend_string_release_ex(const_AMERICA_name, true);
 
 	zval const_ANTARCTICA_value;
 	ZVAL_LONG(&const_ANTARCTICA_value, PHP_DATE_TIMEZONE_GROUP_ANTARCTICA);
-	zend_string *const_ANTARCTICA_name = zend_string_init_interned("ANTARCTICA", sizeof("ANTARCTICA") - 1, 1);
+	zend_string *const_ANTARCTICA_name = zend_string_init_interned("ANTARCTICA", sizeof("ANTARCTICA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ANTARCTICA_name, &const_ANTARCTICA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ANTARCTICA_name);
+	zend_string_release_ex(const_ANTARCTICA_name, true);
 
 	zval const_ARCTIC_value;
 	ZVAL_LONG(&const_ARCTIC_value, PHP_DATE_TIMEZONE_GROUP_ARCTIC);
-	zend_string *const_ARCTIC_name = zend_string_init_interned("ARCTIC", sizeof("ARCTIC") - 1, 1);
+	zend_string *const_ARCTIC_name = zend_string_init_interned("ARCTIC", sizeof("ARCTIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ARCTIC_name, &const_ARCTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ARCTIC_name);
+	zend_string_release_ex(const_ARCTIC_name, true);
 
 	zval const_ASIA_value;
 	ZVAL_LONG(&const_ASIA_value, PHP_DATE_TIMEZONE_GROUP_ASIA);
-	zend_string *const_ASIA_name = zend_string_init_interned("ASIA", sizeof("ASIA") - 1, 1);
+	zend_string *const_ASIA_name = zend_string_init_interned("ASIA", sizeof("ASIA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ASIA_name, &const_ASIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ASIA_name);
+	zend_string_release_ex(const_ASIA_name, true);
 
 	zval const_ATLANTIC_value;
 	ZVAL_LONG(&const_ATLANTIC_value, PHP_DATE_TIMEZONE_GROUP_ATLANTIC);
-	zend_string *const_ATLANTIC_name = zend_string_init_interned("ATLANTIC", sizeof("ATLANTIC") - 1, 1);
+	zend_string *const_ATLANTIC_name = zend_string_init_interned("ATLANTIC", sizeof("ATLANTIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATLANTIC_name, &const_ATLANTIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATLANTIC_name);
+	zend_string_release_ex(const_ATLANTIC_name, true);
 
 	zval const_AUSTRALIA_value;
 	ZVAL_LONG(&const_AUSTRALIA_value, PHP_DATE_TIMEZONE_GROUP_AUSTRALIA);
-	zend_string *const_AUSTRALIA_name = zend_string_init_interned("AUSTRALIA", sizeof("AUSTRALIA") - 1, 1);
+	zend_string *const_AUSTRALIA_name = zend_string_init_interned("AUSTRALIA", sizeof("AUSTRALIA") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_AUSTRALIA_name, &const_AUSTRALIA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_AUSTRALIA_name);
+	zend_string_release_ex(const_AUSTRALIA_name, true);
 
 	zval const_EUROPE_value;
 	ZVAL_LONG(&const_EUROPE_value, PHP_DATE_TIMEZONE_GROUP_EUROPE);
-	zend_string *const_EUROPE_name = zend_string_init_interned("EUROPE", sizeof("EUROPE") - 1, 1);
+	zend_string *const_EUROPE_name = zend_string_init_interned("EUROPE", sizeof("EUROPE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EUROPE_name, &const_EUROPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_EUROPE_name);
+	zend_string_release_ex(const_EUROPE_name, true);
 
 	zval const_INDIAN_value;
 	ZVAL_LONG(&const_INDIAN_value, PHP_DATE_TIMEZONE_GROUP_INDIAN);
-	zend_string *const_INDIAN_name = zend_string_init_interned("INDIAN", sizeof("INDIAN") - 1, 1);
+	zend_string *const_INDIAN_name = zend_string_init_interned("INDIAN", sizeof("INDIAN") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_INDIAN_name, &const_INDIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_INDIAN_name);
+	zend_string_release_ex(const_INDIAN_name, true);
 
 	zval const_PACIFIC_value;
 	ZVAL_LONG(&const_PACIFIC_value, PHP_DATE_TIMEZONE_GROUP_PACIFIC);
-	zend_string *const_PACIFIC_name = zend_string_init_interned("PACIFIC", sizeof("PACIFIC") - 1, 1);
+	zend_string *const_PACIFIC_name = zend_string_init_interned("PACIFIC", sizeof("PACIFIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_PACIFIC_name, &const_PACIFIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_PACIFIC_name);
+	zend_string_release_ex(const_PACIFIC_name, true);
 
 	zval const_UTC_value;
 	ZVAL_LONG(&const_UTC_value, PHP_DATE_TIMEZONE_GROUP_UTC);
-	zend_string *const_UTC_name = zend_string_init_interned("UTC", sizeof("UTC") - 1, 1);
+	zend_string *const_UTC_name = zend_string_init_interned("UTC", sizeof("UTC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_UTC_name, &const_UTC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_UTC_name);
+	zend_string_release_ex(const_UTC_name, true);
 
 	zval const_ALL_value;
 	ZVAL_LONG(&const_ALL_value, PHP_DATE_TIMEZONE_GROUP_ALL);
-	zend_string *const_ALL_name = zend_string_init_interned("ALL", sizeof("ALL") - 1, 1);
+	zend_string *const_ALL_name = zend_string_init_interned("ALL", sizeof("ALL") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ALL_name, &const_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ALL_name);
+	zend_string_release_ex(const_ALL_name, true);
 
 	zval const_ALL_WITH_BC_value;
 	ZVAL_LONG(&const_ALL_WITH_BC_value, PHP_DATE_TIMEZONE_GROUP_ALL_W_BC);
-	zend_string *const_ALL_WITH_BC_name = zend_string_init_interned("ALL_WITH_BC", sizeof("ALL_WITH_BC") - 1, 1);
+	zend_string *const_ALL_WITH_BC_name = zend_string_init_interned("ALL_WITH_BC", sizeof("ALL_WITH_BC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ALL_WITH_BC_name, &const_ALL_WITH_BC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ALL_WITH_BC_name);
+	zend_string_release_ex(const_ALL_WITH_BC_name, true);
 
 	zval const_PER_COUNTRY_value;
 	ZVAL_LONG(&const_PER_COUNTRY_value, PHP_DATE_TIMEZONE_PER_COUNTRY);
-	zend_string *const_PER_COUNTRY_name = zend_string_init_interned("PER_COUNTRY", sizeof("PER_COUNTRY") - 1, 1);
+	zend_string *const_PER_COUNTRY_name = zend_string_init_interned("PER_COUNTRY", sizeof("PER_COUNTRY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_PER_COUNTRY_name, &const_PER_COUNTRY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_PER_COUNTRY_name);
+	zend_string_release_ex(const_PER_COUNTRY_name, true);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1127,7 +1198,15 @@ static zend_class_entry *register_class_DateInterval(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateInterval", class_DateInterval_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1137,66 +1216,74 @@ static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DatePeriod", class_DatePeriod_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval const_EXCLUDE_START_DATE_value;
 	ZVAL_LONG(&const_EXCLUDE_START_DATE_value, PHP_DATE_PERIOD_EXCLUDE_START_DATE);
-	zend_string *const_EXCLUDE_START_DATE_name = zend_string_init_interned("EXCLUDE_START_DATE", sizeof("EXCLUDE_START_DATE") - 1, 1);
+	zend_string *const_EXCLUDE_START_DATE_name = zend_string_init_interned("EXCLUDE_START_DATE", sizeof("EXCLUDE_START_DATE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EXCLUDE_START_DATE_name, &const_EXCLUDE_START_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_EXCLUDE_START_DATE_name);
+	zend_string_release_ex(const_EXCLUDE_START_DATE_name, true);
 
 	zval const_INCLUDE_END_DATE_value;
 	ZVAL_LONG(&const_INCLUDE_END_DATE_value, PHP_DATE_PERIOD_INCLUDE_END_DATE);
-	zend_string *const_INCLUDE_END_DATE_name = zend_string_init_interned("INCLUDE_END_DATE", sizeof("INCLUDE_END_DATE") - 1, 1);
+	zend_string *const_INCLUDE_END_DATE_name = zend_string_init_interned("INCLUDE_END_DATE", sizeof("INCLUDE_END_DATE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_INCLUDE_END_DATE_name, &const_INCLUDE_END_DATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_INCLUDE_END_DATE_name);
+	zend_string_release_ex(const_INCLUDE_END_DATE_name, true);
 
 	zval property_start_default_value;
 	ZVAL_UNDEF(&property_start_default_value);
-	zend_string *property_start_name = zend_string_init("start", sizeof("start") - 1, 1);
+	zend_string *property_start_name = zend_string_init("start", sizeof("start") - 1, true);
 	zend_string *property_start_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
-	zend_declare_typed_property(class_entry, property_start_name, &property_start_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_start_class_DateTimeInterface, 0, MAY_BE_NULL));
-	zend_string_release(property_start_name);
+	zend_declare_typed_property(class_entry, property_start_name, &property_start_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_start_class_DateTimeInterface, 0, MAY_BE_NULL));
+	zend_string_release_ex(property_start_name, true);
 
 	zval property_current_default_value;
 	ZVAL_UNDEF(&property_current_default_value);
-	zend_string *property_current_name = zend_string_init("current", sizeof("current") - 1, 1);
+	zend_string *property_current_name = zend_string_init("current", sizeof("current") - 1, true);
 	zend_string *property_current_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
-	zend_declare_typed_property(class_entry, property_current_name, &property_current_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_current_class_DateTimeInterface, 0, MAY_BE_NULL));
-	zend_string_release(property_current_name);
+	zend_declare_typed_property(class_entry, property_current_name, &property_current_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_current_class_DateTimeInterface, 0, MAY_BE_NULL));
+	zend_string_release_ex(property_current_name, true);
 
 	zval property_end_default_value;
 	ZVAL_UNDEF(&property_end_default_value);
-	zend_string *property_end_name = zend_string_init("end", sizeof("end") - 1, 1);
+	zend_string *property_end_name = zend_string_init("end", sizeof("end") - 1, true);
 	zend_string *property_end_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
-	zend_declare_typed_property(class_entry, property_end_name, &property_end_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_end_class_DateTimeInterface, 0, MAY_BE_NULL));
-	zend_string_release(property_end_name);
+	zend_declare_typed_property(class_entry, property_end_name, &property_end_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_end_class_DateTimeInterface, 0, MAY_BE_NULL));
+	zend_string_release_ex(property_end_name, true);
 
 	zval property_interval_default_value;
 	ZVAL_UNDEF(&property_interval_default_value);
-	zend_string *property_interval_name = zend_string_init("interval", sizeof("interval") - 1, 1);
+	zend_string *property_interval_name = zend_string_init("interval", sizeof("interval") - 1, true);
 	zend_string *property_interval_class_DateInterval = zend_string_init("DateInterval", sizeof("DateInterval")-1, 1);
-	zend_declare_typed_property(class_entry, property_interval_name, &property_interval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_interval_class_DateInterval, 0, MAY_BE_NULL));
-	zend_string_release(property_interval_name);
+	zend_declare_typed_property(class_entry, property_interval_name, &property_interval_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_interval_class_DateInterval, 0, MAY_BE_NULL));
+	zend_string_release_ex(property_interval_name, true);
 
 	zval property_recurrences_default_value;
 	ZVAL_UNDEF(&property_recurrences_default_value);
-	zend_string *property_recurrences_name = zend_string_init("recurrences", sizeof("recurrences") - 1, 1);
-	zend_declare_typed_property(class_entry, property_recurrences_name, &property_recurrences_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_recurrences_name);
+	zend_string *property_recurrences_name = zend_string_init("recurrences", sizeof("recurrences") - 1, true);
+	zend_declare_typed_property(class_entry, property_recurrences_name, &property_recurrences_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_recurrences_name, true);
 
 	zval property_include_start_date_default_value;
 	ZVAL_UNDEF(&property_include_start_date_default_value);
-	zend_string *property_include_start_date_name = zend_string_init("include_start_date", sizeof("include_start_date") - 1, 1);
-	zend_declare_typed_property(class_entry, property_include_start_date_name, &property_include_start_date_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_include_start_date_name);
+	zend_string *property_include_start_date_name = zend_string_init("include_start_date", sizeof("include_start_date") - 1, true);
+	zend_declare_typed_property(class_entry, property_include_start_date_name, &property_include_start_date_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_include_start_date_name, true);
 
 	zval property_include_end_date_default_value;
 	ZVAL_UNDEF(&property_include_end_date_default_value);
-	zend_string *property_include_end_date_name = zend_string_init("include_end_date", sizeof("include_end_date") - 1, 1);
-	zend_declare_typed_property(class_entry, property_include_end_date_name, &property_include_end_date_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_include_end_date_name);
+	zend_string *property_include_end_date_name = zend_string_init("include_end_date", sizeof("include_end_date") - 1, true);
+	zend_declare_typed_property(class_entry, property_include_end_date_name, &property_include_end_date_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_include_end_date_name, true);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
@@ -1205,9 +1292,8 @@ static zend_class_entry *register_class_DateError(zend_class_entry *class_entry_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateError", class_DateError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1216,9 +1302,8 @@ static zend_class_entry *register_class_DateObjectError(zend_class_entry *class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateObjectError", class_DateObjectError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateError);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateObjectError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1227,9 +1312,8 @@ static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_e
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateRangeError", class_DateRangeError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateError);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateRangeError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1238,9 +1322,8 @@ static zend_class_entry *register_class_DateException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateException", class_DateException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1249,9 +1332,8 @@ static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", class_DateInvalidTimeZoneException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1260,9 +1342,8 @@ static zend_class_entry *register_class_DateInvalidOperationException(zend_class
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateInvalidOperationException", class_DateInvalidOperationException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateInvalidOperationException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1271,9 +1352,8 @@ static zend_class_entry *register_class_DateMalformedStringException(zend_class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedStringException", class_DateMalformedStringException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateMalformedStringException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1282,9 +1362,8 @@ static zend_class_entry *register_class_DateMalformedIntervalStringException(zen
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedIntervalStringException", class_DateMalformedIntervalStringException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateMalformedIntervalStringException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -1293,9 +1372,8 @@ static zend_class_entry *register_class_DateMalformedPeriodStringException(zend_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedPeriodStringException", class_DateMalformedPeriodStringException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	INIT_CLASS_ENTRY(ce, "DateMalformedPeriodStringException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }

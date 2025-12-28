@@ -30,6 +30,9 @@ function run_round_test(RoundingMode $mode)
     ];
 
     $minus_precision_cases = [
+        ['0', -3],
+        ['0.01', -3],
+        ['-0.01', -3],
         ['50', -2],
         ['-50', -2],
         ['1230', -1],

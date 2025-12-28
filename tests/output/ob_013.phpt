@@ -57,11 +57,11 @@ Array
     [5] => E::f
     [6] => E::g
     [7] => E::__invoke
-    [8] => Closure::__invoke
+    [8] => {closure:%s:%d}
 )
 Array
 (
-    [name] => Closure::__invoke
+    [name] => {closure:%s:%d}
     [type] => 1
     [flags] => 20593
     [level] => 8
@@ -161,7 +161,7 @@ Array
 
     [8] => Array
         (
-            [name] => Closure::__invoke
+            [name] => {closure:%s:%d}
             [type] => 1
             [flags] => 20593
             [level] => 8

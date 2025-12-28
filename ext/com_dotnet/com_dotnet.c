@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 # include "php_ini.h"
 # include "ext/standard/info.h"
 # include "php_com_dotnet.h"
@@ -245,7 +245,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			RETURN_THROWS();
@@ -258,7 +258,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -270,7 +270,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -303,7 +303,7 @@ PHP_METHOD(dotnet, __construct)
 		IObjectHandle *handle = NULL;
 
 		where = "QI: IObjectHandle";
-		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, &handle);
+		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, (void**) &handle);
 
 		if (SUCCEEDED(hr)) {
 			where = "IObjectHandle_Unwrap";
@@ -312,7 +312,7 @@ PHP_METHOD(dotnet, __construct)
 
 				if (V_VT(&unwrapped) == VT_UNKNOWN) {
 					where = "Unwrapped, QI for IDispatch";
-					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, &V_DISPATCH(&obj->v));
+					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, (void **) &V_DISPATCH(&obj->v));
 
 					if (SUCCEEDED(hr)) {
 						V_VT(&obj->v) = VT_DISPATCH;
@@ -344,7 +344,7 @@ PHP_METHOD(dotnet, __construct)
 	if (ret == FAILURE) {
 		char buf[1024];
 		char *err = php_win32_error_to_msg(hr);
-		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
+		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08lx] %s", where, hr, err);
 		php_win32_error_msg_free(err);
 		php_com_throw_exception(hr, buf);
 		RETURN_THROWS();

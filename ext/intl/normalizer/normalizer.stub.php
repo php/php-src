@@ -20,12 +20,10 @@ class Normalizer
     public const int FORM_KC = UNKNOWN;
     /** @cvalue NORMALIZER_NFKC */
     public const int NFKC = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 56
     /** @cvalue NORMALIZER_FORM_KC_CF */
     public const int FORM_KC_CF = UNKNOWN;
     /** @cvalue NORMALIZER_NFKC_CF */
     public const int NFKC_CF = UNKNOWN;
-#endif
 
     /**
      * @tentative-return-type
@@ -39,11 +37,9 @@ class Normalizer
      */
     public static function isNormalized(string $string, int $form = Normalizer::FORM_C): bool {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
     /**
      * @tentative-return-type
      * @alias normalizer_get_raw_decomposition
      */
     public static function getRawDecomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
-#endif
 }

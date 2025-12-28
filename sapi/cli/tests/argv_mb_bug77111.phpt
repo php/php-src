@@ -24,7 +24,7 @@ $out_fl = __DIR__ . "\\argv_bug77111.txt";
 $argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_bug77111_test.php";
 file_put_contents($argv_fl, "<?php file_put_contents('$out_fl', implode(' ', array_slice(\$argv, 1))); ?>");
 
-`$php -n $argv_fl Ästhetik Æstetik Esthétique Estética Эстетика`;
+shell_exec("$php -n $argv_fl Ästhetik Æstetik Esthétique Estética Эстетика");
 var_dump(file_get_contents($out_fl));
 
 ?>

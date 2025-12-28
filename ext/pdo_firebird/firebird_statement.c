@@ -25,6 +25,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_utils.h"
 
 #include <time.h>
 
@@ -64,6 +65,76 @@ static zend_always_inline ISC_QUAD php_get_isc_quad_from_sqldata(const ISC_SCHAR
 	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
 }
 
+#if FB_API_VER >= 40
+
+static zend_always_inline ISC_TIME_TZ php_get_isc_time_tz_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIME_TZ, sqldata);
+}
+
+static zend_always_inline ISC_TIMESTAMP_TZ php_get_isc_timestamp_tz_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP_TZ, sqldata);
+}
+
+/* fetch formatted time with time zone */
+static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zval *result)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	unsigned hours = 0, minutes = 0, seconds = 0, fractions = 0;
+	char timeZoneBuffer[40] = {0};
+	char *fmt;
+	struct tm t;
+	ISC_TIME time;
+	char timeBuf[80] = {0};
+	if (fb_decode_time_tz(S->H->isc_status, timeTz, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
+		return 1;
+	}
+	time = fb_encode_time(hours, minutes, seconds, fractions);
+	isc_decode_sql_time(&time, &t);
+	fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
+
+	size_t len = strftime(timeBuf, sizeof(timeBuf), fmt, &t);
+	if (len == 0) {
+		return 1;
+	}
+
+	zend_string *time_tz_str = zend_strpprintf(0, "%s %s", timeBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, time_tz_str);
+	return 0;
+}
+
+/* fetch formatted timestamp with time zone */
+static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* timestampTz, zval *result)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	unsigned year, month, day, hours, minutes, seconds, fractions;
+	char timeZoneBuffer[40] = {0};
+	char *fmt;
+	struct tm t;
+	ISC_TIMESTAMP ts;
+	char timestampBuf[80] = {0};
+	if (fb_decode_timestamp_tz(S->H->isc_status, timestampTz, &year, &month, &day, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
+		return 1;
+	}
+	ts.timestamp_date = fb_encode_date(year, month, day);
+	ts.timestamp_time = fb_encode_time(hours, minutes, seconds, fractions);
+	isc_decode_timestamp(&ts, &t);
+
+	fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
+
+	size_t len = strftime(timestampBuf, sizeof(timestampBuf), fmt, &t);
+	if (len == 0) {
+		return 1;
+	}
+
+	zend_string *timestamp_tz_str = zend_strpprintf(0, "%s %s", timestampBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, timestamp_tz_str);
+	return 0;
+}
+
+#endif
+
 /* free the allocated space for passing field values to the db and back */
 static void php_firebird_free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
@@ -85,8 +156,9 @@ static int pdo_firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1;
 
-	/* release the statement */
-	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	/* release the statement.
+	 * Note: if the server object is already gone then the statement was closed already as well. */
+	if (php_pdo_stmt_valid_db_obj_handle(stmt) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		php_firebird_error_stmt(stmt);
 		result = 0;
 	}
@@ -276,11 +348,9 @@ static int pdo_firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, 
 #endif
 				param_type = PDO_PARAM_INT;
 				break;
-#ifdef SQL_BOOLEAN
 			case SQL_BOOLEAN:
 				param_type = PDO_PARAM_BOOL;
 				break;
-#endif
 			default:
 				param_type = PDO_PARAM_STR;
 				break;
@@ -469,11 +539,9 @@ static int pdo_firebird_stmt_get_col(
 					/* TODO: Why is this not returned as the native type? */
 					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", php_get_double_from_sqldata(var->sqldata)));
 					break;
-#ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
 					ZVAL_BOOL(result, *(FB_BOOLEAN*)var->sqldata);
 					break;
-#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
@@ -494,6 +562,16 @@ static int pdo_firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
+#if FB_API_VER >= 40
+				case SQL_TIME_TZ: {
+					ISC_TIME_TZ time = php_get_isc_time_tz_from_sqldata(var->sqldata);
+					return get_formatted_time_tz(stmt, &time, result);
+				}
+				case SQL_TIMESTAMP_TZ: {
+					ISC_TIMESTAMP_TZ ts = php_get_isc_timestamp_tz_from_sqldata(var->sqldata);
+					return get_formatted_timestamp_tz(stmt, &ts, result);
+				}
+#endif
 				case SQL_BLOB: {
 					ISC_QUAD quad = php_get_isc_quad_from_sqldata(var->sqldata);
 					return php_firebird_fetch_blob(stmt, colno, result, &quad);
@@ -661,7 +739,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 			}
 
-#ifdef SQL_BOOLEAN
 			/* keep native BOOLEAN type */
 			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
 				switch (Z_TYPE_P(parameter)) {
@@ -714,8 +791,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 				break;
 			}
-#endif
-
 
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
@@ -746,6 +821,13 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
+#if FB_API_VER >= 40
+						case SQL_INT128:
+						case SQL_DEC16:
+						case SQL_DEC34:
+						case SQL_TIMESTAMP_TZ:
+						case SQL_TIME_TZ:
+#endif
 							force_null = (Z_STRLEN_P(parameter) == 0);
 					}
 					if (!force_null) {
@@ -803,17 +885,28 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 	switch (attr) {
 		default:
 			return 0;
-		case PDO_ATTR_CURSOR_NAME:
-			if (!try_convert_to_string(val)) {
+		case PDO_ATTR_CURSOR_NAME: {
+			zend_string *str_val = zval_try_get_string(val);
+			if (str_val == NULL) {
+				return 0;
+			}
+			// TODO Check cursor name does not have null bytes?
+			if (ZSTR_LEN(str_val) >= sizeof(S->name)) {
+				zend_value_error("Cursor name must not be longer than %zu bytes", sizeof(S->name) - 1);
+				zend_string_release(str_val);
 				return 0;
 			}
 
-			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
+			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, ZSTR_VAL(str_val), 0)) {
 				php_firebird_error_stmt(stmt);
+				zend_string_release(str_val);
 				return 0;
 			}
-			strlcpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
+			/* Include trailing nul byte */
+			memcpy(S->name, ZSTR_VAL(str_val), ZSTR_LEN(str_val) + 1);
+			zend_string_release(str_val);
 			break;
+		}
 	}
 	return 1;
 }

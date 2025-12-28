@@ -2,12 +2,11 @@
 IntlCalendar::get/setSkippedWallTimeOption(): basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 //25 March 2012, transition to DST
 $intlcal = new IntlGregorianCalendar(2012, 2, 25, 0, 0, 0);

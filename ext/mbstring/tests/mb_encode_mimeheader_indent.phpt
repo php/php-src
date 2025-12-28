@@ -2,6 +2,8 @@
 Test mb_encode_mimeheader() function : basic functionality, indent
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 /* (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
@@ -14,8 +16,6 @@ mbstring
  */
 
 echo "*** Testing mb_encode_mimeheader() : indent ***\n";
-
-mb_internal_encoding('utf-8');
 
 // Initialise function arguments not being substituted
 $str = base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg==');

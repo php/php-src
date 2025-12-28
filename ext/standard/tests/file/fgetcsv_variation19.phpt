@@ -68,7 +68,7 @@ foreach ($csv_lists as $csv_list) {
     fseek($file_handle, 0, SEEK_SET);
     $del = "++";
     try {
-        var_dump( fgetcsv($file_handle, 1024, $del) );
+        var_dump( fgetcsv($file_handle, 1024, $del, escape: "\\") );
     } catch (ValueError $e) {
         echo $e->getMessage(), "\n";
     }

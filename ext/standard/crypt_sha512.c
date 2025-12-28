@@ -350,7 +350,7 @@ static const char sha512_rounds_prefix[] = "rounds=";
 #define ROUNDS_MAX 999999999
 
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[64] ZEND_NONSTRING =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 
@@ -375,7 +375,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	bool rounds_custom = 0;
+	bool rounds_custom = false;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	 be present.  Just in case it is not.  */
@@ -396,7 +396,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 			}
 
 			rounds = srounds;
-			rounds_custom = 1;
+			rounds_custom = true;
 		}
 	}
 

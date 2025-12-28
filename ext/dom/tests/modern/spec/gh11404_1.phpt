@@ -1,5 +1,5 @@
 --TEST--
-GH-11404 (DOMDocument::savexml and friends ommit xmlns="" declaration for null namespace, creating incorrect xml representation of the DOM)
+GH-11404 (DOMDocument::savexml and friends omit xmlns="" declaration for null namespace, creating incorrect xml representation of the DOM)
 --EXTENSIONS--
 dom
 --FILE--

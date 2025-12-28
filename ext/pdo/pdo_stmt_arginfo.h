@@ -132,24 +132,19 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_PDORow_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
-	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_queryString_name);
+	zend_string_release_ex(property_queryString_name, true);
 
 	return class_entry;
 }
@@ -158,15 +153,14 @@ static zend_class_entry *register_class_PDORow(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "PDORow", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
-	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_queryString_name);
+	zend_string_release_ex(property_queryString_name, true);
 
 	return class_entry;
 }

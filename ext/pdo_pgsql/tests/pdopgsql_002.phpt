@@ -1,7 +1,6 @@
 --TEST--
 Pdo\Pgsql connect through PDO::connect
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

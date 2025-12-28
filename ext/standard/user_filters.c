@@ -148,13 +148,30 @@ static php_stream_filter_status_t userfilter_filter(
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
-	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
-	if (stream_prop) {
-		/* Give the userfilter class a hook back to the stream */
-		zval_ptr_dtor(stream_prop);
-		php_stream_to_zval(stream, stream_prop);
-		Z_ADDREF_P(stream_prop);
+	/* Give the userfilter class a hook back to the stream */
+	const zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = Z_OBJCE_P(obj);
+
+	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
+	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
+	if (stream_property_exists) {
+		zval stream_zval;
+		php_stream_to_zval(stream, &stream_zval);
+		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
+		/* If property update threw an exception, skip filter execution */
+		if (EG(exception)) {
+			EG(fake_scope) = old_scope;
+			if (buckets_in->head) {
+				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+			}
+			zend_string_release(stream_name);
+			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= orig_no_fclose;
+			return PSFS_ERR_FATAL;
+		}
 	}
+
+	EG(fake_scope) = old_scope;
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
@@ -196,10 +213,15 @@ static php_stream_filter_status_t userfilter_filter(
 
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
-	 * from being destroyed properly */
-	if (stream_prop) {
-		convert_to_null(stream_prop);
+	 * from being destroyed properly.
+	 * Since the property accepted a resource assignment above, it must have
+	 * no type hint or be typed as mixed, so we can safely assign null.
+	 */
+	if (stream_property_exists) {
+		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
 	}
+
+	zend_string_release(stream_name);
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
@@ -237,7 +259,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	len = strlen(filtername);
 
 	/* determine the classname/class entry */
-	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {
+	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), filtername, len))) {
 		char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
@@ -283,13 +305,9 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
-	if (filter == NULL) {
-		zval_ptr_dtor(&obj);
-		return NULL;
-	}
 
 	/* filtername */
-	add_property_string(&obj, "filtername", (char*)filtername);
+	add_property_string(&obj, "filtername", filtername);
 
 	/* and the parameters, if any */
 	if (filterparams) {
@@ -305,9 +323,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
-			/* User reported filter creation error "return false;" */
-			zval_ptr_dtor(&retval);
-
 			/* Kill the filter (safely) */
 			ZVAL_UNDEF(&filter->abstract);
 			php_stream_filter_free(filter);
@@ -357,8 +372,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 		object_init_ex(return_value, stream_bucket_class_entry);
 		zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-		/* add_property_zval increments the refcount which is unwanted here */
-		zval_ptr_dtor(&zbucket);
+		/* zend_update_property increments the refcount which is unwanted here */
+		Z_DELREF(zbucket);
 		zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -402,22 +417,24 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
 		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
+			bucket->buf = perealloc(bucket->buf, MAX(Z_STRLEN_P(pzdata), 1), bucket->is_persistent);
 			bucket->buflen = Z_STRLEN_P(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
+	}
+
+	/* If the bucket is already on a brigade we have to unlink it first to keep the
+	 * linked list consistent. Furthermore, we can transfer the refcount in that case. */
+	if (bucket->brigade) {
+		php_stream_bucket_unlink(bucket);
+	} else {
+		bucket->refcount++;
 	}
 
 	if (append) {
 		php_stream_bucket_append(brigade, bucket);
 	} else {
 		php_stream_bucket_prepend(brigade, bucket);
-	}
-	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
- 	 * multiple times. See bug35916.phpt for reference.
-	 */
-	if (bucket->refcount == 1) {
-		bucket->refcount++;
 	}
 }
 /* }}} */
@@ -439,7 +456,7 @@ PHP_FUNCTION(stream_bucket_append)
 /* {{{ Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
-	zval *zstream, zbucket;
+	zval zbucket;
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
@@ -447,11 +464,10 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream_bucket *bucket;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(zstream)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(buffer, buffer_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_stream_from_zval(stream, zstream);
 	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
@@ -461,8 +477,8 @@ PHP_FUNCTION(stream_bucket_new)
 	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init_ex(return_value, stream_bucket_class_entry);
 	zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
-	/* add_property_zval increments the refcount which is unwanted here */
-	zval_ptr_dtor(&zbucket);
+	/* zend_update_property increments the refcount which is unwanted here */
+	Z_DELREF(zbucket);
 	zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
@@ -477,16 +493,19 @@ PHP_FUNCTION(stream_get_filters)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
 
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash && !HT_IS_PACKED(filters_hash)) {
+		array_init(return_value);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_MAP_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
 				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}
 		} ZEND_HASH_FOREACH_END();
+	} else {
+		RETURN_EMPTY_ARRAY();
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }
@@ -521,13 +540,17 @@ PHP_FUNCTION(stream_filter_register)
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
 	fdat->classname = zend_string_copy(classname);
 
-	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
-		RETVAL_TRUE;
+	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL) {
+		if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
+			RETURN_TRUE;
+		}
+
+		zend_hash_del(BG(user_filter_map), filtername);
 	} else {
 		zend_string_release_ex(classname, 0);
 		efree(fdat);
-		RETVAL_FALSE;
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */

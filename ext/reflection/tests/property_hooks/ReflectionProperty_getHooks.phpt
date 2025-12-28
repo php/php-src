@@ -12,13 +12,16 @@ class Test {
 
 for ($i = 1; $i <= 4; $i++) {
   $rp = new ReflectionProperty(Test::class, 'prop' . $i);
+  var_dump($rp->hasHooks());
   var_dump($rp->getHooks());
 }
 
 ?>
 --EXPECT--
+bool(false)
 array(0) {
 }
+bool(true)
 array(2) {
   ["get"]=>
   object(ReflectionMethod)#1 (2) {
@@ -35,6 +38,7 @@ array(2) {
     string(4) "Test"
   }
 }
+bool(true)
 array(1) {
   ["get"]=>
   object(ReflectionMethod)#2 (2) {
@@ -44,6 +48,7 @@ array(1) {
     string(4) "Test"
   }
 }
+bool(true)
 array(1) {
   ["set"]=>
   object(ReflectionMethod)#3 (2) {

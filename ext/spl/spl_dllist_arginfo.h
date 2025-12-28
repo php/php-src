@@ -146,41 +146,37 @@ static const zend_function_entry class_SplQueue_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SplStack_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
 
 	zval const_IT_MODE_LIFO_value;
 	ZVAL_LONG(&const_IT_MODE_LIFO_value, SPL_DLLIST_IT_LIFO);
-	zend_string *const_IT_MODE_LIFO_name = zend_string_init_interned("IT_MODE_LIFO", sizeof("IT_MODE_LIFO") - 1, 1);
+	zend_string *const_IT_MODE_LIFO_name = zend_string_init_interned("IT_MODE_LIFO", sizeof("IT_MODE_LIFO") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_IT_MODE_LIFO_name, &const_IT_MODE_LIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IT_MODE_LIFO_name);
+	zend_string_release_ex(const_IT_MODE_LIFO_name, true);
 
 	zval const_IT_MODE_FIFO_value;
 	ZVAL_LONG(&const_IT_MODE_FIFO_value, SPL_DLLIST_IT_FIFO);
-	zend_string *const_IT_MODE_FIFO_name = zend_string_init_interned("IT_MODE_FIFO", sizeof("IT_MODE_FIFO") - 1, 1);
+	zend_string *const_IT_MODE_FIFO_name = zend_string_init_interned("IT_MODE_FIFO", sizeof("IT_MODE_FIFO") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_IT_MODE_FIFO_name, &const_IT_MODE_FIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IT_MODE_FIFO_name);
+	zend_string_release_ex(const_IT_MODE_FIFO_name, true);
 
 	zval const_IT_MODE_DELETE_value;
 	ZVAL_LONG(&const_IT_MODE_DELETE_value, SPL_DLLIST_IT_DELETE);
-	zend_string *const_IT_MODE_DELETE_name = zend_string_init_interned("IT_MODE_DELETE", sizeof("IT_MODE_DELETE") - 1, 1);
+	zend_string *const_IT_MODE_DELETE_name = zend_string_init_interned("IT_MODE_DELETE", sizeof("IT_MODE_DELETE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_IT_MODE_DELETE_name, &const_IT_MODE_DELETE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IT_MODE_DELETE_name);
+	zend_string_release_ex(const_IT_MODE_DELETE_name, true);
 
 	zval const_IT_MODE_KEEP_value;
 	ZVAL_LONG(&const_IT_MODE_KEEP_value, SPL_DLLIST_IT_KEEP);
-	zend_string *const_IT_MODE_KEEP_name = zend_string_init_interned("IT_MODE_KEEP", sizeof("IT_MODE_KEEP") - 1, 1);
+	zend_string *const_IT_MODE_KEEP_name = zend_string_init_interned("IT_MODE_KEEP", sizeof("IT_MODE_KEEP") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_IT_MODE_KEEP_name, &const_IT_MODE_KEEP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_IT_MODE_KEEP_name);
+	zend_string_release_ex(const_IT_MODE_KEEP_name, true);
 
 	return class_entry;
 }
@@ -190,7 +186,7 @@ static zend_class_entry *register_class_SplQueue(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplQueue", class_SplQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }
@@ -199,8 +195,8 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SplStack", class_SplStack_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	INIT_CLASS_ENTRY(ce, "SplStack", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }

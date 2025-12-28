@@ -74,14 +74,11 @@ typedef struct bc_struct {
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
 
-#ifndef LONG_MAX
-#define LONG_MAX 0x7ffffff
-#endif
-
-
 /* Function Prototypes */
 
 void bc_init_numbers(void);
+
+void bc_force_free_number(bc_num *num);
 
 bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 
@@ -98,7 +95,9 @@ static inline bc_num bc_copy_num(bc_num num)
 
 void bc_init_num(bc_num *num);
 
-bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale);
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale);
+
+bc_num bc_long2num(zend_long lval);
 
 zend_string *bc_num2str_ex(bc_num num, size_t scale);
 
@@ -121,6 +120,8 @@ bool bc_is_zero_for_scale(bc_num num, size_t scale);
 bool bc_is_near_zero(bc_num num, size_t scale);
 
 bool bc_is_neg(bc_num num);
+
+void bc_rm_trailing_zeros(bc_num num);
 
 bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 
@@ -146,7 +147,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
 	*(result) = mul_ex;                             \
 } while (0)
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale);
 
 bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 
@@ -154,7 +155,15 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale)
 
 bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
 
-void bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
+size_t bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
+
+typedef enum {
+	BC_RAISE_STATUS_OK,
+	BC_RAISE_STATUS_LEN_IS_OVERFLOW,
+	BC_RAISE_STATUS_SCALE_IS_OVERFLOW,
+	BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW,
+	BC_RAISE_STATUS_DIVIDE_BY_ZERO,
+} bc_raise_status;
 
 typedef enum {
 	OK,
@@ -167,7 +176,7 @@ typedef enum {
 
 raise_mod_status bc_raisemod(bc_num base, bc_num exponent, bc_num mod, bc_num *result, size_t scale);
 
-void bc_raise(bc_num base, long exponent, bc_num *resul, size_t scale);
+bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scale);
 
 void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t scale);
 

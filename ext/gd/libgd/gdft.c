@@ -90,16 +90,26 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
  * some last resort values that might match some Un*x system
  * if building this version of gd separate from graphviz.
  */
+
 #ifndef DEFAULT_FONTPATH
-#if defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
-#else
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
+#  if defined(_WIN32)
+#    define DEFAULT_FONTPATH "C:\\WINDOWS\\FONTS;C:\\WINNT\\FONTS"
+#  elif defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
+#    define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
+#  else
+   /* default fontpath for unix systems  - whatever happened to standards ! */
+#    define DEFAULT_FONTPATH "/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/TrueType:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:/usr/lib/X11/fonts/Type1:/usr/openwin/lib/X11/fonts/Type1"
+#  endif
 #endif
-#endif
+
 #ifndef PATHSEPARATOR
-#define PATHSEPARATOR ":"
+#  if defined(_WIN32)
+#    define PATHSEPARATOR ";"
+#  else
+#    define PATHSEPARATOR ":"
+#  endif
 #endif
+
 
 #ifndef TRUE
 #define FALSE 0
@@ -398,9 +408,6 @@ static void *fontFetch (char **error, void *key)
 		path = gdEstrdup (fontsearchpath);
 
 		/* if name is an absolute filename then test directly */
-#ifdef NETWARE
-		if (*name == '/' || (name[0] != 0 && strstr(name, ":/"))) {
-#else
 		/* Actual length doesn't matter, just the minimum does up to length 2. */
 		unsigned int min_length = 0;
 		if (name[0] != '\0') {
@@ -412,7 +419,6 @@ static void *fontFetch (char **error, void *key)
 		}
 		ZEND_IGNORE_VALUE(min_length); /* On Posix systems this may be unused */
 		if (IS_ABSOLUTE_PATH(name, min_length)) {
-#endif
 			snprintf(fullname, sizeof(fullname) - 1, "%s", name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;
@@ -720,7 +726,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 		y = pen_y + row;
 
 		/* clip if out of bounds */
-		if (y >= im->sy || y < 0) {
+		if (y > im->cy2 || y < im->cy1) {
 			continue;
 		}
 
@@ -743,7 +749,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 				x = pen_x + col;
 
 				/* clip if out of bounds */
-				if (x >= im->sx || x < 0) {
+				if (x > im->cx2 || x < im->cx1) {
 					continue;
 				}
 				/* get pixel location in gd buffer */

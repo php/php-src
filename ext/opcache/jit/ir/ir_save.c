@@ -10,31 +10,40 @@
 
 void ir_print_proto(const ir_ctx *ctx, ir_ref func_proto, FILE *f)
 {
-	ir_ref j;
-
 	if (func_proto) {
 		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func_proto);
-
-		fprintf(f, "(");
-		if (proto->params_count > 0) {
-			fprintf(f, "%s", ir_type_cname[proto->param_types[0]]);
-			for (j = 1; j < proto->params_count; j++) {
-				fprintf(f, ", %s", ir_type_cname[proto->param_types[j]]);
-			}
-			if (proto->flags & IR_VARARG_FUNC) {
-				fprintf(f, ", ...");
-			}
-		} else if (proto->flags & IR_VARARG_FUNC) {
-			fprintf(f, "...");
-		}
-		fprintf(f, "): %s", ir_type_cname[proto->ret_type]);
-		if (proto->flags & IR_FASTCALL_FUNC) {
-			fprintf(f, " __fastcall");
-		} else if (proto->flags & IR_BUILTIN_FUNC) {
-			fprintf(f, " __builtin");
-		}
+		ir_print_proto_ex(proto->flags, proto->ret_type, proto->params_count, proto->param_types, f);
 	} else {
 		fprintf(f, "(): int32_t");
+	}
+}
+
+void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f)
+{
+	uint32_t j;
+
+	fprintf(f, "(");
+	if (params_count > 0) {
+		fprintf(f, "%s", ir_type_cname[param_types[0]]);
+		for (j = 1; j < params_count; j++) {
+			fprintf(f, ", %s", ir_type_cname[param_types[j]]);
+		}
+		if (flags & IR_VARARG_FUNC) {
+			fprintf(f, ", ...");
+		}
+	} else if (flags & IR_VARARG_FUNC) {
+		fprintf(f, "...");
+	}
+	fprintf(f, "): %s", ir_type_cname[ret_type]);
+	if (flags & IR_FASTCALL_FUNC) {
+		fprintf(f, " __fastcall");
+	} else if (flags & IR_BUILTIN_FUNC) {
+		fprintf(f, " __builtin");
+	}
+	if (flags & IR_CONST_FUNC) {
+		fprintf(f, " __const");
+	} else if (flags & IR_PURE_FUNC) {
+		fprintf(f, " __pure");
 	}
 }
 
@@ -53,7 +62,7 @@ static void ir_save_dessa_moves(const ir_ctx *ctx, int b, ir_block *bb, FILE *f)
 	use_list = &ctx->use_lists[succ_bb->start];
 	k = ir_phi_input_number(ctx, succ_bb, b);
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		use_ref = *p;
 		use_insn = &ctx->ir_base[use_ref];
 		if (use_insn->op == IR_PHI) {
@@ -97,10 +106,18 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
 		fprintf(f, "\t%s c_%d = ", ir_type_cname[insn->type], i);
 		if (insn->op == IR_FUNC) {
-			fprintf(f, "func %s", ir_get_str(ctx, insn->val.name));
+			fprintf(f, "func %s%s",
+				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+				ir_get_str(ctx, insn->val.name));
 			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
-			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.name));
+			fprintf(f, "sym(%s%s)",
+				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+				ir_get_str(ctx, insn->val.name));
+		} else if (insn->op == IR_LABEL) {
+			fprintf(f, "label(%s%s)",
+				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+				ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
 			fprintf(f, "func *");
 			ir_print_const(ctx, insn, f, true);
@@ -139,6 +156,9 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					IR_ASSERT(bb->loop_header > 0);
 					fprintf(f, ", loop=BB%d(%d)", bb->loop_header, bb->loop_depth);
 				}
+			}
+			if (bb->flags & IR_BB_IRREDUCIBLE_LOOP) {
+				fprintf(f, ", IRREDUCIBLE");
 			}
 			if (bb->predecessors_count) {
 				uint32_t i;
@@ -261,6 +281,13 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 						fprintf(f, "%s%d", first ? "(" : ", ", ref);
 						first = 0;
 						break;
+					case IR_OPND_LABEL_REF:
+						if (ref) {
+							IR_ASSERT(IR_IS_CONST_REF(ref));
+							fprintf(f, "%sc_%d", first ? "(" : ", ", -ref);
+							first = 0;
+						}
+						break;
 				}
 			} else if (opnd_kind == IR_OPND_NUM) {
 				fprintf(f, "%s%d", first ? "(" : ", ", ref);
@@ -273,6 +300,12 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 		}
 		if (first) {
 			fprintf(f, ";");
+		} else if (ctx->value_params
+		 && insn->op == IR_PARAM
+		 && ctx->value_params[insn->op3 - 1].align) {
+			fprintf(f, ") ByVal(%d, %d);",
+				ctx->value_params[insn->op3 - 1].size,
+				ctx->value_params[insn->op3 - 1].align);
 		} else {
 			fprintf(f, ");");
 		}

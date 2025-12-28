@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ff6d6bb0789c719625f4271bf9ce1c12eea5c95e */
+ * Stub hash: 22e652c6a05ade0a6fd3119e4742cd260ba27146 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_crea
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlTimeZone_createEnumeration, 0, 0, IntlIterator, MAY_BE_FALSE)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
+	ZEND_ARG_TYPE_MASK(0, countryOrRawOffset, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_createTimeZone, 0, 1, IntlTimeZone, 1)
@@ -81,18 +81,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_getUnknown arginfo_class_IntlTimeZone_createDefault
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_class_IntlTimeZone_getWindowsID arginfo_class_IntlTimeZone_getRegion
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getIDForWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_hasSameRules, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, other, IntlTimeZone, 0)
@@ -127,12 +121,8 @@ ZEND_FUNCTION(intltz_get_raw_offset);
 ZEND_FUNCTION(intltz_get_region);
 ZEND_FUNCTION(intltz_get_tz_data_version);
 ZEND_FUNCTION(intltz_get_unknown);
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_windows_id);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 ZEND_FUNCTION(intltz_get_id_for_windows_id);
-#endif
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
@@ -161,12 +151,8 @@ static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_RAW_FENTRY("getRegion", zif_intltz_get_region, arginfo_class_IntlTimeZone_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getTZDataVersion", zif_intltz_get_tz_data_version, arginfo_class_IntlTimeZone_getTZDataVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getUnknown", zif_intltz_get_unknown, arginfo_class_IntlTimeZone_getUnknown, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_RAW_FENTRY("getWindowsID", zif_intltz_get_windows_id, arginfo_class_IntlTimeZone_getWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 	ZEND_RAW_FENTRY("getIDForWindowsID", zif_intltz_get_id_for_windows_id, arginfo_class_IntlTimeZone_getIDForWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
-#endif
 	ZEND_RAW_FENTRY("hasSameRules", zif_intltz_has_same_rules, arginfo_class_IntlTimeZone_hasSameRules, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("toDateTimeZone", zif_intltz_to_date_time_zone, arginfo_class_IntlTimeZone_toDateTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("useDaylightTime", zif_intltz_use_daylight_time, arginfo_class_IntlTimeZone_useDaylightTime, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -178,74 +164,73 @@ static zend_class_entry *register_class_IntlTimeZone(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlTimeZone", class_IntlTimeZone_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_DISPLAY_SHORT_value;
 	ZVAL_LONG(&const_DISPLAY_SHORT_value, TimeZone::SHORT);
-	zend_string *const_DISPLAY_SHORT_name = zend_string_init_interned("DISPLAY_SHORT", sizeof("DISPLAY_SHORT") - 1, 1);
+	zend_string *const_DISPLAY_SHORT_name = zend_string_init_interned("DISPLAY_SHORT", sizeof("DISPLAY_SHORT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_SHORT_name, &const_DISPLAY_SHORT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_SHORT_name);
+	zend_string_release_ex(const_DISPLAY_SHORT_name, true);
 
 	zval const_DISPLAY_LONG_value;
 	ZVAL_LONG(&const_DISPLAY_LONG_value, TimeZone::LONG);
-	zend_string *const_DISPLAY_LONG_name = zend_string_init_interned("DISPLAY_LONG", sizeof("DISPLAY_LONG") - 1, 1);
+	zend_string *const_DISPLAY_LONG_name = zend_string_init_interned("DISPLAY_LONG", sizeof("DISPLAY_LONG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_LONG_name, &const_DISPLAY_LONG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_LONG_name);
+	zend_string_release_ex(const_DISPLAY_LONG_name, true);
 
 	zval const_DISPLAY_SHORT_GENERIC_value;
 	ZVAL_LONG(&const_DISPLAY_SHORT_GENERIC_value, TimeZone::SHORT_GENERIC);
-	zend_string *const_DISPLAY_SHORT_GENERIC_name = zend_string_init_interned("DISPLAY_SHORT_GENERIC", sizeof("DISPLAY_SHORT_GENERIC") - 1, 1);
+	zend_string *const_DISPLAY_SHORT_GENERIC_name = zend_string_init_interned("DISPLAY_SHORT_GENERIC", sizeof("DISPLAY_SHORT_GENERIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_SHORT_GENERIC_name, &const_DISPLAY_SHORT_GENERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_SHORT_GENERIC_name);
+	zend_string_release_ex(const_DISPLAY_SHORT_GENERIC_name, true);
 
 	zval const_DISPLAY_LONG_GENERIC_value;
 	ZVAL_LONG(&const_DISPLAY_LONG_GENERIC_value, TimeZone::LONG_GENERIC);
-	zend_string *const_DISPLAY_LONG_GENERIC_name = zend_string_init_interned("DISPLAY_LONG_GENERIC", sizeof("DISPLAY_LONG_GENERIC") - 1, 1);
+	zend_string *const_DISPLAY_LONG_GENERIC_name = zend_string_init_interned("DISPLAY_LONG_GENERIC", sizeof("DISPLAY_LONG_GENERIC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_LONG_GENERIC_name, &const_DISPLAY_LONG_GENERIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_LONG_GENERIC_name);
+	zend_string_release_ex(const_DISPLAY_LONG_GENERIC_name, true);
 
 	zval const_DISPLAY_SHORT_GMT_value;
 	ZVAL_LONG(&const_DISPLAY_SHORT_GMT_value, TimeZone::SHORT_GMT);
-	zend_string *const_DISPLAY_SHORT_GMT_name = zend_string_init_interned("DISPLAY_SHORT_GMT", sizeof("DISPLAY_SHORT_GMT") - 1, 1);
+	zend_string *const_DISPLAY_SHORT_GMT_name = zend_string_init_interned("DISPLAY_SHORT_GMT", sizeof("DISPLAY_SHORT_GMT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_SHORT_GMT_name, &const_DISPLAY_SHORT_GMT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_SHORT_GMT_name);
+	zend_string_release_ex(const_DISPLAY_SHORT_GMT_name, true);
 
 	zval const_DISPLAY_LONG_GMT_value;
 	ZVAL_LONG(&const_DISPLAY_LONG_GMT_value, TimeZone::LONG_GMT);
-	zend_string *const_DISPLAY_LONG_GMT_name = zend_string_init_interned("DISPLAY_LONG_GMT", sizeof("DISPLAY_LONG_GMT") - 1, 1);
+	zend_string *const_DISPLAY_LONG_GMT_name = zend_string_init_interned("DISPLAY_LONG_GMT", sizeof("DISPLAY_LONG_GMT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_LONG_GMT_name, &const_DISPLAY_LONG_GMT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_LONG_GMT_name);
+	zend_string_release_ex(const_DISPLAY_LONG_GMT_name, true);
 
 	zval const_DISPLAY_SHORT_COMMONLY_USED_value;
 	ZVAL_LONG(&const_DISPLAY_SHORT_COMMONLY_USED_value, TimeZone::SHORT_COMMONLY_USED);
-	zend_string *const_DISPLAY_SHORT_COMMONLY_USED_name = zend_string_init_interned("DISPLAY_SHORT_COMMONLY_USED", sizeof("DISPLAY_SHORT_COMMONLY_USED") - 1, 1);
+	zend_string *const_DISPLAY_SHORT_COMMONLY_USED_name = zend_string_init_interned("DISPLAY_SHORT_COMMONLY_USED", sizeof("DISPLAY_SHORT_COMMONLY_USED") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_SHORT_COMMONLY_USED_name, &const_DISPLAY_SHORT_COMMONLY_USED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_SHORT_COMMONLY_USED_name);
+	zend_string_release_ex(const_DISPLAY_SHORT_COMMONLY_USED_name, true);
 
 	zval const_DISPLAY_GENERIC_LOCATION_value;
 	ZVAL_LONG(&const_DISPLAY_GENERIC_LOCATION_value, TimeZone::GENERIC_LOCATION);
-	zend_string *const_DISPLAY_GENERIC_LOCATION_name = zend_string_init_interned("DISPLAY_GENERIC_LOCATION", sizeof("DISPLAY_GENERIC_LOCATION") - 1, 1);
+	zend_string *const_DISPLAY_GENERIC_LOCATION_name = zend_string_init_interned("DISPLAY_GENERIC_LOCATION", sizeof("DISPLAY_GENERIC_LOCATION") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DISPLAY_GENERIC_LOCATION_name, &const_DISPLAY_GENERIC_LOCATION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_DISPLAY_GENERIC_LOCATION_name);
+	zend_string_release_ex(const_DISPLAY_GENERIC_LOCATION_name, true);
 
 	zval const_TYPE_ANY_value;
 	ZVAL_LONG(&const_TYPE_ANY_value, UCAL_ZONE_TYPE_ANY);
-	zend_string *const_TYPE_ANY_name = zend_string_init_interned("TYPE_ANY", sizeof("TYPE_ANY") - 1, 1);
+	zend_string *const_TYPE_ANY_name = zend_string_init_interned("TYPE_ANY", sizeof("TYPE_ANY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_ANY_name, &const_TYPE_ANY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_ANY_name);
+	zend_string_release_ex(const_TYPE_ANY_name, true);
 
 	zval const_TYPE_CANONICAL_value;
 	ZVAL_LONG(&const_TYPE_CANONICAL_value, UCAL_ZONE_TYPE_CANONICAL);
-	zend_string *const_TYPE_CANONICAL_name = zend_string_init_interned("TYPE_CANONICAL", sizeof("TYPE_CANONICAL") - 1, 1);
+	zend_string *const_TYPE_CANONICAL_name = zend_string_init_interned("TYPE_CANONICAL", sizeof("TYPE_CANONICAL") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_CANONICAL_name, &const_TYPE_CANONICAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_CANONICAL_name);
+	zend_string_release_ex(const_TYPE_CANONICAL_name, true);
 
 	zval const_TYPE_CANONICAL_LOCATION_value;
 	ZVAL_LONG(&const_TYPE_CANONICAL_LOCATION_value, UCAL_ZONE_TYPE_CANONICAL_LOCATION);
-	zend_string *const_TYPE_CANONICAL_LOCATION_name = zend_string_init_interned("TYPE_CANONICAL_LOCATION", sizeof("TYPE_CANONICAL_LOCATION") - 1, 1);
+	zend_string *const_TYPE_CANONICAL_LOCATION_name = zend_string_init_interned("TYPE_CANONICAL_LOCATION", sizeof("TYPE_CANONICAL_LOCATION") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_CANONICAL_LOCATION_name, &const_TYPE_CANONICAL_LOCATION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_TYPE_CANONICAL_LOCATION_name);
+	zend_string_release_ex(const_TYPE_CANONICAL_LOCATION_name, true);
 
 	return class_entry;
 }

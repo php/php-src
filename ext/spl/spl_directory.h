@@ -62,7 +62,7 @@ struct _spl_filesystem_object {
 		struct {
 			php_stream         *dirp;
 			zend_string        *sub_path;
-			int                index;
+			zend_long          index;
 			zend_function      *func_rewind;
 			zend_function      *func_next;
 			zend_function      *func_valid;
@@ -82,6 +82,7 @@ struct _spl_filesystem_object {
 			char               delimiter;
 			char               enclosure;
 			int                escape;
+			bool               is_escape_default;
 		} file;
 	} u;
 	zend_object        std;

@@ -561,7 +561,7 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 				return 1;
 			} else {
 				php_error_docref(NULL, E_WARNING,
-					"Cannot unserialize value for hooked property %s::$%s",
+					"Cannot unserialize value for virtual property %s::$%s",
 					ZSTR_VAL(existing_propinfo->ce->name), Z_STRVAL_P(key));
 				zval_ptr_dtor_str(key);
 				return -1;
@@ -1312,10 +1312,12 @@ object ":" uiv ":" ["]	{
 	YYCURSOR = *p;
 
 	if (*(YYCURSOR) != ':') {
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 	if (*(YYCURSOR+1) != '{') {
 		*p = YYCURSOR+1;
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 

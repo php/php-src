@@ -36,12 +36,12 @@ To compile this, we must point the compiler to the PHP header files. The paths t
 We must also point the linker and the runtime loader to the `libphp.so` shared lib for linking PHP (`-lphp`) which is located at `$(php-config --prefix)/lib`. So the complete command to compile ends up being:
 
 ```bash
-$  gcc \
+$  cc \
 	$(php-config --includes) \
 	-L$(php-config --prefix)/lib \
 	embed_sapi_basic_example.c \
 	-lphp \
-	-Wl,-rpath=$(php-config --prefix)/lib
+	-Wl,-rpath,$(php-config --prefix)/lib
 ```
 
 > :memo: The embed SAPI is disabled by default. In order for the above example to compile, PHP must be built with the embed SAPI enabled. To see what SAPIs are installed, run `php-config --php-sapis`. If you don't see `embed` in the list, you'll need to rebuild PHP with `./configure --enable-embed`. The PHP shared library `libphp.so` is built when the embed SAPI is enabled.

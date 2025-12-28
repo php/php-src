@@ -24,7 +24,7 @@ $data_size = 16777174;
 // Insert with compression disabled:
 
 $mysqli = mysqli_init();
-$result = my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket);
+my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket);
 $mysqli->query("DROP TABLE IF EXISTS test");
 $mysqli->query("CREATE TABLE test (`blob` LONGBLOB NOT NULL) ENGINE=MyISAM");
 
@@ -37,7 +37,7 @@ $mysqli->close();
 // Insert with compression enabled:
 
 $mysqli = mysqli_init();
-$result = my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_COMPRESS);
+my_mysqli_real_connect($mysqli, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_COMPRESS);
 
 $data = str_repeat("x", $data_size);
 $mysqli->query("INSERT INTO $db.test(`blob`) VALUE ('$data')");

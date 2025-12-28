@@ -282,7 +282,7 @@ static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options
 		} else {
 			xmlCharEncCloseFunc(handler);
 		}
-		(void) xmlSaveClose(ctxt);
+		status |= xmlSaveClose(ctxt);
 	}
 
 	if (UNEXPECTED(status < 0)) {
@@ -319,7 +319,7 @@ zend_long php_new_dom_dump_node_to_file(const char *filename, xmlDocPtr doc, xml
 	if (EXPECTED(ctxt != NULL)) {
 		status = dom_xml_serialize(ctxt, out, node, format, false, get_private_data_from_node(node));
 		status |= xmlOutputBufferFlush(out);
-		(void) xmlSaveClose(ctxt);
+		status |= xmlSaveClose(ctxt);
 	}
 
 	size_t offset = php_stream_tell(stream);

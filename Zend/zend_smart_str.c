@@ -131,6 +131,13 @@ ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) 
 	va_end(arg);
 }
 
+ZEND_API void smart_string_append_printf(smart_string *dest, const char *format, ...) {
+	va_list arg;
+	va_start(arg, format);
+	zend_printf_to_smart_string(dest, format, arg);
+	va_end(arg);
+}
+
 #define SMART_STRING_OVERHEAD   (ZEND_MM_OVERHEAD + 1)
 #define SMART_STRING_START_SIZE 256
 #define SMART_STRING_START_LEN  (SMART_STRING_START_SIZE - SMART_STRING_OVERHEAD)
@@ -201,8 +208,11 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 		break;
 
 		case IS_TRUE:
+			smart_str_appendl(dest, "true", sizeof("true")-1);
+		break;
+
 		case IS_FALSE:
-			smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+			smart_str_appendl(dest, "false", sizeof("false")-1);
 		break;
 
 		case IS_DOUBLE:

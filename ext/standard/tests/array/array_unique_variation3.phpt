@@ -9,13 +9,6 @@ Test array_unique() function : usage variations - associative array with differe
 
 echo "*** Testing array_unique() : assoc. array with diff. keys passed to \$input argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
 // get a class
 class classA
 {
@@ -41,7 +34,7 @@ $inputs = array (
        array("hello", $heredoc => "string", "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(@$unset_var => "hello", $fp => 'resource', 11, "hello"),
+/*8*/ array(STDERR => 'resource', 11, "hello"),
 );
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
@@ -52,14 +45,12 @@ foreach($inputs as $input) {
   $iterator++;
 }
 
-fclose($fp);
-
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_unique() : assoc. array with diff. keys passed to $input argument ***
 
-Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line %d
 -- Iteration 1 --
 array(1) {
   [0]=>
@@ -101,11 +92,11 @@ array(2) {
 }
 -- Iteration 6 --
 array(3) {
-  [""]=>
-  string(5) "hello"
-  [5]=>
+  [3]=>
   string(8) "resource"
-  [6]=>
+  [4]=>
   int(11)
+  [5]=>
+  string(5) "hello"
 }
 Done

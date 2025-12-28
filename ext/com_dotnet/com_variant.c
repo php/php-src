@@ -26,14 +26,13 @@
 
 /* create an automation SafeArray from a PHP array.
  * Only creates a single-dimensional array of variants.
- * The keys of the PHP hash MUST be numeric.  If the array
- * is sparse, then the gaps will be filled with NULL variants */
+ * The keys of the PHP hash MUST be numeric. */
 static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 {
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
-	int keytype;
+	zend_hash_key_type keytype;
 	zend_string *strindex;
 	zend_ulong intindex = 0;
 	VARIANT *va;
@@ -61,7 +60,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
-	SafeArrayAccessData(sa, &va);
+	SafeArrayAccessData(sa, (void **) &va);
 	va = (VARIANT*)sa->pvData;
 
 	/* now fill it in */
@@ -71,7 +70,9 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 			break;
 		}
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
-		php_com_variant_from_zval(&va[intindex], item, codepage);
+		if (intindex < bound.cElements) {
+			php_com_variant_from_zval(&va[intindex], item, codepage);
+		}
 	}
 
 	/* Unlock it and stuff it into our variant */
@@ -246,7 +247,7 @@ PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, in
 			if (V_UNKNOWN(v) != NULL) {
 				IDispatch *disp;
 
-				if (SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(v), &IID_IDispatch, &disp))) {
+				if (SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(v), &IID_IDispatch, (void **) &disp))) {
 					php_com_wrap_dispatch(z, disp, codepage);
 					IDispatch_Release(disp);
 				} else {

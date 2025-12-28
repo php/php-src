@@ -17,8 +17,9 @@
 17. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 18. avifinfo (ext/standard/libavifinfo) see ext/standard/libavifinfo/LICENSE
 19. xxHash (ext/hash/xxhash)
-20. Lexbor (ext/dom/lexbor/lexbor) see ext/dom/lexbor/LICENSE
+20. Lexbor (ext/lexbor/lexbor) see ext/lexbor/LICENSE
 21. Portions of libcperciva (ext/hash/hash_sha_{ni,sse2}.c) see the header in the source file
+22. uriparser (ext/uri/uriparser) see ext/uri/uriparser/COPYING
 
 3. pcre2lib (ext/pcre)
 

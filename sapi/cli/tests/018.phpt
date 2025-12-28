@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 
-echo `$php -n -m`;
+echo shell_exec("$php -n -m");
 
 echo "Done\n";
 ?>

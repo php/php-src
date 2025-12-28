@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7415695a7ae90e6abd45617baf8a9ecf9232b801 */
+ * Stub hash: 9e47a0d85336f0e149abbdf56468513c5d31780f */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -206,9 +206,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_rename, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, delete_old_rdn, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
@@ -217,39 +215,29 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\
 	ZEND_ARG_TYPE_INFO(0, delete_old_rdn, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_option, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
+	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, value, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_option, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_count_references, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_first_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_next_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, entry, LDAP\\ResultEntry, 0)
@@ -299,9 +287,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_t61_to_8859, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(STR_TRANSLATION)
 #define arginfo_ldap_8859_to_t61 arginfo_ldap_t61_to_8859
 #endif
 
@@ -314,9 +300,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop, 0, 2, LDAP\\Resul
 	ZEND_ARG_INFO(1, response_data)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop_sync, 0, 2, LDAP\\Result, MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
@@ -407,23 +391,11 @@ ZEND_FUNCTION(ldap_err2str);
 ZEND_FUNCTION(ldap_compare);
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_rename);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_rename_ext);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_get_option);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_set_option);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_count_references);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_first_reference);
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_next_reference);
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
@@ -441,14 +413,10 @@ ZEND_FUNCTION(ldap_start_tls);
 ZEND_FUNCTION(ldap_escape);
 #if defined(STR_TRANSLATION)
 ZEND_FUNCTION(ldap_t61_to_8859);
-#endif
-#if defined(STR_TRANSLATION)
 ZEND_FUNCTION(ldap_8859_to_t61);
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop_sync);
 #endif
 #if defined(HAVE_LDAP_PASSWD)
@@ -466,10 +434,10 @@ ZEND_FUNCTION(ldap_parse_exop);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
-	ZEND_FE(ldap_connect, arginfo_ldap_connect)
+	ZEND_RAW_FENTRY("ldap_connect", zif_ldap_connect, arginfo_ldap_connect, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-	ZEND_FE(ldap_connect_wallet, arginfo_ldap_connect_wallet)
+	ZEND_RAW_FENTRY("ldap_connect_wallet", zif_ldap_connect_wallet, arginfo_ldap_connect_wallet, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if !(defined(HAVE_ORALDAP))
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
@@ -515,23 +483,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_compare, arginfo_ldap_compare)
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_rename, arginfo_ldap_rename)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_rename_ext, arginfo_ldap_rename_ext)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_get_option, arginfo_ldap_get_option)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_set_option, arginfo_ldap_set_option)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_count_references, arginfo_ldap_count_references)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_first_reference, arginfo_ldap_first_reference)
-#endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_next_reference, arginfo_ldap_next_reference)
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
@@ -549,14 +505,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_escape, arginfo_ldap_escape)
 #if defined(STR_TRANSLATION)
 	ZEND_FE(ldap_t61_to_8859, arginfo_ldap_t61_to_8859)
-#endif
-#if defined(STR_TRANSLATION)
 	ZEND_FE(ldap_8859_to_t61, arginfo_ldap_8859_to_t61)
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop, arginfo_ldap_exop)
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop_sync, arginfo_ldap_exop_sync)
 #endif
 #if defined(HAVE_LDAP_PASSWD)
@@ -571,18 +523,6 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_LDAP_PARSE_EXTENDED_RESULT)
 	ZEND_FE(ldap_parse_exop, arginfo_ldap_parse_exop)
 #endif
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_Result_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_LDAP_ResultEntry_methods[] = {
 	ZEND_FE_END
 };
 
@@ -601,11 +541,7 @@ static void register_ldap_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_VALUES", LDAP_MODIFY_BATCH_VALUES, CONST_PERSISTENT);
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_DEREF", LDAP_OPT_DEREF, CONST_PERSISTENT);
-#endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_SIZELIMIT", LDAP_OPT_SIZELIMIT, CONST_PERSISTENT);
-#endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_TIMELIMIT", LDAP_OPT_TIMELIMIT, CONST_PERSISTENT);
 #endif
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_NETWORK_TIMEOUT)
@@ -619,11 +555,7 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_PROTOCOL_VERSION", LDAP_OPT_PROTOCOL_VERSION, CONST_PERSISTENT);
-#endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_ERROR_NUMBER", LDAP_OPT_ERROR_NUMBER, CONST_PERSISTENT);
-#endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_REFERRALS", LDAP_OPT_REFERRALS, CONST_PERSISTENT);
 #endif
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_RESTART)
@@ -640,8 +572,6 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_SERVER_CONTROLS", LDAP_OPT_SERVER_CONTROLS, CONST_PERSISTENT);
-#endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_CLIENT_CONTROLS", LDAP_OPT_CLIENT_CONTROLS, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_DEBUG_LEVEL)
@@ -652,14 +582,8 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(HAVE_LDAP_SASL)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_MECH", LDAP_OPT_X_SASL_MECH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_SASL)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_REALM", LDAP_OPT_X_SASL_REALM, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_SASL)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHCID", LDAP_OPT_X_SASL_AUTHCID, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_SASL)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHZID", LDAP_OPT_X_SASL_AUTHZID, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_X_SASL_NOCANON)
@@ -669,60 +593,28 @@ static void register_ldap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_USERNAME", LDAP_OPT_X_SASL_USERNAME, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT);
+	zend_constant *const_GSLC_SSL_NO_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_GSLC_SSL_ONEWAY_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_GSLC_SSL_TWOWAY_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
 #endif
 #if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_REQUIRE_CERT", LDAP_OPT_X_TLS_REQUIRE_CERT, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_NEVER", LDAP_OPT_X_TLS_NEVER, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_HARD", LDAP_OPT_X_TLS_HARD, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_DEMAND", LDAP_OPT_X_TLS_DEMAND, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_ALLOW", LDAP_OPT_X_TLS_ALLOW, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_TRY", LDAP_OPT_X_TLS_TRY, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CACERTDIR", LDAP_OPT_X_TLS_CACERTDIR, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CACERTFILE", LDAP_OPT_X_TLS_CACERTFILE, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CERTFILE", LDAP_OPT_X_TLS_CERTFILE, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CIPHER_SUITE", LDAP_OPT_X_TLS_CIPHER_SUITE, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_KEYFILE", LDAP_OPT_X_TLS_KEYFILE, CONST_PERSISTENT);
-#endif
-#if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_RANDOM_FILE", LDAP_OPT_X_TLS_RANDOM_FILE, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_X_TLS_CRLCHECK)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRLCHECK", LDAP_OPT_X_TLS_CRLCHECK, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_CRLCHECK)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_NONE", LDAP_OPT_X_TLS_CRL_NONE, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_CRLCHECK)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_PEER", LDAP_OPT_X_TLS_CRL_PEER, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_CRLCHECK)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_CRL_ALL", LDAP_OPT_X_TLS_CRL_ALL, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_X_TLS_DHFILE)
@@ -733,20 +625,10 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_MIN", LDAP_OPT_X_TLS_PROTOCOL_MIN, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_SSL2", LDAP_OPT_X_TLS_PROTOCOL_SSL2, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_SSL3", LDAP_OPT_X_TLS_PROTOCOL_SSL3, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_0", LDAP_OPT_X_TLS_PROTOCOL_TLS1_0, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_1", LDAP_OPT_X_TLS_PROTOCOL_TLS1_1, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_TLS_PROTOCOL_MIN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_PROTOCOL_TLS1_2", LDAP_OPT_X_TLS_PROTOCOL_TLS1_2, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_X_TLS_PROTOCOL_TLS1_3)
@@ -760,28 +642,16 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_OPT_X_KEEPALIVE_IDLE)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_IDLE", LDAP_OPT_X_KEEPALIVE_IDLE, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_KEEPALIVE_IDLE)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_PROBES", LDAP_OPT_X_KEEPALIVE_PROBES, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_OPT_X_KEEPALIVE_IDLE)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_KEEPALIVE_INTERVAL", LDAP_OPT_X_KEEPALIVE_INTERVAL, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_FILTER", PHP_LDAP_ESCAPE_FILTER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_DN", PHP_LDAP_ESCAPE_DN, CONST_PERSISTENT);
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	REGISTER_STRING_CONSTANT("LDAP_EXOP_START_TLS", LDAP_EXOP_START_TLS, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	REGISTER_STRING_CONSTANT("LDAP_EXOP_MODIFY_PASSWD", LDAP_EXOP_MODIFY_PASSWD, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	REGISTER_STRING_CONSTANT("LDAP_EXOP_REFRESH", LDAP_EXOP_REFRESH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	REGISTER_STRING_CONSTANT("LDAP_EXOP_WHO_AM_I", LDAP_EXOP_WHO_AM_I, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	REGISTER_STRING_CONSTANT("LDAP_EXOP_TURN", LDAP_EXOP_TURN, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_MANAGEDSAIT)
@@ -798,17 +668,11 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_CONTROL_ASSERT)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_ASSERT", LDAP_CONTROL_ASSERT, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_ASSERT)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_PRE_READ", LDAP_CONTROL_PRE_READ, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_ASSERT)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_POST_READ", LDAP_CONTROL_POST_READ, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_SORTREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_SORTREQUEST", LDAP_CONTROL_SORTREQUEST, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_SORTREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_SORTRESPONSE", LDAP_CONTROL_SORTRESPONSE, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_PAGEDRESULTS)
@@ -816,17 +680,11 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_CONTROL_AUTHZID_REQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_AUTHZID_REQUEST", LDAP_CONTROL_AUTHZID_REQUEST, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_AUTHZID_REQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_AUTHZID_RESPONSE", LDAP_CONTROL_AUTHZID_RESPONSE, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_SYNC)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_SYNC", LDAP_CONTROL_SYNC, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_SYNC)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_SYNC_STATE", LDAP_CONTROL_SYNC_STATE, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_SYNC)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_SYNC_DONE", LDAP_CONTROL_SYNC_DONE, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_DONTUSECOPY)
@@ -834,40 +692,40 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_CONTROL_PASSWORDPOLICYREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_PASSWORDPOLICYREQUEST", LDAP_CONTROL_PASSWORDPOLICYREQUEST, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_PASSWORDPOLICYREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_PASSWORDPOLICYRESPONSE", LDAP_CONTROL_PASSWORDPOLICYRESPONSE, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_INCREMENTAL_VALUES", LDAP_CONTROL_X_INCREMENTAL_VALUES, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_DOMAIN_SCOPE", LDAP_CONTROL_X_DOMAIN_SCOPE, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_PERMISSIVE_MODIFY", LDAP_CONTROL_X_PERMISSIVE_MODIFY, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_SEARCH_OPTIONS", LDAP_CONTROL_X_SEARCH_OPTIONS, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_TREE_DELETE", LDAP_CONTROL_X_TREE_DELETE, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_X_INCREMENTAL_VALUES)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_X_EXTENDED_DN", LDAP_CONTROL_X_EXTENDED_DN, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_CONTROL_VLVREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_VLVREQUEST", LDAP_CONTROL_VLVREQUEST, CONST_PERSISTENT);
-#endif
-#if defined(LDAP_CONTROL_VLVREQUEST)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_VLVRESPONSE", LDAP_CONTROL_VLVRESPONSE, CONST_PERSISTENT);
 #endif
 
 #if defined(HAVE_ORALDAP)
 
+	zend_attribute *attribute_Deprecated_func_ldap_connect_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_ldap_connect_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_ldap_connect_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[1].value, attribute_Deprecated_func_ldap_connect_0_arg1_str);
+	attribute_Deprecated_func_ldap_connect_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+
+	zend_attribute *attribute_Deprecated_func_ldap_connect_wallet_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_ldap_connect_wallet_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[1].value, attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str);
+	attribute_Deprecated_func_ldap_connect_wallet_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
@@ -885,15 +743,37 @@ static void register_ldap_symbols(int module_number)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
+#if defined(HAVE_ORALDAP)
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_NO_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_ONEWAY_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_TWOWAY_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+#endif
 }
 
 static zend_class_entry *register_class_LDAP_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", class_LDAP_Connection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -902,9 +782,8 @@ static zend_class_entry *register_class_LDAP_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", class_LDAP_Result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -913,9 +792,8 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", class_LDAP_ResultEntry_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

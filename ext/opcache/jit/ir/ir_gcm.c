@@ -112,6 +112,25 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 		bb = &ctx->cfg_blocks[b];
 		if (bb->loop_depth < loop_depth) {
 			if (!bb->loop_depth) {
+#if 1
+				/* Avoid LICM if LOOP doesn't have a pre-header block */
+				ir_block *loop_bb = &ctx->cfg_blocks[best];
+
+				if (!(loop_bb->flags & IR_BB_LOOP_HEADER)) {
+					loop_bb = &ctx->cfg_blocks[loop_bb->loop_header];
+				}
+				if (loop_bb->predecessors_count > 2) {
+					int n = loop_bb->predecessors_count;
+					uint32_t *p = ctx->cfg_edges + loop_bb->predecessors;
+
+					while (n && *p != b) {
+						n--; p++;
+					}
+					if (!n) {
+						break;
+					}
+				}
+#endif
 				best = b;
 				break;
 			}
@@ -337,23 +356,25 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			}
 		} else {
 			j = i = ctx->cfg_map[use];
-			IR_ASSERT(i > 0);
-			while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
-				j = ctx->cfg_blocks[j].idom;
+			if (i) {
+				IR_ASSERT(i > 0);
+				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+					j = ctx->cfg_blocks[j].idom;
+				}
+				clone = ir_hashtab_find(&hash, j);
+				if (clone == IR_INVALID_VAL) {
+					clone = clones_count++;
+					ir_hashtab_add(&hash, j, clone);
+					clones[clone].block = j;
+					clones[clone].use_count = 0;
+					clones[clone].use = -1;
+				}
+				uses[uses_count].ref = use;
+				uses[uses_count].block = i;
+				uses[uses_count].next = clones[clone].use;
+				clones[clone].use_count++;
+				clones[clone].use = uses_count++;
 			}
-			clone = ir_hashtab_find(&hash, j);
-			if (clone == IR_INVALID_VAL) {
-				clone = clones_count++;
-				ir_hashtab_add(&hash, j, clone);
-				clones[clone].block = j;
-				clones[clone].use_count = 0;
-				clones[clone].use = -1;
-			}
-			uses[uses_count].ref = use;
-			uses[uses_count].block = i;
-			uses[uses_count].next = clones[clone].use;
-			clones[clone].use_count++;
-			clones[clone].use = uses_count++;
 		}
 	}
 
@@ -380,9 +401,10 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	for (i = 1; i < clones_count; i++) {
 		clones[i].ref = clone = ir_emit(ctx, insn->optx, insn->op1, insn->op2, insn->op3);
 		insn = &ctx->ir_base[ref];
-		if (insn->op1 > 0) ir_use_list_add(ctx, insn->op1, clone);
-		if (insn->op2 > 0) ir_use_list_add(ctx, insn->op2, clone);
-		if (insn->op3 > 0) ir_use_list_add(ctx, insn->op3, clone);
+		/* Depending on the flags in IR_OPS, these can be references or data. */
+		if (insn->op1 > 0 && insn->inputs_count >= 1) ir_use_list_add(ctx, insn->op1, clone);
+		if (insn->op2 > 0 && insn->inputs_count >= 2) ir_use_list_add(ctx, insn->op2, clone);
+		if (insn->op3 > 0 && insn->inputs_count >= 3) ir_use_list_add(ctx, insn->op3, clone);
 	}
 
 	/* Reconstruct IR: Update DEF->USE lists, CFG mapping and etc */
@@ -391,10 +413,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
-		if (clones[i].use_count == 1) {
+		if (clones[i].use_count == 1
+		 && ctx->cfg_blocks[clones[i].block].loop_depth >= ctx->cfg_blocks[uses[clones[i].use].block].loop_depth) {
 			/* TOTALLY_USEFUL block may be a head of a diamond above the real usage.
 			 * Sink it down to the real usage block.
-			 * Clones with few uses we be sunk into the LCA block.
+			 * Clones with few uses will be sunk into the LCA block.
 			 */
 			clones[i].block = uses[clones[i].use].block;
 		}
@@ -762,6 +785,144 @@ IR_ALWAYS_INLINE ir_ref ir_count_constant(ir_ref *_xlat, ir_ref ref)
 	return 0;
 }
 
+IR_ALWAYS_INLINE bool ir_is_good_bb_order(ir_ctx *ctx, uint32_t b, ir_block *bb, ir_ref start)
+{
+	ir_insn	*insn = &ctx->ir_base[start];
+	uint32_t n = insn->inputs_count;
+	ir_ref *p = insn->ops + 1;
+
+	if (n == 1) {
+		return ctx->cfg_map[*p] < b;
+	} else {
+		IR_ASSERT(n > 1);
+		for (; n > 0; p++, n--) {
+			ir_ref input = *p;
+
+			if (!IR_IS_CONST_REF(input)) {
+				uint32_t input_b = ctx->cfg_map[input];
+
+				if (input_b < b) {
+					/* ordered */
+				} else if ((bb->flags & IR_BB_LOOP_HEADER)
+				  && (input_b == b || ctx->cfg_blocks[input_b].loop_header == b)) {
+					/* back-edge of reducible loop */
+				} else if ((bb->flags & IR_BB_IRREDUCIBLE_LOOP)
+				  && (ctx->cfg_blocks[input_b].loop_header == bb->loop_header)) {
+					/* closing edge of irreducible loop */
+				} else {
+					return 0;
+				}
+			}
+		}
+		return 1;
+	}
+}
+
+static IR_NEVER_INLINE void ir_fix_bb_order(ir_ctx *ctx, ir_ref *_prev, ir_ref *_next)
+{
+	uint32_t b, succ, count, *q, *xlat;
+	ir_block *bb;
+	ir_ref ref, n, prev;
+	ir_worklist worklist;
+	ir_block *new_blocks;
+
+#if 0
+	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		if (!ir_is_good_bb_order(ctx, b, bb, bb->start)) {
+			goto fix;
+		}
+	}
+	return;
+
+fix:
+#endif
+	count = ctx->cfg_blocks_count + 1;
+	new_blocks = ir_mem_malloc(count * sizeof(ir_block));
+	xlat = ir_mem_malloc(count * sizeof(uint32_t));
+	ir_worklist_init(&worklist, count);
+	ir_worklist_push(&worklist, 1);
+	while (ir_worklist_len(&worklist) != 0) {
+next:
+		b = ir_worklist_peek(&worklist);
+		bb = &ctx->cfg_blocks[b];
+		n = bb->successors_count;
+		if (n == 1) {
+			succ = ctx->cfg_edges[bb->successors];
+			if (ir_worklist_push(&worklist, succ)) {
+				goto next;
+			}
+		} else if (n > 1) {
+			uint32_t best = 0;
+			uint32_t best_loop_depth = 0;
+
+			q = ctx->cfg_edges + bb->successors + n;
+			do {
+				q--;
+				succ = *q;
+				if (ir_bitset_in(worklist.visited, succ)) {
+					/* already processed */
+				} else if ((ctx->cfg_blocks[succ].flags & IR_BB_LOOP_HEADER)
+				  && (succ == b || ctx->cfg_blocks[b].loop_header == succ)) {
+					/* back-edge of reducible loop */
+				} else if ((ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_LOOP)
+				  && (ctx->cfg_blocks[succ].loop_header == ctx->cfg_blocks[b].loop_header)) {
+					/* closing edge of irreducible loop */
+				} else if (!best) {
+					best = succ;
+					best_loop_depth = ctx->cfg_blocks[best].loop_depth;
+				} else if (ctx->cfg_blocks[succ].loop_depth < best_loop_depth) {
+					/* prefer deeper loop */
+					best = succ;
+					best_loop_depth = ctx->cfg_blocks[best].loop_depth;
+				}
+				n--;
+			} while (n > 0);
+			if (best) {
+				ir_worklist_push(&worklist, best);
+				goto next;
+			}
+		}
+		ir_worklist_pop(&worklist);
+		count--;
+		new_blocks[count] = *bb;
+		xlat[b] = count;
+	}
+	IR_ASSERT(count == 1);
+	xlat[0] = 0;
+	ir_worklist_free(&worklist);
+
+	prev = 0;
+	for (b = 1, bb = new_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		bb->idom = xlat[bb->idom];
+		bb->loop_header = xlat[bb->loop_header];
+		n = bb->successors_count;
+		if (n > 0) {
+			for (q = ctx->cfg_edges + bb->successors; n > 0; q++, n--) {
+				*q = xlat[*q];
+			}
+		}
+		n = bb->predecessors_count;
+		if (n > 0) {
+			for (q = ctx->cfg_edges + bb->predecessors; n > 0; q++, n--) {
+				*q = xlat[*q];
+			}
+		}
+		_next[prev] = bb->start;
+		_prev[bb->start] = prev;
+		prev = bb->end;
+	}
+	_next[0] = 0;
+	_next[prev] = 0;
+
+	for (ref = 2; ref < ctx->insns_count; ref++) {
+		ctx->cfg_map[ref] = xlat[ctx->cfg_map[ref]];
+	}
+	ir_mem_free(xlat);
+
+	ir_mem_free(ctx->cfg_blocks);
+	ctx->cfg_blocks = new_blocks;
+}
+
 int ir_schedule(ir_ctx *ctx)
 {
 	ir_ctx new_ctx;
@@ -769,86 +930,54 @@ int ir_schedule(ir_ctx *ctx)
 	ir_ref *_xlat;
 	ir_ref *edges;
 	ir_ref prev_b_end;
-	uint32_t b, prev_b;
+	uint32_t b;
 	uint32_t *_blocks = ctx->cfg_map;
 	ir_ref *_next = ir_mem_malloc(ctx->insns_count * sizeof(ir_ref));
 	ir_ref *_prev = ir_mem_malloc(ctx->insns_count * sizeof(ir_ref));
-	ir_ref _move_down = 0;
 	ir_block *bb;
 	ir_insn *insn, *new_insn;
 	ir_use_list *lists, *use_list, *new_list;
+	bool bad_bb_order = 0;
+
 
 	/* Create a double-linked list of nodes ordered by BB, respecting BB->start and BB->end */
 	IR_ASSERT(_blocks[1] == 1);
-	prev_b = 1;
-	prev_b_end = ctx->cfg_blocks[1].end;
+
+	/* link BB boundaries */
 	_prev[1] = 0;
-	_prev[prev_b_end] = 0;
-	for (i = 2, j = 1; i < ctx->insns_count; i++) {
-		b = _blocks[i];
-		IR_ASSERT((int32_t)b >= 0);
-		if (b == prev_b && i <= prev_b_end) {
-			/* add to the end of the list */
-			_next[j] = i;
-			_prev[i] = j;
-			j = i;
-		} else if (b > prev_b) {
-			bb = &ctx->cfg_blocks[b];
-			if (i == bb->start) {
-				IR_ASSERT(bb->end > bb->start);
-				prev_b = b;
-				prev_b_end = bb->end;
-				_prev[bb->end] = 0;
-				/* add to the end of the list */
-				_next[j] = i;
-				_prev[i] = j;
-				j = i;
-			} else {
-				IR_ASSERT(i != bb->end);
-				/* move down late (see the following loop) */
-				_next[i] = _move_down;
-				_move_down = i;
-			}
-		} else if (b) {
-			bb = &ctx->cfg_blocks[b];
-			IR_ASSERT(i != bb->start);
-			if (_prev[bb->end]) {
-				/* move up, insert before the end of the already scheduled BB */
-				k = bb->end;
-			} else {
-				/* move up, insert at the end of the block */
-				k = ctx->cfg_blocks[b + 1].start;
-			}
-			/* insert before "k" */
-			_prev[i] = _prev[k];
-			_next[i] = k;
-			_next[_prev[k]] = i;
-			_prev[k] = i;
+	prev_b_end = ctx->cfg_blocks[1].end;
+	_next[1] = prev_b_end;
+	_prev[prev_b_end] = 1;
+	for (b = 2, bb = ctx->cfg_blocks + 2; b <= ctx->cfg_blocks_count; b++, bb++) {
+		_next[prev_b_end] = bb->start;
+		_prev[bb->start] = prev_b_end;
+		_next[bb->start] = bb->end;
+		_prev[bb->end] = bb->start;
+		prev_b_end = bb->end;
+		if (!ir_is_good_bb_order(ctx, b, bb, bb->start)) {
+			bad_bb_order = 1;
 		}
 	}
-	_next[j] = 0;
+	_next[prev_b_end] = 0;
 
-	while (_move_down) {
-		i = _move_down;
-		_move_down = _next[i];
+	/* insert intermediate BB nodes */
+	for (i = 2, j = 1; i < ctx->insns_count; i++) {
 		b = _blocks[i];
+		if (!b) continue;
 		bb = &ctx->cfg_blocks[b];
-		k = _next[bb->start];
-
-		if (bb->flags & (IR_BB_HAS_PHI|IR_BB_HAS_PI|IR_BB_HAS_PARAM|IR_BB_HAS_VAR)) {
-			/* insert after the start of the block and all PARAM, VAR, PI, PHI */
-			insn = &ctx->ir_base[k];
-			while (insn->op == IR_PHI || insn->op == IR_PARAM || insn->op == IR_VAR || insn->op == IR_PI) {
-				k = _next[k];
-				insn = &ctx->ir_base[k];
-			}
+		if (i != bb->start && i != bb->end) {
+			/* insert before "end" */
+			ir_ref n = bb->end;
+			ir_ref p = _prev[n];
+			_prev[i] = p;
+			_next[i] = n;
+			_next[p] = i;
+			_prev[n] = i;
 		}
+	}
 
-		/* insert before "k" */
-		_prev[i] = _prev[k];
-		_next[i] = k;
-		_next[_prev[k]] = i;
-		_prev[k] = i;
+	if (bad_bb_order) {
+		ir_fix_bb_order(ctx, _prev, _next);
 	}
 
 #ifdef IR_DEBUG
@@ -871,26 +1000,40 @@ int ir_schedule(ir_ctx *ctx)
 
 	/* Topological sort according dependencies inside each basic block */
 	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		ir_ref start;
+
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		/* Schedule BB start */
-		i = bb->start;
+		start = i = bb->start;
 		_xlat[i] = bb->start = insns_count;
 		insn = &ctx->ir_base[i];
-		if (insn->op == IR_CASE_VAL) {
+		if (insn->op == IR_BEGIN) {
+			if (insn->op2) {
+				consts_count += ir_count_constant(_xlat, insn->op2);
+			}
+		} else if (insn->op == IR_CASE_VAL) {
 			IR_ASSERT(insn->op2 < IR_TRUE);
 			consts_count += ir_count_constant(_xlat, insn->op2);
+		} else if (insn->op == IR_CASE_RANGE) {
+			IR_ASSERT(insn->op2 < IR_TRUE);
+			consts_count += ir_count_constant(_xlat, insn->op2);
+			IR_ASSERT(insn->op3 < IR_TRUE);
+			consts_count += ir_count_constant(_xlat, insn->op3);
 		}
 		n = insn->inputs_count;
 		insns_count += ir_insn_inputs_to_len(n);
 		i = _next[i];
 		insn = &ctx->ir_base[i];
 		if (bb->flags & (IR_BB_HAS_PHI|IR_BB_HAS_PI|IR_BB_HAS_PARAM|IR_BB_HAS_VAR)) {
+			int count = 0;
+
 			/* Schedule PARAM, VAR, PI */
 			while (insn->op == IR_PARAM || insn->op == IR_VAR || insn->op == IR_PI) {
 				_xlat[i] = insns_count;
 				insns_count += 1;
 				i = _next[i];
 				insn = &ctx->ir_base[i];
+				count++;
 			}
 			/* Schedule PHIs */
 			while (insn->op == IR_PHI) {
@@ -907,6 +1050,53 @@ int ir_schedule(ir_ctx *ctx)
 				}
 				i = _next[i];
 				insn = &ctx->ir_base[i];
+				count++;
+			}
+			/* Schedule remaining PHIs */
+			if (UNEXPECTED(count < ctx->use_lists[start].count - 1)) {
+				ir_use_list *use_list = &ctx->use_lists[start];
+				ir_ref *p, count = use_list->count;
+				ir_ref phis = _prev[i];
+
+				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
+					ir_ref use = *p;
+					ir_insn *use_insn = &ctx->ir_base[use];
+					if (!_xlat[use] && (_blocks[use] || use_insn->op == IR_PARAM)) {
+						IR_ASSERT(_blocks[use] == b || use_insn->op == IR_PARAM);
+						if (use_insn->op == IR_PARAM
+						 || use_insn->op == IR_VAR
+						 || use_insn->op == IR_PI
+						 || use_insn->op == IR_PHI) {
+							if (_prev[use] != phis) {
+								/* remove "use" */
+								_prev[_next[use]] = _prev[use];
+								_next[_prev[use]] = _next[use];
+								/* insert "use" after "phis" */
+								_prev[use] = phis;
+								_next[use] = _next[phis];
+								_prev[_next[phis]] = use;
+								_next[phis] = use;
+							}
+							phis = use;
+							_xlat[use] = insns_count;
+							if (use_insn->op == IR_PHI) {
+								ir_ref *q;
+								/* Reuse "n" from MERGE and skip first input */
+								insns_count += ir_insn_inputs_to_len(n + 1);
+								for (j = n, q = use_insn->ops + 2; j > 0; q++, j--) {
+									ir_ref input = *q;
+									if (input < IR_TRUE) {
+										consts_count += ir_count_constant(_xlat, input);
+									}
+								}
+							} else {
+								insns_count += 1;
+							}
+						}
+					}
+				}
+				i = _next[phis];
+				insn = &ctx->ir_base[i];
 			}
 		}
 		if (bb->successors_count > 1) {
@@ -916,7 +1106,11 @@ int ir_schedule(ir_ctx *ctx)
 			if (end->op == IR_IF) {
 				/* Move condition closer to IF */
 				input = end->op2;
-				if (input > 0 && _blocks[input] == b && !_xlat[input] && _prev[j] != input) {
+				if (input > 0
+				 && _blocks[input] == b
+				 && !_xlat[input]
+				 && _prev[j] != input
+				 && (!(ir_op_flags[ctx->ir_base[input].op] & IR_OP_FLAG_CONTROL) || end->op1 == input)) {
 					if (input == i) {
 						i = _next[i];
 						insn = &ctx->ir_base[i];
@@ -936,6 +1130,7 @@ int ir_schedule(ir_ctx *ctx)
 			ir_ref n, j, *p, input;
 
 restart:
+			IR_ASSERT(_blocks[i] == b);
 			n = insn->inputs_count;
 			for (j = n, p = insn->ops + 1; j > 0; p++, j--) {
 				input = *p;
@@ -969,6 +1164,7 @@ restart:
 			}
 			_xlat[i] = insns_count;
 			insns_count += ir_insn_inputs_to_len(n);
+			IR_ASSERT(_next[i] != IR_UNUSED);
 			i = _next[i];
 			insn = &ctx->ir_base[i];
 		}
@@ -986,7 +1182,7 @@ restart:
 	if (ctx->flags & IR_DEBUG_SCHEDULE) {
 		fprintf(stderr, "After Schedule\n");
 		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d\n", i, _blocks[i]);
+			fprintf(stderr, "%d -> %d (%d)\n", i, _blocks[i], _xlat[i]);
 		}
 	}
 #endif
@@ -1022,6 +1218,7 @@ restart:
 	new_ctx.insns_count = insns_count;
 	new_ctx.flags2 = ctx->flags2;
 	new_ctx.ret_type = ctx->ret_type;
+	new_ctx.value_params = ctx->value_params;
 	new_ctx.mflags = ctx->mflags;
 	new_ctx.spill_base = ctx->spill_base;
 	new_ctx.fixed_stack_red_zone = ctx->fixed_stack_red_zone;
@@ -1055,14 +1252,17 @@ restart:
 						new_insn->proto = ir_strl(&new_ctx, proto, len);
 					}
 				} else if (new_insn->op == IR_FUNC) {
-					new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.name));
+					size_t len;
+					const char *name = ir_get_strl(ctx, new_insn->val.name, &len);
+					new_insn->val.u64 = ir_strl(&new_ctx, name, len);
 					if (new_insn->proto) {
-						size_t len;
 						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
 						new_insn->proto = ir_strl(&new_ctx, proto, len);
 					}
-				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR) {
-					new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.name));
+				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR || new_insn->op == IR_LABEL) {
+					size_t len;
+					const char *str = ir_get_strl(ctx, new_insn->val.name, &len);
+					new_insn->val.u64 = ir_strl(&new_ctx, str, len);
 				}
 				new_insn++;
 				ref++;
@@ -1087,16 +1287,19 @@ restart:
 					new_insn->proto = 0;
 				}
 			} else if (insn->op == IR_FUNC) {
-				new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, insn->val.name));
+				size_t len;
+				const char *name = ir_get_strl(ctx, insn->val.name, &len);
+				new_insn->val.u64 = ir_strl(&new_ctx, name, len);
 				if (insn->proto) {
-					size_t len;
 					const char *proto = ir_get_strl(ctx, insn->proto, &len);
 					new_insn->proto = ir_strl(&new_ctx, proto, len);
 				} else {
 					new_insn->proto = 0;
 				}
-			} else if (insn->op == IR_SYM || insn->op == IR_STR) {
-				new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, insn->val.name));
+			} else if (insn->op == IR_SYM || insn->op == IR_STR || insn->op == IR_LABEL) {
+				size_t len;
+				const char *str = ir_get_strl(ctx, insn->val.name, &len);
+				new_insn->val.u64 = ir_strl(&new_ctx, str, len);
 			} else {
 				new_insn->val.u64 = insn->val.u64;
 			}
@@ -1161,12 +1364,12 @@ restart:
 				break;
 			case 1:
 				new_insn->op1 = _xlat[insn->op1];
-				if (new_insn->op == IR_PARAM || insn->op == IR_VAR) {
-					new_insn->op2 = ir_str(&new_ctx, ir_get_str(ctx, insn->op2));
-				} else if (new_insn->op == IR_PROTO) {
+				if (new_insn->op == IR_PARAM || new_insn->op == IR_VAR || new_insn->op == IR_PROTO) {
 					size_t len;
-					const char *proto = ir_get_strl(ctx, insn->op2, &len);
-					new_insn->op2 = ir_strl(&new_ctx, proto, len);
+					const char *str = ir_get_strl(ctx, insn->op2, &len);
+					new_insn->op2 = ir_strl(&new_ctx, str, len);
+				} else if (new_insn->op == IR_BEGIN && insn->op2) {
+					new_insn->op2 = _xlat[insn->op2];
 				} else {
 					new_insn->op2 = insn->op2;
 				}
@@ -1182,6 +1385,8 @@ restart:
 					switch (new_insn->op) {
 						case IR_EQ:
 						case IR_NE:
+						case IR_ORDERED:
+						case IR_UNORDERED:
 						case IR_ADD:
 						case IR_MUL:
 						case IR_ADD_OV:
@@ -1255,11 +1460,14 @@ restart:
 	new_ctx.cfg_edges = ctx->cfg_edges;
 	ctx->cfg_blocks = NULL;
 	ctx->cfg_edges = NULL;
+	ctx->value_params = NULL;
+	ir_code_buffer *saved_code_buffer = ctx->code_buffer;
 
 	ir_free(ctx);
 	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
 	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
 	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
+	ctx->code_buffer = saved_code_buffer;
 	ctx->flags2 |= IR_LINEAR;
 
 	ir_mem_free(_next);

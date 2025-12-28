@@ -5,7 +5,7 @@ session
 --FILE--
 <?php
 function output_html($ext) {
-    return strlen($ext);
+    return (string)strlen($ext);
 }
 
 class MySessionHandler implements SessionHandlerInterface {

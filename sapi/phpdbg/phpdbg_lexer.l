@@ -77,12 +77,12 @@ T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
 WS          [ \r\t]+
-DIGITS      [-]?[0-9\.]+
+DIGITS      [-]?[0-9.]+
 ID          [^ \r\n\t:#\000]+
 GENERIC_ID  ([^ \r\n\t:#\000"']|":\\")+|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+[']
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Z_a-z])+
-INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\n\000'])+[']|[^\n\000#"'])+
+INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])*["]|[']("\\"[']|"\\\\"|[^\n\000'])*[']|[^\n\000#"'])+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
@@ -160,8 +160,9 @@ INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\
 
 <NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
-	yylval->len = yyleng;
+	size_t len = yyleng - unescape_string(yytext);
+	yylval->str = estrndup(yytext, len);
+	yylval->len = len;
 	return T_ID;
 }
 

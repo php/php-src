@@ -11,7 +11,7 @@ session.cache_limiter=
 <?php
 error_reporting(E_ALL);
 
-$session_array = explode(";", @session_encode());
+$session_array = explode(";", (string)@session_encode());
 print "I live\n";
 ?>
 --EXPECT--

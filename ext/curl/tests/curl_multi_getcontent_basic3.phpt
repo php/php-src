@@ -5,6 +5,13 @@ Rein Velt (rein@velt.org)
 #TestFest Utrecht 20090509
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
+}
+?>
 --FILE--
 <?php
     //CURL_MULTI_GETCONTENT TEST

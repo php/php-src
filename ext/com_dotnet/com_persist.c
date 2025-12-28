@@ -290,7 +290,7 @@ static zend_class_entry *helper_ce;
 static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 {
 	if (!helper->ips && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, &helper->ips);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, (void **) &helper->ips);
 	}
 	return helper->ips ? S_OK : E_NOTIMPL;
 }
@@ -298,7 +298,7 @@ static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 {
 	if (!helper->ipsi && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, &helper->ipsi);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, (void **) &helper->ipsi);
 	}
 	return helper->ipsi ? S_OK : E_NOTIMPL;
 }
@@ -306,7 +306,7 @@ static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 static inline HRESULT get_persist_file(php_com_persist_helper *helper)
 {
 	if (!helper->ipf && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, &helper->ipf);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, (void **) &helper->ipf);
 	}
 	return helper->ipf ? S_OK : E_NOTIMPL;
 }
@@ -545,7 +545,7 @@ CPH_METHOD(LoadFromStream)
 		IDispatch *disp = NULL;
 
 		/* we need to create an object and load using OleLoadFromStream */
-		res = OleLoadFromStream(stm, &IID_IDispatch, &disp);
+		res = OleLoadFromStream(stm, &IID_IDispatch, (void **) &disp);
 
 		if (SUCCEEDED(res)) {
 			php_com_wrap_dispatch(return_value, disp, COMG(code_page));
@@ -557,7 +557,7 @@ CPH_METHOD(LoadFromStream)
 		} else {
 			res = get_persist_stream(helper);
 			if (helper->ips) {
-				res = IPersistStreamInit_Load(helper->ipsi, stm);
+				res = IPersistStream_Load(helper->ips, stm);
 			}
 		}
 	}

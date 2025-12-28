@@ -5,7 +5,7 @@ session
 --INI--
 session.use_strict_mode=0
 --XFAIL--
-Current session module is designed to write empty session always. In addition, current session module only supports SessionHandlerInterface only from PHP 7.0.
+Current session module is designed to write empty session always.
 --FILE--
 <?php
 class MySessionHandler extends SessionHandler implements SessionUpdateTimestampHandlerInterface

@@ -1,7 +1,7 @@
 name: Push
 on:
   push:
-    paths-ignore:
+    paths-ignore: &ignore_paths
       - docs/**
       - NEWS
       - UPGRADING
@@ -10,29 +10,19 @@ on:
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
-      - .travis.yml
-      - travis/**
       - .circleci/**
     branches:
       - PHP-8.1
       - PHP-8.2
       - PHP-8.3
+      - PHP-8.4
+      - PHP-8.5
       - master
   pull_request:
-    paths-ignore:
-      - docs/**
-      - NEWS
-      - UPGRADING
-      - UPGRADING.INTERNALS
-      - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
-      - .cirrus.yml
-      - .travis.yml
-      - travis/**
-      - .circleci/**
+    paths-ignore: *ignore_paths
     branches:
       - '**'
+  workflow_dispatch: ~
 permissions:
   contents: read
 concurrency:
@@ -42,6 +32,47 @@ env:
   CC: ccache gcc
   CXX: ccache g++
 jobs:
+  ALPINE:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
+    runs-on: ubuntu-24.04
+    container:
+      image: 'alpine:3.22'
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v6
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
+        with:
+          configurationParameters: >-
+            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
+            CC=clang-20
+            CXX=clang++-20
+            --enable-debug
+            --enable-zts
+          skipSlow: true # FIXME: This should likely include slow extensions
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-alpine
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            --asan -x
+            -d opcache.enable_cli=1
   LINUX_X64:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
@@ -80,21 +111,13 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
-    container:
-      image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: apt
         uses: ./.github/actions/apt-x64
-      - name: LLVM 16 (ASAN-only)
-        if: ${{ matrix.asan }}
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
-          wget https://apt.llvm.org/llvm.sh
-          chmod u+x llvm.sh
-          sudo ./llvm.sh 16
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -122,8 +145,9 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -140,7 +164,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
@@ -150,12 +173,14 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     container:
-      image: ubuntu:20.04
+      image: ubuntu:24.04
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
       PDO_MYSQL_TEST_HOST: mysql
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
         image: mysql:8.3
@@ -164,9 +189,18 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
@@ -174,6 +208,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-x32
         with:
@@ -189,7 +224,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
@@ -197,15 +231,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 13
-            arch: X64
-          - os: 14
+          - os: 15
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+      - name: Update clang
+        uses: ./.github/actions/macos-update-clang
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache
@@ -229,7 +264,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -237,11 +271,12 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2022
+    timeout-minutes: 50
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
       PHP_BUILD_CRT: vs17
       PLATFORM: x64
       THREAD_SAFE: "1"
@@ -252,7 +287,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -262,10 +297,11 @@ jobs:
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
@@ -297,7 +333,6 @@ jobs:
           ./configure \
             --disable-debug \
             --enable-mbstring \
-            --enable-opcache \
             --enable-option-checking=fatal \
             --enable-sockets \
             --enable-werror \
@@ -317,7 +352,6 @@ jobs:
           sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
-          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup
@@ -329,7 +363,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
@@ -360,8 +394,18 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
+  FREEBSD:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: FREEBSD
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v6
+      - name: FreeBSD
+        uses: ./.github/actions/freebsd

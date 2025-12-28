@@ -47,7 +47,7 @@ echo $dom->saveXml();
 svg http://www.w3.org/2000/svg
   Attribute: width (NONE)
   Attribute: height (NONE)
-  Attribute: viewbox (NONE)
+  Attribute: viewBox (NONE)
 rect http://www.w3.org/2000/svg
   Attribute: id (NONE)
   Attribute: x (NONE)
@@ -65,7 +65,7 @@ svg http://www.w3.org/1998/Math/MathML
     <title>Test</title>
 </head>
 <body>
-    <svg width="100" height="100" viewbox="0 0 4 2">
+    <svg width="100" height="100" viewBox="0 0 4 2">
         <rect id="rectangle" x="10" y="20" width="90" height="60">
         </rect>
     </svg>
@@ -85,7 +85,7 @@ svg http://www.w3.org/1998/Math/MathML
     <title>Test</title>
 </head>
 <body>
-    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewbox="0 0 4 2">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 4 2">
         <rect id="rectangle" x="10" y="20" width="90" height="60">
         </rect>
     </svg>

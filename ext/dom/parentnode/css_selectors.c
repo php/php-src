@@ -21,9 +21,10 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "../php_dom.h"
+#include "../obj_map.h"
 
-#include "lexbor/css/parser.h"
-#include "lexbor/selectors-adapted/selectors.h"
+#include "ext/lexbor/lexbor/css/parser.h"
+#include "../lexbor/selectors-adapted/selectors.h"
 
 // TODO: optimization idea: cache the parsed selectors in an LRU fashion?
 
@@ -103,7 +104,7 @@ static lxb_css_selector_list_t *dom_parse_selector(
 			php_dom_throw_error_with_message(SYNTAX_ERR, "Invalid selector", true);
 		}
 	}
-	
+
 	return list;
 }
 
@@ -245,11 +246,12 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 		zend_array_destroy(list);
 		RETURN_THROWS();
 	} else {
-		php_dom_create_iterator(return_value, DOM_NODELIST, true);
+		object_init_ex(return_value, dom_modern_nodelist_class_entry);
 		dom_object *ret_obj = Z_DOMOBJ_P(return_value);
 		dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
-		ZVAL_ARR(&mapptr->baseobj_zv, list);
-		mapptr->nodetype = DOM_NODESET;
+		mapptr->array = list;
+		mapptr->release_array = true;
+		mapptr->handler = &php_dom_obj_map_nodeset;
 	}
 }
 

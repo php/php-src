@@ -16,7 +16,7 @@ foreach (get_defined_functions()["internal"] as $function) {
     if (in_array($function, ["extract", "compact", "get_defined_vars"])) {
         continue;
     }
-    $contents .= "    \$result = {$function}();\n";
+    $contents .= "    \$result = \\{$function}();\n";
 }
 $contents .= "}\n";
 

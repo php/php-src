@@ -28,14 +28,28 @@ BEGIN_EXTERN_C()
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI const char *php_version(void);
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void);
 
 /* Returns the PHP version id the engine was built with. This is useful for
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI unsigned int php_version_id(void);
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void);
 
+/* Returns the build provider specified at build time. NULL is returned if
+ * no build provider was specified. This is useful for extensions which want
+ * to know the origin of a PHP binary at run-time, for example to provide
+ * statistics.
+ */
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void);
+
+/* Prints the PHP version string for the -v option. It's in main/ so that
+ * it can be shared between SAPIs.
+ */
+PHPAPI char *php_get_version(sapi_module_struct *sapi_module);
+PHPAPI void php_print_version(sapi_module_struct *sapi_module);
+
+PHPAPI void php_child_init(void);
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);

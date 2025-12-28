@@ -30,6 +30,7 @@
 #include "zend_language_scanner_defs.h"
 
 #include <errno.h>
+#include <stdint.h>
 #include "zend.h"
 #ifdef ZEND_WIN32
 # include <Winuser.h>
@@ -210,6 +211,7 @@ void shutdown_scanner(void)
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
 	SCNG(on_event) = NULL;
+	SCNG(on_event_context) = NULL;
 }
 
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
@@ -275,7 +277,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename);
 
-	if (SCNG(script_filtered)) {
+	if (SCNG(script_filtered) && SCNG(script_filtered) != lex_state->script_filtered) {
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
@@ -581,6 +583,8 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	zend_set_compiled_filename(compiled_filename);
 	zend_string_release_ex(compiled_filename, 0);
 
+	SCNG(on_event) = NULL;
+	SCNG(on_event_context) = NULL;
 	RESET_DOC_COMMENT();
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
@@ -597,7 +601,7 @@ static zend_op_array *zend_compile(int type)
 	CG(ast_arena) = zend_arena_create(1024 * 32);
 
 	if (!zendparse()) {
-		int last_lineno = CG(zend_lineno);
+		uint32_t last_lineno = CG(zend_lineno);
 		zend_file_context original_file_context;
 		zend_oparray_context original_oparray_context;
 		zend_op_array *original_active_op_array = CG(active_op_array);
@@ -650,7 +654,17 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			}
 		}
 	} else {
+		bool orig_record_errors = EG(record_errors);
+		if (!orig_record_errors) {
+			zend_begin_record_errors();
+		}
+
 		op_array = zend_compile(ZEND_USER_FUNCTION);
+
+		if (!orig_record_errors) {
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
+		}
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -756,6 +770,8 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename)
 	zend_set_compiled_filename(filename);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
+	SCNG(on_event) = NULL;
+	SCNG(on_event_context) = NULL;
 	RESET_DOC_COMMENT();
 }
 
@@ -911,7 +927,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
 
-static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
+static zend_result zend_scan_escape_string(zval *zendlval, char *str, size_t len, char quote_type)
 {
 	char *s, *t;
 	char *end;
@@ -921,9 +937,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 			ZVAL_EMPTY_STRING(zendlval);
 		} else {
 			zend_uchar c = (zend_uchar)*str;
-			if (c == '\n' || c == '\r') {
-				CG(zend_lineno)++;
-			}
+			HANDLE_NEWLINE(c);
 			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
 		}
 		goto skip_escape_conversion;
@@ -1127,7 +1141,7 @@ skip_escape_conversion:
 		unsigned char *str;
 		// TODO: avoid realocation ???
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)(&str, &sz, (unsigned char *)s, Z_STRLEN_P(zendlval));
 		zval_ptr_dtor(zendlval);
 		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
@@ -1159,7 +1173,7 @@ static bool strip_multiline_string_indentation(
 	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
 
-	int newline_count = 0;
+	uint32_t newline_count = 0;
 	size_t newline_len;
 	const char *nl;
 
@@ -1240,7 +1254,7 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 }
 
 /* Check that { }, [ ], ( ) are nested correctly */
-static void report_bad_nesting(char opening, int opening_lineno, char closing)
+static void report_bad_nesting(char opening, uint32_t opening_lineno, char closing)
 {
 	char   buf[256];
 	size_t used = 0;
@@ -1348,7 +1362,7 @@ int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
 int offset;
-int start_line = CG(zend_lineno);
+uint32_t start_line = CG(zend_lineno);
 
 	ZVAL_UNDEF(zendlval);
 restart:
@@ -1621,11 +1635,31 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_VAR);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"){TABS_AND_SPACES}")" {
 	RETURN_TOKEN(T_INT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"|"float"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("integer"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (integer) is deprecated, use the (int) cast instead");
+		if (EG(exception)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+	}
+	RETURN_TOKEN(T_INT_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("float"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_DOUBLE_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (double) is deprecated, use the (float) cast instead");
+		if (EG(exception)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+	}
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
@@ -1637,7 +1671,17 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_STRING_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("binary"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (binary) is deprecated, use the (string) cast instead");
+		if (EG(exception)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+	}
 	RETURN_TOKEN(T_STRING_CAST);
 }
 
@@ -1649,12 +1693,26 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_OBJECT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_BOOL_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("boolean"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (boolean) is deprecated, use the (bool) cast instead");
+		if (EG(exception)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+	}
 	RETURN_TOKEN(T_BOOL_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
 	RETURN_TOKEN(T_UNSET_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("void"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_VOID_CAST);
 }
 
 <ST_IN_SCRIPTING>"eval" {
@@ -1723,6 +1781,18 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"protected" {
 	RETURN_TOKEN_WITH_IDENT(T_PROTECTED);
+}
+
+<ST_IN_SCRIPTING>"public(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PUBLIC_SET);
+}
+
+<ST_IN_SCRIPTING>"protected(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PROTECTED_SET);
+}
+
+<ST_IN_SCRIPTING>"private(set)" {
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE_SET);
 }
 
 <ST_IN_SCRIPTING>"public" {
@@ -1801,11 +1871,11 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_MUL_EQUAL);
 }
 
-<ST_IN_SCRIPTING>"*\*" {
+<ST_IN_SCRIPTING>"**" {
 	RETURN_TOKEN(T_POW);
 }
 
-<ST_IN_SCRIPTING>"*\*=" {
+<ST_IN_SCRIPTING>"**=" {
 	RETURN_TOKEN(T_POW_EQUAL);
 }
 
@@ -1843,6 +1913,10 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"??=" {
 	RETURN_TOKEN(T_COALESCE_EQUAL);
+}
+
+<ST_IN_SCRIPTING>"|>" {
+	RETURN_TOKEN(T_PIPE);
 }
 
 <ST_IN_SCRIPTING>"||" {
@@ -2426,7 +2500,7 @@ inline_char_handler:
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
 	} else {
-		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %d", CG(zend_lineno));
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %" PRIu32, CG(zend_lineno));
 		if (PARSER_MODE()) {
 			RETURN_TOKEN(T_ERROR);
 		}
@@ -2492,9 +2566,7 @@ inline_char_handler:
 			ZVAL_EMPTY_STRING(zendlval);
 		} else {
 			zend_uchar c = (zend_uchar)*(yytext+bprefix+1);
-			if (c == '\n' || c == '\r') {
-				CG(zend_lineno)++;
-			}
+			HANDLE_NEWLINE(c);
 			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
 		}
 		goto skip_escape_conversion;
@@ -2545,7 +2617,7 @@ skip_escape_conversion:
 		zend_string *new_str;
 		s = Z_STRVAL_P(zendlval);
 		// TODO: avoid reallocation ???
-		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
+		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, Z_STRLEN_P(zendlval));
 		new_str = zend_string_init(str, sz, 0);
 		if (str != s) {
 			efree(str);
@@ -2687,6 +2759,7 @@ skip_escape_conversion:
 		SCNG(heredoc_scan_ahead) = 1;
 		SCNG(heredoc_indentation) = 0;
 		SCNG(heredoc_indentation_uses_spaces) = 0;
+		SCNG(on_event_context) = NULL;
 		LANG_SCNG(on_event) = NULL;
 		CG(doc_comment) = NULL;
 

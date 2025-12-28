@@ -40,7 +40,7 @@ $ccode = sprintf(
     basename(__FILE__),
     implode("\n    ", array_map(function ($line) {
         $escapedPy = addcslashes($line."\n", "\"\n\\");
-        $escapedAsm = addcslashes(sprintf(".ascii \"%s\"\n", $escapedPy), "\"\n\\");
+        $escapedAsm = addcslashes(sprintf(".ascii \"%s\"\n", $escapedPy), "\"\n\\?");
         return sprintf('"%s"', $escapedAsm);
     }, explode("\n", $pyscript))),
 );

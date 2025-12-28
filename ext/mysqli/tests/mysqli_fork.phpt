@@ -32,7 +32,6 @@ if (!have_innodb($link))
         case 0:
             /* child */
             exit(0);
-            break;
 
         default:
             /* parent */
@@ -123,8 +122,8 @@ if (!have_innodb($link))
 
             if (!mysqli_query($plink, sprintf($sql, 'stop')) || !mysqli_commit($link))
                 exit(mysqli_errno($plink));
+
             exit(0);
-            break;
 
         default:
             /* parent */

@@ -30,7 +30,9 @@ runs:
           export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres"
         fi
         export PDO_FIREBIRD_TEST_DATABASE=test.fdb
-        export PDO_FIREBIRD_TEST_DSN=firebird:dbname=localhost:test.fdb
+        if [[ -z "$PDO_FIREBIRD_TEST_DSN" ]]; then
+          export PDO_FIREBIRD_TEST_DSN=firebird:dbname=localhost:test.fdb
+        fi
         export PDO_FIREBIRD_TEST_PASS=test
         export PDO_FIREBIRD_TEST_USER=test
         export ODBC_TEST_USER="odbc_test"

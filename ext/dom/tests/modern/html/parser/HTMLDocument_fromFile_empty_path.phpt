@@ -9,7 +9,7 @@ $dom = Dom\HTMLDocument::createFromFile("");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: Path cannot be empty in %s:%d
+Fatal error: Uncaught ValueError: Path must not be empty in %s:%d
 Stack trace:
 #0 %s(%d): Dom\HTMLDocument::createFromFile('')
 #1 {main}

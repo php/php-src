@@ -12,14 +12,14 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug65729.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug65729-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     $expected_names = ['foo.test.com.sg', 'foo.test.com', 'FOO.TEST.COM', 'foo.bar.test.com'];
     foreach ($expected_names as $name) {
@@ -29,10 +29,8 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
-
-    phpt_wait();
 
     $expected_names = ['foo.test.com.sg', 'foo.test.com', 'FOO.TEST.COM', 'foo.bar.test.com'];
     foreach ($expected_names as $expected_name) {
@@ -65,7 +63,7 @@ Warning: stream_socket_client(): Peer certificate CN=`*.test.com' did not match 
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:%d (Unknown error) in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
@@ -74,5 +72,5 @@ Warning: stream_socket_client(): Peer certificate CN=`*.test.com' did not match 
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:%d (Unknown error) in %s on line %d
 bool(false)

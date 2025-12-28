@@ -70,23 +70,27 @@ do_test(1, true);
 echo "\n";
 
 ?>
---EXPECT--
-Type='text/plain'
-Hello
-Size=5
-World
+--EXPECTF--
 
 Type='text/plain'
 Hello
-Size=5
-World
+
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+
 
 Type='text/plain'
 Hello
-Size=5
-World
+
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+
 
 Type='text/plain'
 Hello
-Size=5
-World
+
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+
+
+Type='text/plain'
+Hello
+
+Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s

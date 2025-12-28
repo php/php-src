@@ -97,6 +97,10 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 {
 	struct pdo_sqlite_func *func;
 
+	if (ZEND_FCC_INITIALIZED(H->authorizer_fcc)) {
+		zend_fcc_dtor(&H->authorizer_fcc);
+	}
+
 	while (H->funcs) {
 		func = H->funcs;
 		H->funcs = func->next;
@@ -104,14 +108,14 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		if (H->db) {
 			/* delete the function from the handle */
 			sqlite3_create_function(H->db,
-				func->funcname,
+				ZSTR_VAL(func->funcname),
 				func->argc,
 				SQLITE_UTF8,
 				func,
 				NULL, NULL, NULL);
 		}
 
-		efree((char*)func->funcname);
+		zend_string_release(func->funcname);
 		if (ZEND_FCC_INITIALIZED(func->func)) {
 			zend_fcc_dtor(&func->func);
 		}
@@ -132,13 +136,13 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		if (H->db) {
 			/* delete the collation from the handle */
 			sqlite3_create_collation(H->db,
-				collation->name,
+				ZSTR_VAL(collation->name),
 				SQLITE_UTF8,
 				collation,
 				NULL);
 		}
 
-		efree((char*)collation->name);
+		zend_string_release(collation->name);
 		if (ZEND_FCC_INITIALIZED(collation->callback)) {
 			zend_fcc_dtor(&collation->callback);
 		}
@@ -226,6 +230,19 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
 		return NULL;
 	}
+
+	if (UNEXPECTED(zend_str_has_nul_byte(unquoted))) {
+		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+			zend_throw_exception_ex(
+				php_pdo_get_exception(), 0,
+				"SQLite PDO::quote does not support null bytes");
+		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+			php_error_docref(NULL, E_WARNING,
+				"SQLite PDO::quote does not support null bytes");
+		}
+		return NULL;
+	}
+
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
@@ -238,7 +255,20 @@ static bool sqlite_handle_begin(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
-	if (sqlite3_exec(H->db, "BEGIN", NULL, NULL, NULL) != SQLITE_OK) {
+	const char *begin_statement = "BEGIN";
+	switch (H->transaction_mode) {
+		case PDO_SQLITE_TRANSACTION_MODE_DEFERRED:
+			begin_statement = "BEGIN DEFERRED TRANSACTION";
+			break;
+		case PDO_SQLITE_TRANSACTION_MODE_IMMEDIATE:
+			begin_statement = "BEGIN IMMEDIATE TRANSACTION";
+			break;
+		case PDO_SQLITE_TRANSACTION_MODE_EXCLUSIVE:
+			begin_statement = "BEGIN EXCLUSIVE TRANSACTION";
+			break;
+	}
+
+	if (sqlite3_exec(H->db, begin_statement, NULL, NULL, NULL) != SQLITE_OK) {
 		pdo_sqlite_error(dbh);
 		return false;
 	}
@@ -269,10 +299,15 @@ static bool sqlite_handle_rollback(pdo_dbh_t *dbh)
 
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 		case PDO_ATTR_SERVER_VERSION:
 			ZVAL_STRING(return_value, (char *)sqlite3_libversion());
+			break;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
+			ZVAL_LONG(return_value, H->transaction_mode);
 			break;
 
 		default:
@@ -309,6 +344,19 @@ static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			sqlite3_extended_result_codes(H->db, lval);
 			return true;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			switch (lval) {
+				case PDO_SQLITE_TRANSACTION_MODE_DEFERRED:
+				case PDO_SQLITE_TRANSACTION_MODE_IMMEDIATE:
+				case PDO_SQLITE_TRANSACTION_MODE_EXCLUSIVE:
+					H->transaction_mode = lval;
+					return true;
+				default:
+					return false;
+			}
 	}
 	return false;
 }
@@ -466,20 +514,20 @@ static int php_sqlite3_collation_callback(void *context, int string1_len, const 
 
 	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
-	if (!Z_ISUNDEF(retval)) {
-		if (Z_TYPE(retval) != IS_LONG) {
-			convert_to_long(&retval);
-		}
-		if (Z_LVAL(retval) > 0) {
-			ret = 1;
-		} else if (Z_LVAL(retval) < 0) {
-			ret = -1;
-		}
-		zval_ptr_dtor(&retval);
-	}
-
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
+
+	if (!Z_ISUNDEF(retval)) {
+		if (Z_TYPE(retval) != IS_LONG) {
+			zend_string *func_name = get_active_function_or_method_name();
+			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
+				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_string_release(func_name);
+			zval_ptr_dtor(&retval);
+			return FAILURE;
+		}
+		ret = ZEND_NORMALIZE_BOOL(Z_LVAL(retval));
+	}
 
 	return ret;
 }
@@ -496,8 +544,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	struct pdo_sqlite_func *func;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	char *func_name;
-	size_t func_name_len;
+	zend_string *func_name;
 	zend_long argc = -1;
 	zend_long flags = 0;
 	pdo_dbh_t *dbh;
@@ -505,7 +552,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_STR(func_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
@@ -513,15 +560,15 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(error);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8, func, php_sqlite3_func_callback, NULL, NULL);
+	ret = sqlite3_create_function(H->db, ZSTR_VAL(func_name), argc, flags | SQLITE_UTF8, func, php_sqlite3_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
-		func->funcname = estrdup(func_name);
+		func->funcname = zend_string_copy(func_name);
 
 		zend_fcc_dup(&func->func, &fcc);
 
@@ -555,15 +602,14 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	zend_fcall_info fini_fci = empty_fcall_info;
 	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
 	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
-	char *func_name;
-	size_t func_name_len;
+	zend_string *func_name;
 	zend_long argc = -1;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_STR(func_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(step_fci, step_fcc)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
@@ -571,16 +617,16 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(error);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8, func, NULL,
+	ret = sqlite3_create_function(H->db, ZSTR_VAL(func_name), argc, SQLITE_UTF8, func, NULL,
 		php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
 	if (ret == SQLITE_OK) {
-		func->funcname = estrdup(func_name);
+		func->funcname = zend_string_copy(func_name);
 
 		zend_fcc_dup(&func->step, &step_fcc);
 		zend_fcc_dup(&func->fini, &fini_fcc);
@@ -631,27 +677,26 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 	struct pdo_sqlite_collation *collation;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	char *collation_name;
-	size_t collation_name_len;
+	zend_string *collation_name;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_STR(collation_name)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup_fcc);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
 
-	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, callback);
+	ret = sqlite3_create_collation(H->db, ZSTR_VAL(collation_name), SQLITE_UTF8, collation, callback);
 	if (ret == SQLITE_OK) {
-		collation->name = estrdup(collation_name);
+		collation->name = zend_string_copy(collation_name);
 
 		zend_fcc_dup(&collation->callback, &fcc);
 
@@ -663,12 +708,12 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 	zend_release_fcall_info_cache(&fcc);
 
-	if (UNEXPECTED(EG(exception))) {
-		RETURN_THROWS();
-	}
-
 	efree(collation);
 	RETURN_FALSE;
+
+cleanup_fcc:
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_THROWS();
 }
 
 /* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
@@ -703,6 +748,10 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 static void pdo_sqlite_get_gc(pdo_dbh_t *dbh, zend_get_gc_buffer *gc_buffer)
 {
 	pdo_sqlite_db_handle *H = dbh->driver_data;
+
+	if (ZEND_FCC_INITIALIZED(H->authorizer_fcc)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &H->authorizer_fcc);
+	}
 
 	struct pdo_sqlite_func *func = H->funcs;
 	while (func) {
@@ -744,7 +793,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_request_shutdown,
 	pdo_sqlite_in_transaction,
 	pdo_sqlite_get_gc,
-    pdo_sqlite_scanner
+	pdo_sqlite_scanner
 };
 
 static char *make_filename_safe(const char *filename)
@@ -774,24 +823,77 @@ static char *make_filename_safe(const char *filename)
 	return estrdup(filename);
 }
 
-static int authorizer(void *autharg, int access_type, const char *arg3, const char *arg4,
-		const char *arg5, const char *arg6)
+#define ZVAL_NULLABLE_STRING(zv, str) do { \
+	zval *zv_ = zv; \
+	const char *str_ = str; \
+	if (str_) { \
+		ZVAL_STRING(zv_, str_); \
+	} else { \
+		ZVAL_NULL(zv_); \
+	} \
+} while (0)
+
+static int authorizer(void *autharg, int access_type, const char *arg1, const char *arg2,
+		const char *arg3, const char *arg4)
 {
-	char *filename;
-	switch (access_type) {
-		case SQLITE_ATTACH: {
-			filename = make_filename_safe(arg3);
+	if (PG(open_basedir) && *PG(open_basedir)) {
+		if (access_type == SQLITE_ATTACH) {
+			char *filename = make_filename_safe(arg1);
 			if (!filename) {
 				return SQLITE_DENY;
 			}
 			efree(filename);
-			return SQLITE_OK;
 		}
-
-		default:
-			/* access allowed */
-			return SQLITE_OK;
 	}
+
+	pdo_sqlite_db_handle *db_obj = autharg;
+
+	/* fallback to access allowed if authorizer callback is not defined */
+	if (!ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
+		return SQLITE_OK;
+	}
+
+	/* call userland authorizer callback, if set */
+	zval retval;
+	zval argv[5];
+
+	ZVAL_LONG(&argv[0], access_type);
+	ZVAL_NULLABLE_STRING(&argv[1], arg1);
+	ZVAL_NULLABLE_STRING(&argv[2], arg2);
+	ZVAL_NULLABLE_STRING(&argv[3], arg3);
+	ZVAL_NULLABLE_STRING(&argv[4], arg4);
+
+	int authreturn = SQLITE_DENY;
+
+	zend_call_known_fcc(&db_obj->authorizer_fcc, &retval, /* argc */ 5, argv, /* named_params */ NULL);
+	if (Z_ISUNDEF(retval)) {
+		ZEND_ASSERT(EG(exception));
+	} else {
+		if (Z_TYPE(retval) != IS_LONG) {
+			zend_string *func_name = get_active_function_or_method_name();
+			zend_type_error("%s(): Return value of the authorizer callback must be of type int, %s returned",
+				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_string_release(func_name);
+		} else {
+			authreturn = Z_LVAL(retval);
+
+			if (authreturn != SQLITE_OK && authreturn != SQLITE_IGNORE && authreturn != SQLITE_DENY) {
+				zend_string *func_name = get_active_function_or_method_name();
+				zend_value_error("%s(): Return value of the authorizer callback must be one of Pdo\\Sqlite::OK, Pdo\\Sqlite::DENY, or Pdo\\Sqlite::IGNORE",
+					ZSTR_VAL(func_name));
+				zend_string_release(func_name);
+				authreturn = SQLITE_DENY;
+			}
+		}
+	}
+
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&argv[1]);
+	zval_ptr_dtor(&argv[2]);
+	zval_ptr_dtor(&argv[3]);
+	zval_ptr_dtor(&argv[4]);
+
+	return authreturn;
 }
 
 static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
@@ -833,9 +935,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 		goto cleanup;
 	}
 
-	if (PG(open_basedir) && *PG(open_basedir)) {
-		sqlite3_set_authorizer(H->db, authorizer, NULL);
-	}
+	sqlite3_set_authorizer(H->db, authorizer, H);
 
 	if (driver_options) {
 		timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, timeout);

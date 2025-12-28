@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 82caf527a8ec686bc450e5d782bb79275d5a13e3 */
+ * Stub hash: 25e0aa769d72988ebca07fff96c8ed1fcb6b7d5e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -460,5 +460,8 @@ static void register_posix_symbols(int module_number)
 #endif
 #if defined(_PC_SYMLINK_MAX)
 	REGISTER_LONG_CONSTANT("POSIX_PC_SYMLINK_MAX", _PC_SYMLINK_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_SC_OPEN_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_SC_OPEN_MAX", _SC_OPEN_MAX, CONST_PERSISTENT);
 #endif
 }

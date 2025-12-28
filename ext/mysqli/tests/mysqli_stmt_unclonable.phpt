@@ -17,12 +17,11 @@ require_once 'skipifconnectfailure.inc';
     if (!$stmt = mysqli_stmt_init($link))
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    /* no, still bails out */
-    $stmt_clone = clone $stmt;
-    print "done!";
+    try {
+        $stmt_clone = clone $stmt;
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    }
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class mysqli_stmt in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class mysqli_stmt

@@ -19,18 +19,23 @@ class Pgsql extends \PDO
 #endif
 
     /** @cvalue PGSQL_TRANSACTION_IDLE */
+    #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_IDLE = UNKNOWN;
 
     /** @cvalue PGSQL_TRANSACTION_ACTIVE */
+    #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_ACTIVE = UNKNOWN;
 
     /** @cvalue PGSQL_TRANSACTION_INTRANS */
+    #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_INTRANS = UNKNOWN;
 
     /**  @cvalue PGSQL_TRANSACTION_INERROR */
+    #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_INERROR = UNKNOWN;
 
     /** @cvalue PGSQL_TRANSACTION_UNKNOWN */
+    #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_UNKNOWN = UNKNOWN;
 
     public function escapeIdentifier(string $input): string {}

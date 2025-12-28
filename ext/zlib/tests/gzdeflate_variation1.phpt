@@ -4,11 +4,9 @@ Test gzdeflate() function : variation
 zlib
 --FILE--
 <?php
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzdeflate() : variation ***\n";
-
-
 
 echo "\n-- Testing multiple compression --\n";
 $output = gzdeflate($data);

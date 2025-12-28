@@ -49,11 +49,12 @@
 .type	jump_fcontext, @function
 
 #define ARG_OFFSET         0
-#define GR_OFFSET	   16
-#define FP_OFFSET	   96
-#define FPC_OFFSET	   160
-#define PC_OFFSET	   168
-#define CONTEXT_SIZE	   176
+#define GR_OFFSET          16
+#define R14_OFFSET         88
+#define FP_OFFSET          96
+#define FPC_OFFSET         160
+#define PC_OFFSET          168
+#define CONTEXT_SIZE       176
 
 #define REG_SAVE_AREA_SIZE 160
 
@@ -131,11 +132,14 @@ jump_fcontext:
 	ltg	%r2,GR_OFFSET(%r15)
 	jnz	use_return_slot
 
-	/* We restore a make_fcontext context.  Use the function
-	   argument slot in the context we just saved and allocate the
-	   register save area for the target function.  */
-	la	%r2,ARG_OFFSET(%r1)
-	aghi	%r15,-REG_SAVE_AREA_SIZE
+	/* We're restoring a context created by make_fcontext.
+	   This is going to be the argument of the entry point
+	   of the fiber. We're placing it on top of the ABI
+	   defined register save area of the fiber's own stack. */
+	la	%r2,REG_SAVE_AREA_SIZE(%r15)
+
+	/* REG_SAVE_AREA_SIZE + sizeof(transfer_t) */
+	aghi	%r15,-(REG_SAVE_AREA_SIZE+16)
 
 use_return_slot:
 	/* Save the two fields in transfer_t.  When calling a

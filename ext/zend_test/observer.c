@@ -20,6 +20,7 @@
 #include "zend_observer.h"
 #include "zend_smart_str.h"
 #include "ext/standard/php_var.h"
+#include "zend_generators.h"
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
 
@@ -154,7 +155,7 @@ static void observer_show_init(zend_function *fbc)
 			php_printf("%*s<!-- init %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
 	} else {
-		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
+		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 	}
 }
 
@@ -163,6 +164,11 @@ static void observer_show_init_backtrace(zend_execute_data *execute_data)
 	zend_execute_data *ex = execute_data;
 	php_printf("%*s<!--\n", 2 * ZT_G(observer_nesting_depth), "");
 	do {
+		if (UNEXPECTED(!ex->func)) {
+			ex = zend_generator_check_placeholder_frame(ex);
+			ZEND_ASSERT(ex->func);
+		}
+
 		zend_function *fbc = ex->func;
 		int indent = 2 * ZT_G(observer_nesting_depth) + 4;
 		if (fbc->common.function_name) {
@@ -172,7 +178,7 @@ static void observer_show_init_backtrace(zend_execute_data *execute_data)
 				php_printf("%*s%s()\n", indent, "", ZSTR_VAL(fbc->common.function_name));
 			}
 		} else {
-			php_printf("%*s{main} %s\n", indent, "", ZSTR_VAL(fbc->op_array.filename));
+			php_printf("%*s{main} %s\n", indent, "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 		}
 	} while ((ex = ex->prev_execute_data) != NULL);
 	php_printf("%*s-->\n", 2 * ZT_G(observer_nesting_depth), "");
@@ -288,7 +294,7 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else {
+	} else if (ZEND_USER_CODE(fbc->type)) {
 		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
 
@@ -304,6 +310,9 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
+	if (!ZT_G(observer_enabled)) {
+		return FAILURE;
+	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {

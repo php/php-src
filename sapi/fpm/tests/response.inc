@@ -119,10 +119,11 @@ class Response extends BaseResponse
     /**
      * @param mixed  $body
      * @param string $contentType
+     * @param bool $skipHeadersCheck
      *
      * @return Response
      */
-    public function expectBody($body, $contentType = 'text/html')
+    public function expectBody($body, $contentType = 'text/html', bool $skipHeadersCheck = false)
     {
         if ($multiLine = is_array($body)) {
             $body = implode("\n", $body);
@@ -130,7 +131,7 @@ class Response extends BaseResponse
 
         if ( ! $this->checkIfValid()) {
             $this->error('Response is invalid');
-        } elseif ( ! $this->checkDefaultHeaders($contentType)) {
+        } elseif ( ! $skipHeadersCheck && ! $this->checkDefaultHeaders($contentType)) {
             $this->error('Response default headers not found');
         } elseif ($body !== $this->rawBody) {
             if ($multiLine) {
@@ -144,6 +145,29 @@ class Response extends BaseResponse
                 );
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Expect status field with value that matches the supplied pattern.
+     *
+     * @param string $fieldName
+     * @param string $pattern
+     *
+     * @return Response
+     */
+    public function expectJsonBodyPatternForStatusField(string $fieldName, string $pattern): Response
+    {
+        $rawData = $this->getBody('application/json');
+        $data = json_decode($rawData, true);
+        if (preg_match('|' . $pattern . '|', $data[$fieldName]) > 0) {
+            return $this;
+        }
+
+        $this->error(
+            "Field $fieldName did not match pattern $pattern in status data '$rawData'"
+        );
 
         return $this;
     }
@@ -167,7 +191,7 @@ class Response extends BaseResponse
             );
         }
         foreach ($data['processes'] as $process) {
-            if (preg_match('|' . $pattern . '|', $process[$fieldName]) !== false) {
+            if (preg_match('|' . $pattern . '|', $process[$fieldName]) > 0) {
                 return $this;
             }
         }

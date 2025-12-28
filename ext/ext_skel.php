@@ -18,14 +18,11 @@
 
 /* $Id$ */
 
-/* {{{ error */
 function error($message) {
     printf('Error: %s%s', $message, PHP_EOL);
     exit;
 }
-/* }}} */
 
-/* {{{ print_help */
 function print_help() {
     if (PHP_OS_FAMILY != 'Windows') {
         $file_prefix = './';
@@ -45,7 +42,7 @@ HOW TO USE IT
   Very simple. First, change to the ext/ directory of the PHP sources. Then run
   the following
 
-    php ext_skel.php --ext extension_name
+    php ext_skel.php --ext extension_name --vendor vendor_name
 
   and everything you need will be placed in directory ext/extension_name.
 
@@ -93,11 +90,12 @@ SOURCE AND HEADER FILE NAME
 
 OPTIONS
 
-  php ext_skel.php --ext <name> [--experimental] [--author <name>]
-                   [--dir <path>] [--std] [--onlyunix]
-                   [--onlywindows] [--help]
+  php ext_skel.php --ext <name> --vendor <name> [--experimental]
+                   [--author <name>] [--dir <path>] [--std]
+                   [--onlyunix] [--onlywindows] [--help]
 
   --ext <name>          The name of the extension defined as <name>
+  --vendor <name>       The vendor of the extension for Packagist
   --experimental        Passed if this extension is experimental, this creates
                         the EXPERIMENTAL file in the root of the extension
   --author <name>       Your name, this is used if --std is passed and for the
@@ -114,9 +112,7 @@ OPTIONS
 HELP;
     exit;
 }
-/* }}} */
 
-/* {{{ task */
 function task($label, $callback) {
     printf('%s... ', $label);
 
@@ -124,9 +120,7 @@ function task($label, $callback) {
 
     printf('done%s', PHP_EOL);
 }
-/* }}} */
 
-/* {{{ print_success */
 function print_success() {
     global $options;
 
@@ -148,14 +142,13 @@ function print_success() {
     printf('%smake test%2$s%2$s', $make_prefix, PHP_EOL);
     printf('Thank you for using PHP!%s', PHP_EOL);
 }
-/* }}} */
 
-/* {{{ process_args */
 function process_args($argv, $argc) {
     $options = [
             'unix'		=> true,
             'windows' 	=> true,
             'ext' 		=> '',
+            'vendor' 	=> '',
             'dir'		=> __DIR__ . DIRECTORY_SEPARATOR,
             'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
             'author'	=> false,
@@ -194,6 +187,7 @@ function process_args($argv, $argc) {
             }
             break;
             case 'ext':
+            case 'vendor':
             case 'dir':
             case 'author': {
                 if (!isset($argv[$i + 1]) || ($argv[$i + 1][0] == '-' && $argv[$i + 1][1] == '-')) {
@@ -213,6 +207,8 @@ function process_args($argv, $argc) {
 
     if (empty($options['ext'])) {
         error('No extension name passed, use "--ext <name>"');
+    } else if (empty($options['vendor'])) {
+        error('No vendor name passed, use "--vendor <name>"');
     } else if (!$options['unix'] && !$options['windows']) {
         error('Cannot pass both --onlyunix and --onlywindows');
     } else if (!is_dir($options['skel'])) {
@@ -226,13 +222,17 @@ function process_args($argv, $argc) {
             .' Using only lower case letters is preferred.');
     }
 
+    // Validate vendor
+    if (!preg_match('/^[a-z][a-z0-9_-]+$/i', $options['vendor'])) {
+        error('Invalid vendor name. Valid names start with a letter,'
+            .' followed by any number of letters, numbers, hypens, or underscores.');
+    }
+
     $options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));
 
     return $options;
 }
-/* }}} */
 
-/* {{{ process_source_tags */
 function process_source_tags($file, $short_name) {
     global $options;
 
@@ -242,6 +242,7 @@ function process_source_tags($file, $short_name) {
         error('Unable to open file for reading: ' . $short_name);
     }
 
+    $source = str_replace('%VENDORNAME%', $options['vendor'], $source);
     $source = str_replace('%EXTNAME%', $options['ext'], $source);
     $source = str_replace('%EXTNAMECAPS%', strtoupper($options['ext']), $source);
 
@@ -286,9 +287,7 @@ HEADER;
         error('Unable to save contents to file: ' . $short_name);
     }
 }
-/* }}} */
 
-/* {{{ copy_config_scripts */
 function copy_config_scripts() {
     global $options;
 
@@ -303,6 +302,7 @@ function copy_config_scripts() {
     }
 
     $files[] = '.gitignore';
+    $files[] = 'composer.json';
 
     foreach($files as $config_script) {
         $new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
@@ -314,9 +314,7 @@ function copy_config_scripts() {
         process_source_tags($new_config_script, $config_script);
     }
 }
-/* }}} */
 
-/* {{{ copy_sources */
 function copy_sources() {
     global $options;
 
@@ -335,9 +333,7 @@ function copy_sources() {
         process_source_tags($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $dst_file, $dst_file);
     }
 }
-/* }}} */
 
-/* {{{ copy_tests */
 function copy_tests() {
     global $options;
 
@@ -361,8 +357,6 @@ function copy_tests() {
         process_source_tags($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $new_test, $new_test);
     }
 }
-/* }}} */
-
 
 if (PHP_SAPI != 'cli') {
     error('This script is only suited for CLI');

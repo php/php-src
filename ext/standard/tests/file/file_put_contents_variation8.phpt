@@ -64,9 +64,9 @@ rmdir($dir);
 -- Iteration 1 --
 9 bytes written to: '1'
 -- Iteration 2 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 3 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 4 --
 9 bytes written to: ' '
 -- Iteration 5 --

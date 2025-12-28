@@ -14,9 +14,8 @@ catch (\Error $ex) {
 }
 
 imagesetpixel($im, 0, 0, IMG_COLOR_STYLED);
-imagedestroy($im);
 ?>
 ====DONE====
 --EXPECT--
-imagesetstyle(): Argument #2 ($style) cannot be empty
+imagesetstyle(): Argument #2 ($style) must not be empty
 ====DONE====

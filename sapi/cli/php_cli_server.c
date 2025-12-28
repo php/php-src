@@ -95,7 +95,6 @@
 #include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_raw_url_decode() */
-#include "ext/standard/php_string.h" /* for php_dirname() */
 #include "ext/date/php_date.h" /* for php_format_date() */
 #include "php_network.h"
 
@@ -305,7 +304,7 @@ static int status_comp(const void *a, const void *b) /* {{{ */
 
 static const char *get_status_string(int code) /* {{{ */
 {
-	http_response_status_code_pair needle = {code, NULL},
+	const http_response_status_code_pair needle = {code, NULL},
 		*result = NULL;
 
 	result = bsearch(&needle, http_status_map, http_status_map_len, sizeof(needle), status_comp);
@@ -396,13 +395,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	char *ret;
-	ALLOCA_FLAG(use_heap)
-	char *ext_lower = do_alloca(ext_len + 1, use_heap);
-	zend_str_tolower_copy(ext_lower, ext, ext_len);
-	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
-	free_alloca(ext_lower, use_heap);
-	return (const char*)ret;
+	return zend_hash_str_find_ptr_lc(&server->extension_mime_types, ext, ext_len);
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
@@ -511,9 +504,9 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry);
+	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -1681,14 +1674,33 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* Wrap header value in a zval to add is to the HashTable which acts as an array */
 	zval tmp;
-	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 
-	/* Add the wrapped zend_string to the HashTable */
-	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
+	zval *entry = zend_hash_find(&client->request.headers, lc_header_name);
+	bool with_comma = !zend_string_equals_literal(lc_header_name, "set-cookie");
+
+	/**
+	 * `Set-Cookie` HTTP header being the exception, they can have 1 or more values separated
+	 * by a comma while still possibly be set separately by the client.
+	 **/
+	if (!with_comma || entry == NULL) {
+		ZVAL_STR(&tmp, client->current_header_value);
+	} else {
+		zend_string *curval = Z_STR_P(entry);
+		zend_string *newval = zend_string_safe_alloc(1, ZSTR_LEN(curval),  ZSTR_LEN(client->current_header_value) + 2, /* persistent */true);
+
+		memcpy(ZSTR_VAL(newval), ZSTR_VAL(curval), ZSTR_LEN(curval));
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval), ", ", 2);
+		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval) + 2, ZSTR_VAL(client->current_header_value), ZSTR_LEN(client->current_header_value) + 1);
+
+		ZVAL_STR(&tmp, newval);
+	}
+
+	/* Add/Update the wrapped zend_string to the HashTable */
+	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
+	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 	zend_string_release_ex(client->current_header_name, /* persistent */ true);
@@ -1928,6 +1940,8 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (NULL != (val = zend_hash_str_find(&client->request.headers, "content-type", sizeof("content-type")-1))) {
 		request_info->content_type = Z_STRVAL_P(val);
+	} else {
+		request_info->content_type = NULL;
 	}
 } /* }}} */
 
@@ -2006,7 +2020,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 		{
-			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			static const char prologue_template[] = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>%d %s</title>";
 			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 			if (!chunk) {
 				goto fail;
@@ -2248,6 +2262,7 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 		int sg_options_back = SG(options);
 		/* Don't chdir to the router script because the file path may be relative. */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		CG(skip_shebang) = true;
 		bool result = php_execute_script_ex(&zfd, &retval);
 		SG(options) = sg_options_back;
 		if (result) {
@@ -2334,14 +2349,14 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 }
 /* }}} */
 
-static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map_ptr) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
-	for (pair = mime_type_map; pair->ext; pair++) {
+	for (pair = mime_type_map_ptr; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
@@ -2377,7 +2392,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
@@ -2509,6 +2524,7 @@ static void php_cli_server_startup_workers(void) {
 #if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 				php_cli_server_worker_install_pdeathsig();
 #endif
+				php_child_init();
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
@@ -2541,7 +2557,11 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
 	if (server_sock == SOCK_ERR) {
-		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		if (strchr(host, ':')) {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on [%s]:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		} else {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		}
 		if (errstr) {
 			zend_string_release_ex(errstr, 0);
 		}
@@ -2686,14 +2706,16 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
-			int err = php_socket_errno();
-			if (err != SOCK_EAGAIN && php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
+			pefree(sa, 1);
+			if (php_socket_errno() == SOCK_EAGAIN) {
+				return SUCCESS;
+			}
+			if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 				char *errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR,
 					"Failed to accept a client (reason: %s)", errstr);
 				efree(errstr);
 			}
-			pefree(sa, 1);
 			return FAILURE;
 		}
 		if (SUCCESS != php_set_sock_blocking(client_sock, 0)) {

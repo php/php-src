@@ -13,9 +13,9 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
- * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
+#[\Deprecated(since: '8.4', message: 'as it had no effect since 5.1.2')]
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
 /**
  * @var int
@@ -84,7 +84,8 @@ const CURLOPT_DNS_USE_GLOBAL_CACHE = UNKNOWN;
 const CURLOPT_EGDSOCKET = UNKNOWN;
 /**
  * @var int
- * @cvalue CURLOPT_ENCODING
+ * @cvalue CURLOPT_ACCEPT_ENCODING
+ * @alias CURLOPT_ACCEPT_ENCODING
  */
 const CURLOPT_ENCODING = UNKNOWN;
 /**
@@ -187,6 +188,11 @@ const CURLOPT_INFILE = UNKNOWN;
  * @cvalue CURLOPT_INFILESIZE
  */
 const CURLOPT_INFILESIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_INFILESIZE_LARGE
+ */
+const CURLOPT_INFILESIZE_LARGE = UNKNOWN;
 /**
  * @var int
  * @cvalue CURLOPT_INTERFACE
@@ -407,6 +413,13 @@ const CURLOPT_SSL_VERIFYPEER = UNKNOWN;
  * @cvalue CURLOPT_STDERR
  */
 const CURLOPT_STDERR = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_TCP_KEEPCNT
+ */
+const CURLOPT_TCP_KEEPCNT = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_TELNETOPTIONS
@@ -477,6 +490,66 @@ const CURLOPT_WRITEHEADER = UNKNOWN;
  * @cvalue CURLOPT_XFERINFOFUNCTION
  */
 const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLOPT_DEBUGFUNCTION
+ */
+const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+#if LIBCURL_VERSION_NUM >= 0x080d00 /* Available since 8.13.0 */
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_ALL
+ */
+const CURLFOLLOW_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_OBEYCODE
+ */
+const CURLFOLLOW_OBEYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_FIRSTONLY
+ */
+const CURLFOLLOW_FIRSTONLY = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue CURLINFO_TEXT
+ */
+const CURLINFO_TEXT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_HEADER_IN
+ */
+const CURLINFO_HEADER_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_IN
+ */
+const CURLINFO_DATA_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_OUT
+ */
+const CURLINFO_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_OUT
+ */
+const CURLINFO_SSL_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_IN
+ */
+const CURLINFO_SSL_DATA_IN = UNKNOWN;
 
 /* */
 /**
@@ -950,6 +1023,18 @@ const CURLINFO_CAPATH = UNKNOWN;
  */
 const CURLINFO_CAINFO = UNKNOWN;
 #endif
+#if LIBCURL_VERSION_NUM >= 0x080c00 /* Available since 8.12.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_HTTPAUTH_USED
+ */
+const CURLINFO_HTTPAUTH_USED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLINFO_PROXYAUTH_USED
+ */
+const CURLINFO_PROXYAUTH_USED = UNKNOWN;
+#endif
 
 /* Other */
 /**
@@ -1284,9 +1369,15 @@ const CURLINFO_RESPONSE_CODE = UNKNOWN;
 const CURLINFO_PROXYAUTH_AVAIL = UNKNOWN;
 /**
  * @var int
- * @cvalue CURLOPT_FTP_RESPONSE_TIMEOUT
+ * @cvalue CURLOPT_SERVER_RESPONSE_TIMEOUT
+ * @alias CURLOPT_SERVER_RESPONSE_TIMEOUT
  */
 const CURLOPT_FTP_RESPONSE_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_SERVER_RESPONSE_TIMEOUT
+ */
+const CURLOPT_SERVER_RESPONSE_TIMEOUT = UNKNOWN;
 /**
  * @var int
  * @cvalue CURLOPT_IPRESOLVE
@@ -2963,6 +3054,13 @@ const CURL_LOCK_DATA_PSL = UNKNOWN;
  * @cvalue CURLAUTH_BEARER
  */
 const CURLAUTH_BEARER = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_QUEUE_TIME_T
+ */
+const CURLINFO_QUEUE_TIME_T = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLINFO_APPCONNECT_TIME_T
@@ -2998,6 +3096,27 @@ const CURLINFO_STARTTRANSFER_TIME_T = UNKNOWN;
  * @cvalue CURLINFO_TOTAL_TIME_T
  */
 const CURLINFO_TOTAL_TIME_T = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080700 /* Available since 8.7.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_USED_PROXY
+ */
+const CURLINFO_USED_PROXY = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080a00 /* Available since 8.10.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_POSTTRANSFER_TIME_T
+ */
+const CURLINFO_POSTTRANSFER_TIME_T = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_CONN_ID
+ */
+const CURLINFO_CONN_ID = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_DISALLOW_USERNAME_IN_URL
@@ -3102,6 +3221,11 @@ const CURL_VERSION_HTTP3 = UNKNOWN;
  * @cvalue CURLINFO_RETRY_AFTER
  */
 const CURLINFO_RETRY_AFTER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3
+ */
+const CURL_HTTP_VERSION_3  = UNKNOWN;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
@@ -3215,6 +3339,13 @@ const CURLINFO_PROXY_ERROR = UNKNOWN;
  * @cvalue CURLOPT_SSL_EC_CURVES
  */
 const CURLOPT_SSL_EC_CURVES = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_SSL_SIGNATURE_ALGORITHMS
+ */
+const CURLOPT_SSL_SIGNATURE_ALGORITHMS = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLPX_BAD_ADDRESS_TYPE
@@ -3485,6 +3616,21 @@ const CURLOPT_MAXLIFETIME_CONN = UNKNOWN;
  * @cvalue CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256
  */
 const CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_PREREQFUNCTION
+ */
+const CURLOPT_PREREQFUNCTION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_PREREQFUNC_OK
+ */
+const CURL_PREREQFUNC_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_PREREQFUNC_ABORT
+ */
+const CURL_PREREQFUNC_ABORT = UNKNOWN;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
@@ -3547,6 +3693,14 @@ const CURLOPT_CA_CACHE_TIMEOUT = UNKNOWN;
 const CURLOPT_QUICK_EXIT = UNKNOWN;
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x075800 /* Available since 7.88.0 */
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3ONLY
+ */
+const CURL_HTTP_VERSION_3ONLY  = UNKNOWN;
+#endif
+
 /**
  * @var int
  * @cvalue CURLOPT_SAFE_UPLOAD
@@ -3577,6 +3731,16 @@ final class CurlShareHandle
 {
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class CurlSharePersistentHandle
+{
+    public readonly array $options;
+}
+
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */
@@ -3610,6 +3774,8 @@ function curl_upkeep(CurlHandle $handle): bool {}
 #endif
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
+
+function curl_multi_get_handles(CurlMultiHandle $multi_handle): array {}
 
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 
@@ -3645,6 +3811,7 @@ function curl_setopt_array(CurlHandle $handle, array $options): bool {}
 
 function curl_setopt(CurlHandle $handle, int $option, mixed $value): bool {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function curl_share_close(CurlShareHandle $share_handle): void {}
 
 function curl_share_errno(CurlShareHandle $share_handle): int {}
@@ -3656,6 +3823,9 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 
 /** @refcount 1 */
 function curl_share_strerror(int $error_code): ?string {}
+
+/** @refcount 1 */
+function curl_share_init_persistent(array $share_options): CurlSharePersistentHandle {}
 
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}

@@ -7,7 +7,7 @@ curl
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl version', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
-if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
+
 if (PHP_OS_FAMILY === 'Darwin') die('skip Fails intermittently on macOS');
 if (PHP_OS === 'FreeBSD') die('skip proc_open seems to be stuck on FreeBSD');
 $curl_version = curl_version();
@@ -18,9 +18,13 @@ if ($curl_version['version_number'] < 0x074700) {
 --FILE--
 <?php
 
-function check_error(CurlHandle $ch) {
+function check_error(CurlHandle $ch, $expected = null) {
     if (curl_errno($ch) !== 0) {
-        echo "CURL ERROR: " . curl_errno($ch) . "\n";
+        $errno = curl_errno($ch);
+        if (!is_null($expected)) {
+            $errno = $errno == $expected ? 'EXPECTED' : "UNEXPECTED(A:$errno,E:$expected)";
+        }
+        echo "CURL ERROR: " . $errno . "\n";
     }
 }
 
@@ -62,7 +66,7 @@ $port = 14430;
 
 // set up local server
 $cmd = "openssl s_server -key $serverKeyPath -cert $serverCertPath -accept $port -www -CAfile $clientCertPath -verify_return_error -Verify 1";
-$process = proc_open($cmd, [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]], $pipes);
+$process = proc_open($cmd, [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]], $pipes, null, null, ["bypass_shell" => true]);
 
 if ($process === false) {
     die('failed to start server');
@@ -82,7 +86,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 2: empty client cert and key from string\n";
@@ -96,7 +100,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 3: client cert and empty key from string\n";
@@ -109,8 +113,8 @@ try {
 
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
-    check_error($ch);
-    curl_close($ch);
+    check_error($ch, curl_version()['version_number'] < 0x081000 ? 58 : 43);
+    $ch = null;
 
     echo "\n";
     echo "case 4: client cert and key from file\n";
@@ -124,7 +128,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 5: issuer cert from file\n";
@@ -140,7 +144,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 6: issuer cert from string\n";
@@ -156,7 +160,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 7: empty issuer cert from string\n";
@@ -172,7 +176,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
 } finally {
     // clean up server process
@@ -203,7 +207,7 @@ bool(true)
 bool(true)
 bool(true)
 client cert subject not in response
-CURL ERROR: 58
+CURL ERROR: EXPECTED
 
 case 4: client cert and key from file
 bool(true)
