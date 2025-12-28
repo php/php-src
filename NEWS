@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.18
 
-
+- Readline:
+  . Fixed bug GH-18139 (Memory leak when overriding some settings
+    via readline_info()). (ndossche)
 
 15 Jan 2026, PHP 8.4.17
 
