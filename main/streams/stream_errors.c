@@ -158,15 +158,25 @@ static void php_stream_error_operation_free(php_stream_error_operation *op)
 /* Cleanup function for request shutdown */
 PHPAPI void php_stream_error_state_cleanup(void)
 {
-	/* Clear active operations (shouldn't normally have any, but clean up just in case) */
-	while (FG(stream_error_state).current_operation) {
-		php_stream_error_operation *op = FG(stream_error_state).current_operation;
-		FG(stream_error_state).current_operation = op->parent;
-		php_stream_error_operation_free(op);
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	/* Clear active operations */
+	while (state->current_operation) {
+		php_stream_error_operation *op = state->current_operation;
+		state->current_operation = op->parent;
+
+		/* Free errors */
+		php_stream_error_entry_free(op->first_error);
+
+		/* Reset operation */
+		op->first_error = NULL;
+		op->last_error = NULL;
+		op->error_count = 0;
+		op->parent = NULL;
 	}
 
 	/* Clear stored errors */
-	php_stream_stored_error *stored = FG(stream_error_state).stored_errors;
+	php_stream_stored_error *stored = state->stored_errors;
 	while (stored) {
 		php_stream_stored_error *next = stored->next;
 		php_stream_error_entry_free(stored->first_error);
@@ -174,35 +184,70 @@ PHPAPI void php_stream_error_state_cleanup(void)
 		stored = next;
 	}
 
-	FG(stream_error_state).stored_errors = NULL;
-	FG(stream_error_state).stored_count = 0;
-	FG(stream_error_state).operation_depth = 0;
-}
+	state->stored_errors = NULL;
+	state->stored_count = 0;
+	state->operation_depth = 0;
 
+	/* Free overflow operations array */
+	if (state->overflow_operations) {
+		efree(state->overflow_operations);
+		state->overflow_operations = NULL;
+		state->overflow_capacity = 0;
+	}
+}
 /* Error operation stack management */
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(php_stream_context *context)
 {
+	php_stream_error_state *state = &FG(stream_error_state);
+
 	/* Check depth limit */
-	if (FG(stream_error_state).operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
+	if (state->operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
 		php_error_docref(NULL, E_WARNING,
 				"Stream error operation depth exceeded (%u), possible infinite recursion",
-				FG(stream_error_state).operation_depth);
+				state->operation_depth);
 		return NULL;
 	}
 
-	/* Create new operation with empty error list */
-	php_stream_error_operation *op = emalloc(sizeof(php_stream_error_operation));
+	php_stream_error_operation *op;
+
+	/* Try to use pre-allocated pool first */
+	if (state->operation_depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
+		op = &state->operation_pool[state->operation_depth];
+	} else {
+		/* Need overflow allocation */
+		uint32_t overflow_index = state->operation_depth - PHP_STREAM_ERROR_OPERATION_POOL_SIZE;
+
+		/* Grow overflow array if needed */
+		if (overflow_index >= state->overflow_capacity) {
+			uint32_t new_capacity
+					= state->overflow_capacity == 0 ? 8 : state->overflow_capacity * 2;
+			php_stream_error_operation *new_overflow = erealloc(
+					state->overflow_operations, sizeof(php_stream_error_operation) * new_capacity);
+			state->overflow_operations = new_overflow;
+			state->overflow_capacity = new_capacity;
+		}
+
+		op = &state->overflow_operations[overflow_index];
+	}
+
+	/* Initialize operation */
 	op->first_error = NULL;
 	op->last_error = NULL;
 	op->error_count = 0;
-	op->parent = FG(stream_error_state).current_operation;
+	op->parent = state->current_operation;
 
 	/* Push onto stack */
-	FG(stream_error_state).current_operation = op;
-	FG(stream_error_state).operation_depth++;
+	state->current_operation = op;
+	state->operation_depth++;
 
 	return op;
+}
+
+PHPAPI php_stream_error_operation *php_stream_error_operation_begin_for_stream(php_stream *stream)
+{
+	/* Don't fetch context yet - will be fetched in _end_for_stream if needed */
+	return php_stream_error_operation_begin(NULL);
 }
 
 static void php_stream_error_add(StreamErrorCode code, const char *wrapper_name,
@@ -334,15 +379,16 @@ static void php_stream_report_errors(php_stream_context *context, php_stream_err
 
 PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 {
-	php_stream_error_operation *op = FG(stream_error_state).current_operation;
+	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_operation *op = state->current_operation;
 
 	if (!op) {
 		return;
 	}
 
 	/* Pop from stack */
-	FG(stream_error_state).current_operation = op->parent;
-	FG(stream_error_state).operation_depth--;
+	state->current_operation = op->parent;
+	state->operation_depth--;
 
 	/* Process errors if we have any */
 	if (op->error_count > 0) {
@@ -359,8 +405,6 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		if (store_mode == PHP_STREAM_ERROR_STORE_NONE) {
 			/* Free all errors */
 			php_stream_error_entry_free(op->first_error);
-			op->first_error = NULL;
-			op->last_error = NULL;
 		} else {
 			/* Filter and store */
 			php_stream_error_entry *entry = op->first_error;
@@ -408,7 +452,6 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 					efree(entry->param);
 					efree(entry);
 
-					/* Don't update prev */
 					entry = next;
 					continue;
 				}
@@ -421,21 +464,48 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 			if (to_store_first) {
 				php_stream_stored_error *stored = emalloc(sizeof(php_stream_stored_error));
 				stored->first_error = to_store_first;
-				stored->next = FG(stream_error_state).stored_errors;
+				stored->next = state->stored_errors;
 
-				FG(stream_error_state).stored_errors = stored;
-				FG(stream_error_state).stored_count++;
+				state->stored_errors = stored;
+				state->stored_count++;
 			}
 
 			/* Free any remaining errors not moved to storage */
 			php_stream_error_entry_free(op->first_error);
-			op->first_error = NULL;
-			op->last_error = NULL;
 		}
 	}
 
-	/* Free operation structure */
-	efree(op);
+	/* Reset operation for reuse (don't free if from pool or overflow) */
+	op->first_error = NULL;
+	op->last_error = NULL;
+	op->error_count = 0;
+	op->parent = NULL;
+}
+
+PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_operation *op = state->current_operation;
+
+	if (!op) {
+		return;
+	}
+
+	/* Fast path: no errors - just pop and return */
+	if (op->error_count == 0) {
+		state->current_operation = op->parent;
+		state->operation_depth--;
+
+		/* Reset operation for reuse */
+		op->first_error = NULL;
+		op->last_error = NULL;
+		op->parent = NULL;
+		return;
+	}
+
+	/* Slow path: have errors - fetch context and process */
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	php_stream_error_operation_end(context);
 }
 
 PHPAPI void php_stream_error_operation_abort(void)
