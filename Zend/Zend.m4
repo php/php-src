@@ -476,13 +476,6 @@ AC_DEFUN([ZEND_CHECK_PRESERVE_NONE], [dnl
   AC_CACHE_CHECK([for preserve_none calling convention],
    [php_cv_preserve_none],
    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-
-#ifdef __apple_build_version__
-# if __apple_build_version__ < 17000404
-#  error This version of Apple Clang doesn't support preserve_none
-# endif
-#endif
-
 #include <stdio.h>
 #include <stdint.h>
 
