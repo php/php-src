@@ -216,7 +216,7 @@ static void php_stream_error_add(StreamErrorCode code, const char *wrapper_name,
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
 	entry->param = param;
-	entry->param = docref ? estrdup(docref) : NULL;
+	entry->docref = docref ? estrdup(docref) : NULL;
 	entry->severity = severity;
 	entry->terminating = terminating;
 	entry->next = NULL;
