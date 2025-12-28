@@ -5,16 +5,16 @@ Stream errors - error_store NONE option
 
 $context = stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
-        'error_store' => STREAM_ERROR_STORE_NONE,
+        'error_mode' => StreamErrorMode::Silent,
+        'error_store' => StreamErrorStore::None,
     ]
 ]);
 
 $stream = fopen('php://nonexistent', 'r', false, $context);
 
-$errors = stream_get_errors();
-echo "Error count: " . count($errors) . "\n";
+$error = stream_get_last_error();
+echo "Has error: " . ($error ? "yes" : "no") . "\n";
 
 ?>
 --EXPECT--
-Error count: 0
+Has error: no

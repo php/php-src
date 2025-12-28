@@ -31,158 +31,117 @@ function stream_test_errors($title, $context) {
     $stream = fopen('test://foo', 'r', false, $context);
     try {
         echo $title . "\n";
-        $readin = fopen( 'php://stdin', 'r' );
-        $data   = fread( $stream, 10 );
+        $readin = fopen('php://stdin', 'r');
+        $data = fread($stream, 10);
 
-        $read   = [$readin, $stream];
-        $write  = NULL;
+        $read = [$readin, $stream];
+        $write = NULL;
         $except = NULL;
         stream_select($read, $write, $except, 0);
     } catch (StreamException $e) {
         echo 'EXCEPTION: ' . $e->getMessage() . "\n";
     }
 
-    $errors = stream_get_errors($stream);
-    var_dump($errors);
+    $error = stream_get_last_error();
+    if ($error) {
+        echo "Error details:\n";
+        echo "- Message: " . $error->message . "\n";
+        echo "- Code: " . $error->code->name . " (" . $error->code->value . ")\n";
+        echo "- Wrapper: " . $error->wrapperName . "\n";
+        echo "- Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
+        echo "- Count: " . $error->count() . "\n";
+        
+        // Show all errors in chain
+        $current = $error;
+        $idx = 0;
+        while ($current) {
+            echo "  [$idx] " . $current->code->name . ": " . substr($current->message, 0, 50) . "...\n";
+            $current = $current->next;
+            $idx++;
+        }
+    } else {
+        echo "No errors stored\n";
+    }
+    echo "\n";
 }
 
 stream_test_errors('ALL', stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
-        'error_store' => STREAM_ERROR_STORE_ALL,
+        'error_mode' => StreamErrorMode::Silent,
+        'error_store' => StreamErrorStore::All,
     ]
 ]));
+
 stream_test_errors('NON TERMINAL', stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
-        'error_store' => STREAM_ERROR_STORE_NON_TERMINAL,
+        'error_mode' => StreamErrorMode::Silent,
+        'error_store' => StreamErrorStore::NonTerminal,
     ]
 ]));
+
 stream_test_errors('TERMINAL', stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
-        'error_store' => STREAM_ERROR_STORE_TERMINAL,
+        'error_mode' => StreamErrorMode::Silent,
+        'error_store' => StreamErrorStore::Terminal,
     ]
 ]));
+
 stream_test_errors('AUTO EXCEPTION', stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_EXCEPTION,
-        'error_store' => STREAM_ERROR_STORE_AUTO,
+        'error_mode' => StreamErrorMode::Exception,
+        'error_store' => StreamErrorStore::Auto,
     ]
 ]));
+
 stream_test_errors('AUTO ERROR', stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_ERROR,
-        'error_store' => STREAM_ERROR_STORE_AUTO,
+        'error_mode' => StreamErrorMode::Error,
+        'error_store' => StreamErrorStore::Auto,
     ]
 ]));
 
 ?>
 --EXPECTF--
 ALL
-array(3) {
-  [0]=>
-  array(5) {
-    ["message"]=>
-    string(113) "TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost"
-    ["code"]=>
-    int(161)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(false)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-  [1]=>
-  array(5) {
-    ["message"]=>
-    string(43) "TestStream::stream_cast is not implemented!"
-    ["code"]=>
-    int(70)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(true)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-  [2]=>
-  array(5) {
-    ["message"]=>
-    string(73) "Cannot represent a stream of type user-space as a select()able descriptor"
-    ["code"]=>
-    int(101)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(true)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-}
+Error details:
+- Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+- Code: UserspaceInvalidReturn (161)
+- Wrapper: user-space
+- Terminating: no
+- Count: 3
+  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data ...
+  [1] NotImplemented: TestStream::stream_cast is not implemented!...
+  [2] CastNotSupported: Cannot represent a stream of type user-space as...
+
 NON TERMINAL
-array(1) {
-  [0]=>
-  array(5) {
-    ["message"]=>
-    string(113) "TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost"
-    ["code"]=>
-    int(161)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(false)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-}
+Error details:
+- Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+- Code: UserspaceInvalidReturn (161)
+- Wrapper: user-space
+- Terminating: no
+- Count: 1
+  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data ...
+
 TERMINAL
-array(2) {
-  [0]=>
-  array(5) {
-    ["message"]=>
-    string(43) "TestStream::stream_cast is not implemented!"
-    ["code"]=>
-    int(70)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(true)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-  [1]=>
-  array(5) {
-    ["message"]=>
-    string(73) "Cannot represent a stream of type user-space as a select()able descriptor"
-    ["code"]=>
-    int(101)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(true)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-}
+Error details:
+- Message: TestStream::stream_cast is not implemented!
+- Code: NotImplemented (70)
+- Wrapper: user-space
+- Terminating: yes
+- Count: 2
+  [0] NotImplemented: TestStream::stream_cast is not implemented!...
+  [1] CastNotSupported: Cannot represent a stream of type user-space as...
+
 AUTO EXCEPTION
 EXCEPTION: Cannot represent a stream of type user-space as a select()able descriptor
-array(1) {
-  [0]=>
-  array(5) {
-    ["message"]=>
-    string(113) "TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost"
-    ["code"]=>
-    int(161)
-    ["severity"]=>
-    int(2)
-    ["terminal"]=>
-    bool(false)
-    ["wrapper"]=>
-    string(10) "user-space"
-  }
-}
+Error details:
+- Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+- Code: UserspaceInvalidReturn (161)
+- Wrapper: user-space
+- Terminating: no
+- Count: 1
+  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data ...
+
 AUTO ERROR
 
 Warning: fread(): TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost in %s on line %d
@@ -190,5 +149,4 @@ Warning: fread(): TestStream::stream_read - read 10 bytes more data than request
 Warning: stream_select(): TestStream::stream_cast is not implemented! in %s on line %d
 
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
-array(0) {
-}
+No errors stored

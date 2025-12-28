@@ -5,23 +5,25 @@ Stream errors - silent mode with error storage
 
 $context = stream_context_create([
     'stream' => [
-        'error_mode' => STREAM_ERROR_MODE_SILENT,
+        'error_mode' => StreamErrorMode::Silent,
     ]
 ]);
 
 $stream = fopen('php://nonexistent', 'r', false, $context);
 var_dump($stream);
 
-$errors = stream_get_errors();
-echo "Error count: " . count($errors) . "\n";
-if (count($errors) > 0) {
-    echo "First error code: " . $errors[0]['code'] . "\n";
-    echo "First error wrapper: " . $errors[0]['wrapper'] . "\n";
+$error = stream_get_last_error();
+if ($error) {
+    echo "Has error: yes\n";
+    echo "Error code: " . $error->code->name . "\n";
+    echo "Error wrapper: " . $error->wrapperName . "\n";
+    echo "Error message: " . $error->message . "\n";
 }
 
 ?>
 --EXPECT--
 bool(false)
-Error count: 1
-First error code: 36
-First error wrapper: PHP
+Has error: yes
+Error code: OpenFailed
+Error wrapper: PHP
+Error message: Failed to open stream: operation failed
