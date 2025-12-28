@@ -14,5 +14,5 @@ var_dump(readline_info('line_buffer', 'fourth'));
 --EXPECTF--
 string(%d) "%S"
 string(5) "first"
-string(0) ""
+string(%d) "%S"
 string(5) "third"
