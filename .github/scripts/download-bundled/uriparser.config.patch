@@ -1,0 +1,14 @@
+diff --git a/ext/uri/uriparser/src/UriConfig.h b/ext/uri/uriparser/src/UriConfig.h
+index b9a85a8..ab78b96 100644
+--- a/ext/uri/uriparser/src/UriConfig.h
++++ b/ext/uri/uriparser/src/UriConfig.h
+@@ -41,7 +41,9 @@
+ 
+ #  define PACKAGE_VERSION "@PROJECT_VERSION@"
+ 
++/*
+ #cmakedefine HAVE_WPRINTF
+ #cmakedefine HAVE_REALLOCARRAY
++*/
+ 
+ #endif /* !defined(URI_CONFIG_H) */
