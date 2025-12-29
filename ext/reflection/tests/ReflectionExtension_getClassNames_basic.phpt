@@ -16,6 +16,10 @@ AssertionError
 Directory
 RoundingMode
 StreamBucket
+StreamError
+StreamErrorCode
+StreamErrorMode
+StreamErrorStore
 StreamException
 __PHP_Incomplete_Class
 php_user_filter
