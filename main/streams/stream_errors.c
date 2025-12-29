@@ -681,14 +681,13 @@ static void php_stream_wrapper_log_store_error(zend_string *message, int code,
 {
 	char *param_copy = param ? estrdup(param) : NULL;
 
-	php_stream_error_entry *entry = emalloc(sizeof(php_stream_error_entry));
+	php_stream_error_entry *entry = ecalloc(1, sizeof(php_stream_error_entry));
 	entry->message = message;
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
 	entry->param = param_copy;
 	entry->severity = severity;
 	entry->terminating = terminating;
-	entry->next = NULL;
 
 	if (!FG(wrapper_logged_errors)) {
 		ALLOC_HASHTABLE(FG(wrapper_logged_errors));
