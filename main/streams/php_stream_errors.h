@@ -180,7 +180,6 @@ typedef struct _php_stream_error_operation {
 	php_stream_error_entry *first_error;
 	php_stream_error_entry *last_error;
 	uint32_t error_count;
-	struct _php_stream_error_operation *parent;
 } php_stream_error_operation;
 
 /* Stored completed operation */
