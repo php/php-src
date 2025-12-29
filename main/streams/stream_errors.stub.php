@@ -38,8 +38,8 @@ enum StreamErrorStore
 {
     case Auto;
     case None;
-    case NonTerminal;
-    case Terminal;
+    case NonTerminating;
+    case Terminating;
     case All;
 }
 

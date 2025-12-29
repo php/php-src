@@ -112,9 +112,9 @@ static int php_stream_get_error_store_mode(php_stream_context *context, int erro
 		return php_stream_auto_decide_error_store_mode(error_mode);
 	} else if (zend_string_equals_literal(case_name, "None")) {
 		return PHP_STREAM_ERROR_STORE_NONE;
-	} else if (zend_string_equals_literal(case_name, "NonTerminal")) {
+	} else if (zend_string_equals_literal(case_name, "NonTerminating")) {
 		return PHP_STREAM_ERROR_STORE_NON_TERM;
-	} else if (zend_string_equals_literal(case_name, "Terminal")) {
+	} else if (zend_string_equals_literal(case_name, "Terminating")) {
 		return PHP_STREAM_ERROR_STORE_TERMINAL;
 	} else if (zend_string_equals_literal(case_name, "All")) {
 		return PHP_STREAM_ERROR_STORE_ALL;

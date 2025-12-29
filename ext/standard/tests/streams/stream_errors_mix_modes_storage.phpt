@@ -73,17 +73,17 @@ stream_test_errors('ALL', [
     ]
 ]);
 
-stream_test_errors('NON TERMINAL', [
+stream_test_errors('NON TERMINATING', [
     'stream' => [
         'error_mode' => StreamErrorMode::Silent,
-        'error_store' => StreamErrorStore::NonTerminal,
+        'error_store' => StreamErrorStore::NonTerminating,
     ]
 ]);
 
-stream_test_errors('TERMINAL', [
+stream_test_errors('TERMINATING', [
     'stream' => [
         'error_mode' => StreamErrorMode::Silent,
-        'error_store' => StreamErrorStore::Terminal,
+        'error_store' => StreamErrorStore::Terminating,
     ]
 ]);
 
@@ -113,7 +113,7 @@ Error details:
   [0] NotImplemented: TestStream::stream_cast is not implemented!
   [1] CastNotSupported: Cannot represent a stream of type user-space as a select()able descriptor
 
-NON TERMINAL
+NON TERMINATING
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
 - Code: UserspaceInvalidReturn (161)
@@ -122,7 +122,7 @@ Error details:
 - Count: 1
   [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
 
-TERMINAL
+TERMINATING
 Error details:
 - Message: TestStream::stream_cast is not implemented!
 - Code: NotImplemented (70)
