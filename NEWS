@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20714 (Uncatchable exception thrown in generator). (ilutov)
   . Fixed bug GH-20352 (UAF in php_output_handler_free via re-entrant
     ob_start() during error deactivation). (ndossche)
+  . Fixed bug GH-20745 ("Casting out of range floats to int" applies to
+    strings). (Bob)
 
 - DOM:
   . Fixed bug GH-20722 (Null pointer dereference in DOM namespace node cloning
