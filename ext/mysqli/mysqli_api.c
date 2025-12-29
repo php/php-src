@@ -1362,6 +1362,29 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	RETURN_NEW_STR(newstr);
 }
 
+PHP_FUNCTION(mysqli_quote_string) {
+	MY_MYSQL	*mysql;
+	zval		*mysql_link = NULL;
+	char		*escapestr;
+	size_t		escapestr_len;
+	zend_string *newstr;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &mysql_link, mysqli_link_class_entry, &escapestr, &escapestr_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
+
+	newstr = zend_string_safe_alloc(2, escapestr_len+1, 0, 0);
+	ZSTR_VAL(newstr)[0] = '\'';
+	ZSTR_LEN(newstr) = 1 +  mysql_real_escape_string(mysql->mysql, ZSTR_VAL(newstr) + 1, escapestr, escapestr_len);
+	ZSTR_VAL(newstr)[ZSTR_LEN(newstr)] = '\'';
+	ZSTR_LEN(newstr) += 1;
+	ZSTR_VAL(newstr)[ZSTR_LEN(newstr)] = '\0';
+	newstr = zend_string_truncate(newstr, ZSTR_LEN(newstr), 0);
+
+	RETURN_NEW_STR(newstr);
+}
+
 /* {{{ Undo actions from current transaction */
 PHP_FUNCTION(mysqli_rollback)
 {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fecde55745fb219cb15fd35a54a71371ef2b8b7d */
+ * Stub hash: 1c90e5fcc20b0e810643eb812db01e95bfa928f4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -251,6 +251,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_escape_string, 0, 2,
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_escape_string arginfo_mysqli_real_escape_string
+
+#define arginfo_mysqli_quote_string arginfo_mysqli_real_escape_string
 
 #define arginfo_mysqli_real_query arginfo_mysqli_multi_query
 
@@ -527,6 +529,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_real_esca
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_quote_string, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_reap_async_query, 0, 0, mysqli_result, MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
@@ -767,6 +773,7 @@ ZEND_FUNCTION(mysqli_report);
 ZEND_FUNCTION(mysqli_query);
 ZEND_FUNCTION(mysqli_real_connect);
 ZEND_FUNCTION(mysqli_real_escape_string);
+ZEND_FUNCTION(mysqli_quote_string);
 ZEND_FUNCTION(mysqli_real_query);
 ZEND_FUNCTION(mysqli_reap_async_query);
 ZEND_FUNCTION(mysqli_release_savepoint);
@@ -883,6 +890,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_real_connect, arginfo_mysqli_real_connect)
 	ZEND_FE(mysqli_real_escape_string, arginfo_mysqli_real_escape_string)
 	ZEND_RAW_FENTRY("mysqli_escape_string", zif_mysqli_real_escape_string, arginfo_mysqli_escape_string, 0, NULL, NULL)
+	ZEND_FE(mysqli_quote_string, arginfo_mysqli_quote_string)
 	ZEND_FE(mysqli_real_query, arginfo_mysqli_real_query)
 	ZEND_FE(mysqli_reap_async_query, arginfo_mysqli_reap_async_query)
 	ZEND_FE(mysqli_release_savepoint, arginfo_mysqli_release_savepoint)
@@ -957,6 +965,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("query", zif_mysqli_query, arginfo_class_mysqli_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_connect", zif_mysqli_real_connect, arginfo_class_mysqli_real_connect, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_escape_string", zif_mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("quote_string", zif_mysqli_quote_string, arginfo_class_mysqli_quote_string, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("reap_async_query", zif_mysqli_reap_async_query, arginfo_class_mysqli_reap_async_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("escape_string", zif_mysqli_real_escape_string, arginfo_class_mysqli_escape_string, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_query", zif_mysqli_real_query, arginfo_class_mysqli_real_query, ZEND_ACC_PUBLIC, NULL, NULL)
