@@ -427,9 +427,9 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (offset != 0 && php_stream_seek(stream, offset, ((offset > 0) ? SEEK_SET : SEEK_END)) < 0) {
-		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		php_stream_close(stream);
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		RETURN_FALSE;
 	}
 
@@ -495,8 +495,8 @@ PHP_FUNCTION(file_put_contents)
 
 	if ((flags & LOCK_EX) && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
 		php_stream_close(stream);
-		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;
 	}
 
@@ -1264,20 +1264,20 @@ PHP_FUNCTION(rename)
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
-		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->rename) {
-		php_error_docref(NULL, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
 		RETURN_FALSE;
 	}
 
 	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0)) {
-		php_error_docref(NULL, E_WARNING, "Cannot rename a file across wrapper types");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Cannot rename a file across wrapper types");
 		RETURN_FALSE;
 	}
 
@@ -1307,14 +1307,14 @@ PHP_FUNCTION(unlink)
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
-		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->unlink) {
-		php_error_docref(NULL, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
 	RETVAL_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
@@ -1332,8 +1332,8 @@ PHP_FUNCTION(fsync)
 
 	php_stream_error_operation_begin();
 	if (!php_stream_sync_supported(stream)) {
-		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		php_stream_error_operation_end_for_stream(stream);
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		RETURN_FALSE;
 	}
 
@@ -1351,8 +1351,8 @@ PHP_FUNCTION(fdatasync)
 
 	php_stream_error_operation_begin();
 	if (!php_stream_sync_supported(stream)) {
-		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		php_stream_error_operation_end_for_stream(stream);
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		RETURN_FALSE;
 	}
 
@@ -1379,8 +1379,8 @@ PHP_FUNCTION(ftruncate)
 	php_stream_error_operation_begin();
 
 	if (!php_stream_truncate_supported(stream)) {
-		php_error_docref(NULL, E_WARNING, "Can't truncate this stream!");
 		php_stream_error_operation_end_for_stream(stream);
+		php_error_docref(NULL, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
 
