@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c9a7e6c0b34de0c6ee76c2a9d80c50deafc8079a */
+ * Stub hash: 24a4229f4272983a6fb996ce136ea904183e14e0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamErrorCode_isIoError, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -99,9 +99,9 @@ static zend_class_entry *register_class_StreamErrorStore(void)
 
 	zend_enum_add_case_cstr(class_entry, "None", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "NonTerminal", NULL);
+	zend_enum_add_case_cstr(class_entry, "NonTerminating", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "Terminal", NULL);
+	zend_enum_add_case_cstr(class_entry, "Terminating", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "All", NULL);
 
