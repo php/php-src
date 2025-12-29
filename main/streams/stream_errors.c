@@ -410,6 +410,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		if (context == NULL) {
 			context = FG(default_context);
 		}
+
 		/* Get error handling settings */
 		int error_mode = php_stream_get_error_mode(context);
 		int store_mode = php_stream_get_error_store_mode(context, error_mode);
@@ -423,12 +424,14 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		if (store_mode == PHP_STREAM_ERROR_STORE_NONE) {
 			/* Free all errors */
 			php_stream_error_entry_free(op->first_error);
+			op->first_error = NULL;
 		} else {
 			/* Filter and store */
 			php_stream_error_entry *entry = op->first_error;
 			php_stream_error_entry *prev = NULL;
 			php_stream_error_entry *to_store_first = NULL;
 			php_stream_error_entry *to_store_last = NULL;
+			php_stream_error_entry *remaining_first = NULL;
 
 			while (entry) {
 				php_stream_error_entry *next = entry->next;
@@ -444,12 +447,6 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 
 				if (should_store) {
 					/* Move to storage chain */
-					if (prev) {
-						prev->next = next;
-					} else {
-						op->first_error = next;
-					}
-
 					entry->next = NULL;
 					if (to_store_last) {
 						to_store_last->next = entry;
@@ -458,24 +455,16 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 					}
 					to_store_last = entry;
 				} else {
-					/* Free this error */
+					/* Keep in remaining chain (to be freed) */
+					entry->next = NULL;
 					if (prev) {
-						prev->next = next;
+						prev->next = entry;
 					} else {
-						op->first_error = next;
+						remaining_first = entry;
 					}
-
-					zend_string_release(entry->message);
-					efree(entry->wrapper_name);
-					efree(entry->param);
-					efree(entry->docref);
-					efree(entry);
-
-					entry = next;
-					continue;
+					prev = entry;
 				}
 
-				prev = entry;
 				entry = next;
 			}
 
@@ -489,8 +478,12 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 				state->stored_count++;
 			}
 
-			/* Free any remaining errors not moved to storage */
-			php_stream_error_entry_free(op->first_error);
+			/* Free remaining errors that were not stored */
+			if (remaining_first) {
+				php_stream_error_entry_free(remaining_first);
+			}
+
+			op->first_error = NULL;
 		}
 	}
 
