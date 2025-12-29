@@ -25,8 +25,6 @@ var_dump($array[$string_float]);
 --EXPECTF--
 Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 int(0)
-
-Warning: The float-string "1.0E+121" is not representable as an int, cast occurred in %s on line %d
 bool(true)
 
 Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d

@@ -149,10 +149,8 @@ static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d, const zend_string *s)
 {
 	if (UNEXPECTED(!zend_finite(d))) {
-		zend_oob_string_to_long_error(s);
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
-		zend_oob_string_to_long_error(s);
 		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
 	}
 	return (zend_long)d;
