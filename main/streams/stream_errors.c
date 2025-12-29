@@ -413,6 +413,9 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 
 	/* Process errors if we have any */
 	if (op->error_count > 0) {
+		if (context == NULL) {
+			context = FG(default_context);
+		}
 		/* Get error handling settings */
 		int error_mode = php_stream_get_error_mode(context);
 		int store_mode = php_stream_get_error_store_mode(context, error_mode);
