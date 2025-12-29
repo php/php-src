@@ -177,12 +177,6 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry)
 	}
 }
 
-static void php_stream_error_operation_free(php_stream_error_operation *op)
-{
-	php_stream_error_entry_free(op->first_error);
-	efree(op);
-}
-
 PHPAPI void php_stream_error_state_cleanup(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
