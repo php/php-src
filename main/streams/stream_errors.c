@@ -137,6 +137,34 @@ static bool php_stream_has_terminating_error(php_stream_error_operation *op)
 	return false;
 }
 
+/* Helper to get operation at specific depth */
+static inline php_stream_error_operation *php_stream_get_operation_at_depth(uint32_t depth)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	if (depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
+		return &state->operation_pool[depth];
+	} else {
+		uint32_t overflow_index = depth - PHP_STREAM_ERROR_OPERATION_POOL_SIZE;
+		ZEND_ASSERT(overflow_index < state->overflow_capacity);
+		return &state->overflow_operations[overflow_index];
+	}
+}
+
+/* Helper to get parent operation */
+static inline php_stream_error_operation *php_stream_get_parent_operation(void)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	if (state->operation_depth <= 1) {
+		return NULL;
+	}
+
+	return php_stream_get_operation_at_depth(state->operation_depth - 2);
+}
+
+/* Clean up functions */
+
 static void php_stream_error_entry_free(php_stream_error_entry *entry)
 {
 	while (entry) {
@@ -155,7 +183,6 @@ static void php_stream_error_operation_free(php_stream_error_operation *op)
 	efree(op);
 }
 
-/* Cleanup function for request shutdown */
 PHPAPI void php_stream_error_state_cleanup(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
@@ -163,7 +190,8 @@ PHPAPI void php_stream_error_state_cleanup(void)
 	/* Clear active operations */
 	while (state->current_operation) {
 		php_stream_error_operation *op = state->current_operation;
-		state->current_operation = op->parent;
+		state->operation_depth--;
+		state->current_operation = php_stream_get_parent_operation();
 
 		/* Free errors */
 		php_stream_error_entry_free(op->first_error);
@@ -172,7 +200,6 @@ PHPAPI void php_stream_error_state_cleanup(void)
 		op->first_error = NULL;
 		op->last_error = NULL;
 		op->error_count = 0;
-		op->parent = NULL;
 	}
 
 	/* Clear stored errors */
@@ -195,6 +222,7 @@ PHPAPI void php_stream_error_state_cleanup(void)
 		state->overflow_capacity = 0;
 	}
 }
+
 /* Error operation stack management */
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
@@ -235,9 +263,8 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 	op->first_error = NULL;
 	op->last_error = NULL;
 	op->error_count = 0;
-	op->parent = state->current_operation;
 
-	/* Push onto stack */
+	/* Update stack state */
 	state->current_operation = op;
 	state->operation_depth++;
 
@@ -381,8 +408,8 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 	}
 
 	/* Pop from stack */
-	state->current_operation = op->parent;
 	state->operation_depth--;
+	state->current_operation = php_stream_get_parent_operation();
 
 	/* Process errors if we have any */
 	if (op->error_count > 0) {
@@ -444,6 +471,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 					zend_string_release(entry->message);
 					efree(entry->wrapper_name);
 					efree(entry->param);
+					efree(entry->docref);
 					efree(entry);
 
 					entry = next;
@@ -469,11 +497,10 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		}
 	}
 
-	/* Reset operation for reuse (don't free if from pool or overflow) */
+	/* Reset operation for reuse */
 	op->first_error = NULL;
 	op->last_error = NULL;
 	op->error_count = 0;
-	op->parent = NULL;
 }
 
 PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream)
@@ -487,13 +514,12 @@ PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream)
 
 	/* Fast path: no errors - just pop and return */
 	if (op->error_count == 0) {
-		state->current_operation = op->parent;
 		state->operation_depth--;
+		state->current_operation = php_stream_get_parent_operation();
 
 		/* Reset operation for reuse */
 		op->first_error = NULL;
 		op->last_error = NULL;
-		op->parent = NULL;
 		return;
 	}
 
@@ -504,16 +530,22 @@ PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream)
 
 PHPAPI void php_stream_error_operation_abort(void)
 {
-	php_stream_error_operation *op = FG(stream_error_state).current_operation;
+	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_operation *op = state->current_operation;
 
 	if (!op) {
 		return;
 	}
 
-	FG(stream_error_state).current_operation = op->parent;
-	FG(stream_error_state).operation_depth--;
+	/* Pop from stack */
+	state->operation_depth--;
+	state->current_operation = php_stream_get_parent_operation();
 
-	php_stream_error_operation_free(op);
+	/* Free errors and reset operation */
+	php_stream_error_entry_free(op->first_error);
+	op->first_error = NULL;
+	op->last_error = NULL;
+	op->error_count = 0;
 }
 
 /* Wrapper error reporting */
@@ -525,7 +557,7 @@ static void php_stream_wrapper_error_internal(const char *wrapper_name, php_stre
 	/* If not in an operation, create one */
 	bool implicit_operation = (FG(stream_error_state).current_operation == NULL);
 	if (implicit_operation) {
-		php_stream_error_operation_begin(context);
+		php_stream_error_operation_begin();
 	}
 
 	/* Add to current operation (or skip if no operation) */
