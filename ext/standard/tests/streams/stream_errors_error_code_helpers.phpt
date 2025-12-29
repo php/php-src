@@ -10,7 +10,7 @@ $context = stream_context_create([
 ]);
 
 // Generate a network error
-$stream = @fsockopen('invalid-host-12345.example.com', 80, $errno, $errstr, 1, $context);
+$stream = fopen('php://nonexistent', 'r', false, $context);
 
 $error = stream_get_last_error();
 if ($error) {
@@ -22,7 +22,7 @@ if ($error) {
 
 ?>
 --EXPECTF--
-Is I/O error: %s
-Is filesystem error: no
-Is network error: %s
-Is wrapper error: %s
+Is I/O error: no
+Is filesystem error: yes
+Is network error: no
+Is wrapper error: no
