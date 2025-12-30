@@ -39942,7 +39942,7 @@
 !:ext	esd
 >>12	ulelong		!3584			(
 # look for archive member RunTime.xml like in Microsoft.Windows.Cosa.Desktop.Client.ppkg
->>>156	search/68233/s		RunTime.xml	\bWindows provisioningt package)
+>>>156	search/68233/s		RunTime.xml	\bWindows provisioning package)
 !:ext	ppkg
 # if it is not a Windows provisioning package, then it is a WIM
 >>>156	default			x		\bWIM) image
