@@ -801,15 +801,22 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
  * version of the address will be emalloc'd and returned.
  * */
 
-/* {{{ php_network_accept_incoming */
-PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+ /* Accept a client connection from a server socket,
+ * using an optional timeout.
+ * Returns the peer address in addr/addrlen (it will emalloc
+ * these, so be sure to efree the result).
+ * If you specify textaddr, a text-printable
+ * version of the address will be emalloc'd and returned.
+ * */
+
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
 		int *error_code,
-		int tcp_nodelay
+		php_sockvals *sockvals
 		)
 {
 	php_socket_t clisock = -1;
@@ -833,11 +840,19 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 					textaddr,
 					addr, addrlen
 					);
-			if (tcp_nodelay) {
 #ifdef TCP_NODELAY
+			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_NODELAY)) {
+				int tcp_nodelay = 1;
 				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
-#endif
 			}
+#endif
+#ifdef TCP_KEEPALIVE
+			/* MacOS does not inherit TCP_KEEPALIVE so it needs to be set */
+			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_KEEPIDLE)) {
+				setsockopt(clisock, IPPROTO_TCP, TCP_KEEPALIVE,
+						(char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#endif
 		} else {
 			error = php_socket_errno();
 		}
@@ -852,7 +867,22 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 
 	return clisock;
 }
-/* }}} */
+
+PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		int tcp_nodelay
+		)
+{
+	php_sockvals sockvals = { .mask = tcp_nodelay ? PHP_SOCKVAL_TCP_NODELAY : 0 };
+
+	return php_network_accept_incoming_ex(srvsock, textaddr, addr, addrlen, timeout, error_string,
+			error_code, &sockvals);
+}
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly

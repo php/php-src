@@ -267,12 +267,16 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
-#define PHP_SOCKVAL_TCP_KEEPIDLE  (1 << 0)
-#define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 1)
-#define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 2)
+#define PHP_SOCKVAL_TCP_NODELAY   (1 << 0)
+#define PHP_SOCKVAL_TCP_KEEPIDLE  (1 << 1)
+#define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 2)
+#define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 3)
+
+#define PHP_SOCKVAL_IS_SET(sockvals, opt) (sockvals->mask & opt)
 
 typedef struct {
 	unsigned int mask;
+	int tcp_nodelay;
 	struct {
 		int keepidle;
 		int keepcnt;
@@ -311,6 +315,16 @@ PHPAPI php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, u
 
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
+		);
+
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		php_sockvals *sockvals
 		);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
