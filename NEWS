@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.30
+01 Jan 2026, PHP 8.3.30RC1
 
 - Core:
   . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
