@@ -764,30 +764,27 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 #if defined(TCP_KEEPIDLE) || defined(TCP_KEEPALIVE)
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
-			sockvals.keepalive.keepidle = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
 		}
 #endif
 
 #ifdef TCP_KEEPINTVL
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepintvl")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPINTVL;
-			sockvals.keepalive.keepintvl = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepintvl = (int)zval_get_long(tmpzval);
 		}
 #endif
 
 #ifdef TCP_KEEPCNT
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepcnt")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPCNT;
-			sockvals.keepalive.keepcnt = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepcnt = (int)zval_get_long(tmpzval);
 		}
 #endif
 	}
@@ -895,30 +892,27 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 #if defined(TCP_KEEPIDLE) || defined(TCP_KEEPALIVE)
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
-			sockvals.keepalive.keepidle = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
 		}
 #endif
 
 #ifdef TCP_KEEPINTVL
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepintvl")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPINTVL;
-			sockvals.keepalive.keepintvl = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepintvl = (int)zval_get_long(tmpzval);
 		}
 #endif
 
 #ifdef TCP_KEEPCNT
 		if (PHP_STREAM_CONTEXT(stream)
 			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepcnt")) != NULL
-			&& Z_TYPE_P(tmpzval) == IS_LONG
 		) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPCNT;
-			sockvals.keepalive.keepcnt = (int)Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepcnt = (int)zval_get_long(tmpzval);
 		}
 #endif
 	}
@@ -976,9 +970,9 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 			sockvals.tcp_nodelay = 1;
 		}
 		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle");
-		if (tmpzval != NULL && Z_TYPE_P(tmpzval) == IS_LONG) {
+		if (tmpzval != NULL) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
-			sockvals.keepalive.keepidle = Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
 		}
 	}
 
