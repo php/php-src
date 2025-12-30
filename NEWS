@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.20
 
+- Bz2:
+  . Fix truncation of total output size causing erroneous errors. (ndossche)
+
 - PCRE:
   . Fixed re-entrancy issue on php_pcre_match_impl, php_pcre_replace_impl,
     php_pcre_split_impl, and php_pcre_grep_impl. (David Carlier)
