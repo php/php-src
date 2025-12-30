@@ -15004,7 +15004,7 @@
 >12	use next
 
 # bcachefs
-# From: Thomas Weiï¿½schuh <thomas@t-8ch.de>
+# From: Thomas Weißschuh <thomas@t-8ch.de>
 
 0	name	bcachefs-uuid
 >0	ubelong		x	\b%08x
@@ -19034,7 +19034,7 @@
 # GRR: with --keep-going option the line above gives duplicate messages
 0	search/1/ts	#FIG
 >&0	use		image-xfig
-# binary data variant with non ASCII text characters like Control-A or ï¿½C in thermostat.fig
+# binary data variant with non ASCII text characters like Control-A or °C in thermostat.fig
 0	search/1/bs	#FIG
 >&0	use		image-xfig
 #	display XFIG image describing text, mime type, file name extension and version
@@ -28342,7 +28342,7 @@
 # URL:		https://en.wikipedia.org/wiki/Microsoft_OneNote#File_format
 #		http://fileformats.archiveteam.org/wiki/OneNote
 # Reference:	https://mark0.net/download/triddefs_xml.7z/defs/o/onepkg.trid.xml
-# 1st member name like: "Class Notes.one" "test-onenote.one" "Open Notebook.onetoc2" "Editor ï¿½ffnen.onetoc2"
+# 1st member name like: "Class Notes.one" "test-onenote.one" "Open Notebook.onetoc2" "Editor Öffnen.onetoc2"
 >>>>>&0	string/c	one		\b, OneNote Package
 !:mime	application/msonenote
 !:ext	onepkg
@@ -39942,7 +39942,7 @@
 !:ext	esd
 >>12	ulelong		!3584			(
 # look for archive member RunTime.xml like in Microsoft.Windows.Cosa.Desktop.Client.ppkg
->>>156	search/68233/s		RunTime.xml	\bWindows provisioning package)
+>>>156	search/68233/s		RunTime.xml	\bWindows provisioningt package)
 !:ext	ppkg
 # if it is not a Windows provisioning package, then it is a WIM
 >>>156	default			x		\bWIM) image
