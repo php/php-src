@@ -713,7 +713,7 @@ void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset);
 void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info);
 
 /**
- * Attaches the time zone information in 'tz' to 't'.
+ * Attaches the time zone information in 'tz' to to 't'.
  *
  * It fetches the right UTC offset that is currently stored in the time
  * stamp field in 't' ('sse'), and assigns that to the 'z' field and 'dst'
