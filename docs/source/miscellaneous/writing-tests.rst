@@ -1389,7 +1389,7 @@ Example 1 (full): :ref:`sample002.phpt`
 ``--EXPECT_EXTERNAL--``
 -----------------------
 
-**Description:** Similar to to ``--EXPECT--`` section, but just stating a filename where to load the
+**Description:** Similar to ``--EXPECT--`` section, but just stating a filename where to load the
 expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1526,7 +1526,7 @@ Example 2 (full): :ref:`sample020.phpt`
 ``--EXPECTF_EXTERNAL--``
 ------------------------
 
-**Description:** Similar to to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
+**Description:** Similar to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
 just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
