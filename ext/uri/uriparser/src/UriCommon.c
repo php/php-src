@@ -727,7 +727,7 @@ UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri, UriMemoryManager * memory
 }
 
 /* When dropping a host from a URI without a scheme, an absolute path
- * and and empty first path segment, a consecutive reparse would rightfully
+ * and empty first path segment, a consecutive reparse would rightfully
  * mis-classify the first path segment as a host marker due to the "//".
  * To protect against this case, we prepend an artificial "." segment
  * to the path in here; the function is called after the host has

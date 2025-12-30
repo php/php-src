@@ -1607,7 +1607,7 @@ Example 3 (snippet):
 ``--EXPECTREGEX_EXTERNAL--``
 ----------------------------
 
-**Description:** Similar to to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
+**Description:** Similar to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
 section just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.

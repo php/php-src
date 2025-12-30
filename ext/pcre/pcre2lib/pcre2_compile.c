@@ -7753,7 +7753,7 @@ for (;; pptr++)
       /* If previous was a character type match (\d or similar), abolish it and
       create a suitable repeat item. The code is shared with single-character
       repeats by setting op_type to add a suitable offset into repeat_type.
-      Note the the Unicode property types will be present only when
+      Note the Unicode property types will be present only when
       SUPPORT_UNICODE is defined, but we don't wrap the little bits of code
       here because it just makes it horribly messy. */
 
