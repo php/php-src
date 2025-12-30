@@ -541,6 +541,15 @@ php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned
 
 		/* Set socket values if provided */
 		if (sockvals != NULL) {
+#ifdef SO_LINGER
+			if (sockvals->mask & PHP_SOCKVAL_SO_LINGER) {
+				struct linger linger_val = {
+					.l_onoff = (sockvals->linger > 0),
+					.l_linger = (unsigned short)sockvals->linger
+				};
+				setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&linger_val, sizeof(linger_val));
+			}
+#endif
 #if defined(TCP_KEEPIDLE)
 			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
 				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
@@ -1027,6 +1036,15 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 
 		/* Set socket values if provided */
 		if (sockvals != NULL) {
+#ifdef SO_LINGER
+			if (sockvals->mask & PHP_SOCKVAL_SO_LINGER) {
+				struct linger linger_val = {
+					.l_onoff = (sockvals->linger > 0),
+					.l_linger = (unsigned short)sockvals->linger
+				};
+				setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&linger_val, sizeof(linger_val));
+			}
+#endif
 #if defined(TCP_KEEPIDLE)
 			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
 				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
