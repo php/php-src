@@ -487,7 +487,7 @@ uint64_t key = UINT64_C(0x9d7f71d2bd296364);
 uintptr_t _a = 0;
 uintptr_t _b = 0;
 
-uintptr_t __attribute__((preserve_none)) fun(uintptr_t a, uintptr_t b) {
+uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_t b) {
 	_a = a;
 	_b = b;
 	return (uintptr_t)const3;
@@ -568,6 +568,7 @@ int main(void) {
     [php_cv_preserve_none=no],
     [php_cv_preserve_none=no])
   ])
+  AC_MSG_RESULT([$php_cv_preserve_none])
   AS_VAR_IF([php_cv_preserve_none], [yes], [
     AC_DEFINE([HAVE_PRESERVE_NONE], [1],
       [Define to 1 if you have preserve_none support.])
