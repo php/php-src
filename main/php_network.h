@@ -272,7 +272,7 @@ typedef struct {
 #define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 2)
 #define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 3)
 
-#define PHP_SOCKVAL_IS_SET(sockvals, opt) (sockvals->mask & opt)
+#define PHP_SOCKVAL_IS_SET(sockvals, opt) ((sockvals)->mask & (opt))
 
 typedef struct {
 	unsigned int mask;
