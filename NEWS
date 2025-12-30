@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.2
+?? ??? ????, PHP 8.5.3
+
+
+
+15 Jan 2026, PHP 8.5.2
 
 - Core:
   . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
