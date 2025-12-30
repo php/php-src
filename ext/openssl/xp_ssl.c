@@ -2231,9 +2231,9 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 			sockvals.tcp_nodelay = 1;
 		}
 		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle");
-		if (tmpzval != NULL && Z_TYPE_P(tmpzval) == IS_LONG) {
+		if (tmpzval != NULL) {
 			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
-			sockvals.keepalive.keepidle = Z_LVAL_P(tmpzval);
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
 		}
 	}
 
