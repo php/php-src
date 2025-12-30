@@ -1448,7 +1448,7 @@ static zend_result php_openssl_enable_server_sni(
 	zend_ulong key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
-	SSL_CTX *ctx;
+	SSL_CTX *ctx = NULL;
 
 	/* If the stream ctx disables SNI we're finished here */
 	if (GET_VER_OPT("SNI_enabled") && !zend_is_true(val)) {
@@ -1557,7 +1557,6 @@ static zend_result php_openssl_enable_server_sni(
 			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "SNI_server_certs options values must be of type array|string");
-			return FAILURE;
 		}
 
 		if (ctx == NULL) {
