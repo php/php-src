@@ -1448,7 +1448,7 @@ static zend_result php_openssl_enable_server_sni(
 	zend_ulong key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
-	SSL_CTX *ctx;
+	SSL_CTX *ctx = NULL;
 
 	/* If the stream ctx disables SNI we're finished here */
 	if (GET_VER_OPT("SNI_enabled") && !zend_is_true(val)) {
@@ -1489,6 +1489,8 @@ static zend_result php_openssl_enable_server_sni(
 			);
 			return FAILURE;
 		}
+
+		ZVAL_DEREF(current);
 
 		if (Z_TYPE_P(current) == IS_ARRAY) {
 			zval *local_pk, *local_cert;
@@ -1544,17 +1546,17 @@ static zend_result php_openssl_enable_server_sni(
 			zend_string_release(local_pk_str);
 
 			ctx = php_openssl_create_sni_server_ctx(resolved_cert_path_buff, resolved_pk_path_buff);
-
-		} else if (php_openssl_check_path_str_ex(
-				Z_STR_P(current), resolved_path_buff, 0, false, false,
-				"SNI_server_certs in ssl stream context")) {
-			ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
+		} else if (Z_TYPE_P(current) == IS_STRING) {
+			if (php_openssl_check_path_str_ex(Z_STR_P(current), resolved_path_buff, 0, false, false, "SNI_server_certs in ssl stream context")) {
+				ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
+			} else {
+				php_error_docref(NULL, E_WARNING,
+						"Failed setting local cert chain file `%s'; file not found",
+						Z_STRVAL_P(current)
+				);
+			}
 		} else {
-			php_error_docref(NULL, E_WARNING,
-				"Failed setting local cert chain file `%s'; file not found",
-				Z_STRVAL_P(current)
-			);
-			return FAILURE;
+			php_error_docref(NULL, E_WARNING, "SNI_server_certs options values must be of type array|string");
 		}
 
 		if (ctx == NULL) {
