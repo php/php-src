@@ -1,5 +1,5 @@
 --TEST--
-stream_copy_to_stream() with socket as $source
+stream_copy_to_stream() single byte with socket as $source and file as $dest
 --SKIPIF--
 <?php
 $sockets = @stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
