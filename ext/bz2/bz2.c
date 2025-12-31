@@ -30,6 +30,7 @@
 
 /* for fileno() */
 #include <stdio.h>
+#include <zlib.h>
 
 /* Internal error constants */
 #define PHP_BZ_ERRNO   0
@@ -455,6 +456,7 @@ PHP_FUNCTION(bzcompress)
 	zend_string *dest = NULL;      /* Destination to place the compressed data into */
 	size_t       source_len;       /* Length of the source data */
 	unsigned int dest_len;         /* Length of the destination buffer */
+	bz_stream stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		RETURN_THROWS();
@@ -471,6 +473,13 @@ PHP_FUNCTION(bzcompress)
 		RETURN_THROWS();
 	}
 	int work_factor = (int) zwork_factor;
+	stream.bzalloc = 0;
+	stream.bzfree = 0;
+
+	int r = BZ2_bzCompressInit(&stream, block_size, 0, work_factor); 
+	if (r != BZ_OK) {
+		RETURN_LONG(r);
+	}
 
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
 	   + .01 x length of data + 600 which is the largest size the results of the compression
@@ -489,17 +498,35 @@ PHP_FUNCTION(bzcompress)
 	/* Allocate the destination buffer */
 	dest = zend_string_alloc(dest_len, 0);
 
-	int error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
-	if (error != BZ_OK) {
-		zend_string_efree(dest);
-		RETURN_LONG(error);
-	} else {
-		/* Copy the buffer, we have perhaps allocate a lot more than we need,
-		   so we erealloc() the buffer to the proper size */
-		ZSTR_LEN(dest) = dest_len;
-		ZSTR_VAL(dest)[ZSTR_LEN(dest)] = '\0';
-		RETURN_NEW_STR(dest);
+	stream.next_in = source;
+	stream.avail_in = (uInt) source_len;
+	stream.next_out = ZSTR_VAL(dest);
+	stream.avail_out = (uInt) dest_len;
+
+	while ((r = BZ2_bzCompress(&stream, BZ_RUN)) == BZ_RUN_OK && stream.avail_in > 0) {
+		if (r != BZ_RUN_OK && r != BZ_FINISH_OK && r != BZ_STREAM_END) {
+			goto fail;
+		}
 	}
+
+	while ((r = BZ2_bzCompress(&stream, BZ_FINISH)) != BZ_STREAM_END) {
+		if (r != BZ_FINISH_OK && r != BZ_STREAM_END) {
+			goto fail;
+		}
+	}
+
+	/* Copy the buffer, we have perhaps allocate a lot more than we need,
+	   so we erealloc() the buffer to the proper size */
+	ZSTR_LEN(dest) = dest_len;
+	ZSTR_VAL(dest)[ZSTR_LEN(dest)] = '\0';
+	BZ2_bzCompressEnd(&stream);
+	RETURN_NEW_STR(dest);
+
+fail:
+	BZ2_bzCompressEnd(&stream);
+	zend_string_efree(dest);
+	RETURN_LONG(r);
+
 }
 /* }}} */
 
