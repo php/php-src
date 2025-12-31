@@ -98,24 +98,14 @@ ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen
 #ifdef HAVE_SENDFILE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
-	off_t src_offset = 0;
-
-	/* Get current source file position */
-	src_offset = lseek(src_fd, 0, SEEK_CUR);
-
-	if (src_offset == (off_t) -1) {
-		/* Can't get position, fall back to generic copy */
-		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
-	}
 
 	while (remaining > 0) {
 		/* Clamp to SSIZE_MAX */
 		size_t to_send = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
-		ssize_t result = sendfile(dest_fd, src_fd, &src_offset, to_send);
+		ssize_t result = sendfile(dest_fd, src_fd, NULL, to_send);
 
 		if (result > 0) {
 			total_copied += result;
-			/* src_offset is automatically updated by sendfile */
 
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
@@ -125,16 +115,35 @@ ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen
 			break;
 		} else {
 			/* Error occurred */
-			if (errno == EAGAIN) {
-				/* Would block - return what we have */
-				return total_copied > 0 ? (ssize_t) total_copied : -1;
+			switch (errno) {
+				case EINVAL:
+				case ENOSYS:
+					/* sendfile not supported - fall back */
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+					}
+					/* Already copied some, continue with fallback for the rest */
+					if (maxlen != PHP_IO_COPY_ALL) {
+						remaining = (total_copied < maxlen) ? maxlen - total_copied : 0;
+					}
+					if (remaining > 0) {
+						ssize_t fallback_result
+								= php_io_generic_copy_fallback(src_fd, dest_fd, remaining);
+						if (fallback_result > 0) {
+							total_copied += fallback_result;
+						}
+					}
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
+				case EAGAIN:
+					/* Would block - return what we have */
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
+				default:
+					/* Other errors */
+					if (total_copied == 0) {
+						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+					}
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
-			/* Other errors - fall back if we haven't copied anything yet */
-			if (total_copied == 0) {
-				return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
-			}
-			/* Already copied some, return what we have */
-			break;
 		}
 
 		/* For bounded copies, stop if we reached maxlen */
