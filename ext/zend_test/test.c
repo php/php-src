@@ -1820,7 +1820,7 @@ typedef off_t off64_t;
 PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
 {
 	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
-	if (ZT_G(limit_copy_file_range) >= Z_L(0)) {
+	if (ZT_G(limit_copy_file_range) >= Z_L(0) && ZT_G(limit_copy_file_range) < len) {
 		len = ZT_G(limit_copy_file_range);
 	}
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
