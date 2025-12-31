@@ -29,13 +29,11 @@ ssize_t php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 	/* BSD sendfile signature: sendfile(fd, s, offset, nbytes, hdtr, sbytes, flags) */
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
-	off_t src_offset = 0;
+	off_t src_offset;
 
 	/* Get current source file position */
 	src_offset = lseek(src_fd, 0, SEEK_CUR);
-
 	if (src_offset == (off_t) -1) {
-		/* Can't get position, fall back to generic copy */
 		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 	}
 
@@ -44,40 +42,58 @@ ssize_t php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 		off_t sbytes = 0;
 		int result = sendfile(src_fd, dest_fd, src_offset, to_send, NULL, &sbytes, 0);
 
-		if (result == 0 || sbytes > 0) {
-			/* Success or partial send */
+		if (sbytes > 0) {
+			/* Some data was transferred */
 			total_copied += sbytes;
 			src_offset += sbytes;
 
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= sbytes;
 			}
+		}
 
-			/* If result != 0, error occurred but some data was transferred */
-			if (result != 0) {
+		if (result == 0) {
+			/* Success - continue */
+			if (sbytes == 0) {
+				/* No data transferred and success = EOF */
 				break;
 			}
 		} else {
-			/* Error occurred with no data transferred */
+			/* Error occurred */
 			switch (errno) {
-				case EAGAIN:
-				case EBUSY:
 				case EINVAL:
+				case ENOTSOCK:
 				case ENOTCONN:
-					/* Various errors */
+					/* sendfile not supported - fall back */
 					if (total_copied == 0) {
 						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
-					/* Already copied some, return what we have */
-					break;
+					/* Continue with fallback for remaining data */
+					if (maxlen != PHP_IO_COPY_ALL) {
+						remaining = (total_copied < maxlen) ? maxlen - total_copied : 0;
+					}
+					if (remaining > 0) {
+						/* Update file position for fallback */
+						if (lseek(src_fd, src_offset, SEEK_SET) != (off_t) -1) {
+							ssize_t fallback_result
+									= php_io_generic_copy_fallback(src_fd, dest_fd, remaining);
+							if (fallback_result > 0) {
+								total_copied += fallback_result;
+							}
+						}
+					}
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
+				case EAGAIN:
+				case EBUSY:
+					/* Would block - return what we have */
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
 				default:
 					/* Other errors */
 					if (total_copied == 0) {
 						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
-					break;
+					return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
-			break;
 		}
 
 		/* For bounded copies, stop if we reached maxlen */
@@ -89,9 +105,8 @@ ssize_t php_io_bsd_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
 	if (total_copied > 0) {
 		return (ssize_t) total_copied;
 	}
-#endif /* HAVE_SENDFILE */
+#endif
 
-	/* Fallback to generic implementation */
 	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
