@@ -5,7 +5,9 @@ Nikita Sveshnikov (Positive Technologies)
 ndossche
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === "Windows") die("skip Only for platforms with FIFO pipes");
+if (!function_exists("posix_mkfifo")) {
+    die("skip no posix_mkfifo()");
+}
 ?>
 --FILE--
 <?php
