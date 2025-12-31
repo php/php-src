@@ -121,7 +121,7 @@ static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 
-/* This function is meant to unify the headers passed to to mail()
+/* This function is meant to unify the headers passed to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
  * As a second step we also eliminate all \r\n occurrences which are:
  * 1) At the start of the header
