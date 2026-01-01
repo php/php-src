@@ -795,6 +795,17 @@ static void zend_do_free(znode *op1) /* {{{ */
 				case ZEND_PRE_DEC:
 					SET_UNUSED(opline->result);
 					return;
+				case ZEND_FRAMELESS_ICALL_0:
+				case ZEND_FRAMELESS_ICALL_1:
+				case ZEND_FRAMELESS_ICALL_2:
+				case ZEND_FRAMELESS_ICALL_3: {
+					const zend_type return_type = ZEND_FLF_FUNC(opline)->common.arg_info[-1].type;
+					if (!ZEND_TYPE_IS_COMPLEX(return_type)
+					 && !(ZEND_TYPE_PURE_MASK(return_type) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+						return;
+					}
+					break;
+				}
 			}
 		}
 
@@ -816,9 +827,11 @@ static void zend_do_free(znode *op1) /* {{{ */
 			} else {
 				/* Frameless calls usually use the return value, so always emit a free. This should be
 				 * faster than checking RETURN_VALUE_USED inside the handler. */
-				// FIXME: We may actually look at the function signature to determine whether a free
-				// is necessary.
-				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
+				const zend_type return_type = ZEND_FLF_FUNC(opline)->common.arg_info[-1].type;
+				if (ZEND_TYPE_IS_COMPLEX(return_type)
+				 || (ZEND_TYPE_PURE_MASK(return_type) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
+				}
 			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
