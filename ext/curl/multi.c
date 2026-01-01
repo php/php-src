@@ -565,6 +565,18 @@ static void curl_multi_free_obj(zend_object *object)
 		}
 	}
 
+#if LIBCURL_VERSION_NUM < 0x071e00 /* 7.30.0 */
+	/* In 7.29.0 curl_multi_cleanup segfaults if there no handles have been
+	 * added.  To avoid this, just add and then remove a dummy handle. */
+	CURL *tmp_cp = curl_easy_init();
+	if (tmp_cp) {
+		if (curl_multi_add_handle(mh->multi, tmp_cp) == CURLM_OK) {
+			curl_multi_remove_handle(mh->multi, tmp_cp);
+		}
+		curl_easy_cleanup(tmp_cp);
+	}
+#endif
+
 	curl_multi_cleanup(mh->multi);
 	zend_llist_clean(&mh->easyh);
 	if (mh->handlers.server_push) {
