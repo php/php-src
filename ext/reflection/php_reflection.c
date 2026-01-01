@@ -3441,6 +3441,13 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			RETURN_THROWS();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_STRUCT)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"May not invoke mutating method \"%s::%s()\" through reflection",
+				ZSTR_VAL(Z_OBJCE_P(object)->name), ZSTR_VAL(mptr->common.function_name));
+			RETURN_THROWS();
+		}
 	}
 	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
 	callback = _copy_function(mptr);
@@ -5958,6 +5965,13 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_OBJ(object)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
+
+		if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_STRUCT)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"May not set property value of struct \"%s\" through reflection",
+				ZSTR_VAL(object->ce->name));
+			RETURN_THROWS();
+		}
 
 		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;

@@ -873,6 +873,8 @@ static const char *zend_modifier_token_to_string(uint32_t token)
 			return "protected(set)";
 		case T_PRIVATE_SET:
 			return "private(set)";
+		case T_MUTATING:
+			return "mutating";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -925,6 +927,11 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 		case T_PRIVATE_SET:
 			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
 				return ZEND_ACC_PRIVATE_SET;
+			}
+			break;
+		case T_MUTATING:
+			if (target == ZEND_MODIFIER_TARGET_METHOD) {
+				return ZEND_ACC_MUTATING;
 			}
 			break;
 	}
@@ -995,6 +1002,16 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the final modifier on an abstract class", 0);
+		return 0;
+	}
+	if ((new_flags & ZEND_ACC_STRUCT) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the final modifier on a struct, as structs are implicitly final", 0);
+		return 0;
+	}
+	if ((new_flags & ZEND_ACC_STRUCT) && (new_flags & ZEND_ACC_ABSTRACT)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the abstract modifier on a struct, as structs are implicitly final", 0);
 		return 0;
 	}
 	return new_flags;
@@ -2491,6 +2508,7 @@ static bool zend_ast_kind_is_short_circuited(zend_ast_kind ast_kind)
 		case ZEND_AST_STATIC_PROP:
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
+		case ZEND_AST_MUTATING_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
 			return 1;
 		default:
@@ -2505,6 +2523,7 @@ static bool zend_ast_is_short_circuited(const zend_ast *ast)
 		case ZEND_AST_PROP:
 		case ZEND_AST_STATIC_PROP:
 		case ZEND_AST_METHOD_CALL:
+		case ZEND_AST_MUTATING_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
 			return zend_ast_is_short_circuited(ast->child[0]);
 		case ZEND_AST_NULLSAFE_PROP:
@@ -2727,7 +2746,9 @@ static inline bool zend_is_call(const zend_ast *ast) /* {{{ */
 		|| ast->kind == ZEND_AST_METHOD_CALL
 		|| ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL
 		|| ast->kind == ZEND_AST_STATIC_CALL
-		|| ast->kind == ZEND_AST_PIPE;
+		|| ast->kind == ZEND_AST_PIPE
+		|| ast->kind == ZEND_AST_MUTATING_METHOD_CALL
+		|| ast->kind == ZEND_AST_STATIC_CALL;
 }
 /* }}} */
 
@@ -3389,6 +3410,7 @@ static void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
 	if (
 		ast->kind == ZEND_AST_METHOD_CALL
 		|| ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL
+		|| ast->kind == ZEND_AST_MUTATING_METHOD_CALL
 		|| ast->kind == ZEND_AST_STATIC_CALL
 	) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use method return value in write context");
@@ -3498,7 +3520,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_NULLSAFE_PROP:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_prop(result, var_ast, BP_VAR_W);
-			zend_compile_expr(&expr_node, expr_ast);
+			zend_compile_expr_with_potential_assign_to_self(&expr_node, expr_ast, var_ast);
 
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_OBJ;
@@ -3971,7 +3993,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 	zend_do_extended_fcall_begin();
 
 	opline = &CG(active_op_array)->opcodes[opnum_init];
-	opline->extended_value = arg_count;
+	opline->extended_value |= arg_count;
 
 	if (opline->opcode == ZEND_INIT_FCALL) {
 		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
@@ -5294,6 +5316,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 	zend_op *opline;
 	const zend_function *fbc = NULL;
 	bool nullsafe = ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL;
+	bool mutating = ast->kind == ZEND_AST_MUTATING_METHOD_CALL;
 	uint32_t short_circuiting_checkpoint = zend_short_circuiting_checkpoint();
 
 	if (is_this_fetch(obj_ast)) {
@@ -5308,7 +5331,11 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
-		zend_compile_expr(&obj_node, obj_ast);
+		if (mutating && zend_is_variable(obj_ast)) {
+			zend_compile_var(&obj_node, obj_ast, BP_VAR_RW, /* by_ref */ false);
+		} else {
+			zend_compile_expr(&obj_node, obj_ast);
+		}
 		if (nullsafe) {
 			zend_emit_jmp_null(&obj_node, type);
 		}
@@ -5316,6 +5343,9 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 
 	zend_compile_expr(&method_node, method_ast);
 	opline = zend_emit_op(NULL, ZEND_INIT_METHOD_CALL, &obj_node, NULL);
+	if (mutating) {
+		opline->extended_value |= ZEND_INIT_METHOD_CALL_MUTATING;
+	}
 
 	if (method_node.op_type == IS_CONST) {
 		if (Z_TYPE(method_node.u.constant) != IS_STRING) {
@@ -8572,6 +8602,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 	} else if (is_method) {
 		bool has_body = stmt_ast != NULL;
 		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
+		if ((op_array->fn_flags & ZEND_ACC_MUTATING) && !(op_array->scope->ce_flags & ZEND_ACC_STRUCT)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Mutating modifier may only be added to struct methods");
+		}
 	} else {
 		lcname = zend_begin_func_decl(result, op_array, decl, level);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
@@ -11918,6 +11951,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_CALL:
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
+		case ZEND_AST_MUTATING_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
 		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 			zend_compile_var(result, ast, BP_VAR_R, false);
@@ -12052,6 +12086,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			case ZEND_AST_CALL:
 			case ZEND_AST_METHOD_CALL:
 			case ZEND_AST_NULLSAFE_METHOD_CALL:
+			case ZEND_AST_MUTATING_METHOD_CALL:
 			case ZEND_AST_STATIC_CALL:
 				zend_compile_memoized_expr(result, ast);
 				/* This might not actually produce an opcode, e.g. for expressions evaluated at comptime. */
@@ -12077,6 +12112,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			return NULL;
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
+		case ZEND_AST_MUTATING_METHOD_CALL:
 			zend_compile_method_call(result, ast, type);
 			return NULL;
 		case ZEND_AST_STATIC_CALL:

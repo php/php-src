@@ -2476,6 +2476,61 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
+static bool zend_is_identical_struct(const zval *op1, const zval *op2) /* {{{ */
+{
+	ZEND_ASSERT(Z_TYPE_P(op1) == IS_OBJECT);
+	ZEND_ASSERT(Z_TYPE_P(op2) == IS_OBJECT);
+
+	zend_object *obj1 = Z_OBJ_P(op1);
+	zend_object *obj2 = Z_OBJ_P(op2);
+
+	/* Should be handled by fast path. */
+	ZEND_ASSERT(obj1 != obj2);
+	ZEND_ASSERT(obj1->ce == obj2->ce);
+
+	if (!obj1->properties && !obj2->properties) {
+		if (!obj1->ce->default_properties_count) {
+			return true;
+		}
+
+		/* It's enough to protect only one of the objects. The second one may be
+		 * referenced from the first and this may cause false recursion
+		 * detection. */
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(op1))) {
+			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+		}
+		Z_PROTECT_RECURSION_P(op1);
+
+		for (int i = 0; i < obj1->ce->default_properties_count; i++) {
+			zend_property_info *info = obj1->ce->properties_info_table[i];
+			if (!info) {
+				continue;
+			}
+
+			zval *p1 = OBJ_PROP(obj1, info->offset);
+			zval *p2 = OBJ_PROP(obj2, info->offset);
+			if (!zend_is_identical(p1, p2)) {
+				Z_UNPROTECT_RECURSION_P(op1);
+				return false;
+			}
+		}
+
+		Z_UNPROTECT_RECURSION_P(op1);
+		return true;
+	} else {
+		if (!obj1->properties) {
+			zend_std_get_properties(obj1);
+		}
+		if (!obj2->properties) {
+			zend_std_get_properties(obj2);
+		}
+		return zend_hash_compare(
+			obj1->properties, obj2->properties,
+			(compare_func_t) hash_zval_identical_function,
+			/* ordered */ true) == 0;
+	}
+}
+
 ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
@@ -2498,7 +2553,14 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
 				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
 		case IS_OBJECT:
-			return (Z_OBJ_P(op1) == Z_OBJ_P(op2));
+			if (Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
+				return true;
+			}
+			if (UNEXPECTED(Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_STRUCT)
+			 && Z_OBJCE_P(op1) == Z_OBJCE_P(op2)) {
+				return zend_is_identical_struct(op1, op2);
+			}
+			return false;
 		default:
 			return 0;
 	}
