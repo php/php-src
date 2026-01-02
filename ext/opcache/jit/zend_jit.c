@@ -2845,7 +2845,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							const zend_op *next_opline = opline + 1;
 
 							ZEND_ASSERT(b + 1 == ssa->cfg.blocks[b].successors[0]);
-							zend_jit_constructor(&ctx, next_opline, op_array, ssa, call_level, b + 1);
+							zend_jit_constructor(&ctx, next_opline, op_array, ssa, call_level, b, b + 1);
 						}
 
 						/* We skip over the DO_FCALL, so decrement call_level ourselves. */
