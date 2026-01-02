@@ -31,6 +31,9 @@ PHP 8.6 UPGRADE NOTES
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
 
+- Fileinfo:
+  . finfo_file() now works with remote streams.
+
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and

@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     needing to be present beforehand. (ndossche)
   . Added `clamp()`. (kylekatarnls, thinkverse)
 
+- Fileinfo:
+  . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
+    (ndossche)
+
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
 
