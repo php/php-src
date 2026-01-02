@@ -14,7 +14,7 @@ var_dump($uri2->equals($uri1, Uri\UriComparisonMode::ExcludeFragment));
 
 ?>
 --EXPECT--
-bool(true)
-bool(true)
 bool(false)
 bool(false)
+bool(true)
+bool(true)
