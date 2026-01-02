@@ -595,6 +595,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 		const char *pos = zend_memrchr(ZSTR_VAL(uri_string), '#', ZSTR_LEN(uri_string));
 		if (pos != NULL) {
 			uri_string = zend_string_truncate(uri_string, (pos - ZSTR_VAL(uri_string)), false);
+			ZSTR_VAL(uri_string)[ZSTR_LEN(uri_string)] = '\0';
 		}
 	}
 
