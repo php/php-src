@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20767 (build failure with musttail/preserve_none feature
     on macOs). (David Carlier)
 
+- Readline:
+  . Fixed bug GH-18139 (Memory leak when overriding some settings
+    via readline_info()). (ndossche)
+
 15 Jan 2026, PHP 8.5.2
 
 - Core:

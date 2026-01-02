@@ -47,6 +47,11 @@ static zval _prepped_callback;
 static zval _readline_completion;
 static zval _readline_array;
 
+ZEND_TLS char *php_readline_custom_readline_name = NULL;
+#if defined(PHP_WIN32) || defined(HAVE_LIBEDIT)
+ZEND_TLS char *php_readline_custom_line_buffer = NULL;
+#endif
+
 PHP_MINIT_FUNCTION(readline);
 PHP_MSHUTDOWN_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
@@ -146,7 +151,6 @@ PHP_FUNCTION(readline_info)
 	zend_string *what = NULL;
 	zval *value = NULL;
 	size_t oldval;
-	char *oldstr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!z!", &what, &value) == FAILURE) {
 		RETURN_THROWS();
@@ -181,35 +185,29 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
-			oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
+			RETVAL_STRING(SAFE_STRING(rl_line_buffer));
 			if (value) {
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
+				/* XXX: These stores would need to be atomic ideally or use a memory barrier */
 #if !defined(PHP_WIN32) && !defined(HAVE_LIBEDIT)
-				if (!rl_line_buffer) {
-					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
-				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
-					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
-					free(oldstr);
-					oldstr = strdup(rl_line_buffer ? rl_line_buffer : "");
+				rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
+				if (EXPECTED(rl_line_buffer)) {
+					memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 				}
-				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 #else
-				char *tmp = strdup(Z_STRVAL_P(value));
-				if (tmp) {
-					if (rl_line_buffer) {
-						free(rl_line_buffer);
-					}
-					rl_line_buffer = tmp;
+				char *copy = strdup(Z_STRVAL_P(value));
+				rl_line_buffer = copy;
+				if (php_readline_custom_line_buffer) {
+					free(php_readline_custom_line_buffer);
 				}
+				php_readline_custom_line_buffer = copy;
 #endif
 #if !defined(PHP_WIN32)
 				rl_end = Z_STRLEN_P(value);
 #endif
 			}
-			RETVAL_STRING(SAFE_STRING(oldstr));
-			free(oldstr);
 		} else if (zend_string_equals_literal_ci(what, "point")) {
 			RETVAL_LONG(rl_point);
 #ifndef PHP_WIN32
@@ -268,15 +266,19 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
 #endif
 		} else if (zend_string_equals_literal_ci(what, "readline_name")) {
-			oldstr = (char*)rl_readline_name;
+			RETVAL_STRING(SAFE_STRING(rl_readline_name));
 			if (value) {
-				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				rl_readline_name = strdup(Z_STRVAL_P(value));
+				char *copy = strdup(Z_STRVAL_P(value));
+				/* XXX: This store would need to be atomic ideally or use a memory barrier */
+				rl_readline_name = copy;
+				if (php_readline_custom_readline_name) {
+					free(php_readline_custom_readline_name);
+				}
+				php_readline_custom_readline_name = copy;
 			}
-			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (zend_string_equals_literal_ci(what, "attempted_completion_over")) {
 			oldval = rl_attempted_completion_over;
 			if (value) {
