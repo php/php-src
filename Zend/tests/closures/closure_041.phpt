@@ -84,8 +84,12 @@ Warning: Cannot unbind $this of closure using $this, this will be an error in PH
 NULL
 
 After binding, with same-class instance for the bound ones
+
+Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 scoped to A: bool(false)
 bound: A (should be scoped to dummy class)
+
+Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 scoped to A: bool(true)
 bound: A
 After binding, with different instance for the bound ones

@@ -157,10 +157,10 @@ bindTo(null, Cls::class):
 Success!
 
 bindTo(new Cls, null):
-Cannot rebind scope of closure created from method, this will be an error in PHP 9
+Cannot bind an instance to a static closure, this will be an error in PHP 9
 
 bindTo(new Cls, Cls::class):
-Success!
+Cannot bind an instance to a static closure, this will be an error in PHP 9
 
 bindTo(null, null):
 Cannot rebind scope of closure created from method, this will be an error in PHP 9

@@ -82,12 +82,15 @@ static bool zend_valid_closure_binding(
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
-			// FIXME: Restrict this workaround to implicitly static closures?
-			// Will need an additional fn_flag.
-			zend_object *obj = Z_OBJ_P(newthis);
-			ZVAL_UNDEF(newthis);
-			GC_DTOR(obj);
-			*newthis_ptr = NULL;
+			if (!(func->common.fn_flags2 & ZEND_ACC2_INFERRED_STATIC)) {
+				zend_error(E_WARNING, "Cannot bind an instance to a static closure, this will be an error in PHP 9");
+				return false;
+			} else {
+				zend_object *obj = Z_OBJ_P(newthis);
+				ZVAL_UNDEF(newthis);
+				GC_DTOR(obj);
+				*newthis_ptr = NULL;
+			}
 		}
 
 		if (is_fake_closure && func->common.scope &&

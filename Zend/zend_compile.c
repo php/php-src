@@ -8711,6 +8711,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 		 && !CG(context).closure_may_use_this
 		 && !info.varvars_used) {
 			op_array->fn_flags |= ZEND_ACC_STATIC;
+			op_array->fn_flags2 |= ZEND_ACC2_INFERRED_STATIC;
 		}
 
 		zend_op_array *declaring_op_array = orig_oparray_context.op_array;
