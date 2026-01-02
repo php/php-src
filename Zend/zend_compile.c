@@ -2915,6 +2915,8 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, const zend_ast *ast
 	znode name_node;
 	zend_op *opline;
 
+	CG(context).closure_may_use_this = true;
+
 	zend_compile_expr(&name_node, name_ast);
 	if (name_node.op_type == IS_CONST) {
 		convert_to_string(&name_node.u.constant);
@@ -8708,8 +8710,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		/* Attempt to infer static for closures that don't use $this. */
 		if (!(op_array->fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_USES_THIS))
-		 && !CG(context).closure_may_use_this
-		 && !info.varvars_used) {
+		 && !CG(context).closure_may_use_this) {
 			op_array->fn_flags |= ZEND_ACC_STATIC;
 			op_array->fn_flags2 |= ZEND_ACC2_INFERRED_STATIC;
 		}
