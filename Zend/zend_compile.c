@@ -816,8 +816,6 @@ static void zend_do_free(znode *op1) /* {{{ */
 			} else {
 				/* Frameless calls usually use the return value, so always emit a free. This should be
 				 * faster than checking RETURN_VALUE_USED inside the handler. */
-				// FIXME: We may actually look at the function signature to determine whether a free
-				// is necessary.
 				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 			}
 		} else {
