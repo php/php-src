@@ -65,8 +65,7 @@ static const php_stream_filter_ops strfilter_rot13_ops = {
 
 static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_rot13_factory = {
@@ -150,14 +149,12 @@ static const php_stream_filter_ops strfilter_tolower_ops = {
 
 static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
 static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_toupper_factory = {
@@ -1672,8 +1669,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_START);
+	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory strfilter_convert_factory = {
@@ -1767,8 +1763,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	data->offset = ~0;
 	fops = &consumed_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory consumed_filter_factory = {
@@ -1999,8 +1994,7 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	data->persistent = persistent;
 	fops = &chunked_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent,
-			PHP_STREAM_FILTER_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory chunked_filter_factory = {

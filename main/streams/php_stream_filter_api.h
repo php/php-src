@@ -34,12 +34,6 @@
 #define PHP_STREAM_FILTER_WRITE	0x0002
 #define PHP_STREAM_FILTER_ALL	(PHP_STREAM_FILTER_READ | PHP_STREAM_FILTER_WRITE)
 
-#define PHP_STREAM_FILTER_SEEKABLE_NEVER  0
-#define PHP_STREAM_FILTER_SEEKABLE_START  1
-#define PHP_STREAM_FILTER_SEEKABLE_CHECK  2
-#define PHP_STREAM_FILTER_SEEKABLE_ALWAYS 3
-#define PHP_STREAM_FILTER_SEEKABLE_MASK   3
-
 typedef struct _php_stream_bucket			php_stream_bucket;
 typedef struct _php_stream_bucket_brigade	php_stream_bucket_brigade;
 
@@ -66,6 +60,13 @@ typedef enum {
 	PSFS_FEED_ME,	/* filter needs more data; stop processing chain until more is available */
 	PSFS_PASS_ON	/* filter generated output buckets; pass them on to next in chain */
 } php_stream_filter_status_t;
+
+typedef enum {
+	PSFS_SEEKABLE_NEVER, /* seeking filter never possible */
+	PSFS_SEEKABLE_START, /* seeking possible only to start (position 0) */
+	PSFS_SEEKABLE_CHECK, /* seeking possible but it is always checked if callback function set */
+	PSFS_SEEKABLE_ALWAYS, /* seeking is always possible */
+} php_stream_filter_seekable_t;
 
 /* Buckets API. */
 BEGIN_EXTERN_C()
@@ -119,8 +120,8 @@ struct _php_stream_filter {
 	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
+	php_stream_filter_seekable_t seekable;
 	bool is_persistent;
-	uint8_t seekable;
 
 	/* link into stream and chain */
 	php_stream_filter_chain *chain;
@@ -142,13 +143,13 @@ PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool fini
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
-		void *abstract, bool persistent, uint32_t flags STREAMS_DC);
+		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC);
 
 END_EXTERN_C()
-#define php_stream_filter_alloc(fops, thisptr, persistent, flags) \
-		_php_stream_filter_alloc((fops), (thisptr), (persistent), (flags) STREAMS_CC)
-#define php_stream_filter_alloc_rel(fops, thisptr, persistent, flags) \
-	_php_stream_filter_alloc((fops), (thisptr), (persistent), (flags) STREAMS_REL_CC)
+#define php_stream_filter_alloc(fops, thisptr, persistent, seekable) \
+		_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_CC)
+#define php_stream_filter_alloc_rel(fops, thisptr, persistent, seekable) \
+	_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_REL_CC)
 #define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter))
 #define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter))
 #define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish))

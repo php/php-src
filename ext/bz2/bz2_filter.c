@@ -189,13 +189,11 @@ static zend_result php_bz2_decompress_seek(
 	int whence
 	)
 {
-	php_bz2_filter_data *data;
-
 	if (!Z_PTR(thisfilter->abstract)) {
 		return FAILURE;
 	}
 
-	data = (php_bz2_filter_data *)Z_PTR(thisfilter->abstract);
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
 
 	/* End current decompression if running */
 	if (data->status == PHP_BZ2_RUNNING) {
@@ -332,14 +330,13 @@ static zend_result php_bz2_compress_seek(
 	int whence
 	)
 {
-	php_bz2_filter_data *data;
 	int status;
 
 	if (!Z_PTR(thisfilter->abstract)) {
 		return FAILURE;
 	}
 
-	data = (php_bz2_filter_data *)Z_PTR(thisfilter->abstract);
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
 
 	/* End current compression */
 	BZ2_bzCompressEnd(&(data->strm));
@@ -481,7 +478,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent, PHP_STREAM_FILTER_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {

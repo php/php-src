@@ -151,14 +151,13 @@ static zend_result php_zlib_inflate_seek(
 	int whence
 	)
 {
-	php_zlib_filter_data *data;
 	int status;
 
 	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
 		return FAILURE;
 	}
 
-	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
+	php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
 
 	if (data->finished) {
 		/* Stream was ended, need to reinitialize */
@@ -310,14 +309,13 @@ static zend_result php_zlib_deflate_seek(
 	int whence
 	)
 {
-	php_zlib_filter_data *data;
 	int status;
 
 	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
 		return FAILURE;
 	}
 
-	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
+	php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
 
 	/* Reset zlib deflation state */
 	status = deflateReset(&(data->strm));
@@ -502,7 +500,7 @@ factory_setlevel:
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent, PHP_STREAM_FILTER_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 const php_stream_filter_factory php_zlib_filter_factory = {

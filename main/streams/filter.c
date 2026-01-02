@@ -261,7 +261,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 }
 
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
-		void *abstract, bool persistent, uint32_t flags STREAMS_DC)
+		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -269,7 +269,7 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
-	filter->seekable = flags & PHP_STREAM_FILTER_SEEKABLE_MASK;
+	filter->seekable = seekable;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
 
