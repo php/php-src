@@ -4633,9 +4633,8 @@ PHP_FUNCTION(mb_send_mail)
 
 	unsigned int num_errors = 0;
 	zend_string *tmpstr = mb_fast_convert((unsigned char*)message, message_len, msg_enc, tran_cs, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR, &num_errors);
-	zend_string *conv = mb_fast_convert((unsigned char*)ZSTR_VAL(tmpstr), ZSTR_LEN(tmpstr), &mbfl_encoding_8bit, body_enc, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR, &num_errors);
+	zend_string *converted_message = mb_fast_convert((unsigned char*)ZSTR_VAL(tmpstr), ZSTR_LEN(tmpstr), &mbfl_encoding_8bit, body_enc, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR, &num_errors);
 	zend_string_free(tmpstr);
-	message = ZSTR_VAL(conv);
 
 	/* other headers */
 #define PHP_MBSTR_MAIL_MIME_HEADER1 "MIME-Version: 1.0"
@@ -4703,7 +4702,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd));
+	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), converted_message, str_headers, extra_cmd));
 
 	if (extra_cmd) {
 		zend_string_release_ex(extra_cmd, 0);
@@ -4712,7 +4711,7 @@ PHP_FUNCTION(mb_send_mail)
 		efree(to_r);
 	}
 	zend_string_release(subject);
-	zend_string_free(conv);
+	zend_string_free(converted_message);
 	zend_hash_destroy(&ht_headers);
 	if (str_headers) {
 		zend_string_release_ex(str_headers, 0);
