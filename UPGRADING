@@ -23,6 +23,10 @@ PHP 8.6 UPGRADE NOTES
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
 
+- SPL:
+  . RecursiveArrayIterator modifications now follow standard CoW semantics and
+    child modifications no longer affect the parent array.
+
 ========================================
 2. New Features
 ========================================
