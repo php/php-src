@@ -39,5 +39,5 @@ First read (20 bytes): I am the very model
 Seek to start: SUCCESS
 Content after seek matches: YES
 
-Warning: fseek(): Stream filter bzip2.decompress is not seekable in %s on line %d
+Warning: fseek(): Stream filter bzip2.decompress is seekable only to start position in %s on line %d
 Seek to middle: FAILURE

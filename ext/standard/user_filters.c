@@ -133,13 +133,14 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 	zval_ptr_dtor(obj);
 }
 
-static zend_result userfilter_assign_stream(php_stream *stream, zval *obj, zend_string **stream_name_p)
+static zend_result userfilter_assign_stream(php_stream *stream, zval *obj,
+		zend_string **stream_name_p, uint32_t orig_no_fclose)
 {
 	/* Give the userfilter class a hook back to the stream */
 	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = Z_OBJCE_P(obj);
 
-	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", 0);
+	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", false);
 	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
 	if (stream_property_exists) {
 		zval stream_zval;
@@ -149,6 +150,8 @@ static zend_result userfilter_assign_stream(php_stream *stream, zval *obj, zend_
 		if (EG(exception)) {
 			EG(fake_scope) = old_scope;
 			zend_string_release(stream_name);
+			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= orig_no_fclose;
 			return FAILURE;
 		}
 		*stream_name_p = stream_name;
@@ -186,12 +189,10 @@ static php_stream_filter_status_t userfilter_filter(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *stream_name = NULL;
-	if (userfilter_assign_stream(stream, obj, &stream_name) == FAILURE) {
+	if (userfilter_assign_stream(stream, obj, &stream_name, orig_no_fclose) == FAILURE) {
 		if (buckets_in->head) {
 			php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		}
-		stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
-		stream->flags |= orig_no_fclose;
 		return PSFS_ERR_FATAL;
 	}
 
@@ -283,9 +284,7 @@ static zend_result userfilter_seek(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *stream_name = NULL;
-	if (userfilter_assign_stream(stream, obj, &stream_name) == FAILURE) {
-		stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
-		stream->flags |= orig_no_fclose;
+	if (userfilter_assign_stream(stream, obj, &stream_name, orig_no_fclose) == FAILURE) {
 		return FAILURE;
 	}
 

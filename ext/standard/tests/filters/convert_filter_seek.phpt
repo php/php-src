@@ -63,7 +63,7 @@ First read (20 bytes): Hello World! This is
 Seek to start: SUCCESS
 Content matches: YES
 
-Warning: fseek(): Stream filter convert.* is not seekable in %s on line %d
+Warning: fseek(): Stream filter convert.* is seekable only to start position in %s on line %d
 Seek to middle: FAILURE
 
 Testing convert.quoted-printable-encode/decode
@@ -71,5 +71,5 @@ First read (10 bytes): 4c696e65310d0a4c696e
 Seek to start: SUCCESS
 Content matches: YES
 
-Warning: fseek(): Stream filter convert.* is not seekable in %s on line %d
+Warning: fseek(): Stream filter convert.* is seekable only to start position in %s on line %d
 Seek to middle: FAILURE

@@ -41,5 +41,5 @@ Seek to start: SUCCESS
 Position after seek: 0
 Content after seek matches: YES
 
-Warning: fseek(): Stream filter zlib.inflate is not seekable in %s on line %d
+Warning: fseek(): Stream filter zlib.inflate is seekable only to start position in %s on line %d
 Seek to middle: FAILURE

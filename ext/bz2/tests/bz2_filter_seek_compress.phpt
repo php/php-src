@@ -50,6 +50,6 @@ Seek to start: SUCCESS
 Size after second write: 98
 Second write is larger: YES
 
-Warning: fseek(): Stream filter bzip2.compress is not seekable in %s on line %d
+Warning: fseek(): Stream filter bzip2.compress is seekable only to start position in %s on line %d
 Seek to middle: FAILURE
 Decompressed content matches text2: YES

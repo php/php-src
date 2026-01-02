@@ -39,5 +39,5 @@ First read (20 bytes): Hello, this is a tes
 Seek to start: SUCCESS
 Content after seek matches: YES
 
-Warning: fseek(): Stream filter convert.iconv.* is not seekable in %s on line %d
+Warning: fseek(): Stream filter convert.iconv.* is seekable only to start position in %s on line %d
 Seek to middle: FAILURE

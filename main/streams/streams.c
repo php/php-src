@@ -1364,9 +1364,12 @@ PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
 static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_start_seeking)
 {
 	while (filter) {
-		if (filter->seekable == PSFS_SEEKABLE_NEVER ||
-				(!is_start_seeking && filter->seekable == PSFS_SEEKABLE_START)) {
-			php_error_docref(NULL, E_WARNING, "Stream filter %s is not seekable", filter->fops->label);
+		if (filter->seekable == PSFS_SEEKABLE_NEVER) {
+			php_error_docref(NULL, E_WARNING, "Stream filter %s is never seekable", filter->fops->label);
+			return false;
+		}
+		if (!is_start_seeking && filter->seekable == PSFS_SEEKABLE_START) {
+			php_error_docref(NULL, E_WARNING, "Stream filter %s is seekable only to start position", filter->fops->label);
 			return false;
 		}
 		filter = filter->next;
@@ -1380,7 +1383,7 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 	while (filter) {
 		if (((filter->seekable == PSFS_SEEKABLE_START && is_start_seeking) ||
 				filter->seekable == PSFS_SEEKABLE_CHECK) &&
-				filter->fops->seek(stream, filter, offset, whence)) {
+				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
 			return FAILURE;
 		}
