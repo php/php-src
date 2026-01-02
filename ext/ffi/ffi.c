@@ -2792,7 +2792,17 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 		free_alloca(arg_values, arg_values_use_heap);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+	zend_ffi_type *func_ret_type = type->func.ret_type;
+
+	if (ZEND_FFI_TYPE_IS_OWNED(func_ret_type)) {
+		func_ret_type = ZEND_FFI_TYPE(func_ret_type);
+		if (!(func_ret_type->attr & ZEND_FFI_ATTR_STORED)
+			&& func_ret_type->kind == ZEND_FFI_TYPE_POINTER) {
+			type->func.ret_type = func_ret_type = zend_ffi_remember_type(func_ret_type);
+		}
+	}
+
+	zend_ffi_cdata_to_zval(NULL, ret, func_ret_type, BP_VAR_R, return_value, 0, 1, 0);
 	free_alloca(ret, ret_use_heap);
 
 exit:
@@ -2934,7 +2944,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 
 	if (code && ZSTR_LEN(code)) {
 		/* Parse C definitions */
-		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
+		FFI_G(default_type_attr) = 0;
 
 		if (zend_ffi_parse_decl(ZSTR_VAL(code), ZSTR_LEN(code)) != SUCCESS) {
 			if (FFI_G(symbols)) {
@@ -3159,6 +3169,7 @@ static void zend_ffi_cleanup_type(zend_ffi_type *old, zend_ffi_type *type) /* {{
 
 static zend_ffi_type *zend_ffi_remember_type(zend_ffi_type *type) /* {{{ */
 {
+	ZEND_ASSERT(!ZEND_FFI_TYPE_IS_OWNED(type) && "type argument must not be a tagged pointer");
 	if (!FFI_G(weak_types)) {
 		FFI_G(weak_types) = emalloc(sizeof(HashTable));
 		zend_hash_init(FFI_G(weak_types), 0, NULL, zend_ffi_type_hash_dtor, 0);
