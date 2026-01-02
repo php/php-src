@@ -164,7 +164,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 #ifdef PHP_WIN32
 			efree(arch);
 #endif
-			zend_bailout();
+			zend_bailout_without_gc_protect();
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
 			efree(basename);
@@ -176,7 +176,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			efree((void *) ctr.line);
 
 			if (FAILURE == sapi_send_headers()) {
-				zend_bailout();
+				zend_bailout_without_gc_protect();
 			}
 
 			/* prepare to output  */
@@ -207,7 +207,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				}
 			} while (1);
 
-			zend_bailout();
+			zend_bailout_without_gc_protect();
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, ru_len);
@@ -283,7 +283,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					efree(name);
 				} zend_end_try();
 
-				zend_bailout();
+				zend_bailout_without_gc_protect();
 			}
 
 			return PHAR_MIME_PHP;
@@ -705,7 +705,7 @@ PHP_METHOD(Phar, webPhar)
 				}
 				efree(pt);
 
-				zend_bailout();
+				zend_bailout_without_gc_protect();
 			default:
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 
@@ -751,7 +751,7 @@ cleanup_fail:
 				efree(path_info);
 			}
 
-			zend_bailout();
+			zend_bailout_without_gc_protect();
 		} else {
 			char *tmp = NULL, sa = '\0';
 			sapi_header_line ctr = {0};
@@ -785,14 +785,14 @@ cleanup_fail:
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			sapi_send_headers();
 			efree((void *) ctr.line);
-			zend_bailout();
+			zend_bailout_without_gc_protect();
 		}
 	}
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	}
 
 	if (mimeoverride && zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {

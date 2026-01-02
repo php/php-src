@@ -32,7 +32,7 @@ static zend_always_inline void fuzzer_step(void) {
 		/* Reset steps before bailing out, so code running after bailout (e.g. in
 		 * destructors) will get another MAX_STEPS, rather than UINT32_MAX steps. */
 		steps_left = MAX_STEPS;
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	}
 }
 
