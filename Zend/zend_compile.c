@@ -6538,6 +6538,10 @@ static bool can_match_use_jumptable(const zend_ast_list *arms) {
 		for (uint32_t j = 0; j < conds->children; j++) {
 			zend_ast **cond_ast = &conds->child[j];
 
+			if ((*cond_ast)->kind == ZEND_AST_IS) {
+				return 0;
+			}
+
 			zend_eval_const_expr(cond_ast);
 			if ((*cond_ast)->kind != ZEND_AST_ZVAL) {
 				return 0;
@@ -6624,6 +6628,593 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	zend_compile_expr(result, fcall_ast);
 }
 
+typedef struct _zend_pm_context {
+	bool inside_or_pattern;
+	zend_stack labels;
+	uint32_t num_bindings;
+	zend_stack bindings;
+} zend_pm_context;
+
+typedef struct _zend_pm_binding {
+	uint32_t cv;
+	znode value;
+} zend_pm_binding;
+
+static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context);
+static zend_type zend_compile_single_typename(zend_ast *ast);
+
+static void zend_pm_context_init(zend_pm_context *context)
+{
+	zend_stack_init(&context->labels, sizeof(uint32_t));
+	/* Avoid offsets 0 and 1. */
+	uint32_t dummy = 0;
+	zend_stack_push(&context->labels, &dummy);
+	zend_stack_push(&context->labels, &dummy);
+
+	zend_stack_init(&context->bindings, sizeof(zend_pm_binding));
+}
+
+static void zend_pm_context_free(zend_pm_context *context)
+{
+	zend_stack_destroy(&context->labels);
+	zend_stack_destroy(&context->bindings);
+}
+
+static uint32_t zend_pm_label_create(zend_pm_context *context)
+{
+	uint32_t dummy = 0;
+	/* Use negative offset into labels array to be stored in
+	 * zend_op.opN.opline_num. In two's complement, this counts downward from
+	 * UINT_MAX, which avoids conflicts with the existing, ordinary opline
+	 * offsets. */
+	return -zend_stack_push(&context->labels, &dummy);
+}
+
+static void zend_pm_label_set_next(zend_pm_context *context, uint32_t label_offset)
+{
+	uint32_t *labels = zend_stack_base(&context->labels);
+	/* See above. */
+	labels[-label_offset] = get_next_op_number();
+}
+
+static void zend_pm_labels_replace(zend_pm_context *context, uint32_t start_opnum)
+{
+	uint32_t *labels = zend_stack_base(&context->labels);
+	uint32_t label_lower_bound = -zend_stack_count(&context->labels);
+	zend_op_array *op_array = CG(active_op_array);
+	zend_op *opline = &op_array->opcodes[start_opnum];
+	zend_op *end_opline = &op_array->opcodes[op_array->last];
+
+	while (opline < end_opline) {
+		switch (opline->opcode) {
+			case ZEND_JMP:
+				if (opline->op1.opline_num >= label_lower_bound) {
+					opline->op1.opline_num = labels[-opline->op1.opline_num];
+				}
+				break;
+			case ZEND_JMPZ_EX:
+			case ZEND_JMPNZ_EX:
+				if (opline->op2.opline_num >= label_lower_bound) {
+					opline->op2.opline_num = labels[-opline->op2.opline_num];
+				}
+				break;
+		}
+		opline++;
+	}
+}
+
+static void zend_pm_emit_jmpz_ex(znode *result, uint32_t opnum_target)
+{
+	zend_op *opline = zend_emit_op(NULL, ZEND_JMPZ_EX, result, NULL);
+	opline->op2.opline_num = opnum_target;
+	SET_NODE(opline->result, result);
+}
+
+static void zend_pm_emit_jmpnz_ex(znode *result, uint32_t opnum_target)
+{
+	zend_op *opline = zend_emit_op(NULL, ZEND_JMPNZ_EX, result, NULL);
+	opline->op2.opline_num = opnum_target;
+	SET_NODE(opline->result, result);
+}
+
+static void zend_pm_kill_last_op_if_jmp(zend_pm_context *context)
+{
+	zend_op_array *op_array = CG(active_op_array);
+	zend_op *opline = &op_array->opcodes[op_array->last - 1];
+	uint32_t *labels = zend_stack_base(&context->labels);
+	uint32_t label_lower_bound = -zend_stack_count(&context->labels);
+
+	uint32_t label_idx;
+	switch (opline->opcode) {
+		case ZEND_JMP:
+			label_idx = opline->op1.opline_num;
+			break;
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+			label_idx = opline->op2.opline_num;
+			break;
+		default:
+			return;
+	}
+
+	ZEND_ASSERT(label_idx >= label_lower_bound);
+	uint32_t label_target = labels[-label_idx];
+	ZEND_ASSERT(label_target == op_array->last);
+
+	MAKE_NOP(opline);
+	op_array->last--;
+
+	uint32_t *label = labels;
+	uint32_t *label_end = zend_stack_top(&context->labels);
+	while (label <= label_end) {
+		if (*label == label_target) {
+			(*label)--;
+		}
+		label++;
+	}
+}
+
+static void zend_pm_compile_expr_like(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum)
+{
+	znode value;
+	zend_compile_expr(&value, ast->child[0]);
+	zend_op *opline = zend_emit_op_tmp(NULL, expr_node->op_type == IS_CV || consume_expr ? ZEND_IS_IDENTICAL : ZEND_CASE_STRICT, expr_node, &value);
+	SET_NODE(opline->result, result);
+
+	zend_pm_emit_jmpz_ex(result, false_opnum);
+}
+
+static void zend_pm_verify_parenthesized_compound_pattern(zend_ast *ast, zend_ast_kind kind)
+{
+	zend_ast_list *ast_list = zend_ast_get_list(ast);
+
+	for (uint32_t i = 0; i < ast_list->children; i++) {
+		zend_ast *element_ast = ast_list->child[i];
+		if (element_ast->kind == kind && !(element_ast->attr & ZEND_PARENTHESIZED_PATTERN)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Nested compound pattern must be parenthesized");
+		}
+	}
+}
+
+static void zend_pm_compile_or(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	zend_pm_verify_parenthesized_compound_pattern(ast, ZEND_AST_AND_PATTERN);
+
+	context->inside_or_pattern = true;
+
+	zend_ast_list *ast_list = zend_ast_get_list(ast);
+	uint32_t true_label = zend_pm_label_create(context);
+	uint32_t false_label = consume_expr ? zend_pm_label_create(context) : false_opnum;
+	uint32_t next_label = 0;
+
+	for (uint32_t i = 0; i < ast_list->children - 1; i++) {
+		if (next_label) {
+			zend_pm_label_set_next(context, next_label);
+		}
+		next_label = zend_pm_label_create(context);
+		zend_compile_pattern(ast_list->child[i], result, expr_node, false, (uint32_t)-1, context);
+		zend_pm_emit_jmpnz_ex(result, true_label);
+	}
+	zend_pm_label_set_next(context, next_label);
+
+	zend_compile_pattern(ast_list->child[ast_list->children - 1], result, expr_node, false, false_label, context);
+
+	zend_pm_label_set_next(context, true_label);
+	if (consume_expr) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+
+	context->inside_or_pattern = false;
+}
+
+static void zend_pm_compile_and(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	zend_pm_verify_parenthesized_compound_pattern(ast, ZEND_AST_OR_PATTERN);
+
+	zend_ast_list *ast_list = zend_ast_get_list(ast);
+	uint32_t false_label = consume_expr ? zend_pm_label_create(context) : false_opnum;
+
+	for (uint32_t i = 0; i < ast_list->children; i++) {
+		zend_compile_pattern(ast_list->child[i], result, expr_node, false, false_label, context);
+	}
+
+	if (consume_expr) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+}
+
+static void zend_pm_compile_type(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum)
+{
+	zend_ast *type_ast = ast->child[0];
+	bool nullable = type_ast->attr & ZEND_TYPE_NULLABLE;
+	type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+
+	// FIXME: Does this need heap allocation/free for main/eval?
+	zend_type *type = zend_arena_alloc(&CG(arena), sizeof(zend_type));
+	*type = zend_compile_single_typename(type_ast);
+	if (nullable) {
+		ZEND_TYPE_FULL_MASK(*type) |= MAY_BE_NULL;
+	}
+
+	znode type_node;
+	type_node.op_type = IS_CONST;
+	Z_PTR_P(&type_node.u.constant) = type;
+	Z_TYPE_INFO_P(&type_node.u.constant) = IS_TYPE;
+
+	zend_op *opline = zend_emit_op(NULL, ZEND_HAS_TYPE, expr_node, &type_node);
+	SET_NODE(opline->result, result);
+	if (consume_expr) {
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+	}
+	zend_pm_emit_jmpz_ex(result, false_opnum);
+}
+
+static void zend_pm_copy_tmp(znode *dest, znode *src, bool consume)
+{
+	if (!consume && (src->op_type & (IS_VAR|IS_TMP_VAR))) {
+		zend_emit_op(dest, ZEND_COPY_TMP, src, NULL);
+	} else {
+		*dest = *src;
+	}
+}
+
+static void zend_pm_compile_binding(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	if (context->inside_or_pattern) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Must not bind to variables inside | pattern");
+	}
+
+	zend_pm_binding binding = {0};
+	binding.cv = lookup_cv(zend_ast_get_str(ast->child[0]));
+
+	if (consume_expr) {
+		binding.value = *expr_node;
+	} else {
+		znode expr_copy_node;
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, consume_expr);
+		zend_emit_op_tmp(&binding.value, ZEND_QM_ASSIGN, &expr_copy_node, NULL);
+	}
+
+	zend_stack_push(&context->bindings, &binding);
+
+	znode true_node;
+	true_node.op_type = IS_CONST;
+	ZVAL_TRUE(&true_node.u.constant);
+	zend_op *opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &true_node, NULL);
+	SET_NODE(opline->result, result);
+}
+
+static void zend_pm_compile_container(
+	zend_ast *ast,
+	znode *result,
+	znode *expr_node,
+	bool consume_expr,
+	uint32_t false_opnum,
+	zend_pm_context *context,
+	bool is_array
+) {
+	znode expr_copy_node;
+
+	uint32_t false_label = consume_expr ? zend_pm_label_create(context) : false_opnum;
+	zend_ast_list *element_list = zend_ast_get_list(ast->child[0]);
+
+	/* Make sure the value is actually of the right type. */
+	if (is_array) {
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+		zend_op *is_array_op = zend_emit_op(NULL, ZEND_TYPE_CHECK, &expr_copy_node, NULL);
+		SET_NODE(is_array_op->result, result);
+		is_array_op->extended_value = is_array ? MAY_BE_ARRAY : MAY_BE_OBJECT;
+		zend_pm_emit_jmpz_ex(result, false_label);
+
+		/* Make sure the array has the right size. */
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+		znode count_node;
+		zend_emit_op(&count_node, ZEND_COUNT, &expr_copy_node, NULL);
+
+		znode count_target_node;
+		count_target_node.op_type = IS_CONST;
+		ZVAL_LONG(&count_target_node.u.constant, element_list->children);
+
+		zend_op *count_ok_op = zend_emit_op(NULL,
+			(ast->attr & ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE) ? ZEND_IS_SMALLER_OR_EQUAL : ZEND_IS_EQUAL,
+			&count_target_node, &count_node);
+		SET_NODE(count_ok_op->result, result);
+		zend_pm_emit_jmpz_ex(result, false_label);
+	} else {
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+
+		znode class_node;
+		zend_compile_class_ref(&class_node, ast->child[1], ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION | ZEND_FETCH_CLASS_SILENT);
+
+		zend_op *opline = zend_emit_op_tmp(NULL, ZEND_INSTANCEOF, &expr_copy_node, NULL);
+		SET_NODE(opline->result, result);
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(Z_STR(class_node.u.constant));
+		opline->extended_value = zend_alloc_cache_slot();
+
+		zend_pm_emit_jmpz_ex(result, false_label);
+	}
+
+	/* Check elements. */
+	bool has_implicit = false, has_explicit = false;
+	for (uint32_t i = 0; i < element_list->children; i++) {
+		zend_ast *element_ast = element_list->child[i];
+		zend_ast *element_key_ast = element_ast->child[0];
+		zend_ast *element_value_ast = element_ast->child[1];
+
+		/* Fetch element. */
+		zend_pm_copy_tmp(&expr_copy_node, expr_node, false);
+		znode element_value_node, element_key_node;
+		element_key_node.op_type = IS_CONST;
+		if (element_key_ast) {
+			has_explicit = true;
+			ZVAL_COPY(&element_key_node.u.constant, zend_ast_get_zval(element_key_ast));
+		} else {
+			has_implicit = true;
+			ZVAL_LONG(&element_key_node.u.constant, i);
+		}
+		if (is_array) {
+			zend_emit_op_tmp(&element_value_node, ZEND_FETCH_DIM_IS, &expr_copy_node, &element_key_node);
+		} else {
+			zend_op *fetch_prop_op = zend_emit_op_tmp(&element_value_node, ZEND_FETCH_OBJ_R, &expr_copy_node, &element_key_node);
+			fetch_prop_op->extended_value = zend_alloc_cache_slots(3);
+		}
+
+		/* Compile element check. */
+		zend_compile_pattern(element_value_ast, result, &element_value_node, true, false_label, context);
+	}
+
+	if (consume_expr) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+
+	if (has_implicit && has_explicit) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Must not mix implicit and explicit array keys in array pattern");
+	}
+}
+
+static void zend_pm_compile_range(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context, bool is_inclusive)
+{
+	zend_ast *lo_ast = ast->child[0];
+	zend_ast *hi_ast = ast->child[1];
+	bool consume_branch = consume_expr && lo_ast && hi_ast;
+	uint32_t false_label = consume_branch ? zend_pm_label_create(context) : false_opnum;
+
+	if (lo_ast) {
+		znode expr_node_copy;
+		zend_pm_copy_tmp(&expr_node_copy, expr_node, consume_expr && !consume_branch);
+
+		znode lo_node;
+		lo_node.op_type = IS_CONST;
+		ZVAL_COPY(&lo_node.u.constant, zend_ast_get_zval(lo_ast));
+
+		zend_op *opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &lo_node, &expr_node_copy);
+		SET_NODE(opline->result, result);
+
+		zend_pm_emit_jmpz_ex(result, false_label);
+	}
+	if (hi_ast) {
+		znode expr_node_copy;
+		zend_pm_copy_tmp(&expr_node_copy, expr_node, consume_expr && !consume_branch);
+
+		znode hi_node;
+		hi_node.op_type = IS_CONST;
+		ZVAL_COPY(&hi_node.u.constant, zend_ast_get_zval(hi_ast));
+
+		zend_op *opline = zend_emit_op_tmp(NULL,
+			is_inclusive ? ZEND_IS_SMALLER_OR_EQUAL : ZEND_IS_SMALLER,
+			&expr_node_copy, &hi_node);
+		SET_NODE(opline->result, result);
+
+		zend_pm_emit_jmpz_ex(result, false_label);
+	}
+	if (consume_branch) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+}
+
+static void zend_pm_compile_comparison(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	zend_op *opline;
+
+	uint32_t false_label = consume_expr ? zend_pm_label_create(context) : false_opnum;
+
+	opline = zend_emit_op_tmp(NULL, ZEND_IS_NUMERIC, expr_node, NULL);
+	SET_NODE(opline->result, result);
+	zend_pm_emit_jmpz_ex(result, false_label);
+
+	znode expr_node_copy;
+	zend_pm_copy_tmp(&expr_node_copy, expr_node, false);
+
+	zend_ast *const_ast = ast->child[0];
+	znode const_node;
+	const_node.op_type = IS_CONST;
+	ZVAL_COPY(&const_node.u.constant, zend_ast_get_zval(const_ast));
+
+	switch (ast->attr) {
+		case ZEND_COMPARISON_PATTERN_SMALLER:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER, &expr_node_copy, &const_node);
+			break;
+		case ZEND_COMPARISON_PATTERN_SMALLER_OR_EQUAL:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &expr_node_copy, &const_node);
+			break;
+		case ZEND_COMPARISON_PATTERN_GREATER:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER, &const_node, &expr_node_copy);
+			break;
+		case ZEND_COMPARISON_PATTERN_GREATER_OR_EQUAL:
+			opline = zend_emit_op_tmp(NULL, ZEND_IS_SMALLER_OR_EQUAL, &const_node, &expr_node_copy);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	SET_NODE(opline->result, result);
+	zend_pm_emit_jmpz_ex(result, false_label);
+
+	if (consume_expr) {
+		zend_pm_label_set_next(context, false_label);
+		zend_emit_op(NULL, ZEND_FREE, expr_node, NULL);
+		zend_pm_emit_jmpz_ex(result, false_opnum);
+	}
+}
+
+static void zend_compile_pattern(zend_ast *ast, znode *result, znode *expr_node, bool consume_expr, uint32_t false_opnum, zend_pm_context *context)
+{
+	bool create_label = false_opnum == (uint32_t)-1;
+	if (create_label) {
+		false_opnum = zend_pm_label_create(context);
+	}
+
+	switch (ast->kind) {
+		case ZEND_AST_EXPR_LIKE_PATTERN:
+			zend_pm_compile_expr_like(ast, result, expr_node, consume_expr, false_opnum);
+			break;
+		case ZEND_AST_OR_PATTERN:
+			zend_pm_compile_or(ast, result, expr_node, consume_expr, false_opnum, context);
+			break;
+		case ZEND_AST_AND_PATTERN:
+			zend_pm_compile_and(ast, result, expr_node, consume_expr, false_opnum, context);
+			break;
+		case ZEND_AST_TYPE_PATTERN:
+			zend_pm_compile_type(ast, result, expr_node, consume_expr, false_opnum);
+			break;
+		case ZEND_AST_BINDING_PATTERN:
+			zend_pm_compile_binding(ast, result, expr_node, consume_expr, false_opnum, context);
+			break;
+		case ZEND_AST_ARRAY_PATTERN:
+			zend_pm_compile_container(ast, result, expr_node, consume_expr, false_opnum, context, true);
+			break;
+		case ZEND_AST_OBJECT_PATTERN:
+			zend_pm_compile_container(ast, result, expr_node, consume_expr, false_opnum, context, false);
+			break;
+		case ZEND_AST_RANGE_EXCLUSIVE:
+			zend_pm_compile_range(ast, result, expr_node, consume_expr, false_opnum, context, false);
+			break;
+		case ZEND_AST_RANGE_INCLUSIVE:
+			zend_pm_compile_range(ast, result, expr_node, consume_expr, false_opnum, context, true);
+			break;
+		case ZEND_AST_COMPARISON_PATTERN:
+			zend_pm_compile_comparison(ast, result, expr_node, consume_expr, false_opnum, context);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	if (create_label) {
+		zend_pm_label_set_next(context, false_opnum);
+		zend_pm_kill_last_op_if_jmp(context);
+	}
+}
+
+static void zend_pm_count_bindings(zend_ast **ast_ptr, void *context)
+{
+	zend_ast *ast = *ast_ptr;
+	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
+		return;
+	}
+
+	if (ast->kind == ZEND_AST_BINDING_PATTERN) {
+		zend_pm_context *pattern_context = context;
+		pattern_context->num_bindings++;
+	}
+
+	zend_ast_apply(ast, zend_pm_count_bindings, context);
+}
+
+static void zend_emit_is(znode *result, znode *expr_node, bool consume_expr, zend_ast *pattern_ast)
+{
+	/* When expr is a CONST, create a copy to avoid inserting multiple literals.
+	 * A cleaner solution would be to remember whether a literal has already been
+	 * inserted. This could be stored in znode.flag and handled in SET_NODE().
+	 * However, this field is unfortunately inconsistently initialized. */
+	znode expr_copy_node;
+	if (expr_node->op_type == IS_CONST) {
+		zend_emit_op(&expr_copy_node, ZEND_QM_ASSIGN, expr_node, NULL);
+		consume_expr = true;
+	} else {
+		expr_copy_node = *expr_node;
+	}
+
+	uint32_t num_tmps_before_pm = CG(active_op_array)->T;
+
+	zend_pm_context context = {0};
+	zend_pm_context_init(&context);
+	zend_pm_count_bindings(&pattern_ast, &context);
+
+	/* Initialize binding values. If the pattern fails midway, we need to be able
+	 * to free temporaries that may not have been initialized yet. */
+	uint32_t first_binding_init_opnum = get_next_op_number();
+	for (uint32_t i = 0; i < context.num_bindings; i++) {
+		znode null_node;
+		null_node.op_type = IS_CONST;
+		ZVAL_NULL(&null_node.u.constant);
+		zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &null_node, NULL);
+	}
+
+	uint32_t start_opnum = get_next_op_number();
+	uint32_t false_label = context.num_bindings ? zend_pm_label_create(&context) : -1;
+	zend_compile_pattern(pattern_ast, result, &expr_copy_node, consume_expr, false_label, &context);
+
+	if (context.num_bindings) {
+		zend_pm_binding *binding, *binding_end;
+
+		binding = zend_stack_base(&context.bindings);
+		binding_end = zend_stack_top(&context.bindings);
+		zend_op *binding_init_op = &CG(active_op_array)->opcodes[first_binding_init_opnum];
+		while (binding <= binding_end) {
+			znode var_node;
+			var_node.op_type = IS_CV;
+			var_node.u.op.var = binding->cv;
+			zend_emit_op(NULL, ZEND_ASSIGN, &var_node, &binding->value);
+
+			/* Only TMPs that are produced during pattern matching may be
+			 * uninitialized. Don't override existing vars. */
+			if (binding->value.u.op.var >= num_tmps_before_pm) {
+				binding_init_op->result_type = binding->value.op_type;
+				binding_init_op->result.var = binding->value.u.op.var;
+			} else {
+				MAKE_NOP(binding_init_op);
+			}
+
+			binding++;
+			binding_init_op++;
+		}
+		uint32_t jmp_end = zend_emit_jump(0);
+
+		zend_pm_label_set_next(&context, false_label);
+		binding = zend_stack_base(&context.bindings);
+		binding_end = zend_stack_top(&context.bindings);
+		while (binding <= binding_end) {
+			zend_emit_op(NULL, ZEND_FREE, &binding->value, NULL);
+			binding++;
+		}
+
+		zend_update_jump_target_to_next(jmp_end);
+	}
+
+	zend_pm_labels_replace(&context, start_opnum);
+	zend_pm_context_free(&context);
+}
+
+static void zend_compile_is(znode *result, zend_ast *ast)
+{
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *pattern_ast = ast->child[1];
+
+	znode expr_node;
+	zend_compile_expr(&expr_node, expr_ast);
+
+	result->op_type = IS_TMP_VAR;
+	result->u.op.var = get_temporary_variable();
+
+	zend_emit_is(result, &expr_node, (expr_node.op_type & (IS_VAR|IS_TMP_VAR)), pattern_ast);
+}
+
 static void zend_compile_match(znode *result, zend_ast *ast)
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -6684,14 +7275,19 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
 
-				znode cond_node;
-				zend_compile_expr(&cond_node, cond_ast);
+				if (cond_ast->kind != ZEND_AST_IS) {
+					znode cond_node;
+					zend_compile_expr(&cond_node, cond_ast);
 
-				uint32_t opcode = (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE_STRICT : ZEND_IS_IDENTICAL;
-				zend_op *opline = zend_emit_op(NULL, opcode, &expr_node, &cond_node);
-				SET_NODE(opline->result, &case_node);
-				if (opline->op1_type == IS_CONST) {
-					Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+					uint32_t opcode = (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE_STRICT : ZEND_IS_IDENTICAL;
+					zend_op *opline = zend_emit_op(NULL, opcode, &expr_node, &cond_node);
+					SET_NODE(opline->result, &case_node);
+					if (opline->op1_type == IS_CONST) {
+						Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+					}
+				} else {
+					zend_ast *pattern_ast = cond_ast->child[1];
+					zend_emit_is(&case_node, &expr_node, false, pattern_ast);
 				}
 
 				jmpnz_opnums[cond_count] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
@@ -12025,6 +12621,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PIPE:
 			zend_compile_pipe(result, ast);
+			return;
+		case ZEND_AST_IS:
+			zend_compile_is(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

@@ -909,4 +909,23 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
 
+#ifdef HAVE_STDBIT_H
+#include <stdbit.h>
+#endif
+
+#ifndef HAVE_STDC_BIT_CEIL_UI
+/* https://stackoverflow.com/a/466242/1320374 */
+static zend_always_inline unsigned int stdc_bit_ceil_ui(unsigned int value)
+{
+	value--;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	value++;
+	return value;
+}
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

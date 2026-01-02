@@ -1225,6 +1225,15 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 /* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
 #define ZEND_PARENTHESIZED_ARROW_FUNC 1
 
+#define ZEND_PARENTHESIZED_PATTERN (1<<0)
+/* Array pattern contains ... */
+#define ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE (1<<1)
+
+#define ZEND_COMPARISON_PATTERN_SMALLER          0
+#define ZEND_COMPARISON_PATTERN_SMALLER_OR_EQUAL 1
+#define ZEND_COMPARISON_PATTERN_GREATER          2
+#define ZEND_COMPARISON_PATTERN_GREATER_OR_EQUAL 3
+
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)
