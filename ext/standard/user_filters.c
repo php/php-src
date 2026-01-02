@@ -263,10 +263,8 @@ static zend_result userfilter_seek(
 			)
 {
 	zval *obj = &thisfilter->abstract;
-	zval func_name;
 	zval retval;
 	zval args[2];
-	int call_result;
 
 	/* the userfilter object probably doesn't exist anymore */
 	if (CG(unclean_shutdown)) {
@@ -274,9 +272,8 @@ static zend_result userfilter_seek(
 	}
 
 	/* Check if the seek method exists */
-	zend_string *method_name = ZSTR_INIT_LITERAL("seek", 0);
-	if (!zend_hash_exists(&Z_OBJCE_P(obj)->function_table, method_name)) {
-		zend_string_release(method_name);
+	zend_function *seek_method = zend_hash_str_find_ptr(&Z_OBJCE_P(obj)->function_table, ZEND_STRL("seek"));
+	if (seek_method == NULL) {
 		/* Method doesn't exist - consider this a successful seek for BC */
 		return SUCCESS;
 	}
@@ -289,30 +286,19 @@ static zend_result userfilter_seek(
 	if (userfilter_assign_stream(stream, obj, &stream_name) == FAILURE) {
 		stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 		stream->flags |= orig_no_fclose;
-		zend_string_release(method_name);
 		return FAILURE;
 	}
-
-	ZVAL_STR(&func_name, method_name);
 
 	/* Setup calling arguments */
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
 
-	call_result = call_user_function(NULL,
-			obj,
-			&func_name,
-			&retval,
-			2, args);
-
-	zval_ptr_dtor(&func_name);
+	zend_call_known_function(seek_method, Z_OBJ_P(obj), Z_OBJCE_P(obj), &retval, 2, args, NULL);
 
 	zend_result ret = FAILURE;
-	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+	if (Z_TYPE(retval) != IS_UNDEF) {
 		ret = zend_is_true(&retval) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Failed to call seek function");
 	}
 
 	/* filter resources are cleaned up by the stream destructor,
