@@ -8762,6 +8762,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
 
+	if (!(op_array->fn_flags & ZEND_ACC_STATIC)) {
+		CG(context).closure_may_use_this = true;
+	}
+
 	return op_array;
 }
 
@@ -10930,6 +10934,8 @@ static void zend_compile_include_or_eval(znode *result, const zend_ast *ast) /* 
 	znode expr_node;
 	zend_op *opline;
 
+	CG(context).closure_may_use_this = true;
+
 	zend_do_extended_fcall_begin();
 	zend_compile_expr(&expr_node, expr_ast);
 
@@ -12054,7 +12060,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
-			CG(context).closure_may_use_this = true;
 			zend_compile_func_decl(result, ast, FUNC_DECL_LEVEL_NESTED);
 			return;
 		case ZEND_AST_THROW:
