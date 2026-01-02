@@ -8707,7 +8707,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		/* Attempt to infer static for closures that don't use $this. */
-		if (!(op_array->fn_flags & ZEND_ACC_USES_THIS)
+		if (!(op_array->fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_USES_THIS))
 		 && !CG(context).closure_may_use_this
 		 && !info.varvars_used) {
 			op_array->fn_flags |= ZEND_ACC_STATIC;
