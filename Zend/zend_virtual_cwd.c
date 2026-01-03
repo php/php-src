@@ -1417,7 +1417,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	int ret;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
+	if (virtual_file_ex(&new_state, filename, NULL, link ? CWD_EXPAND : CWD_REALPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
