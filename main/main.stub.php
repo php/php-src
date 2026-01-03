@@ -104,7 +104,7 @@ const PHP_BINDIR = UNKNOWN;
  * @cvalue PHP_SBINDIR
  */
 const PHP_SBINDIR = UNKNOWN;
-#ifndef PHP_WIN32
+#ifdef PHP_MANDIR
 /**
  * @var string
  * @cvalue PHP_MANDIR
