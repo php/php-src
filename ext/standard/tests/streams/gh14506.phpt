@@ -86,9 +86,9 @@ Warning: fclose(): cannot close the provided stream, as it must not be manually 
 
 Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
 
-Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
-
 Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
+
+Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
 
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
 No stream arrays were passed

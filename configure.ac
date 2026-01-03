@@ -1695,6 +1695,7 @@ PHP_ADD_SOURCES([main/streams], m4_normalize([
     memory.c
     mmap.c
     plain_wrapper.c
+    stream_errors.c
     streams.c
     transports.c
     userspace.c

@@ -24,7 +24,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 #ifdef PHAR_DIRSTREAM
 #include "ext/standard/url.h"
 
-php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options);
+php_url* phar_parse_url(php_stream_wrapper *wrapper, php_stream_context *context, const char *filename, const char *mode, int options);
 
 /* directory handlers */
 static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count);
