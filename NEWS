@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
 
+- Standard:
+  . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
+    (Jakub Zelenka)
+
 15 Jan 2026, PHP 8.5.2
 
 - Core:
