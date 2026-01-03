@@ -271,12 +271,14 @@ typedef struct {
 #define PHP_SOCKVAL_TCP_KEEPIDLE  (1 << 1)
 #define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 2)
 #define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 3)
+#define PHP_SOCKVAL_SO_LINGER     (1 << 4)
 
 #define PHP_SOCKVAL_IS_SET(sockvals, opt) ((sockvals)->mask & (opt))
 
 typedef struct {
 	unsigned int mask;
 	int tcp_nodelay;
+	int linger;
 	struct {
 		int keepidle;
 		int keepcnt;
