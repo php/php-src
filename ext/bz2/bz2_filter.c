@@ -42,6 +42,10 @@ typedef struct _php_bz2_filter_data {
 	unsigned int is_flushed : 1;          /* only for compression */
 
 	int persistent;
+
+	/* Configuration for reset - immutable */
+	int blockSize100k;  /* compress only */
+	int workFactor;     /* compress only */
 } php_bz2_filter_data;
 
 /* }}} */
@@ -178,6 +182,36 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_decompress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current decompression if running */
+	if (data->status == PHP_BZ2_RUNNING) {
+		BZ2_bzDecompressEnd(&(data->strm));
+	}
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->status = PHP_BZ2_UNINITIALIZED;
+
+	/* Note: We don't reinitialize here - it will be done on first use in the filter function */
+
+	return SUCCESS;
+}
+
 static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -193,6 +227,7 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_filter,
+	php_bz2_decompress_seek,
 	php_bz2_decompress_dtor,
 	"bzip2.decompress"
 };
@@ -288,6 +323,41 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_compress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	int status;
+
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current compression */
+	BZ2_bzCompressEnd(&(data->strm));
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->is_flushed = 1;
+
+	/* Reinitialize compression with saved configuration */
+	status = BZ2_bzCompressInit(&(data->strm), data->blockSize100k, 0, data->workFactor);
+	if (status != BZ_OK) {
+		php_error_docref(NULL, E_WARNING, "bzip2.compress: failed to reset compression state");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 {
 	if (Z_PTR(thisfilter->abstract)) {
@@ -301,6 +371,7 @@ static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_compress_ops = {
 	php_bz2_compress_filter,
+	php_bz2_compress_seek,
 	php_bz2_compress_dtor,
 	"bzip2.compress"
 };
@@ -309,7 +380,7 @@ static const php_stream_filter_ops php_bz2_compress_ops = {
 
 /* {{{ bzip2.* common factory */
 
-static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_bz2_filter_data *data;
@@ -388,6 +459,10 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			}
 		}
 
+		/* Save configuration for reset */
+		data->blockSize100k = blockSize100k;
+		data->workFactor = workFactor;
+
 		status = BZ2_bzCompressInit(&(data->strm), blockSize100k, 0, workFactor);
 		data->is_flushed = 1;
 		fops = &php_bz2_compress_ops;
@@ -403,7 +478,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {
