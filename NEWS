@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
 
+- JSON:
+  . Enriched JSON last error / exception message with error location.
+    (Juan Morales)
+
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)

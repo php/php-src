@@ -40,6 +40,10 @@ PHP 8.6 UPGRADE NOTES
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
 
+- JSON:
+  . Added extra info about error location to the JSON error messages returned
+    from json_last_error_msg() and JsonException message.
+
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
     influences the result of the phar buildFrom family of functions.
