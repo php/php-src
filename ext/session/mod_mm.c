@@ -32,6 +32,10 @@
 
 #define PS_MM_FILE "session_mm_"
 
+#ifdef ZTS
+MUTEX_T session_mm_lock;
+#endif
+
 /* This list holds all data associated with one session. */
 
 typedef struct ps_sd {
@@ -63,28 +67,14 @@ static ps_mm *ps_mm_instance = NULL;
 # define ps_mm_debug(a)
 #endif
 
-static inline uint32_t ps_sd_hash(const zend_string *data)
-{
-	uint32_t h;
-	const char *data_char = ZSTR_VAL(data);
-	const char *e = ZSTR_VAL(data) + ZSTR_LEN(data);
-
-	for (h = 2166136261U; data_char < e; ) {
-		h *= 16777619;
-		h ^= *data_char++;
-	}
-
-	return h;
-}
-
 static ps_sd *ps_sd_new(ps_mm *data, zend_string *key)
 {
 	ps_sd *sd;
 
-	sd = g_malloc(sizeof(ps_sd) + ZSTR_LEN(key));
+	sd = g_try_malloc(sizeof(ps_sd) + ZSTR_LEN(key));
 	if (!sd) {
 
-		//php_error_docref(NULL, E_WARNING, "g_malloc failed, avail %ld, err %s", mm_available(data->mm), mm_error());
+		php_error_docref(NULL, E_WARNING, "g_malloc failed");
 		return NULL;
 	}
 
@@ -108,24 +98,6 @@ static void ps_sd_destroy(ps_mm *data, zend_string *key, ps_sd *sd)
 	}
 
 	g_hash_table_remove(data->hash, key);
-}
-
-static ps_sd *ps_sd_lookup(ps_mm *data, const zend_string *key, bool _rw)
-{
-	return (ps_sd *)g_hash_table_lookup(data->hash, key);
-}
-
-static zend_result ps_mm_key_exists(ps_mm *data, const zend_string *key)
-{
-	ps_sd *sd;
-	if (!key) {
-		return FAILURE;
-	}
-	sd = ps_sd_lookup(data, key, false);
-	if (sd) {
-		return SUCCESS;
-	}
-	return FAILURE;
 }
 
 const ps_module ps_mod_mm = {
@@ -244,6 +216,10 @@ PHP_MINIT_FUNCTION(ps_mm)
 		return FAILURE;
 	}
 
+#ifdef ZTS
+	session_mm_lock = tsrm_mutex_alloc();
+#endif
+
 	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
 }
@@ -251,6 +227,10 @@ PHP_MINIT_FUNCTION(ps_mm)
 PHP_MSHUTDOWN_FUNCTION(ps_mm)
 {
 	if (ps_mm_instance) {
+#ifdef ZTS
+		tsrm_mutex_free(session_mm_lock);
+		session_mm_lock = NULL;
+#endif
 		ps_mm_destroy(ps_mm_instance);
 		return SUCCESS;
 	}
@@ -284,7 +264,7 @@ PS_READ_FUNC(mm)
 
 	/* If there is an ID and strict mode, verify existence */
 	if (PS(use_strict_mode)
-		&& ps_mm_key_exists(data, key) == FAILURE) {
+		&& g_hash_table_contains(data->hash, key) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
 			efree(PS(id));
@@ -301,7 +281,7 @@ PS_READ_FUNC(mm)
 		PS(session_status) = php_session_active;
 	}
 
-	sd = ps_sd_lookup(data, PS(id), false);
+	sd = g_hash_table_lookup(data->hash, PS(id));
 	if (sd) {
 		*val = zend_string_init(sd->data, sd->datalen, false);
 		ret = SUCCESS;
@@ -315,9 +295,11 @@ PS_WRITE_FUNC(mm)
 	PS_MM_DATA;
 	ps_sd *sd;
 
-	mm_lock(data->mm, MM_LOCK_RW);
+#ifdef ZTS
+	tsrm_mutex_lock(session_mm_lock);
+#endif
 
-	sd = ps_sd_lookup(data, key, true);
+	sd = g_hash_table_lookup(data->hash, key);
 	if (!sd) {
 		sd = ps_sd_new(data, key);
 		ps_mm_debug(("new entry for %s\n", ZSTR_VAL(key)));
@@ -341,6 +323,9 @@ PS_WRITE_FUNC(mm)
 		}
 	}
 
+#ifdef ZTS
+	tsrm_mutex_unlock(session_mm_lock);
+#endif
 	return sd ? SUCCESS : FAILURE;
 }
 
@@ -349,13 +334,18 @@ PS_DESTROY_FUNC(mm)
 	PS_MM_DATA;
 	ps_sd *sd;
 
-	mm_lock(data->mm, MM_LOCK_RW);
+#ifdef ZTS
+	tsrm_mutex_lock(session_mm_lock);
+#endif
 
-	sd = ps_sd_lookup(data, key, false);
+	sd = g_hash_table_lookup(data->hash, key);
 	if (sd) {
 		ps_sd_destroy(data, key, sd);
 	}
 
+#ifdef ZTS
+	tsrm_mutex_unlock(session_mm_lock);
+#endif
 	return SUCCESS;
 }
 
@@ -387,7 +377,7 @@ PS_CREATE_SID_FUNC(mm)
 	do {
 		sid = php_session_create_id((void **)&data);
 		/* Check collision */
-		if (ps_mm_key_exists(data, sid) == SUCCESS) {
+		if (g_hash_table_contains(data->hash, sid) == SUCCESS) {
 			if (sid) {
 				zend_string_release_ex(sid, 0);
 				sid = NULL;
