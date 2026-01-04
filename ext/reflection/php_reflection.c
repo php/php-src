@@ -6289,6 +6289,22 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			}
 		}
 
+		/* If this is an uninitialized lazy object, do not trigger initialization. */
+		if (ref->prop
+		    && !(prop_get_flags(ref) & ZEND_ACC_STATIC)
+		    && !(prop_get_flags(ref) & ZEND_ACC_VIRTUAL)
+		    && zend_object_is_lazy(Z_OBJ_P(object))
+		    && !zend_lazy_object_initialized(Z_OBJ_P(object))
+		) {
+		    zval *slot = OBJ_PROP(Z_OBJ_P(object), ref->prop->offset);
+
+		    if (Z_PROP_FLAG_P(slot) & IS_PROP_LAZY) {
+		        RETURN_FALSE;
+		    }
+
+		    RETURN_BOOL(!Z_ISUNDEF_P(slot));
+		}
+
 		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
