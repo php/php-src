@@ -119,7 +119,7 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
 		}
-	} else if (ZEND_TYPE_HAS_NAME(type)) {
+	} else if (ZEND_TYPE_HAS_NAME(type) || ZEND_TYPE_IS_GENERIC_PARAM_NAME(type)) {
 		zend_string_release(ZEND_TYPE_NAME(type));
 	}
 }
@@ -343,6 +343,20 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 	if (--ce->refcount > 0) {
 		return;
+	}
+
+	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
+	/* Common to internal and user classes */
+	if (ce->bound_types) {
+		zend_hash_release(ce->bound_types);
+	}
+	if (ce->num_generic_parameters > 0) {
+		for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
+			const zend_generic_parameter generic_param = ce->generic_parameters[generic_param_index];
+			zend_string_release(generic_param.name);
+			zend_type_release(generic_param.constraint, persistent);
+		}
+		pefree(ce->generic_parameters, persistent);
 	}
 
 	switch (ce->type) {
