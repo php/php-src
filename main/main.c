@@ -1997,15 +1997,15 @@ void php_request_shutdown(void *dummy)
 		zend_unset_timeout();
 	} zend_end_try();
 
-	/* 5. Call all extensions RSHUTDOWN functions */
-	if (PG(modules_activated)) {
-		zend_deactivate_modules();
-	}
-
-	/* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
+	/* 5. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
 	zend_try {
 		php_output_deactivate();
 	} zend_end_try();
+
+	/* 6. Call all extensions RSHUTDOWN functions */
+	if (PG(modules_activated)) {
+		zend_deactivate_modules();
+	}
 
 	/* 7. Free shutdown functions */
 	if (PG(modules_activated)) {
