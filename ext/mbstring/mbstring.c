@@ -5848,6 +5848,11 @@ PHP_FUNCTION(mb_str_pad)
 	}
 
 	size_t pad_length = mb_get_strlen(pad, encoding);
+	if (pad_length == 0) {
+		/* Possible with invalidly encoded padding string. */
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
 
 	size_t num_mb_pad_chars = pad_to_length - input_length;
 
