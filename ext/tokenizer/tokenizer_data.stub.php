@@ -274,6 +274,11 @@ const T_CONST = UNKNOWN;
 const T_RETURN = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_DEFER
+ */
+const T_DEFER = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_TRY
  */
 const T_TRY = UNKNOWN;

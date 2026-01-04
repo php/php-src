@@ -142,6 +142,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_FN            "'fn'"
 %token <ident> T_CONST         "'const'"
 %token <ident> T_RETURN        "'return'"
+%token <ident> T_DEFER         "'defer'"
 %token <ident> T_TRY           "'try'"
 %token <ident> T_CATCH         "'catch'"
 %token <ident> T_FINALLY       "'finally'"
@@ -309,7 +310,7 @@ reserved_non_modifiers:
 	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
-	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
+	| T_FUNCTION | T_CONST | T_RETURN | T_DEFER | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
 	| T_PROPERTY_C
@@ -521,6 +522,7 @@ statement:
 	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
 	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
 	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
+	|	T_DEFER statement				{ $$ = zend_ast_create(ZEND_AST_DEFER, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $2; }

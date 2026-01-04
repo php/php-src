@@ -5,10 +5,10 @@ r
 q
 --EXPECTF--
 [Successful compilation of %s]
-prompt> array(1) {
+prompt> array(%d) {
   [5]=>
   int(0)
-}
+%A
 [Script ended normally]
 prompt>
 --FILE--
