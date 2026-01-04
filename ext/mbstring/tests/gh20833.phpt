@@ -1,5 +1,7 @@
 --TEST--
 GH-20833 (mb_str_pad() divide by zero if padding string is invalid in the encoding)
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $utf8 = "test";
