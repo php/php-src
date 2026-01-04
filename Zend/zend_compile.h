@@ -1236,6 +1236,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 #define ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opcode) \
 	(((opcode) >= ZEND_ADD) && ((opcode) <= ZEND_POW))
 
+/* PFAs/FCCs */
+#define ZEND_PLACEHOLDER_VARIADIC (1<<0)
+
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253
 #define ZEND_BRK   254

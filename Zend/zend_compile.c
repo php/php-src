@@ -3948,6 +3948,11 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
+		zend_ast_list *args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
+		if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create a Closure for call expression with more than one argument, or non-variadic placeholders");
+		}
+
 		if (opcode == ZEND_INIT_FCALL) {
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
