@@ -9,6 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8") === false) {
     die('skip en_US.utf8/Ko_KR.utf8/zh_CN.utf8 locales not available');
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris locale names ends with .UTF-8 (not utf8)");
+}
 ?>
 --FILE--
 <?php

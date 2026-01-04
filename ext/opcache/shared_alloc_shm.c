@@ -42,7 +42,7 @@
 # define MIN(x, y) ((x) > (y)? (y) : (x))
 #endif
 
-#define SEG_ALLOC_SIZE_MAX 32*1024*1024
+#define SEG_ALLOC_SIZE_MAX 64*1024*1024 /* 64MB to match ZEND_JIT_DEFAULT_BUFFER_SIZE */
 #define SEG_ALLOC_SIZE_MIN 2*1024*1024
 
 typedef struct  {
