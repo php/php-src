@@ -27,7 +27,6 @@ class Test {
     }
 }
 
-// TODO Rename pdo_fetch_class_change_ctor_two table to pdo_fetch_class_change_ctor_two in PHP-8.4
 $db->exec('CREATE TABLE pdo_fetch_class_change_ctor_two(id int NOT NULL PRIMARY KEY, val1 VARCHAR(10), val2 VARCHAR(10))');
 $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(1, 'A', 'alpha')");
 $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(2, 'B', 'beta')");
