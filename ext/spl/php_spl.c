@@ -398,16 +398,6 @@ PHP_FUNCTION(spl_autoload_call)
 	zend_string_release(lc_name);
 } /* }}} */
 
-#define HT_MOVE_TAIL_TO_HEAD(ht)						        \
-	ZEND_ASSERT(!HT_IS_PACKED(ht));						        \
-	do {												        \
-		Bucket tmp = (ht)->arData[(ht)->nNumUsed-1];				\
-		memmove((ht)->arData + 1, (ht)->arData,					\
-			sizeof(Bucket) * ((ht)->nNumUsed - 1));				\
-		(ht)->arData[0] = tmp;									\
-		zend_hash_rehash(ht);						        	\
-	} while (0)
-
 static Bucket *spl_find_registered_function(const zend_fcall_info_cache *find_fcc) {
 	if (!spl_autoload_functions) {
 		return NULL;
@@ -478,7 +468,11 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_hash_next_index_insert_mem(spl_autoload_functions, &fcc, sizeof(zend_fcall_info_cache));
 	if (prepend && spl_autoload_functions->nNumOfElements > 1) {
 		/* Move the newly created element to the head of the hashtable */
-		HT_MOVE_TAIL_TO_HEAD(spl_autoload_functions);
+		ZEND_ASSERT(!HT_IS_PACKED(spl_autoload_functions));
+		Bucket tmp = spl_autoload_functions->arData[spl_autoload_functions->nNumUsed-1];
+		memmove(spl_autoload_functions->arData + 1, spl_autoload_functions->arData, sizeof(Bucket) * (spl_autoload_functions->nNumUsed - 1));
+		spl_autoload_functions->arData[0] = tmp;
+		zend_hash_rehash(spl_autoload_functions);
 	}
 
 	RETURN_TRUE;
