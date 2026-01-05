@@ -52,6 +52,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
 %precedence T_THROW
+%precedence T_IS
 %precedence PREC_ARROW_FUNCTION
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
@@ -135,6 +136,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_CASE          "'case'"
 %token <ident> T_DEFAULT       "'default'"
 %token <ident> T_MATCH         "'match'"
+%token <ident> T_IS            "'is'"
 %token <ident> T_BREAK         "'break'"
 %token <ident> T_CONTINUE      "'continue'"
 %token <ident> T_GOTO          "'goto'"
@@ -238,7 +240,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
-%token T_PIPE         "'|>'"
+%token T_PIPE            "'|>'"
+%token T_RANGE_EXCLUSIVE "'..<'"
+%token T_RANGE_INCLUSIVE "'..='"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -283,15 +287,21 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> inline_function union_type_element union_type intersection_type
 %type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
-%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list match_arm_cond
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
+%type <ast> pattern atomic_pattern compound_pattern type_pattern scalar_pattern or_pattern and_pattern class_const_pattern
+%type <ast> object_pattern object_pattern_element_list non_empty_object_pattern_element_list
+%type <ast> object_pattern_element binding_pattern
+%type <ast> array_pattern array_pattern_element_list array_pattern_element
+%type <ast> range_pattern range_pattern_element comparison_pattern comparison_pattern_element
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
 %type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
+%type <num> comparison_pattern_op
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -312,7 +322,7 @@ reserved_non_modifiers:
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
-	| T_PROPERTY_C
+	| T_PROPERTY_C | T_IS
 ;
 
 semi_reserved:
@@ -582,6 +592,11 @@ function_name:
 			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
 			$$ = zend_ast_create_zval(&zv);
 		}
+	|	T_IS {
+			zval zv;
+			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
+			$$ = zend_ast_create_zval(&zv);
+		}
 ;
 
 function_declaration_statement:
@@ -747,8 +762,13 @@ match_arm:
 ;
 
 match_arm_cond_list:
-		expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
-	|	match_arm_cond_list ',' expr { $$ = zend_ast_list_add($1, $3); }
+		match_arm_cond { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
+	|	match_arm_cond_list ',' match_arm_cond { $$ = zend_ast_list_add($1, $3); }
+;
+
+match_arm_cond:
+		expr { $$ = $1; }
+	|	T_IS pattern { $$ = zend_ast_create(ZEND_AST_IS, NULL, $2); }
 ;
 
 
@@ -1386,8 +1406,143 @@ expr:
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	match { $$ = $1; }
+	|	expr T_IS pattern { $$ = zend_ast_create(ZEND_AST_IS, $1, $3); }
 ;
 
+pattern:
+		atomic_pattern { $$ = $1; }
+	|	compound_pattern { $$ = $1; }
+;
+
+atomic_pattern:
+		scalar_pattern { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $1); }
+	|	'^' T_VARIABLE { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, zend_ast_create(ZEND_AST_VAR, $2)); }
+	|	'^' constant { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $2); }
+	|	type_pattern { $$ = $1; }
+	|	object_pattern { $$ = $1; }
+	|	array_pattern { $$ = $1; }
+	|	binding_pattern { $$ = $1; }
+	|	class_const_pattern { $$ = zend_ast_create(ZEND_AST_EXPR_LIKE_PATTERN, $1); }
+	|	comparison_pattern { $$ = $1; }
+	|	'(' pattern ')' {
+			$$ = $2;
+			$$->attr = ZEND_PARENTHESIZED_PATTERN;
+		}
+;
+
+compound_pattern:
+		or_pattern { $$ = $1; }
+	|	and_pattern { $$ = $1; }
+	|	range_pattern { $$ = $1; }
+;
+
+type_pattern:
+		type		{ $$ = zend_ast_create(ZEND_AST_TYPE_PATTERN, $1); }
+	|	'?' type	{ $$ = zend_ast_create(ZEND_AST_TYPE_PATTERN, $2); $2->attr |= ZEND_TYPE_NULLABLE; }
+;
+
+scalar_pattern:
+		T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
+	|	T_CONSTANT_ENCAPSED_STRING { $$ = $1; }
+	|	'"' '"' { $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
+	|	'"' T_ENCAPSED_AND_WHITESPACE '"' { $$ = $2; }
+	|	T_START_HEREDOC T_END_HEREDOC { $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
+	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
+;
+
+object_pattern:
+		class_name '(' object_pattern_element_list ')' { $$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN, $3, $1); }
+;
+
+object_pattern_element_list:
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_OBJECT_PATTERN_ELEMENT_LIST); }
+	|	non_empty_object_pattern_element_list { $$ = $1; }
+	|	non_empty_object_pattern_element_list ',' { $$ = $1; }
+;
+
+non_empty_object_pattern_element_list:
+		object_pattern_element { $$ = zend_ast_create_list(1, ZEND_AST_OBJECT_PATTERN_ELEMENT_LIST, $1); }
+	|	non_empty_object_pattern_element_list ',' object_pattern_element { $$ = zend_ast_list_add($1, $3); }
+;
+
+object_pattern_element:
+		T_STRING ':' pattern { $$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN_ELEMENT, $1, $3); }
+	|	':' binding_pattern {
+			zend_string *name = zend_string_copy(zend_ast_get_str($2->child[0]));
+			$$ = zend_ast_create(ZEND_AST_OBJECT_PATTERN_ELEMENT, zend_ast_create_zval_from_str(name), $2);
+		}
+;
+
+or_pattern:
+		pattern '|' pattern { $$ = zend_ast_merge_lists(ZEND_AST_OR_PATTERN, $1, $3); }
+;
+
+and_pattern:
+		pattern T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG pattern { $$ = zend_ast_merge_lists(ZEND_AST_AND_PATTERN, $1, $3); }
+	|	pattern T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG pattern { $$ = zend_ast_merge_lists(ZEND_AST_AND_PATTERN, $1, $3); }
+;
+
+range_pattern:
+		range_pattern_element T_RANGE_EXCLUSIVE range_pattern_element { $$ = zend_ast_create(ZEND_AST_RANGE_EXCLUSIVE, $1, $3); }
+	|	range_pattern_element T_RANGE_INCLUSIVE range_pattern_element { $$ = zend_ast_create(ZEND_AST_RANGE_INCLUSIVE, $1, $3); }
+;
+
+range_pattern_element:
+		%empty { $$ = NULL; }
+	|	T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
+;
+
+comparison_pattern_op:
+		'<' { $<num>$ = ZEND_COMPARISON_PATTERN_SMALLER; }
+	|	T_IS_SMALLER_OR_EQUAL { $<num>$ = ZEND_COMPARISON_PATTERN_SMALLER_OR_EQUAL; }
+	|	'>' { $<num>$ = ZEND_COMPARISON_PATTERN_GREATER; }
+	|	T_IS_GREATER_OR_EQUAL { $<num>$ = ZEND_COMPARISON_PATTERN_GREATER_OR_EQUAL; }
+;
+
+comparison_pattern_element:
+		T_LNUMBER { $$ = $1; }
+	|	T_DNUMBER { $$ = $1; }
+;
+
+comparison_pattern:
+	comparison_pattern_op comparison_pattern_element { $$ = zend_ast_create_ex(ZEND_AST_COMPARISON_PATTERN, $1, $2); }
+;
+
+binding_pattern:
+		T_VARIABLE { $$ = zend_ast_create(ZEND_AST_BINDING_PATTERN, $1); }
+;
+
+array_pattern:
+		'[' ']' { $$ = zend_ast_create(ZEND_AST_ARRAY_PATTERN, zend_ast_create_list(0, ZEND_AST_ARRAY_PATTERN_ELEMENT_LIST)); }
+	|	'[' T_ELLIPSIS ']' {
+			$$ = zend_ast_create_ex(
+				ZEND_AST_ARRAY_PATTERN,
+				ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE,
+				zend_ast_create_list(0, ZEND_AST_ARRAY_PATTERN_ELEMENT_LIST));
+		}
+	|	'[' array_pattern_element_list possible_comma ']' { $$ = zend_ast_create(ZEND_AST_ARRAY_PATTERN, $2); }
+	|	'[' array_pattern_element_list ',' T_ELLIPSIS ']' {
+			$$ = zend_ast_create_ex(ZEND_AST_ARRAY_PATTERN, ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE, $2);
+		}
+;
+
+array_pattern_element_list:
+		array_pattern_element { $$ = zend_ast_create_list(1, ZEND_AST_ARRAY_PATTERN_ELEMENT_LIST, $1); }
+	|	array_pattern_element_list ',' array_pattern_element { $$ = zend_ast_list_add($1, $3); }
+;
+
+array_pattern_element:
+		pattern { $$ = zend_ast_create(ZEND_AST_ARRAY_PATTERN_ELEMENT, NULL, $1); }
+	|	scalar_pattern T_DOUBLE_ARROW pattern
+			 { $$ = zend_ast_create(ZEND_AST_ARRAY_PATTERN_ELEMENT, $1, $3); }
+;
+
+class_const_pattern:
+		class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
+;
 
 inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type

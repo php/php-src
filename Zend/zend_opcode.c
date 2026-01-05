@@ -606,6 +606,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zval *end = literal + op_array->last_literal;
 	 	while (literal < end) {
 			zval_ptr_dtor_nogc(literal);
+			if (UNEXPECTED(Z_TYPE_P(literal) == IS_TYPE)) {
+				zend_type_release(*(zend_type*)Z_PTR_P(literal), 1);
+			}
 			literal++;
 		}
 		if (ZEND_USE_ABS_CONST_ADDR
@@ -911,7 +914,9 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP
-	 || opline->opcode == ZEND_EXT_STMT) {
+	 || opline->opcode == ZEND_EXT_STMT
+	 || opline->opcode == ZEND_HAS_TYPE
+	 || opline->opcode == ZEND_IS_NUMERIC) {
 		return true;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R

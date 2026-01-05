@@ -633,6 +633,7 @@ struct _zend_ast_ref {
 #define IS_PTR						13
 #define IS_ALIAS_PTR				14
 #define _IS_ERROR					15
+#define IS_TYPE						16
 
 /* used for casts */
 #define _IS_BOOL					18

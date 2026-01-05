@@ -131,6 +131,7 @@ void init_executor(void) /* {{{ */
 
 	ZVAL_NULL(&EG(uninitialized_zval));
 	ZVAL_ERROR(&EG(error_zval));
+	ZVAL_UNDEF(&EG(undef_zval));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);

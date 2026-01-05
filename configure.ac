@@ -418,6 +418,7 @@ AC_CHECK_HEADERS(m4_normalize([
   nmmintrin.h
   wmmintrin.h
   immintrin.h
+  stdbit.h
 ]),,, [dnl
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -433,6 +434,9 @@ AC_CHECK_HEADERS(m4_normalize([
 #endif
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
+#endif
+#ifdef HAVE_STDBIT_H
+#include <stdbit.h>
 #endif
 ])
 
@@ -587,6 +591,7 @@ AC_CHECK_FUNCS(m4_normalize([
   statfs
   statvfs
   std_syslog
+  stdc_bit_ceil_ui
   strcasecmp
   strptime
   strtok_r

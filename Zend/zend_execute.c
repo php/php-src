@@ -1103,6 +1103,7 @@ static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
 
 	zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 	if (!called_scope) {
+		zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
 		return 0;
 	}
 	return instanceof_function(Z_OBJCE_P(zv), called_scope);
@@ -1124,7 +1125,7 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_type(
 		}
 	} else {
 		ce = zend_fetch_class(name,
-			ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+			ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT | ZEND_FETCH_CLASS_EXCEPTION);
 		if (UNEXPECTED(!ce)) {
 			return NULL;
 		}
@@ -1229,6 +1230,11 @@ static zend_always_inline bool zend_check_type(
 	}
 
 	return zend_check_type_slow(type, arg, ref, is_return_type, is_internal);
+}
+
+ZEND_API bool zend_check_type_ex(const zend_type *type, zval *arg, zend_class_entry *scope, bool is_return_type, bool is_internal)
+{
+	return zend_check_type(type, arg, scope, is_return_type, is_internal);
 }
 
 ZEND_API bool zend_check_user_type_slow(
@@ -2818,8 +2824,10 @@ num_undef:
 					zend_undefined_offset(hval);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_UNSET:
-				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_IS:
+					retval = &EG(undef_zval);
 					break;
 				case BP_VAR_RW:
 					retval = zend_undefined_offset_write(ht, hval);
@@ -2844,8 +2852,10 @@ str_index:
 						zend_undefined_index(offset_key);
 						ZEND_FALLTHROUGH;
 					case BP_VAR_UNSET:
-					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_IS:
+						retval = &EG(undef_zval);
 						break;
 					case BP_VAR_RW:
 						retval = zend_undefined_index_write(ht, offset_key);

@@ -2966,3 +2966,31 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 
 	return ast;
 }
+
+zend_ast *zend_ast_merge_lists(zend_ast_kind kind, zend_ast *lhs, zend_ast *rhs)
+{
+	if (lhs->kind == kind && rhs->kind != kind) {
+		return zend_ast_list_add(lhs, rhs);
+	}
+
+	uint32_t lhs_count = lhs->kind == kind ? zend_ast_get_list(lhs)->children : 1;
+	uint32_t rhs_count = rhs->kind == kind ? zend_ast_get_list(rhs)->children : 1;
+	uint32_t count = lhs_count + rhs_count;
+	uint32_t size = stdc_bit_ceil_ui(count);
+	if (size < 4) size = 4;
+
+	zend_ast *ast = zend_ast_alloc(zend_ast_list_size(size));
+	zend_ast_list *list = (zend_ast_list *) ast;
+	list->kind = kind;
+	list->lineno = lhs->lineno;
+	list->attr = 0;
+	list->children = count;
+
+	zend_ast **lhs_elements = lhs->kind == kind ? &zend_ast_get_list(lhs)->child[0] : &lhs;
+	memcpy(&list->child[0], lhs_elements, lhs_count * sizeof(zend_ast *));
+
+	zend_ast **rhs_elements = rhs->kind == kind ? &zend_ast_get_list(rhs)->child[0] : &rhs;
+	memcpy(&list->child[lhs_count], rhs_elements, rhs_count * sizeof(zend_ast *));
+
+	return ast;
+}

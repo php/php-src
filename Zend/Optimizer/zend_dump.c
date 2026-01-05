@@ -90,6 +90,13 @@ void zend_dump_const(const zval *zv)
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");
 			break;
+		case IS_TYPE: {
+			zend_type *type = Z_PTR_P(zv);
+			zend_string *type_str = zend_type_to_string(*type);
+			fprintf(stderr, " type(%s)", ZSTR_VAL(type_str));
+			zend_string_release(type_str);
+			break;
+		}
 		default:
 			fprintf(stderr, " zval(type=%d)", Z_TYPE_P(zv));
 			break;

@@ -276,7 +276,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		for (uint32_t i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].num_related) {
 				/* unset literal */
-				zval_ptr_dtor_nogc(&op_array->literals[i]);
+				if (Z_TYPE(op_array->literals[i]) == IS_TYPE) {
+					zend_type_release(*(zend_type*)Z_PTR_P(&op_array->literals[i]), false);
+				} else {
+					zval_ptr_dtor_nogc(&op_array->literals[i]);
+				}
 				continue;
 			}
 			switch (Z_TYPE(op_array->literals[i])) {

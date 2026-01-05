@@ -1235,6 +1235,31 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			ssa_op++;
 			SET_RESULT_BOT(op1);
 			break;
+		case ZEND_HAS_TYPE: {
+			zend_ssa *ssa = ctx->scdf.ssa;
+			zend_ssa_var_info *info = &ssa->var_info[ssa_op->result_def];
+			if (info->type == MAY_BE_TRUE) {
+				ZVAL_TRUE(&zv);
+				SET_RESULT(result, &zv);
+				return;
+			} else if (info->type == MAY_BE_FALSE) {
+				ZVAL_FALSE(&zv);
+				SET_RESULT(result, &zv);
+				return;
+			}
+
+			if (!IS_BOT(op1)) {
+				SKIP_IF_TOP(op1);
+				zend_type *type = Z_PTR_P(op2);
+				// FIXME: Abusing internal/return type flags to achieve strict type check
+				ZVAL_BOOL(&zv, zend_check_type_ex(type, op1, NULL, true, true));
+				SET_RESULT(result, &zv);
+				return;
+			}
+
+			SET_RESULT_BOT(result);
+			return;
+		}
 	}
 
 	if ((op1 && IS_BOT(op1)) || (op2 && IS_BOT(op2))) {

@@ -87,6 +87,7 @@ typedef void (*zend_persist_func_t)(zval*);
 
 static void zend_persist_zval(zval *z);
 static void zend_persist_op_array(zval *zv);
+static void zend_persist_type(zend_type *type);
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -282,6 +283,11 @@ static void zend_persist_zval(zval *z)
 			break;
 		case IS_PTR:
 			break;
+		case IS_TYPE: {
+			zend_type *type = zend_shared_memdup_put(Z_PTR_P(z), sizeof(zend_type));
+			zend_persist_type(type);
+			break;
+		}
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
