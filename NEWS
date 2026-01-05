@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
+  . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
+    recursive array references). (alexandre-daubois)
 
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
