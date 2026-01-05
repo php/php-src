@@ -34,7 +34,6 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "main/snprintf.h"
 
 ZEND_TLS zend_string *spl_autoload_extensions;
 ZEND_TLS HashTable *spl_autoload_functions;
@@ -224,21 +223,19 @@ PHP_FUNCTION(spl_classes)
 }
 /* }}} */
 
-static int spl_autoload(zend_string *class_name, zend_string *lc_name, const char *ext, int ext_len) /* {{{ */
+static bool spl_autoload(zend_string *lc_name, const char *ext, size_t ext_len) /* {{{ */
 {
 	zend_string *class_file;
 	zval dummy;
 	zend_file_handle file_handle;
-	zend_op_array *new_op_array;
 	zval result;
-	int ret;
 
-	class_file = zend_strpprintf(0, "%s%.*s", ZSTR_VAL(lc_name), ext_len, ext);
+	class_file = zend_string_concat2(ZSTR_VAL(lc_name), ZSTR_LEN(lc_name), ext, ext_len);
 
 #if DEFAULT_SLASH != '\\'
 	{
 		char *ptr = ZSTR_VAL(class_file);
-		char *end = ptr + ZSTR_LEN(class_file);
+		const char *end = ptr + ZSTR_LEN(class_file);
 
 		while ((ptr = memchr(ptr, '\\', (end - ptr))) != NULL) {
 			*ptr = DEFAULT_SLASH;
@@ -246,22 +243,20 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	}
 #endif
 
+	bool ret = false;
 	zend_stream_init_filename_ex(&file_handle, class_file);
-	ret = php_stream_open_for_zend_ex(&file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE);
-
-	if (ret == SUCCESS) {
+	if (php_stream_open_for_zend_ex(&file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS) {
 		zend_string *opened_path;
 		if (!file_handle.opened_path) {
 			file_handle.opened_path = zend_string_copy(class_file);
 		}
 		opened_path = zend_string_copy(file_handle.opened_path);
 		ZVAL_NULL(&dummy);
+		zend_op_array *new_op_array = NULL;
 		if (zend_hash_add(&EG(included_files), opened_path, &dummy)) {
 			new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
-		} else {
-			new_op_array = NULL;
 		}
-		zend_string_release_ex(opened_path, 0);
+		zend_string_release_ex(opened_path, false);
 		if (new_op_array) {
 			uint32_t orig_jit_trace_num = EG(jit_trace_num);
 
@@ -271,24 +266,20 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
-			if (!EG(exception)) {
-				zval_ptr_dtor(&result);
-			}
+			zval_ptr_dtor(&result);
 
-			zend_destroy_file_handle(&file_handle);
-			zend_string_release(class_file);
-			return zend_hash_exists(EG(class_table), lc_name);
+			ret = zend_hash_exists(EG(class_table), lc_name);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
 	zend_string_release(class_file);
-	return 0;
+	return ret;
 } /* }}} */
 
 /* {{{ Default autoloader implementation */
 PHP_FUNCTION(spl_autoload)
 {
-	int pos_len, pos1_len;
+	size_t pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = NULL;
 
@@ -305,18 +296,18 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = sizeof(SPL_DEFAULT_FILE_EXTENSIONS) - 1;
 	} else {
 		pos = ZSTR_VAL(file_exts);
-		pos_len = (int)ZSTR_LEN(file_exts);
+		pos_len = ZSTR_LEN(file_exts);
 	}
 
 	lc_name = zend_string_tolower(class_name);
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
-			pos1_len = (int)(pos1 - pos);
+			pos1_len = (size_t)(pos1 - pos);
 		} else {
 			pos1_len = pos_len;
 		}
-		if (spl_autoload(class_name, lc_name, pos, pos1_len)) {
+		if (spl_autoload(lc_name, pos, pos1_len)) {
 			break; /* loaded */
 		}
 		pos = pos1 ? pos1 + 1 : NULL;
