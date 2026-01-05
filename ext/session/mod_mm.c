@@ -169,7 +169,7 @@ static void ps_mm_destroy(ps_mm *data)
 
 	g_hash_table_destroy(data->hash);
 	g_mapped_file_unref(data->mm);
-	free(data);
+	efree(data);
 }
 
 PHP_MINIT_FUNCTION(ps_mm)
@@ -180,13 +180,13 @@ PHP_MINIT_FUNCTION(ps_mm)
 	char *ps_mm_path, euid[30];
 	zend_result ret;
 
-	ps_mm_instance = calloc(1, sizeof(*ps_mm_instance));
+	ps_mm_instance = ecalloc(1, sizeof(*ps_mm_instance));
 	if (!ps_mm_instance) {
 		return FAILURE;
 	}
 
 	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
-		free(ps_mm_instance);
+		efree(ps_mm_instance);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
