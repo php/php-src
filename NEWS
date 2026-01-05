@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20767 (build failure with musttail/preserve_none feature
     on macOs). (David Carlier)
 
+- MbString:
+  . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
+    invalid in the encoding). (ndossche)
+
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
