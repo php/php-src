@@ -149,10 +149,6 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 						call_info->named_args = true;
 						break;
 					}
-					if (opline->opcode == ZEND_SEND_PLACEHOLDER
-							&& opline->op1.num == ZEND_PLACEHOLDER_VARIADIC) {
-						break;
-					}
 
 					uint32_t num = opline->op2.num;
 					if (num > 0) {
