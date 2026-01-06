@@ -15,7 +15,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
 
 - Windows:
-  . Fixed compilation with clang (missing intrin.h include)
+  . Fixed compilation with clang (missing intrin.h include).
     (Kévin Dunglas)
 
 15 Jan 2026, PHP 8.4.17
