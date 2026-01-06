@@ -166,11 +166,11 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 		if (!Z_IS_PLACEHOLDER_P(&argv[offset])) {
 			continue;
 		}
-		int n = offset - function->common.num_args;
+		uint32_t n = offset - function->common.num_args;
 		zend_string *orig_name = zp_get_param_name(function, function->common.num_args);
 		zend_string *new_name;
 		do {
-			new_name = zend_strpprintf_unchecked(0, "%S%d", orig_name, n);
+			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
 			if (!zp_name_exists(names, num_names, new_name)) {
 				break;
 			}
@@ -187,13 +187,13 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 		if (Z_IS_PLACEHOLDER_P(&argv[offset]) || Z_ISUNDEF(argv[offset])) {
 			continue;
 		}
-		int n = -1;
+		uint32_t n = 0;
 		zend_string *orig_name = zp_get_param_name(function, MIN(offset, function->common.num_args));
 		zend_string *new_name = zend_string_copy(orig_name);
 		while (zp_name_exists(names, num_names, new_name)) {
 			zend_string_release(new_name);
+			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
 			n++;
-			new_name = zend_strpprintf_unchecked(0, "%S%d", orig_name, n);
 		}
 		names[offset] = new_name;
 		zend_string_release(orig_name);
@@ -201,24 +201,24 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 
 	/* Assign name for $extra_named_params */
 	if (extra_named_params) {
-		int n = 1;
+		uint32_t n = 1;
 		zend_string *new_name = ZSTR_INIT_LITERAL("extra_named_params", 0);
 		while (zp_name_exists(names, num_names, new_name)) {
 			zend_string_release(new_name);
 			n++;
-			new_name = zend_strpprintf(0, "%s%d", "extra_named_params", n);
+			new_name = zend_strpprintf(0, "%s%" PRIu32, "extra_named_params", n);
 		}
 		names[argc + variadic_partial] = new_name;
 	}
 
 	/* Assign name for $fn */
 	if (function->common.fn_flags & ZEND_ACC_CLOSURE) {
-		int n = 1;
+		uint32_t n = 1;
 		zend_string *new_name = ZSTR_INIT_LITERAL("fn", 0);
 		while (zp_name_exists(names, num_names, new_name)) {
 			zend_string_release(new_name);
 			n++;
-			new_name = zend_strpprintf(0, "%s%d", "fn", n);
+			new_name = zend_strpprintf(0, "%s%" PRIu32, "fn", n);
 		}
 		names[argc + variadic_partial + (extra_named_params != NULL)] = new_name;
 	}
@@ -666,7 +666,7 @@ static const zend_known_string_id zp_non_dynamic_call_funcs[] = {
 
 static bool zp_is_non_dynamic_call_func(zend_function *function)
 {
-	for (int i = 0; i < sizeof(zp_non_dynamic_call_funcs) / sizeof(zp_non_dynamic_call_funcs[0]); i++) {
+	for (size_t i = 0; i < sizeof(zp_non_dynamic_call_funcs) / sizeof(zp_non_dynamic_call_funcs[0]); i++) {
 		if (zend_string_equals(function->common.function_name, ZSTR_KNOWN(zp_non_dynamic_call_funcs[i]))) {
 			return true;
 		}
@@ -707,10 +707,10 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	zend_arena *orig_ast_arena = CG(ast_arena);
 	CG(ast_arena) = zend_arena_create(1024 * 4);
 
-	int orig_lineno = CG(zend_lineno);
+	uint32_t orig_lineno = CG(zend_lineno);
 	CG(zend_lineno) = zend_get_executed_lineno();
 
-	int new_argc = argc;
+	uint32_t new_argc = argc;
 
 	if (uses_variadic_placeholder) {
 		new_argc = MAX(new_argc, function->common.num_args);
