@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
     (Jakub Zelenka)
 
+- Windows:
+  . Fixed compilation with clang (missing intrin.h include)
+    (Kévin Dunglas)
+
 15 Jan 2026, PHP 8.4.17
 
 - Core:
