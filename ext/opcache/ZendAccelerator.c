@@ -2175,7 +2175,7 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 			zend_string_addref(copy->function_name);
 			(*copy->refcount)++;
 			/* Reference the copy in op_array->dynamic_func_defs so that it's
-			 * destroyed when op_array is destroy. */
+			 * destroyed when op_array is destroyed. */
 			ZEND_ASSERT(!op_array->dynamic_func_defs && !op_array->num_dynamic_func_defs);
 			op_array->dynamic_func_defs = emalloc(sizeof(zend_op_array*));
 			op_array->dynamic_func_defs[0] = copy;

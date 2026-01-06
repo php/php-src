@@ -35,7 +35,7 @@
  * create a Closure and return it, consuming the stack frame in the process
  * like an internal function call.
  *
- * We create the Closure by generating the relevant AST and compling it to an
+ * We create the Closure by generating the relevant AST and compiling it to an
  * op_array. The op_array is cached in the Opcache SHM and inline caches.
  *
  * This file implements the Closure generation logic
@@ -548,6 +548,7 @@ static zend_ast *zp_compile_forwarding_call(
 			}
 			zend_ast *default_value_ast;
 			if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
+				/* Must dup AST because we are doing to destroy it */
 				default_value_ast = zend_ast_dup(Z_ASTVAL(default_value));
 			} else {
 				default_value_ast = zend_ast_create_zval(&default_value);
@@ -702,6 +703,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		called_scope = Z_CE_P(this_ptr);
 	}
 
+	/* CG(ast_arena) is usually NULL, so we can't just make a snapshot */
 	zend_arena *orig_ast_arena = CG(ast_arena);
 	CG(ast_arena) = zend_arena_create(1024 * 4);
 
@@ -718,7 +720,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	memcpy(tmp, argv, argc * sizeof(zval));
 	argv = tmp;
 
-	/* Compute number of required args and param positions, add implicit
+	/* Compute param positions and number of required args, add implicit
 	 * placeholders.
 	 *
 	 * Parameters are placed in the following order:
