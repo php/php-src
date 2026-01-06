@@ -21,6 +21,9 @@
 
 #include "zend.h"
 #include "zend_portability.h"
+#ifdef ZEND_WIN32
+# include <intrin.h>
+#endif
 #ifdef __APPLE__
 # include <pthread.h>
 #endif
