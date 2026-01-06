@@ -52,6 +52,7 @@ function check_equivalence($tests)
                     '?float' => 100.5 + $i,
                     'string' => (string) (100 + $i),
                     'Point' => new Point,
+                    'mixed' => "mixed($i)",
                     '' => "mixed($i)",
                 };
             }

@@ -44,7 +44,6 @@
 #include "zend_call_stack.h"
 #include "zend_attributes.h"
 #include "Optimizer/zend_func_info.h"
-#include "zend_partial.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -1233,11 +1232,11 @@ static zend_always_inline bool zend_check_type(
 	return zend_check_type_slow(type, arg, ref, is_return_type, is_internal);
 }
 
+/* We can not expose zend_check_type() directly because it's inline and uses static functions */
 ZEND_API bool zend_check_type_ex(
-		const zend_type *type, zval *arg, zend_class_entry *scope,
-		bool is_return_type, bool is_internal)
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
 {
-	return zend_check_type(type, arg, scope, is_return_type, is_internal);
+	return zend_check_type(type, arg, is_return_type, is_internal);
 }
 
 ZEND_API bool zend_check_user_type_slow(

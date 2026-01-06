@@ -4,12 +4,12 @@ PFA RFC examples: "Evaluation order" section
 <?php
 
 function getArg() {
-  print __FUNCTION__ . PHP_EOL;
-  return 'hi';
+    print __FUNCTION__ . PHP_EOL;
+    return 'hi';
 }
 
 function speak(string $who, string $msg) {
-  printf("%s: %s\n", $who, $msg);
+    printf("%s: %s\n", $who, $msg);
 }
 
 $arrow = static fn($who) => speak($who, getArg());

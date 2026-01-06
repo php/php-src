@@ -1,5 +1,5 @@
 --TEST--
-PFA compile errors: can not use unpacking in PFA, including with variadic placeholdres
+PFA compile errors: can not use unpacking in PFA, including with variadic placeholders
 --FILE--
 <?php
 foo(...["foo" => "bar"], ...);

@@ -86,6 +86,7 @@ static bool zend_valid_closure_binding(
 		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
 {
 	zend_function *func = &closure->func;
+	// TODO: rename variable
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0
 		|| (closure->std.extra_flags & ZEND_PARTIAL);
 	if (newthis) {
@@ -271,6 +272,7 @@ static zend_result do_closure_bind(zval *return_value, zval *zclosure, zval *new
 	if (ZEND_CLOSURE_FLAGS(closure) & ZEND_PARTIAL_OF_CLOSURE) {
 		/* Re-bind the inner closure */
 
+		closure = (zend_closure*)Z_OBJ_P(return_value);
 		HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 		ZEND_ASSERT(static_variables->nNumOfElements > 0);
 		zval *inner = &static_variables->arData[0].val;

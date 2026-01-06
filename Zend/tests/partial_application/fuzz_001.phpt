@@ -7,7 +7,7 @@ $closure = function($a, $b) {};
 echo (string) new ReflectionFunction($closure(1, ?));
 ?>
 --EXPECTF--
-Closure [ <user> static function {closure:%s:%d} ] {
+Closure [ <user> function {closure:%s:%d} ] {
   @@ %s 4 - 4
 
   - Bound Variables [2] {

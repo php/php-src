@@ -11,43 +11,43 @@ function foo($a = 1, $b = 2, $c = 3) {
     var_dump($a, $b, $c);
 }
 
-$foo = foo(b: ?);
+$c = foo(b: ?);
 
-echo (string) new ReflectionFunction($foo);
+echo (string) new ReflectionFunction($c);
 
-$foo(new B);
+$c(new B);
 
-$foo = $foo(?);
+$c = $c(?);
 
-echo (string) new ReflectionFunction($foo);
+echo (string) new ReflectionFunction($c);
 
-$foo(new B);
+$c(new B);
 
-$foo = foo(?, ?);
-$foo = $foo(b: ?);
+$c = foo(?, ?);
+$c = $c(b: ?);
 
-echo (string) new ReflectionFunction($foo);
+echo (string) new ReflectionFunction($c);
 
-$foo(new B);
+$c(new B);
 
 function bar($a = 1, $b = 2, ...$c) {
     var_dump($a, $b, $c);
 }
 
-$bar = bar(b: ?, ...);
+$d = bar(b: ?, ...);
 
-echo (string) new ReflectionFunction($bar);
+echo (string) new ReflectionFunction($d);
 
-$bar(new B, new A, new C);
+$d(new B, new A, new C);
 
 try {
-    $bar = bar(?, a: ?);
+    $d = bar(?, a: ?);
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $bar = bar(c: ?, ...);
+    $d = bar(c: ?, ...);
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }

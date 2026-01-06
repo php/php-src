@@ -4,7 +4,6 @@ PFA magic null ptr deref in arginfo
 <?php
 class Foo {
     function __call($name, $args) {
-        var_dump($args);
     }
 }
 $foo = new Foo;
@@ -18,13 +17,13 @@ object(Closure)#%d (%d) {
   ["file"]=>
   string(%d) "%smagic_005.php"
   ["line"]=>
-  int(8)
+  int(7)
   ["this"]=>
   object(Foo)#%d (0) {
   }
   ["parameter"]=>
   array(1) {
-    ["$args0"]=>
+    ["$arguments0"]=>
     string(10) "<required>"
   }
 }

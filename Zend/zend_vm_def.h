@@ -5723,7 +5723,7 @@ ZEND_VM_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(213, ZEND_SEND_PLACEHOLDER, UNUSED, CONST|UNUSED)
+ZEND_VM_HANDLER(213, ZEND_SEND_PLACEHOLDER, UNUSED, CONST|UNUSED|NUM)
 {
 	zval *arg;
 
@@ -8942,9 +8942,10 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
 		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
-			const char *param_name = get_function_arg_name(fbc, argno);
 			zend_string *expected = zend_type_to_string(arginfo->type);
-			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_argument_type_error_ex(fbc, argno,
+					"must be of type %s, %s given",
+					ZSTR_VAL(expected), zend_zval_value_name(value));
 			zend_string_release(expected);
 		}
 	}
@@ -9874,7 +9875,7 @@ ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NU
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		&EX(func)->op_array, opline, cache_slot,

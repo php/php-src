@@ -4,6 +4,10 @@ PFA preloading
 opcache.enable=1
 opcache.enable_cli=1
 opcache.preload={PWD}/preloading.inc
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --FILE--
 <?php
 

@@ -600,7 +600,7 @@ static zend_op_array *zend_compile_ast_internal(int type)
 	zend_oparray_context original_oparray_context;
 	zend_op_array *original_active_op_array = CG(active_op_array);
 
-	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
+	zend_op_array *op_array = emalloc(sizeof(*op_array));
 	init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 	CG(active_op_array) = op_array;
 
@@ -685,7 +685,7 @@ ZEND_API zend_op_array *zend_compile_ast(
 {
 	zend_string *original_compiled_filename = CG(compiled_filename);
 	bool original_in_compilation = CG(in_compilation);
-	CG(in_compilation) = 1;
+	CG(in_compilation) = true;
 	CG(ast) = ast;
 
 	zend_set_compiled_filename(filename);

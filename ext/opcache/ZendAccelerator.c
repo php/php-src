@@ -2034,7 +2034,7 @@ static char *zend_accel_uintptr_hex(char *dest, uintptr_t n)
 static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 		const zend_function *called_function)
 {
-	size_t key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
+	const size_t key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
 	zend_string *key = zend_string_alloc(key_len, 0);
 	char *dest = ZSTR_VAL(key);
 
@@ -2042,7 +2042,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_opline);
 	*dest++ = ':';
 
-	void *ptr;
+	const void *ptr;
 	if ((called_function->common.fn_flags & ZEND_ACC_CLOSURE)
 			&& called_function->type == ZEND_USER_FUNCTION) {
 		/* Can not use 'called_function' as part of the key, as it's an inner
@@ -2051,7 +2051,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 		 * in this case. */
 		ptr = called_function->op_array.opcodes;
 	} else {
-		ptr = (void*) called_function;
+		ptr = called_function;
 	}
 	dest = zend_accel_uintptr_hex(dest, (uintptr_t)ptr);
 
@@ -2063,7 +2063,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	return key;
 }
 
-zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
+const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
 		const zend_op *declaring_opline, const zend_function *called_function)
 {
 	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
@@ -2167,7 +2167,7 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 			zend_string_addref(copy->function_name);
 			(*copy->refcount)++;
 			/* Reference the copy in op_array->dynamic_func_defs so that it's
-			 * destroyed when op_array is destroy. */
+			 * destroyed when op_array is destroyed. */
 			ZEND_ASSERT(!op_array->dynamic_func_defs && !op_array->num_dynamic_func_defs);
 			op_array->dynamic_func_defs = emalloc(sizeof(zend_op_array*));
 			op_array->dynamic_func_defs[0] = copy;
@@ -2189,8 +2189,8 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 	new_persistent_script->script.filename = key;
 
 	if (ZCG(accel_directives).record_warnings) {
-		new_persistent_script->num_warnings = EG(num_errors);
-		new_persistent_script->warnings = EG(errors);
+		new_persistent_script->num_warnings = EG(errors).size;
+		new_persistent_script->warnings = EG(errors).errors;
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();

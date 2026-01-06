@@ -306,6 +306,7 @@ static uint8_t zend_user_opcodes[256] = {0,
 };
 
 #include "Zend/zend_vm_opcodes.h"
+#include "Zend/zend_partial.h"
 
 #define SPEC_START_MASK        0x0000ffff
 #define SPEC_EXTRA_MASK        0xfffc0000
@@ -4284,7 +4285,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		&EX(func)->op_array, opline, cache_slot,
@@ -4467,7 +4468,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		&EX(func)->op_array, opline, cache_slot,
@@ -6248,9 +6249,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_T
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
 		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
-			const char *param_name = get_function_arg_name(fbc, argno);
 			zend_string *expected = zend_type_to_string(arginfo->type);
-			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_argument_type_error_ex(fbc, argno,
+					"must be of type %s, %s given",
+					ZSTR_VAL(expected), zend_zval_value_name(value));
 			zend_string_release(expected);
 		}
 	}
@@ -57084,7 +57086,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		&EX(func)->op_array, opline, cache_slot,
@@ -57267,7 +57269,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		&EX(func)->op_array, opline, cache_slot,
@@ -59048,9 +59050,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_TYPE_A
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
 		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
-			const char *param_name = get_function_arg_name(fbc, argno);
 			zend_string *expected = zend_type_to_string(arginfo->type);
-			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_argument_type_error_ex(fbc, argno,
+					"must be of type %s, %s given",
+					ZSTR_VAL(expected), zend_zval_value_name(value));
 			zend_string_release(expected);
 		}
 	}

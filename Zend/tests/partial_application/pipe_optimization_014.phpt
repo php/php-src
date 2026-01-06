@@ -1,5 +1,5 @@
 --TEST--
-PFA pipe optimization: PFA with only one placeholder can be optimized (named)
+PFA pipe optimization: PFA with unknown named parameter can be optimized
 --EXTENSIONS--
 opcache
 --INI--
@@ -17,30 +17,45 @@ if (time() > 0) {
     }
 }
 
-2 |> foo(1, c: ?);
+try {
+    2 |> foo(1, unknown: ?);
+} catch (Error $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=11, args=0, vars=0, tmps=%d)
+     ; (lines=20, args=0, vars=1, tmps=%d)
      ; (after optimizer)
-     ; %spipe_optimization_006.php:1-12
+     ; %s:1-16
 0000 INIT_FCALL 0 %d string("time")
-0001 T1 = DO_ICALL
-0002 T0 = IS_SMALLER int(0) T1
-0003 JMPZ T0 0005
+0001 T2 = DO_ICALL
+0002 T1 = IS_SMALLER int(0) T2
+0003 JMPZ T1 0005
 0004 DECLARE_FUNCTION string("foo") 0
 0005 INIT_FCALL_BY_NAME 1 string("foo")
 0006 SEND_VAL_EX int(1) 1
-0007 SEND_VAL_EX int(2) string("c")
+0007 SEND_VAL_EX int(2) string("unknown")
 0008 CHECK_UNDEF_ARGS
 0009 DO_FCALL_BY_NAME
 0010 RETURN int(1)
+0011 CV0($e) = CATCH string("Error")
+0012 T1 = FETCH_CLASS_NAME CV0($e)
+0013 ECHO T1
+0014 ECHO string(": ")
+0015 INIT_METHOD_CALL 0 CV0($e) string("getMessage")
+0016 T1 = DO_FCALL
+0017 ECHO T1
+0018 ECHO string("\n")
+0019 RETURN int(1)
+EXCEPTION TABLE:
+     0005, 0011, -, -
 
 foo:
      ; (lines=9, args=3, vars=3, tmps=%d)
      ; (after optimizer)
-     ; %spipe_optimization_006.php:4-6
+     ; %s:4-6
 0000 CV0($a) = RECV 1
 0001 CV1($b) = RECV_INIT 2 null
 0002 CV2($c) = RECV_INIT 3 null
@@ -50,6 +65,4 @@ foo:
 0006 SEND_VAR CV2($c) 3
 0007 DO_ICALL
 0008 RETURN null
-int(1)
-NULL
-int(2)
+Error: Unknown named parameter $unknown
