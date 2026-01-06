@@ -798,7 +798,6 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		+ ((function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 	zend_string **param_names = zend_arena_calloc(&CG(ast_arena),
 			num_names, sizeof(zend_string*));
-	memset(param_names, 0, sizeof(zend_string*) * num_names);
 	zp_assign_names(param_names, num_names, argc, argv, function,
 			uses_variadic_placeholder, extra_named_params);
 
