@@ -195,6 +195,8 @@ void startup_scanner(void)
 	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
+	/* ensure contextual flag is cleared at startup */
+	SCNG(in_use_declaration) = 0;
 }
 
 static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
@@ -1740,7 +1742,18 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_IN_SCRIPTING>"use" {
+	/* Enter a contextual "in use" mode until the statement terminator is seen. */
+	SCNG(in_use_declaration) = 1;
 	RETURN_TOKEN_WITH_IDENT(T_USE);
+}
+
+<ST_IN_SCRIPTING>"from" {
+	/* Emit T_FROM only when we are inside a `use` declaration; otherwise treat as an identifier. */
+	if (SCNG(in_use_declaration)) {
+		RETURN_TOKEN_WITH_IDENT(T_FROM);
+	} else {
+		RETURN_TOKEN_WITH_STR(T_STRING, 0);
+	}
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
@@ -1967,6 +1980,10 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_IN_SCRIPTING>{TOKENS} {
+	/* Clear contextual `in_use_declaration` at statement terminator. */
+	if (yytext[0] == ';') {
+		SCNG(in_use_declaration) = 0;
+	}
 	RETURN_TOKEN(yytext[0]);
 }
 
@@ -2528,6 +2545,8 @@ inline_char_handler:
 	if (yytext[yyleng-1] != '>') {
 		CG(increment_lineno) = 1;
 	}
+	/* implicit statement terminator at php-end tag: clear use flag */
+	SCNG(in_use_declaration) = 0;
 	if (PARSER_MODE()) {
 		RETURN_TOKEN(';');  /* implicit ';' at php-end tag */
 	}
