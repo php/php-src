@@ -21,4 +21,7 @@ ob_start(new Test, 1);
 echo "trigger bug";
 ?>
 --EXPECTF--
+%r(Notice: ob_start\(\): Failed to create buffer in [^\r\n]+ on line \d+\r?\n(\r?\n)?)+%r
+Notice: ob_start(): Failed to create buffer in %s on line %d
+
 Fatal error: ob_start(): Cannot use output buffering in output buffering display handlers in %s on line %d
