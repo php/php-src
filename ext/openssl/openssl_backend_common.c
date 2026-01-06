@@ -1637,6 +1637,13 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 {
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
+
+	#if defined(EVP_CIPH_FLAG_AEAD_CIPHER)
+		if (EVP_CIPHER_flags(cipher_type) & EVP_CIPH_FLAG_AEAD_CIPHER) {
+			php_openssl_set_aead_flags(mode);
+		}
+	#endif
+
 	switch (cipher_mode) {
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
