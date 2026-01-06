@@ -7,7 +7,7 @@ function foo($a, &$b) {
     $b = 2;
 }
 
-$a = [];
+$a = ['this will be changed'];
 $b = &$a[0];
 
 $foo = foo(1, ?);

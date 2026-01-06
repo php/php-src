@@ -22,12 +22,12 @@ if (time() > 0) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=10, args=0, vars=0, tmps=2)
+     ; (lines=10, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_002.php:1-12
 0000 INIT_FCALL 0 %d string("time")
-0001 V1 = DO_ICALL
-0002 T0 = IS_SMALLER int(0) V1
+0001 T1 = DO_ICALL
+0002 T0 = IS_SMALLER int(0) T1
 0003 JMPZ T0 0005
 0004 DECLARE_FUNCTION string("foo") 0
 0005 INIT_FCALL_BY_NAME 2 string("foo")
@@ -37,7 +37,7 @@ $_main:
 0009 RETURN int(1)
 
 foo:
-     ; (lines=7, args=2, vars=2, tmps=0)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_002.php:4-6
 0000 CV0($a) = RECV 1

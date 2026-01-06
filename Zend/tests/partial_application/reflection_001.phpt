@@ -1,5 +1,5 @@
 --TEST--
-PFA reflection: required parameters
+PFA reflection: optional parameters
 --FILE--
 <?php
 function foo($a = 1, $b = 5, $c = 10) {

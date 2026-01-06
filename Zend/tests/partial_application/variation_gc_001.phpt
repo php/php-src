@@ -5,9 +5,9 @@ PFA variation: GC (001)
 #[AllowDynamicProperties]
 class Foo {
 
-  public function __construct($a) {
-    $this->method = self::__construct(new stdClass, ...);
-  }
+    public function __construct($a) {
+        $this->method = self::__construct(new stdClass, ...);
+    }
 }
 
 $foo = new Foo(new stdClass);

@@ -1,5 +1,5 @@
 --TEST--
-PFA returns by val if the actual function does
+PFA receives by val if the actual function does
 --FILE--
 <?php
 

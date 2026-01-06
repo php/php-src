@@ -24,7 +24,7 @@ $closure = $bar->method(?, new Param);
 
 $closure(1);
 
-$closure->call(new Foo(), 10);
+$closure->call(/* newThis: */ new Foo(), 10);
 ?>
 --EXPECT--
 Bar: 1, Param

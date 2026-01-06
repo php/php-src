@@ -41,6 +41,6 @@ foreach (['_func_get_arg', '_compact', '_extract', '_func_get_args', '_func_num_
 Error: Cannot call func_get_arg() dynamically
 Error: Cannot call compact() dynamically
 Error: Cannot call extract() dynamically
-ArgumentCountError: Partial application of func_get_args() expects at most 0 arguments, 1 given
-ArgumentCountError: Partial application of func_num_args() expects at most 0 arguments, 1 given
-ArgumentCountError: Partial application of get_defined_vars() expects at most 0 arguments, 1 given
+Error: Cannot call func_get_args() dynamically
+Error: Cannot call func_num_args() dynamically
+Error: Cannot call get_defined_vars() dynamically

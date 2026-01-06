@@ -10,14 +10,13 @@ $closure = function ($a) {
     return $var;
 };
 
-$closure(new stdClass);
+var_dump($closure(new stdClass));
 
 $foo = $closure(new stdClass, ...);
 $closure = null;
 
-if ($foo() == 2) {
-    echo "OK";
-}
+var_dump($foo());
 ?>
 --EXPECT--
-OK
+int(1)
+int(2)

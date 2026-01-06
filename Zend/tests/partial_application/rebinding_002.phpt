@@ -25,7 +25,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo "# Function cannot be refound to a different scope:\n";
+echo "# Function cannot be rebound to a different scope:\n";
 try {
     $g->bindTo($c, SubClass::class)(1);
 } catch (Error $e) {
@@ -39,7 +39,7 @@ string(1) "C"
 
 Warning: Cannot rebind scope of closure created from method, this will be an error in PHP 9 in %s on line %d
 Value of type null is not callable
-# Function cannot be refound to a different scope:
+# Function cannot be rebound to a different scope:
 
 Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 Value of type null is not callable

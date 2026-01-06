@@ -104,6 +104,8 @@ static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type);
 
+static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg);
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 zend_never_inline static void zend_stack_limit_error(void)
 {
@@ -5251,42 +5253,21 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	}
 
 	zend_ast *callback = args->child[0];
-
-	/* Bail out if the callback is not a FCC/PFA. */
-	zend_ast *args_ast;
-	switch (callback->kind) {
-		case ZEND_AST_CALL:
-		case ZEND_AST_STATIC_CALL:
-			args_ast = zend_ast_call_get_args(callback);
-			if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
-				return FAILURE;
-			}
-
-			break;
-		default:
-			return FAILURE;
-	}
-
-	/* Bail out if the callback is assert() due to the AST stringification logic
-	 * breaking for the generated call.
-	 */
-	if (callback->kind == ZEND_AST_CALL
-	 && callback->child[0]->kind == ZEND_AST_ZVAL
-	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
-	 && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
-		return FAILURE;
-	}
-
-	zend_ast_list *callback_args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
-	if (callback_args->children != 1 || callback_args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-		/* Full PFA is not yet implemented, will fail in zend_compile_call_common(). */
+	if (callback->kind != ZEND_AST_CALL && callback->kind != ZEND_AST_STATIC_CALL) {
 		return FAILURE;
 	}
 
 	znode value;
 	value.op_type = IS_TMP_VAR;
 	value.u.op.var = get_temporary_variable();
-	zend_ast *call_args = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&value));
+
+	zend_ast *call_args = zend_partial_apply(callback,
+			zend_ast_create_znode(&value));
+	if (!call_args) {
+		CG(active_op_array)->T--;
+		/* The callback is not a FCC/PFA, or is not optimizable */
+		return FAILURE;
+	}
 
 	zend_op *opline;
 
@@ -6934,17 +6915,17 @@ static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg)
 			if (first_placeholder == NULL) {
 				first_placeholder = arg;
 			} else {
-				/* A PFA with multiple placeholders is unexpected in is this
+				/* A PFA with multiple placeholders is unexpected in this
 				 * context, and will usually error due to a missing argument,
 				 * so we don't optimize those. */
 				return NULL;
 			}
 			if (arg->attr == ZEND_PLACEHOLDER_VARIADIC && uses_named_args) {
-				/* PFAs with both a variadic placeholder and named args can not
-				 * be optimized because the named arg may resolve to the
-				 * position of the placeholder: f(..., name: $v).
-				 * Arg placeholders ('?') are safe, as named args are not
-				 * allowed to override them. */
+				/* A PFA with both a variadic placeholder and named args can not
+				 * be optimized because this would result in a positional arg
+				 * after a named arg: f(name: $v, ...) -> f(name: $v, pipe_arg).
+				 * Arg placeholders ('?') are safe since they are not allowed
+				 * after named args. */
 				return NULL;
 			}
 		}
@@ -7017,7 +6998,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast, uint32_t type)
 						callable_ast->child[0], callable_ast->child[1],
 						pfa_arg_list_ast);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default:
+				ZEND_UNREACHABLE();
 		}
 	/* Turn $foo |> $expr into ($expr)($foo) */
 	} else {
