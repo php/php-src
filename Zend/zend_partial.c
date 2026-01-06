@@ -224,14 +224,21 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 	}
 }
 
-static bool zp_is_single_may_be_type(uint32_t type_mask)
+static bool zp_is_power_of_two(uint32_t x)
 {
-	return ((type_mask > 0) && (type_mask & (type_mask - 1)) == 0)
+	return (x > 0) && !(x & (x - 1));
+}
+
+static bool zp_is_simple_type(uint32_t type_mask)
+{
+	ZEND_ASSERT(!(type_mask & ~_ZEND_TYPE_MAY_BE_MASK));
+
+	return zp_is_power_of_two(type_mask)
 		|| type_mask == MAY_BE_BOOL
 		|| type_mask == MAY_BE_ANY;
 }
 
-static zend_ast *zp_single_may_be_type_to_ast(uint32_t type)
+static zend_ast *zp_simple_type_to_ast(uint32_t type)
 {
 	zend_string *name;
 
@@ -305,7 +312,7 @@ static zend_ast *zp_type_to_ast(const zend_type type)
 
 	if (ZEND_TYPE_IS_UNION(type)
 			|| (ZEND_TYPE_IS_COMPLEX(type) && ZEND_TYPE_PURE_MASK(type))
-			|| (ZEND_TYPE_PURE_MASK(type) && !zp_is_single_may_be_type(ZEND_TYPE_PURE_MASK(type)))) {
+			|| (ZEND_TYPE_PURE_MASK(type) && !zp_is_simple_type(ZEND_TYPE_PURE_MASK(type)))) {
 		zend_ast *type_ast = zend_ast_create_list(0, ZEND_AST_TYPE_UNION);
 		if (ZEND_TYPE_HAS_LIST(type)) {
 			const zend_type *type_ptr;
@@ -316,33 +323,34 @@ static zend_ast *zp_type_to_ast(const zend_type type)
 			zend_ast *name_ast = zp_type_name_to_ast(
 					zend_string_copy(ZEND_TYPE_NAME(type)));
 			type_ast = zend_ast_list_add(type_ast, name_ast);
-		} else if (ZEND_TYPE_IS_COMPLEX(type)) {
-			ZEND_UNREACHABLE();
+		} else {
+			ZEND_ASSERT(!ZEND_TYPE_IS_COMPLEX(type));
 		}
 		uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 		if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
-			type_ast = zend_ast_list_add(type_ast, zp_single_may_be_type_to_ast(MAY_BE_BOOL));
+			type_ast = zend_ast_list_add(type_ast, zp_simple_type_to_ast(MAY_BE_BOOL));
 			type_mask &= ~MAY_BE_BOOL;
 		}
 		for (uint32_t may_be_type = 1; may_be_type < _ZEND_TYPE_MAY_BE_MASK; may_be_type <<= 1) {
 			if (type_mask & may_be_type) {
-				type_ast = zend_ast_list_add(type_ast, zp_single_may_be_type_to_ast(may_be_type));
+				type_ast = zend_ast_list_add(type_ast, zp_simple_type_to_ast(may_be_type));
 			}
 		}
 		return type_ast;
 	}
 
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
+		ZEND_ASSERT(!ZEND_TYPE_PURE_MASK(type));
 		zend_ast *type_ast = zend_ast_create_list(0, ZEND_AST_TYPE_INTERSECTION);
 		const zend_type *type_ptr;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), type_ptr) {
 			type_ast = zend_ast_list_add(type_ast, zp_type_to_ast(*type_ptr));
 		} ZEND_TYPE_LIST_FOREACH_END();
-		ZEND_ASSERT(!ZEND_TYPE_PURE_MASK(type));
 		return type_ast;
 	}
 
 	if (ZEND_TYPE_HAS_NAME(type)) {
+		ZEND_ASSERT(!ZEND_TYPE_PURE_MASK(type));
 		zend_ast *type_ast = zp_type_name_to_ast(
 				zend_string_copy(ZEND_TYPE_NAME(type)));
 		return type_ast;
@@ -351,9 +359,9 @@ static zend_ast *zp_type_to_ast(const zend_type type)
 	ZEND_ASSERT(!ZEND_TYPE_IS_COMPLEX(type));
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-	ZEND_ASSERT(zp_is_single_may_be_type(type_mask));
+	ZEND_ASSERT(zp_is_simple_type(type_mask));
 
-	return zp_single_may_be_type_to_ast(type_mask);
+	return zp_simple_type_to_ast(type_mask);
 }
 
 /* Can not use zend_argument_error() as the function is not on the stack */
