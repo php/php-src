@@ -580,7 +580,7 @@ const IMAGETYPE_JPX = UNKNOWN;
  * @cvalue IMAGE_FILETYPE_JB2
  */
 const IMAGETYPE_JB2 = UNKNOWN;
-#if (defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB))
+#ifdef PHP_HAVE_ZLIB_LIBRARY
 /**
  * @var int
  * @cvalue IMAGE_FILETYPE_SWC

@@ -1,7 +1,5 @@
 --TEST--
 GetImageSize() for compressed swf files
---EXTENSIONS--
-zlib
 --SKIPIF--
 <?php
 if (!defined("IMAGETYPE_SWC")) {

@@ -383,6 +383,11 @@ AS_VAR_IF([php_cv_func_getifaddrs], [yes],
   [AC_DEFINE([HAVE_GETIFADDRS], [1],
     [Define to 1 if you have the 'getifaddrs' function.])])
 
+dnl Optionally check for zlib (needed for SWC files support in PHP).
+PHP_SETUP_ZLIB([], [AC_DEFINE([PHP_HAVE_ZLIB_LIBRARY], [1],
+  [Define to 1 if the system has the zlib library.])],
+  [:])
+
 dnl
 dnl Setup extension sources
 dnl

@@ -21,6 +21,13 @@ AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1, "Define to 1 if PHP uses its own crypt_r, an
 
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 
+// Optionally check for zlib (needed for SWC files support in PHP).
+if (SETUP_ZLIB_LIB(null, PHP_ZLIB) &&
+	CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_STANDARD", "..\\zlib;" + php_usual_include_suspects)
+) {
+	AC_DEFINE("PHP_HAVE_ZLIB_LIBRARY", 1, "ZLIB support");
+}
+
 ADD_FLAG("LIBS_STANDARD", "iphlpapi.lib");
 
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \

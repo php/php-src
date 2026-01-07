@@ -28,7 +28,7 @@
 #endif
 #include "php_image.h"
 
-#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
+#ifdef PHP_HAVE_ZLIB_LIBRARY
 #include "zlib.h"
 #endif
 
@@ -154,7 +154,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 }
 /* }}} */
 
-#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
+#ifdef PHP_HAVE_ZLIB_LIBRARY
 /* {{{ php_handle_swc */
 static struct php_gfxinfo *php_handle_swc(php_stream * stream)
 {
@@ -1503,10 +1503,10 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_SWC:
 			/* TODO: with the new php_image_register_handler() APIs, this restriction could be solved */
-#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
+#ifdef PHP_HAVE_ZLIB_LIBRARY
 			result = php_handle_swc(stream);
 #else
-			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");
+			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but PHP was compiled without zlib support");
 #endif
 			break;
 		case IMAGE_FILETYPE_PSD:

@@ -1,7 +1,5 @@
 --TEST--
 Test image_type_to_mime_type() function : usage variations - Passing IMAGETYPE_ICO and IMAGETYPE_SWC
---EXTENSIONS--
-zlib
 --SKIPIF--
 <?php
 if (!defined("IMAGETYPE_SWC")) {

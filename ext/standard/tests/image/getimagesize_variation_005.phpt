@@ -1,7 +1,5 @@
 --TEST--
 Test getimagesize() function : basic functionality for shockwave-flash
---EXTENSIONS--
-zlib
 --SKIPIF--
 <?php
 if (!defined("IMAGETYPE_SWC")) {
