@@ -1464,7 +1464,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast)
 {
 	ZEND_ASSERT(ast != NULL);
 
-	void *buf = zend_ast_alloc(zend_ast_tree_size(ast));
+	zend_ast *buf = zend_ast_alloc(zend_ast_tree_size(ast));
 	zend_ast_tree_copy(ast, buf);
 
 	return buf;
