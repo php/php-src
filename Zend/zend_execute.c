@@ -45,7 +45,6 @@
 #include "zend_call_stack.h"
 #include "zend_attributes.h"
 #include "Optimizer/zend_func_info.h"
-#include "zend_partial.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
