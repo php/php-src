@@ -1139,19 +1139,22 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		{
 			zend_function *fptr;
 			zend_class_entry *called_scope = NULL;
+
+			zend_ast *args_ast = zend_ast_call_get_args(ast);
+			ZEND_ASSERT(args_ast && args_ast->kind == ZEND_AST_CALLABLE_CONVERT);
+
+			zend_ast_fcc *fcc_ast = (zend_ast_fcc*)args_ast;
+
+			zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
+			ZEND_ASSERT(args->children > 0);
+			if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
+				/* TODO: PFAs */
+				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+				return FAILURE;
+			}
+
 			switch (ast->kind) {
 				case ZEND_AST_CALL: {
-					ZEND_ASSERT(ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT);
-					zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast->child[1];
-
-					zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
-					ZEND_ASSERT(args->children > 0);
-					if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-						/* TODO: PFAs */
-						zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-						return FAILURE;
-					}
-
 					fptr = ZEND_MAP_PTR_GET(fcc_ast->fptr);
 
 					if (!fptr) {
@@ -1176,17 +1179,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					break;
 				}
 				case ZEND_AST_STATIC_CALL: {
-					ZEND_ASSERT(ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT);
-					zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast->child[2];
-
-					zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
-					ZEND_ASSERT(args->children > 0);
-					if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-						/* TODO: PFAs */
-						zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-						return FAILURE;
-					}
-
 					zend_class_entry *ce = zend_ast_fetch_class(ast->child[0], scope);
 					if (!ce) {
 						return FAILURE;
@@ -3082,4 +3074,15 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 	}
 
 	return ast;
+}
+
+zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast)
+{
+	if (ast->kind == ZEND_AST_CALL) {
+		return ast->child[1];
+	} else if (ast->kind == ZEND_AST_STATIC_CALL || ast->kind == ZEND_AST_METHOD_CALL) {
+		return ast->child[2];
+	}
+
+	return NULL;
 }

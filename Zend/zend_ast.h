@@ -440,4 +440,6 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 
 zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
 
+zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
+
 #endif
