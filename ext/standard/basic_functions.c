@@ -1349,11 +1349,17 @@ PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
+	const char *hdrs = NULL;
 
 	switch (opt_err)
 	{
 		case 1:		/*send an email */
-			if (!php_mail(ZSTR_VAL(opt), "PHP error_log message", ZSTR_VAL(message), ZSTR_VAL(headers), NULL)) {
+			if (!opt) {
+				return FAILURE;
+			}
+
+			hdrs = headers ? ZSTR_VAL(headers) : NULL;
+			if (!php_mail(ZSTR_VAL(opt), "PHP error_log message", ZSTR_VAL(message), hdrs, NULL)) {
 				return FAILURE;
 			}
 			break;

@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
+- Mail:
+  . Fixed bug GH-20862 (null pointer dereference in 
+    php_mail_detect_multiple_crlf via error_log (jordikroon)
+
 - Mbstring:
   . ini_set() with mbstring.detect_order changes the order of mb_detect_order
     as intended, since mbstring.detect_order is an INI_ALL setting. (tobee94)
