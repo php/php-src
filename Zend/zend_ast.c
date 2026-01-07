@@ -1141,7 +1141,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			zend_class_entry *called_scope = NULL;
 
 			zend_ast *args_ast = zend_ast_call_get_args(ast);
-			ZEND_ASSERT(args_ast && args_ast->kind == ZEND_AST_CALLABLE_CONVERT);
+			ZEND_ASSERT(args_ast->kind == ZEND_AST_CALLABLE_CONVERT);
 
 			zend_ast_fcc *fcc_ast = (zend_ast_fcc*)args_ast;
 
@@ -3084,5 +3084,6 @@ zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast)
 		return ast->child[2];
 	}
 
+	ZEND_UNREACHABLE();
 	return NULL;
 }
