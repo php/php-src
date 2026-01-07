@@ -1804,7 +1804,9 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 
-	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *) aad, (int) aad_len)) {
+	/* Only pass AAD to OpenSSL if caller provided it.
+	   This makes NULL mean zero AAD items, while "" with len 0 means one empty AAD item. */
+	if (mode->is_aead && aad != NULL && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *)aad, (int)aad_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;

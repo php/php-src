@@ -7,6 +7,7 @@ openssl
 $algo = 'aes-256-siv';
 $key = str_repeat('1', 64);
 $tag = '';
+$aad = null;
 $input = 'Hello world!';
 
 $ciphertext = openssl_encrypt(
@@ -14,8 +15,10 @@ $ciphertext = openssl_encrypt(
     $algo,
     $key,
     OPENSSL_RAW_DATA,
-    '',      // IV is empty for this cipher in PHP
-    $tag     // gets filled with the SIV
+    '', // IV is empty for this cipher in PHP
+    $tag, // gets filled with the SIV
+    $aad,
+    16
 );
 
 echo 'input: ' . $input . PHP_EOL;
@@ -29,15 +32,16 @@ $dec = openssl_decrypt(
     $key,
     OPENSSL_RAW_DATA,
     '',
-    $tag
+    $tag,
+    $aad
 );
 
 echo 'decrypted: ' . var_export($dec, true) . PHP_EOL;
 ?>
 --EXPECTF--
 input: Hello world!
-tag: f6c98e3e785947502a09994d2757f9c1
-ciphertext: a430a41a9bc089fa45ad27be
-combined: f6c98e3e785947502a09994d2757f9c1a430a41a9bc089fa45ad27be
+tag: c06f0df087e2784c5560ce5d0b378311
+ciphertext: 72fffba74d7bc3ddcceeb6d1
+combined: c06f0df087e2784c5560ce5d0b37831172fffba74d7bc3ddcceeb6d1
 decrypted: 'Hello world!'
 
