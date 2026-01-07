@@ -384,7 +384,12 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
-		zend_file_cache_serialize_ast(fcc->args, script, info, buf);
+		if (!IS_SERIALIZED(fcc->args)) {
+			SERIALIZE_PTR(fcc->args);
+			tmp = fcc->args;
+			UNSERIALIZE_PTR(tmp);
+			zend_file_cache_serialize_ast(tmp, script, info, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1305,7 +1310,10 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_NEW(fcc->fptr);
-		zend_file_cache_unserialize_ast(fcc->args, script, buf);
+		if (!IS_UNSERIALIZED(fcc->args)) {
+			UNSERIALIZE_PTR(fcc->args);
+			zend_file_cache_unserialize_ast(fcc->args, script, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
