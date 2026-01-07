@@ -307,6 +307,7 @@ static uint8_t zend_user_opcodes[256] = {0,
 };
 
 #include "Zend/zend_vm_opcodes.h"
+#include "Zend/zend_partial.h"
 
 #define SPEC_START_MASK        0x0000ffff
 #define SPEC_EXTRA_MASK        0xfffc0000
