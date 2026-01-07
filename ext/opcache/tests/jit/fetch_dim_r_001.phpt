@@ -18,7 +18,7 @@ function foo() {
     var_dump($a["2"]);
     var_dump($a[false]);
     var_dump($a[true]);
-    var_dump($a[null]);
+    var_dump($a['']);
     var_dump($a["ab"]);
     $x = "a";
     $y = "b";
