@@ -1,5 +1,5 @@
 --TEST--
-PFA magic trampoline release unused
+PFA magic trampoline release (result unused)
 --FILE--
 <?php
 class Foo {
