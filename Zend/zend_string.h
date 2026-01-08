@@ -639,6 +639,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_ASSERT,                 "assert") \
 	_(ZEND_STR_CALL_USER_FUNC,         "call_user_func") \
 	_(ZEND_STR_ARRAY_SLICE,            "array_slice") \
+	_(ZEND_STR_GET_DEFINED_VARS,       "get_defined_vars") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
