@@ -2184,7 +2184,7 @@ OUPUT_EXAMPLE
                 $defaultValue = $arg->getDefaultValueAsMethodSynopsisString();
                 if ($defaultValue !== null) {
                     $initializer = $doc->createElement('initializer');
-                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9]*$/', $defaultValue)) {
+                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9\:\\\\]*$/', $defaultValue)) {
                         $constant = $doc->createElement('constant', $defaultValue);
                         $initializer->appendChild($constant);
                     } else {
