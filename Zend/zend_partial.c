@@ -666,10 +666,12 @@ static uint32_t zp_compute_num_required(zend_function *function,
 
 /* Functions that do not allow to be called dynamically */
 static const zend_known_string_id zp_non_dynamic_call_funcs[] = {
-	ZEND_STR_FUNC_GET_ARG,
 	ZEND_STR_COMPACT,
 	ZEND_STR_EXTRACT,
-	/* Omit nullary functions such as func_num_args(), as these can't be PFA'd*/
+	ZEND_STR_FUNC_GET_ARG,
+	ZEND_STR_FUNC_GET_ARGS,
+	ZEND_STR_FUNC_NUM_ARGS,
+	ZEND_STR_GET_DEFINED_VARS,
 };
 
 static bool zp_is_non_dynamic_call_func(zend_function *function)
