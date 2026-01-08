@@ -8,7 +8,7 @@ function foo($a, $b) {
 
 $foo = foo(b: 10, ...);
 
-var_dump($foo->__invoke(32) == 42);
+var_dump($foo->__invoke(32));
 
 try {
     $foo->nothing();
@@ -17,5 +17,5 @@ try {
 }
 ?>
 --EXPECT--
-bool(true)
+int(42)
 Error: Call to undefined method Closure::nothing()

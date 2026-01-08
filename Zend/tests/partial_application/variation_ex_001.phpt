@@ -5,7 +5,7 @@ PFA variation: UAF in cleanup unfinished calls
 function test($a){}
 
 try {
-    test(1,...)(?);
+    test(1, ...)(?);
 } catch (Error $ex) {
     echo $ex::class, ": ", $ex->getMessage(), "\n";
 }

@@ -10,13 +10,12 @@ function foo($a) {
     return $var;
 }
 
-foo(new stdClass);
+var_dump(foo(new stdClass));
 
 $foo = foo(new stdClass, ...);
 
-if ($foo() == 2) {
-    echo "OK";
-}
+var_dump($foo());
 ?>
---EXPECTF--
-OK
+--EXPECT--
+int(1)
+int(2)
