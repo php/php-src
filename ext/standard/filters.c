@@ -59,12 +59,13 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 static const php_stream_filter_ops strfilter_rot13_ops = {
 	strfilter_rot13_filter,
 	NULL,
+	NULL,
 	"string.rot13"
 };
 
-static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
+	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_rot13_factory = {
@@ -135,23 +136,25 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 static const php_stream_filter_ops strfilter_toupper_ops = {
 	strfilter_toupper_filter,
 	NULL,
+	NULL,
 	"string.toupper"
 };
 
 static const php_stream_filter_ops strfilter_tolower_ops = {
 	strfilter_tolower_filter,
 	NULL,
+	NULL,
 	"string.tolower"
 };
 
-static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent);
+	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
-static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
+	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_toupper_factory = {
@@ -181,14 +184,17 @@ typedef struct _php_conv php_conv;
 
 typedef php_conv_err_t (*php_conv_convert_func)(php_conv *, const char **, size_t *, char **, size_t *);
 typedef void (*php_conv_dtor_func)(php_conv *);
+typedef php_conv_err_t (*php_conv_reset_func)(php_conv *);
 
 struct _php_conv {
 	php_conv_convert_func convert_op;
 	php_conv_dtor_func dtor;
+	php_conv_reset_func reset_op;
 };
 
 #define php_conv_convert(a, b, c, d, e) ((php_conv *)(a))->convert_op((php_conv *)(a), (b), (c), (d), (e))
 #define php_conv_dtor(a) ((php_conv *)a)->dtor((a))
+#define php_conv_reset(a) (((php_conv *)(a))->reset_op ? ((php_conv *)(a))->reset_op((php_conv *)(a)) : PHP_CONV_ERR_SUCCESS)
 
 /* {{{ php_conv_base64_encode */
 typedef struct _php_conv_base64_encode {
@@ -206,6 +212,7 @@ typedef struct _php_conv_base64_encode {
 
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
 static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst);
+static php_conv_err_t php_conv_base64_encode_reset(php_conv_base64_encode *inst);
 
 static const unsigned char b64_tbl_enc[256] = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
@@ -226,10 +233,19 @@ static const unsigned char b64_tbl_enc[256] = {
 	'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
 };
 
+static php_conv_err_t php_conv_base64_encode_reset(php_conv_base64_encode *inst)
+{
+	/* Reset only mutable state, preserve configuration (lbchars, line_len, etc.) */
+	inst->erem_len = 0;
+	inst->line_ccnt = inst->line_len;
+	return PHP_CONV_ERR_SUCCESS;
+}
+
 static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, bool persistent)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_encode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_encode_dtor;
+	inst->_super.reset_op = (php_conv_reset_func) php_conv_base64_encode_reset;
 	inst->erem_len = 0;
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
@@ -449,6 +465,7 @@ typedef struct _php_conv_base64_decode {
 
 static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
 static void php_conv_base64_decode_dtor(php_conv_base64_decode *inst);
+static php_conv_err_t php_conv_base64_decode_reset(php_conv_base64_decode *inst);
 
 static unsigned int b64_tbl_dec[256] = {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
@@ -469,10 +486,21 @@ static unsigned int b64_tbl_dec[256] = {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 };
 
+static php_conv_err_t php_conv_base64_decode_reset(php_conv_base64_decode *inst)
+{
+	/* Reset only mutable state */
+	inst->urem = 0;
+	inst->urem_nbits = 0;
+	inst->ustat = 0;
+	inst->eos = 0;
+	return PHP_CONV_ERR_SUCCESS;
+}
+
 static void php_conv_base64_decode_ctor(php_conv_base64_decode *inst)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_decode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_decode_dtor;
+	inst->_super.reset_op = (php_conv_reset_func) php_conv_base64_decode_reset;
 
 	inst->urem = 0;
 	inst->urem_nbits = 0;
@@ -618,6 +646,7 @@ typedef struct _php_conv_qprint_encode {
 
 static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst);
 static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p);
+static php_conv_err_t php_conv_qprint_encode_reset(php_conv_qprint_encode *inst);
 
 static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 {
@@ -625,6 +654,15 @@ static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 	if (inst->lbchars_dup && inst->lbchars != NULL) {
 		pefree((void *)inst->lbchars, inst->persistent);
 	}
+}
+
+static php_conv_err_t php_conv_qprint_encode_reset(php_conv_qprint_encode *inst)
+{
+	/* Reset only mutable state, preserve configuration */
+	inst->line_ccnt = inst->line_len;
+	inst->lb_ptr = 0;
+	inst->lb_cnt = 0;
+	return PHP_CONV_ERR_SUCCESS;
 }
 
 #define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
@@ -832,6 +870,7 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 	}
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_encode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_encode_dtor;
+	inst->_super.reset_op = (php_conv_reset_func) php_conv_qprint_encode_reset;
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
 	if (lbchars != NULL) {
@@ -862,12 +901,26 @@ typedef struct _php_conv_qprint_decode {
 	unsigned int lb_cnt;
 } php_conv_qprint_decode;
 
+static void php_conv_qprint_decode_dtor(php_conv_qprint_decode *inst);
+static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p);
+static php_conv_err_t php_conv_qprint_decode_reset(php_conv_qprint_decode *inst);
+
 static void php_conv_qprint_decode_dtor(php_conv_qprint_decode *inst)
 {
 	assert(inst != NULL);
 	if (inst->lbchars_dup && inst->lbchars != NULL) {
 		pefree((void *)inst->lbchars, inst->persistent);
 	}
+}
+
+static php_conv_err_t php_conv_qprint_decode_reset(php_conv_qprint_decode *inst)
+{
+	/* Reset only mutable state, preserve configuration */
+	inst->scan_stat = 0;
+	inst->next_char = 0;
+	inst->lb_ptr = 0;
+	inst->lb_cnt = 0;
+	return PHP_CONV_ERR_SUCCESS;
 }
 
 static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
@@ -1040,10 +1093,12 @@ out:
 
 	return err;
 }
+
 static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, const char *lbchars, size_t lbchars_len, int lbchars_dup, bool persistent)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_decode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_decode_dtor;
+	inst->_super.reset_op = (php_conv_reset_func) php_conv_qprint_decode_reset;
 	inst->scan_stat = 0;
 	inst->next_char = 0;
 	inst->lb_ptr = inst->lb_cnt = 0;
@@ -1540,6 +1595,29 @@ out_failure:
 	return PSFS_ERR_FATAL;
 }
 
+static zend_result strfilter_convert_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	php_convert_filter *inst = (php_convert_filter *)Z_PTR(thisfilter->abstract);
+	
+	/* Reset stub buffer */
+	inst->stub_len = 0;
+	
+	/* Reset the converter state - preserves all configuration/options */
+	if (inst->cd != NULL) {
+		php_conv_err_t err = php_conv_reset(inst->cd);
+		if (err != PHP_CONV_ERR_SUCCESS) {
+			return FAILURE;
+		}
+	}
+	
+	return SUCCESS;
+}
+
 static void strfilter_convert_dtor(php_stream_filter *thisfilter)
 {
 	assert(Z_PTR(thisfilter->abstract) != NULL);
@@ -1550,11 +1628,12 @@ static void strfilter_convert_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops strfilter_convert_ops = {
 	strfilter_convert_filter,
+	strfilter_convert_seek,
 	strfilter_convert_dtor,
 	"convert.*"
 };
 
-static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	php_convert_filter *inst;
 
@@ -1590,7 +1669,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory strfilter_convert_factory = {
@@ -1637,6 +1716,22 @@ static php_stream_filter_status_t consumed_filter_filter(
 	return PSFS_PASS_ON;
 }
 
+static zend_result consumed_filter_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	php_consumed_filter_data *data = (php_consumed_filter_data *)Z_PTR(thisfilter->abstract);
+	
+	/* Reset consumed state */
+	data->consumed = 0;
+	data->offset = ~0;
+	
+	return SUCCESS;
+}
+
 static void consumed_filter_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -1647,11 +1742,12 @@ static void consumed_filter_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops consumed_filter_ops = {
 	consumed_filter_filter,
+	consumed_filter_seek,
 	consumed_filter_dtor,
 	"consumed"
 };
 
-static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_consumed_filter_data *data;
@@ -1667,7 +1763,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	data->offset = ~0;
 	fops = &consumed_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory consumed_filter_factory = {
@@ -1851,6 +1947,22 @@ static php_stream_filter_status_t php_chunked_filter(
 	return PSFS_PASS_ON;
 }
 
+static zend_result php_chunked_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	php_chunked_filter_data *data = (php_chunked_filter_data *)Z_PTR(thisfilter->abstract);
+	
+	/* Reset chunked decoder state */
+	data->state = CHUNK_SIZE_START;
+	data->chunk_size = 0;
+	
+	return SUCCESS;
+}
+
 static void php_chunked_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -1861,11 +1973,12 @@ static void php_chunked_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops chunked_filter_ops = {
 	php_chunked_filter,
+	php_chunked_seek,
 	php_chunked_dtor,
 	"dechunk"
 };
 
-static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
@@ -1881,7 +1994,7 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	data->persistent = persistent;
 	fops = &chunked_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
 }
 
 static const php_stream_filter_factory chunked_filter_factory = {

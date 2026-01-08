@@ -61,6 +61,13 @@ typedef enum {
 	PSFS_PASS_ON	/* filter generated output buckets; pass them on to next in chain */
 } php_stream_filter_status_t;
 
+typedef enum {
+	PSFS_SEEKABLE_NEVER, /* seeking filter never possible */
+	PSFS_SEEKABLE_START, /* seeking possible only to start (position 0) */
+	PSFS_SEEKABLE_CHECK, /* seeking possible but it is always checked if callback function set */
+	PSFS_SEEKABLE_ALWAYS, /* seeking is always possible */
+} php_stream_filter_seekable_t;
+
 /* Buckets API. */
 BEGIN_EXTERN_C()
 PHPAPI php_stream_bucket *php_stream_bucket_new(const php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent);
@@ -88,6 +95,13 @@ typedef struct _php_stream_filter_ops {
 			int flags
 			);
 
+	zend_result (*seek)(
+			php_stream *stream,
+			php_stream_filter *thisfilter,
+			zend_off_t offset,
+			int whence
+	);
+
 	void (*dtor)(php_stream_filter *thisfilter);
 
 	const char *label;
@@ -106,7 +120,8 @@ struct _php_stream_filter {
 	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
-	int is_persistent;
+	php_stream_filter_seekable_t seekable;
+	bool is_persistent;
 
 	/* link into stream and chain */
 	php_stream_filter_chain *chain;
@@ -127,10 +142,14 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
-PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
+		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC);
+
 END_EXTERN_C()
-#define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC)
-#define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC)
+#define php_stream_filter_alloc(fops, thisptr, persistent, seekable) \
+		_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_CC)
+#define php_stream_filter_alloc_rel(fops, thisptr, persistent, seekable) \
+	_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_REL_CC)
 #define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter))
 #define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter))
 #define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish))
@@ -138,12 +157,12 @@ END_EXTERN_C()
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 
 typedef struct _php_stream_filter_factory {
-	php_stream_filter *(*create_filter)(const char *filtername, zval *filterparams, uint8_t persistent);
+	php_stream_filter *(*create_filter)(const char *filtername, zval *filterparams, bool persistent);
 } php_stream_filter_factory;
 
 BEGIN_EXTERN_C()
 PHPAPI zend_result php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory);
 PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpattern);
 PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory);
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent);
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, bool persistent);
 END_EXTERN_C()
