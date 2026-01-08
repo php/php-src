@@ -4,7 +4,7 @@ Test Uri\WhatWg\Url equivalence - returns false - user is different
 <?php
 
 $url1 = Uri\WhatWg\Url::parse("https://user:pass@example.com:443/foo/bar?abc=123&def=ghi#hashmark");
-$url2 = Uri\WhatWg\Url::parse("http://usr:pass@example.com:443/foo/bar/baz?abc=123&def=ghi#hashmark");
+$url2 = Uri\WhatWg\Url::parse("https://usr:pass@example.com:443/foo/bar?abc=123&def=ghi#hashmark");
 
 var_dump($url1->equals($url2));
 var_dump($url2->equals($url1));
