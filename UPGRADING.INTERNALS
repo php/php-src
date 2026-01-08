@@ -52,6 +52,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
     zend_internal_arg_info on internal functions, unless the
     ZEND_ACC_USER_ARG_INFO flag was set.
+  . Added zend_ast_call_get_args() to fetch the argument node from any call
+    node.
 
 ========================
 2. Build system changes

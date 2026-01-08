@@ -197,6 +197,7 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		node = (zend_ast *) copy;
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		copy->args = zend_persist_ast(copy->args);
 		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
