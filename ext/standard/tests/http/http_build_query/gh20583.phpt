@@ -24,4 +24,5 @@ try {
 }
 ?>
 --EXPECTF--
-Fatal error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached during compilation. Try splitting expression in %s on line %d
+Error: Maximum call stack size reached.
+Fatal error: Maximum call stack size of %s reached during compilation. Try splitting expression in %s on line %d
