@@ -7,6 +7,9 @@ pdo
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not for Windows!');
 }
+if (version_compare(PHP_VERSION, '8.5.0', '>')) {
+    die('skip PDO::PGSQL_TRANSACTION* constants removed in PHP 8.6');
+}
 ?>
 --FILE--
 <?php
