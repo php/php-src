@@ -1535,6 +1535,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
+			if (op2 && Z_TYPE_P(op2) == IS_NULL) {
+				/* Emits deprecation at run-time. */
+				SET_RESULT_BOT(result);
+				break;
+			}
+
 			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1545,6 +1551,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
+
+			if (op2 && Z_TYPE_P(op2) == IS_NULL) {
+				/* Emits deprecation at run-time. */
+				SET_RESULT_BOT(result);
+				break;
+			}
 
 			if (ct_eval_isset_dim(&zv, opline->extended_value, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
