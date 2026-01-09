@@ -124,7 +124,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		}
 	} else if (ZEND_VM_OP_LOOP_END == (flags & ZEND_VM_OP_MASK)) {
 		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			fprintf(stderr, " loop-end(%u)", op.num);
+			fprintf(stderr, " loop-end(+%u)", op.num);
 		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " THIS");
