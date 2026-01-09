@@ -3624,20 +3624,14 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			ZVAL_ERROR(result);
 			goto end;
 		}
-		if (UNEXPECTED(!Z_REFCOUNTED_P(ptr) && !Z_ISREF_P(ptr) && Z_TYPE_P(ptr) != IS_INDIRECT )) {
-			if (Z_TYPE_P(ptr) == IS_FALSE) {
-				ZVAL_FALSE(result);
-			} 
-			if (Z_TYPE_P(ptr) == IS_NULL) {
-				ZVAL_NULL(result);
-			} 
+		if (Z_TYPE_P(ptr) == IS_NULL && Z_NEXT_P(ptr) == 0) {
+			ZVAL_NULL(result);
 			goto end;
 		}
 	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
 		ZVAL_ERROR(result);
 		goto end;
 	}
-
 	ZVAL_INDIRECT(result, ptr);
 	flags &= ZEND_FETCH_OBJ_FLAGS;
 	if (flags) {
