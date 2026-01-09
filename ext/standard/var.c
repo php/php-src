@@ -56,6 +56,12 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 {
 	const char *prop_name, *class_name;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		php_printf("%*cnesting level too deep", level + 1, ' ');
+		return;
+	}
+#endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
