@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
     (Jakub Zelenka)
+  . Fixed bug GH-20843 (var_dump() crash with nested objects)
+    (David Carlier)
 
 15 Jan 2026, PHP 8.5.2
 
