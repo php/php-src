@@ -33,7 +33,7 @@ function ut_main()
             $fmt = ut_datefmt_create($locale_entry, $datetype_entry, $datetype_entry, $timezone, IntlDateFormatter::GREGORIAN);
             $formatted = ut_datefmt_format($fmt, $date_entry);
 
-            // Replace narrow no-break space (U+202F) with regular space for consistent output.--ARGS--
+            // Replace narrow no-break space (U+202F) with regular space for consistent output.
             // INTL doesn't seem to be very consistent about it either
             $formatted = str_replace("\u{202F}", ' ', $formatted);
 
