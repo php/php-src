@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (henderkes)
   . Fixed bug GH-20767 (build failure with musttail/preserve_none feature
     on macOs). (David Carlier)
+  . Fixed bug GH-20837 (NULL dereference when calling ob_start() in shutdown
+    function triggered by bailout in php_output_lock_error()). (timwolla)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
