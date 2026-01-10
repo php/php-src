@@ -538,6 +538,10 @@ PHPAPI zend_result php_output_handler_start(php_output_handler *handler)
 	HashTable *rconflicts;
 	php_output_handler_conflict_check_t conflict;
 
+	if (!(OG(flags) & PHP_OUTPUT_ACTIVATED)) {
+		return FAILURE;
+	}
+
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START) || !handler) {
 		return FAILURE;
 	}
