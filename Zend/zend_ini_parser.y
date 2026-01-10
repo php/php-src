@@ -205,7 +205,11 @@ static ZEND_COLD void ini_error(const char *msg)
 		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
 
-		sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
+		if (strcmp(currently_parsed_filename, "Unknown") == 0 && CG(ini_parser_unbuffered_errors)) {
+			sprintf(error_buf, "%s in -d option on line 0\n", msg);
+		} else {
+			sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
+		}
 	} else {
 		error_buf = estrdup("Invalid configuration directive\n");
 	}
