@@ -379,7 +379,7 @@ attribute_group:
 ;
 
 attribute:
-		T_ATTRIBUTE attribute_group possible_comma ']'	{ $$ = $2; }
+		T_ATTRIBUTE backup_doc_comment attribute_group possible_comma ']'	{ $$ = $3; CG(doc_comment) = $2; }
 ;
 
 attributes:
