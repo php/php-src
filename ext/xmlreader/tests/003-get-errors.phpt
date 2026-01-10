@@ -69,7 +69,7 @@ unlink(__DIR__.'/003-get-errors.xml');
 book
 bool(true)
 num: 1
-XMLReader::getAttribute(): Argument #1 ($name) cannot be empty
+XMLReader::getAttribute(): Argument #1 ($name) must not be empty
 num: 1
 NULL
 num: 1

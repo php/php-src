@@ -52,7 +52,8 @@ const mbfl_encoding mbfl_encoding_8bit = {
 	&vtbl_wchar_8bit,
 	mb_8bit_to_wchar,
 	mb_wchar_to_8bit,
-	NULL
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_wchar = {

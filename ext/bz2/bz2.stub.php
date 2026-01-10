@@ -14,21 +14,18 @@ function bzread($bz, int $length = 1024): string|false {}
 /**
  * @param resource $bz
  * @implementation-alias fwrite
- * @no-verify Uses different parameter name
  */
 function bzwrite($bz, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $bz
  * @implementation-alias fflush
- * @no-verify Uses different parameter name
  */
 function bzflush($bz): bool {}
 
 /**
  * @param resource $bz
  * @implementation-alias fclose
- * @no-verify Uses different parameter name
  */
 function bzclose($bz): bool {}
 

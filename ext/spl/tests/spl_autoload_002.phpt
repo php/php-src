@@ -35,7 +35,7 @@ spl_autoload_unregister('spl_autoload');
 var_dump(spl_autoload_functions());
 
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
 array(1) {
@@ -56,6 +56,8 @@ array(2) {
   [1]=>
   string(16) "SplAutoloadTest2"
 }
+
+Deprecated: spl_autoload_unregister(): Using spl_autoload_call() as a callback for spl_autoload_unregister() is deprecated, to remove all registered autoloaders, call spl_autoload_unregister() for all values returned from spl_autoload_functions() in %s on line %d
 array(0) {
 }
 array(1) {

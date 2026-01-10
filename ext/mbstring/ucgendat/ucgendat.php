@@ -367,14 +367,22 @@ function parseSpecialCasing(UnicodeData $data, string $input) : void {
 
 function parseDerivedCoreProperties(UnicodeData $data, string $input) : void {
     foreach (parseDataFile($input) as $fields) {
-        if (count($fields) != 2) {
-            throw new Exception("Line does not contain 2 fields");
+        $fieldCount = count($fields);
+        if ($fieldCount != 2 && $fieldCount !== 3) {
+            throw new Exception("Line does not contain 2 or 3 fields");
         }
 
-        $property = $fields[1];
-        if ($property != 'Cased' && $property != 'Case_Ignorable') {
+        $usedProperties = ['Cased', 'Case_Ignorable'];
+        if (isset($fields[2]) && in_array($fields[2], $usedProperties, true)) {
+            $property = $fields[2];
+        }
+        elseif (!in_array($fields[1], $usedProperties, true)) {
             continue;
         }
+        else{
+            $property = $fields[1];
+        }
+
 
         $range = explode('..', $fields[0]);
         if (count($range) == 2) {

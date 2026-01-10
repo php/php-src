@@ -18,11 +18,10 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-$from = '';
-if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
-    $from = 'from dual';
-} else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
-    $from = 'FROM RDB$DATABASE';
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+    case 'oci': $from = ' FROM DUAL'; break;
+    case 'firebird': $from = ' FROM RDB$DATABASE'; break;
+    default: $from = ''; break;
 }
 
 var_dump($db->query("select 0 as abc, 1 as xyz, 2 as def $from")->fetchAll(PDO::FETCH_GROUP));

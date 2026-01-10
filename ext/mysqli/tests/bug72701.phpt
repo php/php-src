@@ -14,7 +14,7 @@ if ("127.0.0.1" != $host && "localhost" != $host) {
 --FILE--
 <?php
 
-require_once "connect.inc";
+require_once 'connect.inc';
 
 $con = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 

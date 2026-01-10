@@ -86,8 +86,6 @@ static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned
 ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
-	unsigned int i;
-	zend_string *str;
 
 	interned_string_request_handler = zend_new_interned_string_request;
 	interned_string_init_request_handler = zend_string_init_interned_request;
@@ -96,28 +94,30 @@ ZEND_API void zend_interned_strings_init(void)
 	zend_empty_string = NULL;
 	zend_known_strings = NULL;
 
-	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
+	zend_init_interned_strings_ht(&interned_strings_permanent, true);
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
 	zend_string_init_interned = zend_string_init_interned_permanent;
 	zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 
 	/* interned empty string */
-	str = zend_string_alloc(sizeof("")-1, 1);
-	ZSTR_VAL(str)[0] = '\000';
-	zend_empty_string = zend_new_interned_string_permanent(str);
+	zend_empty_string = zend_string_init_interned_permanent("", 0, true);
+	GC_ADD_FLAGS(zend_empty_string, IS_STR_VALID_UTF8);
 
 	s[1] = 0;
-	for (i = 0; i < 256; i++) {
+	for (size_t i = 0; i < 256; i++) {
 		s[0] = i;
-		zend_one_char_string[i] = zend_new_interned_string_permanent(zend_string_init(s, 1, 1));
+		zend_one_char_string[i] = zend_string_init_interned_permanent(s, 1, true);
+		if (i < 0x80) {
+			GC_ADD_FLAGS(zend_one_char_string[i], IS_STR_VALID_UTF8);
+		}
 	}
 
 	/* known strings */
 	zend_known_strings = pemalloc(sizeof(zend_string*) * ((sizeof(known_strings) / sizeof(known_strings[0]) - 1)), 1);
-	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
-		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
-		zend_known_strings[i] = zend_new_interned_string_permanent(str);
+	for (size_t i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
+		zend_known_strings[i] = zend_string_init_interned_permanent(known_strings[i], strlen(known_strings[i]), true);
+		GC_ADD_FLAGS(zend_known_strings[i], IS_STR_VALID_UTF8);
 	}
 }
 
@@ -190,6 +190,17 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
+static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent)
+{
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(str);
+	zend_ulong h = ZSTR_H(str);
+	zend_string_delref(str);
+	str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), persistent);
+	GC_ADD_FLAGS(str, flags);
+	ZSTR_H(str) = h;
+	return str;
+}
+
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str)
 {
 	zend_string *ret;
@@ -207,10 +218,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string
 
 	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, true);
 	}
 
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
@@ -248,10 +256,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	}
 #endif
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, false);
 	}
 
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);
@@ -340,7 +345,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(con
 
 ZEND_API void zend_interned_strings_activate(void)
 {
-	zend_init_interned_strings_ht(&CG(interned_strings), 0);
+	zend_init_interned_strings_ht(&CG(interned_strings), false);
 }
 
 ZEND_API void zend_interned_strings_deactivate(void)
@@ -495,8 +500,10 @@ ZEND_API zend_string *zend_string_concat3(
 	return res;
 }
 
-/* strlcpy and strlcat are not intercepted by msan, so we need to do it ourselves. */
-#if __has_feature(memory_sanitizer)
+/* strlcpy and strlcat are not always intercepted by msan, so we need to do it
+ * ourselves. Apply a simple heuristic to determine the platforms that need it.
+ * See https://github.com/php/php-src/issues/20002. */
+#if __has_feature(memory_sanitizer) && !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__APPLE__)
 static size_t (*libc_strlcpy)(char *__restrict, const char *__restrict, size_t);
 size_t strlcpy(char *__restrict dest, const char *__restrict src, size_t n)
 {

@@ -7,11 +7,11 @@ pgsql
 <?php
 require_once dirname(__DIR__, 2) . '/dba/tests/setup/setup_dba_tests.inc';
 check_skip_any();
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

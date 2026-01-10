@@ -14,14 +14,27 @@ $responses = array(
 
 ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
+var_dump(http_get_last_response_headers());
+
 $f = file_get_contents($uri);
 var_dump($f);
 var_dump($http_response_header);
+var_dump(http_get_last_response_headers());
 
 http_server_kill($pid);
 
---EXPECT--
+?>
+
+--EXPECTF--
+Deprecated: The predefined locally scoped $http_response_header variable is deprecated, call http_get_last_response_headers() instead in %s on line 14
+NULL
 string(4) "Body"
+array(2) {
+  [0]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [1]=>
+  string(14) "Some:   Header"
+}
 array(2) {
   [0]=>
   string(15) "HTTP/1.0 200 Ok"

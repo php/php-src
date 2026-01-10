@@ -20,33 +20,33 @@ foreach ($properties as $property) {
     try {
         $period->$property = "new";
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         $period->$property[] = "extra";
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 try {
     $period->start->modify("+1 hour");
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot modify readonly property DatePeriod::$recurrences
-Cannot modify readonly property DatePeriod::$recurrences
-Cannot modify readonly property DatePeriod::$include_start_date
-Cannot modify readonly property DatePeriod::$include_start_date
-Cannot modify readonly property DatePeriod::$start
-Cannot modify readonly property DatePeriod::$start
-Cannot modify readonly property DatePeriod::$current
-Cannot modify readonly property DatePeriod::$current
-Cannot modify readonly property DatePeriod::$end
-Cannot modify readonly property DatePeriod::$end
-Cannot modify readonly property DatePeriod::$interval
-Cannot modify readonly property DatePeriod::$interval
+Error: Cannot modify readonly property DatePeriod::$recurrences
+Error: Cannot modify readonly property DatePeriod::$recurrences
+Error: Cannot modify readonly property DatePeriod::$include_start_date
+Error: Cannot modify readonly property DatePeriod::$include_start_date
+Error: Cannot modify readonly property DatePeriod::$start
+Error: Cannot modify readonly property DatePeriod::$start
+Error: Cannot modify readonly property DatePeriod::$current
+Error: Cannot modify readonly property DatePeriod::$current
+Error: Cannot modify readonly property DatePeriod::$end
+Error: Cannot modify readonly property DatePeriod::$end
+Error: Cannot modify readonly property DatePeriod::$interval
+Error: Cannot modify readonly property DatePeriod::$interval

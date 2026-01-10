@@ -16,11 +16,17 @@
 #define PHP_INTL_CONVERTER_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int php_converter_minit(INIT_FUNC_ARGS);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PHP_INTL_CONVERTER_H */

@@ -19,4 +19,6 @@ var_dump($some->getIterator());
 ?>
 --EXPECTF--
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(27) "SomeCollection::getIterator"
 }

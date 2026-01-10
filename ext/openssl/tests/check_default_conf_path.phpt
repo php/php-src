@@ -7,7 +7,6 @@ openssl
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip windows only test');
 }
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip Failing on Windows");
 ?>
 --ENV--
 OPENSSL_CONF=
@@ -22,7 +21,7 @@ ob_end_clean();
 preg_match(",Openssl default config [^ ]* (.*),", $info, $m);
 
 if (isset($m[1])) {
-    var_dump(str_replace('/', '\\', strtolower($m[1])));
+    var_dump(str_replace('\\/', '\\', strtolower($m[1])));
 } else {
     echo $info;
 }

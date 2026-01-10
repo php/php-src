@@ -27,7 +27,7 @@ Passing undefined by value
 
 Warning: Undefined variable $undef1 in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 
 Inside passbyVal call:
 NULL

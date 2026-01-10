@@ -52,7 +52,7 @@ static inline void zend_worklist_stack_push(zend_worklist_stack *stack, int i)
 	stack->buf[stack->len++] = i;
 }
 
-static inline int zend_worklist_stack_peek(zend_worklist_stack *stack)
+static inline int zend_worklist_stack_peek(const zend_worklist_stack *stack)
 {
 	ZEND_ASSERT(stack->len);
 	return stack->buf[stack->len - 1];
@@ -87,7 +87,7 @@ static inline void zend_worklist_prepare(zend_arena **arena, zend_worklist *work
 	zend_worklist_stack_prepare(arena, &worklist->stack, len);
 }
 
-static inline int zend_worklist_len(zend_worklist *worklist)
+static inline int zend_worklist_len(const zend_worklist *worklist)
 {
 	return worklist->stack.len;
 }
@@ -97,15 +97,15 @@ static inline bool zend_worklist_push(zend_worklist *worklist, int i)
 	ZEND_ASSERT(i >= 0 && i < worklist->stack.capacity);
 
 	if (zend_bitset_in(worklist->visited, i)) {
-		return 0;
+		return false;
 	}
 
 	zend_bitset_incl(worklist->visited, i);
 	zend_worklist_stack_push(&worklist->stack, i);
-	return 1;
+	return true;
 }
 
-static inline int zend_worklist_peek(zend_worklist *worklist)
+static inline int zend_worklist_peek(const zend_worklist *worklist)
 {
 	return zend_worklist_stack_peek(&worklist->stack);
 }

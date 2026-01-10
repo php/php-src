@@ -44,13 +44,21 @@ const X509_PURPOSE_SMIME_ENCRYPT = UNKNOWN;
  * @cvalue X509_PURPOSE_CRL_SIGN
  */
 const X509_PURPOSE_CRL_SIGN = UNKNOWN;
-#ifdef X509_PURPOSE_ANY
 /**
  * @var int
  * @cvalue X509_PURPOSE_ANY
  */
 const X509_PURPOSE_ANY = UNKNOWN;
-#endif
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_OCSP_HELPER
+ */
+const X509_PURPOSE_OCSP_HELPER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_TIMESTAMP_SIGN
+ */
+const X509_PURPOSE_TIMESTAMP_SIGN = UNKNOWN;
 
 /* digest algorithm constants */
 
@@ -78,14 +86,6 @@ const OPENSSL_ALGO_MD4 = UNKNOWN;
  */
 const OPENSSL_ALGO_MD2 = UNKNOWN;
 #endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-/**
- * @var int
- * @cvalue OPENSSL_ALGO_DSS1
- */
-const OPENSSL_ALGO_DSS1 = UNKNOWN;
-#endif
-
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_SHA224
@@ -161,6 +161,31 @@ const PKCS7_BINARY = UNKNOWN;
  * @cvalue PKCS7_NOSIGS
  */
 const PKCS7_NOSIGS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOOLDMIMETYPE
+ */
+const PKCS7_NOOLDMIMETYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOSMIMECAP
+ */
+const PKCS7_NOSMIMECAP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_CRLFEOL
+ */
+const PKCS7_CRLFEOL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCRL
+ */
+const PKCS7_NOCRL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NO_DUAL_CONTENT
+ */
+const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
 
 /**
  * @var int
@@ -202,6 +227,11 @@ const OPENSSL_CMS_BINARY = UNKNOWN;
  * @cvalue CMS_NOSIGS
  */
 const OPENSSL_CMS_NOSIGS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CMS_NOOLDMIMETYPE
+ */
+const OPENSSL_CMS_OLDMIMETYPE = UNKNOWN;
 
 /**
  * @var int
@@ -226,6 +256,11 @@ const OPENSSL_NO_PADDING = UNKNOWN;
  * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PKCS1_PSS_PADDING
+ */
+const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
 /* Informational stream wrapper constants */
 
@@ -313,6 +348,28 @@ const OPENSSL_KEYTYPE_DH = UNKNOWN;
  */
 const OPENSSL_KEYTYPE_EC = UNKNOWN;
 #endif
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X25519
+ */
+const OPENSSL_KEYTYPE_X25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED25519
+ */
+const OPENSSL_KEYTYPE_ED25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X448
+ */
+const OPENSSL_KEYTYPE_X448 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED448
+ */
+const OPENSSL_KEYTYPE_ED448 = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -331,7 +388,6 @@ const OPENSSL_ZERO_PADDING = UNKNOWN;
 const OPENSSL_DONT_ZERO_PAD_KEY = UNKNOWN;
 
 #ifndef OPENSSL_NO_TLSEXT
-/** @var int */
 const OPENSSL_TLSEXT_SERVER_NAME = 1;
 #endif
 
@@ -403,7 +459,7 @@ function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $
 
 function openssl_x509_read(OpenSSLCertificate|string $certificate): OpenSSLCertificate|false {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLCertificate objects are freed automatically')]
 function openssl_x509_free(OpenSSLCertificate $certificate): void {}
 
 /**
@@ -430,7 +486,7 @@ function openssl_csr_export(OpenSSLCertificateSigningRequest|string $csr, &$outp
 /**
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, #[\SensitiveParameter] $private_key, int $days, ?array $options = null, int $serial = 0): OpenSSLCertificate|false {}
+function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, #[\SensitiveParameter] $private_key, int $days, ?array $options = null, int $serial = 0, ?string $serial_hex = null): OpenSSLCertificate|false {}
 
 /**
  * @param OpenSSLAsymmetricKey|null $private_key
@@ -467,15 +523,13 @@ function openssl_pkey_get_public($public_key): OpenSSLAsymmetricKey|false {}
  */
 function openssl_get_publickey($public_key): OpenSSLAsymmetricKey|false {}
 
-/**
- * @deprecated
- */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_pkey_free(OpenSSLAsymmetricKey $key): void {}
 
 /**
  * @alias openssl_pkey_free
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_free_key(OpenSSLAsymmetricKey $key): void {}
 
 /**
@@ -519,7 +573,7 @@ function openssl_pkcs7_read(string $data, &$certificates): bool {}
 function openssl_cms_verify(string $input_filename, int $flags = 0, ?string $certificates = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
 /** @param OpenSSLCertificate|array|string $certificate */
-function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, int $cipher_algo = OPENSSL_CIPHER_AES_128_CBC): bool {}
+function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, string|int $cipher_algo = OPENSSL_CIPHER_AES_128_CBC): bool {}
 
 /**
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
@@ -545,13 +599,13 @@ function openssl_private_encrypt(#[\SensitiveParameter] string $data, &$encrypte
  * @param string $decrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $encrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key
  */
-function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $decrypted_data
@@ -565,10 +619,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
 
 /**
  * @param string $sealed_data
@@ -640,3 +694,8 @@ function openssl_spki_export_challenge(string $spki): string|false {}
  * @refcount 1
  */
 function openssl_get_cert_locations(): array {}
+
+#if defined(HAVE_OPENSSL_ARGON2)
+function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
+function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
+#endif

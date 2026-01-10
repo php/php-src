@@ -4,30 +4,28 @@ PDO_sqlite: Testing sqliteCreateFunction() with flags
 pdo_sqlite
 --SKIPIF--
 <?php
-if (!defined('PDO::SQLITE_DETERMINISTIC')) die('skip system sqlite is too old');
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip system sqlite is too old');
 ?>
 --FILE--
 <?php
 
 $db = new PDO('sqlite::memory:');
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE test_pdo_sqlite_createfunction_with_flags (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
-
-
-$db->sqliteCreateFunction('testing', function($v) { return strtolower($v); }, 1, PDO::SQLITE_DETERMINISTIC);
+$db->query('INSERT INTO test_pdo_sqlite_createfunction_with_flags VALUES (NULL, "PHP"), (NULL, "PHP6")');
 
 
-foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
+$db->sqliteCreateFunction('testing', function($v) { return strtolower($v); }, 1, Pdo\Sqlite::DETERMINISTIC);
+
+
+foreach ($db->query('SELECT testing(name) FROM test_pdo_sqlite_createfunction_with_flags') as $row) {
     var_dump($row);
 }
 
-$db->query('DROP TABLE foobar');
-
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 array(2) {
   ["testing(name)"]=>
   string(3) "php"

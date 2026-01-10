@@ -20,7 +20,7 @@ echo "Done\n";
 --EXPECTF--
 SELECTING from invalid table
 
-Warning: SQLite3::query(): Unable to prepare statement: 1, no such table: non_existent_table in %s on line %d
+Warning: SQLite3::query(): Unable to prepare statement: no such table: non_existent_table in %s on line %d
 Error Code: 1
 Error Msg: no such table: non_existent_table
 Closing database

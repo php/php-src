@@ -7,8 +7,9 @@ if (substr(PHP_OS, 0, 3) == "WIN") die("skip non windows test");
 ?>
 --FILE--
 <?php
-$php = getenv("TEST_PHP_EXECUTABLE");
+$php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 $ini_file = __DIR__ . "/bug74600.ini";
+$ini_file_escaped = escapeshellarg($ini_file);
 file_put_contents($ini_file, <<<INI
 [PHP]\n;\rs=\000\000=\n;\r[PATH\000]\000\376 =\n
 INI
@@ -19,7 +20,7 @@ $desc = array(
     2 => array("pipe", "w"),
 );
 $pipes = array();
-$proc = proc_open("$php -c $ini_file -r 'echo \"okey\";'", $desc, $pipes);
+$proc = proc_open("$php -c $ini_file_escaped -r 'echo \"okey\";'", $desc, $pipes);
 if (!$proc) {
     exit(1);
 }

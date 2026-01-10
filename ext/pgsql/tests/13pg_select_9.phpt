@@ -4,19 +4,23 @@ PostgreSQL pg_select() (9.0+)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_server_version('9.0', '<');
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = "table_13pg_select_9";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1234, 'AAA', 'BBB')");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1234, 'AAA', 'BBB')");
+
 pg_query($db, "SET bytea_output = 'hex'");
 
-$fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
 $ids = array('num'=>'1234');
 
 $res = pg_select($db, $table_name, $ids) or print "Error\n";
@@ -55,6 +59,14 @@ try {
 echo "Ok\n";
 
 ?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_13pg_select_9";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
+?>
 --EXPECT--
 array(2) {
   [0]=>
@@ -76,8 +88,8 @@ array(2) {
     string(8) "\x424242"
   }
 }
-SELECT * FROM "php_pgsql_test" WHERE "num"=1234;
-SELECT * FROM "php_pgsql_test" WHERE "num"='1234';
+SELECT * FROM "table_13pg_select_9" WHERE "num"=1234;
+SELECT * FROM "table_13pg_select_9" WHERE "num"='1234';
 Array of values must be an associative array with string keys
 Array of values must be an associative array with string keys
 Values must be of type string|int|float|bool|null, array given

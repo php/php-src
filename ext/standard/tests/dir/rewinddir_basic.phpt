@@ -76,6 +76,14 @@ NULL
 bool(true)
 
 -- Read and rewind second directory (no argument supplied) --
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 array(3) {
   [0]=>
   string(1) "."
@@ -84,5 +92,9 @@ array(3) {
   [2]=>
   string(9) "file2.tmp"
 }
+
+Deprecated: rewinddir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 NULL
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 bool(true)

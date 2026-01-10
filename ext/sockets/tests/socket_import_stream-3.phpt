@@ -15,6 +15,7 @@ $so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
 ));
 if ($so === false)
     die("SKIP joining group 224.0.0.23 on interface lo failed");
+?>
 --FILE--
 <?php
 
@@ -33,7 +34,7 @@ $br = socket_bind($sendsock, '127.0.0.1');
 $so = socket_sendto($sendsock, $m = "my message", strlen($m), 0, "224.0.0.23", 58379);
 var_dump($so);
 
-stream_set_blocking($stream, 0);
+stream_set_blocking($stream, false);
 var_dump(fread($stream, strlen($m)));
 echo "Done.\n";
 ?>

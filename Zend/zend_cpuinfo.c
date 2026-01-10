@@ -73,7 +73,7 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 }
 #endif
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_X64) || defined(_M_IX86)
 /* Function based on compiler-rt implementation. */
 static unsigned get_xcr0_eax(void) {
 # if defined(__GNUC__) || defined(__clang__)
@@ -93,21 +93,21 @@ static unsigned get_xcr0_eax(void) {
 static bool is_avx_supported(void) {
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
 		/* No support for AVX */
-		return 0;
+		return false;
 	}
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_OSXSAVE)) {
 		/* The operating system does not support XSAVE. */
-		return 0;
+		return false;
 	}
 	if ((get_xcr0_eax() & 0x6) != 0x6) {
 		/* XCR0 SSE and AVX bits must be set. */
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 #else
 static bool is_avx_supported(void) {
-	return 0;
+	return false;
 }
 #endif
 

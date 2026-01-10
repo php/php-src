@@ -31,5 +31,5 @@ var_dump($data);
 --EXPECTF--
 Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
 
-Notice: unserialize(): Error at offset 55 of 56 bytes in %s on line %d
+Warning: unserialize(): Error at offset 55 of 56 bytes in %s on line %d
 bool(false)

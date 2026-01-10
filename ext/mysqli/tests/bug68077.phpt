@@ -22,7 +22,7 @@ mysqli.max_persistent=1
 open_basedir=
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     ini_set("open_basedir", __DIR__);
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
@@ -61,7 +61,7 @@ open_basedir=
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

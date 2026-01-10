@@ -8,7 +8,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --EXTENSIONS--
 opcache
@@ -24,5 +23,5 @@ function test($char_code) {
 echo test(65), "\n";
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
+Warning: The float 4294967168 is not representable as an int, cast occurred in %s on line %d
 correct

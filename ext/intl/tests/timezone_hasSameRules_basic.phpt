@@ -4,7 +4,6 @@ IntlTimeZone::hasSameRules(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 $prt = IntlTimeZone::createTimeZone('Portugal');
@@ -28,4 +27,4 @@ Europe/Lisbon has same rules as Portugal:
 bool(true)
 
 Europe/Lisbon has same rules as Atlantic/Azores:
-bool(false)
+bool(false)

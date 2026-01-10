@@ -4,7 +4,9 @@ imagecreatefromstring() - BMP format
 gd
 --SKIPIF--
 <?php
-if (!(imagetypes() & IMG_BMP)) die('skip BMP support required');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -19,7 +21,7 @@ $bmp = "\x42\x4D\x3E\x00\x00\x00\x00\x00\x00\x00\x3E\x00\x00\x00\x28\x00"
      . "\x01\x00\x05\x00\x00\x00\x02\x00\x01\x01\x01\x00\x06\x00\x00\x00"
      . "\x0A\x00\x00\x00\x0A\x00\x00\x00\x00\x01";
 $im = imagecreatefromstring($bmp);
-
+imagepalettetotruecolor($im);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/imagecreatefromstring_bmp.png', $im);
 ?>

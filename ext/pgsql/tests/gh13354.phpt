@@ -3,10 +3,10 @@ GH-13354 (null-by-reference handling in pg_execute, pg_send_query_params, pg_sen
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include 'config.inc';
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 $val = null;

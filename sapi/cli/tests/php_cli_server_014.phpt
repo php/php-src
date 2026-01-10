@@ -1,5 +1,5 @@
 --TEST--
-Bug #60477: Segfault after two multipart/form-data POST requestes
+Bug #60477: Segfault after two multipart/form-data POST requests
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -61,12 +61,11 @@ X-Powered-By: %s
 Content-type: %s
 
 done
-HTTP/1.1 404 Not Found
+HTTP/1.1 200 OK
 Host: %s
 Date: %s
 Connection: close
-Content-Type: %s
-Content-Length: %d
+X-Powered-By: PHP/%s
+Content-type: %s
 
-<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/no-exists.php</code> was not found on this server.</p></body></html>
+done

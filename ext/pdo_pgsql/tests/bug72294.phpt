@@ -1,7 +1,6 @@
 --TEST--
 Bug #72294 Segmentation fault/invalid pointer in connection with pgsql_stmt_dtor
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -27,7 +26,7 @@ abstract class PHPUnit_Framework_TestCase
     private $name = null;
     private $result;
 
-    public function run(PHPUnit_Framework_TestResult $result = null)
+    public function run(?PHPUnit_Framework_TestResult $result = null)
     {
         $result->run($this);
     }
@@ -131,11 +130,11 @@ SQL
     {
     $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-    $pdo->exec( 'CREATE TEMPORARY TABLE temp_table ( test_column INT NOT NULL );' );
+    $pdo->exec( 'CREATE TEMPORARY TABLE test72294 ( test_column INT NOT NULL );' );
 
     $this->cache = new PreparedStatementCache( $pdo );
 
-    $statement = $this->cache->prepare( $pdo, 'SELECT * FROM temp_table WHERE test_column > 0' );
+    $statement = $this->cache->prepare( $pdo, 'SELECT * FROM test72294 WHERE test_column > 0' );
     $statement->execute();
     }
 }

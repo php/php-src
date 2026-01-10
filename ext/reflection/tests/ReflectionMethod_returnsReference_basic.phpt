@@ -11,10 +11,10 @@ class TestClass {
     }
 }
 
-$methodInfo = new ReflectionMethod('TestClass::foo');
+$methodInfo = ReflectionMethod::createFromMethodName('TestClass::foo');
 var_dump($methodInfo->returnsReference());
 
-$methodInfo = new ReflectionMethod('TestClass::bar');
+$methodInfo = ReflectionMethod::createFromMethodName('TestClass::bar');
 var_dump($methodInfo->returnsReference());
 
 ?>

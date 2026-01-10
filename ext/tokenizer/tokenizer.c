@@ -15,11 +15,10 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_tokenizer.h"
 
@@ -38,7 +37,7 @@
 #define zendcursor LANG_SCNG(yy_cursor)
 #define zendlimit  LANG_SCNG(yy_limit)
 
-zend_class_entry *php_token_ce;
+static zend_class_entry *php_token_ce;
 
 /* {{{ tokenizer_module_entry */
 zend_module_entry tokenizer_module_entry = {
@@ -187,13 +186,13 @@ PHP_METHOD(PhpToken, is)
 					RETURN_TRUE;
 				}
 			} else {
-				zend_argument_type_error(1, "must only have elements of type string|int, %s given", zend_zval_type_name(entry));
+				zend_argument_type_error(1, "must only have elements of type string|int, %s given", zend_zval_value_name(entry));
 				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 		RETURN_FALSE;
 	} else {
-		zend_argument_type_error(1, "must be of type string|int|array, %s given", zend_zval_type_name(kind));
+		zend_argument_type_error(1, "must be of type string|int|array, %s given", zend_zval_value_name(kind));
 		RETURN_THROWS();
 	}
 }
@@ -281,7 +280,7 @@ static zend_string *make_str(unsigned char *text, size_t leng, HashTable *intern
 }
 
 static void add_token(
-		zval *return_value, int token_type, unsigned char *text, size_t leng, int lineno,
+		HashTable *return_value_ht, int token_type, unsigned char *text, size_t leng, int lineno,
 		zend_class_entry *token_class, HashTable *interned_strings) {
 	zval token;
 	if (token_class) {
@@ -316,7 +315,7 @@ static void add_token(
 	} else {
 		ZVAL_STR(&token, make_str(text, leng, interned_strings));
 	}
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
+	zend_hash_next_index_insert_new(return_value_ht, &token);
 }
 
 static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
@@ -338,11 +337,13 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	zend_hash_init(&interned_strings, 0, NULL, NULL, 0);
 	array_init(return_value);
 
+	HashTable *return_value_ht = Z_ARRVAL_P(return_value);
+
 	while ((token_type = lex_scan(&token, NULL))) {
 		ZEND_ASSERT(token_type != T_ERROR);
 
 		add_token(
-			return_value, token_type, zendtext, zendleng, token_line,
+			return_value_ht, token_type, zendtext, zendleng, token_line,
 			token_class, &interned_strings);
 
 		if (Z_TYPE(token) != IS_UNDEF) {
@@ -359,7 +360,7 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 				/* fetch the rest into a T_INLINE_HTML */
 				if (zendcursor < zendlimit) {
 					add_token(
-						return_value, T_INLINE_HTML, zendcursor, zendlimit - zendcursor,
+						return_value_ht, T_INLINE_HTML, zendcursor, zendlimit - zendcursor,
 						token_line, token_class, &interned_strings);
 				}
 				break;
@@ -380,11 +381,11 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	zend_restore_lexical_state(&original_lex_state);
 	zend_hash_destroy(&interned_strings);
 
-	return 1;
+	return true;
 }
 
 struct event_context {
-	zval *tokens;
+	HashTable *tokens;
 	zend_class_entry *token_class;
 };
 
@@ -410,7 +411,7 @@ static zval *extract_token_id_to_replace(zval *token_zv, const char *text, size_
 	return NULL;
 }
 
-void on_event(
+static void on_event(
 		zend_php_scanner_event event, int token, int line,
 		const char *text, size_t length, void *context)
 {
@@ -429,7 +430,7 @@ void on_event(
 				ctx->tokens, token, (unsigned char *) text, length, line, ctx->token_class, NULL);
 			break;
 		case ON_FEEDBACK: {
-			HashTable *tokens_ht = Z_ARRVAL_P(ctx->tokens);
+			HashTable *tokens_ht = ctx->tokens;
 			zval *token_zv, *id_zv = NULL;
 			ZEND_HASH_REVERSE_FOREACH_VAL(tokens_ht, token_zv) {
 				id_zv = extract_token_id_to_replace(token_zv, text, length);
@@ -470,7 +471,7 @@ static bool tokenize_parse(
 	zend_prepare_string_for_scanning(&source_zval, ZSTR_EMPTY_ALLOC());
 	array_init(&token_stream);
 
-	ctx.tokens = &token_stream;
+	ctx.tokens = Z_ARRVAL(token_stream);
 	ctx.token_class = token_class;
 
 	CG(ast) = NULL;

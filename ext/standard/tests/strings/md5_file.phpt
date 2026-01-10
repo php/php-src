@@ -64,7 +64,7 @@ echo "\nDone";
 ?>
 --EXPECTF--
 *** Testing for error conditions ***
-Path cannot be empty
+Path must not be empty
 
 Warning: md5_file(aZrq16u): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

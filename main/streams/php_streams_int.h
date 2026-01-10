@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed; FIXME but unfortunately is */
+
 #if ZEND_DEBUG
 
 #define emalloc_rel_orig(size)	\

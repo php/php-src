@@ -4,8 +4,6 @@ IntlCalendar::setTimeZone() basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('Europe/Amsterdam');
 print_r($intlcal->getTimeZone()->getID());

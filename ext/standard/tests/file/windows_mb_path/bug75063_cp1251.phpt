@@ -2,12 +2,8 @@
 Bug #75063 Many filesystem-related functions do not work with multibyte file names, cp1251
 --SKIPIF--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
 ?>
 --INI--
 default_charset=cp1251
@@ -49,7 +45,7 @@ CODE;
 $code_fn = "code.php";
 file_put_contents($code_fn, $code);
 
-print(shell_exec(getenv('TEST_PHP_EXECUTABLE') . " -n -d default_charset=cp1251 -f code.php"));
+print(shell_exec(getenv('TEST_PHP_EXECUTABLE_ESCAPED') . " -n -d default_charset=cp1251 -f code.php"));
 
 chdir($old_cwd);
 

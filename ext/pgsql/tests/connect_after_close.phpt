@@ -3,10 +3,10 @@ Reopen connection after it was closed
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include('config.inc');
+include('inc/config.inc');
 
 /* Run me under valgrind */
 $db1 = pg_connect($conn_str);

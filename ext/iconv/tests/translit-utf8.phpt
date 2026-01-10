@@ -4,7 +4,7 @@ Translit UTF-8 quotes
 iconv
 --SKIPIF--
 <?php
-( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\"");
+( ICONV_IMPL != "libiconv" && ICONV_IMPL != "\"libiconv\"" ) and die("skip ICONV_IMPL != \"libiconv\"");
 ?>
 --INI--
 error_reporting=2047

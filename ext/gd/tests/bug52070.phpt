@@ -2,6 +2,12 @@
 Bug #52070 (imagedashedline() - dashed line sometimes is not visible)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 $im = imagecreate(1200, 800);
@@ -14,6 +20,7 @@ imagedashedline($im, 800, 400, 500, 800, $color);
 imagedashedline($im, 800, 400, 600, 800, $color);
 imagedashedline($im, 800, 400, 700, 800, $color);
 imagedashedline($im, 800, 400, 800, 800, $color);
+imagepalettetotruecolor($im);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/bug52070.png', $im);
 ?>

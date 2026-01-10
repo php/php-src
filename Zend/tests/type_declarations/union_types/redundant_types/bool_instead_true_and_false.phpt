@@ -8,4 +8,4 @@ function test(): true|false {
 
 ?>
 --EXPECTF--
-Fatal error: Type contains both true and false, bool should be used instead in %s on line %d
+Fatal error: Type contains both true and false, bool must be used instead in %s on line %d

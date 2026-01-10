@@ -22,12 +22,8 @@ function test($input) {
 
     $proc = new XsltProcessor();
     $proc->registerPhpFunctions();
-    $xsl = $proc->importStylesheet($xsl);
-    try {
-        $proc->transformToDoc($inputdom);
-    } catch (Exception $e) {
-        echo $e->getMessage(), "\n";
-    }
+    $proc->importStylesheet($xsl);
+    $proc->transformToDoc($inputdom);
 }
 
 try {
@@ -36,10 +32,13 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-test("3");
+try {
+    test("3");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 Function name must be passed as the first argument
-
-Warning: XSLTProcessor::transformToDoc(): Handler name must be a string in %s on line %d
+Handler name must be a string

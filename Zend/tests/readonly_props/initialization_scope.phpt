@@ -22,12 +22,10 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
-try {
-    $test->initProtected();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->initProtected();
+var_dump($test);
 
+$test = new B;
 $test->initPrivate();
 var_dump($test->prop);
 
@@ -56,17 +54,20 @@ class Y extends X {
 }
 
 $test = new Y;
-try {
-    $test->initFromParent();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$test->initFromParent();
+var_dump($test);
 
 ?>
---EXPECT--
-Cannot initialize readonly property A::$prop from global scope
-Cannot initialize readonly property A::$prop from scope B
+--EXPECTF--
+Cannot modify protected(set) readonly property A::$prop from global scope
+object(B)#%d (1) {
+  ["prop"]=>
+  int(2)
+}
 int(3)
 int(1)
 int(3)
-Cannot initialize readonly property Y::$prop from scope X
+object(Y)#%d (1) {
+  ["prop"]=>
+  int(1)
+}

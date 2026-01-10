@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
     if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
@@ -38,7 +41,6 @@ $color1 = imagecolorsforindex($image, $col1);
 $color2 = imagecolorsforindex($image, $col2);
 var_dump($color1, $color2);
 
-imagedestroy($image);
 echo "Done\n";
 ?>
 --CLEAN--

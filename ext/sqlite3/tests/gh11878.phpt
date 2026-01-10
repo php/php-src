@@ -10,10 +10,13 @@ class Foo {
         $this->sqlite = new SQLite3(":memory:");
         if ($aggregates) {
             $this->sqlite->createAggregate("indexes", array($this, "SQLiteIndex"), array($this, "SQLiteFinal"), 0);
+            $this->sqlite->createAggregate("indexes_closure", fn () => 0, fn () => 0, 0);
         }
         if ($normalFunctions) {
             $this->sqlite->createFunction("func", array($this, "SQLiteIndex"), 0);
+            $this->sqlite->createFunction("func_closure", fn () => 0, 0);
             $this->sqlite->createCollation("collation", array($this, "SQLiteIndex"));
+            $this->sqlite->createCollation("collation_closure", fn () => 0);
         }
     }
     public function SQLiteIndex() {}

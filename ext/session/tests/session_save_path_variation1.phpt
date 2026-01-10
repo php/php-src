@@ -40,7 +40,7 @@ string(%d) "%stests"
 bool(true)
 string(%d) "%stests"
 
-Warning: session_save_path(): Session save path cannot be changed when a session is active in %s on line %d
+Warning: session_save_path(): Session save path cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 string(%d) "%stests"
 bool(true)

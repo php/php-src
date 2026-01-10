@@ -11,12 +11,12 @@ require_once "payload_server.inc";
 $address = run_server(__DIR__ . "/bug_76452.data");
 
 // no need to change the credentials; we're running against a falke server
-$dsn = "firebird:dbname=inet://$address/test";
+$dsn = "firebird:dbname=inet://$address/test76452";
 $username = 'SYSDBA';
 $password = 'masterkey';
 
 $dbh = new PDO($dsn, $username, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-$query = $dbh->prepare("select * from test");
+$query = $dbh->prepare("SELECT * FROM test76452");
 $query->execute();
 var_dump($query->fetch());
 ?>

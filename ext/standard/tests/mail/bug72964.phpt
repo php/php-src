@@ -1,77 +1,64 @@
 --TEST--
 Bug #72964 (White space not unfolded for CC/Bcc headers)
---EXTENSIONS--
-imap
---CONFLICTS--
-imap
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
-require_once __DIR__ . '/mail_skipif.inc';
+require_once __DIR__.'/mail_windows_skipif.inc';
 ?>
 --INI--
 SMTP=localhost
 smtp_port=25
+sendmail_from=from@example.com
 --FILE--
 <?php
-require_once __DIR__ . '/mail_include.inc';
 
-function find_and_delete_message($username, $subject) {
-    global $default_mailbox, $password;
+require_once __DIR__.'/mail_util.inc';
+$users = MailBox::USERS;
 
-    $imap_stream = imap_open($default_mailbox, $username, $password);
-    if ($imap_stream === false) {
-        die("Cannot connect to IMAP server $server: " . imap_last_error() . "\n");
-    }
-
-    $found = false;
-    $repeat_count = 20; // we will repeat a max of 20 times
-    while (!$found && $repeat_count > 0) {
-        // sleep for a while to allow msg to be delivered
-        sleep(1);
-    
-        $num_messages = imap_check($imap_stream)->Nmsgs;
-        for ($i = $num_messages; $i > 0; $i--) {
-            $info = imap_headerinfo($imap_stream, $i);
-            if ($info->subject === $subject) {
-                imap_delete($imap_stream, $i);
-                $found = true;
-                break;
-            }
-        }
-        $repeat_count--;
-    }
-
-    imap_close($imap_stream, CL_EXPUNGE);
-    return $found;
-}
-
-$to = "{$users[2]}@$domain";
-$subject = bin2hex(random_bytes(16));
+$to = $users[0];
+$from = ini_get('sendmail_from');
+$cc = ['cc1' => $users[0], 'cc2' => $users[1]];
+$bcc = ['bcc1' => $users[2], 'bcc2' => $users[3]];
+$subject = 'mail_bug72964';
 $message = 'hello';
-$headers = "From: webmaster@example.com\r\n"
-    . "Cc: {$users[0]}@$domain,\r\n\t{$users[1]}@$domain\r\n"
-    . "Bcc: {$users[2]}@$domain,\r\n {$users[3]}@$domain\r\n";
+$headers = "From: {$from}\r\n"
+    . "Cc: {$cc['cc1']},\r\n\t{$cc['cc2']}\r\n"
+    . "Bcc: {$bcc['bcc1']},\r\n {$bcc['bcc2']}\r\n";
 
 $res = mail($to, $subject, $message, $headers);
+
 if ($res !== true) {
-	die("TEST FAILED : Unable to send test email\n");
-} else {
-	echo "Message sent OK\n";
+    die("Unable to send the email.\n");
 }
 
-foreach ($users as $user) {
-    if (!find_and_delete_message("$user@$domain", $subject)) {
-        echo "TEST FAILED: email not delivered\n";
-    } else {
-        echo "TEST PASSED: Message sent and deleted OK\n";
+echo "Email sent.\n";
+
+foreach ([['to' => $to], $cc, $bcc] as $mailAddresses) {
+    foreach ($mailAddresses as $recipient => $mailAddress) {
+        $mailBox = MailBox::login($mailAddress);
+        $mail = $mailBox->getMailsBySubject($subject);
+        $mailBox->logout();
+
+        if ($mail->isAsExpected($from, $to, $subject, $message)) {
+            echo "Found the email. {$recipient} received.\n";
+        }
     }
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mail_util.inc';
+$subject = 'mail_bug72964';
+foreach (MailBox::USERS as $mailAddress) {
+    $mailBox = MailBox::login($mailAddress);
+    $mailBox->deleteMailsBySubject($subject);
+    $mailBox->logout();
+}
+?>
 --EXPECT--
-Message sent OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
+Email sent.
+Found the email. to received.
+Found the email. cc1 received.
+Found the email. cc2 received.
+Found the email. bcc1 received.
+Found the email. bcc2 received.

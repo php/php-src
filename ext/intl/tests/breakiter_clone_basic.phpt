@@ -4,7 +4,6 @@ IntlBreakIterator: clone handler
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $bi = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+;');
 $bi_clone = clone $bi;

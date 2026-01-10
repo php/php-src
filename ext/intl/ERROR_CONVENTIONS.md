@@ -75,7 +75,7 @@ and `intl_get_error_message()`.
   parsing errors), not `NULL`. Constructors and factory methods are the
   exception; these should return `NULL`, not `FALSE`.
 
-Not that constructors in Intl generally (always?) don't throws exceptions. They
+Note that constructors in Intl generally (always?) don't throws exceptions. They
 instead destroy the object to that the result of new `IntlClass()` can be
 `NULL`. This may be surprising.
 

@@ -67,8 +67,7 @@ struct _zend_ssa_phi {
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */
-	int                    visited : 1;   /* flag to avoid recursive processing */
-	int                    has_range_constraint : 1;
+	bool                   has_range_constraint;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
 	int                   *sources;       /* Array of SSA IDs that produce this var.
@@ -109,28 +108,28 @@ typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
 	int                    scc;            /* strongly connected component */
 	int                    definition;     /* opcode that defines this value */
-	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
+	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
 	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
-	unsigned int           no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
-	unsigned int           scc_entry : 1;
+	bool                   no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
+	bool                   scc_entry : 1;
 	unsigned int           alias : 2;  /* value may be changed indirectly */
 	unsigned int           escape_state : 2;
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
 	uint32_t               type; /* inferred type (see zend_inference.h) */
+	bool                   has_range : 1;
+	bool                   is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
+	bool                   recursive : 1;
+	bool                   use_as_double : 1;
+	bool                   delayed_fetch_this : 1;
+	bool                   avoid_refcounting : 1;
+	bool                   guarded_reference : 1;
+	bool                   indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
 	zend_ssa_range         range;
 	zend_class_entry      *ce;
-	unsigned int           has_range : 1;
-	unsigned int           is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
-	unsigned int           recursive : 1;
-	unsigned int           use_as_double : 1;
-	unsigned int           delayed_fetch_this : 1;
-	unsigned int           avoid_refcounting : 1;
-	unsigned int           guarded_reference : 1;
-	unsigned int           indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
 } zend_ssa_var_info;
 
 typedef struct _zend_ssa {
@@ -148,15 +147,15 @@ BEGIN_EXTERN_C()
 ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
 ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var);
-void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
-void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var);
+void zend_ssa_unlink_use_chain(const zend_ssa *ssa, int op, int var);
+void zend_ssa_replace_use_chain(const zend_ssa *ssa, int op, int new_op, int var);
 
 void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op);
-void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
-void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
-void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
-void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int b);
+void zend_ssa_remove_instr(const zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
+void zend_ssa_remove_phi(const zend_ssa *ssa, zend_ssa_phi *phi);
+void zend_ssa_remove_uses_of_var(const zend_ssa *ssa, int var_num);
+void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, int b);
 void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, bool update_types);
 void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int b);
 
@@ -241,21 +240,21 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 	/* Rename def to use if possible. Mark variable as not defined otherwise. */
 	if (ssa_op->op1_def >= 0) {
 		if (ssa_op->op1_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, true);
 		}
 		ssa->vars[ssa_op->op1_def].definition = -1;
 		ssa_op->op1_def = -1;
 	}
 	if (ssa_op->op2_def >= 0) {
 		if (ssa_op->op2_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, true);
 		}
 		ssa->vars[ssa_op->op2_def].definition = -1;
 		ssa_op->op2_def = -1;
 	}
 	if (ssa_op->result_def >= 0) {
 		if (ssa_op->result_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, true);
 		}
 		ssa->vars[ssa_op->result_def].definition = -1;
 		ssa_op->result_def = -1;

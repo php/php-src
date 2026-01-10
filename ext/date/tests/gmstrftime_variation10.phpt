@@ -35,16 +35,16 @@ foreach($inputs as $key =>$value) {
 
 --The ISO 8601:1988 week number--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(2) "32"
 
 --Weekday as decimal--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(1) "5"

@@ -28,8 +28,8 @@ var_dump(class_exists('autoload_implements', false));
 --EXPECTF--
 bool(false)
 bool(false)
-{closure}(autoload_interface)
-{closure}(Autoload_Implements)
+{closure:%s:%d}(autoload_interface)
+{closure:%s:%d}(Autoload_Implements)
 object(autoload_implements)#%d (0) {
 }
 bool(true)

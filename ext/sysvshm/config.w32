@@ -3,6 +3,6 @@
 ARG_ENABLE('sysvshm', 'SysV Shared Memory support', 'no');
 
 if (PHP_SYSVSHM != 'no') {
-	AC_DEFINE('HAVE_SYSVSHM', 1);
+	AC_DEFINE('HAVE_SYSVSHM', 1, "Define to 1 if the PHP extension 'sysvshm' is available.");
 	EXTENSION('sysvshm', 'sysvshm.c');
 }

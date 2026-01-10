@@ -4,7 +4,7 @@ mysqli_stmt_bind_param()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -17,9 +17,7 @@ require_once('skipifconnectfailure.inc');
     in this file and we test mysqli_stmt_bind_result() in the other
     test -- therefore the "duplicate" makes some sense to me.
     */
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     $stmt = mysqli_stmt_init($link);
     if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
@@ -350,7 +348,7 @@ require_once('skipifconnectfailure.inc');
         printf("[2002] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     mysqli_stmt_close($stmt);
-    include("table.inc");
+    include 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[2003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -384,14 +382,14 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
         printf("[2010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-        foreach ($value_list as $k => $values) {
+        foreach ($value_list as $values) {
         if (!mysqli_stmt_bind_param($stmt, 'is', $values['id'], $values['label'])) {
             printf("[2011] bind_param() failed for id = %d, [%d] %s\n",
                 $values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
             continue;
         }
         if (!$stmt->execute())
-            printf("[2012] [%d] execute() failed for id = %d, [%d] %s\n",
+            printf("[2012] execute() failed for id = %d, [%d] %s\n",
                 $values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
         if (!$res = mysqli_query($link, sprintf("SELECT label FROM test WHERE id = %d", $values['id'])))
@@ -411,11 +409,11 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 The number of variables must match the number of parameters in the prepared statement
-mysqli_stmt_bind_param(): Argument #2 ($types) cannot be empty
+mysqli_stmt_bind_param(): Argument #2 ($types) must not be empty
 The number of elements in the type definition string must match the number of bind variables
 The number of variables must match the number of parameters in the prepared statement
 The number of elements in the type definition string must match the number of bind variables

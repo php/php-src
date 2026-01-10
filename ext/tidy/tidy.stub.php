@@ -1004,4 +1004,8 @@ final class tidyNode
     public function isPhp(): bool {}
 
     public function getParent(): ?tidyNode {}
+
+    public function getPreviousSibling(): ?tidyNode {}
+
+    public function getNextSibling(): ?tidyNode {}
 }

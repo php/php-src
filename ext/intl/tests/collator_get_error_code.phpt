@@ -36,9 +36,6 @@ function ut_main()
     return $res;
 }
 
-# Suppress warning messages.
-error_reporting( E_ERROR );
-
 include_once( 'ut_common.inc' );
 ut_run();
 ?>

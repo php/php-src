@@ -11,7 +11,7 @@ Bug #61546 (functions related to current script failed when chdir() in cli sapi)
 // the ext/standard/tests/file/statpage.phpt test also tests getmyinode() returns an integer and will
 // pass even if that integer is 0. on Windows, the getmyinode() call in statpage.phpt returns 0 and
 // passes on Windows.
-$php = getenv("TEST_PHP_EXECUTABLE");
+$php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 $test_code = <<<PHP
 <?php
 chdir('..');

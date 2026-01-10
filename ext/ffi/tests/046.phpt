@@ -51,18 +51,27 @@ var_dump($x->getPointerType()->getFuncParameterCount());
 var_dump($x->getPointerType()->getFuncParameterType(0)->getKind() === $x::TYPE_DOUBLE);
 var_dump($x->getPointerType()->getFuncParameterType(1)->getKind() === $x::TYPE_SINT32);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 int(1)
 int(1)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 bool(true)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 int(5)
 bool(true)
 int(5)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 bool(true)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 bool(false)
 array(2) {
@@ -75,6 +84,8 @@ int(0)
 int(8)
 bool(true)
 bool(true)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 bool(true)
 array(2) {
@@ -87,6 +98,8 @@ int(0)
 int(0)
 bool(true)
 bool(true)
+
+Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)

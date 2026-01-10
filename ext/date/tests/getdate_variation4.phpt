@@ -1,5 +1,5 @@
 --TEST--
-Test getdate() function : usage variation - Verifyig by supplying year-wise sample time stamps since Unix epoch time
+Test getdate() function : usage variation - Verifying by supplying year-wise sample time stamps since Unix epoch time
 --FILE--
 <?php
 echo "*** Testing getdate() : usage variation ***\n";

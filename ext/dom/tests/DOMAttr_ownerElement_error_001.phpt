@@ -14,11 +14,7 @@ $document->appendChild($root);
 $attr = $root->setAttribute('category', 'books');
 $document->removeChild($root);
 $root = null;
-try {
-    var_dump($attr->ownerElement);
-} catch (\Error $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
-}
+var_dump($attr->ownerElement);
 ?>
 --EXPECT--
-Error: Couldn't fetch DOMAttr. Node no longer exists
+NULL

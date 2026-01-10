@@ -4,6 +4,9 @@ Bug #79945 (using php wrappers in imagecreatefrompng causes segmentation fault)
 gd
 --SKIPIF--
 <?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 set_error_handler(function($errno, $errstr) {
     if (str_contains($errstr, 'Cannot cast a filtered stream on this system')) {
         die('skip: fopencookie not support on this system');

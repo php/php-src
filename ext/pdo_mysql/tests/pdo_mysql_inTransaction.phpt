@@ -4,12 +4,12 @@ MySQL PDO class inTransaction
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 const BEGIN = ['BEGIN', 'START TRANSACTION'];
 const END = ['COMMIT', 'ROLLBACK'];
@@ -62,7 +62,7 @@ echo "\n";
 // DDL query causes an implicit commit.
 $db->beginTransaction();
 var_dump($db->inTransaction());
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_inTransaction');
 var_dump($db->inTransaction());
 
 // We should be able to start a new transaction after the implicit commit.

@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -44,16 +44,16 @@ PHP_METHOD(DOMEntityReference, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	node = xmlNewReference(NULL, (xmlChar *) name);
+	node = xmlNewReference(NULL, BAD_CAST name);
 
 	if (!node) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -80,46 +80,27 @@ xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr referenc
 	return entity;
 }
 
-int dom_entity_reference_child_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlEntityPtr entity = dom_entity_reference_fetch_and_sync_declaration(nodep);
-	if (entity == NULL) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object((xmlNodePtr) entity, retval, obj);
+	php_dom_create_nullable_object((xmlNodePtr) entity, retval, obj);
 	return SUCCESS;
 }
 
-int dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	dom_entity_reference_fetch_and_sync_declaration(nodep);
 	return dom_node_text_content_read(obj, retval);
 }
 
-int dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	dom_entity_reference_fetch_and_sync_declaration(nodep);
 	return dom_node_child_nodes_read(obj, retval);

@@ -8,6 +8,14 @@ class stdClass
 }
 
 /** @refcount 1 */
+function clone(object $object, array $withProperties = []): object {}
+
+function exit(string|int $status = 0): never {}
+
+/** @alias exit */
+function die(string|int $status = 0): never {}
+
+/** @refcount 1 */
 function zend_version(): string {}
 
 function func_num_args(): int {}
@@ -68,9 +76,16 @@ function get_class_methods(object|string $object_or_class): array {}
 /** @param object|string $object_or_class */
 function method_exists($object_or_class, string $method): bool {}
 
-/** @param object|string $object_or_class */
+/**
+ * @param object|string $object_or_class
+ * @frameless-function {"arity": 2}
+ */
 function property_exists($object_or_class, string $property): bool {}
 
+/**
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function class_exists(string $class, bool $autoload = true): bool {}
 
 function interface_exists(string $interface, bool $autoload = true): bool {}
@@ -95,20 +110,24 @@ function get_included_files(): array {}
  */
 function get_required_files(): array {}
 
-function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool {}
+function trigger_error(string $message, int $error_level = E_USER_NOTICE): true {}
 
 /** @alias trigger_error */
-function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
+function user_error(string $message, int $error_level = E_USER_NOTICE): true {}
 
 /** @return callable|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 function restore_error_handler(): true {}
 
+function get_error_handler(): ?callable {}
+
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
 function restore_exception_handler(): true {}
+
+function get_exception_handler(): ?callable {}
 
 /**
  * @return array<int, string>
@@ -194,7 +213,7 @@ function gc_enable(): void {}
 function gc_disable(): void {}
 
 /**
- * @return array<string, int>
+ * @return array<string, int|float|bool>
  * @refcount 1
  */
 function gc_status(): array {}

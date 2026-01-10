@@ -7,214 +7,91 @@ class UConverter
 {
     /* enum UConverterCallbackReason */
 
-    /**
-     * @var int
-     * @cvalue UCNV_UNASSIGNED
-     */
-    public const REASON_UNASSIGNED = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_ILLEGAL
-     */
-    public const REASON_ILLEGAL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_IRREGULAR
-     */
-    public const REASON_IRREGULAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_RESET
-     */
-    public const REASON_RESET = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_CLOSE
-     */
-    public const REASON_CLOSE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_CLONE
-     */
-    public const REASON_CLONE = UNKNOWN;
+    /** @cvalue UCNV_UNASSIGNED */
+    public const int REASON_UNASSIGNED = UNKNOWN;
+    /** @cvalue UCNV_ILLEGAL */
+    public const int REASON_ILLEGAL = UNKNOWN;
+    /** @cvalue UCNV_IRREGULAR */
+    public const int REASON_IRREGULAR = UNKNOWN;
+    /** @cvalue UCNV_RESET */
+    public const int REASON_RESET = UNKNOWN;
+    /** @cvalue UCNV_CLOSE */
+    public const int REASON_CLOSE = UNKNOWN;
+    /** @cvalue UCNV_CLONE */
+    public const int REASON_CLONE = UNKNOWN;
 
     /* enum UConverterType */
 
-    /**
-     * @var int
-     * @cvalue UCNV_UNSUPPORTED_CONVERTER
-     */
-    public const UNSUPPORTED_CONVERTER = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_SBCS
-     */
-    public const SBCS = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_DBCS
-     */
-    public const DBCS = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_MBCS
-     */
-    public const MBCS = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LATIN_1
-     */
-    public const LATIN_1 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF8
-     */
-    public const UTF8 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF16_BigEndian
-     */
-    public const UTF16_BigEndian = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF16_LittleEndian
-     */
-    public const UTF16_LittleEndian = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF32_BigEndian
-     */
-    public const UTF32_BigEndian = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF32_LittleEndian
-     */
-    public const UTF32_LittleEndian = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_EBCDIC_STATEFUL
-     */
-    public const EBCDIC_STATEFUL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_ISO_2022
-     */
-    public const ISO_2022 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_1
-     */
-    public const LMBCS_1 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_2
-     */
-    public const LMBCS_2 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_3
-     */
-    public const LMBCS_3 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_4
-     */
-    public const LMBCS_4 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_5
-     */
-    public const LMBCS_5 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_6
-     */
-    public const LMBCS_6 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_8
-     */
-    public const LMBCS_8 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_11
-     */
-    public const LMBCS_11 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_16
-     */
-    public const LMBCS_16 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_17
-     */
-    public const LMBCS_17 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_18
-     */
-    public const LMBCS_18 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_19
-     */
-    public const LMBCS_19 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_LMBCS_LAST
-     */
-    public const LMBCS_LAST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_HZ
-     */
-    public const HZ = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_SCSU
-     */
-    public const SCSU = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_ISCII
-     */
-    public const ISCII = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_US_ASCII
-     */
-    public const US_ASCII = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF7
-     */
-    public const UTF7 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_BOCU1
-     */
-    public const BOCU1 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF16
-     */
-    public const UTF16 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_UTF32
-     */
-    public const UTF32 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_CESU8
-     */
-    public const CESU8 = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCNV_IMAP_MAILBOX
-     */
-    public const IMAP_MAILBOX = UNKNOWN;
+    /** @cvalue UCNV_UNSUPPORTED_CONVERTER */
+    public const int UNSUPPORTED_CONVERTER = UNKNOWN;
+    /** @cvalue UCNV_SBCS */
+    public const int SBCS = UNKNOWN;
+    /** @cvalue UCNV_DBCS */
+    public const int DBCS = UNKNOWN;
+    /** @cvalue UCNV_MBCS */
+    public const int MBCS = UNKNOWN;
+    /** @cvalue UCNV_LATIN_1 */
+    public const int LATIN_1 = UNKNOWN;
+    /** @cvalue UCNV_UTF8 */
+    public const int UTF8 = UNKNOWN;
+    /** @cvalue UCNV_UTF16_BigEndian */
+    public const int UTF16_BigEndian = UNKNOWN;
+    /** @cvalue UCNV_UTF16_LittleEndian */
+    public const int UTF16_LittleEndian = UNKNOWN;
+    /** @cvalue UCNV_UTF32_BigEndian */
+    public const int UTF32_BigEndian = UNKNOWN;
+    /** @cvalue UCNV_UTF32_LittleEndian */
+    public const int UTF32_LittleEndian = UNKNOWN;
+    /** @cvalue UCNV_EBCDIC_STATEFUL */
+    public const int EBCDIC_STATEFUL = UNKNOWN;
+    /** @cvalue UCNV_ISO_2022 */
+    public const int ISO_2022 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_1 */
+    public const int LMBCS_1 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_2 */
+    public const int LMBCS_2 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_3 */
+    public const int LMBCS_3 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_4 */
+    public const int LMBCS_4 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_5 */
+    public const int LMBCS_5 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_6 */
+    public const int LMBCS_6 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_8 */
+    public const int LMBCS_8 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_11 */
+    public const int LMBCS_11 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_16 */
+    public const int LMBCS_16 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_17 */
+    public const int LMBCS_17 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_18 */
+    public const int LMBCS_18 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_19 */
+    public const int LMBCS_19 = UNKNOWN;
+    /** @cvalue UCNV_LMBCS_LAST */
+    public const int LMBCS_LAST = UNKNOWN;
+    /** @cvalue UCNV_HZ */
+    public const int HZ = UNKNOWN;
+    /** @cvalue UCNV_SCSU */
+    public const int SCSU = UNKNOWN;
+    /** @cvalue UCNV_ISCII */
+    public const int ISCII = UNKNOWN;
+    /** @cvalue UCNV_US_ASCII */
+    public const int US_ASCII = UNKNOWN;
+    /** @cvalue UCNV_UTF7 */
+    public const int UTF7 = UNKNOWN;
+    /** @cvalue UCNV_BOCU1 */
+    public const int BOCU1 = UNKNOWN;
+    /** @cvalue UCNV_UTF16 */
+    public const int UTF16 = UNKNOWN;
+    /** @cvalue UCNV_UTF32 */
+    public const int UTF32 = UNKNOWN;
+    /** @cvalue UCNV_CESU8 */
+    public const int CESU8 = UNKNOWN;
+    /** @cvalue UCNV_IMAP_MAILBOX */
+    public const int IMAP_MAILBOX = UNKNOWN;
 
     public function __construct(?string $destination_encoding = null, ?string $source_encoding = null) {}
 

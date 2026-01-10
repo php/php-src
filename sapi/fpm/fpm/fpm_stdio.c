@@ -153,7 +153,7 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		close(fpm_globals.error_log_fd);
 	}
 	fpm_globals.error_log_fd = -1;
-	zlog_set_fd(-1);
+	zlog_set_fd(-1, 0);
 
 	return 0;
 }
@@ -374,13 +374,14 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		php_openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
 		fpm_globals.error_log_fd = ZLOG_SYSLOG;
 		if (fpm_use_error_log()) {
-			zlog_set_fd(fpm_globals.error_log_fd);
+			zlog_set_fd(fpm_globals.error_log_fd, 0);
 		}
 		return 0;
 	}
 #endif
 
 	fd = open(fpm_global_config.error_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+
 	if (0 > fd) {
 		zlog(ZLOG_SYSERROR, "failed to open error_log (%s)", fpm_global_config.error_log);
 		return -1;
@@ -393,7 +394,11 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	} else {
 		fpm_globals.error_log_fd = fd;
 		if (fpm_use_error_log()) {
-			zlog_set_fd(fpm_globals.error_log_fd);
+			bool is_stderr = (
+				strcmp(fpm_global_config.error_log, "/dev/stderr") == 0 ||
+				strcmp(fpm_global_config.error_log, "/proc/self/fd/2") == 0
+			);
+			zlog_set_fd(fpm_globals.error_log_fd, is_stderr);
 		}
 	}
 	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {

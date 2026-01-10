@@ -3,11 +3,11 @@ Bug #68638 pg_update() fails to store infinite values
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 
@@ -30,8 +30,15 @@ while ($row = pg_fetch_assoc($rs)) {
         var_dump($row);
 }
 
-pg_query($conn, "DROP TABLE $table");
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
+$table='test_68638';
+
+pg_query($conn, "DROP TABLE IF EXISTS $table");
 ?>
 --EXPECT--
 string(52) "UPDATE "test_68638" SET "value"=E'inf' WHERE "id"=1;"

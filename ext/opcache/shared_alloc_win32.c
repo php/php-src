@@ -47,7 +47,7 @@ static void *mapping_base;
 static void zend_win_error_message(int type, char *msg, int err)
 {
 	HANDLE h;
-	char *ev_msgs[2];
+	const char *ev_msgs[2];
 	char *buf = php_win32_error_to_msg(err);
 
 	h = RegisterEventSource(NULL, TEXT(ACCEL_EVENT_SOURCE));
@@ -69,20 +69,22 @@ static void zend_win_error_message(int type, char *msg, int err)
 	php_win32_error_msg_free(buf);
 }
 
-static char *create_name_with_username(char *name)
+static char *create_name_with_username(const char *name, size_t unique_id)
 {
-	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + 1];
+	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + sizeof("ffffffffffffffff")-1 + 1];
 	char *p = newname;
 	p += strlcpy(newname, name, MAXPATHLEN + 1);
 	*(p++) = '@';
-	memcpy(p, accel_uname_id, 32);
-	p += 32;
+	p = zend_mempcpy(p, accel_uname_id, 32);
 	*(p++) = '@';
 	p += strlcpy(p, sapi_module.name, 21);
 	*(p++) = '@';
-	memcpy(p, zend_system_id, 32);
-	p += 32;
-	*(p++) = '\0';
+	p = zend_mempcpy(p, zend_system_id, 32);
+	if (unique_id) {
+		p += snprintf(p, sizeof("ffffffffffffffff"), "%zx", unique_id) + 1;
+	} else {
+		*(p++) = '\0';
+	}
 	ZEND_ASSERT(p - newname <= sizeof(newname));
 
 	return newname;
@@ -90,9 +92,9 @@ static char *create_name_with_username(char *name)
 
 void zend_shared_alloc_create_lock(void)
 {
-	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
+	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME, 0));
 	if (!memory_mutex) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %u)", GetLastError());
+		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %lu)", GetLastError());
 		return;
 	}
 	ReleaseMutex(memory_mutex);
@@ -112,7 +114,7 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
+static int zend_shared_alloc_reattach(size_t requested_size, const char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
@@ -199,7 +201,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	return SUCCESSFULLY_REATTACHED;
 }
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	int err = 0, ret;
 	zend_shared_segment *shared_segment;
@@ -224,7 +226,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   can be called before the child process is killed. In this case, the mapping will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
-		memfile = OpenFileMapping(FILE_MAP_READ|FILE_MAP_WRITE|FILE_MAP_EXECUTE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
+		memfile = OpenFileMapping(FILE_MAP_READ|FILE_MAP_WRITE|FILE_MAP_EXECUTE, 0, create_name_with_username(ACCEL_FILEMAP_NAME, requested_size));
 		if (memfile == NULL) {
 			err = GetLastError();
 			break;
@@ -269,7 +271,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	(*shared_segments_p)[0] = shared_segment;
 
 	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_EXECUTE_READWRITE | SEC_COMMIT, size_high, size_low,
-								create_name_with_username(ACCEL_FILEMAP_NAME));
+								create_name_with_username(ACCEL_FILEMAP_NAME, requested_size));
 	if (memfile == NULL) {
 		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
@@ -286,7 +288,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
-		/* skip leading 0x, %p assumes hexdecimal format anyway */
+		/* skip leading 0x, %p assumes hexadecimal format anyway */
 		if (*s == '0' && *(s + 1) == 'x') {
 			s += 2;
 		}
@@ -352,7 +354,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_win32_handlers = {
+const zend_shared_memory_handlers zend_alloc_win32_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

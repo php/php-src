@@ -13,17 +13,15 @@ runs:
 
         # Some packages exist on x86 but not arm, or vice versa.
         # Install them with reinstall to avoid warnings.
-        brew reinstall autoconf webp tidy-html5 libzip libsodium icu4c
+        brew reinstall autoconf webp tidy-html5 libzip libsodium icu4c curl
         brew install \
           bison \
           re2c
         brew install \
-          aspell \
           bzip2 \
           enchant \
           libffi \
           intltool \
-          icu4c \
           libiconv \
           t1lib \
           libxml2 \

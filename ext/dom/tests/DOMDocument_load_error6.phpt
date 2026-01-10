@@ -23,5 +23,5 @@ var_dump($dom->load(str_repeat(" ", PHP_MAXPATHLEN + 1)));
 ?>
 --EXPECT--
 DOMDocument::load(): Argument #1 ($filename) must not be empty
-Path to document must not contain any null bytes
+DOMDocument::load(): Argument #1 ($filename) must not contain any null bytes
 bool(false)

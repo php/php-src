@@ -143,16 +143,16 @@ array_diff_uassoc(): Argument #2 must be of type array, null given
 array_diff_uassoc(): Argument #2 must be of type array, null given
 
 --lowercase true--
-array_diff_uassoc(): Argument #2 must be of type array, bool given
+array_diff_uassoc(): Argument #2 must be of type array, true given
 
 --lowercase false--
-array_diff_uassoc(): Argument #2 must be of type array, bool given
+array_diff_uassoc(): Argument #2 must be of type array, false given
 
 --uppercase TRUE--
-array_diff_uassoc(): Argument #2 must be of type array, bool given
+array_diff_uassoc(): Argument #2 must be of type array, true given
 
 --uppercase FALSE--
-array_diff_uassoc(): Argument #2 must be of type array, bool given
+array_diff_uassoc(): Argument #2 must be of type array, false given
 
 --empty string DQ--
 array_diff_uassoc(): Argument #2 must be of type array, string given

@@ -25,11 +25,6 @@
 #ifndef UNICODE_TABLE_UHC_H
 #define UNICODE_TABLE_UHC_H
 
-/*
- * Unicode table
- */
-#ifdef UNICODE_TABLE_UHC_DEF
-
 const unsigned short uhc1_ucs_table[] = {
 0xac02,0xac03,0xac05,0xac06,0xac0b,0xac0c,0xac0d,0xac0e,
 0xac0f,0xac18,0xac1e,0xac1f,0xac21,0xac22,0xac23,0xac25,
@@ -790,12 +785,8 @@ const unsigned short uhc1_ucs_table[] = {
 0xc876,0xc877,0xc879,0xc87b,0xc87c,0xc87d,0xc87e,0xc87f,
 0xc882,0xc884,0xc888,0xc889,0xc88a,0xc88e,0xc88f,0xc890,
 0xc891,0xc892,0xc893,0xc895,0xc896,0xc897,0xc898,0xc899,
-0xc89a,0xc89b,0xc89c,0xc89e,0xc8a0,0xc8a2,0xc8a3,0xc8a4
-};
+0xc89a,0xc89b,0xc89c,0xc89e,0xc8a0,0xc8a2,0xc8a3,0xc8a4,
 
-const int uhc1_ucs_table_size = (sizeof(uhc1_ucs_table)/sizeof(unsigned short));
-
-const unsigned short uhc2_ucs_table[] = {
 0xc8a5,0xc8a6,0xc8a7,0xc8a9,0xc8aa,0xc8ab,0xc8ac,0xc8ad,
 0xc8ae,0xc8af,0xc8b0,0xc8b1,0xc8b2,0xc8b3,0xc8b4,0xc8b5,
 0xc8b6,0xc8b7,0xc8b8,0xc8b9,0xc8ba,0xc8bb,0xc8be,0xc8bf,
@@ -1698,9 +1689,10 @@ const unsigned short uhc2_ucs_table[] = {
 0xd391,0xd398,0xd399,0xd39c,0xd3a0,0xd3a8,0xd3a9,0xd3ab,
 0xd3ad,0xd3b4,0xd3b8,0xd3bc,0xd3c4,0xd3c5,0xd3c8,0xd3c9,
 0xd3d0,0xd3d8,0xd3e1,0xd3e3,0xd3ec,0xd3ed,0xd3f0,0xd3f4,
-0xd3fc,0xd3fd,0xd3ff,0xd401};
+0xd3fc,0xd3fd,0xd3ff,0xd401
+};
 
-const int uhc2_ucs_table_size = (sizeof(uhc2_ucs_table)/sizeof(unsigned short));
+const int uhc1_ucs_table_size = (sizeof(uhc1_ucs_table)/sizeof(unsigned short));
 
 const unsigned short uhc3_ucs_table[] = {
 0xd408,0xd41d,0xd440,0xd444,0xd45c,0xd460,0xd464,0xd46d,
@@ -7180,43 +7172,5 @@ const unsigned short ucs_r2_uhc_table[] = {
 
 const int ucs_r2_uhc_table_min = 0xff00;
 const int ucs_r2_uhc_table_max = 0xff00 + (sizeof (ucs_r2_uhc_table) / sizeof (unsigned short));
-
-#else
-
-extern const unsigned short uhc1_ucs_table[];
-extern const unsigned short uhc2_ucs_table[];
-extern const unsigned short uhc3_ucs_table[];
-extern const unsigned short ucs_a1_uhc_table[];
-extern const unsigned short ucs_a2_uhc_table[];
-extern const unsigned short ucs_a3_uhc_table[];
-extern const unsigned short ucs_i_uhc_table[];
-extern const unsigned short ucs_s_uhc_table[];
-extern const unsigned short ucs_r1_uhc_table[];
-extern const unsigned short ucs_r2_uhc_table[];
-
-extern const int uhc1_ucs_table_size;
-extern const int uhc2_ucs_table_size;
-extern const int uhc3_ucs_table_size;
-extern const int ucs_a1_uhc_table_min;
-extern const int ucs_a1_uhc_table_max;
-extern const int ucs_a2_uhc_table_min;
-extern const int ucs_a2_uhc_table_max;
-extern const int ucs_a3_uhc_table_min;
-extern const int ucs_a3_uhc_table_max;
-extern const int ucs_i_uhc_table_min;
-extern const int ucs_i_uhc_table_max;
-extern const int ucs_s_uhc_table_min;
-extern const int ucs_s_uhc_table_max;
-extern const int ucs_r1_uhc_table_min;
-extern const int ucs_r1_uhc_table_max;
-extern const int ucs_r2_uhc_table_min;
-extern const int ucs_r2_uhc_table_max;
-
-
-
-
-#endif
-
-
 
 #endif /* UNICODE_TABLE_UHC_H */

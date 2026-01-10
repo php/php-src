@@ -3,6 +3,7 @@ Bug #74556 stream_socket_get_name() on unix socket returns "\0"
 --SKIPIF--
 <?php
 if (!strncasecmp(PHP_OS, 'WIN', 3)) echo "skip Unix Only";
+?>
 --FILE--
 <?php
 

@@ -42,7 +42,7 @@ class PDODatabaseX extends PDO
         echo __METHOD__ . "()\n";
     }
 
-    function test()
+    function testMethod()
     {
         $this->test2 = 2;
         var_dump($this->test1);
@@ -60,15 +60,15 @@ class PDODatabaseX extends PDO
 }
 
 $db = PDOTest::factory('PDODatabaseX');
-$db->test();
+$db->testMethod();
 var_dump($db);
 
-$db->query('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->query('INSERT INTO test VALUES(0, \'A\')');
-$db->query('INSERT INTO test VALUES(1, \'B\')');
+$db->query('CREATE TABLE test023(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');
+$db->query("INSERT INTO test023 VALUES(0, 'A')");
+$db->query("INSERT INTO test023 VALUES(1, 'B')");
 
 
-$stmt = $db->query('SELECT val, id FROM test');
+$stmt = $db->query('SELECT val, id FROM test023');
 var_dump($stmt);
 var_dump($stmt->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 
@@ -76,6 +76,12 @@ $stmt = NULL;
 $db = NULL;
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test023");
 ?>
 --EXPECTF--
 int(1)
@@ -99,7 +105,7 @@ PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
   ["queryString"]=>
-  string(24) "SELECT val, id FROM test"
+  string(27) "SELECT val, id FROM test023"
   ["test1"]=>
   int(1)
   ["test2"]=>

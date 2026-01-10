@@ -46,12 +46,12 @@ typedef struct _zend_basic_block {
 	uint32_t          len;                /* number of opcodes           */
 	int               successors_count;   /* number of successors        */
 	int               predecessors_count; /* number of predecessors      */
-	int               predecessor_offset; /* offset of 1-st predecessor  */
-	int               idom;               /* immediate dominator block   */
+	int               predecessor_offset; /* offset of 1-st predecessor, or -1 */
+	int               idom;               /* immediate dominator block, or -1  */
 	int               loop_header;        /* closest loop header, or -1  */
-	int               level;              /* steps away from the entry in the dom. tree */
-	int               children;           /* list of dominated blocks    */
-	int               next_child;         /* next dominated block        */
+	int               level;              /* steps away from the entry in the dom. tree, or -1 */
+	int               children;           /* list of dominated blocks, or -1 */
+	int               next_child;         /* next dominated block, or -1 */
 	int               successors_storage[2]; /* up to 2 successor blocks */
 } zend_basic_block;
 

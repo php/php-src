@@ -4,7 +4,6 @@ NaN handling: 001
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --FILE--
 <?php
@@ -14,7 +13,12 @@ for ($i = 0; $i < 3; $i++) {
     else { echo "nan is false\n"; }
 }	
 ?>
---EXPECT--
+--EXPECTF--
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
+
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
+
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true

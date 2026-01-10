@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'));
 
@@ -48,8 +49,10 @@ $stub = '/*
   +----------------------------------------------------------------------+
 */
 
-static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len)
+static inline zend_string *phar_get_stub(const char *index_php, const char *web, size_t name_len, size_t web_len)
 {
+	/* Do NOT modify this file directly!
+	 * Instead modify shortarc.php to change PHP code or makestub.php to change C code and then use makestub.php to generate this file. */
 ';
 $s1split = str_split($s1, 2046);
 $s3split = str_split($s3, 2046);
@@ -88,9 +91,9 @@ foreach ($s3split as $i => $chunk) {
     $stub .= "\tstatic const char newstub3_" . $i . '[] = "' . $chunk . '";
 ';
 }
-$stub .= "\n\tstatic const int newstub_len = " . $slen . ";
+$stub .= "\n\tstatic const size_t newstub_len = " . $slen . ";
 
-\t*len = spprintf(stub, name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%d'
+\treturn strpprintf(name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%zu'
     . str_repeat('%s', $s3count) . '", newstub0, web';
 foreach ($s1split as $i => $unused) {
     $stub .= ', newstub1_' . $i;

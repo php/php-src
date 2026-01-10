@@ -23,7 +23,7 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'dba_tcadb.tch';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
 === RUNNING WITH FILE LOCK ===
 Remove key 1 and 3
 bool(true)
@@ -71,4 +71,4 @@ array(6) {
 === RUNNING WITH DB LOCK (default) ===
 SAME OUTPUT AS PREVIOUS RUN
 === RUNNING WITH NO LOCK ===
-SAME OUTPUT AS PREVIOUS RUN
+SAME OUTPUT AS PREVIOUS RUN%S

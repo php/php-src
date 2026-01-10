@@ -4,10 +4,10 @@ odbc_data_source(): Basic test
 odbc
 --SKIPIF--
 <?php
-    include 'skipif.inc';
-    if (odbc_data_source($conn, SQL_FETCH_FIRST) === NULL) {
-        die("skip no data sources defined on this system");
-    }
+include 'skipif.inc';
+if (odbc_data_source($conn, SQL_FETCH_FIRST) === NULL) {
+    die("skip no data sources defined on this system");
+}
 ?>
 --FILE--
 <?php

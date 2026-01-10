@@ -1,5 +1,5 @@
 --TEST--
-Bug #67167: filter_var(null,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) returns null
+Bug #67167 (filter_var(null,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) returns null)
 --EXTENSIONS--
 filter
 --FILE--

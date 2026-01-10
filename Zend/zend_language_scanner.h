@@ -20,6 +20,9 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
+/* The zend_php_scanner_event enum is declared in zend_globals and we don't want everything to include zend_language_scanner.h */
+#include "zend_globals.h"
+
 typedef struct _zend_lex_state {
 	unsigned int yy_leng;
 	unsigned char *yy_start;
@@ -69,7 +72,7 @@ typedef struct _zend_heredoc_label {
 /* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
 typedef struct _zend_nest_location {
 	char text;
-	int  lineno;
+	uint32_t lineno;
 } zend_nest_location;
 
 BEGIN_EXTERN_C()

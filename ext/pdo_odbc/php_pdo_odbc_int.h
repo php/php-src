@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+/* internal header; not supposed to be installed */
+
 #ifdef PHP_WIN32
 # define PDO_ODBC_TYPE	"Win32"
 #endif
@@ -89,10 +91,6 @@
 
 #ifdef HAVE_CLI0ENV_H
 # include <cli0env.h>
-#endif
-
-#ifdef HAVE_ODBCSDK_H
-# include <odbcsdk.h>
 #endif
 
 /* }}} */

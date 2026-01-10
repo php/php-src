@@ -27,11 +27,11 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 Parameter uses "self" as type but function is not a class member
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 Parameter uses "parent" as type but function is not a class member
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 Parameter uses "parent" as type although class does not have a parent

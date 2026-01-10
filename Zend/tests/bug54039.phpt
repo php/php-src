@@ -31,12 +31,12 @@ $f = test_2(); $f();
 function test_3() {
     static $v = "";
     $v .= 'b';
-    echo "Outer function catenates 'b' onto \$v to give $v\n";
+    echo "Outer function concatenates 'b' onto \$v to give $v\n";
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
     };
     $v .= 'a';
-    echo "Outer function catenates 'a' onto \$v to give $v\n";
+    echo "Outer function concatenates 'a' onto \$v to give $v\n";
     return $f;
 }
 $f = test_3(); $f();
@@ -51,9 +51,9 @@ Outer function increments $v to 1
 Inner function reckons $v is 0
 Outer function increments $v to 2
 Inner function reckons $v is 1
-Outer function catenates 'b' onto $v to give b
-Outer function catenates 'a' onto $v to give ba
+Outer function concatenates 'b' onto $v to give b
+Outer function concatenates 'a' onto $v to give ba
 Inner function reckons $v is b
-Outer function catenates 'b' onto $v to give bab
-Outer function catenates 'a' onto $v to give baba
+Outer function concatenates 'b' onto $v to give bab
+Outer function concatenates 'a' onto $v to give baba
 Inner function reckons $v is bab

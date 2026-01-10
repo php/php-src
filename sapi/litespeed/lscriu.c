@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -60,10 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/stat.h>
 
-#if HAVE_SYS_TYPES_H
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
 #endif
 
 #include <sys/types.h>
@@ -87,6 +85,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "lscriu.h"
 
 #include <Zend/zend_portability.h>
+#include "main/php_main.h"
 
 #define  LSCRIU_PATH    256
 
@@ -99,7 +98,9 @@ static int (*s_lscapi_dump_me)(void) = NULL;
 static int (*s_lscapi_prepare_me)(void) = NULL;
 static int s_native = 0;
 static int s_tried_checkpoint = 0;
+#ifdef LSAPILIB_DEBUG_CRIU
 static int s_criu_debug = 0;
+#endif
 static int s_fd_native = -1;
 static char *s_criu_image_path = NULL;
 static int s_pid = 0;
@@ -309,6 +310,7 @@ static void LSCRIU_Wink_Server_is_Ready(void)
 }
 
 
+#ifdef LSAPILIB_DEBUG_CRIU
 static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 {
     const char *pchDefaultSocketPath = "/tmp/";
@@ -319,7 +321,6 @@ static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 }
 
 
-#ifdef LSAPILIB_DEBUG_CRIU
 static void LSCRIU_Debugging(void) {
     char *pchCRIUDebug;
     pchCRIUDebug = getenv("LSAPI_CRIU_DEBUG");
@@ -417,7 +418,9 @@ static int LSCRIU_Native_Dump(pid_t iPid,
     memset(&criu_native_dump, 0, sizeof(criu_native_dump));
     criu_native_dump.m_iPidToDump = iPid;
     strncpy(criu_native_dump.m_chImageDirectory, pchImagePath,
-            sizeof(criu_native_dump.m_chImageDirectory));
+            sizeof(criu_native_dump.m_chImageDirectory) - 1);
+    criu_native_dump.m_chImageDirectory[
+        sizeof(criu_native_dump.m_chImageDirectory) - 1] = '\0';
     pchLastSlash = strrchr(criu_native_dump.m_chSocketDir,'/');
     if (pchLastSlash) {
         pchLastSlash++;
@@ -457,6 +460,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
     else {
         s_restored = 1;
         LSAPI_reset_server_state();
+        php_child_init();
         /*
          Here we have restored the php process, so we should to tell (via
          semaphore) mod_lsapi that we are started and ready to receive data.
@@ -496,7 +500,6 @@ static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 
 static void LSCRIU_try_checkpoint(int *forked_pid)
 {
-    int iRet;
     pid_t iPid;
     pid_t iPidDump = getpid();
 
@@ -523,7 +526,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         pid_t   iPidParent = getppid();
 
         setsid();
-        iRet = LSCRIU_Native_Dump(iPidDump,
+        (void)LSCRIU_Native_Dump(iPidDump,
                                   s_criu_image_path,
                                   s_fd_native);
         close(s_fd_native);
@@ -531,6 +534,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         LSCRIU_Wait_Dump_Finish_Or_Restored(iPidParent);
         LSCRIU_Restored_Error(0, "Restored!");
         LSAPI_reset_server_state();
+        php_child_init();
         s_restored = 1;
     }
     else {
@@ -659,7 +663,7 @@ static int LSCRIU_Init_Env_Parameters(void)
 }
 
 
-void LSCRIU_inc_req_processed()
+void LSCRIU_inc_req_processed(void)
 {
     if (!LSCRIU_Get_Global_Counter_Type()) {
         ++s_requests_count;

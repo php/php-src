@@ -74,26 +74,26 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 2 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 3 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 4 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 5 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 6 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 7 --
 string(6) "012atm"
@@ -105,30 +105,26 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 11 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 12 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 13 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 14 --
-
-Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 15 --
-
-Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 16 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, sample given
 
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type array|string, resource given
+strtr(): Argument #2 ($from) must be of type array, resource given
 *** Done ***

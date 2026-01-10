@@ -18,7 +18,7 @@ if ($ret) {
 --FILE--
 <?php
 $expect_executable = trim(`which expect`);
-$php_executable = getenv('TEST_PHP_EXECUTABLE');
+$php_executable = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $script = __DIR__ . "/expect.sh";
 
 if (extension_loaded("readline")) {

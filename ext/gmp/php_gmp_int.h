@@ -1,8 +1,10 @@
+/* interface header; needs to be installed; FIXME rename? */
+
 #ifndef incl_PHP_GMP_INT_H
 #define incl_PHP_GMP_INT_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -28,7 +30,7 @@ static inline gmp_object *php_gmp_object_from_zend_object(zend_object *zobj) {
 PHP_GMP_API zend_class_entry *php_gmp_class_entry(void);
 
 /* GMP and MPIR use different datatypes on different platforms */
-#ifdef PHP_WIN32
+#ifdef _WIN64
 typedef zend_long gmp_long;
 typedef zend_ulong gmp_ulong;
 #else

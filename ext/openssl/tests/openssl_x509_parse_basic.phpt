@@ -5,7 +5,6 @@ openssl
 --SKIPIF--
 <?php
 if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL < 3.2');
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip Failing on Windows");
 ?>
 --FILE--
 <?php

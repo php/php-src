@@ -17,7 +17,7 @@ array(1) {
   string(5) "str%c%c"
 }
 
-Warning: unpack(): Type a: not enough input, need 6, have 5 in %s on line %d
+Warning: unpack(): Type a: not enough input values, need 6 values but only 5 were provided in %s on line %d
 bool(false)
 array(1) {
   [1]=>

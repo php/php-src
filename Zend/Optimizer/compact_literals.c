@@ -43,50 +43,6 @@ typedef struct _literal_info {
 		info[n].num_related = (related); \
 	} while (0)
 
-static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
-{
-	zend_arg_info *arg_info;
-	if (arg_num > 0) {
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			return 0;
-		}
-		if (EXPECTED(arg_num <= op_array->num_args)) {
-			arg_info = &op_array->arg_info[arg_num-1];
-		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
-			arg_info = &op_array->arg_info[op_array->num_args];
-		} else {
-			return 0;
-		}
-	} else {
-		arg_info = op_array->arg_info - 1;
-	}
-
-	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
-		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			/* Intersection types cannot have nested list types */
-			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
-				return ZEND_TYPE_LIST(arg_info->type)->num_types;
-			}
-			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
-			size_t count = 0;
-			zend_type *list_type;
-
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-					count += ZEND_TYPE_LIST(*list_type)->num_types;
-				} else {
-					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-					count += 1;
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
-			return count;
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
 static uint32_t add_static_slot(HashTable     *hash,
                                 zend_op_array *op_array,
                                 uint32_t       op1,
@@ -154,7 +110,7 @@ static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
-	int i, j, n, *map;
+	int n, *map;
 	uint32_t cache_size;
 	zval zv, *pos;
 	literal_info *info;
@@ -165,9 +121,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
 
 	if (op_array->last_literal) {
+		uint32_t j;
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
 
 	    /* Mark literals of specific types */
@@ -175,6 +132,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		end = opline + op_array->last;
 		while (opline < end) {
 			switch (opline->opcode) {
+				case ZEND_JMP_FRAMELESS:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_INIT_FCALL_BY_NAME:
 					LITERAL_INFO(opline->op2.constant, 2);
 					break;
@@ -197,6 +157,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						LITERAL_INFO(opline->op2.constant, 2);
 					}
 					break;
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, 2);
 					break;
@@ -211,7 +174,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op1_type == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, 2);
 					}
-					LITERAL_INFO(opline->op2.constant, 1);
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, 1);
+					}
 					break;
 				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
@@ -294,9 +259,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					op_array->function_name ? op_array->function_name->val : "main");
 			fprintf(stderr, "Literals table size %d\n", op_array->last_literal);
 
-			for (int i = 0; i < op_array->last_literal; i++) {
+			for (uint32_t i = 0; i < op_array->last_literal; i++) {
 				zend_string *str = zval_get_string(op_array->literals + i);
-				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
+				fprintf(stderr, "Literal %" PRIu32 ", val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
 				zend_string_release(str);
 			}
 			fflush(stderr);
@@ -308,7 +273,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
-		for (i = 0; i < op_array->last_literal; i++) {
+		for (uint32_t i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].num_related) {
 				/* unset literal */
 				zval_ptr_dtor_nogc(&op_array->literals[i]);
@@ -475,13 +440,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 6 * sizeof(int));
-		memset(const_slot, -1, j * 6 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
+		memset(const_slot, -1, j * 7 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
+		jmp_slot = method_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -495,26 +461,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				opline->op2.constant = map[opline->op2.constant];
 			}
 			switch (opline->opcode) {
-				case ZEND_RECV_INIT:
-				case ZEND_RECV:
-				case ZEND_RECV_VARIADIC:
-				{
-					size_t num_classes = type_num_classes(op_array, opline->op1.num);
-					if (num_classes) {
-						opline->extended_value = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
-				case ZEND_VERIFY_RETURN_TYPE:
-				{
-					size_t num_classes = type_num_classes(op_array, 0);
-					if (num_classes) {
-						opline->op2.num = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
-					break;
-				}
 				case ZEND_ASSIGN_STATIC_PROP_OP:
 					if (opline->op1_type == IS_CONST) {
 						// op1 static property
@@ -668,7 +614,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS_CONSTANT:
-					if (opline->op1_type == IS_CONST) {
+					if (opline->op1_type == IS_CONST
+						&& opline->op2_type == IS_CONST
+						&& Z_TYPE(op_array->literals[opline->op2.constant]) == IS_STRING) {
 						// op1/op2 class_const
 						opline->extended_value = add_static_slot(&hash, op_array,
 							opline->op1.constant,
@@ -769,6 +717,16 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
 					break;
+				case ZEND_JMP_FRAMELESS:
+					// op1 func
+					if (jmp_slot[opline->op1.constant] >= 0) {
+						opline->extended_value = jmp_slot[opline->op1.constant];
+					} else {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+						jmp_slot[opline->op1.constant] = opline->extended_value;
+					}
+					break;
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR:
@@ -781,6 +739,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op2_type == IS_CONST) {
 						opline->result.num = cache_size;
 						cache_size += 2 * sizeof(void *);
+					}
+					break;
+				case ZEND_CALLABLE_CONVERT:
+					if (opline->extended_value != (uint32_t)-1) {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
 					}
 					break;
 			}
@@ -813,9 +777,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		{
 			fprintf(stderr, "Optimized literals table size %d\n", op_array->last_literal);
 
-			for (int i = 0; i < op_array->last_literal; i++) {
+			for (uint32_t i = 0; i < op_array->last_literal; i++) {
 				zend_string *str = zval_get_string(op_array->literals + i);
-				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
+				fprintf(stderr, "Literal %" PRIu32 ", val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
 				zend_string_release(str);
 			}
 			fflush(stderr);

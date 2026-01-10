@@ -12,6 +12,7 @@ file_get_contents('error://test');
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant self::INVALID in %s:%d
 Stack trace:
-#0 %sbug77664.php(%d): file_get_contents('error://test')
-#1 {main}
+#0 %s(%d): [constant expression]()
+#1 %s(%d): file_get_contents('error://test')
+#2 {main}
   thrown in %sbug77664.php on line %d

@@ -79,5 +79,5 @@ object(Directory)#%d (2) {
 }
 
 Test read after closing the dir:
-Directory::read(): supplied resource is not a valid Directory resource
+Directory::read(): cannot use Directory resource after it has been closed
 Done

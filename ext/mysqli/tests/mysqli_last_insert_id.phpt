@@ -4,7 +4,7 @@ API vs. SQL LAST_INSERT_ID()
 mysqli
 --SKIPIF--
 <?php
-  require_once('skipifconnectfailure.inc');
+  require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -14,7 +14,7 @@ mysqli
     It is not necessarily a bug if API and SQL function return different
     values. Check the MySQL C API reference manual for details.
     */
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     function get_sql_id($link) {
         if (!($res = $link->query("SELECT LAST_INSERT_ID() AS _id"))) {
@@ -177,7 +177,7 @@ mysqli
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 API: %d, SQL: %d

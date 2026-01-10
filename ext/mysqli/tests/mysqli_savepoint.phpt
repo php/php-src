@@ -13,7 +13,7 @@ if (!have_innodb($link))
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -36,7 +36,7 @@ if (!have_innodb($link))
 
     /* overrule autocommit */
     if (true !== ($tmp = mysqli_savepoint($link, 'my')))
-        printf("[010] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
+        printf("[010] Got %s - [%d] %s\n", $tmp, mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, 'INSERT INTO test(id) VALUES (1)'))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -49,8 +49,8 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_savepoint(): Argument #2 ($name) cannot be empty
+mysqli_savepoint(): Argument #2 ($name) must not be empty
 done!

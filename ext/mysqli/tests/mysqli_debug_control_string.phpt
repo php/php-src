@@ -4,7 +4,7 @@ mysqli_debug() - invalid debug control strings
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip: mysqli_debug() not available");
@@ -17,8 +17,8 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     function try_control_string($link, $control_string, $trace_file, $offset) {
 
@@ -31,7 +31,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
             return false;
         }
 
-        if (!$res = mysqli_query($link, 'SELECT * FROM test')) {
+        if (false === mysqli_query($link, 'SELECT * FROM test')) {
             printf("[%03d][control string '%s'] [%d] %s.\n",
                 $offset + 2,
                 $control_string,

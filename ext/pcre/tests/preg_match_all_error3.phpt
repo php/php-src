@@ -17,7 +17,7 @@ echo "Done";
 --EXPECTF--
 *** Testing preg_match_all() : error conditions ***
 
-Fatal error: Uncaught Error: preg_match_all(): Argument #3 ($matches) cannot be passed by reference in %s:%d
+Fatal error: Uncaught Error: preg_match_all(): Argument #3 ($matches) could not be passed by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

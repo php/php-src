@@ -2,6 +2,8 @@
 Test mb_strrpos() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 /*
@@ -9,8 +11,6 @@ mbstring
  */
 
 echo "*** Testing mb_strrpos() : basic ***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'This is an English string. 0123456789.';
 //Japanese string in UTF-8

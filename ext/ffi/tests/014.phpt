@@ -6,9 +6,11 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-var_dump(FFI::sizeof(FFI::new("uint32_t[2]")));
-var_dump(FFI::sizeof(FFI::new("uint32_t([2])")));
-var_dump(FFI::sizeof(FFI::new("uint32_t([2])[2]")));
+$ffi = FFI::cdef();
+
+var_dump(FFI::sizeof($ffi->new("uint32_t[2]")));
+var_dump(FFI::sizeof($ffi->new("uint32_t([2])")));
+var_dump(FFI::sizeof($ffi->new("uint32_t([2])[2]")));
 ?>
 ok
 --EXPECT--

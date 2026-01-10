@@ -7,6 +7,7 @@ include "skipif.inc";
 
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
   die("skip this test is for Windows platforms only");
+if (getenv('SKIP_ASAN')) die('skip child process cannot be stopped under ASan');
 ?>
 --FILE--
 <?php
@@ -24,7 +25,7 @@ if ($is_child) {
 
     while(1) usleep(100);
 } else {
-    $cmd = PHP_BINARY . " -n " . $argv[0] . " 1";
+    $cmd = getenv('TEST_PHP_EXECUTABLE_ESCAPED') . " -n " . $argv[0] . " 1";
     $spec = [0 => ["pipe", "r"], 1 => ["pipe", "w"]];
 
     $proc = proc_open($cmd, $spec, $pipes, NULL, NULL, ["bypass_shell" => true, "create_process_group" => true]);

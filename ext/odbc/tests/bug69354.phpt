@@ -11,13 +11,11 @@ include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-@odbc_exec($conn, 'CREATE DATABASE odbcTEST');
+odbc_exec($conn, 'CREATE TABLE bug69354 (ID INT, VARCHAR_COL VARCHAR(100))');
 
-odbc_exec($conn, 'CREATE TABLE FOO (ID INT, VARCHAR_COL VARCHAR(100))');
+odbc_exec($conn, "INSERT INTO bug69354(ID, VARCHAR_COL) VALUES (1, '" . str_repeat("a", 100) . "')");
 
-odbc_exec($conn, "INSERT INTO FOO(ID, VARCHAR_COL) VALUES (1, '" . str_repeat("a", 100) . "')");
-
-$res = odbc_exec($conn,"select VARCHAR_COL from FOO");
+$res = odbc_exec($conn,"SELECT VARCHAR_COL FROM bug69354");
 if ($res) {
     if (odbc_fetch_row($res)) {
         $ret = odbc_result($res,'varchar_col');
@@ -27,17 +25,16 @@ if ($res) {
     }
 }
 ?>
---EXPECT--
-100
-a
-a
 --CLEAN--
 <?php
 include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-odbc_exec($conn, 'DROP TABLE FOO');
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
+odbc_exec($conn, 'DROP TABLE bug69354');
 
 ?>
+--EXPECT--
+100
+a
+a

@@ -19,7 +19,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+static zend_always_inline void zend_dfg_add_use_def_op_impl(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
 	uint32_t var_num;
 	const zend_op *next;
@@ -122,6 +122,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_OP:
+		case ZEND_FRAMELESS_ICALL_3:
 			next = opline + 1;
 			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 				var_num = EX_VAR_TO_NUM(next->op1.var);
@@ -150,6 +151,7 @@ add_op1_def:
 		case ZEND_POST_DEC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_VAR_EX:
@@ -243,20 +245,19 @@ add_op1_def:
 
 ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
-	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
+	zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, use, def);
 }
 /* }}} */
 
-void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
+void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
-	int set_size;
+	uint32_t set_size = dfg->size;
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
 	int k;
 	int j;
 
-	set_size = dfg->size;
 	tmp = dfg->tmp;
 	def = dfg->def;
 	use = dfg->use;
@@ -265,7 +266,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
-		zend_op *opline, *end;
+		const zend_op *opline, *end;
 		zend_bitset b_use, b_def;
 
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
@@ -278,7 +279,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 		b_def = DFG_BITSET(def, set_size, j);
 		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
-				_zend_dfg_add_use_def_op(op_array, opline, build_flags, b_use, b_def);
+				zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, b_use, b_def);
 			}
 		}
 	}
@@ -316,7 +317,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 				/* Add predecessors of changed block to worklist */
 				{
-					int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
+					const int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
 					for (k = 0; k < blocks[j].predecessors_count; k++) {
 						zend_bitset_incl(worklist, predecessors[k]);
 					}

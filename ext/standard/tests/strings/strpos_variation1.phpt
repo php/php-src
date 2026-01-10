@@ -9,8 +9,8 @@ echo bin2hex( chr(128) ) ." => ";
 var_dump( strpos($string, chr(128)) );
 echo bin2hex( chr(255) ) ." => ";
 var_dump( strpos($string, chr(255), 3) );
-echo bin2hex( chr(256) ) ." => ";
-var_dump( strpos($string, chr(256)) );
+echo bin2hex( chr(0) ) ." => ";
+var_dump( strpos($string, chr(0)) );
 ?>
 
 DONE

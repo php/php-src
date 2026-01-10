@@ -4,12 +4,11 @@ mysqli_real_escape_string() - SQL Mode NO_BACKSLASH_ESCAPE
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once('table.inc');
+    require_once 'table.inc';
 
     if (!mysqli_query($link, 'SET @@sql_mode="NO_BACKSLASH_ESCAPES"'))
         printf("[001] Cannot set NO_BACKSLASH_ESCAPES, [%d] %s\n", mysqli_errno($link), mysqli_error($link));

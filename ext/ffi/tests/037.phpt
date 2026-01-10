@@ -7,13 +7,13 @@ ffi.enable=1
 --FILE--
 <?php
 function foo($ptr) {
-    $buf = FFI::new("int*[1]");
+    $buf = FFI::cdef()->new("int*[1]");
     $buf[0] = $ptr;
     //...
     return $buf[0];
 }
 
-$int = FFI::new("int");
+$int = FFI::cdef()->new("int");
 $int->cdata = 42;
 var_dump(foo(FFI::addr($int)));
 ?>

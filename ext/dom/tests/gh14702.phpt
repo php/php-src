@@ -32,7 +32,7 @@ $keep = $doc->documentElement->lastElementChild;
 var_dump(@$doc->xinclude());
 echo $doc->saveXML();
 
-var_dump($child1, $child2, $fallback, $keep->nodeName);
+var_dump($keep->nodeName);
 
 $keep->textContent = 'still works';
 echo $doc->saveXML();
@@ -45,18 +45,6 @@ int(2)
   
   <keep/>
 </root>
-object(DOMElement)#4 (1) {
-  ["schemaTypeInfo"]=>
-  NULL
-}
-object(DOMElement)#5 (1) {
-  ["schemaTypeInfo"]=>
-  NULL
-}
-object(DOMElement)#3 (1) {
-  ["schemaTypeInfo"]=>
-  NULL
-}
 string(4) "keep"
 <?xml version="1.0"?>
 <root>

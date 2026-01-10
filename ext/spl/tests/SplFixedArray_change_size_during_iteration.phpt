@@ -31,6 +31,7 @@ foreach ($splFixedArray as $k => $v) {
   }
 }
 echo "\n";
+?>
 --EXPECT--
 0 => a
 1 => b

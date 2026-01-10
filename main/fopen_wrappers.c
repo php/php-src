@@ -38,13 +38,14 @@
 #include "ext/standard/php_standard.h"
 #include "zend_compile.h"
 #include "php_network.h"
+#include "zend_smart_str.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -53,7 +54,7 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -76,15 +77,12 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
+		if (PG(open_basedir_modified)) {
+			efree(*p);
+		}
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
 		*p = new_value ? ZSTR_VAL(new_value) : NULL;
-		return SUCCESS;
-	}
-
-	/* Otherwise we're in runtime */
-	if (!*p || !**p) {
-		/* open_basedir not set yet, go ahead and give it a value */
-		*p = ZSTR_VAL(new_value);
+		PG(open_basedir_modified) = false;
 		return SUCCESS;
 	}
 
@@ -94,6 +92,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	}
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
+	smart_str buf = {0};
 	ptr = pathbuf = estrdup(ZSTR_VAL(new_value));
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
@@ -101,22 +100,35 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 			*end = '\0';
 			end++;
 		}
-		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || IS_SLASH(ptr[2]))) {
-			/* Don't allow paths with a leading .. path component to be set at runtime */
+		char resolved_name[MAXPATHLEN + 1];
+		if (expand_filepath(ptr, resolved_name) == NULL) {
 			efree(pathbuf);
+			smart_str_free(&buf);
 			return FAILURE;
 		}
-		if (php_check_open_basedir_ex(ptr, 0) != 0) {
+		if (php_check_open_basedir_ex(resolved_name, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
 			efree(pathbuf);
+			smart_str_free(&buf);
 			return FAILURE;
 		}
+		if (smart_str_get_len(&buf) != 0) {
+			smart_str_appendc(&buf, DEFAULT_DIR_SEPARATOR);
+		}
+		smart_str_appends(&buf, resolved_name);
 		ptr = end;
 	}
 	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	*p = ZSTR_VAL(new_value);
+	zend_string *tmp = smart_str_extract(&buf);
+	char *result = estrdup(ZSTR_VAL(tmp));
+	if (PG(open_basedir_modified)) {
+		efree(*p);
+	}
+	*p = result;
+	PG(open_basedir_modified) = true;
+	zend_string_release(tmp);
 
 	return SUCCESS;
 }
@@ -356,7 +368,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	memset(file_handle, 0, sizeof(zend_file_handle));
 
 	path_info = SG(request_info).request_uri;
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
 		char *s = strchr(path_info + 2, '/');
 
@@ -494,7 +506,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	php_stream_wrapper *wrapper;
 	zend_string *exec_filename;
 
-	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
+	if (!filename || zend_char_has_nul_byte(filename, filename_length)) {
 		return NULL;
 	}
 
@@ -519,7 +531,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for
 		   now. */
-		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+		(filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1])) ||
 #endif
 	    !path ||
 	    !*path) {
@@ -584,14 +596,20 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		}
 	} /* end provided path */
 
-	/* check in calling scripts' current working directory as a fall back case
+	/* check in calling scripts' current working directory as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
 		const char *exec_fname = ZSTR_VAL(exec_filename);
 		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
-		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while (exec_fname_length > 0) {
+			--exec_fname_length;
+			if (IS_SLASH(exec_fname[exec_fname_length])) {
+				break;
+			}
+		}
+
 		if (exec_fname_length > 0 &&
 			filename_length < (MAXPATHLEN - 2) &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
@@ -664,7 +682,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 
 	/* check in provided path */
 	/* append the calling scripts' current working directory
-	 * as a fall back case
+	 * as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
@@ -800,7 +818,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 			fdtest = VCWD_OPEN(filepath, O_RDONLY);
 			if (fdtest != -1) {
 				/* return a relative file path if for any reason
-				 * we cannot cannot getcwd() and the requested,
+				 * we cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
 				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
 				if (real_path) {

@@ -1,14 +1,14 @@
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://test-uri" targetNamespace="http://test-uri">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://test-uri" targetNamespace="http://test-uri">
 	<types>
-		<xs:schema targetNamespace="http://test-uri" elementFormDefault="qualified">
+		<schema targetNamespace="http://test-uri" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
 			<import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd" />
 			<complexType name="LocalizedString">
 				<sequence>
-					<element name="value" type="xsd:string"/>
+					<element name="value" type="string"/>
 				</sequence>
 				<attribute ref="xml:lang" use="required"/>
 			</complexType>
-		</xs:schema>
+		</schema>
 	</types>
 	<message name="EchoStringRequest">
 		<part name="string" type="tns:LocalizedString"/>

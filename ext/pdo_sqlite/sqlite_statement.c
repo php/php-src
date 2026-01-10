@@ -15,17 +15,22 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 
+#if defined(__APPLE__)
+// If more than one usage, a Zend macro could be created
+// around this runtime check
+#include <Availability.h>
+#endif
 
 static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -305,7 +310,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	const char *str;
 	zval flags;
 
-	if (!S->stmt) {
+	if (!S->stmt || !stmt->executed) {
 		return FAILURE;
 	}
 	if(colno >= sqlite3_column_count(S->stmt)) {
@@ -319,26 +324,25 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
-			add_assoc_string(return_value, "native_type", "null");
+			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE));
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_NULL);
 			break;
 
 		case SQLITE_FLOAT:
-			add_assoc_string(return_value, "native_type", "double");
+			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_DOUBLE));
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
-			/* TODO Check this is correct */
 			ZEND_FALLTHROUGH;
 		case SQLITE_TEXT:
-			add_assoc_string(return_value, "native_type", "string");
+			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_STRING));
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_INTEGER:
-			add_assoc_string(return_value, "native_type", "integer");
+			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_INTEGER));
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 	}
@@ -375,13 +379,75 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 		case PDO_SQLITE_ATTR_READONLY_STATEMENT:
 			ZVAL_FALSE(val);
 
-#if SQLITE_VERSION_NUMBER >= 3007004
-				if (sqlite3_stmt_readonly(S->stmt)) {
-					ZVAL_TRUE(val);
-				}
-#endif
+			if (sqlite3_stmt_readonly(S->stmt)) {
+				ZVAL_TRUE(val);
+			}
 			break;
 
+		case PDO_SQLITE_ATTR_BUSY_STATEMENT:
+			ZVAL_FALSE(val);
+
+			if (sqlite3_stmt_busy(S->stmt)) {
+				ZVAL_TRUE(val);
+			}
+			break;
+		case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
+#if SQLITE_VERSION_NUMBER >= 3043000
+#if defined(__APPLE__)
+			if (__builtin_available(macOS 14.2, *)) {
+#endif
+				ZVAL_LONG(val, (zend_long)sqlite3_stmt_isexplain(S->stmt));
+				return 1;
+#if defined(__APPLE__)
+			} else {
+				zend_value_error("explain statement unsupported");
+				return 0;
+			}
+#endif
+#else
+			zend_value_error("explain statement unsupported");
+			return 0;
+#endif
+		default:
+			return 0;
+	}
+
+	return 1;
+}
+
+static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *zval)
+{
+	switch (attr) {
+		case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
+#if SQLITE_VERSION_NUMBER >= 3043000
+#if defined(__APPLE__)
+			if (__builtin_available(macOS 14.2, *)) {
+#endif
+				if (Z_TYPE_P(zval) != IS_LONG) {
+					zend_type_error("explain mode must be of type int, %s given", zend_zval_value_name(zval));
+					return 0;
+				}
+				if (Z_LVAL_P(zval) < 0 || Z_LVAL_P(zval) > 2) {
+					zend_value_error("explain mode must be one of the Pdo\\Sqlite::EXPLAIN_MODE_* constants");
+					return 0;
+				}
+
+				pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+				if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
+					return 0;
+				}
+
+				return 1;
+#if defined(__APPLE__)
+			} else {
+				zend_value_error("explain statement unsupported");
+				return 0;
+			}
+#endif
+#else
+			zend_value_error("explain statement unsupported");
+			return 0;
+#endif
 		default:
 			return 0;
 	}
@@ -396,7 +462,7 @@ const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_describe,
 	pdo_sqlite_stmt_get_col,
 	pdo_sqlite_stmt_param_hook,
-	NULL, /* set_attr */
+	pdo_sqlite_stmt_set_attribute, /* set_attr */
 	pdo_sqlite_stmt_get_attribute, /* get_attr */
 	pdo_sqlite_stmt_col_meta,
 	NULL, /* next_rowset */

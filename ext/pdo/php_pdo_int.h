@@ -22,15 +22,14 @@
 #include "php_pdo_error.h"
 
 extern HashTable pdo_driver_hash;
+extern HashTable pdo_driver_specific_ce_hash;
 extern zend_class_entry *pdo_exception_ce;
 int php_pdo_list_entry(void);
 
 void pdo_dbh_init(int module_number);
 void pdo_stmt_init(void);
 
-extern zend_object *pdo_dbh_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_dbh_functions[];
-extern zend_class_entry *pdo_dbh_ce;
 extern ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor);
 
 extern zend_object *pdo_dbstmt_new(zend_class_entry *ce);
@@ -43,10 +42,8 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt);
 bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num,
 	zval *args, uint32_t variadic_num_args);
 
-extern zend_object *pdo_row_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_row_functions[];
 extern zend_class_entry *pdo_row_ce;
-void pdo_row_free_storage(zend_object *std);
 extern zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object);

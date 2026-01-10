@@ -4,12 +4,12 @@ Trying implicit reconnect after wait_timeout and KILL using mysqli_ping()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot create second database connection, [%d] %s\n",
@@ -67,7 +67,7 @@ require_once('skipifconnectfailure.inc');
     if (false !== @mysqli_ping($link))
         printf("[010] Reconnect should not have happened");
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[011] Executing a query should not be possible, connection should be closed, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 
@@ -111,7 +111,7 @@ require_once('skipifconnectfailure.inc');
     if (false !== ($tmp = @mysqli_ping($link)))
         printf("[016] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[017] Running a query should not be possible, connection should be gone, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 

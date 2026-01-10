@@ -83,9 +83,9 @@ var_dump(foo());
               {main} %s%eobserver_backtrace_%d.php
           -->
           <array_map>
-            <!-- init TestClass::{closure}() -->
+            <!-- init TestClass::{closure:%s:%d}() -->
             <!--
-                TestClass::{closure}()
+                TestClass::{closure:%s:%d}()
                 array_map()
                 TestClass::foo()
                 gen()
@@ -93,11 +93,11 @@ var_dump(foo());
                 foo()
                 {main} %s%eobserver_backtrace_%d.php
             -->
-            <TestClass::{closure}>
+            <TestClass::{closure:%s:%d}>
               <!-- init TestClass::bar() -->
               <!--
                   TestClass::bar()
-                  TestClass::{closure}()
+                  TestClass::{closure:%s:%d}()
                   array_map()
                   TestClass::foo()
                   gen()
@@ -107,11 +107,11 @@ var_dump(foo());
               -->
               <TestClass::bar>
               </TestClass::bar>
-            </TestClass::{closure}>
-            <TestClass::{closure}>
+            </TestClass::{closure:%s:%d}>
+            <TestClass::{closure:%s:%d}>
               <TestClass::bar>
               </TestClass::bar>
-            </TestClass::{closure}>
+            </TestClass::{closure:%s:%d}>
           </array_map>
         </TestClass::foo>
       </gen>

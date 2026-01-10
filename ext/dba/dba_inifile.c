@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -127,7 +127,7 @@ DBA_DELETE_FUNC(inifile)
 {
 	inifile *dba = info->dbf;
 	int res;
-	bool found = 0;
+	bool found = false;
 	key_type ini_key;
 
 	if (!key) {

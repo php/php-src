@@ -6,7 +6,7 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("int[10]");
+$a = FFI::cdef()->new("int[10]");
 for ($i = 0; $i < 10; $i++) {
     $a[$i] = $i;
 }

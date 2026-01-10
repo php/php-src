@@ -61,6 +61,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, &is_prototype);
@@ -73,11 +74,13 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 					call_info->num_args = opline->extended_value;
 					call_info->next_callee = func_info->callee_info;
 					call_info->is_prototype = is_prototype;
+					call_info->is_frameless = false;
 					func_info->callee_info = call_info;
 
 					if (build_flags & ZEND_CALL_TREE) {
 						call_info->next_caller = NULL;
-					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+					} else if (func->type == ZEND_INTERNAL_FUNCTION
+					 || func->op_array.filename != script->filename) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
@@ -102,6 +105,24 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				call_info = NULL;
 				call++;
 				break;
+			case ZEND_FRAMELESS_ICALL_0:
+			case ZEND_FRAMELESS_ICALL_1:
+			case ZEND_FRAMELESS_ICALL_2:
+			case ZEND_FRAMELESS_ICALL_3: {
+				func = ZEND_FLF_FUNC(opline);
+				zend_call_info *call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info));
+				call_info->caller_op_array = op_array;
+				call_info->caller_init_opline = opline;
+				call_info->caller_call_opline = NULL;
+				call_info->callee_func = func;
+				call_info->num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+				call_info->next_callee = func_info->callee_info;
+				call_info->is_prototype = false;
+				call_info->is_frameless = true;
+				call_info->next_caller = NULL;
+				func_info->callee_info = call_info;
+				break;
+			}
 			case ZEND_DO_FCALL:
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
@@ -125,7 +146,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_USER:
 				if (call_info) {
 					if (opline->op2_type == IS_CONST) {
-						call_info->named_args = 1;
+						call_info->named_args = true;
 						break;
 					}
 
@@ -139,12 +160,8 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_ARRAY:
 			case ZEND_SEND_UNPACK:
 				if (call_info) {
-					call_info->send_unpack = 1;
+					call_info->send_unpack = true;
 				}
-				break;
-			case ZEND_EXIT:
-				/* In this case the DO_CALL opcode may have been dropped
-				 * and caller_call_opline will be NULL. */
 				break;
 		}
 		opline++;
@@ -152,26 +169,26 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 	free_alloca(call_stack, use_heap);
 }
 
-static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
+static bool zend_is_indirectly_recursive(const zend_op_array *root, const zend_op_array *op_array, zend_bitset visited)
 {
-	zend_func_info *func_info;
+	const zend_func_info *func_info;
 	zend_call_info *call_info;
-	bool ret = 0;
+	bool ret = false;
 
 	if (op_array == root) {
-		return 1;
+		return true;
 	}
 
 	func_info = ZEND_FUNC_INFO(op_array);
 	if (zend_bitset_in(visited, func_info->num)) {
-		return 0;
+		return false;
 	}
 	zend_bitset_incl(visited, func_info->num);
 	call_info = func_info->caller_info;
 	while (call_info) {
 		if (zend_is_indirectly_recursive(root, call_info->caller_op_array, visited)) {
-			call_info->recursive = 1;
-			ret = 1;
+			call_info->recursive = true;
+			ret = true;
 		}
 		call_info = call_info->next_caller;
 	}
@@ -180,16 +197,15 @@ static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_
 
 static void zend_analyze_recursion(zend_call_graph *call_graph)
 {
-	zend_op_array *op_array;
+	const zend_op_array *op_array;
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	int i;
-	int set_len = zend_bitset_len(call_graph->op_arrays_count);
+	uint32_t set_len = zend_bitset_len(call_graph->op_arrays_count);
 	zend_bitset visited;
 	ALLOCA_FLAG(use_heap);
 
 	visited = ZEND_BITSET_ALLOCA(set_len, use_heap);
-	for (i = 0; i < call_graph->op_arrays_count; i++) {
+	for (uint32_t i = 0; i < call_graph->op_arrays_count; i++) {
 		op_array = call_graph->op_arrays[i];
 		func_info = call_graph->func_infos + i;
 		call_info = func_info->caller_info;
@@ -199,12 +215,12 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 				continue;
 			}
 			if (call_info->caller_op_array == op_array) {
-				call_info->recursive = 1;
+				call_info->recursive = true;
 				func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_DIRECTLY;
 			} else {
 				memset(visited, 0, sizeof(zend_ulong) * set_len);
 				if (zend_is_indirectly_recursive(op_array, call_info->caller_op_array, visited)) {
-					call_info->recursive = 1;
+					call_info->recursive = true;
 					func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_INDIRECTLY;
 				}
 			}
@@ -235,9 +251,7 @@ ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zen
 
 ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
 {
-	int i;
-
-	for (i = 0; i < call_graph->op_arrays_count; i++) {
+	for (uint32_t i = 0; i < call_graph->op_arrays_count; i++) {
 		zend_analyze_calls(arena, script, 0, call_graph->op_arrays[i], call_graph->func_infos + i);
 	}
 	zend_analyze_recursion(call_graph);
@@ -245,7 +259,7 @@ ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, z
 }
 /* }}} */
 
-ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array) /* {{{ */
+ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, const zend_func_info *info, const zend_op_array *op_array) /* {{{ */
 {
 	zend_call_info **map, *call;
 	if (!info->callee_info) {
@@ -255,14 +269,15 @@ ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info
 
 	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
 	for (call = info->callee_info; call; call = call->next_callee) {
-		int i;
 		map[call->caller_init_opline - op_array->opcodes] = call;
 		if (call->caller_call_opline) {
 			map[call->caller_call_opline - op_array->opcodes] = call;
 		}
-		for (i = 0; i < call->num_args; i++) {
-			if (call->arg_info[i].opline) {
-				map[call->arg_info[i].opline - op_array->opcodes] = call;
+		if (!call->is_frameless) {
+			for (uint32_t i = 0; i < call->num_args; i++) {
+				if (call->arg_info[i].opline) {
+					map[call->arg_info[i].opline - op_array->opcodes] = call;
+				}
 			}
 		}
 	}

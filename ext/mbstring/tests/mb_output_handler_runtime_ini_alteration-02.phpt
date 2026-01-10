@@ -4,10 +4,10 @@ mb_output_handler() and mbstring.http_output_conv_mimetypes alteration in runtim
 mbstring
 --INI--
 internal_encoding=UTF-8
+output_encoding=EUC-JP
 mbstring.http_output_conv_mimetypes=html
 --FILE--
 <?php
-mb_http_output("EUC-JP");
 ini_set('mbstring.http_output_conv_mimetypes', 'application');
 header("Content-Type: text/html");
 ob_start();

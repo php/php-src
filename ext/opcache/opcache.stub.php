@@ -14,6 +14,8 @@ function opcache_compile_file(string $filename): bool {}
 
 function opcache_invalidate(string $filename, bool $force = false): bool {}
 
+function opcache_jit_blacklist(Closure $closure): void {}
+
 /**
  * @return array<string, mixed>|false
  * @refcount 1
@@ -21,3 +23,5 @@ function opcache_invalidate(string $filename, bool $force = false): bool {}
 function opcache_get_configuration(): array|false {}
 
 function opcache_is_script_cached(string $filename): bool {}
+
+function opcache_is_script_cached_in_file_cache(string $filename): bool {}

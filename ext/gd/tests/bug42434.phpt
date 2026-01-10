@@ -15,8 +15,6 @@ if (imagecolorat($im, 9, 0) == 0x000000) {
 } else {
     echo 'Bugged';
 }
-
-imagedestroy($im);
 ?>
 --EXPECT--
 DONE

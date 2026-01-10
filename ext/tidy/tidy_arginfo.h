@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5efa4f23774fac9610f05d895d8f8c6f481cc5a6 */
+ * Stub hash: 0e6561410a63658f76011c1ddcecdd1e68757f0a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -183,6 +183,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_tidyNode_getParent, 0, 0, tidyNode, 1)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_tidyNode_getPreviousSibling arginfo_class_tidyNode_getParent
+
+#define arginfo_class_tidyNode_getNextSibling arginfo_class_tidyNode_getParent
 
 ZEND_FUNCTION(tidy_parse_string);
 ZEND_FUNCTION(tidy_get_error_buffer);
@@ -223,7 +226,8 @@ ZEND_METHOD(tidyNode, isJste);
 ZEND_METHOD(tidyNode, isAsp);
 ZEND_METHOD(tidyNode, isPhp);
 ZEND_METHOD(tidyNode, getParent);
-
+ZEND_METHOD(tidyNode, getPreviousSibling);
+ZEND_METHOD(tidyNode, getNextSibling);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(tidy_parse_string, arginfo_tidy_parse_string)
@@ -255,32 +259,30 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_tidy_methods[] = {
 	ZEND_ME(tidy, __construct, arginfo_class_tidy___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getOpt, tidy_getopt, arginfo_class_tidy_getOpt, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(cleanRepair, tidy_clean_repair, arginfo_class_tidy_cleanRepair, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("getOpt", zif_tidy_getopt, arginfo_class_tidy_getOpt, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("cleanRepair", zif_tidy_clean_repair, arginfo_class_tidy_cleanRepair, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(tidy, parseFile, arginfo_class_tidy_parseFile, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidy, parseString, arginfo_class_tidy_parseString, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(repairString, tidy_repair_string, arginfo_class_tidy_repairString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(repairFile, tidy_repair_file, arginfo_class_tidy_repairFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(diagnose, tidy_diagnose, arginfo_class_tidy_diagnose, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getRelease, tidy_get_release, arginfo_class_tidy_getRelease, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getConfig, tidy_get_config, arginfo_class_tidy_getConfig, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getStatus, tidy_get_status, arginfo_class_tidy_getStatus, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getHtmlVer, tidy_get_html_ver, arginfo_class_tidy_getHtmlVer, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("repairString", zif_tidy_repair_string, arginfo_class_tidy_repairString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("repairFile", zif_tidy_repair_file, arginfo_class_tidy_repairFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("diagnose", zif_tidy_diagnose, arginfo_class_tidy_diagnose, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getRelease", zif_tidy_get_release, arginfo_class_tidy_getRelease, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getConfig", zif_tidy_get_config, arginfo_class_tidy_getConfig, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getStatus", zif_tidy_get_status, arginfo_class_tidy_getStatus, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getHtmlVer", zif_tidy_get_html_ver, arginfo_class_tidy_getHtmlVer, ZEND_ACC_PUBLIC, NULL, NULL)
 #if defined(HAVE_TIDYOPTGETDOC)
-	ZEND_ME_MAPPING(getOptDoc, tidy_get_opt_doc, arginfo_class_tidy_getOptDoc, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("getOptDoc", zif_tidy_get_opt_doc, arginfo_class_tidy_getOptDoc, ZEND_ACC_PUBLIC, NULL, NULL)
 #endif
-	ZEND_ME_MAPPING(isXhtml, tidy_is_xhtml, arginfo_class_tidy_isXhtml, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(isXml, tidy_is_xml, arginfo_class_tidy_isXml, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(root, tidy_get_root, arginfo_class_tidy_root, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(head, tidy_get_head, arginfo_class_tidy_head, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(html, tidy_get_html, arginfo_class_tidy_html, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(body, tidy_get_body, arginfo_class_tidy_body, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("isXhtml", zif_tidy_is_xhtml, arginfo_class_tidy_isXhtml, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isXml", zif_tidy_is_xml, arginfo_class_tidy_isXml, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("root", zif_tidy_get_root, arginfo_class_tidy_root, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("head", zif_tidy_get_head, arginfo_class_tidy_head, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("html", zif_tidy_get_html, arginfo_class_tidy_html, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("body", zif_tidy_get_body, arginfo_class_tidy_body, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_tidyNode_methods[] = {
 	ZEND_ME(tidyNode, __construct, arginfo_class_tidyNode___construct, ZEND_ACC_PRIVATE)
@@ -293,6 +295,8 @@ static const zend_function_entry class_tidyNode_methods[] = {
 	ZEND_ME(tidyNode, isAsp, arginfo_class_tidyNode_isAsp, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidyNode, isPhp, arginfo_class_tidyNode_isPhp, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidyNode, getParent, arginfo_class_tidyNode_getParent, ZEND_ACC_PUBLIC)
+	ZEND_ME(tidyNode, getPreviousSibling, arginfo_class_tidyNode_getPreviousSibling, ZEND_ACC_PUBLIC)
+	ZEND_ME(tidyNode, getNextSibling, arginfo_class_tidyNode_getNextSibling, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -433,86 +437,32 @@ static void register_tidy_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_XMP", TidyTag_XMP, CONST_PERSISTENT);
 #if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_ARTICLE", TidyTag_ARTICLE, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_ASIDE", TidyTag_ASIDE, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_AUDIO", TidyTag_AUDIO, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_BDI", TidyTag_BDI, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_CANVAS", TidyTag_CANVAS, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_COMMAND", TidyTag_COMMAND, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_DATALIST", TidyTag_DATALIST, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_DETAILS", TidyTag_DETAILS, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_DIALOG", TidyTag_DIALOG, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_FIGCAPTION", TidyTag_FIGCAPTION, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_FIGURE", TidyTag_FIGURE, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_FOOTER", TidyTag_FOOTER, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_HEADER", TidyTag_HEADER, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_HGROUP", TidyTag_HGROUP, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_MAIN", TidyTag_MAIN, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_MARK", TidyTag_MARK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_MENUITEM", TidyTag_MENUITEM, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_METER", TidyTag_METER, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_NAV", TidyTag_NAV, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_OUTPUT", TidyTag_OUTPUT, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_PROGRESS", TidyTag_PROGRESS, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_SECTION", TidyTag_SECTION, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_SOURCE", TidyTag_SOURCE, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_SUMMARY", TidyTag_SUMMARY, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_TEMPLATE", TidyTag_TEMPLATE, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_TIME", TidyTag_TIME, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_TRACK", TidyTag_TRACK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_TIDYBUFFIO_H)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_VIDEO", TidyTag_VIDEO, CONST_PERSISTENT);
 #endif
 }
@@ -522,19 +472,17 @@ static zend_class_entry *register_class_tidy(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "tidy", class_tidy_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_errorBuffer_default_value;
 	ZVAL_NULL(&property_errorBuffer_default_value);
-	zend_string *property_errorBuffer_name = zend_string_init("errorBuffer", sizeof("errorBuffer") - 1, 1);
+	zend_string *property_errorBuffer_name = zend_string_init("errorBuffer", sizeof("errorBuffer") - 1, true);
 	zend_declare_typed_property(class_entry, property_errorBuffer_name, &property_errorBuffer_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_errorBuffer_name);
+	zend_string_release_ex(property_errorBuffer_name, true);
 
 	zval property_value_default_value;
 	ZVAL_NULL(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
-	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_value_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	return class_entry;
 }
@@ -544,62 +492,53 @@ static zend_class_entry *register_class_tidyNode(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "tidyNode", class_tidyNode_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
-	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_value_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_name_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
-	zend_string *property_type_name = zend_string_init("type", sizeof("type") - 1, 1);
-	zend_declare_typed_property(class_entry, property_type_name, &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_type_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TYPE), &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
 	zval property_line_default_value;
 	ZVAL_UNDEF(&property_line_default_value);
-	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_line_name);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
-	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, true);
 	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_column_name);
+	zend_string_release_ex(property_column_name, true);
 
 	zval property_proprietary_default_value;
 	ZVAL_UNDEF(&property_proprietary_default_value);
-	zend_string *property_proprietary_name = zend_string_init("proprietary", sizeof("proprietary") - 1, 1);
+	zend_string *property_proprietary_name = zend_string_init("proprietary", sizeof("proprietary") - 1, true);
 	zend_declare_typed_property(class_entry, property_proprietary_name, &property_proprietary_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_proprietary_name);
+	zend_string_release_ex(property_proprietary_name, true);
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
-	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
-	zend_string_release(property_id_name);
+	zend_string_release_ex(property_id_name, true);
 
 	zval property_attribute_default_value;
 	ZVAL_UNDEF(&property_attribute_default_value);
-	zend_string *property_attribute_name = zend_string_init("attribute", sizeof("attribute") - 1, 1);
+	zend_string *property_attribute_name = zend_string_init("attribute", sizeof("attribute") - 1, true);
 	zend_declare_typed_property(class_entry, property_attribute_name, &property_attribute_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_attribute_name);
+	zend_string_release_ex(property_attribute_name, true);
 
 	zval property_child_default_value;
 	ZVAL_UNDEF(&property_child_default_value);
-	zend_string *property_child_name = zend_string_init("child", sizeof("child") - 1, 1);
+	zend_string *property_child_name = zend_string_init("child", sizeof("child") - 1, true);
 	zend_declare_typed_property(class_entry, property_child_name, &property_child_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_child_name);
+	zend_string_release_ex(property_child_name, true);
 
 	return class_entry;
 }

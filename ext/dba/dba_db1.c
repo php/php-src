@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -61,7 +61,7 @@ DBA_OPEN_FUNC(db1)
 			return FAILURE; /* not possible */
 	}
 
-	db = dbopen((char *)info->path, gmode, filemode, DB_HASH, NULL);
+	db = dbopen((char *)ZSTR_VAL(info->path), gmode, filemode, DB_HASH, NULL);
 
 	if (db == NULL) {
 		return FAILURE;

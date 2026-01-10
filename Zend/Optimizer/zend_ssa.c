@@ -22,6 +22,7 @@
 #include "zend_ssa.h"
 #include "zend_dump.h"
 #include "zend_inference.h"
+#include "zend_worklist.h"
 #include "Optimizer/zend_optimizer_internal.h"
 
 static bool dominates(const zend_basic_block *blocks, int a, int b) {
@@ -51,20 +52,20 @@ static bool will_rejoin(
 		/* The other successor dominates this predecessor,
 		 * so we will get the original value from it. */
 		if (dominates(cfg->blocks, other_successor, predecessor)) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
-static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
-	zend_basic_block *from_block, *to_block;
+	const zend_basic_block *from_block, *to_block;
 	int other_successor;
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
 		/* Variable is not live, certainly won't benefit from pi */
-		return 0;
+		return false;
 	}
 
 	/* Make sure that both successors of the from block aren't the same. Pi nodes are associated
@@ -72,13 +73,13 @@ static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa
 	from_block = &ssa->cfg.blocks[from];
 	ZEND_ASSERT(from_block->successors_count == 2);
 	if (from_block->successors[0] == from_block->successors[1]) {
-		return 0;
+		return false;
 	}
 
 	to_block = &ssa->cfg.blocks[to];
 	if (to_block->predecessors_count == 1) {
 		/* Always place pi if one predecessor (an if branch) */
-		return 1;
+		return true;
 	}
 
 	/* Check whether we will rejoin with the original value coming from the other successor,
@@ -90,7 +91,7 @@ static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa
 /* }}} */
 
 static zend_ssa_phi *add_pi(
-		zend_arena **arena, const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa,
+		zend_arena **arena, const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa,
 		int from, int to, int var) /* {{{ */
 {
 	zend_ssa_phi *phi;
@@ -130,7 +131,7 @@ static zend_ssa_phi *add_pi(
 
 static void pi_range(
 		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
-		char underflow, char overflow, char negative) /* {{{ */
+		bool underflow, bool overflow, bool negative) /* {{{ */
 {
 	zend_ssa_range_constraint *constraint = &phi->constraint.range;
 	constraint->min_var = min_var;
@@ -142,25 +143,25 @@ static void pi_range(
 	constraint->range.underflow = underflow;
 	constraint->range.overflow = overflow;
 	constraint->negative = negative ? NEG_INIT : NEG_NONE;
-	phi->has_range_constraint = 1;
+	phi->has_range_constraint = true;
 }
 /* }}} */
 
 static inline void pi_range_equals(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, var, val, val, 0, 0, 0);
+	pi_range(phi, var, var, val, val, false, false, false);
 }
 static inline void pi_range_not_equals(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, var, val, val, 0, 0, 1);
+	pi_range(phi, var, var, val, val, false, false, true);
 }
 static inline void pi_range_min(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, -1, val, ZEND_LONG_MAX, 0, 1, 0);
+	pi_range(phi, var, -1, val, ZEND_LONG_MAX, false, true, false);
 }
 static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, -1, var, ZEND_LONG_MIN, val, 1, 0, 0);
+	pi_range(phi, -1, var, ZEND_LONG_MIN, val, true, false, false);
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->has_range_constraint = 0;
+	phi->has_range_constraint = false;
 	phi->constraint.type.ce = NULL;
 	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
 	phi->constraint.type.type_mask |= type_mask;
@@ -240,8 +241,8 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
  */
 static void place_essa_pis(
 		zend_arena **arena, const zend_script *script, const zend_op_array *op_array,
-		uint32_t build_flags, zend_ssa *ssa, zend_dfg *dfg) /* {{{ */ {
-	zend_basic_block *blocks = ssa->cfg.blocks;
+		uint32_t build_flags, const zend_ssa *ssa, const zend_dfg *dfg) /* {{{ */ {
+	const zend_basic_block *blocks = ssa->cfg.blocks;
 	int j, blocks_count = ssa->cfg.blocks_count;
 	for (j = 0; j < blocks_count; j++) {
 		zend_ssa_phi *pi;
@@ -607,7 +608,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
-			if (opline->op1_type == IS_CV) {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 				ssa_ops[k].op1_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -679,6 +680,7 @@ add_op1_def:
 		case ZEND_POST_DEC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_VAR_EX:
@@ -765,6 +767,35 @@ add_op1_def:
 				//NEW_SSA_VAR(opline->op1.var)
 			}
 			break;
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
+				next = opline + 1;
+				if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+					//USE_SSA_VAR(op_array->last_var + next->op1.var);
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+						ssa_ops[k + 1].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(next->op1.var)
+					}
+				}
+			}
+		}
 		default:
 			break;
 	}
@@ -786,23 +817,14 @@ ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *op
 }
 /* }}} */
 
-static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
+static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
-	zend_basic_block *blocks = ssa->cfg.blocks;
-	zend_ssa_block *ssa_blocks = ssa->blocks;
+	const zend_basic_block *blocks = ssa->cfg.blocks;
+	const zend_ssa_block *ssa_blocks = ssa->blocks;
 	zend_ssa_op *ssa_ops = ssa->ops;
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
-	zend_op *opline, *end;
-	int *tmp = NULL;
-	ALLOCA_FLAG(use_heap = 0);
-
-	// FIXME: Can we optimize this copying out in some cases?
-	if (blocks[n].next_child >= 0) {
-		tmp = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), use_heap);
-		memcpy(tmp, var, sizeof(int) * (op_array->last_var + op_array->T));
-		var = tmp;
-	}
+	const zend_op *opline, *end;
 
 	if (ssa_blocks[n].phis) {
 		zend_ssa_phi *phi = ssa_blocks[n].phis;
@@ -827,7 +849,7 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 		}
 	}
 
-	zend_ssa_op *fe_fetch_ssa_op = blocks[n].len != 0
+	const zend_ssa_op *fe_fetch_ssa_op = blocks[n].len != 0
 			&& ((end-1)->opcode == ZEND_FE_FETCH_R || (end-1)->opcode == ZEND_FE_FETCH_RW)
 			&& (end-1)->op2_type == IS_CV
 		? &ssa_ops[blocks[n].start + blocks[n].len - 1] : NULL;
@@ -886,26 +908,94 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 	}
 
 	ssa->vars_count = ssa_vars_count;
-
-	j = blocks[n].children;
-	while (j >= 0) {
-		// FIXME: Tail call optimization?
-		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) == FAILURE)
-			return FAILURE;
-		j = blocks[j].next_child;
-	}
-
-	if (tmp) {
-		free_alloca(tmp, use_heap);
-	}
-
-	return SUCCESS;
 }
 /* }}} */
 
+static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n)
+{
+	/* The worklist contains block numbers, encoded as positive or negative value.
+	 * Positive values indicate that the variable rename still needs to happen for the block.
+	 * Negative values indicate the variable rename was done and all children were handled too.
+	 * In that case, we will clean up.
+	 * Because block 0 is valid, we bias the block numbers by adding 1 such that we can distinguish
+	 * positive and negative values in all cases. */
+	zend_worklist_stack work;
+	ALLOCA_FLAG(work_use_heap);
+	ZEND_WORKLIST_STACK_ALLOCA(&work, ssa->cfg.blocks_count, work_use_heap);
+	zend_worklist_stack_push(&work, n + 1);
+
+	/* This is used to backtrack the right version of the renamed variables to use. */
+	ALLOCA_FLAG(save_vars_use_heap);
+	unsigned int save_vars_top = 0;
+	int **save_vars = do_alloca(sizeof(int *) * (ssa->cfg.blocks_count + 1), save_vars_use_heap);
+	save_vars[0] = var;
+
+	while (work.len) {
+		n = zend_worklist_stack_pop(&work);
+
+		/* Enter state: perform SSA variable rename */
+		if (n > 0) {
+			n--;
+
+			// FIXME: Can we optimize this copying out in some cases?
+			int *new_var;
+			if (ssa->cfg.blocks[n].next_child >= 0) {
+				new_var = emalloc(sizeof(int) * (op_array->last_var + op_array->T));
+				memcpy(new_var, save_vars[save_vars_top], sizeof(int) * (op_array->last_var + op_array->T));
+				save_vars[++save_vars_top] = new_var;
+			} else {
+				new_var = save_vars[save_vars_top];
+			}
+
+			zend_ssa_rename_in_block(op_array, build_flags, ssa, new_var, n);
+
+			int j = ssa->cfg.blocks[n].children;
+			if (j >= 0) {
+				/* Push backtrack state */
+				zend_worklist_stack_push(&work, -(n + 1));
+
+				/* Push children in enter state */
+				unsigned int child_count = 0;
+				int len_prior = work.len;
+				do {
+					zend_worklist_stack_push(&work, j + 1);
+					j = ssa->cfg.blocks[j].next_child;
+					child_count++;
+				} while (j >= 0);
+
+				/* Reverse block order to maintain SSA variable number order given in previous PHP versions,
+				 * but the data structure doesn't allow reverse dominator tree traversal. */
+				for (unsigned int i = 0; i < child_count / 2; i++) {
+					int tmp = work.buf[len_prior + i];
+					work.buf[len_prior + i] = work.buf[work.len - 1 - i];
+					work.buf[work.len - 1 - i] = tmp;
+				}
+			} else {
+				/* Leafs jump directly to backtracking */
+				goto backtrack;
+			}
+		}
+		/* Leave state: backtrack */
+		else {
+			n = -n;
+			n--;
+backtrack:;
+			if (ssa->cfg.blocks[n].next_child >= 0) {
+				efree(save_vars[save_vars_top]);
+				save_vars_top--;
+			}
+		}
+	}
+
+	free_alloca(save_vars, save_vars_use_heap);
+	ZEND_WORKLIST_STACK_FREE_ALLOCA(&work, work_use_heap);
+
+	return SUCCESS;
+}
+
 ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {
-	zend_basic_block *blocks = ssa->cfg.blocks;
+	const zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
 	int blocks_count = ssa->cfg.blocks_count;
 	uint32_t set_size;
@@ -1169,7 +1259,7 @@ ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_
 }
 /* }}} */
 
-void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
+void zend_ssa_unlink_use_chain(const zend_ssa *ssa, int op, int var) /* {{{ */
 {
 	if (ssa->vars[var].use_chain == op) {
 		ssa->vars[var].use_chain = zend_ssa_next_use(ssa->ops, var, op);
@@ -1208,7 +1298,7 @@ void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 }
 /* }}} */
 
-void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var) /* {{{ */
+void zend_ssa_replace_use_chain(const zend_ssa *ssa, int op, int new_op, int var) /* {{{ */
 {
 	if (ssa->vars[var].use_chain == op) {
 		ssa->vars[var].use_chain = new_op;
@@ -1248,7 +1338,7 @@ void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var) /* {
 }
 /* }}} */
 
-void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) /* {{{ */
+void zend_ssa_remove_instr(const zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) /* {{{ */
 {
 	if (ssa_op->result_use >= 0) {
 		zend_ssa_unlink_use_chain(ssa, ssa_op - ssa->ops, ssa_op->result_use);
@@ -1279,7 +1369,7 @@ void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) 
 }
 /* }}} */
 
-static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, zend_ssa_phi *p) /* {{{ */
+static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(const zend_ssa *ssa, int var, zend_ssa_phi *p) /* {{{ */
 {
 	if (p->pi >= 0) {
 		return &p->use_chains[0];
@@ -1298,7 +1388,7 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, z
 
 /* May be called even if source is not used in the phi (useful when removing uses in a phi
  * with multiple identical operands) */
-static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi) /* {{{ */
+static inline void zend_ssa_remove_use_of_phi_source(const zend_ssa *ssa, const zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi) /* {{{ */
 {
 	zend_ssa_phi **cur = &ssa->vars[source].phi_use_chain;
 	while (*cur && *cur != phi) {
@@ -1310,7 +1400,7 @@ static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi
 }
 /* }}} */
 
-static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+static void zend_ssa_remove_uses_of_phi_sources(const zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
 {
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
@@ -1319,7 +1409,7 @@ static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi
 }
 /* }}} */
 
-static void zend_ssa_remove_phi_from_block(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+static void zend_ssa_remove_phi_from_block(const zend_ssa *ssa, const zend_ssa_phi *phi) /* {{{ */
 {
 	zend_ssa_block *block = &ssa->blocks[phi->block];
 	zend_ssa_phi **cur = &block->phis;
@@ -1348,7 +1438,7 @@ void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op) /* {{{ */
 }
 /* }}} */
 
-static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
+static inline void zend_ssa_remove_phi_source(const zend_ssa *ssa, const zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
 {
 	int j, var_num = phi->sources[pred_offset];
 	zend_ssa_phi *next_phi = phi->use_chains[pred_offset];
@@ -1377,7 +1467,7 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 }
 /* }}} */
 
-void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+void zend_ssa_remove_phi(const zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
 {
 	ZEND_ASSERT(phi->ssa_var >= 0);
 	ZEND_ASSERT(ssa->vars[phi->ssa_var].use_chain < 0
@@ -1389,7 +1479,7 @@ void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
 }
 /* }}} */
 
-void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
+void zend_ssa_remove_uses_of_var(const zend_ssa *ssa, int var_num) /* {{{ */
 {
 	zend_ssa_var *var = &ssa->vars[var_num];
 	zend_ssa_phi *phi;
@@ -1425,7 +1515,7 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 {
 	zend_basic_block *next_block = &ssa->cfg.blocks[to];
-	zend_ssa_block *next_ssa_block = &ssa->blocks[to];
+	const zend_ssa_block *next_ssa_block = &ssa->blocks[to];
 	zend_ssa_phi *phi;
 	int j;
 
@@ -1450,7 +1540,7 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 	for (phi = next_ssa_block->phis; phi; phi = phi->next) {
 		if (phi->pi >= 0) {
 			if (phi->pi == from) {
-				zend_ssa_rename_var_uses(ssa, phi->ssa_var, phi->sources[0], /* update_types */ 0);
+				zend_ssa_rename_var_uses(ssa, phi->ssa_var, phi->sources[0], /* update_types */ false);
 				zend_ssa_remove_phi(ssa, phi);
 			}
 		} else {
@@ -1468,10 +1558,10 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 }
 /* }}} */
 
-void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
+void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
-	zend_ssa_block *ssa_block = &ssa->blocks[i];
+	const zend_ssa_block *ssa_block = &ssa->blocks[i];
 	zend_ssa_phi *phi;
 	int j;
 
@@ -1581,15 +1671,15 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 
 		/* If the op already uses the new var, don't add the op to the use
 		 * list again. Instead move the use_chain to the correct operand. */
-		bool add_to_use_chain = 1;
+		bool add_to_use_chain = true;
 		if (ssa_op->result_use == new) {
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		} else if (ssa_op->op1_use == new) {
 			if (ssa_op->result_use == old) {
 				ssa_op->res_use_chain = ssa_op->op1_use_chain;
 				ssa_op->op1_use_chain = -1;
 			}
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		} else if (ssa_op->op2_use == new) {
 			if (ssa_op->result_use == old) {
 				ssa_op->res_use_chain = ssa_op->op2_use_chain;
@@ -1598,7 +1688,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 				ssa_op->op1_use_chain = ssa_op->op2_use_chain;
 				ssa_op->op2_use_chain = -1;
 			}
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		}
 
 		/* Perform the actual renaming */
@@ -1633,7 +1723,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 	/* Update phi use chains */
 	FOREACH_PHI_USE(old_var, phi) {
 		int j;
-		bool after_first_new_source = 0;
+		bool after_first_new_source = false;
 
 		/* If the phi already uses the new var, find its use chain, as we may
 		 * need to move it to a different source operand. */
@@ -1647,7 +1737,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 
 		for (j = 0; j < ssa->cfg.blocks[phi->block].predecessors_count; j++) {
 			if (phi->sources[j] == new) {
-				after_first_new_source = 1;
+				after_first_new_source = true;
 			} else if (phi->sources[j] == old) {
 				phi->sources[j] = new;
 
@@ -1661,7 +1751,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 						phi->use_chains[j] = new_var->phi_use_chain;
 						new_var->phi_use_chain = phi;
 					}
-					after_first_new_source = 1;
+					after_first_new_source = true;
 				} else {
 					phi->use_chains[j] = NULL;
 				}

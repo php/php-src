@@ -16,6 +16,8 @@ class C implements I {
 var_dump((new C)->test());
 
 ?>
---EXPECT--
-object(Generator)#2 (0) {
+--EXPECTF--
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(7) "C::test"
 }

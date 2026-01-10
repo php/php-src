@@ -89,6 +89,7 @@ runs:
             --enable-intl \
             --with-mhash \
             --with-sodium \
+            --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d \
             ${{ inputs.configurationParameters }}
@@ -112,8 +113,7 @@ runs:
             --offline \
             --show-diff \
             --show-slow 1000 \
-            --set-timeout 120 \
-            -d zend_extension=opcache.so
+            --set-timeout 120
 
           if test "${{ inputs.runExtraTests }}" = "true"; then
             sapi/cli/php run-extra-tests.php

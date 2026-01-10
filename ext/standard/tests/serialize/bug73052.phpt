@@ -14,5 +14,5 @@ $poc = 'O:3:"obj":1:{';
 var_dump(unserialize($poc));
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset 13 of 13 bytes in %sbug73052.php on line %d
+Warning: unserialize(): Error at offset 13 of 13 bytes in %s on line %d
 bool(false)

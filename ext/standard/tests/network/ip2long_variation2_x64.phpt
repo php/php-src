@@ -8,6 +8,7 @@ Test ip2long() function : usage variation 2, 64 bit
      otherwise, the number is interpreted as decimal).
 */
 if(PHP_OS == 'Darwin') die("skip - inet_pton behaves differently on Darwin");
+if(PHP_OS == 'OpenBSD') die("skip - inet_pton accepts leading zeros on OpenBSD");
 if(PHP_INT_SIZE != 8) {die('skip 64 bit only');}
 ?>
 --FILE--

@@ -23,10 +23,9 @@ struct st_tick_function
 	void *arg;
 };
 
-int php_startup_ticks(void)
+void php_startup_ticks(void)
 {
 	zend_llist_init(&PG(tick_functions), sizeof(struct st_tick_function), NULL, 1);
-	return SUCCESS;
 }
 
 void php_deactivate_ticks(void)

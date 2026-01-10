@@ -4,7 +4,6 @@ JIT COUNT: 001
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 ;opcache.jit_debug=1
 --EXTENSIONS--
 opcache
@@ -52,6 +51,7 @@ for ($i = 0; $i < 5; $i++) {
     }
 }
 
+?>
 --EXPECT--
 0
 1

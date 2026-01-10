@@ -4,13 +4,11 @@ mysqli_real_escape_string()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if ('\\\\' !== ($tmp = mysqli_real_escape_string($link, '\\')))
         printf("[004] Expecting \\\\, got %s\n", $tmp);

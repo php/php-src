@@ -4,7 +4,7 @@ mysqli_stmt_fetch()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -13,9 +13,7 @@ require_once('skipifconnectfailure.inc');
     mysqli_stmt_bind_result.phpt already. Restrict
     this test case to the basics.
     */
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -59,7 +57,7 @@ require_once('skipifconnectfailure.inc');
         printf("[013] Expecting boolean/true, got %s/%s, [%d] %s\n",
             gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (!mysqli_kill($link, mysqli_thread_id($link)))
+    if (!$link->query('KILL '.mysqli_thread_id($link)))
         printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (true !== ($tmp = mysqli_stmt_fetch($stmt)))
@@ -79,7 +77,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 mysqli_stmt object is not fully initialized

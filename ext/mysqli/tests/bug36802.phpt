@@ -10,7 +10,7 @@ mysqli
         }
     }
 
-    require_once("connect.inc");
+    require_once 'connect.inc';
     $mysql = mysqli_init();
 
     /* following operations should not work */

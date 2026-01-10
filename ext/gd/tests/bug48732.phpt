@@ -2,9 +2,13 @@
 Bug #48732 (TTF Bounding box wrong for letters below baseline)
 --EXTENSIONS--
 gd
+
 --SKIPIF--
 <?php
     if(!function_exists('imagefttext')) die('skip imagefttext() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

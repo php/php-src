@@ -10,7 +10,8 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.optimization_level=-1
+; Disable inlining pass
+opcache.optimization_level=0x7ffe3fff
 opcache.preload={PWD}/observer_preload.inc
 opcache.file_cache=
 opcache.file_cache_only=0

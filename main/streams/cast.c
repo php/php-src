@@ -42,9 +42,9 @@ typedef struct {
 	int (*writer)(void *, const char *, int);
 	PHP_FPOS_T (*seeker)(void *, PHP_FPOS_T, int);
 	int (*closer)(void *);
-} COOKIE_IO_FUNCTIONS_T;
+} cookie_io_functions_t;
 
-FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
+FILE *fopencookie(void *cookie, const char *mode, cookie_io_functions_t *funcs)
 {
 	FILE *file = funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
 	if (file) {
@@ -135,8 +135,8 @@ static int stream_cookie_closer(void *cookie)
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 
-#if HAVE_FOPENCOOKIE
-static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
+#ifdef HAVE_FOPENCOOKIE
+static cookie_io_functions_t stream_cookie_functions =
 {
 	stream_cookie_reader, stream_cookie_writer,
 	stream_cookie_seeker, stream_cookie_closer
@@ -191,7 +191,7 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 /* }}} */
 
 /* {{{ php_stream_cast */
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
+PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
 	castas &= ~PHP_STREAM_CAST_MASK;
@@ -227,7 +227,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-#if HAVE_FOPENCOOKIE
+#ifdef HAVE_FOPENCOOKIE
 		/* if just checking, say yes we can be a FILE*, but don't actually create it yet */
 		if (ret == NULL) {
 			goto exit_success;
@@ -273,12 +273,12 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 			newstream = php_stream_fopen_tmpfile();
 			if (newstream) {
-				int retcopy = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
+				zend_result retcopy = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
 
 				if (retcopy != SUCCESS) {
 					php_stream_close(newstream);
 				} else {
-					int retcast = php_stream_cast(newstream, castas | flags, (void **)ret, show_err);
+					zend_result retcast = php_stream_cast(newstream, castas | flags, (void **)ret, show_err);
 
 					if (retcast == SUCCESS) {
 						rewind(*(FILE**)ret);
@@ -370,7 +370,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 /* }}} */
 
 /* {{{ php_stream_make_seekable */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
+PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
 {
 	if (newstream == NULL) {
 		return PHP_STREAM_FAILED;

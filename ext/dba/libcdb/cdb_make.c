@@ -236,7 +236,7 @@ int cdb_make_finish(struct cdb_make *c)
 /* }}} */
 
 /* {{{ cdb_make_version */
-char *cdb_make_version()
+const char *cdb_make_version(void)
 {
 	return "0.75, $Id$";
 }

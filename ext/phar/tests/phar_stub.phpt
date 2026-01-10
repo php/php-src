@@ -55,6 +55,24 @@ echo file_get_contents($fname2) . "\n";
 $fp = fopen($fname2, 'rb');
 
 //// 4
+set_error_handler(function ($severity, $message, $file, $line) {
+    throw new Exception($message);
+});
+try {
+    $phar->setStub($fp);
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
+}
+set_error_handler(null);
+fclose($fp);
+
+$fp = fopen($fname, 'rb');
+echo fread($fp, strlen($file)) . "\n";
+fclose($fp);
+
+$fp = fopen($fname2, 'rb');
+
+//// 5
 $phar->setStub($fp, strlen($file));
 fclose($fp);
 
@@ -81,10 +99,16 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
 __HALT_COMPILER();
 ?>
---EXPECT--
+--EXPECTF--
 <?php echo "first stub\n"; __HALT_COMPILER(); ?>
 <?php echo "second stub\n"; __HALT_COMPILER(); ?>
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
+Calling Phar::setStub(resource $stub, int $length) is deprecated
+<?php echo "third stub\n"; __HALT_COMPILER(); ?>
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>

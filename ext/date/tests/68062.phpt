@@ -10,9 +10,9 @@ echo $tz->getOffset($dt), "\n";
 try {
     echo $tz->getOffset(1);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 3600
-DateTimeZone::getOffset(): Argument #1 ($datetime) must be of type DateTimeInterface, int given
+TypeError: DateTimeZone::getOffset(): Argument #1 ($datetime) must be of type DateTimeInterface, int given

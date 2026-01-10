@@ -689,7 +689,7 @@ mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngrou
 	gn = onig_name_to_backref_number(reg, name, name_end, args->region);
 	beg = args->region->beg[gn];
 	end = args->region->end[gn];
-	if (beg >= 0 && beg < end && end <= args->search_len) {
+	if (beg >= 0 && beg < end && ((size_t)end <= args->search_len)) {
 		add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
 	} else {
 		add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
@@ -900,7 +900,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1106,12 +1106,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
-				} else {
-					if (!EG(exception)) {
-						zend_throw_error(NULL, "Unable to call custom replacement function");
-						zval_ptr_dtor(&subpats);
-						RETURN_THROWS();
-					}
 				}
 				zval_ptr_dtor(&subpats);
 			}
@@ -1184,7 +1178,7 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	zend_long count = -1;
+	zend_ulong count = -1; /* unsigned, it's a limit and we want to prevent signed overflow */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
 		RETURN_THROWS();
@@ -1468,7 +1462,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	}
 
 	if (arg_pattern && arg_pattern_len == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

@@ -62,10 +62,13 @@ function get_depends($module)
         'msvcr90.dll',
         'wldap32.dll',
         'vcruntime140.dll',
+        'vcruntime140_1.dll',
         'msvcp140.dll',
         );
     static $no_dist_re = array(
         "api-ms-win-crt-.+\.dll",
+        "api-ms-win-core-.+\.dll",
+        "clang_rt.asan_dynamic-.+\.dll",
     );
     global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 
@@ -271,7 +274,7 @@ foreach ($general_files as $src => $dest) {
 }
 
 /* include a snapshot identifier */
-$branch = "HEAD"; // TODO - determine this from SVN branche name
+$branch = "HEAD"; // TODO - determine this from GitHub branch name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
 fwrite($fp, <<<EOT

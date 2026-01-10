@@ -2,10 +2,10 @@
 IntlBreakIterator factories: basic tests
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=ja
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "ja");
 
 $m = array('createWordInstance', 'createLineInstance', 'createCharacterInstance',
     'createSentenceInstance', 'createTitleInstance');

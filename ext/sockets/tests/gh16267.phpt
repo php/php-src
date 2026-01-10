@@ -3,20 +3,16 @@ GH-16267 - overflow on socket_strerror argument
 --EXTENSIONS--
 sockets
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
+var_dump(socket_strerror(-2147483648));
 try {
-	socket_strerror(PHP_INT_MIN);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
-}
-try {
-	socket_strerror(PHP_INT_MAX);
+	socket_strerror(2147483648);
 } catch (\ValueError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 ?>
 --EXPECTF--
-socket_strerror(): Argument #1 ($error_code) must be between %s and %s
-socket_strerror(): Argument #1 ($error_code) must be between %s and %s
+string(%d) "%S"
+socket_strerror(): Argument #1 ($error_code) must be between %i and %d

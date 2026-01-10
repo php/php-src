@@ -3,11 +3,13 @@ PostgreSQL escape functions
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = "table_08escape";
+
 define('FILE_NAME', __DIR__ . '/php.gif');
 
 // pg_escape_string() test
@@ -42,6 +44,7 @@ else {
 // Test using database
 $data = file_get_contents(FILE_NAME);
 $db   = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 
 // Insert binary to DB
 $escaped_data = pg_escape_bytea($db, $data);
@@ -97,6 +100,14 @@ else {
     var_dump($expect);
 }
 
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_08escape";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d

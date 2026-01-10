@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__.'/008.test.php';
 $code ='
@@ -26,8 +26,12 @@ var_dump(test::$pri);
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -f "$filename"`);
-var_dump(`$php -n -f "wrong"`);
+var_dump(shell_exec(<<<SHELL
+$php -n -f "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -f "wrong"
+SHELL));
 
 @unlink($filename);
 
@@ -41,6 +45,6 @@ Stack trace:
 #0 {main}
   thrown in %s on line %d
 "
-string(33) "Could not open input file: wrong
-"
+Could not open input file: wrong
+NULL
 Done

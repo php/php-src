@@ -4,7 +4,10 @@ imagefilter() function test
 gd
 --SKIPIF--
 <?php
-    if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
+    if (!function_exists("imagefilter")) die("skip requires imagefilter function");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
@@ -92,7 +95,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
         echo "IMG_FILTER_SCATTER failed\n";
     }
 ?>
---EXPECT--
+--EXPECTF--
 IMG_FILTER_NEGATE success
 IMG_FILTER_GRAYSCALE success
 IMG_FILTER_EDGEDETECT success

@@ -24,7 +24,6 @@ END_OF_XML;
 $parser = xml_parser_create_ns('UTF-8');
 xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 $result = xml_parse_into_struct($parser, $data, $vals, $index);
-xml_parser_free($parser);
 var_dump($vals);
 ?>
 --EXPECT--

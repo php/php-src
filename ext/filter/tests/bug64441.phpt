@@ -1,5 +1,5 @@
 --TEST--
-bug 64441, FILTER_VALIDATE_URL will invalidate a hostname that ended by dot
+Bug #64441 (FILTER_VALIDATE_URL will invalidate a hostname that ended by dot)
 --EXTENSIONS--
 filter
 --FILE--

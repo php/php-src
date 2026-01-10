@@ -6,9 +6,10 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$cdata_value = \FFI::new('int');
-$cdata_array = \FFI::new('int[1]');
-$cdata_free = \FFI::new('int[1]', false);
+$cdef = \FFI::cdef();
+$cdata_value = $cdef->new('int');
+$cdata_array = $cdef->new('int[1]');
+$cdata_free = $cdef->new('int[1]', false);
 \FFI::free($cdata_free);
 
 $ref_value = \WeakReference::create($cdata_value);

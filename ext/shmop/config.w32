@@ -4,5 +4,5 @@ ARG_ENABLE("shmop", "shmop support", "no");
 
 if (PHP_SHMOP == "yes") {
 	EXTENSION("shmop", "shmop.c");
-	AC_DEFINE('HAVE_SHMOP', 1, 'Have SHMOP support');
+	AC_DEFINE('HAVE_SHMOP', 1, "Define to 1 if the PHP extension 'shmop' is available.");
 }

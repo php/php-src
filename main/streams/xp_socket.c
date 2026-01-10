@@ -44,10 +44,10 @@
 
 const php_stream_ops php_stream_generic_socket_ops;
 PHPAPI const php_stream_ops php_stream_socket_ops;
-const php_stream_ops php_stream_udp_socket_ops;
+static const php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops;
-const php_stream_ops php_stream_unixdg_socket_ops;
+static const php_stream_ops php_stream_unix_socket_ops;
+static const php_stream_ops php_stream_unixdg_socket_ops;
 #endif
 
 
@@ -80,13 +80,13 @@ retry:
 			if (sock->is_blocked) {
 				int retval;
 
-				sock->timeout_event = 0;
+				sock->timeout_event = false;
 
 				do {
 					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
 					if (retval == 0) {
-						sock->timeout_event = 1;
+						sock->timeout_event = true;
 						break;
 					}
 
@@ -107,8 +107,8 @@ retry:
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
 			php_error_docref(NULL, E_NOTICE,
-				"Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
-				(zend_long)count, err, estr);
+				"Send of %zu bytes failed with errno=%d %s",
+				count, err, estr);
 			efree(estr);
 		}
 	}
@@ -120,27 +120,33 @@ retry:
 	return didwrite;
 }
 
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
+static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock, bool has_buffered_data)
 {
 	int retval;
-	struct timeval *ptimeout;
+	struct timeval *ptimeout, zero_timeout;
 
 	if (!sock || sock->socket == -1) {
 		return;
 	}
 
-	sock->timeout_event = 0;
+	sock->timeout_event = false;
 
-	if (sock->timeout.tv_sec == -1)
+	if (has_buffered_data) {
+		/* If there is already buffered data, use no timeout. */
+		zero_timeout.tv_sec = 0;
+		zero_timeout.tv_usec = 0;
+		ptimeout = &zero_timeout;
+	} else if (sock->timeout.tv_sec == -1) {
 		ptimeout = NULL;
-	else
+	} else {
 		ptimeout = &sock->timeout;
+	}
 
 	while(1) {
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
 
 		if (retval == 0)
-			sock->timeout_event = 1;
+			sock->timeout_event = true;
 
 		if (retval >= 0)
 			break;
@@ -153,21 +159,37 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	ssize_t nr_bytes = 0;
-	int err;
 
 	if (!sock || sock->socket == -1) {
 		return -1;
 	}
 
+	int recv_flags = 0;
+	/* Special handling for blocking read. */
 	if (sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock);
-		if (sock->timeout_event)
-			return -1;
+		/* Find out if there is any data buffered from the previous read. */
+		bool has_buffered_data = stream->has_buffered_data;
+		/* No need to wait if there is any data buffered or no timeout. */
+		bool dont_wait = has_buffered_data ||
+				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
+		/* Set MSG_DONTWAIT if no wait is needed or there is unlimited timeout which was
+		 * added by fix for #41984 committed in 9343c5404. */
+		if (dont_wait || sock->timeout.tv_sec != -1) {
+			recv_flags = MSG_DONTWAIT;
+		}
+		/* If the wait is needed or it is a platform without MSG_DONTWAIT support (e.g. Windows),
+		 * then poll for data. */
+		if (!dont_wait || MSG_DONTWAIT == 0) {
+			php_sock_stream_wait_for_data(stream, sock, has_buffered_data);
+			if (sock->timeout_event) {
+				/* It is ok to timeout if there is any data buffered so return 0, otherwise -1. */
+				return has_buffered_data ? 0 : -1;
+			}
+		}
 	}
 
-	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
-	err = php_socket_errno();
+	ssize_t nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), recv_flags);
+	int err = php_socket_errno();
 
 	if (nr_bytes < 0) {
 		if (PHP_IS_TRANSIENT_ERROR(err)) {
@@ -351,13 +373,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 #else
 					ssize_t ret;
 #endif
-					int err;
 
 					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
-					err = php_socket_errno();
-					if (0 == ret || /* the counterpart did properly shutdown*/
-						(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
+					if (0 == ret) {
+						/* the counterpart did properly shutdown */
 						alive = 0;
+					} else if (0 > ret) {
+						int err = php_socket_errno();
+						if (err != EWOULDBLOCK && err != EMSGSIZE && err != EAGAIN) {
+							/* there was an unrecoverable error */
+							alive = 0;
+						}
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
@@ -373,7 +399,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 		case PHP_STREAM_OPTION_READ_TIMEOUT:
 			sock->timeout = *(struct timeval*)ptrparam;
-			sock->timeout_event = 0;
+			sock->timeout_event = false;
 			return PHP_STREAM_OPTION_RETURN_OK;
 
 		case PHP_STREAM_OPTION_META_DATA_API:
@@ -524,7 +550,7 @@ const php_stream_ops php_stream_socket_ops = {
 	php_tcp_sockop_set_option,
 };
 
-const php_stream_ops php_stream_udp_socket_ops = {
+static const php_stream_ops php_stream_udp_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udp_socket",
@@ -535,7 +561,7 @@ const php_stream_ops php_stream_udp_socket_ops = {
 };
 
 #ifdef AF_UNIX
-const php_stream_ops php_stream_unix_socket_ops = {
+static const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"unix_socket",
@@ -544,7 +570,7 @@ const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_stat,
 	php_tcp_sockop_set_option,
 };
-const php_stream_ops php_stream_unixdg_socket_ops = {
+static const php_stream_ops php_stream_unixdg_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udg_socket",
@@ -652,9 +678,10 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 
 		if (sock->socket == SOCK_ERR) {
 			if (xparam->want_errortext) {
+				char errstr[256];
 				xparam->outputs.error_text = strpprintf(0, "Failed to create unix%s socket %s",
 						stream->ops == &php_stream_unix_socket_ops ? "" : "datagram",
-						strerror(errno));
+						php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 			return -1;
 		}
@@ -688,6 +715,16 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		&& zend_is_true(tmpzval)
 	) {
 		sockopts |= STREAM_SOCKOP_SO_REUSEPORT;
+	}
+#endif
+
+#ifdef SO_REUSEADDR
+	/* SO_REUSEADDR is enabled by default so this option is just to disable it if set to false. */
+	if (!PHP_STREAM_CONTEXT(stream)
+		|| (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_reuseaddr")) == NULL
+		|| zend_is_true(tmpzval)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_REUSEADDR;
 	}
 #endif
 
@@ -831,7 +868,6 @@ out:
 static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)
 {
-	int clisock;
 	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
@@ -843,7 +879,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		nodelay = 1;
 	}
 
-	clisock = php_network_accept_incoming(sock->socket,
+	php_socket_t clisock = php_network_accept_incoming(sock->socket,
 		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 		xparam->want_addr ? &xparam->outputs.addr : NULL,
 		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
@@ -852,14 +888,14 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		&xparam->outputs.error_code,
 		nodelay);
 
-	if (clisock >= 0) {
+	if (clisock != SOCK_ERR) {
 		php_netstream_data_t *clisockdata = (php_netstream_data_t*) emalloc(sizeof(*clisockdata));
 
 		memcpy(clisockdata, sock, sizeof(*clisockdata));
 		clisockdata->socket = clisock;
 #ifdef __linux__
 		/* O_NONBLOCK is not inherited on Linux */
-		clisockdata->is_blocked = 1;
+		clisockdata->is_blocked = true;
 #endif
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
@@ -937,7 +973,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
-	sock->is_blocked = 1;
+	sock->is_blocked = true;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 
@@ -950,10 +986,6 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	if (stream == NULL)	{
 		pefree(sock, persistent_id ? 1 : 0);
 		return NULL;
-	}
-
-	if (flags == 0) {
-		return stream;
 	}
 
 	return stream;

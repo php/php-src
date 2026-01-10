@@ -20,6 +20,8 @@
 #ifndef ZEND_SORT_H
 #define ZEND_SORT_H
 
+#include "zend_types.h"
+
 BEGIN_EXTERN_C()
 ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
 ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);

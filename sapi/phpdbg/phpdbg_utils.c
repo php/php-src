@@ -199,7 +199,7 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (p && isspace(*p)) {
+	while (isspace(*p)) {
 		++p;
 		--len;
 	}
@@ -503,8 +503,9 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						keylen = spprintf(&key, 0, ZEND_ULONG_FMT, numkey);
 					}
 					propkey = phpdbg_get_property_key(key);
-					name = emalloc(i + keylen + 2);
-					namelen = sprintf(name, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
+					namelen = i + keylen + 2;
+					name = emalloc(namelen);
+					namelen = snprintf(name, namelen, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
 					if (!strkey) {
 						efree(key);
 					}
@@ -611,10 +612,10 @@ int phpdbg_is_auto_global(char *name, int len) {
 PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
 	zend_op *cur;
-	uint32_t op_num, i;
+	uint32_t op_num;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3) {
+	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
 		op = EG(opline_before_exception);
 	} else {
 		op = execute_data->opline;
@@ -622,7 +623,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
+	for (uint32_t i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
 		uint32_t catch = op_array->try_catch_array[i].catch_op, finally = op_array->try_catch_array[i].finally_op;
 		if (op_num <= catch || op_num <= finally) {
 			if (finally) {

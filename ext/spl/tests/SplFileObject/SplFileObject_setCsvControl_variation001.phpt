@@ -23,7 +23,8 @@ foreach ($s as $row) {
 <?php
 unlink('csv_control_data_variation001.csv');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: SplFileObject::setCsvControl(): the $escape parameter must be provided as its default value will change in %s on line %d
 groene appelen : 10
 gele bananen : 20
 rode kersen : 30

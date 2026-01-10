@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 072486274a3361dee3655cfd046a293cfb8a2757 */
+ * Stub hash: 29606d7114a0698b8ae231173a624b17c196ffec */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -182,7 +182,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_quit arginfo_ftp_cdup
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_set_option, 0, 3, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_set_option, 0, 3, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
@@ -192,7 +192,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_get_option, 0, 2, MAY_BE_LON
 	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_FUNCTION(ftp_connect);
 #if defined(HAVE_FTP_SSL)
@@ -232,7 +231,6 @@ ZEND_FUNCTION(ftp_close);
 ZEND_FUNCTION(ftp_set_option);
 ZEND_FUNCTION(ftp_get_option);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_connect, arginfo_ftp_connect)
 #if defined(HAVE_FTP_SSL)
@@ -269,14 +267,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_delete, arginfo_ftp_delete)
 	ZEND_FE(ftp_site, arginfo_ftp_site)
 	ZEND_FE(ftp_close, arginfo_ftp_close)
-	ZEND_FALIAS(ftp_quit, ftp_close, arginfo_ftp_quit)
+	ZEND_RAW_FENTRY("ftp_quit", zif_ftp_close, arginfo_ftp_quit, 0, NULL, NULL)
 	ZEND_FE(ftp_set_option, arginfo_ftp_set_option)
 	ZEND_FE(ftp_get_option, arginfo_ftp_get_option)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_FTP_Connection_methods[] = {
 	ZEND_FE_END
 };
 
@@ -302,9 +295,8 @@ static zend_class_entry *register_class_FTP_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "FTP", "Connection", class_FTP_Connection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_NS_CLASS_ENTRY(ce, "FTP", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

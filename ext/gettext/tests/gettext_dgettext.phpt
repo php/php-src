@@ -8,6 +8,7 @@ gettext
 if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
     die("SKIP en_US.UTF-8 locale not supported.");
 }
+?>
 --FILE--
 <?php
 chdir(__DIR__);

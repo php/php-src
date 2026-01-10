@@ -6,7 +6,7 @@ mysqli
 <?php
 die("skip TODO - we need to add a user level way to check if CHANGE_USER gets called by pconnect");
 
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_persistent=1
@@ -14,7 +14,7 @@ mysqli.max_persistent=2
 mysqli.max_links=2
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $host = 'p:' . $host;
     if (!$link1 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {

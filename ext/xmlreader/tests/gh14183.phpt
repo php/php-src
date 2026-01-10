@@ -6,7 +6,7 @@ xmlreader
 <?php
 class MyXMLReader extends XMLReader
 {
-    public static function open(string $uri, string $encoding = null, int $flags = 0): bool|\XMLReader
+    public static function open(string $uri, ?string $encoding = null, int $flags = 0): bool|\XMLReader
     {
         echo 'overridden', PHP_EOL;
         return true;

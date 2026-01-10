@@ -25,11 +25,11 @@ $dom->removeChild($dom->doctype);
 unset($decl);
 
 try {
-    $iter->current()->publicId;
+    var_dump($iter->current()->publicId);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Couldn't fetch DOMEntity. Node no longer exists
+NULL

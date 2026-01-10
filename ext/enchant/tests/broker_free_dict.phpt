@@ -6,8 +6,7 @@ marcosptf - <marcosptf@yahoo.com.br>
 enchant
 --SKIPIF--
 <?php
-if(!is_object(enchant_broker_init())) {die("skip, resource dont load\n");}
-if(!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, no dictionary installed on this machine! \n");}
+if (!enchant_broker_list_dicts(enchant_broker_init())) {die("skip no dictionary installed on this machine! \n");}
 ?>
 --FILE--
 <?php
@@ -50,6 +49,6 @@ OK
 OK
 NULL
 
-Deprecated: Function enchant_broker_free_dict() is deprecated in %s
+Deprecated: Function enchant_broker_free_dict() is deprecated since 8.0, as EnchantDictionary objects are freed automatically in %s
 OK
 OK

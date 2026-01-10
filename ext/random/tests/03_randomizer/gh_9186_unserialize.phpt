@@ -1,5 +1,5 @@
 --TEST--
-Fix GH-9186 @strict-properties can be bypassed using unserialization
+GH-9186: @strict-properties can be bypassed using unserialization
 --FILE--
 <?php
 

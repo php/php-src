@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -43,7 +43,7 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	nodep = xmlNewDocFragment(NULL);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -55,40 +55,6 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
 /* }}} end DOMDocumentFragment::__construct */
-
-/* php_dom_xmlSetTreeDoc is a custom implementation of xmlSetTreeDoc
- needed for hack in appendXML due to libxml bug - no need to share this function */
-static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
-{
-	xmlAttrPtr prop;
-	xmlNodePtr cur;
-
-	if (tree) {
-		if(tree->type == XML_ELEMENT_NODE) {
-			prop = tree->properties;
-			while (prop != NULL) {
-				prop->doc = doc;
-				if (prop->children) {
-					cur = prop->children;
-					while (cur != NULL) {
-						php_dom_xmlSetTreeDoc(cur, doc);
-						cur = cur->next;
-					}
-				}
-				prop = prop->next;
-			}
-		}
-		if (tree->children != NULL) {
-			cur = tree->children;
-			while (cur != NULL) {
-				php_dom_xmlSetTreeDoc(cur, doc);
-				cur = cur->next;
-			}
-		}
-		tree->doc = doc;
-	}
-}
-/* }}} */
 
 /* {{{ */
 PHP_METHOD(DOMDocumentFragment, appendXML) {
@@ -107,69 +73,23 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
+	if (dom_node_is_read_only(nodep)) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
 	if (data) {
 		PHP_LIBXML_SANITIZE_GLOBALS(parse);
-		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
+		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, BAD_CAST data, &lst);
 		PHP_LIBXML_RESTORE_GLOBALS(parse);
 		if (err != 0) {
 			RETURN_FALSE;
 		}
-		/* Following needed due to bug in libxml2 <= 2.6.14
-		ifdef after next libxml release as bug is fixed in their cvs */
-		php_dom_xmlSetTreeDoc(lst, nodep->doc);
-		/* End stupid hack */
 
 		xmlAddChildList(nodep,lst);
 	}
 
 	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-append
-Since: DOM Living Standard (DOM4)
-*/
-PHP_METHOD(DOMDocumentFragment, append)
-{
-	int argc = 0;
-	zval *args, *id;
-	dom_object *intern;
-	xmlNode *context;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
-
-	dom_parent_node_append(intern, args, argc);
-}
-/* }}} */
-
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
-Since: DOM Living Standard (DOM4)
-*/
-PHP_METHOD(DOMDocumentFragment, prepend)
-{
-	int argc = 0;
-	zval *args, *id;
-	dom_object *intern;
-	xmlNode *context;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
-
-	dom_parent_node_prepend(intern, args, argc);
 }
 /* }}} */
 

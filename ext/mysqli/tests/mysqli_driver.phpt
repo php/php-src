@@ -4,11 +4,11 @@ mysqli_driver class
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 $driver = new mysqli_driver();
 

@@ -13,7 +13,6 @@ $fp = fopen("xmltest.xml", "r");
 while ($data = fread($fp, 4096)) {
     xml_parse($xp, $data, feof($fp));
 }
-xml_parser_free($xp);
 $xp = xml_parser_create();
 xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, true);
 xml_set_element_handler($xp, "start_element", "end_element");
@@ -21,7 +20,6 @@ $fp = fopen("xmltest.xml", "r");
 while ($data = fread($fp, 4096)) {
     xml_parse($xp, $data, feof($fp));
 }
-xml_parser_free($xp);
 
 function start_element($xp, $elem, $attribs)
 {

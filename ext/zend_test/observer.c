@@ -40,7 +40,7 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 	while (1) {
 		if (*e == ' ' || *e == ',' || *e == '\0') {
 			if (s) {
-				zend_uchar opcode = zend_get_opcode_id(s, e - s);
+				uint8_t opcode = zend_get_opcode_id(s, e - s);
 				if (opcode <= ZEND_VM_LAST_OPCODE) {
 					zend_set_user_opcode_handler(opcode, handler);
 				} else {
@@ -155,7 +155,7 @@ static void observer_show_init(zend_function *fbc)
 			php_printf("%*s<!-- init %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
 	} else {
-		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
+		php_printf("%*s<!-- init '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 	}
 }
 
@@ -178,7 +178,7 @@ static void observer_show_init_backtrace(zend_execute_data *execute_data)
 				php_printf("%*s%s()\n", indent, "", ZSTR_VAL(fbc->common.function_name));
 			}
 		} else {
-			php_printf("%*s{main} %s\n", indent, "", ZSTR_VAL(fbc->op_array.filename));
+			php_printf("%*s{main} %s\n", indent, "", fbc->op_array.filename ? ZSTR_VAL(fbc->op_array.filename) : "[no active file]");
 		}
 	} while ((ex = ex->prev_execute_data) != NULL);
 	php_printf("%*s-->\n", 2 * ZT_G(observer_nesting_depth), "");
@@ -310,11 +310,15 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
+	if (!ZT_G(observer_enabled)) {
+		return FAILURE;
+	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
-				zend_observer_remove_begin_handler(func, observer_begin);
-				zend_observer_remove_end_handler(func, observer_end);
+				void *old_handler;
+				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
+				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

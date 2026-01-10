@@ -5,10 +5,13 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $query = "declare @myInt int = 1; select @myInt;";
 $stmt = $db->query($query);

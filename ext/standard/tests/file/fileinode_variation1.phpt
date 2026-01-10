@@ -7,6 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+?>
 --FILE--
 <?php
 /* Creating soft and hard links to a file and applying fileinode() on links */

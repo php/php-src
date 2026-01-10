@@ -4,7 +4,6 @@ JIT ASSIGN_DIM_OP: 001
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --EXTENSIONS--
 opcache
 --FILE--
@@ -79,7 +78,7 @@ Warning: Undefined array key 2 in %s on line %d
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Cannot access offset of type array on array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
@@ -104,5 +103,5 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Cannot access offset of type array on array
 Unsupported operand types: null % string

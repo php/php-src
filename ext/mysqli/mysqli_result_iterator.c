@@ -17,13 +17,12 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "zend_interfaces.h"
@@ -74,7 +73,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ */
-static int php_mysqli_result_iterator_valid(zend_object_iterator *iter)
+static zend_result php_mysqli_result_iterator_valid(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
@@ -99,7 +98,7 @@ static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter)
 	mysqli_object *intern = iterator->result;
 	MYSQL_RES	*result;
 
-	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, MYSQLI_STATUS_VALID);
 
 	zval_ptr_dtor(&iterator->current_row);
 	php_mysqli_fetch_into_hash_aux(&iterator->current_row, result, MYSQLI_ASSOC);
@@ -116,11 +115,11 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	mysqli_object *intern = iterator->result;
 	MYSQL_RES	*result;
 
-	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
 		if (result->unbuf->eof_reached) {
-			php_error_docref(NULL, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
+			zend_error(E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
 			return;
 		}
 	} else {

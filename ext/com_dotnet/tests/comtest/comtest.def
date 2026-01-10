@@ -1,0 +1,4 @@
+LIBRARY comtest.dll
+EXPORTS
+DllGetClassObject PRIVATE
+DllCanUnloadNow   PRIVATE

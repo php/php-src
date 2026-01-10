@@ -2,6 +2,12 @@
 Bug #22544 (TrueColor transparency in PNG images).
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
     $image = imageCreateTruecolor(640, 100);

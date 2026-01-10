@@ -22,6 +22,13 @@ $b_world = $b_hello->nextSibling;
 $b_hello->append($b_world->firstChild);
 var_dump($dom->saveHTML());
 
+echo "-- Append hello with world's child and text --\n";
+$dom = clone $dom_original;
+$b_hello = $dom->firstChild->firstChild;
+$b_world = $b_hello->nextSibling;
+$b_hello->append($b_world->firstChild, "foo");
+var_dump($dom->saveHTML());
+
 echo "-- Append world's child with hello --\n";
 $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
@@ -34,6 +41,16 @@ $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
 try {
     $b_hello->append($b_hello);
+} catch (\DOMException $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($dom->saveHTML());
+
+echo "-- Append hello with itself and text --\n";
+$dom = clone $dom_original;
+$b_hello = $dom->firstChild->firstChild;
+try {
+    $b_hello->append($b_hello, "foo");
 } catch (\DOMException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -70,12 +87,19 @@ string(39) "<p><b>hello<b><i>world</i></b></b></p>
 -- Append hello with world's child --
 string(39) "<p><b>hello<i>world</i></b><b></b></p>
 "
+-- Append hello with world's child and text --
+string(42) "<p><b>hello<i>world</i>foo</b><b></b></p>
+"
 -- Append world's child with hello --
 string(39) "<p><b><i>world<b>hello</b></i></b></p>
 "
 -- Append hello with itself --
 Hierarchy Request Error
 string(39) "<p><b>hello</b><b><i>world</i></b></p>
+"
+-- Append hello with itself and text --
+Hierarchy Request Error
+string(27) "<p><b><i>world</i></b></p>
 "
 -- Append world's i tag with the parent --
 Hierarchy Request Error

@@ -4,7 +4,7 @@ ZE2 An interface method cannot be private
 <?php
 
 interface if_a {
-    abstract private function err();
+    private function err();
 }
 
 ?>

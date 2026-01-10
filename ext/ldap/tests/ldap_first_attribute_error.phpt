@@ -9,7 +9,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 try {
     var_dump(ldap_first_attribute($link, $link));
 } catch (TypeError $e) {

@@ -39,7 +39,8 @@ database handler: flatfile
 Test 1
 
 Warning: ini_set(): No such handler: does_not_exist in %s on line %d
-resource(%d) of type (dba)
+object(Dba\Connection)#%d (%d) {
+}
 Test 2
 
 Warning: dba_open(): No default handler selected in %s on line %d

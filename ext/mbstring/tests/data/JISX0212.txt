@@ -53,7 +53,7 @@
 #
 #	   However, JIS X 0212 maintains the distinction between
 #	   the lowercase forms of these two elements at 0x2942 and 0x2943.
-#	   Given the structre of these JIS encodings, it is clear that
+#	   Given the structure of these JIS encodings, it is clear that
 #	   0x2922 and 0x2942 are intended to be a capital/small pair.
 #	   Consequently, in the Unicode mapping, 0x2922 is treated as
 #	   LATIN CAPITAL LETTER D WITH STROKE.

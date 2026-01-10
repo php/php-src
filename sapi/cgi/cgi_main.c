@@ -36,11 +36,11 @@
 # include <process.h>
 #endif
 
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -48,11 +48,11 @@
 
 #include <locale.h>
 
-#if HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
 
@@ -87,17 +87,20 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fastcgi.h"
 #include "cgi_main_arginfo.h"
 
-#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+#  include "valgrind/cachegrind.h"
+# endif
 #endif
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
-struct sigaction act, old_term, old_quit, old_int;
+static struct sigaction act, old_term, old_quit, old_int;
 #endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
@@ -116,7 +119,7 @@ static int parent = 1;
 
 #ifndef PHP_WIN32
 /* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
-static int exit_signal = 0;
+static volatile sig_atomic_t exit_signal = 0;
 
 /* Is Parent waiting for children to exit */
 static int parent_waiting = 0;
@@ -155,7 +158,6 @@ static const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -355,11 +357,11 @@ static void sapi_fcgi_flush(void *server_context)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
-	if (
-		!parent &&
-		request && !fcgi_flush(request, 0)) {
-
-		php_handle_aborted_connection();
+	if (!parent && request) {
+		sapi_send_headers();
+		if (!fcgi_flush(request, 0)) {
+			php_handle_aborted_connection();
+		}
 	}
 }
 
@@ -595,23 +597,23 @@ static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 
 static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 {
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	size_t len;
 	char *buf;
 #endif
 
-#if HAVE_SETENV
+#ifdef HAVE_SETENV
 	if (value) {
 		setenv(name, value, 1);
 	}
 #endif
-#if HAVE_UNSETENV
+#ifdef HAVE_UNSETENV
 	if (!value) {
 		unsetenv(name);
 	}
 #endif
 
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment
 		this leaks, but it's only cgi anyway, we'll fix
@@ -623,13 +625,13 @@ static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 		return getenv(name);
 	}
 #endif
-#if !HAVE_SETENV
+#if !defined(HAVE_SETENV)
 	if (value) {
 		len = slprintf(buf, len - 1, "%s=%s", name, value);
 		putenv(buf);
 	}
 #endif
-#if !HAVE_UNSETENV
+#if !defined(HAVE_UNSETENV)
 	if (!value) {
 		len = slprintf(buf, len - 1, "%s=", name);
 		putenv(buf);
@@ -965,9 +967,9 @@ static int sapi_cgi_deactivate(void)
 	return SUCCESS;
 }
 
-static int php_cgi_startup(sapi_module_struct *sapi_module)
+static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module, &cgi_module_entry);
+	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1039,7 +1041,6 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
@@ -1454,7 +1455,7 @@ static void init_request_info(fcgi_request *request)
 /**
  * Clean up child processes upon exit
  */
-void fastcgi_cleanup(int signal)
+static void fastcgi_cleanup(int signal)
 {
 #ifdef DEBUG_FASTCGI
 	fprintf(stderr, "FastCGI shutdown, pid %d\n", getpid());
@@ -1468,7 +1469,7 @@ void fastcgi_cleanup(int signal)
 	if (parent && parent_waiting) {
 		exit_signal = 1;
 	} else {
-		exit(0);
+		_exit(0);
 	}
 }
 #else
@@ -1515,23 +1516,23 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	php_cgi_globals->rfc2616_headers = 0;
-	php_cgi_globals->nph = 0;
-	php_cgi_globals->check_shebang_line = 1;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
-	php_cgi_globals->fix_pathinfo = 1;
-	php_cgi_globals->discard_path = 0;
-	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals_ptr->rfc2616_headers = 0;
+	php_cgi_globals_ptr->nph = 0;
+	php_cgi_globals_ptr->check_shebang_line = 1;
+	php_cgi_globals_ptr->force_redirect = 1;
+	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->fix_pathinfo = 1;
+	php_cgi_globals_ptr->discard_path = 0;
+	php_cgi_globals_ptr->fcgi_logging = 1;
 #ifdef PHP_WIN32
-	php_cgi_globals->impersonate = 0;
+	php_cgi_globals_ptr->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals_ptr->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -1737,7 +1738,7 @@ int main(int argc, char *argv[])
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval start, end;
 #else
 	time_t start, end;
@@ -1778,9 +1779,9 @@ int main(int argc, char *argv[])
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY; /* sets default for file streams to binary */
-	setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
 #endif
 
 	if (!fastcgi) {
@@ -1902,14 +1903,14 @@ int main(int argc, char *argv[])
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
-<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"http://php.net/security.cgi-bin\">\
+<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"https://www.php.net/security.cgi-bin\">\
 manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
-<a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
+<a href=\"https://www.php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
-#if defined(ZTS) && !defined(PHP_DEBUG)
+#if defined(ZTS) && !PHP_DEBUG
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
 			 * SG(request_info).path_translated is an invalid pointer.
@@ -1928,9 +1929,16 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 
 	if (bindpath) {
-		int backlog = 128;
+		int backlog = MIN(SOMAXCONN, 128);
 		if (getenv("PHP_FCGI_BACKLOG")) {
 			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		if (backlog < -1 || backlog > SOMAXCONN) {
+			fprintf(stderr, "Invalid backlog %d, needs to be between -1 and %d\n", backlog, SOMAXCONN);
+#ifdef ZTS
+			tsrm_shutdown();
+#endif
+			return FAILURE;
 		}
 		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
@@ -2032,6 +2040,8 @@ consult the installation file that came with this distribution, or visit \n\
 						 * fork loop any more
 						 */
 						parent = 0;
+
+						php_child_init();
 
 						/* don't catch our signals */
 						sigaction(SIGTERM, &old_term, 0);
@@ -2213,7 +2223,7 @@ parent_loop_end:
 		} else {
 			parent = 0;
 		}
-#endif /* WIN32 */
+#endif /* PHP_WIN32 */
 	}
 
 	zend_first_try {
@@ -2229,6 +2239,12 @@ parent_loop_end:
 #ifdef HAVE_VALGRIND
 							if (warmup_repeats > 0) {
 								CALLGRIND_STOP_INSTRUMENTATION;
+								/* We're not interested in measuring startup */
+								CALLGRIND_ZERO_STATS;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+								CACHEGRIND_STOP_INSTRUMENTATION;
+								/* Zeroing stats is not supported for cachegrind. */
+# endif
 							}
 #endif
 						} else {
@@ -2357,11 +2373,7 @@ parent_loop_end:
 							}
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
-#if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
 							exit_status = 0;
@@ -2371,15 +2383,12 @@ parent_loop_end:
 							behavior = PHP_MODE_STRIP;
 							break;
 
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
-							break;
-
 						default:
 							break;
 					}
 				}
 
+do_repeat:
 				if (script_file) {
 					/* override path_translated if -f on command line */
 					if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
@@ -2413,7 +2422,7 @@ parent_loop_end:
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					size_t slen = strlen(PG(arg_separator).input);
+					size_t slen = ZSTR_LEN(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {
@@ -2429,13 +2438,22 @@ parent_loop_end:
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);
 						if (i < (argc - 1)) {
-							strlcat(s, PG(arg_separator).input, len);
+							strlcat(s, ZSTR_VAL(PG(arg_separator).input), len);
 						}
 					}
 					SG(request_info).query_string = s;
 					free_query_string = 1;
 				}
 			} /* end !cgi && !fastcgi */
+
+#ifdef HAVE_VALGRIND
+			if (warmup_repeats == 0) {
+				CALLGRIND_START_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+				CACHEGRIND_START_INSTRUMENTATION;
+# endif
+			}
+#endif
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2514,7 +2532,6 @@ parent_loop_end:
 					PG(during_request_startup) = 0;
 					if (php_lint_script(&file_handle) == SUCCESS) {
 						zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
-						exit_status = 0;
 					} else {
 						zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
 						exit_status = -1;
@@ -2527,11 +2544,11 @@ parent_loop_end:
 					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
-						zend_syntax_highlighter_ini syntax_highlighter_ini;
+						zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
-							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini);
+							php_get_highlight_struct(&default_syntax_highlighter_ini);
+							zend_highlight(&default_syntax_highlighter_ini);
 						}
 					}
 					break;
@@ -2556,6 +2573,14 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+#ifdef HAVE_VALGRIND
+			/* We're not interested in measuring shutdown */
+			CALLGRIND_STOP_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+			CACHEGRIND_STOP_INSTRUMENTATION;
+# endif
+#endif
+
 			if (!fastcgi) {
 				if (benchmark) {
 					if (warmup_repeats) {
@@ -2565,9 +2590,6 @@ fastcgi_request_done:
 							gettimeofday(&start, NULL);
 #else
 							time(&start);
-#endif
-#ifdef HAVE_VALGRIND
-							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}
 						continue;
@@ -2580,6 +2602,11 @@ fastcgi_request_done:
 							continue;
 						}
 					}
+				}
+				if (behavior == PHP_MODE_LINT && argc - 1 > php_optind) {
+					php_optind++;
+					script_file = NULL;
+					goto do_repeat;
 				}
 				break;
 			}

@@ -4,7 +4,7 @@ Test compress.zlib:// scheme with the copy function: compressed to compressed
 zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $outputFileName = __FILE__.'.tmp';
 
 $srcFile = "compress.zlib://$inputFileName";

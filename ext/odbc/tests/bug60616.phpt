@@ -2,12 +2,23 @@
 odbc_exec(): Getting accurate unicode data from query
 --EXTENSIONS--
 odbc
+mbstring
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
 <?php
-    if ("unixODBC" != ODBC_TYPE) {
-        die("skip ODBC_TYPE != unixODBC");
+include 'skipif.inc';
+if ("unixODBC" != ODBC_TYPE) {
+    die("skip ODBC_TYPE != unixODBC");
+}
+
+$conn = odbc_connect($dsn, $user, $pass);
+$result = @odbc_exec($conn, "SELECT @@Version");
+if ($result) {
+    $array = odbc_fetch_array($result);
+    $info = (string) reset($array);
+    if (str_contains($info, "Microsoft SQL Server")) {
+        echo "skip Doesn't work with MS SQL";
     }
+}
 ?>
 --FILE--
 <?php
@@ -23,14 +34,12 @@ ini_set("odbc.defaultlrl", 4); // Set artificially low
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-odbc_exec($conn, 'CREATE DATABASE odbcTEST ENCODING=\'EUC_JP\'');
+odbc_exec($conn, 'CREATE DATABASE bug60616Test ENCODING=\'EUC_JP\'');
+odbc_exec($conn, 'USE bug60616Test');
+odbc_exec($conn, 'CREATE TABLE bug60616 (ID INT, CHAR_COL CHAR(200), VARCHAR_COL VARCHAR(200), TEXT_COL TEXT)');
+odbc_exec($conn, "INSERT INTO bug60616(ID, CHAR_COL, VARCHAR_COL, TEXT_COL) VALUES (1, '$euc_jp', '$euc_jp', '$euc_jp'), (2, '$ascii', '$ascii', '$ascii')");
 
-odbc_exec($conn, 'CREATE TABLE FOO (ID INT, CHAR_COL CHAR(200), VARCHAR_COL VARCHAR(200), TEXT_COL TEXT)');
-
-odbc_exec($conn, "INSERT INTO FOO(ID, CHAR_COL, VARCHAR_COL, TEXT_COL) VALUES (1, '$euc_jp', '$euc_jp', '$euc_jp')");
-odbc_exec($conn, "INSERT INTO FOO(ID, CHAR_COL, VARCHAR_COL, TEXT_COL) VALUES (2, '$ascii', '$ascii', '$ascii')");
-
-$res = odbc_exec($conn, 'SELECT * FROM FOO ORDER BY ID ASC');
+$res = odbc_exec($conn, 'SELECT * FROM bug60616 ORDER BY ID ASC');
 
 while(odbc_fetch_row($res)) {
     $char_col = odbc_result($res, "CHAR_COL");
@@ -61,16 +70,17 @@ while(odbc_fetch_row($res)) {
 }
 
 ?>
---EXPECT--
-EUC-JP matched
-ASCII matched
 --CLEAN--
 <?php
 include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-odbc_exec($conn, 'DROP TABLE FOO');
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
-
+odbc_exec($conn, 'USE bug60616Test');
+odbc_exec($conn, 'DROP TABLE bug60616');
+odbc_exec($conn, 'DROP DATABASE bug60616Test');
 ?>
+--EXPECT--
+EUC-JP matched
+ASCII matched
+

@@ -19,14 +19,14 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/file.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
 
@@ -60,7 +60,6 @@ static zend_object *inflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &inflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -99,7 +98,6 @@ static zend_object *deflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &deflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -133,7 +131,7 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 /* }}} */
 
 /* {{{ php_zlib_output_conflict_check() */
-static int php_zlib_output_conflict_check(const char *handler_name, size_t handler_name_len)
+static zend_result php_zlib_output_conflict_check(const char *handler_name, size_t handler_name_len)
 {
 	if (php_output_get_level() > 0) {
 		if (php_output_handler_conflict(handler_name, handler_name_len, ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME))
@@ -168,7 +166,7 @@ static int php_zlib_output_encoding(void)
 /* }}} */
 
 /* {{{ php_zlib_output_handler_ex() */
-static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
+static zend_result php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
 
@@ -254,7 +252,7 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 /* }}} */
 
 /* {{{ php_zlib_output_handler() */
-static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
+static zend_result php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
 
@@ -528,7 +526,7 @@ PHP_FUNCTION(ob_gzhandler)
 	size_t in_len;
 	zend_long flags = 0;
 	php_output_context ctx = {0};
-	int encoding, rv;
+	int encoding;
 
 	/*
 	 * NOTE that the real ob_gzhandler is an alias to "zlib output compression".
@@ -566,7 +564,7 @@ PHP_FUNCTION(ob_gzhandler)
 	ctx.in.data = in_str;
 	ctx.in.used = in_len;
 
-	rv = php_zlib_output_handler_ex(ZLIBG(ob_gzhandler), &ctx);
+	zend_result rv = php_zlib_output_handler_ex(ZLIBG(ob_gzhandler), &ctx);
 
 	if (SUCCESS != rv) {
 		if (ctx.out.data && ctx.out.free) {
@@ -612,10 +610,10 @@ PHP_FUNCTION(gzfile)
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
 	int i = 0;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 	php_stream *stream;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path)) {
 		RETURN_THROWS();
 	}
 
@@ -624,7 +622,7 @@ PHP_FUNCTION(gzfile)
 	}
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, NULL STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
 
 	if (!stream) {
 		/* Error reporting is already done by stream code */
@@ -633,6 +631,7 @@ PHP_FUNCTION(gzfile)
 
 	/* Initialize return array */
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, sizeof(buf));
@@ -652,9 +651,9 @@ PHP_FUNCTION(gzopen)
 	size_t filename_len, mode_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|b", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -662,7 +661,7 @@ PHP_FUNCTION(gzopen)
 		flags |= USE_PATH;
 	}
 
-	stream = php_stream_gzopen(NULL, filename, mode, flags, NULL, NULL STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, mode, flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -679,9 +678,9 @@ PHP_FUNCTION(readgzfile)
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
 	size_t size;
-	zend_long use_include_path = 0;
+	bool use_include_path = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -689,7 +688,7 @@ PHP_FUNCTION(readgzfile)
 		flags |= USE_PATH;
 	}
 
-	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, NULL STREAMS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", flags, NULL, php_stream_context_from_zval(NULL, false) STREAMS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -792,6 +791,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		ZVAL_DEREF(option_buffer);
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
@@ -799,62 +799,63 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				*dict = emalloc(ZSTR_LEN(str));
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
-			} break;
+
+				return true;
+			}
 
 			case IS_ARRAY: {
 				HashTable *dictionary = Z_ARR_P(option_buffer);
+				bool result = true;
 
 				if (zend_hash_num_elements(dictionary) > 0) {
-					char *dictptr;
-					zval *cur;
 					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
-					zend_string **end, **ptr = strings - 1;
+					size_t total = 0;
 
+					zval *cur;
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						*++ptr = zval_get_string(cur);
-						ZEND_ASSERT(*ptr);
-						if (ZSTR_LEN(*ptr) == 0 || EG(exception)) {
-							do {
-								zend_string_release(*ptr);
-							} while (--ptr >= strings);
-							efree(strings);
-							if (!EG(exception)) {
-								zend_argument_value_error(2, "must not contain empty strings");
-							}
-							return 0;
+						zend_string *string = zval_try_get_string(cur);
+						if (string == NULL) {
+							result = false;
+							break;
 						}
-						if (zend_str_has_nul_byte(*ptr)) {
-							do {
-								zend_string_release(*ptr);
-							} while (--ptr >= strings);
-							efree(strings);
+						*dictlen += ZSTR_LEN(string) + 1;
+						strings[total++] = string;
+						if (ZSTR_LEN(string) == 0) {
+							result = false;
+							zend_argument_value_error(2, "must not contain empty strings");
+							break;
+						}
+						if (zend_str_has_nul_byte(string)) {
+							result = false;
 							zend_argument_value_error(2, "must not contain strings with null bytes");
-							return 0;
+							break;
 						}
-
-						*dictlen += ZSTR_LEN(*ptr) + 1;
 					} ZEND_HASH_FOREACH_END();
 
-					dictptr = *dict = emalloc(*dictlen);
-					ptr = strings;
-					end = strings + zend_hash_num_elements(dictionary);
-					do {
-						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
-						dictptr += ZSTR_LEN(*ptr);
+					char *dictptr = emalloc(*dictlen);
+					*dict = dictptr;
+					for (size_t i = 0; i < total; i++) {
+						zend_string *string = strings[i];
+						dictptr = zend_mempcpy(dictptr, ZSTR_VAL(string), ZSTR_LEN(string));
 						*dictptr++ = 0;
-						zend_string_release_ex(*ptr, 0);
-					} while (++ptr != end);
+						zend_string_release(string);
+					}
 					efree(strings);
+					if (!result) {
+						efree(*dict);
+						*dict = NULL;
+					}
 				}
-			} break;
+
+				return result;
+			}
 
 			default:
-				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_type_name(option_buffer));
-				return 0;
+				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
+				return false;
 		}
 	}
-
-	return 1;
+	return true;
 }
 
 /* {{{ Initialize an incremental inflate context with the specified encoding */
@@ -872,14 +873,11 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
 		zend_value_error("zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
-		RETURN_THROWS();
-	}
-
-	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
 		RETURN_THROWS();
 	}
 
@@ -889,8 +887,12 @@ PHP_FUNCTION(inflate_init)
 		case PHP_ZLIB_ENCODING_DEFLATE:
 			break;
 		default:
-			zend_value_error("Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
+			zend_argument_value_error(1, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
+	}
+
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, inflate_context_ce);
@@ -989,7 +991,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_OK:
 				if (ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
+					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->Z.avail_out = CHUNK_SIZE;
 					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
@@ -1001,7 +1003,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
+					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->Z.avail_out = CHUNK_SIZE;
 					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
@@ -1037,7 +1039,7 @@ PHP_FUNCTION(inflate_add)
 	} while (1);
 
 complete:
-	out = zend_string_realloc(out, buffer_used, 0);
+	out = zend_string_truncate(out, buffer_used, 0);
 	ZSTR_VAL(out)[buffer_used] = 0;
 	RETURN_STR(out);
 }
@@ -1090,6 +1092,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("level"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
@@ -1098,6 +1101,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("memory"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
@@ -1106,6 +1110,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
@@ -1114,6 +1119,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("strategy"))) != NULL) {
+		ZVAL_DEINDIRECT(option_buffer);
 		strategy = zval_get_long(option_buffer);
 	}
 	switch (strategy) {
@@ -1128,10 +1134,6 @@ PHP_FUNCTION(deflate_init)
 			RETURN_THROWS();
 	}
 
-	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
-		RETURN_THROWS();
-	}
-
 	switch (encoding) {
 		case PHP_ZLIB_ENCODING_RAW:
 		case PHP_ZLIB_ENCODING_GZIP:
@@ -1140,6 +1142,10 @@ PHP_FUNCTION(deflate_init)
 		default:
 			zend_argument_value_error(1, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
+	}
+
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, deflate_context_ce);
@@ -1222,7 +1228,7 @@ PHP_FUNCTION(deflate_add)
 		if (ctx->Z.avail_out == 0) {
 			/* more output buffer space needed; realloc and try again */
 			/* adding 64 more bytes solved every issue I have seen    */
-			out = zend_string_realloc(out, ZSTR_LEN(out) + 64, 0);
+			out = zend_string_extend(out, ZSTR_LEN(out) + 64, 0);
 			ctx->Z.avail_out = 64;
 			ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 		}
@@ -1334,6 +1340,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
+	inflate_context_ce->default_object_handlers = &inflate_context_object_handlers;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1344,6 +1351,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
+	deflate_context_ce->default_object_handlers = &deflate_context_object_handlers;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1398,7 +1406,7 @@ static PHP_RSHUTDOWN_FUNCTION(zlib)
 static PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "ZLib Support", "enabled");
+	php_info_print_table_row(2, "ZLib Support", "enabled");
 	php_info_print_table_row(2, "Stream Wrapper", "compress.zlib://");
 	php_info_print_table_row(2, "Stream Filter", "zlib.inflate, zlib.deflate");
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION);

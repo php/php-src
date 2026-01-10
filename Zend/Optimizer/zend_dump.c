@@ -23,17 +23,18 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_dump.h"
+#include "zend_smart_str.h"
 
 void zend_dump_ht(HashTable *ht)
 {
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
-	bool first = 1;
+	bool first = true;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
 		if (first) {
-			first = 0;
+			first = false;
 		} else {
 			fprintf(stderr, ", ");
 		}
@@ -65,9 +66,27 @@ void zend_dump_const(const zval *zv)
 		case IS_DOUBLE:
 			fprintf(stderr, " float(%g)", Z_DVAL_P(zv));
 			break;
-		case IS_STRING:
-			fprintf(stderr, " string(\"%s\")", Z_STRVAL_P(zv));
+		case IS_STRING: {
+			smart_str escaped_string = {0};
+			smart_str_append_escaped(&escaped_string, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+			smart_str_0(&escaped_string);
+
+			fprintf(stderr, " string(\"");
+
+			/* Also escape '"' */
+			for (size_t i = 0; i < ZSTR_LEN(escaped_string.s); i++) {
+				if (ZSTR_VAL(escaped_string.s)[i] == '"') {
+					fprintf(stderr, "\\\"");
+				} else {
+					putc(ZSTR_VAL(escaped_string.s)[i], stderr);
+				}
+			}
+
+			fprintf(stderr, "\")");
+
+			smart_str_free_ex(&escaped_string, false);
 			break;
+		}
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");
 			break;
@@ -132,7 +151,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	}
 }
 
-ZEND_API void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
+ZEND_API void zend_dump_var(const zend_op_array *op_array, uint8_t var_type, uint32_t var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
@@ -169,36 +188,36 @@ static void zend_dump_range(const zend_ssa_range *r)
 
 static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_instanceof, uint32_t dump_flags)
 {
-	bool first = 1;
+	bool first = true;
 
 	fprintf(stderr, " [");
 	if (info & MAY_BE_GUARD) {
 		fprintf(stderr, "!");
 	}
 	if (info & MAY_BE_UNDEF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
 	}
 	if (info & MAY_BE_INDIRECT) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "ind");
 	}
 	if (info & MAY_BE_REF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "ref");
 	}
 	if (dump_flags & ZEND_DUMP_RC_INFERENCE) {
 		if (info & MAY_BE_RC1) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "rc1");
 		}
 		if (info & MAY_BE_RCN) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "rcn");
 		}
 	}
 	if (info & MAY_BE_CLASS) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "class");
 		if (ce) {
 			if (is_instanceof) {
@@ -208,37 +227,37 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			}
 		}
 	} else if ((info & MAY_BE_ANY) == MAY_BE_ANY) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "any");
 	} else {
 		if (info & MAY_BE_NULL) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "null");
 		}
 		if ((info & MAY_BE_FALSE) && (info & MAY_BE_TRUE)) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "bool");
 		} else if (info & MAY_BE_FALSE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "false");
 		} else if (info & MAY_BE_TRUE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "true");
 		}
 		if (info & MAY_BE_LONG) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "long");
 		}
 		if (info & MAY_BE_DOUBLE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "double");
 		}
 		if (info & MAY_BE_STRING) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "string");
 		}
 		if (info & MAY_BE_ARRAY) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			if (info & MAY_BE_PACKED_GUARD) {
 				fprintf(stderr, "!");
 			}
@@ -249,18 +268,18 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			} else if (MAY_BE_HASH_ONLY(info)) {
 				fprintf(stderr, "hash ");
 			} else if ((info & MAY_BE_ARRAY_KEY_ANY) != MAY_BE_ARRAY_KEY_ANY && (info & MAY_BE_ARRAY_KEY_ANY) != 0) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, "[");
 				if (info & MAY_BE_ARRAY_EMPTY) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "empty");
 				}
 				if (MAY_BE_PACKED(info)) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "packed");
 				}
 				if (MAY_BE_HASH(info)) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "hash");
 				}
 				fprintf(stderr, "] ");
@@ -269,71 +288,71 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if ((info & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING)) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
 			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, " [");
 				if (info & MAY_BE_ARRAY_KEY_LONG) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "long");
 				}
 				if (info & MAY_BE_ARRAY_KEY_STRING) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "string");
 					}
 				fprintf(stderr, "]");
 			}
 			if (info & (MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, " of [");
 				if ((info & MAY_BE_ARRAY_OF_ANY) == MAY_BE_ARRAY_OF_ANY) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "any");
 				} else {
 					if (info & MAY_BE_ARRAY_OF_NULL) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "null");
 					}
 					if (info & MAY_BE_ARRAY_OF_FALSE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "false");
 					}
 					if (info & MAY_BE_ARRAY_OF_TRUE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "true");
 					}
 					if (info & MAY_BE_ARRAY_OF_LONG) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "long");
 					}
 					if (info & MAY_BE_ARRAY_OF_DOUBLE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "double");
 					}
 					if (info & MAY_BE_ARRAY_OF_STRING) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "string");
 					}
 					if (info & MAY_BE_ARRAY_OF_ARRAY) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "array");
 					}
 					if (info & MAY_BE_ARRAY_OF_OBJECT) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "object");
 					}
 					if (info & MAY_BE_ARRAY_OF_RESOURCE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "resource");
 					}
 				}
 				if (info & MAY_BE_ARRAY_OF_REF) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "ref");
 				}
 				fprintf(stderr, "]");
 			}
 		}
 		if (info & MAY_BE_OBJECT) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "object");
 			if (ce) {
 				if (is_instanceof) {
@@ -344,7 +363,7 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			}
 		}
 		if (info & MAY_BE_RESOURCE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "resource");
 		}
 	}
@@ -361,7 +380,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
+ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, uint8_t var_type, uint32_t var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);
@@ -456,6 +475,11 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 		fprintf(stderr, "%s", (name + 5));
 	} else {
 		fprintf(stderr, "OP_%d", (int)opline->opcode);
+	}
+
+	if (ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
+		zend_function *func = ZEND_FLF_FUNC(opline);
+		fprintf(stderr, "(%s)", ZSTR_VAL(func->common.function_name));
 	}
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
@@ -919,7 +943,6 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 
 ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data)
 {
-	int i;
 	const zend_cfg *cfg = NULL;
 	const zend_ssa *ssa = NULL;
 	zend_func_info *func_info = NULL;
@@ -1005,7 +1028,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 	}
 
 	if (ssa && ssa->var_info) {
-		for (i = 0; i < op_array->last_var; i++) {
+		for (uint32_t i = 0; i < op_array->last_var; i++) {
 			fprintf(stderr, "     ; ");
 			zend_dump_ssa_var(op_array, ssa, i, IS_CV, i, dump_flags);
 			fprintf(stderr, "\n");
@@ -1033,7 +1056,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1060,7 +1083,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr, "        BB%u",
 					cfg->map[op_array->try_catch_array[i].try_op]);
 				if (op_array->try_catch_array[i].catch_op) {
@@ -1093,7 +1116,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1120,7 +1143,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr,
 					"     %04u",
 					op_array->try_catch_array[i].try_op);
@@ -1141,7 +1164,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 				}
 				if (op_array->try_catch_array[i].finally_end) {
 					fprintf(stderr,
-						", %04u",
+						", %04u\n",
 						op_array->try_catch_array[i].finally_end);
 				} else {
 					fprintf(stderr, ", -\n");
@@ -1163,20 +1186,6 @@ void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 		if (b->flags & ZEND_BB_REACHABLE) {
 			zend_dump_block_info(cfg, j, 0);
 		}
-	}
-}
-
-void zend_dump_variables(const zend_op_array *op_array)
-{
-	int j;
-
-	fprintf(stderr, "\nCV Variables for \"");
-	zend_dump_op_array_name(op_array);
-	fprintf(stderr, "\"\n");
-	for (j = 0; j < op_array->last_var; j++) {
-		fprintf(stderr, "    ");
-		zend_dump_var(op_array, IS_CV, j);
-		fprintf(stderr, "\n");
 	}
 }
 
@@ -1207,14 +1216,14 @@ void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa,
 
 static void zend_dump_var_set(const zend_op_array *op_array, const char *name, zend_bitset set)
 {
-	bool first = 1;
+	bool first = true;
 	uint32_t i;
 
 	fprintf(stderr, "    ; %s = {", name);
 	for (i = 0; i < op_array->last_var + op_array->T; i++) {
 		if (zend_bitset_in(set, i)) {
 			if (first) {
-				first = 0;
+				first = false;
 			} else {
 				fprintf(stderr, ", ");
 			}

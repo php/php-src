@@ -4,6 +4,7 @@
 class CliServerInfo {
     public function __construct(
         public string $docRoot,
+        public $processHandle,
     ) {}
 }
 
@@ -16,7 +17,7 @@ function php_cli_server_start(
     $error = null;
 
     // Create dedicated doc root to avoid index.php clashes between tests.
-    $doc_root = __DIR__ . '/' . basename($_SERVER['PHP_SELF'], '.php');
+    $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php');
     @mkdir($doc_root);
 
     if ($code) {
@@ -33,6 +34,9 @@ function php_cli_server_start(
     if ($output_file_fd === false) {
         die(sprintf("Failed opening output file %s\n", $output_file));
     }
+    register_shutdown_function(function () use ($output_file) {
+        unlink($output_file);
+    });
 
     $descriptorspec = array(
         0 => STDIN,
@@ -102,7 +106,7 @@ function php_cli_server_start(
                 printf("Server output:\n%s\n", file_get_contents($output_file));
             }
             @unlink(__DIR__ . "/{$router}");
-            @rmdir($doc_root);
+            remove_directory($doc_root);
         },
         $handle
     );
@@ -113,7 +117,7 @@ function php_cli_server_start(
     define("PHP_CLI_SERVER_PORT", $port);
     define("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
-    return new CliServerInfo($doc_root);
+    return new CliServerInfo($doc_root, $handle);
 }
 
 function php_cli_server_connect() {
@@ -123,6 +127,21 @@ function php_cli_server_connect() {
         die("connect failed");
     }
     return $fp;
+}
+
+function remove_directory($dir) {
+    if (is_dir($dir) === false) {
+        return;
+    }
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($files as $fileinfo) {
+        $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+        $todo($fileinfo->getRealPath());
+    }
+    @rmdir($dir);
 }
 
 ?>

@@ -5,6 +5,7 @@ dom
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/foobar.dtd");
+?>
 --FILE--
 <?php
 chdir(__DIR__);

@@ -423,11 +423,11 @@ const U_FMT_PARSE_ERROR_START = UNKNOWN;
  */
 const U_MULTIPLE_DECIMAL_SEPARATORS = UNKNOWN;
 /**
- * Typo: kept for backward compatibility. Use U_MULTIPLE_DECIMAL_SEPARATORS
  * @var int
  * @cvalue U_MULTIPLE_DECIMAL_SEPERATORS
  */
-const U_MULTIPLE_DECIMAL_SEPERATORS = UNKNOWN; // TODO Deprecate
+#[\Deprecated(since: '8.3', message: 'use U_MULTIPLE_DECIMAL_SEPARATORS instead')]
+const U_MULTIPLE_DECIMAL_SEPERATORS = UNKNOWN;
 /**
  * @var int
  * @cvalue U_MULTIPLE_EXPONENTIAL_SYMBOLS

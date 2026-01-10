@@ -1,5 +1,5 @@
 --TEST--
-Bug #67167: object with VALIDATE_BOOLEAN and NULL_ON_FAILURE
+Bug #67167 (object with VALIDATE_BOOLEAN and NULL_ON_FAILURE)
 --EXTENSIONS--
 filter
 --FILE--

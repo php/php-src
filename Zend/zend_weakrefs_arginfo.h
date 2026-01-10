@@ -34,7 +34,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_WeakMap_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(WeakReference, __construct);
 ZEND_METHOD(WeakReference, create);
 ZEND_METHOD(WeakReference, get);
@@ -45,14 +44,12 @@ ZEND_METHOD(WeakMap, offsetUnset);
 ZEND_METHOD(WeakMap, count);
 ZEND_METHOD(WeakMap, getIterator);
 
-
 static const zend_function_entry class_WeakReference_methods[] = {
 	ZEND_ME(WeakReference, __construct, arginfo_class_WeakReference___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakReference, create, arginfo_class_WeakReference_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(WeakReference, get, arginfo_class_WeakReference_get, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_WeakMap_methods[] = {
 	ZEND_ME(WeakMap, offsetGet, arginfo_class_WeakMap_offsetGet, ZEND_ACC_PUBLIC)
@@ -69,8 +66,7 @@ static zend_class_entry *register_class_WeakReference(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "WeakReference", class_WeakReference_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -80,8 +76,7 @@ static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_Ar
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 3, class_entry_ArrayAccess, class_entry_Countable, class_entry_IteratorAggregate);
 
 	return class_entry;

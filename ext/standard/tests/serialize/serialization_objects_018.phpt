@@ -20,14 +20,14 @@ var_dump(unserialize('C:1:"A":'));
 
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset 9 of 15 bytes in %s on line %d
+Warning: unserialize(): Error at offset 9 of 15 bytes in %s on line %d
 bool(false)
 
-Notice: unserialize(): Error at offset 10 of 15 bytes in %s on line %d
+Warning: unserialize(): Error at offset 10 of 15 bytes in %s on line %d
 bool(false)
 
-Notice: unserialize(): Error at offset 14 of 15 bytes in %s on line %d
+Warning: unserialize(): Error at offset 14 of 15 bytes in %s on line %d
 bool(false)
 
-Notice: unserialize(): Error at offset 8 of 8 bytes in %s on line %d
+Warning: unserialize(): Error at offset 8 of 8 bytes in %s on line %d
 bool(false)

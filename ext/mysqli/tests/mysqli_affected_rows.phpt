@@ -4,11 +4,11 @@ mysqli_affected_rows()
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
+    require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -78,8 +78,7 @@ mysqli
     if (1 !== ($tmp = mysqli_affected_rows($link)))
         printf("[025] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-    $charsets = array('utf8');
-    foreach ($charsets as $k => $charset) {
+    foreach (['utf8'] as $charset) {
         if (!($res = mysqli_query($link, sprintf("SHOW CHARACTER SET LIKE '%s'", $charset))))
             continue;
         mysqli_free_result($res);
@@ -120,7 +119,7 @@ mysqli
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli object is already closed

@@ -65,5 +65,5 @@ ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 ------ stream_truncate bad return: -------
 truncation with new_size=0
 
-Warning: ftruncate(): test_wrapper_bad::stream_truncate did not return a boolean! in %s on line %d
+Warning: ftruncate(): test_wrapper_bad::stream_truncate value must be of type bool, string given in %s on line %d
 bool(false)

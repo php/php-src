@@ -51,7 +51,7 @@ object(GMP)#2 (1) {
   string(1) "1"
 }
 gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, float given
-gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, bool given
-gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, bool given
+gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, false given
+gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, true given
 gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, null given
 gmp_abs(): Argument #1 ($num) must be of type GMP|string|int, array given

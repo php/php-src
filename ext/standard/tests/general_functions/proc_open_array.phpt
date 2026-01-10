@@ -31,13 +31,21 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+echo "\nEmpty program name:\n";
+try {
+     proc_open([""], $ds, $pipes);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 echo "\nBasic usage:\n";
 $proc = proc_open([$php, '-r', 'echo "Hello World!\n";'], $ds, $pipes);
 fpassthru($pipes[1]);
 proc_close($proc);
 
 putenv('ENV_1=ENV_1');
-$env = ['ENV_2' => 'ENV_2'];
+/* PATH is needed to find ASan DLLs (and maybe others) on Windows */
+$env = ['ENV_2' => 'ENV_2', 'PATH' => getenv('PATH')];
 $cmd = [$php, '-n', '-r', 'var_dump(getenv("ENV_1"), getenv("ENV_2"));'];
 
 echo "\nEnvironment inheritance:\n";
@@ -68,13 +76,16 @@ proc_close($proc);
 ?>
 --EXPECT--
 Empty command array:
-proc_open(): Argument #1 ($command) must have at least one element
+proc_open(): Argument #1 ($command) must not be empty
 
 Nul byte in program name:
 Command array element 1 contains a null byte
 
 Nul byte in argument:
 Command array element 2 contains a null byte
+
+Empty program name:
+First element must contain a non-empty program name
 
 Basic usage:
 Hello World!

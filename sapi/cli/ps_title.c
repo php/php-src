@@ -28,13 +28,14 @@
  * The following code is adopted from the PostgreSQL's ps_status(.h/.c).
  */
 
+#include <php.h>
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #include <windows.h>
 #include <process.h>
 #include "win32/codepage.h"
 #else
-#include "php_config.h"
+#include <php_config.h>
 extern char** environ;
 #endif
 
@@ -57,7 +58,7 @@ extern char** environ;
 #include <machine/vmparam.h> /* for old BSD */
 #include <sys/exec.h>
 #endif
-#if defined(DARWIN)
+#if defined(__APPLE__)
 #include <crt_externs.h>
 #endif
 
@@ -91,9 +92,9 @@ extern char** environ;
 #define PS_USE_PSTAT
 #elif defined(HAVE_PS_STRINGS)
 #define PS_USE_PS_STRINGS
-#elif defined(BSD) && !defined(DARWIN)
+#elif defined(BSD) && !defined(__APPLE__)
 #define PS_USE_CHANGE_ARGV
-#elif defined(__linux__) || defined(_AIX) || defined(__sgi) || (defined(sun) && !defined(BSD)) || defined(ultrix) || defined(__osf__) || defined(DARWIN)
+#elif defined(__linux__) || defined(_AIX) || defined(__sgi) || (defined(sun) && !defined(BSD)) || defined(ultrix) || defined(__osf__) || defined(__APPLE__)
 #define PS_USE_CLOBBER_ARGV
 #elif defined(PHP_WIN32)
 #define PS_USE_WIN32
@@ -102,7 +103,7 @@ extern char** environ;
 #endif
 
 /* Different systems want the buffer padded differently */
-#if defined(_AIX) || defined(__linux__) || defined(DARWIN)
+#if defined(_AIX) || defined(__linux__) || defined(__APPLE__)
 #define PS_PADDING '\0'
 #else
 #define PS_PADDING ' '
@@ -235,7 +236,7 @@ char** save_ps_args(int argc, char** argv)
         }
         new_argv[argc] = NULL;
 
-#if defined(DARWIN)
+#if defined(__APPLE__)
         /*
          * Darwin (and perhaps other NeXT-derived platforms?) has a static
          * copy of the argv pointer, which we may fix like so:
@@ -283,7 +284,7 @@ clobber_error:
  * and the init function was called.
  * Otherwise returns NOT_AVAILABLE or NOT_INITIALIZED
  */
-int is_ps_title_available(void)
+ps_title_status is_ps_title_available(void)
 {
 #ifdef PS_USE_NONE
     return PS_TITLE_NOT_AVAILABLE; /* disabled functionality */
@@ -303,7 +304,7 @@ int is_ps_title_available(void)
 /*
  * Convert error codes into error strings
  */
-const char* ps_title_errno(int rc)
+const char* ps_title_errno(ps_title_status rc)
 {
     switch(rc)
     {
@@ -319,11 +320,16 @@ const char* ps_title_errno(int rc)
     case PS_TITLE_BUFFER_NOT_AVAILABLE:
         return "Buffer not contiguous";
 
-#ifdef PS_USE_WIN32
+    case PS_TITLE_TOO_LONG:
+        // TODO Indicate max length?
+        return "Too long";
+
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %lu", GetLastError());
+#ifdef PS_USE_WIN32
+        snprintf(windows_error_details, sizeof(windows_error_details), "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
+        return "Windows error";
     }
 
     return "Unknown error code";
@@ -336,15 +342,19 @@ const char* ps_title_errno(int rc)
  * save_ps_args() was not called.
  * Else returns 0 on success.
  */
-int set_ps_title(const char* title)
+ps_title_status set_ps_title(const char *title, size_t title_len)
 {
-    int rc = is_ps_title_available();
+    if (title_len >= ps_buffer_size) {
+        return PS_TITLE_TOO_LONG;
+    }
+
+    ps_title_status rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 
-    strncpy(ps_buffer, title, ps_buffer_size);
-    ps_buffer[ps_buffer_size - 1] = '\0';
-    ps_buffer_cur_len = strlen(ps_buffer);
+    /* Include final null byte */
+    memcpy(ps_buffer, title, title_len+1);
+    ps_buffer_cur_len = title_len;
 
 #ifdef PS_USE_SETPROCTITLE
     setproctitle("%s", ps_buffer);
@@ -394,9 +404,9 @@ int set_ps_title(const char* title)
  * length into *displen.
  * The return code indicates the error.
  */
-int get_ps_title(size_t *displen, const char** string)
+ps_title_status get_ps_title(size_t *displen, const char** string)
 {
-    int rc = is_ps_title_available();
+    ps_title_status rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 

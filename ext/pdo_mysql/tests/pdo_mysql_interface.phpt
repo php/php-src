@@ -4,34 +4,32 @@ MySQL PDO class interface
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-    die("skip Transactional engine not found");
-?>
+MySQLPDOTest::skipNotTransactionalEngine();
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
-    $expected = array(
-        '__construct'							=> true,
+    $expected = [
+        '__construct'						=> true,
+        'connect' 							=> true,
         'prepare' 							=> true,
-        'beginTransaction'						=> true,
+        'beginTransaction'					=> true,
         'commit'							=> true,
         'rollBack'							=> true,
-        'setAttribute'							=> true,
+        'setAttribute'						=> true,
         'exec'								=> true,
         'query'								=> true,
-        'lastInsertId'							=> true,
+        'lastInsertId'						=> true,
         'errorCode'							=> true,
         'errorInfo'							=> true,
-        'getAttribute'							=> true,
+        'getAttribute'						=> true,
         'quote'								=> true,
-        'inTransaction'							=> true,
-        'getAvailableDrivers'	=> true,
-    );
+        'inTransaction'						=> true,
+        'getAvailableDrivers'				=> true,
+    ];
     $classname = get_class($db);
 
     $methods = get_class_methods($classname);

@@ -4,16 +4,10 @@
 
 class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
 {
-    /**
-     * @var int
-     * @cvalue SPL_ARRAY_STD_PROP_LIST
-     */
-    const STD_PROP_LIST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_ARRAY_ARRAY_AS_PROPS
-     */
-    const ARRAY_AS_PROPS = UNKNOWN;
+    /** @cvalue SPL_ARRAY_STD_PROP_LIST */
+    public const int STD_PROP_LIST = UNKNOWN;
+    /** @cvalue SPL_ARRAY_ARRAY_AS_PROPS */
+    public const int ARRAY_AS_PROPS = UNKNOWN;
 
     public function __construct(array|object $array = [], int $flags = 0, string $iteratorClass = ArrayIterator::class) {}
 
@@ -45,22 +39,22 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function setFlags(int $flags): void {}
 
     /** @tentative-return-type */
-    public function asort(int $flags = SORT_REGULAR): bool {}
+    public function asort(int $flags = SORT_REGULAR): true {}
 
     /** @tentative-return-type */
-    public function ksort(int $flags = SORT_REGULAR): bool {}
+    public function ksort(int $flags = SORT_REGULAR): true {}
 
     /** @tentative-return-type */
-    public function uasort(callable $callback): bool {}
+    public function uasort(callable $callback): true {}
 
     /** @tentative-return-type */
-    public function uksort(callable $callback): bool {}
+    public function uksort(callable $callback): true {}
 
     /** @tentative-return-type */
-    public function natsort(): bool {}
+    public function natsort(): true {}
 
     /** @tentative-return-type */
-    public function natcasesort(): bool {}
+    public function natcasesort(): true {}
 
     /** @tentative-return-type */
     public function unserialize(string $data): void {}
@@ -92,16 +86,10 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 
 class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
 {
-    /**
-     * @var int
-     * @cvalue SPL_ARRAY_STD_PROP_LIST
-     */
-    public const STD_PROP_LIST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_ARRAY_ARRAY_AS_PROPS
-     */
-    public const ARRAY_AS_PROPS = UNKNOWN;
+    /** @cvalue SPL_ARRAY_STD_PROP_LIST */
+    public const int STD_PROP_LIST = UNKNOWN;
+    /** @cvalue SPL_ARRAY_ARRAY_AS_PROPS */
+    public const int ARRAY_AS_PROPS = UNKNOWN;
 
     public function __construct(array|object $array = [], int $flags = 0) {}
 
@@ -163,37 +151,37 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      * @tentative-return-type
      * @implementation-alias ArrayObject::asort
      */
-    public function asort(int $flags = SORT_REGULAR): bool {}
+    public function asort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::ksort
      */
-    public function ksort(int $flags = SORT_REGULAR): bool {}
+    public function ksort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uasort
      */
-    public function uasort(callable $callback): bool {}
+    public function uasort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uksort
      */
-    public function uksort(callable $callback): bool {}
+    public function uksort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natsort
      */
-    public function natsort(): bool {}
+    public function natsort(): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natcasesort
      */
-    public function natcasesort(): bool {}
+    public function natcasesort(): true {}
 
     /**
      * @tentative-return-type
@@ -246,11 +234,8 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
 
 class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
 {
-    /**
-     * @var int
-     * @cvalue SPL_ARRAY_CHILD_ARRAYS_ONLY
-     */
-    public const CHILD_ARRAYS_ONLY = UNKNOWN;
+    /** @cvalue SPL_ARRAY_CHILD_ARRAYS_ONLY */
+    public const int CHILD_ARRAYS_ONLY = UNKNOWN;
 
     /** @tentative-return-type */
     public function hasChildren(): bool {}

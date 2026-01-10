@@ -29,8 +29,8 @@ echo "Done\n";
 *** Test readfile(): error conditions ***
 
 -- Testing readfile() with invalid arguments --
-Path cannot be empty
-Path cannot be empty
+Path must not be empty
+Path must not be empty
 
 -- Testing readfile() with non-existent file --
 

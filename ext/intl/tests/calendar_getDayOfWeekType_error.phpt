@@ -1,7 +1,5 @@
 --TEST--
 IntlCalendar::getDayOfWeekOfType(): bad arguments
---INI--
-date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --FILE--
@@ -14,12 +12,6 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-try {
-    var_dump(intlcal_get_day_of_week_type(1, 1));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
 ?>
 --EXPECT--
 IntlCalendar::getDayOfWeekType(): Argument #1 ($dayOfWeek) must be a valid day of the week
-intlcal_get_day_of_week_type(): Argument #1 ($calendar) must be of type IntlCalendar, int given

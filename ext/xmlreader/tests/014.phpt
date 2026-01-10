@@ -54,6 +54,6 @@ $reader->close();
 unlink(__DIR__.'/_014.xml');
 ?>
 --EXPECT--
-Cannot write to read-only property
-Cannot write to read-only property
-Cannot write to read-only property
+Cannot modify readonly property XMLReader::$value
+Cannot modify readonly property XMLReader::$value
+Cannot modify readonly property XMLReader::$name

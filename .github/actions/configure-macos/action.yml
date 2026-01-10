@@ -11,9 +11,8 @@ runs:
         set -x
         BREW_OPT="$(brew --prefix)"/opt
         export PATH="$BREW_OPT/bison/bin:$PATH"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/curl/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/krb5/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libffi/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxml2/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxslt/lib/pkgconfig"
@@ -22,7 +21,6 @@ runs:
         sed -i -e 's/Requires.private:.*//g' "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"
         ./buildconf --force
         ./configure \
-          CFLAGS="-Wno-strict-prototypes -Wno-unused-but-set-variable -Wno-single-bit-bitfield-constant-conversion" \
           --enable-option-checking=fatal \
           --prefix=/usr/local \
           --enable-fpm \
@@ -60,8 +58,6 @@ runs:
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \
-          --with-pspell="$BREW_OPT"/aspell \
-          --with-kerberos \
           --enable-sysvmsg \
           --with-ffi \
           --enable-zend-test \

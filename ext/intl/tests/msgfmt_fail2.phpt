@@ -130,23 +130,23 @@ Deprecated: MessageFormatter::__construct(): Passing null to parameter #1 ($loca
 
 Deprecated: MessageFormatter::__construct(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
 
-IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+IntlException: MessageFormatter::__construct(): message formatter creation failed in %s on line %d
+'MessageFormatter::__construct(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 Deprecated: MessageFormatter::create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
 
 Deprecated: MessageFormatter::create(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'MessageFormatter::create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 Deprecated: msgfmt_create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
 
 Deprecated: msgfmt_create(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+IntlException: MessageFormatter::__construct(): message formatter creation failed in %s on line %d
+'MessageFormatter::__construct(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'MessageFormatter::create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 TypeError: MessageFormatter::__construct(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
@@ -157,17 +157,17 @@ TypeError: MessageFormatter::create(): Argument #1 ($locale) must be of type str
 TypeError: msgfmt_create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-IntlException: pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR in %s on line %d
-'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
-'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
-'pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+IntlException: MessageFormatter::__construct(): pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}") in %s on line %d
+'MessageFormatter::__construct(): pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'MessageFormatter::create(): pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create(): pattern syntax error (parse error at offset 1, after "{", before or at "0,choice}"): U_PATTERN_SYNTAX_ERROR'
 
-IntlException: msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES in %s on line %d
-'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
-'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
-'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+IntlException: MessageFormatter::__construct(): message formatter creation failed in %s on line %d
+'MessageFormatter::__construct(): message formatter creation failed: U_UNMATCHED_BRACES'
+'MessageFormatter::create(): message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create(): message formatter creation failed: U_UNMATCHED_BRACES'
 
-IntlException: msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND in %s on line %d
-'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
-'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
-'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+IntlException: MessageFormatter::__construct(): error converting pattern to UTF-16 in %s on line %d
+'MessageFormatter::__construct(): error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'MessageFormatter::create(): error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create(): error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

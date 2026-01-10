@@ -32,7 +32,7 @@ for ($i = 0;  $i < 3; $i ++) {
             }
         }
     } catch (Exception $e) {
-       var_dump("cactched");
+       var_dump("caught");
     }  finally {
        var_dump("finally");
     }
@@ -46,7 +46,7 @@ string(9) "continue1"
 string(9) "continue2"
 string(7) "finally"
 string(9) "continue2"
-string(8) "cactched"
+string(6) "caught"
 string(7) "finally"
 string(9) "continue2"
 string(7) "finally"

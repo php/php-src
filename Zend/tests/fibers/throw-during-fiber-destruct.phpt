@@ -16,6 +16,6 @@ throw new Exception("Exception 1");
 --EXPECTF--
 Fatal error: Uncaught Exception: Exception 2 in %s:%d
 Stack trace:
-#0 [internal function]: {closure}()
+#0 [internal function]: {closure:%s:%d}()
 #1 {main}
   thrown in %s on line %d

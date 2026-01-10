@@ -49,4 +49,4 @@ rewind
 valid
 current
 %s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid value (must return a string)
+Iterator myIterator returned an invalid value (must return a string, a stream, or an SplFileInfo object)

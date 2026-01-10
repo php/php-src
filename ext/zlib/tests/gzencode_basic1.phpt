@@ -2,15 +2,13 @@
 Test gzencode() function : basic functionality
 --EXTENSIONS--
 zlib
---SKIPIF--
-<?php if (getenv('TRAVIS')) die('skip Currently fails on Travis'); ?>
 --FILE--
 <?php
 /*
  * Test basic function of gzencode
  */
 
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzencode() : basic functionality ***\n";
 
@@ -25,24 +23,24 @@ $smallstring = "A small string to compress\n";
 for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzencode($data, $i);
-    var_dump(strcmp(gzdecode($output), $data)===0);
+    var_dump(gzdecode($output) === $data);
 }
 
 // Compressing a smaller string
 for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzencode($smallstring, $i);
-    var_dump(strcmp(gzdecode($output), $smallstring)===0);
+    var_dump(gzdecode($output) === $smallstring);
 }
 
 // Calling gzencode() with mandatory arguments
 echo "\n-- Testing with no specified compression level --\n";
 $output = gzencode($smallstring);
-var_dump(strcmp(gzdecode($output), $smallstring)===0);
+var_dump(gzdecode($output) === $smallstring);
 
 echo "\n-- Testing gzencode with mode specified --\n";
 $outupt = gzencode($smallstring, -1, FORCE_GZIP);
-var_dump(strcmp(gzdecode($output), $smallstring)===0);
+var_dump(gzdecode($output) === $smallstring);
 ?>
 --EXPECTF--
 *** Testing gzencode() : basic functionality ***

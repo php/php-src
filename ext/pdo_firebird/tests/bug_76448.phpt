@@ -3,8 +3,8 @@ Bug #76448 (Stack buffer overflow in firebird_info_cb)
 --EXTENSIONS--
 pdo_firebird
 sockets
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
 require_once "payload_server.inc";

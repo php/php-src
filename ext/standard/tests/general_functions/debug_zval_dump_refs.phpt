@@ -16,13 +16,13 @@ debug_zval_dump($a);
 
 ?>
 --EXPECT--
-array(1) refcount(2){
+array(1) packed refcount(2){
   [0]=>
   reference refcount(2) {
     int(1)
   }
 }
-array(2) refcount(2){
+array(2) packed refcount(2){
   [0]=>
   reference refcount(3) {
     int(1)
@@ -32,13 +32,13 @@ array(2) refcount(2){
     int(1)
   }
 }
-array(1) refcount(2){
+array(1) packed refcount(2){
   [0]=>
   reference refcount(2) {
     int(1)
   }
 }
-array(1) refcount(2){
+array(1) packed refcount(2){
   [0]=>
   reference refcount(1) {
     int(1)

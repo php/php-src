@@ -375,7 +375,9 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 
 /* {{{ */
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
-	if (stack && stack->next) {
+	ZEND_ASSERT(stack != NULL);
+
+	if (stack->next) {
 		phpdbg_param_t *remove = stack->next;
 
 		while (remove) {
@@ -426,10 +428,9 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				remove = next;
 			else break;
 		}
+
+		stack->next = NULL;
 	}
-
-
-	stack->next = NULL;
 } /* }}} */
 
 /* {{{ */
@@ -743,7 +744,6 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, bool allow_async_unsa
 
 PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 {
-	char buf[PHPDBG_MAX_CMD];
 	char *buffer = NULL;
 
 	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
@@ -773,6 +773,7 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 				free(cmd);
 			}
 #else
+			char buf[PHPDBG_MAX_CMD];
 			phpdbg_write("%s", phpdbg_get_prompt());
 			phpdbg_consume_stdin_line(buf);
 			buffer = estrdup(buf);

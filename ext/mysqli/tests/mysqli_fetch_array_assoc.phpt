@@ -4,11 +4,11 @@ mysqli_fetch_array()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 5")) {
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -29,7 +29,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [002]

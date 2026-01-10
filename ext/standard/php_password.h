@@ -22,12 +22,14 @@ PHP_MINIT_FUNCTION(password);
 PHP_MSHUTDOWN_FUNCTION(password);
 
 #define PHP_PASSWORD_DEFAULT    PHP_PASSWORD_BCRYPT
-#define PHP_PASSWORD_BCRYPT_COST 10
+#define PHP_PASSWORD_BCRYPT_COST 12
 
 #ifdef HAVE_ARGON2LIB
 /**
- * When updating these values, synchronize ext/sodium/sodium_pwhash.c values.
- * Note that libargon expresses memlimit in KB, while libsoidum uses bytes.
+ * When updating these values, synchronize values in
+ *     ext/sodium/php_libsodium.h
+ *     ext/openssl/php_openssl.h
+ * Note that libargon/openssl express memlimit in KB, while libsodium uses bytes.
  */
 #define PHP_PASSWORD_ARGON2_MEMORY_COST (64 << 10)
 #define PHP_PASSWORD_ARGON2_TIME_COST 4

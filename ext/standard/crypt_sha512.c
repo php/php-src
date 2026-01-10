@@ -27,7 +27,6 @@
 # include <string.h>
 #endif
 
-extern void * __php_mempcpy(void * dst, const void * src, size_t len);
 extern char * __php_stpncpy(char *dst, const char *src, size_t len);
 
 #ifndef MIN
@@ -351,7 +350,7 @@ static const char sha512_rounds_prefix[] = "rounds=";
 #define ROUNDS_MAX 999999999
 
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[64] ZEND_NONSTRING =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 
@@ -376,7 +375,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	bool rounds_custom = 0;
+	bool rounds_custom = false;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	 be present.  Just in case it is not.  */
@@ -397,7 +396,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 			}
 
 			rounds = srounds;
-			rounds_custom = 1;
+			rounds_custom = true;
 		}
 	}
 
@@ -486,7 +485,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	ALLOCA_FLAG(use_heap_p_bytes);
 	cp = p_bytes = do_alloca(key_len, use_heap_p_bytes);
 	for (cnt = key_len; cnt >= 64; cnt -= 64) {
-		cp = __php_mempcpy((void *) cp, (const void *)temp_result, 64);
+		cp = zend_mempcpy((void *) cp, (const void *)temp_result, 64);
 	}
 
 	memcpy(cp, temp_result, cnt);
@@ -506,7 +505,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	ALLOCA_FLAG(use_heap_s_bytes);
 	cp = s_bytes = do_alloca(salt_len, use_heap_s_bytes);
 	for (cnt = salt_len; cnt >= 64; cnt -= 64) {
-		cp = __php_mempcpy(cp, temp_result, 64);
+		cp = zend_mempcpy(cp, temp_result, 64);
 	}
 	memcpy(cp, temp_result, cnt);
 

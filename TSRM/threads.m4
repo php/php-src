@@ -31,12 +31,6 @@ dnl
 dnl Set some magic defines to achieve POSIX threads conformance.
 dnl
 AC_DEFUN([PTHREADS_FLAGS],[
-  if test -z "$host_alias" && test -n "$host"; then
-    host_alias=$host
-  fi
-  if test -z "$host_alias"; then
-    AC_MSG_ERROR(host_alias is not set. Make sure to run config.guess)
-  fi
   case $host_alias in
   *solaris*)
     PTHREAD_FLAGS="-D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT";;
@@ -46,8 +40,6 @@ AC_DEFUN([PTHREADS_FLAGS],[
     PTHREAD_FLAGS=-D_REENTRANT;;
   *aix*)
     PTHREAD_FLAGS=-D_THREAD_SAFE;;
-  *irix*)
-    PTHREAD_FLAGS=-D_POSIX_THREAD_SAFE_FUNCTIONS;;
   *hpux*)
     PTHREAD_FLAGS=-D_REENTRANT;;
   *sco*)
@@ -134,7 +126,7 @@ if test "$pthreads_working" != "yes"; then
 fi
 ])
 
-if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
+if test "x$ac_cv_pthreads_cflags" != "x" || test "x$ac_cv_pthreads_lib" != "x"; then
   pthreads_working="yes"
 fi
 ])

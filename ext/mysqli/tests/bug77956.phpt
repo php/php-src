@@ -21,7 +21,7 @@ mysqli_close($link);
 mysqli.allow_local_infile=0
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
     }
@@ -45,7 +45,7 @@ mysqli.allow_local_infile=0
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket);
@@ -57,5 +57,5 @@ $link->close();
 unlink('bug77956.data');
 ?>
 --EXPECT--
-[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
+[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or Pdo\Mysql::ATTR_LOCAL_INFILE|Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY
 done

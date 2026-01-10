@@ -14,14 +14,11 @@ $id_2_date = '2014-09-24';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-@odbc_exec($conn, 'CREATE DATABASE odbcTEST');
+odbc_exec($conn, 'CREATE TABLE bug68087 (ID INT, VARCHAR_COL VARCHAR(100), DATE_COL DATE)');
 
-odbc_exec($conn, 'CREATE TABLE FOO (ID INT, VARCHAR_COL VARCHAR(100), DATE_COL DATE)');
+odbc_exec($conn, "INSERT INTO bug68087(ID, VARCHAR_COL, DATE_COL) VALUES (1, 'hello', '$id_1_date'), (2, 'helloagain', '$id_2_date')");
 
-odbc_exec($conn, "INSERT INTO FOO(ID, VARCHAR_COL, DATE_COL) VALUES (1, 'hello', '$id_1_date')");
-odbc_exec($conn, "INSERT INTO FOO(ID, VARCHAR_COL, DATE_COL) VALUES (2, 'helloagain', '$id_2_date')");
-
-$res = odbc_exec($conn, 'SELECT * FROM FOO ORDER BY ID ASC');
+$res = odbc_exec($conn, 'SELECT * FROM bug68087 ORDER BY ID ASC');
 
 while(odbc_fetch_row($res)) {
     $id = odbc_result($res, "ID");
@@ -44,16 +41,15 @@ while(odbc_fetch_row($res)) {
 }
 
 ?>
---EXPECT--
-Date_1 matched
-Date_2 matched
 --CLEAN--
 <?php
 include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-odbc_exec($conn, 'DROP TABLE FOO');
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
+odbc_exec($conn, 'DROP TABLE bug68087');
 
 ?>
+--EXPECT--
+Date_1 matched
+Date_2 matched

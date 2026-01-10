@@ -20,6 +20,7 @@
 #include "php_ini.h"
 #include "php_variables.h"
 #include "zend_highlight.h"
+#include "zend_portability.h"
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
@@ -30,17 +31,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-#if HAVE_SYS_TYPES_H
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
 #endif
 
 #include <signal.h>
@@ -592,7 +591,7 @@ static int sapi_lsapi_activate(void)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.9",
+    "LiteSpeed V8.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -702,7 +701,7 @@ static void lsapi_clean_shutdown(void)
     setitimer(ITIMER_PROF, &tmv, NULL);
 
 #if PHP_MAJOR_VERSION >= 7
-    key = zend_string_init("error_reporting", 15, 1);
+    key = ZSTR_INIT_LITERAL("error_reporting", 1);
     zend_alter_ini_entry_chars_ex(key, "0", 1,
                         PHP_INI_SYSTEM, PHP_INI_STAGE_SHUTDOWN, 1);
     zend_string_release(key);
@@ -1196,6 +1195,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
         case '?':
             if ( *((*(p-1))+2) == 's' )
                 exit( 99 );
+            ZEND_FALLTHROUGH;
         case 'h':
         case 'i':
         case 'l':
@@ -1272,11 +1272,7 @@ static int cli_main( int argc, char * argv[] )
                 break;
             case 'v':
                 if (php_request_startup() != FAILURE) {
-#if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+                    php_print_version(&sapi_module);
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();
 #else
@@ -1347,7 +1343,7 @@ static int cli_main( int argc, char * argv[] )
                         php_request_shutdown( NULL );
                     }
                 } else {
-                    php_printf("Could not open input file: %s.\n", *p);
+                    fprintf(stderr, "Could not open input file: %s.\n", *p);
                 }
             } else {
                 cli_usage();
@@ -1398,6 +1394,8 @@ void start_children( int children )
             pid = fork();
             switch( pid ) {
             case 0: /* children process */
+
+                php_child_init();
 
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
@@ -1682,11 +1680,11 @@ PHP_FUNCTION(litespeed_response_headers)
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
     if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	    RETURN_THROWS();
+    }
 
-    if (!&SG(sapi_headers).headers) {
-        RETURN_FALSE;
+    if (!zend_llist_count(&SG(sapi_headers).headers)) {
+	    RETURN_FALSE;
     }
     array_init(return_value);
 

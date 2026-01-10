@@ -17,7 +17,7 @@ var_dump($nodes->item(0));
 
 ?>
 --EXPECT--
-object(DOMNameSpaceNode)#4 (8) {
+object(DOMNameSpaceNode)#4 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -30,8 +30,12 @@ object(DOMNameSpaceNode)#4 (8) {
   string(3) "xml"
   ["namespaceURI"]=>
   string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }

@@ -6,19 +6,21 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("int[1][2][3]");
+$ffi = FFI::cdef();
+
+$a = $ffi->new("int[1][2][3]");
 var_dump(count($a));
 var_dump(count($a[0]));
 var_dump(count($a[0][0]));
 
 try {
-    var_dump(FFI::new("void"));
+    var_dump($ffi->new("void"));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 
 try {
-    var_dump(FFI::new("void[1]"));
+    var_dump($ffi->new("void[1]"));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }

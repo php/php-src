@@ -2,10 +2,10 @@
 datefmt_format_code() with relative formats
 --EXTENSIONS--
 intl
+--INI
+date.timezone=America/Los_Angeles
 --FILE--
 <?php
-
-date_default_timezone_set('America/Los_Angeles');
 
 printFormat(IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::NONE, getYesterday());
 printFormat(IntlDateFormatter::RELATIVE_LONG, IntlDateFormatter::NONE, getYesterday());

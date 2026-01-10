@@ -31,13 +31,16 @@
  *                                                                                      *
  ****************************************************************************************/
 
-# if defined __CET__
-#  include <cet.h>
-#  define SHSTK_ENABLED (__CET__ & 0x2)
-#  define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
+# ifdef __i386__
+#  include "jump_i386_sysv_elf_gas.S"
 # else
-#  define _CET_ENDBR
-# endif
+#  if defined __CET__
+#   include <cet.h>
+#   define SHSTK_ENABLED (__CET__ & 0x2)
+#   define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
+#  else
+#   define _CET_ENDBR
+#  endif
 .file "jump_x86_64_sysv_elf_gas.S"
 .text
 .globl jump_fcontext
@@ -71,6 +74,14 @@ jump_fcontext:
     rdsspq  %rcx
     movq  %rcx, (%rsp)
 #endif
+
+#if BOOST_CONTEXT_SHADOW_STACK
+    /* grow the stack to reserve space for shadow stack pointer(SSP) */
+    leaq  -0x8(%rsp), %rsp
+    /* read the current SSP and store it */
+    rdsspq  %rcx
+    movq  %rcx, (%rsp)
+# endif
 
     /* store RSP (pointing to context-data) in RAX */
     movq  %rsp, %rax
@@ -140,3 +151,4 @@ jump_fcontext:
 
 /* Mark that we don't need executable stack.  */
 .section .note.GNU-stack,"",%progbits
+# endif

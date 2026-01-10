@@ -223,7 +223,7 @@ static const unsigned short code_tbl[][3] = {
 	{0x038a, 0x03a3, 0x249c},
 };
 
-static const unsigned short code_ofst_tbl[] [2]= {
+static const unsigned short code_ofst_tbl[][2] = {
 	{0x03ac, 0x03c9},
 	{0x0406, 0x0420},
 	{0x0432, 0x0441},

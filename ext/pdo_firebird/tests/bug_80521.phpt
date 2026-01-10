@@ -4,12 +4,11 @@ Bug #80521 (Parameters with underscores no longer recognized)
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';
 
+$dbh = getDbConnection();
 $dbh->exec("CREATE TABLE bug80521 (foo INTEGER)");
 var_dump($dbh->prepare("SELECT foo FROM bug80521 WHERE foo = :foo_bar"));
 ?>
@@ -21,5 +20,7 @@ object(PDOStatement)#%d (1) {
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE bug80521");
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE bug80521");
+unset($dbh);
 ?>

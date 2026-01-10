@@ -4,12 +4,12 @@ Bug #45019 (Segmentation fault with SELECT ? and UNION)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     // Regular (non-prepared) queries
     print "Using CAST('somestring' AS CHAR)...\n";

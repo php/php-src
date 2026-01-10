@@ -15,7 +15,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
 /* TODO: mysqli.c needs to export a few more constants - see all the defined() calls! */
 
@@ -187,7 +187,7 @@ mysqli_close($link);
     $column_def = array('col1 CHAR(1)', 'col2 CHAR(2)','INDEX idx_col1_col2(col1, col2)');
     $expected_flags = array('col1' => 'MULTIPLE_KEY PART_KEY', 'col2' => 'PART_KEY');
     $create = 'CREATE TABLE test(id INT, ';
-    foreach ($column_def as $k => $v) {
+    foreach ($column_def as $v) {
         $create .= sprintf('%s, ', $v);
     }
     $create = sprintf('%s)', substr($create, 0, -2));
@@ -198,7 +198,7 @@ mysqli_close($link);
                 mysqli_errno($link), mysqli_error($link));
         }
         // id column - skip it
-        $field = mysqli_fetch_field($res);
+        mysqli_fetch_field($res);
         while ($field = mysqli_fetch_field($res)) {
             if (!isset($expected_flags[$field->name])) {
                 printf("[010] Found unexpected field '%s'\n", $field->name);
@@ -218,7 +218,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

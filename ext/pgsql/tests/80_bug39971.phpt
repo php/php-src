@@ -4,29 +4,34 @@ Bug #39971 (8.0+) (pg_insert/pg_update do not allow now() to be used for timesta
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
+$table_name = 'table_80_bug39971';
 
-$dbh = @pg_connect($conn_str);
-if (!$dbh) {
-    die ("Could not connect to the server");
-}
+$dbh = pg_connect($conn_str);
 
-pg_query($dbh, "CREATE TABLE php_test (id SERIAL, tm timestamp NOT NULL)");
+pg_query($dbh, "CREATE TABLE {$table_name} (id SERIAL, tm timestamp NOT NULL)");
 
 $values = array('tm' => 'now()');
-pg_insert($dbh, 'php_test', $values);
+pg_insert($dbh, $table_name, $values);
 
 $ids = array('id' => 1);
-pg_update($dbh, 'php_test', $values, $ids);
+pg_update($dbh, $table_name, $values, $ids);
 
-pg_query($dbh, "DROP TABLE php_test");
 pg_close($dbh);
 ?>
 ===DONE===
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$table_name = 'table_80_bug39971';
+
+$dbh = pg_connect($conn_str);
+pg_query($dbh, "DROP TABLE IF EXISTS {$table_name}");
+?>
 --EXPECT--
 ===DONE===

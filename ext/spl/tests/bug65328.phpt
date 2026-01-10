@@ -13,7 +13,7 @@ class Tree
      */
     protected $head;
 
-    public function __construct(Node $head = null)
+    public function __construct(?Node $head = null)
     {
         $this->head = $head ? : new Node('HEAD');
     }
@@ -109,10 +109,10 @@ class Node extends \RecursiveArrayIterator implements \Countable
     /**
      * @param mixed $data
      * @param mixed $uid
-     * @param Node $parent
+     * @param Node|null $parent
      * @param bool $assureUnique
      */
-    public function __construct($data, $uid = null, Node $parent = null, $assureUnique = false)
+    public function __construct($data, $uid = null, ?Node $parent = null, $assureUnique = false)
     {
         if(null !== $parent) {
             $this->parent = $parent;

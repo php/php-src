@@ -76,22 +76,11 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#ifdef PHP_WIN32
-		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
-		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
-		SYSTEMTIME loc_t;
-		GetLocalTime(&loc_t);
-		snprintf(time_buffer, sizeof(time_buffer) - 1,
-				 /* "%04d-%02d-%02d " */
-				 "%02d:%02d:%02d.%06d ",
-				 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-				 loc_t.wHour, loc_t.wMinute, loc_t.wSecond, loc_t.wMilliseconds);
-		time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-#else
 		struct timeval tv;
 		struct tm *tm_p;
 		if (gettimeofday(&tv, NULL) != -1) {
-			if ((tm_p= localtime((const time_t *)&tv.tv_sec))) {
+			const time_t sec = tv.tv_sec;
+			if ((tm_p = localtime((const time_t *)&sec))) {
 				snprintf(time_buffer, sizeof(time_buffer) - 1,
 						 /* "%04d-%02d-%02d " */
 						 "%02d:%02d:%02d.%06d ",
@@ -99,9 +88,10 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
 						 (int) (tv.tv_usec));
 				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+			} else {
+				time_buffer[0] = '\0';
 			}
 		}
-#endif
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
 		snprintf(file_buffer, sizeof(file_buffer) - 1, "%14s: ", file);
@@ -173,22 +163,11 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#ifdef PHP_WIN32
-		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
-		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
-		SYSTEMTIME loc_t;
-		GetLocalTime(&loc_t);
-		snprintf(time_buffer, sizeof(time_buffer) - 1,
-				 /* "%04d-%02d-%02d " */
-				 "%02d:%02d:%02d.%06d ",
-				 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-				 loc_t.wHour, loc_t.wMinute, loc_t.wSecond, loc_t.wMilliseconds);
-		time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-#else
 		struct timeval tv;
 		struct tm *tm_p;
 		if (gettimeofday(&tv, NULL) != -1) {
-			if ((tm_p= localtime((const time_t *)&tv.tv_sec))) {
+			const time_t sec = tv.tv_sec;
+			if ((tm_p = localtime((const time_t *)&sec))) {
 				snprintf(time_buffer, sizeof(time_buffer) - 1,
 						 /* "%04d-%02d-%02d " */
 						 "%02d:%02d:%02d.%06d ",
@@ -196,9 +175,10 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
 						 (int) (tv.tv_usec));
 				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+			} else {
+				time_buffer[0] = '\0';
 			}
 		}
-#endif
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
 		snprintf(file_buffer, sizeof(file_buffer) - 1, "%14s: ", file);

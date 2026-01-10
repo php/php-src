@@ -27,7 +27,7 @@ EOT;
 
 // heredoc with different whitespaces
 $diff_whitespaces = <<<EOT
-hello\r world\t
+hello\n world\t
 1111\t\t != 2222\v\v
 heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
 EOT;
@@ -47,8 +47,8 @@ $arrays = array (
        array(false, true), // with default keys and boolean values
        array(), // empty array
 /*5*/  array(NULL), // with NULL
-       array("a\v\f", "aaaa\r", "b", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f', 'aaaa\r', 'b', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
+       array("a\v\f", "aaaa\n", "b", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
+       array('a\v\f', 'aaaa\n', 'b', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
        array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces),  // with heredocs
 
        // associative arrays
@@ -59,11 +59,11 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*14*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array containing embedded arrays
 /*15*/ array("str1", "array" => array("hello", 'world'), array(1, 2))
@@ -236,7 +236,8 @@ array(4) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [2]=>
   string(1) "b"
   [3]=>
@@ -247,7 +248,8 @@ array(8) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [2]=>
   string(1) "b"
   [3]=>
@@ -274,7 +276,7 @@ array(4) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
   [2]=>
   string(1) "b"
   [3]=>
@@ -285,7 +287,7 @@ array(8) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
   [2]=>
   string(1) "b"
   [3]=>
@@ -318,7 +320,8 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -334,7 +337,8 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -518,40 +522,6 @@ array(7) {
 }
 -- Iteration 14 --
 -- With default argument --
-array(3) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
-}
--- With more arguments --
-array(7) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(2)
-  ["string"]=>
-  string(5) "hello"
-  ["array"]=>
-  array(3) {
-    [0]=>
-    string(1) "a"
-    [1]=>
-    string(1) "b"
-    [2]=>
-    string(1) "c"
-  }
-}
--- Iteration 15 --
--- With default argument --
 array(4) {
   [0]=>
   string(4) "true"
@@ -588,7 +558,7 @@ array(8) {
     string(1) "c"
   }
 }
--- Iteration 16 --
+-- Iteration 15 --
 -- With default argument --
 array(3) {
   [""]=>
@@ -609,6 +579,44 @@ array(7) {
   [0]=>
   string(3) "one"
   [1]=>
+  int(2)
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
+  array(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+}
+-- Iteration 16 --
+-- With default argument --
+array(4) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(true)
+}
+-- With more arguments --
+array(8) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(true)
+  [4]=>
+  string(3) "one"
+  [5]=>
   int(2)
   ["string"]=>
   string(5) "hello"
@@ -624,37 +632,25 @@ array(7) {
 }
 -- Iteration 17 --
 -- With default argument --
-array(6) {
+array(3) {
+  [""]=>
+  int(2)
   [0]=>
-  string(0) ""
+  int(5)
   [1]=>
-  string(0) ""
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  bool(false)
-  [5]=>
-  bool(true)
+  int(6)
 }
 -- With more arguments --
-array(10) {
+array(7) {
+  [""]=>
+  int(2)
   [0]=>
-  string(0) ""
+  int(5)
   [1]=>
-  string(0) ""
+  int(6)
   [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  bool(false)
-  [5]=>
-  bool(true)
-  [6]=>
   string(3) "one"
-  [7]=>
+  [3]=>
   int(2)
   ["string"]=>
   string(5) "hello"
@@ -669,40 +665,6 @@ array(10) {
   }
 }
 -- Iteration 18 --
--- With default argument --
-array(3) {
-  [""]=>
-  int(4)
-  [0]=>
-  int(5)
-  [1]=>
-  int(6)
-}
--- With more arguments --
-array(7) {
-  [""]=>
-  int(4)
-  [0]=>
-  int(5)
-  [1]=>
-  int(6)
-  [2]=>
-  string(3) "one"
-  [3]=>
-  int(2)
-  ["string"]=>
-  string(5) "hello"
-  ["array"]=>
-  array(3) {
-    [0]=>
-    string(1) "a"
-    [1]=>
-    string(1) "b"
-    [2]=>
-    string(1) "c"
-  }
-}
--- Iteration 19 --
 -- With default argument --
 array(3) {
   [0]=>

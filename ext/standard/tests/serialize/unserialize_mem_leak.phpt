@@ -1,7 +1,5 @@
 --TEST--
 Memleaks if unserialize return a self-referenced array/object
---INI--
-report_memleaks=1
 --FILE--
 <?php
 function foo() {
@@ -15,5 +13,5 @@ foo(unserialize($str));
 echo "okey";
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset %d of %d bytes in %sunserialize_mem_leak.php on line 9
+Warning: unserialize(): Error at offset 13 of 14 bytes in %s on line %d
 okey

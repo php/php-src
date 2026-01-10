@@ -6,7 +6,7 @@ soap
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$hdr = new SoapHeader("http://soapinterop.org/","echoMeStringRequest", array("varString"=>"Hello World"), 1);
+$hdr = new SoapHeader("http://soapinterop.org/","echoMeStringRequest", array("varString"=>"Hello World"), true);
 $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoVoidSoapHeader",array(),null,$hdr);
 echo $client->__getlastrequest();

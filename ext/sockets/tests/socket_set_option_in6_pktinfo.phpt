@@ -17,6 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (!defined('IPV6_PKTINFO')) {
     die('skip IPV6_PKTINFO not available.');
 }
+?>
 --FILE--
 <?php
 

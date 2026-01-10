@@ -17,9 +17,6 @@ $gif = __DIR__."/php.gif";
 $im = imagecreatefromgif($gif);
 
 echo 'Total colors in image: ' . imagecolorstotal($im);
-
-// Free image
-imagedestroy($im);
 ?>
 --EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***

@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
 
     $types = array(
@@ -99,7 +99,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

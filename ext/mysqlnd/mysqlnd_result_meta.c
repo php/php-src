@@ -259,7 +259,7 @@ static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res_meta, field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset)
 {
 	MYSQLND_FIELD_OFFSET return_value = 0;
-	DBG_ENTER("mysqlnd_res_meta::fetch_fields");
+	DBG_ENTER("mysqlnd_res_meta::field_seek");
 	return_value = meta->current_field;
 	meta->current_field = field_offset;
 	DBG_RETURN(return_value);

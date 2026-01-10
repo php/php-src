@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL pgsqlCopyToArray and pgsqlCopyToFile
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -16,12 +15,12 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->exec('CREATE TABLE test (a integer not null primary key, b text, c integer)');
+$db->exec('CREATE TABLE test_copy_to (a integer not null primary key, b text, c integer)');
 
 $db->beginTransaction();
 
 echo "Preparing test table for CopyTo tests\n";
-$stmt = $db->prepare("INSERT INTO test (a, b, c) values (?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test_copy_to (a, b, c) values (?, ?, ?)");
 
 for($i=0;$i<3;$i++) {
     $firstParameter = $i;
@@ -36,11 +35,11 @@ for($i=0;$i<3;$i++) {
 $db->commit();
 
 echo "Testing pgsqlCopyToArray() with default parameters\n";
-var_dump($db->pgsqlCopyToArray('test'));
+var_dump($db->pgsqlCopyToArray('test_copy_to'));
 echo "Testing pgsqlCopyToArray() with different field separator and not null indicator\n";
-var_dump($db->pgsqlCopyToArray('test',";","NULL"));
+var_dump($db->pgsqlCopyToArray('test_copy_to',";","NULL"));
 echo "Testing pgsqlCopyToArray() with only selected fields\n";
-var_dump($db->pgsqlCopyToArray('test',";","NULL",'a,c'));
+var_dump($db->pgsqlCopyToArray('test_copy_to',";","NULL",'a,c'));
 
 echo "Testing pgsqlCopyToArray() with error\n";
 try {
@@ -52,13 +51,13 @@ try {
 echo "Testing pgsqlCopyToFile() with default parameters\n";
 
 $filename="test_pgsqlCopyToFile.csv";
-var_dump($db->pgsqlCopyToFile('test',$filename));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename));
 echo file_get_contents($filename);
 echo "Testing pgsqlCopyToFile() with different field separator and not null indicator\n";
-var_dump($db->pgsqlCopyToFile('test',$filename,";","NULL"));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename,";","NULL"));
 echo file_get_contents($filename);
 echo "Testing pgsqlCopyToFile() with only selected fields\n";
-var_dump($db->pgsqlCopyToFile('test',$filename,";","NULL",'a,c'));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename,";","NULL",'a,c'));
 echo file_get_contents($filename);
 
 echo "Testing pgsqlCopyToFile() with error\n";
@@ -70,7 +69,7 @@ try {
 
 echo "Testing pgsqlCopyToFile() to unwritable file\n";
 try {
-    var_dump($db->pgsqlCopyToFile('test', 'nonexistent/foo.csv'));
+    var_dump($db->pgsqlCopyToFile('test_copy_to', 'nonexistent/foo.csv'));
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
@@ -79,9 +78,17 @@ if(isset($filename)) {
     @unlink($filename);
 }
 ?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE test_copy_to');
+?>
 --EXPECTF--
 Preparing test table for CopyTo tests
 Testing pgsqlCopyToArray() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(19) "0	test insert 0	\N
@@ -94,6 +101,8 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(21) "0;test insert 0;NULL
@@ -106,6 +115,8 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(7) "0;NULL
@@ -118,23 +129,35 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with error
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0	test insert 0	\N
 1	test insert 1	\N
 2	test insert 2	\N
 Testing pgsqlCopyToFile() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0;test insert 0;NULL
 1;test insert 1;NULL
 2;test insert 2;NULL
 Testing pgsqlCopyToFile() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0;NULL
 1;NULL
 2;NULL
 Testing pgsqlCopyToFile() with error
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() to unwritable file
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file for writing

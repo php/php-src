@@ -83,18 +83,19 @@ class finfo
     public function buffer(string $string, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
     /**
-     * @return bool
      * @alias finfo_set_flags
+     * @tentative-return-type
      */
-    public function set_flags(int $flags) {} // TODO make return type void
+    public function set_flags(int $flags): true {}
 }
 
 /** @refcount 1 */
 function finfo_open(int $flags = FILEINFO_NONE, ?string $magic_database = null): finfo|false {}
 
-function finfo_close(finfo $finfo): bool {}
+#[\Deprecated(since: '8.5', message: 'as finfo objects are freed automatically')]
+function finfo_close(finfo $finfo): true {}
 
-function finfo_set_flags(finfo $finfo, int $flags): bool {} // TODO make return type void
+function finfo_set_flags(finfo $finfo, int $flags): true {}
 
 /**
  * @param resource|null $context

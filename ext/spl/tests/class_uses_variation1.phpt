@@ -158,16 +158,16 @@ class_uses(): Argument #1 ($object_or_class) must be of type object|string, null
 class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase true--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --lowercase false--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --uppercase TRUE--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --uppercase FALSE--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --empty string DQ--
 Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)

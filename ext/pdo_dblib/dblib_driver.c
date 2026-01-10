@@ -22,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -145,20 +145,20 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0;
+	bool use_national_character_set = false;
 	size_t i;
 	char *q;
 	size_t quotedlen = 0, extralen = 0;
 	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
-		use_national_character_set = 1;
+		use_national_character_set = true;
 	}
 	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-		use_national_character_set = 1;
+		use_national_character_set = true;
 	}
 	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-		use_national_character_set = 0;
+		use_national_character_set = false;
 	}
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
@@ -233,9 +233,8 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
-	char *id = NULL;
+	BYTE id[32];
 	size_t len;
-	zend_string *ret_id;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
@@ -267,13 +266,10 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	id = emalloc(32);
 	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
 	dbcancel(H->link);
 
-	ret_id = zend_string_init(id, len, 0);
-	efree(id);
-	return ret_id;
+	return zend_string_init((const char *) id, len, 0);
 }
 
 static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
@@ -296,10 +292,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->stringify_uniqueidentifier = lval;
+			H->stringify_uniqueidentifier = bval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			if (!pdo_get_bool_param(&bval, val)) {
@@ -308,10 +304,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->datetime_convert = lval;
+			H->datetime_convert = bval;
 			return true;
 		default:
 			return false;
@@ -442,7 +438,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)

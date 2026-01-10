@@ -2,21 +2,45 @@
 MessageFormatter::format() invalid UTF-8 for arg key or value
 --EXTENSIONS--
 intl
+--INI--
+intl.use_exceptions=On
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $fmt = <<<EOD
 {foo}
 EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
-var_dump($mf->format(array("foo" => 7, "\x80" => "bar")));
+try {
+    var_dump($mf->format(array("foo" => 7, "\x80" => "bar")));
+} catch (Throwable $e) {
+    var_dump($e::class === 'IntlException');
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in argument key: '\x80'" ===  $e->getMessage());
+}
 
-var_dump($mf->format(array("foo" => "\x80")));
---EXPECTF--
-Warning: MessageFormatter::format(): Invalid UTF-8 data in argument key: '€' in %s on line %d
-bool(false)
+try {
+    var_dump($mf->format(array("foo" => "\x80")));
+} catch (Throwable $e) {
+    var_dump($e::class === 'IntlException');
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
+}
 
-Warning: MessageFormatter::format(): Invalid UTF-8 data in string argument: '€' in %s on line %d
-bool(false)
+try {
+    var_dump($mf->format(array("foo" => new class {
+        function __toString(): string {
+            return str_repeat("\x80", random_int(1, 1));
+        }
+    })));
+} catch (Throwable $e) {
+    var_dump($e::class === 'IntlException');
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
+}
+?>
+--EXPECT--
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

@@ -147,9 +147,17 @@ identifyInvalidString("&" . mBase64($doubleChar . $testString) . "-", 'UTF7-IMAP
 
 /* 3. The first half of a surrogate pair could come at the end of the string, */
 $testString = mb_convert_encoding("\x00\x01\x04\x00", 'UTF-16BE', 'UTF-32BE');
-identifyInvalidString("&" . mBase64(substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
-identifyInvalidString("&" . mBase64($singleChar . substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
-identifyInvalidString("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
+testInvalid("&" . mBase64(substr($testString, 0, 2)) . "-", "%");
+testInvalid("&" . mBase64($singleChar . substr($testString, 0, 2)) . "-", "\x01%");
+testInvalid("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)) . "-", "\x01\x01%");
+/* ...and the string could even be improperly terminated... */
+testInvalid("&" . mBase64(substr($testString, 0, 2)), "%%");
+testInvalid("&" . mBase64($singleChar . substr($testString, 0, 2)), "\x01%%");
+/* NOTE: We currently don't check for trailing first half of surrogate pair when the string
+ * abruptly ends after a group of 3 Base64-encoded codepoints... that's why we only emit one
+ * error marker here for the incorrect termination of Base64 section and no error marker
+ * for the trailing first half of surrogate pair */
+testInvalid("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)), "\x01\x01%");
 
 /* 4. Or, it could have an odd number of bytes in it! */
 $testString = utf16BE("ドーナツ");

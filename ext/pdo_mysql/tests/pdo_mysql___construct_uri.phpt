@@ -4,17 +4,16 @@ MySQL PDO->__construct() - URI
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     try {
 
         if ($tmp = MySQLPDOTest::getTempDir()) {
-
             $file = $tmp . DIRECTORY_SEPARATOR . 'pdomuri.tst';
             $dsn = MySQLPDOTest::getDSN();
             $user = PDO_MYSQL_TEST_USER;
@@ -65,4 +64,7 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
+Deprecated: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
+
+Deprecated: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
 done!

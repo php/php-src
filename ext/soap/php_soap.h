@@ -20,8 +20,6 @@
 #define PHP_SOAP_H
 
 #include "php.h"
-#include "php_globals.h"
-#include "ext/standard/info.h"
 #include "ext/standard/php_standard.h"
 #if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
@@ -29,6 +27,7 @@
 #include "zend_smart_str.h"
 #include "php_ini.h"
 #include "SAPI.h"
+#include "ext/uri/php_uri.h"
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
@@ -39,8 +38,6 @@
 # define FALSE 0
 # define stricmp strcasecmp
 #endif
-
-extern int le_url;
 
 typedef struct _encodeType encodeType, *encodeTypePtr;
 typedef struct _encode encode, *encodePtr;
@@ -86,7 +83,7 @@ struct _soapService {
 	struct _soap_class {
 		zend_class_entry *ce;
 		zval *argv;
-		int argc;
+		uint32_t argc;
 		int persistence;
 	} soap_class;
 
@@ -100,8 +97,11 @@ struct _soapService {
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
 	int        features;
+	int        send_errors;
 	struct _soapHeader **soap_headers_ptr;
-	int send_errors;
+
+	bool         trace;
+	zend_string *last_response_body;
 };
 
 #define SOAP_CLASS 1
@@ -152,17 +152,13 @@ struct _soapService {
 
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
-	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
-	HashTable  defEnc;
-	HashTable  defEncIndex;
 	HashTable *typemap;
 	int        cur_uniq_ns;
 	int        soap_version;
 	sdlPtr     sdl;
-	bool  use_soap_error_handler;
 	char*      error_code;
 	zval       error_object;
-	char       cache;
+	bool       use_soap_error_handler;
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
@@ -176,6 +172,8 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	int        cur_uniq_ref;
 	HashTable *ref_map;
 ZEND_END_MODULE_GLOBALS(soap)
+
+extern zend_string *soap_lang_en;
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -194,8 +192,12 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 extern zend_class_entry* soap_class_entry;
 extern zend_class_entry* soap_var_class_entry;
+extern zend_class_entry* soap_url_class_entry;
+extern zend_class_entry* soap_sdl_class_entry;
 
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
+extern HashTable php_soap_defEncNs, php_soap_defEnc, php_soap_defEncIndex;
+
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)
@@ -216,41 +218,59 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 	return zv;
 }
 
-#define Z_CLIENT_URI_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
-#define Z_CLIENT_STYLE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
-#define Z_CLIENT_USE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
-#define Z_CLIENT_LOCATION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
-#define Z_CLIENT_TRACE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
-#define Z_CLIENT_COMPRESSION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
-#define Z_CLIENT_SDL_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
-#define Z_CLIENT_TYPEMAP_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 7))
-#define Z_CLIENT_HTTPSOCKET_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 8))
-#define Z_CLIENT_HTTPURL_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 9))
-#define Z_CLIENT_LOGIN_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 10))
-#define Z_CLIENT_PASSWORD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 11))
-#define Z_CLIENT_USE_DIGEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 12))
-#define Z_CLIENT_DIGEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 13))
-#define Z_CLIENT_PROXY_HOST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 14))
-#define Z_CLIENT_PROXY_PORT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 15))
-#define Z_CLIENT_PROXY_LOGIN_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 16))
-#define Z_CLIENT_PROXY_PASSWORD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 17))
-#define Z_CLIENT_EXCEPTIONS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 18))
-#define Z_CLIENT_ENCODING_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 19))
-#define Z_CLIENT_CLASSMAP_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 20))
-#define Z_CLIENT_FEATURES_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 21))
-#define Z_CLIENT_CONNECTION_TIMEOUT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 22))
-#define Z_CLIENT_STREAM_CONTEXT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 23))
-#define Z_CLIENT_USER_AGENT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 24))
-#define Z_CLIENT_KEEP_ALIVE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 25))
-#define Z_CLIENT_SSL_METHOD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 26))
-#define Z_CLIENT_SOAP_VERSION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 27))
-#define Z_CLIENT_USE_PROXY_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 28))
-#define Z_CLIENT_COOKIES_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 29))
-#define Z_CLIENT_DEFAULT_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 30))
-#define Z_CLIENT_SOAP_FAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 31))
-#define Z_CLIENT_LAST_REQUEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 32))
-#define Z_CLIENT_LAST_RESPONSE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 33))
-#define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 34))
-#define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 35))
+/* SoapClient's properties are all private and can't be references */
+#define Z_CLIENT_URI_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_CLIENT_STYLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_CLIENT_USE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
+#define Z_CLIENT_LOCATION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
+#define Z_CLIENT_TRACE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+#define Z_CLIENT_COMPRESSION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 5)
+#define Z_CLIENT_SDL_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 6)
+#define Z_CLIENT_TYPEMAP_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 7)
+#define Z_CLIENT_HTTPSOCKET_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 8)
+#define Z_CLIENT_HTTPURL_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 9)
+#define Z_CLIENT_LOGIN_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 10)
+#define Z_CLIENT_PASSWORD_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 11)
+#define Z_CLIENT_USE_DIGEST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 12)
+#define Z_CLIENT_DIGEST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 13)
+#define Z_CLIENT_PROXY_HOST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 14)
+#define Z_CLIENT_PROXY_PORT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 15)
+#define Z_CLIENT_PROXY_LOGIN_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 16)
+#define Z_CLIENT_PROXY_PASSWORD_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 17)
+#define Z_CLIENT_EXCEPTIONS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 18)
+#define Z_CLIENT_ENCODING_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 19)
+#define Z_CLIENT_CLASSMAP_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 20)
+#define Z_CLIENT_FEATURES_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 21)
+#define Z_CLIENT_CONNECTION_TIMEOUT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 22)
+#define Z_CLIENT_STREAM_CONTEXT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 23)
+#define Z_CLIENT_USER_AGENT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 24)
+#define Z_CLIENT_KEEP_ALIVE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 25)
+#define Z_CLIENT_SSL_METHOD_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 26)
+#define Z_CLIENT_SOAP_VERSION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 27)
+#define Z_CLIENT_USE_PROXY_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 28)
+#define Z_CLIENT_COOKIES_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 29)
+#define Z_CLIENT_DEFAULT_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 30)
+#define Z_CLIENT_SOAP_FAULT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 31)
+#define Z_CLIENT_LAST_REQUEST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 32)
+#define Z_CLIENT_LAST_RESPONSE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 33)
+#define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 34)
+#define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 35)
+
+typedef struct soap_url_object {
+	php_uri *uri;
+	zend_object std;
+} soap_url_object;
+
+static inline soap_url_object *soap_url_object_fetch(zend_object *obj)
+{
+	return (soap_url_object *) ((char *) obj - XtOffsetOf(soap_url_object, std));
+}
+
+#define Z_SOAP_URL_P(zv) soap_url_object_fetch(Z_OBJ_P(zv))
+
+typedef struct soap_sdl_object {
+	sdl *sdl;
+	zend_object std;
+} soap_sdl_object;
 
 #endif

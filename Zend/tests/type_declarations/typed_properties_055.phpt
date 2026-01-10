@@ -24,6 +24,6 @@ int(2)
 
 Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$bar of type int in %s:%d
 Stack trace:
-#0 %s(%d): {closure}(2)
+#0 %s(%d): {closure:%s:%d}(2)
 #1 {main}
   thrown in %s on line %d

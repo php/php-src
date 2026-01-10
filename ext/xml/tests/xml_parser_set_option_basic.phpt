@@ -26,21 +26,19 @@ var_dump(xml_parser_get_option($parser, XML_OPTION_TARGET_ENCODING));
 var_dump(xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "US-ASCII"));
 var_dump(xml_parser_get_option($parser, XML_OPTION_TARGET_ENCODING));
 
-xml_parser_free( $parser );
-
 echo "Done\n";
 ?>
 --EXPECT--
 Simple testcase for xml_parser_get_option() function
-int(1)
+bool(true)
 string(5) "UTF-8"
 bool(true)
 bool(true)
-int(1)
+bool(true)
 string(10) "ISO-8859-1"
 bool(true)
 bool(true)
-int(0)
+bool(false)
 string(5) "UTF-8"
 bool(true)
 string(8) "US-ASCII"

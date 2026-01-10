@@ -12,7 +12,7 @@ $filename = 'pdo_sqlite_filename.db';
 
 $db = new PDO('sqlite:' . $filename);
 
-var_dump($db->exec('CREATE TABLE test1 (id INT);'));
+var_dump($db->exec('CREATE TABLE test_sqlite_open_basedir (id INT);'));
 
 // create outside basedir
 $filename = '..' . DIRECTORY_SEPARATOR . 'pdo_sqlite_filename.db';

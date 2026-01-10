@@ -3,14 +3,18 @@ PostgreSQL pg_fetch_*() functions
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = "table_17result";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
 
 $sql = "SELECT * FROM $table_name ORDER BY num";
 $result = pg_query($db, $sql) or die('Cannot query db');
@@ -24,6 +28,14 @@ var_dump(pg_fetch_assoc($result, 1));
 var_dump(pg_result_seek($result, 0));
 
 echo "Ok\n";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_17result";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
 bool(true)

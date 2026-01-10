@@ -142,6 +142,8 @@ convertInvalidString("\xEA", "%", "SJIS-win", "UTF-8");
 convertInvalidString("\x81\x20", "%", "SJIS-win", "UTF-8");
 convertInvalidString("\xEA\xA9", "%", "SJIS-win", "UTF-8");
 
+echo 'mb_strlen("\x80\x81", "CP932") == ' . mb_strlen("\x80\x81", "CP932") . PHP_EOL;
+
 echo "Done!\n";
 ?>
 --EXPECT--
@@ -151,4 +153,5 @@ Unicode -> CP932 conversion works on all invalid codepoints
 SJIS-win verification and conversion works on all valid characters
 SJIS-win verification and conversion works on all invalid characters
 Unicode -> SJIS-win conversion works on all invalid codepoints
+mb_strlen("\x80\x81", "CP932") == 2
 Done!

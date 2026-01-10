@@ -40,41 +40,35 @@ struct php_sqlite3_bound_param  {
 	zval parameter;
 };
 
-struct php_sqlite3_fci {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-};
-
 /* Structure for SQLite function. */
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
 
-	const char *func_name;
+	zend_string *func_name;
 	int argc;
 
-	zval func, step, fini;
-	struct php_sqlite3_fci afunc, astep, afini;
+	zend_fcall_info_cache func;
+	zend_fcall_info_cache step;
+	zend_fcall_info_cache fini;
 } php_sqlite3_func;
 
 /* Structure for SQLite collation function */
 typedef struct _php_sqlite3_collation {
 	struct _php_sqlite3_collation *next;
 
-	const char *collation_name;
-	zval cmp_func;
-	struct php_sqlite3_fci fci;
+	zend_string *collation_name;
+	zend_fcall_info_cache cmp_func;
 } php_sqlite3_collation;
 
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_db_object  {
-	int initialised;
+	bool initialised;
+	bool exception;
+
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
-	zend_fcall_info authorizer_fci;
 	zend_fcall_info_cache authorizer_fcc;
-
-	bool exception;
 
 	zend_llist free_list;
 	zend_object zo;
@@ -95,24 +89,17 @@ typedef struct _php_sqlite3_agg_context  {
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;
 typedef struct _php_sqlite3_result_object php_sqlite3_result;
 
-/* sqlite3 objects to be destroyed */
-typedef struct _php_sqlite3_free_list {
-	zval stmt_obj_zval;
-	php_sqlite3_stmt *stmt_obj;
-} php_sqlite3_free_list;
-
 /* Structure for SQLite Result object. */
 struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
 	php_sqlite3_stmt *stmt_obj;
-	zval stmt_obj_zval;
 
+	bool is_prepared_statement;
 	/* Cache of column names to speed up repeated fetchArray(SQLITE3_ASSOC) calls.
 	 * Cache is cleared on reset() and finalize() calls. */
 	int column_count;
 	zend_string **column_names;
 
-	int is_prepared_statement;
 	zend_object zo;
 };
 
@@ -126,9 +113,8 @@ static inline php_sqlite3_result *php_sqlite3_result_from_obj(zend_object *obj) 
 struct _php_sqlite3_stmt_object  {
 	sqlite3_stmt *stmt;
 	php_sqlite3_db_object *db_obj;
-	zval db_obj_zval;
 
-	int initialised;
+	bool initialised;
 
 	/* Keep track of the zvals for bound parameters */
 	HashTable *bound_params;

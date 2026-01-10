@@ -93,7 +93,7 @@ if (VS_TOOLSET) {
 }
 
 // General link flags
-toolset_setup_common_ldlags();
+toolset_setup_common_ldflags();
 
 // General libs
 toolset_setup_common_libs();
@@ -116,7 +116,7 @@ else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 
 // Find the php_build dir - it contains headers and libraries
 // that we need
-ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (https://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
 php_build_option_handle();
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
@@ -228,8 +228,8 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
-	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
-	zend_constants.c zend_exceptions.c \
+	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_call_stack.c \
+	zend_compile.c zend_constants.c zend_exceptions.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
@@ -240,7 +240,8 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_observer.c zend_system_id.c \
-	zend_enum.c zend_fibers.c zend_atomic.c");
+	zend_enum.c zend_fibers.c zend_atomic.c zend_hrtime.c zend_frameless_function.c zend_property_hooks.c \
+	zend_lazy_objects.c");
 ADD_SOURCES("Zend\\Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c");
 
 var PHP_ASSEMBLER = PATH_PROG({
@@ -252,14 +253,6 @@ if (!PHP_ASSEMBLER) {
 	ERROR("No assembler found, fiber cannot be built");
 }
 DEFINE('PHP_ASSEMBLER', PHP_ASSEMBLER);
-DEFINE('FIBER_ASSEMBLER', PHP_ASSEMBLER);// for compatible
-
-var FIBER_ASM_ARCH = {
-	'x64': 'x86_64',
-	'x86': 'i386',
-	'arm64': 'arm64'
-}[TARGET_ARCH];
-DEFINE('FIBER_ASM_ARCH', FIBER_ASM_ARCH); // for compatible only
 
 var FIBER_ASM_ABI = {
 	'x64': 'x86_64_ms_pe_masm',
@@ -274,7 +267,11 @@ if (TARGET_ARCH == 'arm64') {
 	DEFINE('FIBER_ASM_FLAGS', '/DBOOST_CONTEXT_EXPORT=EXPORT /nologo /c /Fo');
 }
 
-ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj');
+var all_asm_objs = '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj';
+if (TARGET_ARCH == 'x64') {
+	all_asm_objs += ' $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj';
+}
+ADD_FLAG('ASM_OBJS', all_asm_objs);
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
@@ -282,46 +279,38 @@ MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
 
-ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_ZEND", "/d2FuncCache1");
+if (TARGET_ARCH == 'x64') {
+	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+	MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
 }
 
-/* XXX inspect this for other toolsets */
-//AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
-	php_ini_builder.c \
+	php_ini_builder.c php_glob.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c \
 	php_syslog.c php_odbc_utils.c safe_bcmp.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_MAIN", "/d2FuncCache1");
-}
 
 AC_DEFINE('HAVE_STRNLEN', 1);
+
+AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
 ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/d2FuncCache1");
-}
 
-ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
+ADD_SOURCES("win32", "dllmain.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
-	inet.c fnmatch.c sockets.c console.c signal.c");
+	fnmatch.c sockets.c console.c signal.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_WIN32", "/d2FuncCache1");
-}
 
 PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
-PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h");
+PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");
 
 STDOUT.WriteBlankLines(1);
 
@@ -329,13 +318,9 @@ STDOUT.WriteBlankLines(1);
 /* Can we build with IPv6 support? */
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
-var main_network_has_ipv6 = 0;
+AC_DEFINE('HAVE_GAI_STRERROR', 1);
 if (PHP_IPV6 == "yes") {
-	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("wspiapi.h", "CFLAGS") ? 1 : 0;
-}
-if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
-	AC_DEFINE('HAVE_GAI_STRERROR', 1);
 	AC_DEFINE('HAVE_IPV6', 1);
 }
 
@@ -364,15 +349,28 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-if (CLANG_TOOLSET) {
-	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
-	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces " +
-		"-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas " +
-		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
+ARG_ENABLE("sanitizer", "Enable ASan (and UBSan) extensions", "no");
+if (PHP_SANITIZER == "yes" && PHP_DEBUG == "yes") {
+	ERROR("Use of both --enable-sanitizer and --enable-debug not allowed.");
+}
+if (PHP_SANITIZER == "yes" && PHP_DEBUG_PACK == "no") {
+	ERROR("--enable-sanitizer requires --enable-debug-pack");
+}
+if (VS_TOOLSET) {
+	if (PHP_SANITIZER == "yes") {
+		if (COMPILER_NUMERIC_VERSION < 1929) {
+			ERROR("MSVC at least 16.10 required for sanitation plugins");
+		}
 	}
+} else if (CLANG_TOOLSET) {
+	AC_DEFINE("PHP_HAVE_BUILTIN_EXPECT", 1, "Define to 1 if the compiler supports '__builtin_expect'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SADDLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_saddll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubl_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smull_overflow '.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_SMULLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smulll_overflow'.");
 
-	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");
@@ -399,9 +397,13 @@ ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
 
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
-	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx512. \
 	SSE and SSE2 are enabled by default. The best instruction set specified will \
 	automatically enable all the older instruction sets. Note, that the produced binary \
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
+
+ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
+
+ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');

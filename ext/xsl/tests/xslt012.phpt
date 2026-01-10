@@ -39,6 +39,7 @@ $proc->setParameter( "", $parameters);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
+?>
 --EXPECT--
 Test 12: Using Associative Array of Parameters
 <?xml version="1.0" encoding="iso-8859-1"?>

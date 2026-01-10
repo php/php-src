@@ -9,10 +9,10 @@ try {
             "start" => new DateTime,
         ]
     );
-} catch (\Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (\Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid serialization data for DatePeriod object
+Error: Invalid serialization data for DatePeriod object

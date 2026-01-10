@@ -4,7 +4,7 @@ Bug #66043 (Segfault calling bind_param() on mysqli)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -40,7 +40,7 @@ echo "Okey";
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 Okey

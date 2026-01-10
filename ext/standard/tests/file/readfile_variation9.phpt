@@ -5,8 +5,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 echo "*** Testing readfile() : variation ***\n";
-$mainDir = "readfileVar8";
-$subDir = "readfileVar8Sub";
+$mainDir = "readfileVar9";
+$subDir = "readfileVar9Sub";
 $absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
@@ -72,11 +72,11 @@ The File Contents
 The File Contents
 -- Iteration 5 --
 
-Warning: readfile(%sreadfileVar8Sub/..///readfileVar8Sub//..//../readfileVar8Sub/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%sreadfileVar9Sub/..///readfileVar9Sub//..//../readfileVar9Sub/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 6 --
 
-Warning: readfile(%sreadfileVar8Sub/BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%sreadfileVar9Sub/BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 7 --
 The File Contents

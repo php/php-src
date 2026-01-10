@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 
@@ -40,6 +40,9 @@
 
 #include "locale/locale.h"
 #include "locale/locale_class.h"
+
+#include "listformatter/listformatter_class.h"
+#include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -72,6 +75,8 @@
 
 #include "php_ini.h"
 
+#include "zend_attributes.h"
+
 #include "php_intl_arginfo.h"
 
 /*
@@ -94,10 +99,38 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
+char* canonicalize_locale_string(const char* locale) {
+	char canonicalized[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = U_ZERO_ERROR;
+	int32_t canonicalized_len;
+
+	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
+
+	if (U_FAILURE(status) || canonicalized_len <= 0) {
+		return NULL;
+	}
+
+	return estrdup(canonicalized);
+}
+
+static PHP_INI_MH(OnUpdateErrorLevel)
+{
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
+	if (*p) {
+		php_error_docref("session.configuration", E_DEPRECATED,
+			"Using a value different than 0 for intl.error_level is deprecated,"
+			" as the intl.error_level INI setting is deprecated."
+			" Instead the intl.use_exceptions INI setting should be enabled to throw exceptions on errors"
+			" or intl_get_error_code()/intl_get_error_message() should be used to manually deal with errors");
+	}
+	return SUCCESS;
+}
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
-	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateErrorLevel, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_BOOLEAN("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
@@ -154,6 +187,13 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
 
+	/* Register 'ListFormatter' PHP class */
+	listformatter_register_class(  );
+
+#if U_ICU_VERSION_MAJOR_NUM >= 63
+	/* Register 'NumberRangeFormatter' PHP class */
+	rangeformatter_register_class( );
+#endif
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
 
@@ -257,7 +297,7 @@ PHP_MINFO_FUNCTION( intl )
 #endif
 
 	php_info_print_table_start();
-	php_info_print_table_header( 2, "Internationalization support", "enabled" );
+	php_info_print_table_row( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );

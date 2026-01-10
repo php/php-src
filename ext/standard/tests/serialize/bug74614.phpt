@@ -9,4 +9,4 @@ unserialize('a:3020000000000000000000000000000001:{i:0;a:0:{}i:1;i:2;i:2;i:3;i:3
 --EXPECTF--
 Warning: unserialize(): %s in %sbug74614.php on line %d
 
-Notice: unserialize(): Error at offset %d of 113 bytes in %s on line %d
+Warning: unserialize(): Error at offset 38 of 113 bytes in %s on line %d

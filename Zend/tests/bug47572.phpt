@@ -16,5 +16,6 @@ $foo = new Foo();
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant "FOO" in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): [constant expression]()
+#1 {main}
   thrown in %s on line %d

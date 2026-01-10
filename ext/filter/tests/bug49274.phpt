@@ -1,5 +1,5 @@
 --TEST--
-#49274, fatal error when an object does not implement toString
+Bug #49274 (fatal error when an object does not implement toString)
 --EXTENSIONS--
 filter
 --FILE--

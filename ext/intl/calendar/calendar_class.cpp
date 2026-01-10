@@ -71,22 +71,15 @@ U_CFUNC void calendar_object_construct(zval *object,
 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
 	assert(co->ucal == NULL);
-	co->ucal = (Calendar*)calendar;
+	co->ucal = calendar;
 }
 
 /* {{{ clone handler for Calendar */
 static zend_object *Calendar_clone_obj(zend_object *object)
 {
-	Calendar_object		*co_orig,
-						*co_new;
-	zend_object 	    *ret_val;
-	intl_error_reset(NULL);
-
-	co_orig = php_intl_calendar_fetch_object(object);
-	intl_error_reset(INTL_DATA_ERROR_P(co_orig));
-
-	ret_val = Calendar_ce_ptr->create_object(object->ce);
-	co_new  = php_intl_calendar_fetch_object(ret_val);
+	Calendar_object *co_orig = php_intl_calendar_fetch_object(object);
+	zend_object     *ret_val = Calendar_ce_ptr->create_object(object->ce);
+	Calendar_object  *co_new = php_intl_calendar_fetch_object(ret_val);
 
 	zend_objects_clone_members(&co_new->zo, &co_orig->zo);
 
@@ -94,20 +87,13 @@ static zend_object *Calendar_clone_obj(zend_object *object)
 		Calendar	*newCalendar;
 
 		newCalendar = co_orig->ucal->clone();
-		if (!newCalendar) {
-			zend_string *err_msg;
-			intl_errors_set_code(CALENDAR_ERROR_P(co_orig),
-				U_MEMORY_ALLOCATION_ERROR);
-			intl_errors_set_custom_msg(CALENDAR_ERROR_P(co_orig),
-				"Could not clone IntlCalendar", 0);
-			err_msg = intl_error_get_message(CALENDAR_ERROR_P(co_orig));
-			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-			zend_string_free(err_msg);
+		if (UNEXPECTED(!newCalendar)) {
+			zend_throw_error(NULL, "Failed to clone IntlCalendar");
 		} else {
 			co_new->ucal = newCalendar;
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed IntlCalendar", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized IntlCalendar");
 	}
 
 	return ret_val;
@@ -248,16 +234,11 @@ static void Calendar_objects_free(zend_object *object)
 /* {{{ Calendar_object_create */
 static zend_object *Calendar_object_create(zend_class_entry *ce)
 {
-	Calendar_object*	intern;
-
-	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	Calendar_object* intern = (Calendar_object*)zend_object_alloc(sizeof(Calendar_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);
 	calendar_object_init(intern);
-
-
-	intern->zo.handlers = &Calendar_handlers;
 
 	return &intern->zo;
 }
@@ -270,6 +251,7 @@ void calendar_register_IntlCalendar_class(void)
 {
 	/* Create and register 'IntlCalendar' class. */
 	Calendar_ce_ptr = register_class_IntlCalendar();
+	Calendar_ce_ptr->default_object_handlers = &Calendar_handlers;
 	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,

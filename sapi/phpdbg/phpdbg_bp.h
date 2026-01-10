@@ -39,7 +39,7 @@ typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 /* {{{ breakpoint base structure */
 #define phpdbg_breakbase(name) \
 	int         id; \
-	zend_uchar  type; \
+	uint8_t  type; \
 	zend_ulong  hits; \
 	bool   disabled; \
 	const char *name /* }}} */

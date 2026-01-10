@@ -52,8 +52,6 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 
 	if (!addr) { return NULL; }
 
-	/* Prefer inet_ntop() as it's more task-specific and doesn't have to be demangled */
-#ifdef HAVE_INET_NTOP
 	switch (addr->sa_family) {
 #ifdef AF_INET6
 		case AF_INET6: {
@@ -76,7 +74,6 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 			break;
 		}
 	}
-#endif
 
 	/* Fallback on getnameinfo() */
 	switch (addr->sa_family) {
@@ -264,7 +261,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	FREE(pAddresses);
 #undef MALLOC
 #undef FREE
-#elif HAVE_GETIFADDRS || defined(__PASE__) /* !PHP_WIN32 */
+#elif defined(HAVE_GETIFADDRS) || defined(__PASE__) /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
 
 	ZEND_PARSE_PARAMETERS_NONE();

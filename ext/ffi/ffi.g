@@ -264,12 +264,14 @@ struct_contents(zend_ffi_dcl *dcl):
 
 struct_declaration(zend_ffi_dcl *struct_dcl):
 	{zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;}
+	{zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;}
 	specifier_qualifier_list(&common_field_dcl)
+	{base_field_dcl = common_field_dcl;}
 	(	/* empty */
 		{zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);}
 	|	struct_declarator(struct_dcl, &common_field_dcl)
 		(	","
-			{zend_ffi_dcl field_dcl = common_field_dcl;}
+			{zend_ffi_dcl field_dcl = base_field_dcl;}
 			attributes(&field_dcl)?
 			struct_declarator(struct_dcl, &field_dcl)
 		)*

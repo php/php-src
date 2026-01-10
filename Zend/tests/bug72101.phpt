@@ -78,7 +78,7 @@ $foo->bar($a, $b, $c);
 --EXPECTF--
 Fatal error: Uncaught Error: Class "DoesNotExists" not found in %s:%d
 Stack trace:
-#0 %sbug72101.php(%d): {closure}(2, 'MethodCallbackB...', '%s', 8)
+#0 %s(%d): {closure:%s:%d}(2, 'MethodCallbackB...', '%s', 8)
 #1 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Stub_ReturnCallback->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
 #2 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Matcher->invoked(Object(PHPUnit_Framework_MockObject_Invocation_Static))
 #3 %sbug72101.php(%d): PHPUnit_Framework_MockObject_InvocationMocker->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))

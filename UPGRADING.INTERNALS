@@ -1,4 +1,4 @@
-PHP 8.2 INTERNALS UPGRADE NOTES
+PHP 8.6 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
 
@@ -14,100 +14,66 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-* Removed zend_binary_zval_str(n)casecmp() APIs. These were thin wrappers
-  around zend_binary_str(n)casecmp_l() -- rather than
-  zend_binary_str(n)casecmp() as one would expect. Call the appropriate
-  wrapped function directly instead.
-* Removed the (ZEND_)WRONG_PARAM_COUNT_WITH_RETVAL() macros.
-* php_stristr() no longer lowercases the haystack and needle as a side effect.
-  Call zend_str_tolower() yourself if necessary. You no longer need to copy
-  the haystack and needle before passing them to php_stristr().
-* zend_register_module_ex() no longer copies the module entry.
-* The main/php_stdint.h header has been removed.
-  Include the standard <inttypes.h> and/or <stdint.h> headers instead.
-  Replace usage of u_char by the standard C99 uint8_t type.
-* A new ZEND_THREEWAY_COMPARE() macro has been introduced which does a
-  three-way comparison of two integers and returns -1, 0 or 1 if the LHS is
-  smaller, equal or larger than the RHS
-* Deprecated zend_atoi() and zend_atol(). Use ZEND_STRTOL() for general purpose
-  string to long conversion, or a variant of zend_ini_parse_quantity() for
-  parsing ini quantities.
-* The return types of the following object handlers has changed from int to zend_result
-  - zend_object_cast_t
-  - zend_object_count_elements_t
-  - zend_object_get_closure_t
-  - zend_object_do_operation_t
-* Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
-  if this a newly created file so the current file offset needs not to be checked.
-* Added smart_str_trim_to_size(). The function trims the memory allocated for the
-  string. This can considerably reduce the memory footprint of strings smaller
-  than approximately 4096 bytes.
-* smart_str_extract() and the spprintf family of functions now use
-  smart_str_trim_to_size() before returning the string.
-* It is recommended to use smart_str_extract() or smart_str_trim_to_size() when
-  using the smart_str API.
-* zend_is_callable_ex, and functions which call it such as zend_is_callable and
-  zend_fcall_info_init, will issue deprecation notices if passed values which
-  are deprecated (see main UPGRADING notes). To suppress the notice, e.g. to
-  avoid duplicates when processing the same value multiple times, pass or add
-  IS_CALLABLE_SUPPRESS_DEPRECATIONS to the check_flags parameter.
-* Registered zend_observer_fcall_init handlers are now also called for internal functions.
-* The pestrdup and pestrndup macros and zend_strndup function are now also infallible
-  for persistent strings, so checking for NULL is no longer necessary.
-* The CHECK_NULL_PATH and CHECK_ZVAL_NULL_PATH macros are now wrappers using
-  the new inline functions: bool zend_str_has_nul_byte(const zend_string *str)
-  and zend_char_has_nul_byte(const char *s, size_t known_length)
-* Added zend_enum_get_case_by_value() function, which provides an internal API
-  similiar to BackedEnum::from() and BackedEnum::tryFrom().
+  . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
+    zend_string_starts_with_literal_ci() now support strings containing NUL
+    bytes. Passing non-literal char* is no longer supported.
+  . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
+  . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
+    added, given the primary flags were running out of bits.
+  . The zval_is_true() alias of zend_is_true() has been removed. Call
+    zend_is_true() directly instead.
+  . The _zval_get_*() compatibility macros for PHP 7.2 have been removed
+    call the variant without the leading underscore instead.
+    Affected: _zval_get_long, _zval_get_double, _zval_get_string,
+    _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
+  . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
+    unsafe. Directly use ZEND_LONG_FMT with a function from the
+    printf family.
+  . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
+    Call zval_ptr_dtor_nogc() directly instead.
+  . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_make_callable() function has been removed, if a callable zval
+    needs to be obtained use the zend_get_callable_zval_from_fcc() function
+    instead. If this was used to store a callable, then an FCC should be
+    stored instead.
+  . The zend_active_function{_ex}() functions now return a const zend_function
+    pointer.
+  . The zend_get_call_trampoline_func() API now takes the __call or
+    __callStatic zend_function* instead of a CE and a boolean argument.
+  . The zend_set_hash_symbol() API has been removed.
+  . Added zend_hash_str_lookup().
+  . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
+    removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
+    instead.
+  . PHP_HAVE_STREAMS macro removed from <php.h>.
+  . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
+    zend_internal_arg_info on internal functions, unless the
+    ZEND_ACC_USER_ARG_INFO flag was set.
 
 ========================
 2. Build system changes
 ========================
 
-* The build system now requires PHP 7.4.0 at least. Previously PHP 7.1 was
-  required.
-* Unsupported libxml2 2.10.0 symbols are no longer exported on Windows.
-* Identifier names for namespaced functions generated from stub files through
-  gen_stub.php have been changed. This requires that namespaced functions
-  should be declared via the PHP_FUNCTION macro by using the fully qualified
-  function name (whereas each part is separated by "_") instead of just the
-  function name itself.
-
 ========================
 3. Module changes
 ========================
 
-  a. ext/standard
-    - The PHP APIs string_natural_compare_function_ex(),
-      string_natural_case_compare_function(), and string_natural_compare_function()
-      have been removed. They always returned SUCCESS and were a wrapper around
-      strnatcmp_ex(). Use strnatcmp_ex() directly instead.
-    - The PHP API php_fgetcsv() now returns a HashTable* instead of having an in-out
-      zval parameter.
-      It now returns NULL on an empty line instead of [null].
-      A new function php_bc_fgetcsv_empty_line() has been added to get a HashTable* which
-      represents [null].
-  b. ext/pdo
-    - pdo_raise_impl_error()'s parameter sqlstate has been changed from
-      const char * to pdo_error_type (aka char [6]).
+- ext/xml:
+  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
+    as it was unused.
+  . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
+    as it was unused and could return the wrong result.
+
+- ext/mbstring:
+  . Added GB18030-2022 to default encoding list for zh-CN.
 
 ========================
 4. OpCode changes
 ========================
 
-* The ZEND_INIT_FCALL opcode now asserts that the function exists in the symbol
-  table as the function's existence is checked at compile time.
-  For extensions modifying the function symbol table, setting
-  CG(compiler_options) |= ZEND_COMPILE_IGNORE_USER_FUNCTIONS | ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS;
-  will produce ZEND_INIT_FCALL_BY_NAME opcodes instead which check for the
-  existence of the function at runtime.
-
 ========================
 5. SAPI changes
 ========================
-
- * The signature of php_module_startup() has changed from
-   int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
-   to
-   zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
-   as only one additional module was ever provided.

@@ -42,16 +42,30 @@ var_dump(
 ?>
 --EXPECTF--
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test1"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test2"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test3"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test4"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test5"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test6"
 }
 object(Generator)#%d (%d) {
+  ["function"]=>
+  string(5) "test7"
 }

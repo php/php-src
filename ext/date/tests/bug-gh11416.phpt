@@ -60,8 +60,8 @@ try {
 echo "OK\n";
 ?>
 --EXPECT--
-Error: The DateTimeInterface object has not been correctly initialized by its constructor
-Error: The DateTimeInterface object has not been correctly initialized by its constructor
+DateObjectError: Object of type DateTimeInterface has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type DateTimeInterface has not been correctly initialized by calling parent::__construct() in its constructor
 Error: Invalid serialization data for DatePeriod object
 Error: Invalid serialization data for DatePeriod object
 Error: Invalid serialization data for DatePeriod object

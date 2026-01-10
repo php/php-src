@@ -116,6 +116,10 @@ array(3) {
   int(3000)
 }
 L=100 M=200 N=300
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
 O= and P=
 10 20 40 50 60 70 80
 

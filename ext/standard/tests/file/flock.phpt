@@ -46,7 +46,7 @@ $file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECT--
-flock(): supplied resource is not a valid stream resource
+flock(): Argument #1 ($stream) must be an open stream resource
 bool(true)
 bool(true)
 bool(true)

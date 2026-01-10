@@ -52,7 +52,9 @@ array(2) {
     ["class"]=>
     string(19) "ReflectionAttribute"
     ["object"]=>
-    object(ReflectionAttribute)#2 (0) {
+    object(ReflectionAttribute)#2 (1) {
+      ["name"]=>
+      string(11) "MyAttribute"
     }
     ["type"]=>
     string(2) "->"

@@ -1,7 +1,7 @@
 --TEST--
 Check permissions for created errorlog file
 --SKIPIF--
-<?php 
+<?php
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     die("skip this test on windows");
 }
@@ -26,7 +26,7 @@ try {
 
     printf("got permissions=%o\n", fileperms(LOG_FILENAME) & 0777);
     printf("errorlog contents\n%s", file_get_contents(LOG_FILENAME));
-    
+
     umask($oldMask);
 } finally {
     unlink(LOG_FILENAME);

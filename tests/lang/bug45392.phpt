@@ -8,6 +8,7 @@ if (PHP_OS_FAMILY === 'Windows' && version_compare(PHP_VERSION, '8.4', '<')) {
 if (getenv("USE_ZEND_ALLOC") === "0") {
     die("skip Zend MM disabled");
 }
+?>
 --FILE--
 <?php
 echo __LINE__ . "\n";

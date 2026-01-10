@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-
 $usage = <<<USAGE
 
 Usage: php find_tested.php [path_to_test_files] ([extension])
@@ -16,7 +15,6 @@ A test status of "verify" for a method means that there is at least one other me
 
 USAGE;
 
-
 /* method record fields */
 define("CLASS_NAME", "CLASS_NAME");
 define("METHOD_NAME", "METHOD_NAME");
@@ -24,7 +22,6 @@ define("EXTENSION_NAME", "EXTENSION_NAME");
 define("IS_DUPLICATE", "IS_DUPLICATE");
 define("IS_TESTED", "IS_TESTED");
 define("TESTS", "TESTS");
-
 
 // process command line args
 $num_params = $argc;
@@ -49,7 +46,6 @@ if ($num_params == 3) {
 } else {
     $extension_name = false;
 }
-
 
 $method_info = populate_method_info();
 
@@ -223,6 +219,5 @@ function filter_functions($x) {
 function map_token_value($x) {
     return $x[1];
 }
-
 
 ?>

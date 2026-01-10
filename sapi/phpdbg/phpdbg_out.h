@@ -19,6 +19,10 @@
 #ifndef PHPDBG_OUT_H
 #define PHPDBG_OUT_H
 
+#ifndef PHPDBG_DEBUG
+# define PHPDBG_DEBUG 0
+#endif
+
 /**
  * Error/notice/formatting helpers
  */

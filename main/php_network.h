@@ -19,9 +19,7 @@
 
 #include <php.h>
 
-#ifdef PHP_WIN32
-# include "win32/inet.h"
-#else
+#ifndef PHP_WIN32
 # undef closesocket
 # define closesocket close
 # include <netinet/tcp.h>
@@ -49,7 +47,7 @@
 # define EWOULDBLOCK EAGAIN
 #endif
 
-/* This is a work around for GCC bug 69602: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602 */
+/* This is a workaround for GCC bug 69602: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602 */
 #if EAGAIN != EWOULDBLOCK
 # define PHP_IS_TRANSIENT_ERROR(err) (err == EAGAIN || err == EWOULDBLOCK)
 #else
@@ -66,6 +64,11 @@
  * unless buf is not NULL.
  * Also works sensibly for win32 */
 BEGIN_EXTERN_C()
+#ifdef PHP_WIN32
+char *php_socket_strerror_s(long err, char *buf, size_t bufsize);
+#else
+#define php_socket_strerror_s php_socket_strerror
+#endif
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 PHPAPI zend_string *php_socket_error_str(long err);
 END_EXTERN_C()
@@ -98,8 +101,10 @@ END_EXTERN_C()
 
 #ifdef PHP_WIN32
 typedef SOCKET php_socket_t;
+#define PHP_SOCKET_FMT "%" PRIxPTR
 #else
 typedef int php_socket_t;
+#define PHP_SOCKET_FMT "%d"
 #endif
 
 #ifdef PHP_WIN32
@@ -118,7 +123,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 #define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
-
+#define STREAM_SOCKOP_SO_REUSEADDR        (1 << 6)
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
@@ -247,11 +252,11 @@ static inline bool _php_check_fd_setsize(php_socket_t *max_fd, int setsize)
 
 #define PHP_SOCK_CHUNK_SIZE	8192
 
-#ifdef HAVE_SOCKADDR_STORAGE
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
-#ifdef HAVE_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 		unsigned char ss_len;
 		unsigned char ss_family;
 #else
@@ -308,14 +313,14 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		);
 
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
-PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr);
+PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr);
 END_EXTERN_C()
 
 struct _php_netstream_data_t	{
 	php_socket_t socket;
-	char is_blocked;
+	bool is_blocked;
+	bool timeout_event;
 	struct timeval timeout;
-	char timeout_event;
 	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
@@ -338,12 +343,12 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		socklen_t *addrlen
 		);
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr,
-		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
+PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr,
+		size_t addrlen, struct sockaddr *sa, socklen_t *sl);
 
 PHPAPI struct hostent*	php_network_gethostbyname(const char *name);
 
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
+PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC)

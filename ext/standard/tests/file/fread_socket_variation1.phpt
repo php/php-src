@@ -12,7 +12,7 @@ for ($i=0; $i<100; $i++) {
   }
 }
 
-socket_set_timeout($server, 0, 1000);
+stream_set_timeout($server, 0, 1000);
 
 var_dump(fread($server, 1));
 

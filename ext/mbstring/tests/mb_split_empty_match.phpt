@@ -1,6 +1,5 @@
 --TEST--
 mb_split() empty match
---
 --EXTENSIONS--
 mbstring
 --SKIPIF--

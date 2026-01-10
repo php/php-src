@@ -37,7 +37,8 @@ extern zend_module_entry xsl_module_entry;
 #include <libexslt/exsltconfig.h>
 #endif
 
-#include "../dom/xml_common.h"
+#include "ext/dom/xml_common.h"
+#include "ext/dom/xpath_callbacks.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
@@ -48,23 +49,19 @@ extern zend_module_entry xsl_module_entry;
 #define XSL_SECPREF_CREATE_DIRECTORY 8
 #define XSL_SECPREF_READ_NETWORK 16
 #define XSL_SECPREF_WRITE_NETWORK 32
-/* Default == disable all write access ==  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE */
-#define XSL_SECPREF_DEFAULT 44
+/* Default == disable all write access */
+#define XSL_SECPREF_DEFAULT (XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE)
 
-typedef struct _xsl_object {
+typedef struct xsl_object {
 	void *ptr;
-	HashTable *prop_handler;
-	zval handle;
 	HashTable *parameter;
-	int hasKeys;
-	int registerPhpFunctions;
-	HashTable *registered_phpfunctions;
-	HashTable *node_list;
-	php_libxml_node_object *doc;
-	char *profiling;
+	bool hasKeys;
+	php_libxml_ref_obj *sheet_ref_obj;
 	zend_long securityPrefs;
-	int securityPrefsSet;
-	zend_object  std;
+	php_dom_xpath_callbacks xpath_callbacks;
+	php_libxml_node_object *doc;
+	zend_string *profiling;
+	zend_object std;
 } xsl_object;
 
 static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
@@ -74,11 +71,14 @@ static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
 #define Z_XSL_P(zv) php_xsl_fetch_object(Z_OBJ_P((zv)))
 
 void php_xsl_set_object(zval *wrapper, void *obj);
+void xsl_free_sheet(xsl_object *intern);
 void xsl_objects_free_storage(zend_object *object);
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value );
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
+
+zval *xsl_prop_max_template_depth(zend_object *object);
+zval *xsl_prop_max_template_vars(zend_object *object);
 
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);

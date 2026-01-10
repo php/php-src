@@ -17,6 +17,7 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
+?>
 --EXPECT--
 Test 5: Checking Indent
 <?xml version="1.0" encoding="iso-8859-1"?>

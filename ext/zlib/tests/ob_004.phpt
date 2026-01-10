@@ -3,9 +3,7 @@ ob_gzhandler
 --EXTENSIONS--
 zlib
 --SKIPIF--
-<?php
-if (false === stristr(PHP_SAPI, "cgi")) die("skip need sapi/cgi");
-?>
+--CGI--
 --INI--
 zlib.output_compression=0
 --ENV--

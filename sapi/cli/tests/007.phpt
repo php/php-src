@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__.'/007.test.php';
 $code ='
@@ -32,9 +32,15 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -w "$filename"`);
-var_dump(`$php -n -w "wrong"`);
-var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
+var_dump(shell_exec(<<<SHELL
+$php -n -w "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -w "wrong"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w
+SHELL));
 
 @unlink($filename);
 
@@ -45,8 +51,8 @@ string(81) "
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>
 "
-string(33) "Could not open input file: wrong
-"
+Could not open input file: wrong
+NULL
 string(43) "<?php  class test { function foo() {} } ?>
 "
 Done

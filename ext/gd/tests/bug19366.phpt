@@ -36,8 +36,6 @@ echo "Alive: Send to browser\n";
 //Header("Content-type: image/PNG");
 //ImagePNG($ImHandle);
 
-echo "Alive: Free resources\n";
-imagedestroy($ImHandle);
 echo "Alive: Done\n";
 ?>
 --EXPECT--
@@ -46,5 +44,4 @@ Alive: Define colors
 Alive: Draw
 Alive: ImageString
 Alive: Send to browser
-Alive: Free resources
 Alive: Done

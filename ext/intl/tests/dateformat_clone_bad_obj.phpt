@@ -1,5 +1,5 @@
 --TEST--
-Cloning unconstructed IntlDateFormatter
+Cloning uninitialized IntlDateFormatter
 --EXTENSIONS--
 intl
 --FILE--
@@ -12,9 +12,10 @@ class A extends IntlDateFormatter {
 $a = new A;
 try {
     $b = clone $a;
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+    var_dump($b);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
---EXPECTF--
-string(%s) "Cannot clone unconstructed IntlDateFormatter"
+--EXPECT--
+Error: Cannot clone uninitialized IntlDateFormatter

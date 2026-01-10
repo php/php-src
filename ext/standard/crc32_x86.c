@@ -19,16 +19,16 @@
 
 #include "crc32_x86.h"
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 # include <nmmintrin.h>
 # include <wmmintrin.h>
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
 # include "Zend/zend_cpuinfo.h"
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 
 typedef struct _crc32_pclmul_bit_consts {
 	uint64_t k1k2[2];
@@ -66,7 +66,7 @@ static uint8_t pclmul_shuf_mask_table[16] = {
 /* Folding of 128-bit data chunks */
 #define CRC32_FOLDING_BLOCK_SIZE (16)
 
-/* PCLMUL version of non-relfected crc32 */
+/* PCLMUL version of non-reflected crc32 */
 ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts));
 size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts)
 {
@@ -183,7 +183,7 @@ size_t crc32_pclmul_batch(uint32_t *crc, const unsigned char *p, size_t nr, cons
 	return (nr_in - nr); /* the nr processed */
 }
 
-/* PCLMUL version of relfected crc32 */
+/* PCLMUL version of reflected crc32 */
 ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_DECL(size_t crc32_pclmul_reflected_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts));
 size_t crc32_pclmul_reflected_batch(uint32_t *crc, const unsigned char *p, size_t nr, const crc32_pclmul_consts *consts)
 {
@@ -287,7 +287,7 @@ size_t crc32_pclmul_reflected_batch(uint32_t *crc, const unsigned char *p, size_
 	return (nr_in - nr); /* the nr processed */
 }
 
-# if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE
+# if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE)
 size_t crc32_x86_simd_update(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr)
 # else /* ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER */
 size_t crc32_sse42_pclmul_update(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr)
@@ -310,13 +310,13 @@ size_t crc32_sse42_pclmul_update(X86_CRC32_TYPE type, uint32_t *crc, const unsig
 }
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
 static size_t crc32_x86_simd_update_default(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr)
 {
 	return 0;
 }
 
-# if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO
+# ifdef ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO
 size_t crc32_x86_simd_update(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr) __attribute__((ifunc("resolve_crc32_x86_simd_update")));
 
 typedef size_t (*crc32_x86_simd_func_t)(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr);

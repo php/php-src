@@ -22,7 +22,6 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, "data");
 curl_exec($ch);
 var_dump(curl_getinfo($ch, CURLINFO_EFFECTIVE_METHOD));
-curl_close($ch);
 ?>
 --EXPECT--
 string(4) "POST"

@@ -4,7 +4,7 @@ mysqli_fetch_assoc() - utf8
 mysqli
 --SKIPIF--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
@@ -34,10 +34,15 @@ mysqli
 ?>
 --FILE--
 <?php
-    require 'table.inc';
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     /* some cyrillic (utf8) comes here */
-    if (!$res = mysqli_query($link, "SET NAMES UTF8")) {
+    if (false === mysqli_query($link, "SET NAMES UTF8")) {
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
@@ -48,16 +53,16 @@ mysqli
     var_dump(mysqli_fetch_assoc($res));
     mysqli_free_result($res);
 
-    if (!$res = mysqli_query($link, "CREATE TABLE автори_на_mysqlnd (id integer not null auto_increment primary key, име varchar(20) character set ucs2, фамилия varchar(20) character set utf8)")) {
+    if (false === mysqli_query($link, "CREATE TABLE автори_на_mysqlnd (id integer not null auto_increment primary key, име varchar(20) character set ucs2, фамилия varchar(20) character set utf8)")) {
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
-    if (!$res = mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('Андрей', 'Христов'), ('Георг', 'Рихтер'), ('Улф','Вендел')")) {
+    if (false === mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('Андрей', 'Христов'), ('Георг', 'Рихтер'), ('Улф','Вендел')")) {
         printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
-    if (!$res = mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('Andrey', 'Hristov'), ('Georg', 'Richter'), ('Ulf','Wendel')")) {
+    if (false === mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('Andrey', 'Hristov'), ('Georg', 'Richter'), ('Ulf','Wendel')")) {
         printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
-    if (!$res = mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('安德烈', 'Hristov'), ('格奥尔', 'Richter'), ('乌尔夫','Wendel')")) {
+    if (false === mysqli_query($link, "INSERT INTO автори_на_mysqlnd (име, фамилия) VALUES ('安德烈', 'Hristov'), ('格奥尔', 'Richter'), ('乌尔夫','Wendel')")) {
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
@@ -70,16 +75,12 @@ mysqli
     }
     mysqli_free_result($res);
 
-    if (!$res = mysqli_query($link, "DROP TABLE автори_на_mysqlnd")) {
+    if (false === mysqli_query($link, "DROP TABLE автори_на_mysqlnd")) {
         printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
     mysqli_close($link);
     print "done!";
-?>
---CLEAN--
-<?php
-require_once "clean_table.inc";
 ?>
 --EXPECTF--
 [003]

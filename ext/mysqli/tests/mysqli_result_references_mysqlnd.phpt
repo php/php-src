@@ -49,10 +49,10 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   array(4) refcount(%d){
     ["row_ref"]=>
@@ -74,7 +74,7 @@ array(1) refcount(%d){
     string(1) "1" interned
   }
 }
-array(2) refcount(%d){
+array(2) packed refcount(%d){
   [0]=>
   array(4) refcount(%d){
     ["row_ref"]=>

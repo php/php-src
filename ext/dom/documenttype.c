@@ -16,29 +16,29 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
+#include "dom_properties.h"
+#include "internal_helpers.h"
 
 /* {{{ name	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1844763134
 Since:
 */
-int dom_documenttype_name_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
+	if (dtdptr->name) {
+		ZVAL_STRING(retval, (const char *) dtdptr->name);
+	} else {
+		ZVAL_EMPTY_STRING(retval);
 	}
-
-	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
-
 	return SUCCESS;
 }
 
@@ -49,23 +49,16 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1788794630
 Since:
 */
-int dom_documenttype_entities_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
-	xmlHashTable *entityht;
-	dom_object *intern;
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 
-	php_dom_create_iterator(retval, DOM_NAMEDNODEMAP);
+	xmlHashTable *entityht = (xmlHashTable *) dtdptr->entities;
 
-	entityht = (xmlHashTable *) doctypep->entities;
-
-	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL);
+	dom_object *intern = Z_DOMOBJ_P(retval);
+	php_dom_create_obj_map(obj, intern, entityht, NULL, NULL, &php_dom_obj_map_entities);
 
 	return SUCCESS;
 }
@@ -77,23 +70,16 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D46829EF
 Since:
 */
-int dom_documenttype_notations_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
-	xmlHashTable *notationht;
-	dom_object *intern;
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 
-	php_dom_create_iterator(retval, DOM_NAMEDNODEMAP);
+	xmlHashTable *notationht = (xmlHashTable *) dtdptr->notations;
 
-	notationht = (xmlHashTable *) doctypep->notations;
-
-	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL);
+	dom_object *intern = Z_DOMOBJ_P(retval);
+	php_dom_create_obj_map(obj, intern, notationht, NULL, NULL, &php_dom_obj_map_notations);
 
 	return SUCCESS;
 }
@@ -105,22 +91,17 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-publicId
 Since: DOM Level 2
 */
-int dom_documenttype_public_id_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_public_id_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	if (dtdptr->ExternalID) {
 		ZVAL_STRING(retval, (char *) (dtdptr->ExternalID));
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
-	return SUCCESS;
 
+	return SUCCESS;
 }
 
 /* }}} */
@@ -130,20 +111,16 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-systemId
 Since: DOM Level 2
 */
-int dom_documenttype_system_id_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_system_id_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	if (dtdptr->SystemID) {
 		ZVAL_STRING(retval, (char *) (dtdptr->SystemID));
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
+
 	return SUCCESS;
 }
 
@@ -154,16 +131,11 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-internalSubset
 Since: DOM Level 2
 */
-int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
+
 	xmlDtdPtr intsubset;
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
 	if (dtdptr->doc != NULL && ((intsubset = xmlGetIntSubset(dtdptr->doc)) != NULL)) {
 		smart_str ret_buf = {0};
 		xmlNodePtr cur = intsubset->children;
@@ -175,11 +147,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 				xmlNodeDumpOutput (buff, NULL, cur, 0, 0, NULL);
 				xmlOutputBufferFlush(buff);
 
-#ifdef LIBXML2_NEW_BUFFER
 				smart_str_appendl(&ret_buf, (const char *) xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
-#else
-				smart_str_appendl(&ret_buf, (char *) buff->buffer->content, buff->buffer->use);
-#endif
 
 				(void)xmlOutputBufferClose(buff);
 			}
@@ -188,7 +156,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 		}
 
 		if (ret_buf.s) {
-			ZVAL_STR(retval, smart_str_extract(&ret_buf));
+			ZVAL_NEW_STR(retval, smart_str_extract(&ret_buf));
 			return SUCCESS;
 		}
 	}
@@ -196,7 +164,6 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 	ZVAL_NULL(retval);
 
 	return SUCCESS;
-
 }
 
 /* }}} */

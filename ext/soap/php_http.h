@@ -19,12 +19,10 @@
 #ifndef PHP_HTTP_H
 #define PHP_HTTP_H
 
-int make_http_soap_request(zval        *this_ptr,
-                           zend_string *request,
-                           char        *location,
-                           char        *soapaction,
-                           int          soap_version,
-                           zval        *response);
+int make_http_soap_request(
+	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
+	int soap_version, zend_string *uri_parser_class, zval *return_value
+);
 
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers);
 int basic_authentication(zval* this_ptr, smart_str* soap_headers);

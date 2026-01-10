@@ -16,11 +16,14 @@
 
 /* Infrastructure for working with persistent COM objects.
  * Implements: IStream* wrapper for PHP streams.
- * TODO: Magic __wakeup and __sleep handlers for serialization
- * (can wait till 5.1) */
+ * TODO:
+ *  - Magic __wakeup and __sleep handlers for serialization.
+ *  - Track the stream and dispatch instances in a global list to make sure
+ *    they are destroyed when a fatal error occurs.
+ */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -38,17 +41,9 @@ typedef struct {
 	DWORD engine_thread;
 	LONG refcount;
 	php_stream *stream;
-	zend_resource *res;
 } php_istream;
 
-static int le_istream;
 static void istream_destructor(php_istream *stm);
-
-static void istream_dtor(zend_resource *rsrc)
-{
-	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
-}
 
 #define FETCH_STM()	\
 	php_istream *stm = (php_istream*)This; \
@@ -93,8 +88,7 @@ static ULONG STDMETHODCALLTYPE stm_release(IStream *This)
 	ret = InterlockedDecrement(&stm->refcount);
 	if (ret == 0) {
 		/* destroy it */
-		if (stm->res)
-			zend_list_delete(stm->res);
+		istream_destructor(stm);
 	}
 	return ret;
 }
@@ -271,14 +265,13 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->stream = stream;
 
 	GC_ADDREF(stream->res);
-	stm->res = zend_register_resource(stm, le_istream);
 
 	return (IStream*)stm;
 }
 
 #define CPH_METHOD(fname)		PHP_METHOD(COMPersistHelper, fname)
 
-#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
+#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(ZEND_THIS);
 
 #define CPH_NO_OBJ()			if (helper->unk == NULL) { php_com_throw_exception(E_INVALIDARG, "No COM object is associated with this helper instance"); RETURN_THROWS(); }
 
@@ -297,7 +290,7 @@ static zend_class_entry *helper_ce;
 static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 {
 	if (!helper->ips && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, &helper->ips);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, (void **) &helper->ips);
 	}
 	return helper->ips ? S_OK : E_NOTIMPL;
 }
@@ -305,7 +298,7 @@ static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 {
 	if (!helper->ipsi && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, &helper->ipsi);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, (void **) &helper->ipsi);
 	}
 	return helper->ipsi ? S_OK : E_NOTIMPL;
 }
@@ -313,7 +306,7 @@ static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 static inline HRESULT get_persist_file(php_com_persist_helper *helper)
 {
 	if (!helper->ipf && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, &helper->ipf);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, (void **) &helper->ipf);
 	}
 	return helper->ipf ? S_OK : E_NOTIMPL;
 }
@@ -552,7 +545,7 @@ CPH_METHOD(LoadFromStream)
 		IDispatch *disp = NULL;
 
 		/* we need to create an object and load using OleLoadFromStream */
-		res = OleLoadFromStream(stm, &IID_IDispatch, &disp);
+		res = OleLoadFromStream(stm, &IID_IDispatch, (void **) &disp);
 
 		if (SUCCEEDED(res)) {
 			php_com_wrap_dispatch(return_value, disp, COMG(code_page));
@@ -564,7 +557,7 @@ CPH_METHOD(LoadFromStream)
 		} else {
 			res = get_persist_stream(helper);
 			if (helper->ips) {
-				res = IPersistStreamInit_Load(helper->ipsi, stm);
+				res = IPersistStream_Load(helper->ips, stm);
 			}
 		}
 	}
@@ -709,7 +702,6 @@ static zend_object* helper_new(zend_class_entry *ce)
 	memset(helper, 0, sizeof(*helper));
 
 	zend_object_std_init(&helper->std, helper_ce);
-	helper->std.handlers = &helper_handlers;
 
 	return &helper->std;
 }
@@ -722,7 +714,5 @@ void php_com_persist_minit(INIT_FUNC_ARGS)
 
 	helper_ce = register_class_COMPersistHelper();
 	helper_ce->create_object = helper_new;
-
-	le_istream = zend_register_list_destructors_ex(istream_dtor,
-			NULL, "com_dotnet_istream_wrapper", module_number);
+	helper_ce->default_object_handlers = &helper_handlers;
 }

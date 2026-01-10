@@ -4,26 +4,16 @@ mysqli_get_charset()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (!function_exists('mysqli_get_charset'))
-    die("skip: function not available");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
-
-    if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    mysqli_free_result($res);
-    $version = explode('.', $tmp['server_version']);
-    if (empty($version))
-        printf("[005] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-
-    if ($version[0] <= 4 && $version[1] < 1)
-        printf("[006] Need MySQL Server 4.1+ for the test!\n");
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     if (!$res = mysqli_query($link, 'SELECT @@character_set_connection AS charset, @@collation_connection AS collation'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -34,12 +24,8 @@ if (!function_exists('mysqli_get_charset'))
 
     if (!$res = mysqli_query($link, $sql = sprintf("SHOW CHARACTER SET LIKE '%s'", $character_set_connection)))
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    if (empty($tmp))
+    if (!mysqli_fetch_assoc($res))
         printf("[010] Cannot fetch Maxlen and/or Comment, test will fail: $sql\n");
-
-    $maxlen = (isset($tmp['Maxlen'])) ? $tmp['Maxlen'] : '';
-    $comment = (isset($tmp['Description'])) ? $tmp['Description'] : '';
 
     if (!$res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $collation_connection)))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -59,12 +45,12 @@ if (!function_exists('mysqli_get_charset'))
         printf("[015] Expecting object/std_class, got %s/%s\n", gettype($charset), $charset);
 
     if (!isset($charset->charset) ||
-        !in_array(gettype($charset->charset), array("string", "unicode")) ||
-        ($character_set_connection !== $charset->charset))
+        !is_string($charset->charset) ||
+        $character_set_connection !== $charset->charset)
         printf("[016] Expecting string/%s, got %s/%s\n", $character_set_connection, gettype($charset->charset), $charset->charset);
     if (!isset($charset->collation) ||
-        !in_array(gettype($charset->collation), array("string", "unicode")) ||
-        ($collation_connection !== $charset->collation))
+        !is_string($charset->collation) ||
+        $collation_connection !== $charset->collation)
         printf("[017] Expecting string/%s, got %s/%s\n", $collation_connection, gettype($charset->collation), $charset->collation);
 
     if (!isset($charset->dir) ||
@@ -96,10 +82,6 @@ if (!function_exists('mysqli_get_charset'))
     }
 
     print "done!";
-?>
---CLEAN--
-<?php
-    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli object is already closed

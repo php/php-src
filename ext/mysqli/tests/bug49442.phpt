@@ -23,7 +23,7 @@ mysqli.allow_persistent=1
 mysqli.max_persistent=1
 --FILE--
 <?php
-    include "connect.inc";
+    include 'connect.inc';
 
     $link = mysqli_init();
     if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
@@ -38,7 +38,7 @@ mysqli.max_persistent=1
         printf("[003] Failed to create test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
-    include("local_infile_tools.inc");
+    include "local_infile_tools.inc";
     $file = create_standard_csv(4);
 
     if (!@mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s'
@@ -105,7 +105,7 @@ mysqli.max_persistent=1
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 array(2) {

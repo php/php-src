@@ -105,9 +105,13 @@ bool(false)
 bool(false)
 
 -- Iteration 5 --
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 -- Iteration 6 --
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -129,7 +133,7 @@ bool(false)
 bool(false)
 
 -- Iteration 13 --
-Illegal offset type
+Cannot access offset of type array on array
 
 -- Iteration 14 --
 bool(true)
@@ -141,12 +145,16 @@ bool(true)
 bool(true)
 
 -- Iteration 17 --
-Illegal offset type
+Cannot access offset of type classA on array
 
 -- Iteration 18 --
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 -- Iteration 19 --
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 -- Iteration 20 --

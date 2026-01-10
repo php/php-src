@@ -2,6 +2,8 @@
 Test mb_substitute_character() function : usage variation
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 declare(strict_types=1);
@@ -93,7 +95,6 @@ $inputs = array(
 
 // loop through each element of the array for substchar
 
-mb_internal_encoding('utf-8');
 foreach($inputs as $key =>$value) {
       echo "--$key--\n";
       try {
@@ -139,13 +140,13 @@ int(12345)
 --lowercase null--
 int(12345)
 --lowercase true--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, true given
 --lowercase false--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, false given
 --uppercase TRUE--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, true given
 --uppercase FALSE--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, false given
 --empty string DQ--
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint
 --empty string SQ--

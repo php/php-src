@@ -4,7 +4,6 @@ IntlBreakIterator::first(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $bi = IntlBreakIterator::createWordInstance('pt');
 $bi->setText('foo bar trans');

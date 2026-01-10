@@ -3,7 +3,7 @@ readline_write_history(): Basic test
 --EXTENSIONS--
 readline
 --SKIPIF--
-<?php if (!function_exists('readline_add_history')) die("skip");
+<?php
 if (READLINE_LIB == "libedit") die("skip readline only");
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>

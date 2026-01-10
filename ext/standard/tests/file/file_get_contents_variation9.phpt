@@ -33,12 +33,18 @@ var_dump(file_get_contents($chainlink));
 var_dump(file_get_contents($softlink));
 var_dump(file_get_contents($hardlink));
 
+echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$filename = __DIR__.'/fileGetContentsVar9.tmp';
+$softlink = __DIR__.'/fileGetContentsVar9.SoftLink';
+$hardlink = __DIR__.'/fileGetContentsVar9.HardLink';
+$chainlink = __DIR__.'/fileGetContentsVar9.ChainLink';
 unlink($chainlink);
 unlink($softlink);
 unlink($hardlink);
 unlink($filename);
-
-echo "\n*** Done ***\n";
 ?>
 --EXPECT--
 *** Testing file_get_contents() : variation ***

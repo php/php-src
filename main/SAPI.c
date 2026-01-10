@@ -18,14 +18,12 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/pageinfo.h"
-#include "ext/pcre/php_pcre.h"
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -169,7 +167,7 @@ SAPI_API void sapi_handle_post(void *arg)
 	}
 }
 
-static void sapi_read_post_data(void)
+SAPI_API void sapi_read_post_data(void)
 {
 	sapi_post_entry *post_entry;
 	uint32_t content_type_length = (uint32_t)strlen(SG(request_info).content_type);
@@ -183,7 +181,7 @@ static void sapi_read_post_data(void)
 	 * - Make the content type lowercase
 	 * - Trim descriptive data, stay with the content-type only
 	 */
-	for (p=content_type; p<content_type+content_type_length; p++) {
+	for (p = content_type; p < content_type + content_type_length; p++) {
 		switch (*p) {
 			case ';':
 			case ',':
@@ -207,10 +205,11 @@ static void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (!sapi_module.default_post_reader) {
-			/* no default reader? */
+		if (UNEXPECTED(!sapi_module.default_post_reader)) {
+			/* this should not happen as there should always be a default_post_reader */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -218,6 +217,7 @@ static void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	/* the content_type_dup is not set at this stage so no need to try to free it first */
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -253,9 +253,11 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
-	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
+	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
+
+	if (post_max_size > 0 && SG(request_info).content_length > post_max_size) {
 		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
-					SG(request_info).content_length, SG(post_max_size));
+					SG(request_info).content_length, post_max_size);
 		return;
 	}
 
@@ -279,8 +281,8 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 				}
 			}
 
-			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", SG(post_max_size));
+			if (post_max_size > 0 && SG(read_post_bytes) > post_max_size) {
+				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", post_max_size);
 				break;
 			}
 
@@ -320,10 +322,8 @@ static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
 		content_type = (char*)emalloc(*len + 1);
 		p = content_type + prefix_len;
-		memcpy(p, mimetype, mimetype_len);
-		p += mimetype_len;
-		memcpy(p, "; charset=", sizeof("; charset=") - 1);
-		p += sizeof("; charset=") - 1;
+		p = zend_mempcpy(p, mimetype, mimetype_len);
+		p = zend_mempcpy(p, "; charset=", sizeof("; charset=") - 1);
 		memcpy(p, charset, charset_len + 1);
 	} else {
 		*len = prefix_len + mimetype_len;
@@ -455,6 +455,12 @@ SAPI_API void sapi_activate(void)
 		SG(request_info).headers_only = 0;
 	}
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
+
+	if (sapi_module.pre_request_init) {
+		sapi_module.pre_request_init();
+	}
 
 	/* Handle request method */
 	if (SG(server_context)) {
@@ -595,7 +601,8 @@ static void sapi_update_response_code(int ncode)
  * since zend_llist_del_element only removes one matched item once,
  * we should remove them manually
  */
-static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
+static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t header_len)
+{
 	sapi_header_struct *header;
 	zend_llist_element *next;
 	zend_llist_element *current=l->head;
@@ -603,7 +610,8 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	while (current) {
 		header = (sapi_header_struct *)(current->data);
 		next = current->next;
-		if (header->header_len > len && header->header[len] == ':'
+		if (header->header_len > header_len
+				&& (header->header[header_len] == ':' || len > header_len)
 				&& !strncasecmp(header->header, name, len)) {
 			if (current->prev) {
 				current->prev->next = next;
@@ -651,7 +659,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
+				sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header), 0);
 				*colon_offset = sav;
 			}
 		}
@@ -666,7 +674,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	char *header_line;
-	size_t header_line_len;
+	size_t header_line_len, header_len;
 	int http_response_code;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
@@ -684,11 +692,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 	switch (op) {
 		case SAPI_HEADER_SET_STATUS:
-			sapi_update_response_code((int)(zend_intptr_t) arg);
+			sapi_update_response_code((int)(intptr_t) arg);
 			return SUCCESS;
 
 		case SAPI_HEADER_ADD:
 		case SAPI_HEADER_REPLACE:
+		case SAPI_HEADER_DELETE_PREFIX:
 		case SAPI_HEADER_DELETE: {
 				sapi_header_line *p = arg;
 
@@ -697,7 +706,13 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				}
 				header_line = estrndup(p->line, p->line_len);
 				header_line_len = p->line_len;
-				http_response_code = p->response_code;
+				if (op == SAPI_HEADER_DELETE_PREFIX) {
+					header_len = p->header_len;
+					http_response_code = 0;
+				} else {
+					header_len = 0;
+					http_response_code = p->response_code;
+				}
 				break;
 			}
 
@@ -720,8 +735,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		header_line[header_line_len]='\0';
 	}
 
-	if (op == SAPI_HEADER_DELETE) {
-		if (strchr(header_line, ':')) {
+	if (op == SAPI_HEADER_DELETE || op == SAPI_HEADER_DELETE_PREFIX) {
+		if (op == SAPI_HEADER_DELETE && strchr(header_line, ':')) {
 			efree(header_line);
 			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
 			return FAILURE;
@@ -731,7 +746,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 			sapi_header.header_len = header_line_len;
 			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers));
 		}
-		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len);
+		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len, header_len);
 		efree(header_line);
 		return SUCCESS;
 	} else {
@@ -802,7 +817,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);
@@ -1021,7 +1036,7 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
 	char *value, *tmp;
-	
+
 	if (!sapi_module.getenv) {
 		return NULL;
 	}

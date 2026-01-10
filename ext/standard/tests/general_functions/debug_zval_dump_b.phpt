@@ -184,36 +184,36 @@ bool(false)
 array(0) interned {
 }
 -- Iteration 44 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   NULL
 }
 -- Iteration 45 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   bool(true)
 }
 -- Iteration 46 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   string(0) "" interned
 }
 -- Iteration 47 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   string(0) "" interned
 }
 -- Iteration 48 --
-array(2) refcount(%d){
+array(2) packed refcount(%d){
   [0]=>
-  array(2) refcount(%d){
+  array(2) packed refcount(%d){
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
   [1]=>
-  array(2) refcount(%d){
+  array(2) packed refcount(%d){
     [0]=>
     string(1) "a" interned
     [1]=>
@@ -228,31 +228,31 @@ array(2) refcount(%d){
   string(3) "One" refcount(%d)
 }
 -- Iteration 50 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   int(0)
 }
 -- Iteration 51 --
-array(1) refcount(%d){
+array(1) packed refcount(%d){
   [0]=>
   int(-1)
 }
 -- Iteration 52 --
-array(2) refcount(%d){
+array(2) packed refcount(%d){
   [0]=>
   float(10.5)
   [1]=>
   float(5.6)
 }
 -- Iteration 53 --
-array(2) refcount(%d){
+array(2) packed refcount(%d){
   [0]=>
   string(6) "string" refcount(%d)
   [1]=>
   string(4) "test" refcount(%d)
 }
 -- Iteration 54 --
-array(2) refcount(%d){
+array(2) packed refcount(%d){
   [0]=>
   string(6) "string" refcount(%d)
   [1]=>

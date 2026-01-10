@@ -17,5 +17,5 @@ $fiber->start();
 ?>
 --EXPECTF--
 #0 %sdebug-backtrace.php(9): inner_function()
-#1 [internal function]: {closure}()
+#1 [internal function]: {closure:%s:%d}()
 #2 %sdebug-backtrace.php(12): Fiber->start()

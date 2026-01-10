@@ -4,14 +4,11 @@ mysqli_dump_debug_info()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp	= NULL;
-    $link	= NULL;
+    require_once 'connect.inc';
 
     if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n", $host, $user, $db, $port, $socket);

@@ -23,7 +23,7 @@ Warning: preg_match(): Empty regular expression in %sdelimiters.php on line 4
 bool(false)
 int(1)
 
-Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %sdelimiters.php on line 6
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL byte in %sdelimiters.php on line 6
 bool(false)
 int(1)
 
@@ -37,5 +37,5 @@ bool(false)
 Warning: preg_match(): No ending matching delimiter '}' found in %sdelimiters.php on line 11
 bool(false)
 
-Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %sdelimiters.php on line 12
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL byte in %sdelimiters.php on line 12
 bool(false)

@@ -1,9 +1,9 @@
 $(srcdir)/phar_path_check.c: $(srcdir)/phar_path_check.re
 	@(cd $(top_srcdir); \
 	if test -f ./php_phar.h; then \
-		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o phar_path_check.c phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) -b -o phar_path_check.c phar_path_check.re; \
 	else \
-		$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
+		$(RE2C) $(RE2C_FLAGS) -b -o ext/phar/phar_path_check.c ext/phar/phar_path_check.re; \
 	fi)
 
 pharcmd: $(builddir)/phar.php $(builddir)/phar.phar
@@ -29,7 +29,6 @@ $(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
 	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
 	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc $(builddir)/phar/phar.inc
 
-
 TEST_PHP_EXECUTABLE = $(shell $(PHP_EXECUTABLE) -v 2>&1)
 TEST_PHP_EXECUTABLE_RES = $(shell echo "$(TEST_PHP_EXECUTABLE)" | grep -c 'Exec format error')
 
@@ -46,7 +45,7 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/
 	if [ "$(TEST_PHP_EXECUTABLE_RES)" != 1 ]; then \
 		rm -f $(builddir)/phar.phar; \
 		rm -f $(srcdir)/phar.phar; \
-		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x \\.svn -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/; \
+		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/; \
 		chmod +x $(builddir)/phar.phar; \
 	else \
 		echo "Skipping phar.phar generating during cross compilation"; \

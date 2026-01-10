@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -52,7 +52,7 @@ DBA_OPEN_FUNC(ndbm)
 			return FAILURE; /* not possible */
 	}
 
-	dbf = dbm_open(info->path, gmode, filemode);
+	dbf = dbm_open(ZSTR_VAL(info->path), gmode, filemode);
 
 	pinfo->dbf = dbf;
 	return SUCCESS;

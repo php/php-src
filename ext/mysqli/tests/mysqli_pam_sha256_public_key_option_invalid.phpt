@@ -86,7 +86,7 @@ echo "nocache";
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     function sha_connect($offset, $host, $db, $port, $socket, $file) {
 
@@ -101,9 +101,10 @@ echo "nocache";
             return false;
         }
 
-        if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
+        if (!$res = $link->query("SELECT id FROM test WHERE id = 1")) {
             printf("[%03d + 003] [%d] %s\n", $offset, $link->errno, $link->error);
             return false;
+        }
 
         if (!$row = mysqli_fetch_assoc($res)) {
             printf("[%03d + 004] [%d] %s\n", $offset, $link->errno, $link->error);
@@ -163,7 +164,7 @@ echo "nocache";
 ?>
 --CLEAN--
 <?php
-    require_once "clean_table.inc";
+    require_once 'clean_table.inc';
     $link->query('DROP USER shatest');
     $link->query('DROP USER shatest@localhost');
     $file = sprintf("%s%s%s_%s", sys_get_temp_dir(), DIRECTORY_SEPARATOR, "test_sha256_" , @date("Ymd"));

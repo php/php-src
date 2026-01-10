@@ -4,7 +4,6 @@ IntlBreakIterator::setText(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 class A {
 function __tostring() { return 'aaa'; }

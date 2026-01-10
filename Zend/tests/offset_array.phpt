@@ -38,6 +38,8 @@ int(2)
 Deprecated: Implicit conversion from float 0.0836 to int loses precision in %s on line %d
 int(1)
 
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
 Warning: Undefined array key "" in %s on line %d
 NULL
 
@@ -48,6 +50,6 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Illegal offset type
-Illegal offset type
+Cannot access offset of type stdClass on array
+Cannot access offset of type array on array
 Done

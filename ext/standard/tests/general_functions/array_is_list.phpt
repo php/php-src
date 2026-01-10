@@ -68,6 +68,7 @@ $arr = [1, 2, 3];
 $arr[4] = 5;
 test_is_list("append with gap", $arr);
 
+?>
 --EXPECT--
 empty: true
 one: true
@@ -80,8 +81,8 @@ int: threw array_is_list(): Argument #1 ($array) must be of type array, int give
 float: threw array_is_list(): Argument #1 ($array) must be of type array, float given
 string: threw array_is_list(): Argument #1 ($array) must be of type array, string given
 object: threw array_is_list(): Argument #1 ($array) must be of type array, stdClass given
-true: threw array_is_list(): Argument #1 ($array) must be of type array, bool given
-false: threw array_is_list(): Argument #1 ($array) must be of type array, bool given
+true: threw array_is_list(): Argument #1 ($array) must be of type array, true given
+false: threw array_is_list(): Argument #1 ($array) must be of type array, false given
 string key: false
 mixed keys: false
 ordered keys: true

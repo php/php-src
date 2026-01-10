@@ -12,7 +12,7 @@ if (!function_exists('mysqli_ssl_set'))
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     /*
     This function always returns TRUE value.

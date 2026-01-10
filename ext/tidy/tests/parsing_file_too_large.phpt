@@ -61,7 +61,7 @@ unlink($path);
 ?>
 --EXPECT--
 int(0)
-ValueError: Input string is too long
-ValueError: Input string is too long
-ValueError: Input string is too long
-ValueError: tidy_repair_file(): Argument #1 ($filename) Input string is too long
+ValueError: File content is too long
+ValueError: File content is too long
+ValueError: File content is too long
+ValueError: tidy_repair_file(): Argument #1 ($filename) File content is too long

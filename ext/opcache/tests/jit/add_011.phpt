@@ -4,7 +4,6 @@ JIT ADD: 011 overflow handling
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 --FILE--
@@ -196,5 +195,6 @@ int(-9223371969208523780)
 
 Warning: Undefined variable $u in %sadd_011.php on line 5
 
-Deprecated: Implicit conversion from float %f to int loses precision in %sadd_011.php on line 5
+Warning: The float %f is not representable as an int, cast occurred in %sadd_011.php on line 5
 int(66572500992)
+

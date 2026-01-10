@@ -1,18 +1,24 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv with alternative enclosure
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv4.csv', 'w+');
-fputcsv($fp, array(
-    'field1',
-    'field2',
-    'field3',
-    5
-), ',', '"');
+fputcsv(
+    $fp,
+    [
+        'field1',
+        'field2',
+        'field3',
+        5,
+    ],
+    enclosure: '"',
+    escape: '',
+);
 fclose($fp);
 
 $fo = new SplFileObject('SplFileObject__fgetcsv4.csv');
-var_dump($fo->fgetcsv(',', '"'));
+$fo->setCsvControl(escape: '');
+var_dump($fo->fgetcsv(enclosure: '"'));
 ?>
 --CLEAN--
 <?php

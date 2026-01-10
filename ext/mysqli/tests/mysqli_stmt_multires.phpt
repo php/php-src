@@ -4,13 +4,12 @@ Multiple result set with PS
 mysqli
 --SKIPIF--
 <?php
-require_once "skipifconnectfailure.inc";
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
     require 'table.inc';
 
-    $stmt = mysqli_stmt_init($link);
     if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {
         printf("[001] [%d] %s\n", $link->error, $link->errno);
     }

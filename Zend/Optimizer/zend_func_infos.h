@@ -1,6 +1,7 @@
 /* This is a generated file, edit the .stub.php files instead. */
 
 static const func_info_t func_infos[] = {
+	F1("clone", MAY_BE_OBJECT),
 	F1("zend_version", MAY_BE_STRING),
 	FN("func_get_args", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
@@ -18,15 +19,19 @@ static const func_info_t func_infos[] = {
 	F1("get_defined_constants", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
 	F1("debug_backtrace", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_extension_funcs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-	F1("gc_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
+	F1("gc_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE),
 	F1("bcadd", MAY_BE_STRING),
 	F1("bcsub", MAY_BE_STRING),
 	F1("bcmul", MAY_BE_STRING),
 	F1("bcdiv", MAY_BE_STRING),
 	F1("bcmod", MAY_BE_STRING),
+	F1("bcdivmod", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("bcpowmod", MAY_BE_STRING),
 	F1("bcpow", MAY_BE_STRING),
 	F1("bcsqrt", MAY_BE_STRING),
+	F1("bcfloor", MAY_BE_STRING),
+	F1("bcceil", MAY_BE_STRING),
+	F1("bcround", MAY_BE_STRING),
 	FN("bzopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("bzerror", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("cal_from_jd", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
@@ -42,6 +47,7 @@ static const func_info_t func_infos[] = {
 	F1("curl_multi_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_share_init", MAY_BE_OBJECT),
 	F1("curl_share_strerror", MAY_BE_STRING|MAY_BE_NULL),
+	F1("curl_share_init_persistent", MAY_BE_OBJECT),
 	F1("curl_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 	F1("date", MAY_BE_STRING),
@@ -74,8 +80,6 @@ static const func_info_t func_infos[] = {
 	F1("date_sunrise", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE),
 	F1("date_sunset", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE),
 	F1("date_sun_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE|MAY_BE_ARRAY_OF_LONG),
-	FN("dba_popen", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("dba_open", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("dba_key_split", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("dba_handlers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
 	FN("dba_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -101,8 +105,6 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatetruecolor", MAY_BE_OBJECT|MAY_BE_FALSE),
 #if defined(PHP_WIN32)
 	F1("imagegrabwindow", MAY_BE_OBJECT|MAY_BE_FALSE),
-#endif
-#if defined(PHP_WIN32)
 	F1("imagegrabscreen", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif
 	F1("imagerotate", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -129,15 +131,11 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatefromgd", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("imagecreatefromgd2", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("imagecreatefromgd2part", MAY_BE_OBJECT|MAY_BE_FALSE),
-#if defined(HAVE_GD_BMP)
 	F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
-#endif
 	F1("imagecolorsforindex", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
 	F1("imagegetclip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
 #if defined(HAVE_GD_FREETYPE)
 	F1("imageftbbox", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_GD_FREETYPE)
 	F1("imagefttext", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
 #endif
 	F1("imagecrop", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -181,11 +179,7 @@ static const func_info_t func_infos[] = {
 	F1("hash_hkdf", MAY_BE_STRING),
 #if defined(PHP_MHASH_BC)
 	F1("mhash_get_hash_name", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
-#if defined(PHP_MHASH_BC)
 	F1("mhash_keygen_s2k", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
-#if defined(PHP_MHASH_BC)
 	F1("mhash", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
 	F1("iconv_substr", MAY_BE_STRING|MAY_BE_FALSE),
@@ -227,7 +221,7 @@ static const func_info_t func_infos[] = {
 	F1("mb_strtoupper", MAY_BE_STRING),
 	F1("mb_strtolower", MAY_BE_STRING),
 	F1("mb_detect_encoding", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encoding_aliases", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encode_mimeheader", MAY_BE_STRING),
 	F1("mb_decode_mimeheader", MAY_BE_STRING),
@@ -238,29 +232,13 @@ static const func_info_t func_infos[] = {
 	F1("mb_get_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL),
 #if defined(HAVE_MBREGEX)
 	F1("mb_regex_encoding", MAY_BE_STRING|MAY_BE_BOOL),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_ereg_replace", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_eregi_replace", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_ereg_replace_callback", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_split", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_ereg_search_pos", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_ereg_search_regs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_ereg_search_getregs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_MBREGEX)
 	F1("mb_regex_set_options", MAY_BE_STRING),
 #endif
 	F1("mysqli_affected_rows", MAY_BE_LONG|MAY_BE_STRING),
@@ -308,39 +286,6 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_stat", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mysqli_store_result", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("mysqli_use_result", MAY_BE_OBJECT|MAY_BE_FALSE),
-	FN("oci_new_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	F1("oci_error", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-	FN("oci_parse", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_get_implicit_resultset", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_password_change", MAY_BE_RESOURCE|MAY_BE_BOOL),
-	FN("oci_new_cursor", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_prepare", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_exec", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_tables", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_columns", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_gettypeinfo", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_primarykeys", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-	FN("odbc_procedurecolumns", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-	FN("odbc_procedures", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-	FN("odbc_foreignkeys", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
-	FN("odbc_specialcolumns", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("odbc_statistics", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
-	FN("odbc_tableprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
-	FN("odbc_columnprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
 	F1("opcache_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
 	F1("opcache_get_configuration", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
 	F1("openssl_x509_parse", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
@@ -365,6 +310,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_tty", MAY_BE_STRING),
 	F1("pg_host", MAY_BE_STRING),
 	F1("pg_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
+	F1("pg_jit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
 	F1("pg_parameter_status", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("pg_query", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("pg_query_params", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -412,9 +358,8 @@ static const func_info_t func_infos[] = {
 	F1("posix_getpwnam", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("posix_getpwuid", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #if defined(HAVE_GETRLIMIT)
-	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
-	F1("pspell_suggest", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("random_bytes", MAY_BE_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -434,8 +379,6 @@ static const func_info_t func_infos[] = {
 	FN("sodium_crypto_kx_server_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 	FN("sodium_crypto_secretstream_xchacha20poly1305_init_push", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
-#endif
-#if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 	FN("sodium_crypto_secretstream_xchacha20poly1305_pull", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
 	F1("class_implements", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
@@ -450,8 +393,6 @@ static const func_info_t func_infos[] = {
 	F1("compact", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	FN("array_fill", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_replace", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_replace_recursive", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	FN("array_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 	FN("array_values", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_count_values", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
@@ -460,13 +401,8 @@ static const func_info_t func_infos[] = {
 	F1("array_flip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("array_change_key_case", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_intersect_key", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_intersect_ukey", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_intersect", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_uintersect", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_intersect_assoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_uintersect_assoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_intersect_uassoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F1("array_uintersect_uassoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_diff_key", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_diff_ukey", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_udiff", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
@@ -477,7 +413,7 @@ static const func_info_t func_infos[] = {
 	FN("array_rand", MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("base64_encode", MAY_BE_STRING),
 	F1("base64_decode", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("long2ip", MAY_BE_STRING|MAY_BE_FALSE),
+	F1("long2ip", MAY_BE_STRING),
 	F1("getenv", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("getopt", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
 #if defined(HAVE_NANOSLEEP)
@@ -485,14 +421,13 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("get_current_user", MAY_BE_STRING),
 	FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
+	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_NULL),
 	F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
 	F1("php_strip_whitespace", MAY_BE_STRING),
-	F1("highlight_string", MAY_BE_STRING|MAY_BE_BOOL),
+	F1("highlight_string", MAY_BE_STRING|MAY_BE_TRUE),
 	F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
 	F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("print_r", MAY_BE_STRING|MAY_BE_BOOL),
+	F1("print_r", MAY_BE_STRING|MAY_BE_TRUE),
 #if defined(HAVE_GETSERVBYPORT)
 	F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
@@ -525,12 +460,8 @@ static const func_info_t func_infos[] = {
 	F1("md5_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("sha1", MAY_BE_STRING),
 	F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
-#if defined(HAVE_INET_NTOP)
 	F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_INET_PTON)
 	F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
 	F1("metaphone", MAY_BE_STRING),
 	F1("headers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("htmlspecialchars", MAY_BE_STRING),
@@ -579,9 +510,7 @@ static const func_info_t func_infos[] = {
 	F1("getcwd", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("readdir", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("scandir", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(HAVE_GLOB)
-	F1("glob", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#endif
+	FN("glob", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("exec", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("system", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("escapeshellcmd", MAY_BE_STRING),
@@ -610,6 +539,7 @@ static const func_info_t func_infos[] = {
 	F1("fsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("pfsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("http_build_query", MAY_BE_STRING),
+	F1("request_parse_body", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("image_type_to_mime_type", MAY_BE_STRING),
 	F1("image_type_to_extension", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("getimagesize", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
@@ -631,8 +561,6 @@ static const func_info_t func_infos[] = {
 	F1("number_format", MAY_BE_STRING),
 #if defined(HAVE_GETTIMEOFDAY)
 	F1("microtime", MAY_BE_STRING|MAY_BE_DOUBLE),
-#endif
-#if defined(HAVE_GETTIMEOFDAY)
 	F1("gettimeofday", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_DOUBLE),
 #endif
 #if defined(HAVE_GETRUSAGE)
@@ -644,8 +572,6 @@ static const func_info_t func_infos[] = {
 	F1("password_hash", MAY_BE_STRING),
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	F1("proc_open", MAY_BE_RESOURCE|MAY_BE_FALSE),
-#endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	F1("proc_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
 	F1("quoted_printable_decode", MAY_BE_STRING),
@@ -688,7 +614,8 @@ static const func_info_t func_infos[] = {
 	F1("var_export", MAY_BE_STRING|MAY_BE_NULL),
 	F1("serialize", MAY_BE_STRING),
 	F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
-	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG),
+	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
+	FN("zend_test_create_throwing_resource", MAY_BE_RESOURCE),
 	FN("zip_open", MAY_BE_RESOURCE|MAY_BE_LONG|MAY_BE_FALSE),
 	FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("ob_gzhandler", MAY_BE_STRING|MAY_BE_FALSE),

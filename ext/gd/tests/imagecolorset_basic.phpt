@@ -5,6 +5,12 @@ Erick Belluci Tedeschi <erickbt86 [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 // Create a 300x100 image
@@ -19,9 +25,9 @@ $bg = imagecolorat($im, 0, 0);
 // Set the background to be blue
 imagecolorset($im, $bg, 0, 0, 255);
 
+imagepalettetotruecolor($im);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/imagecolorset_basic.png', $im);
-imagedestroy($im);
 ?>
 --EXPECT--
 The images are equal.

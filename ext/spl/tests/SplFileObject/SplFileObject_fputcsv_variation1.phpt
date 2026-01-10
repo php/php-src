@@ -42,6 +42,7 @@ foreach ($csv_lists as $csv_list) {
     } else {
       $fo = new SplFileObject($file, $file_modes[$mode_counter]);
     }
+    $fo->setCsvControl(escape: '');
     $delimiter = $csv_list[0];
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];

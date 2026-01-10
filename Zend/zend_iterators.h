@@ -17,6 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef ZEND_ITERATORS_H
+#define ZEND_ITERATORS_H
+
+#include "zend_types.h"
+
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
  * with other iterative engine opcodes.
@@ -31,7 +36,7 @@ typedef struct _zend_object_iterator_funcs {
 	void (*dtor)(zend_object_iterator *iter);
 
 	/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
-	int (*valid)(zend_object_iterator *iter);
+	zend_result (*valid)(zend_object_iterator *iter);
 
 	/* fetch the item data for the current element */
 	zval *(*get_current_data)(zend_object_iterator *iter);
@@ -89,3 +94,5 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter);
 
 ZEND_API void zend_register_iterator_wrapper(void);
 END_EXTERN_C()
+
+#endif /* ZEND_ITERATORS_H */

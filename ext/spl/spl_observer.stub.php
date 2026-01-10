@@ -20,15 +20,18 @@ interface SplSubject
     public function notify(): void;
 }
 
-class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
+class SplObjectStorage implements Countable, SeekableIterator, Serializable, ArrayAccess
 {
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetSet() instead")]
     public function attach(object $object, mixed $info = null): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetUnset() instead")]
     public function detach(object $object): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetExists() instead")]
     public function contains(object $object): bool {}
 
     /** @tentative-return-type */
@@ -64,6 +67,8 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /** @tentative-return-type */
     public function next(): void {}
 
+    public function seek(int $offset): void {}
+
     /** @tentative-return-type */
     public function unserialize(string $data): void {}
 
@@ -88,7 +93,6 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @param object $object
      * @tentative-return-type
      * @implementation-alias SplObjectStorage::attach
-     * @no-verify Cannot specify arg type because ArrayAccess does not
      */
     public function offsetSet($object, mixed $info = null): void {}
 
@@ -96,7 +100,6 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @param object $object
      * @tentative-return-type
      * @implementation-alias SplObjectStorage::detach
-     * @no-verify Cannot specify arg type because ArrayAccess does not
      */
     public function offsetUnset($object): void {}
 
@@ -115,26 +118,14 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
 class MultipleIterator implements Iterator
 {
-    /**
-     * @var int
-     * @cvalue MIT_NEED_ANY
-     */
-    public const MIT_NEED_ANY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue MIT_NEED_ALL
-     */
-    public const MIT_NEED_ALL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue MIT_KEYS_NUMERIC
-     */
-    public const MIT_KEYS_NUMERIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue MIT_KEYS_ASSOC
-     */
-    public const MIT_KEYS_ASSOC = UNKNOWN;
+    /** @cvalue MIT_NEED_ANY */
+    public const int MIT_NEED_ANY = UNKNOWN;
+    /** @cvalue MIT_NEED_ALL */
+    public const int MIT_NEED_ALL = UNKNOWN;
+    /** @cvalue MIT_KEYS_NUMERIC */
+    public const int MIT_KEYS_NUMERIC = UNKNOWN;
+    /** @cvalue MIT_KEYS_ASSOC */
+    public const int MIT_KEYS_ASSOC = UNKNOWN;
 
     public function __construct(int $flags = MultipleIterator::MIT_NEED_ALL|MultipleIterator::MIT_KEYS_NUMERIC) {}
 

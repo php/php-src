@@ -20,7 +20,6 @@ try {
 }
 
 echo "\n-- Testing with invalid encoding --\n";
-$data = 'string_val';
 $level = 2;
 $encoding = 99;
 try {

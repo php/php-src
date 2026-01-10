@@ -12,22 +12,28 @@ namespace {
      * @var int
      * @cvalue MT_RAND_PHP
      */
+    #[\Deprecated(since: '8.3', message: 'as it uses a biased non-standard variant of Mt19937')]
     const MT_RAND_PHP = UNKNOWN;
 
+    #[\Deprecated(since: '8.4', message: "use \\Random\\Randomizer::getFloat() instead")]
     function lcg_value(): float {}
 
-    function mt_srand(int $seed = UNKNOWN, int $mode = MT_RAND_MT19937): void {}
+    function mt_srand(?int $seed = null, int $mode = MT_RAND_MT19937): void {}
 
     /** @alias mt_srand */
-    function srand(int $seed = UNKNOWN, int $mode = MT_RAND_MT19937): void {}
+    function srand(?int $seed = null, int $mode = MT_RAND_MT19937): void {}
 
     function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
     function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
+    /** @compile-time-eval */
     function mt_getrandmax(): int {}
 
-    /** @alias mt_getrandmax */
+    /**
+     * @compile-time-eval
+     * @alias mt_getrandmax
+     */
     function getrandmax(): int {}
 
     /** @refcount 1 */
@@ -133,9 +139,15 @@ namespace Random
 
         public function nextInt(): int {}
 
+        public function nextFloat(): float {}
+
+        public function getFloat(float $min, float $max, IntervalBoundary $boundary = IntervalBoundary::ClosedOpen): float {}
+
         public function getInt(int $min, int $max): int {}
 
         public function getBytes(int $length): string {}
+
+        public function getBytesFromString(string $string, int $length): string {}
 
         public function shuffleArray(array $array): array {}
 
@@ -146,6 +158,13 @@ namespace Random
         public function __serialize(): array {}
 
         public function __unserialize(array $data): void {}
+    }
+
+    enum IntervalBoundary {
+        case ClosedOpen;
+        case ClosedClosed;
+        case OpenClosed;
+        case OpenOpen;
     }
 
     /**

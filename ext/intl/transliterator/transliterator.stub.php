@@ -5,16 +5,10 @@
 /** @not-serializable */
 class Transliterator
 {
-    /**
-     * @var int
-     * @cvalue TRANSLITERATOR_FORWARD
-     */
-    public const FORWARD = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue TRANSLITERATOR_REVERSE
-     */
-    public const REVERSE = UNKNOWN;
+    /** @cvalue TRANSLITERATOR_FORWARD */
+    public const int FORWARD = UNKNOWN;
+    /** @cvalue TRANSLITERATOR_REVERSE */
+    public const int REVERSE = UNKNOWN;
 
     public readonly string $id;
 
@@ -55,11 +49,11 @@ class Transliterator
      * @tentative-return-type
      * @alias transliterator_get_error_code
      */
-    public function getErrorCode(): int|false {}
+    public function getErrorCode(): int {}
 
     /**
      * @tentative-return-type
      * @alias transliterator_get_error_message
      */
-    public function getErrorMessage(): string|false {}
+    public function getErrorMessage(): string {}
 }

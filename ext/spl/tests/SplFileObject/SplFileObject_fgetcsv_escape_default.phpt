@@ -13,7 +13,8 @@ var_dump($fo->fgetcsv());
 <?php
 unlink('SplFileObject__fgetcsv7.csv');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: SplFileObject::fgetcsv(): the $escape parameter must be provided, as its default value will change, either explicitly or via SplFileObject::setCsvControl() in %s on line %d
 array(3) {
   [0]=>
   string(4) "aa\""

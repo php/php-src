@@ -5,6 +5,7 @@ mbstring
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_INT_SIZE == 4 && !extension_loaded("ctype")) die("skip needs ctype extension on 32-bit");
 ?>
 --FILE--
 <?php

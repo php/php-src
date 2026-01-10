@@ -11,29 +11,24 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 // DN not found
-var_dump(ldap_mod_replace($link, "dc=my-domain,$base", array()));
+var_dump(ldap_mod_replace($link, "dc=my-domain,$base", ["dc" => "my-domain"]));
 
 // Invalid DN
-var_dump(ldap_mod_replace($link, "weirdAttribute=val", array()));
+var_dump(ldap_mod_replace($link, "weirdAttribute=val", ["dc" => "my-domain"]));
 
-// Invalid attributes
-var_dump(ldap_mod_replace($link, "$base", array('dc')));
 ?>
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 ?>
 --EXPECTF--
 Warning: ldap_mod_replace(): Modify: No such object in %s on line %d
 bool(false)
 
 Warning: ldap_mod_replace(): Modify: Invalid DN syntax in %s on line %d
-bool(false)
-
-Warning: ldap_mod_replace(): Unknown attribute in the data in %s on line %d
 bool(false)

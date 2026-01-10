@@ -42,7 +42,7 @@ define print_cvs
 
 	printf "Compiled variables count: %d\n\n", $cv_count
 	while $cv_idx < $cv_count
-		printf "[%d] '%s'\n", $cv_idx, $cv[$cv_idx].val
+		printf "[%d] '$%s'\n", $cv_idx, $cv[$cv_idx].val@$cv[$cv_idx].len
 		set $zvalue = ((zval *) $cv_ex_ptr) + $callFrameSize + $cv_idx
 		printzv $zvalue
 		set $cv_idx = $cv_idx + 1
@@ -482,7 +482,7 @@ end
 
 define print_pi
 	set $pi = (zend_property_info *)$arg0
-	set $initial_offset = ((uint32_t)(zend_uintptr_t)(&((zend_object*)0)->properties_table[(0)]))
+	set $initial_offset = ((uint32_t)(uintptr_t)(&((zend_object*)0)->properties_table[(0)]))
 	set $ptr_to_val = (zval*)((char*)$pi->ce->default_properties_table + $pi->offset - $initial_offset)
 	printf "[%p] {\n", $pi
 	printf "    offset = %p\n", $pi->offset

@@ -31,7 +31,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
 static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
@@ -1009,7 +1009,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t opcode) /* {{{ */
 {
 	const char *opname = zend_get_opcode_name(opcode);
 
@@ -1206,14 +1206,14 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num) /* {{{ */
 					name = estrdup(brake->name);
 					name_len = strlen(name);
 					if (zend_hash_num_elements(&PHPDBG_G(bp)[type]) == 1) {
-						PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+						PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 					}
 				}
 			break;
 
 			default: {
 				if (zend_hash_num_elements(table) == 1) {
-					PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+					PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 				}
 			}
 		}
@@ -1510,28 +1510,28 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type) /* {{{ */
 			phpdbg_out(SEPARATE "\n");
 			phpdbg_out("Opline Breakpoints:\n");
 			ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], brake) {
-				const char *type;
+				const char *str_type;
 				switch (brake->type) {
 					case PHPDBG_BREAK_METHOD_OPLINE:
-						type = "method";
+						str_type = "method";
 						goto print_opline;
 					case PHPDBG_BREAK_FUNCTION_OPLINE:
-						type = "function";
+						str_type = "function";
 						goto print_opline;
 					case PHPDBG_BREAK_FILE_OPLINE:
-						type = "method";
+						str_type = "method";
 
 					print_opline: {
 						if (brake->type == PHPDBG_BREAK_METHOD_OPLINE) {
-							type = "method";
+							str_type = "method";
 						} else if (brake->type == PHPDBG_BREAK_FUNCTION_OPLINE) {
-							type = "function";
+							str_type = "function";
 						} else if (brake->type == PHPDBG_BREAK_FILE_OPLINE) {
-							type = "file";
+							str_type = "file";
 						}
 
 						phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"\t\t(%s breakpoint)%s",
-							brake->id, brake->opline, type,
+							brake->id, brake->opline, str_type,
 							((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
 					} break;
 

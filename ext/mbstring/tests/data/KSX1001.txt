@@ -29,7 +29,7 @@
 # (at ftp://ftp.unicode.org/Public/MAPPING/EASTASIA/KSC) which is
 # actually NOT the mapping between KS X 1001(KS C 5601-1992) and Unicode 2.0
 # BUT the mapping table between UHC (Microsoft Unified Hangul Code)
-# and Unicode 2.0. Hence, in this pacakge, I renamed it as UHC.TXT
+# and Unicode 2.0. Hence, in this package, I renamed it as UHC.TXT
 #
 # Please, note that there was a change in naming scheme of
 # Korean standard for information exchange. 
@@ -50,7 +50,7 @@
 #    printf ("0x%04X  0x%04X  %s\n",$k-0x8080, $u,join(' ',@rest));
 #  }
 #
-# Column #1 : KS X 1001(KS C 5601-1992 excluding addtional Hangul
+# Column #1 : KS X 1001(KS C 5601-1992 excluding additional Hangul
 #            syllables defined for Johab encoding in Annex 3)
 #            in hex as 0xXXXX
 # Column #2 : the Unicode (in hex as 0xXXXX)

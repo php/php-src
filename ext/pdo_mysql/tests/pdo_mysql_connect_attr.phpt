@@ -4,27 +4,26 @@ PDO_MYSQL: check the session_connect_attrs table for connection attributes
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');
+MySQLPDOTest::skipNotMySQLnd();
 
 $pdo = MySQLPDOTest::factory();
 
-$stmt = $pdo->query("select count(*) from information_schema.tables where table_schema='performance_schema' and table_name='session_connect_attrs'");
+$stmt = $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='performance_schema' AND table_name='session_connect_attrs'");
 if (!$stmt || !$stmt->fetchColumn()) {
     die("skip mysql does not support session_connect_attrs table yet");
 }
 
-$stmt = $pdo->query("show variables like 'performance_schema'");
+$stmt = $pdo->query("SHOW VARIABLES LIKE 'performance_schema'");
 if (!$stmt || $stmt->fetchColumn(1) !== 'ON') {
     die("skip performance_schema is OFF");
 }
-
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 
 if (preg_match('/host=([^;]+)/', PDO_MYSQL_TEST_DSN, $m)) {
@@ -33,7 +32,7 @@ if (preg_match('/host=([^;]+)/', PDO_MYSQL_TEST_DSN, $m)) {
 
 //in case $host is empty, do not test for _server_host field
 if (isset($host) && $host !== '') {
-    $stmt = $pdo->query("select * from performance_schema.session_connect_attrs where ATTR_NAME='_server_host' and processlist_id = connection_id()");
+    $stmt = $pdo->query("SELECT * FROM performance_schema.session_connect_attrs WHERE ATTR_NAME='_server_host' AND processlist_id = connection_id()");
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -44,7 +43,7 @@ if (isset($host) && $host !== '') {
     }
 }
 
-$stmt = $pdo->query("select * from performance_schema.session_connect_attrs where ATTR_NAME='_client_name' and processlist_id = connection_id()");
+$stmt = $pdo->query("SELECT * FROM performance_schema.session_connect_attrs WHERE ATTR_NAME='_client_name' AND processlist_id = connection_id()");
 
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$row || !isset($row['attr_name'])) {

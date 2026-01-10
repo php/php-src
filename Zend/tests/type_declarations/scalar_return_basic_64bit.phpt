@@ -44,7 +44,7 @@ $values = [
     [],
     new StdClass,
     new StringCapable,
-    fopen("data:text/plain,foobar", "r")
+    STDERR,
 ];
 
 foreach ($functions as $type => $function) {
@@ -74,32 +74,32 @@ int(1)
 E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line %d
 int(1)
 *** Trying string(2) "1a"
-*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(1) "a"
-*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, string returned in %s on line %d
 *** Trying int(9223372036854775807)
 int(9223372036854775807)
 *** Trying float(NAN)
-*** Caught {closure}(): Return value must be of type int, float returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, float returned in %s on line %d
 *** Trying bool(true)
 int(1)
 *** Trying bool(false)
 int(0)
 *** Trying NULL
-*** Caught {closure}(): Return value must be of type int, null returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught {closure}(): Return value must be of type int, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type int, array returned in %s on line %d
+*** Trying object(stdClass)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type int, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type int, stdClass returned in %s on line %d
+*** Trying object(StringCapable)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type int, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
-*** Caught {closure}(): Return value must be of type int, resource returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type int, StringCapable returned in %s on line %d
+*** Trying resource(%d) of type (stream)
+*** Caught {closure:%s:%d}(): Return value must be of type int, resource returned in %s on line %d
 
 Testing 'float' type:
 *** Trying int(1)
@@ -111,11 +111,11 @@ float(1)
 *** Trying float(1.5)
 float(1.5)
 *** Trying string(2) "1a"
-*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(1) "a"
-*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type float, string returned in %s on line %d
 *** Trying int(9223372036854775807)
 float(9.223372036854776E+18)
 *** Trying float(NAN)
@@ -125,18 +125,18 @@ float(1)
 *** Trying bool(false)
 float(0)
 *** Trying NULL
-*** Caught {closure}(): Return value must be of type float, null returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type float, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught {closure}(): Return value must be of type float, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type float, array returned in %s on line %d
+*** Trying object(stdClass)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type float, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type float, stdClass returned in %s on line %d
+*** Trying object(StringCapable)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type float, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
-*** Caught {closure}(): Return value must be of type float, resource returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type float, StringCapable returned in %s on line %d
+*** Trying resource(%d) of type (stream)
+*** Caught {closure:%s:%d}(): Return value must be of type float, resource returned in %s on line %d
 
 Testing 'string' type:
 *** Trying int(1)
@@ -156,24 +156,25 @@ string(0) ""
 *** Trying int(9223372036854775807)
 string(19) "9223372036854775807"
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to string on line %d
 string(3) "NAN"
 *** Trying bool(true)
 string(1) "1"
 *** Trying bool(false)
 string(0) ""
 *** Trying NULL
-*** Caught {closure}(): Return value must be of type string, null returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type string, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught {closure}(): Return value must be of type string, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type string, array returned in %s on line %d
+*** Trying object(stdClass)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type string, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type string, stdClass returned in %s on line %d
+*** Trying object(StringCapable)#%d (0) {
 }
 string(6) "foobar"
-*** Trying resource(5) of type (stream)
-*** Caught {closure}(): Return value must be of type string, resource returned in %s on line %d
+*** Trying resource(%d) of type (stream)
+*** Caught {closure:%s:%d}(): Return value must be of type string, resource returned in %s on line %d
 
 Testing 'bool' type:
 *** Trying int(1)
@@ -193,23 +194,24 @@ bool(false)
 *** Trying int(9223372036854775807)
 bool(true)
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to bool on line %d
 bool(true)
 *** Trying bool(true)
 bool(true)
 *** Trying bool(false)
 bool(false)
 *** Trying NULL
-*** Caught {closure}(): Return value must be of type bool, null returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type bool, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught {closure}(): Return value must be of type bool, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type bool, array returned in %s on line %d
+*** Trying object(stdClass)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type bool, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Caught {closure:%s:%d}(): Return value must be of type bool, stdClass returned in %s on line %d
+*** Trying object(StringCapable)#%d (0) {
 }
-*** Caught {closure}(): Return value must be of type bool, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
-*** Caught {closure}(): Return value must be of type bool, resource returned in %s on line %d
+*** Caught {closure:%s:%d}(): Return value must be of type bool, StringCapable returned in %s on line %d
+*** Trying resource(%d) of type (stream)
+*** Caught {closure:%s:%d}(): Return value must be of type bool, resource returned in %s on line %d
 
 Done

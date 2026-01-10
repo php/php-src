@@ -4,14 +4,15 @@ proc_open() regression test 1 (proc_open() leak)
 <?php
 $pipes = array(1, 2, 3);
 $orig_pipes = $pipes;
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 if ($php === false) {
     die("no php executable defined");
 }
+/* PATH is needed to find ASan DLLs (and maybe others) on Windows */
 $proc = proc_open(
     "$php -n",
     array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
-    $pipes, getcwd(), array(), array()
+    $pipes, getcwd(), array('PATH' => getenv('PATH')), array()
 );
 if ($proc === false) {
     print "something went wrong.\n";

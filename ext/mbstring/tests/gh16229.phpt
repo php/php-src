@@ -14,7 +14,7 @@ if (!function_exists("mb_send_mail") || !mb_language("japanese")) {
 --FILE--
 <?php
 try {
-	$a = false;
+	$a = '';
 	mb_send_mail($a,$a,$a,$a,$a);
 } catch (Exception $e) {
 }

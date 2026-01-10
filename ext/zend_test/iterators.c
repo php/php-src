@@ -52,7 +52,7 @@ static void test_traversable_it_next(zend_object_iterator *iter) {
 	ZVAL_LONG(&iterator->current, Z_LVAL(iterator->current) + 1);
 }
 
-static int test_traversable_it_valid(zend_object_iterator *iter) {
+static zend_result test_traversable_it_valid(zend_object_iterator *iter) {
 	DUMP("TraversableTest::valid\n");
 	test_traversable_it *iterator = test_traversable_it_fetch(iter);
 	if (Z_LVAL(iterator->current) < 4) {

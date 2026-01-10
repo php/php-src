@@ -33,9 +33,6 @@ fclose($fh);
 
 $im = imagecreatefromgd2($fname);
 
-if ($im) {
-    imagedestroy($im);
-}
 unlink($fname);
 
 ?>

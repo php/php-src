@@ -40,13 +40,23 @@
 #define SAVE_CURL_ERROR(__handle, __err) \
     do { (__handle)->err.no = (int) __err; } while (0)
 
+
+ZEND_BEGIN_MODULE_GLOBALS(curl)
+	HashTable persistent_curlsh;
+ZEND_END_MODULE_GLOBALS(curl)
+
+ZEND_EXTERN_MODULE_GLOBALS(curl)
+
+#define CURL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(curl, v)
+
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
+PHP_GINIT_FUNCTION(curl);
+PHP_GSHUTDOWN_FUNCTION(curl);
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	smart_str             buf;
 	int                   method;
@@ -54,8 +64,7 @@ typedef struct {
 } php_curl_write;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	zend_resource        *res;
 	int                   method;
@@ -63,20 +72,20 @@ typedef struct {
 } php_curl_read;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
-} php_curl_callback;
-
-typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_callback *progress;
-#if LIBCURL_VERSION_NUM >= 0x072000
-	php_curl_callback  *xferinfo;
+	zend_fcall_info_cache progress;
+	zend_fcall_info_cache xferinfo;
+	zend_fcall_info_cache fnmatch;
+	zend_fcall_info_cache debug;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	zend_fcall_info_cache prereq;
 #endif
-	php_curl_callback  *fnmatch;
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	zend_fcall_info_cache sshhostkey;
+#endif
 } php_curl_handlers;
 
 struct _php_curl_error  {
@@ -91,10 +100,7 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
-#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
-	zend_llist buffers;
-#endif
-	HashTable *slist;
+	HashTable slist;
 };
 
 typedef struct {
@@ -116,7 +122,7 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curl_callback	*server_push;
+	zend_fcall_info_cache server_push;
 } php_curlm_handlers;
 
 typedef struct {
@@ -144,6 +150,9 @@ void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
+/* Consumes `zv` */
+zend_long php_curl_get_long(zval *zv);
+
 static inline php_curl *curl_from_obj(zend_object *obj) {
 	return (php_curl *)((char *)(obj) - XtOffsetOf(php_curl, std));
 }
@@ -158,6 +167,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
+void curl_share_persistent_register_handlers(void);
+void curl_share_free_persistent_curlsh(zval *data);
 void curlfile_register_class(void);
 zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 

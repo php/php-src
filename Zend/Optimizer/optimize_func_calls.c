@@ -37,7 +37,7 @@ typedef struct _optimizer_call_info {
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 
-static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opline)
+static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op *opline)
 {
 	int call = 0;
 
@@ -48,6 +48,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				if (call == 0) {
 					MAKE_NOP(opline);
 					return;
@@ -75,10 +76,12 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 	}
 }
 
-static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_op *opline, zend_function *func)
+static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, zend_op *opline, const zend_function *func)
 {
+	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
+
 	if (func->type == ZEND_USER_FUNCTION
-	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS))
+	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_DEPRECATED|no_discard))
 		/* TODO: function copied from trait may be inconsistent ??? */
 	 && !(func->op_array.fn_flags & (ZEND_ACC_TRAIT_CLONE))
 	 && fcall->extended_value >= func->op_array.required_num_args
@@ -150,7 +153,7 @@ static bool has_known_send_mode(const optimizer_call_info *info, uint32_t arg_nu
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
-	zend_op *end = opline + op_array->last;
+	const zend_op *end = opline + op_array->last;
 	int call = 0;
 	void *checkpoint;
 	optimizer_call_info *call_stack;
@@ -169,12 +172,15 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
 			case ZEND_NEW:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				/* The argument passing optimizations are valid for prototypes as well,
 				 * as inheritance cannot change between ref <-> non-ref arguments. */
 				call_stack[call].func = zend_optimizer_get_called_func(
 					ctx->script, op_array, opline, &call_stack[call].is_prototype);
 				call_stack[call].try_inline =
-					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
+					!call_stack[call].is_prototype
+					&& opline->opcode != ZEND_NEW
+					&& opline->opcode != ZEND_INIT_PARENT_PROPERTY_HOOK_CALL;
 				ZEND_FALLTHROUGH;
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
@@ -198,24 +204,29 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
 						fcall->op2.constant = fcall->op2.constant + 1;
-						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
-							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
-						}
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
 						fcall->op2.constant = fcall->op2.constant + 1;
-						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
-							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
-						}
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
 							|| fcall->opcode == ZEND_INIT_METHOD_CALL
+							|| fcall->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL
 							|| fcall->opcode == ZEND_NEW) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
 						ZEND_UNREACHABLE();
+					}
+
+					/* If the INIT opcode changed the DO opcode can also change to
+					 * a more optimized one.
+					 *
+					 * At this point we also know whether or not the result of
+					 * the DO opcode is used, allowing to optimize calls to
+					 * ZEND_ACC_NODISCARD functions. */
+					if (opline->opcode != ZEND_CALLABLE_CONVERT) {
+						opline->opcode = zend_get_call_op(fcall, call_stack[call].func, !RESULT_UNUSED(opline));
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
@@ -226,7 +237,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				call_stack[call].func = NULL;
 				call_stack[call].opline = NULL;
-				call_stack[call].try_inline = 0;
+				call_stack[call].try_inline = false;
 				call_stack[call].func_arg_num = (uint32_t)-1;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
@@ -254,7 +265,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								&& opline->op2_type == IS_UNUSED) {
 							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
 							 * Performing the replacement would create an invalid opcode. */
-							call_stack[call - 1].try_inline = 0;
+							call_stack[call - 1].try_inline = false;
 							break;
 						}
 
@@ -268,7 +279,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAL_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -280,7 +291,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_CHECK_FUNC_ARG:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					call_stack[call - 1].func_arg_num = (uint32_t)-1;
 					break;
 				}
@@ -294,7 +305,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* Don't transform SEND_FUNC_ARG if any FETCH opcodes weren't transformed. */
 				if (call_stack[call - 1].last_check_func_arg_opline == NULL) {
 					if (opline->op2_type == IS_CONST) {
-						call_stack[call - 1].try_inline = 0;
+						call_stack[call - 1].try_inline = false;
 					}
 					break;
 				}
@@ -303,7 +314,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				ZEND_FALLTHROUGH;
 			case ZEND_SEND_VAR_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -318,7 +329,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAR_NO_REF_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -336,14 +347,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_SEND_VAR:
 			case ZEND_SEND_REF:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 				break;
 			case ZEND_SEND_UNPACK:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_ARRAY:
-				call_stack[call - 1].try_inline = 0;
+				call_stack[call - 1].try_inline = false;
 				break;
 			default:
 				break;

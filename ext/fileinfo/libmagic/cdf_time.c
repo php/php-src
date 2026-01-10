@@ -23,12 +23,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "php.h"
 
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.19 2019/03/12 20:43:05 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.25 2024/11/25 21:24:59 christos Exp $")
 #endif
 
 #include <time.h>
@@ -42,14 +41,14 @@ FILE_RCSID("@(#)$File: cdf_time.c,v 1.19 2019/03/12 20:43:05 christos Exp $")
 #define isleap(y) ((((y) % 4) == 0) && \
     ((((y) % 100) != 0) || (((y) % 400) == 0)))
 
-static const int mdays[] = {
+file_private const int mdays[] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
 /*
  * Return the number of days between jan 01 1601 and jan 01 of year.
  */
-static int
+file_private int
 cdf_getdays(int year)
 {
 	int days = 0;
@@ -64,7 +63,7 @@ cdf_getdays(int year)
 /*
  * Return the day within the month
  */
-static int
+file_private int
 cdf_getday(int year, int days)
 {
 	size_t m;
@@ -81,7 +80,7 @@ cdf_getday(int year, int days)
 /*
  * Return the 0...11 month number.
  */
-static int
+file_private int
 cdf_getmonth(int year, int days)
 {
 	size_t m;
@@ -96,12 +95,12 @@ cdf_getmonth(int year, int days)
 	return CAST(int, m);
 }
 
-int
+file_protected int
 cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 {
 	struct tm tm;
 #ifdef HAVE_STRUCT_TM_TM_ZONE
-	static char UTC[] = "UTC";
+	file_private char UTC[] = "UTC";
 #endif
 	int rdays;
 
@@ -143,7 +142,7 @@ cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 	return 0;
 }
 
-int
+file_protected int
 /*ARGSUSED*/
 cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 {
@@ -153,12 +152,12 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 #endif
 #ifdef notyet
 	struct tm tm;
-	if (php_gmtime_r(&ts->ts_sec, &tm) == NULL) {
+	if (gmtime_r(&ts->ts_sec, &tm) == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 	*t = (ts->ts_nsec / 100) * CDF_TIME_PREC;
-	*t = tm.tm_sec;
+	*t += tm.tm_sec;
 	*t += tm.tm_min * 60;
 	*t += tm.tm_hour * 60 * 60;
 	*t += tm.tm_mday * 60 * 60 * 24;
@@ -166,14 +165,19 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 	return 0;
 }
 
-char *
+file_protected char *
 cdf_ctime(const time_t *sec, char *buf)
 {
-	char *ptr = php_ctime_r(sec, buf);
+	char *ptr = *sec > MAX_CTIME ? NULL : ctime_r(sec, buf);
 	if (ptr != NULL)
 		return buf;
+#ifdef WIN32
+	(void)snprintf(buf, 26, "*Bad* 0x%16.16I64x\n",
+	    CAST(long long, *sec));
+#else
 	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 	    CAST(long long, *sec));
+#endif
 	return buf;
 }
 
@@ -184,8 +188,8 @@ main(int argc, char *argv[])
 {
 	struct timespec ts;
 	char buf[25];
-	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
-	static const char *ref = "Sat Apr 23 01:30:00 1977";
+	file_private const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
+	file_private const char *ref = "Sat Apr 23 01:30:00 1977";
 	char *p, *q;
 
 	cdf_timestamp_to_timespec(&ts, tst);

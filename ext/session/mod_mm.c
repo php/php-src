@@ -207,7 +207,7 @@ static zend_result ps_mm_key_exists(ps_mm *data, const zend_string *key)
 	if (!key) {
 		return FAILURE;
 	}
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, key, false);
 	if (sd) {
 		return SUCCESS;
 	}
@@ -264,7 +264,7 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	size_t save_path_len = strlen(PS(save_path));
+	size_t save_path_len = ZSTR_LEN(PS(save_path));
 	size_t mod_name_len = strlen(sapi_module.name);
 	size_t euid_len;
 	char *ps_mm_path, euid[30];
@@ -284,8 +284,8 @@ PHP_MINIT_FUNCTION(ps_mm)
 	/* Directory + '/' + File + Module Name + Effective UID + \0 */
 	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
 
-	memcpy(ps_mm_path, PS(save_path), save_path_len);
-	if (save_path_len && PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
+	memcpy(ps_mm_path, ZSTR_VAL(PS(save_path)), save_path_len);
+	if (save_path_len && ZSTR_VAL(PS(save_path))[save_path_len - 1] != DEFAULT_SLASH) {
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		save_path_len++;
 	}
@@ -365,7 +365,7 @@ PS_READ_FUNC(mm)
 		PS(session_status) = php_session_active;
 	}
 
-	sd = ps_sd_lookup(data, PS(id), 0);
+	sd = ps_sd_lookup(data, PS(id), false);
 	if (sd) {
 		*val = zend_string_init(sd->data, sd->datalen, 0);
 		ret = SUCCESS;
@@ -383,7 +383,7 @@ PS_WRITE_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 1);
+	sd = ps_sd_lookup(data, key, true);
 	if (!sd) {
 		sd = ps_sd_new(data, key);
 		ps_mm_debug(("new entry for %s\n", ZSTR_VAL(key)));
@@ -422,7 +422,7 @@ PS_DESTROY_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, key, false);
 	if (sd) {
 		ps_sd_destroy(data, sd);
 	}

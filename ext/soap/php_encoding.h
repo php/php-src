@@ -35,7 +35,7 @@
 #define SOAP_1_2_ENC_NAMESPACE "http://www.w3.org/2003/05/soap-encoding"
 #define SOAP_1_2_ENC_NS_PREFIX "enc"
 
-#define SCHEMA_NAMESPACE "http://www.w3.org/2001/XMLSchema"
+#define XSD_DRAFT_2000_NAMESPACE "http://www.w3.org/2000/10/XMLSchema"
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NS_PREFIX "xsd"
 #define XSI_NAMESPACE "http://www.w3.org/2001/XMLSchema-instance"
@@ -181,6 +181,7 @@ struct _encodeType {
 	int type;
 	char *type_str;
 	char *ns;
+	zend_string *clark_notation;
 	sdlTypePtr sdl_type;
 	soapMappingPtr map;
 };
@@ -214,7 +215,7 @@ encodePtr get_conversion(int encode);
 void delete_encoder(zval *zv);
 void delete_encoder_persistent(zval *zv);
 
-extern const encode defaultEncoding[];
+extern encode defaultEncoding[];
 extern int numDefaultEncodings;
 
 #endif

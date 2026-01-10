@@ -8,14 +8,14 @@ $str = <<< EOF
 part1.*.part2 = 1
 EOF;
 
-$file = __DIR__ . '/parse.ini';
+$file = __DIR__ . '/bug46347.ini';
 file_put_contents($file, $str);
 
 var_dump(parse_ini_file($file));
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__.'/parse.ini');
+unlink(__DIR__.'/bug46347.ini');
 ?>
 --EXPECT--
 array(1) {

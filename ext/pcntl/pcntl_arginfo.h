@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c4d254eda16f8cb94f077adc4fe0866b4ad3872a */
+ * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -10,6 +10,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitpid, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
 ZEND_END_ARG_INFO()
+
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, idtype, IS_LONG, 0, "P_ALL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, id, IS_LONG, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "WEXITED")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_wait, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(1, status)
@@ -43,9 +53,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigtimedwait, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -76,7 +84,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pcntl_wstopsig arginfo_pcntl_wexitstatus
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_exec, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_exec, 0, 1, IS_FALSE, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, env_vars, IS_ARRAY, 0, "[]")
@@ -132,9 +140,43 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setns, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nstype, IS_LONG, 0, "CLONE_NEWNET")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getcpuaffinity, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setcpuaffinity, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cpu_ids, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_getcpu, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, Pcntl\\QosClass, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setqos_class, 0, 0, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, Pcntl\\QosClass, 0, "Pcntl\\QosClass::Default")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+ZEND_FUNCTION(pcntl_waitid);
+#endif
 ZEND_FUNCTION(pcntl_wait);
 ZEND_FUNCTION(pcntl_signal);
 ZEND_FUNCTION(pcntl_signal_get_handler);
@@ -144,8 +186,6 @@ ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigwaitinfo);
-#endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
 ZEND_FUNCTION(pcntl_wifexited);
@@ -177,11 +217,27 @@ ZEND_FUNCTION(pcntl_rfork);
 #if defined(HAVE_FORKX)
 ZEND_FUNCTION(pcntl_forkx);
 #endif
-
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_FUNCTION(pcntl_setns);
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_FUNCTION(pcntl_getcpuaffinity);
+ZEND_FUNCTION(pcntl_setcpuaffinity);
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_FUNCTION(pcntl_getcpu);
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_FUNCTION(pcntl_getqos_class);
+ZEND_FUNCTION(pcntl_setqos_class);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
 	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+	ZEND_FE(pcntl_waitid, arginfo_pcntl_waitid)
+#endif
 	ZEND_FE(pcntl_wait, arginfo_pcntl_wait)
 	ZEND_FE(pcntl_signal, arginfo_pcntl_signal)
 	ZEND_FE(pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler)
@@ -191,8 +247,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
-#endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif
 	ZEND_FE(pcntl_wifexited, arginfo_pcntl_wifexited)
@@ -207,7 +261,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_exec, arginfo_pcntl_exec)
 	ZEND_FE(pcntl_alarm, arginfo_pcntl_alarm)
 	ZEND_FE(pcntl_get_last_error, arginfo_pcntl_get_last_error)
-	ZEND_FALIAS(pcntl_errno, pcntl_get_last_error, arginfo_pcntl_errno)
+	ZEND_RAW_FENTRY("pcntl_errno", zif_pcntl_get_last_error, arginfo_pcntl_errno, 0, NULL, NULL)
 #if defined(HAVE_GETPRIORITY)
 	ZEND_FE(pcntl_getpriority, arginfo_pcntl_getpriority)
 #endif
@@ -225,6 +279,20 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_FORKX)
 	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
 #endif
+#if defined(HAVE_PIDFD_OPEN)
+	ZEND_FE(pcntl_setns, arginfo_pcntl_setns)
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+	ZEND_FE(pcntl_getcpuaffinity, arginfo_pcntl_getcpuaffinity)
+	ZEND_FE(pcntl_setcpuaffinity, arginfo_pcntl_setcpuaffinity)
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+	ZEND_FE(pcntl_getcpu, arginfo_pcntl_getcpu)
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	ZEND_FE(pcntl_getqos_class, arginfo_pcntl_getqos_class)
+	ZEND_FE(pcntl_setqos_class, arginfo_pcntl_setqos_class)
+#endif
 	ZEND_FE_END
 };
 
@@ -238,6 +306,31 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_WCONTINUED)
 	REGISTER_LONG_CONSTANT("WCONTINUED", LONG_CONST(WCONTINUED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+	REGISTER_LONG_CONSTANT("WEXITED", LONG_CONST(WEXITED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
+	REGISTER_LONG_CONSTANT("WSTOPPED", LONG_CONST(WSTOPPED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
+	REGISTER_LONG_CONSTANT("WNOWAIT", LONG_CONST(WNOWAIT), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_ALL", LONG_CONST(P_ALL), CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("P_PID", LONG_CONST(P_PID), CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("P_PGID", LONG_CONST(P_PGID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_LINUX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_PIDFD", LONG_CONST(P_PIDFD), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_UID", LONG_CONST(P_UID), CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("P_GID", LONG_CONST(P_GID), CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("P_SID", LONG_CONST(P_SID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_FREEBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_JAILID", LONG_CONST(P_JAILID), CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SIG_IGN", LONG_CONST(SIG_IGN), CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_DFL", LONG_CONST(SIG_DFL), CONST_PERSISTENT);
@@ -289,11 +382,18 @@ static void register_pcntl_symbols(int module_number)
 #if defined(SIGPWR)
 	REGISTER_LONG_CONSTANT("SIGPWR", LONG_CONST(SIGPWR), CONST_PERSISTENT);
 #endif
-#if defined(SIGSYS)
-	REGISTER_LONG_CONSTANT("SIGSYS", LONG_CONST(SIGSYS), CONST_PERSISTENT);
+#if defined(SIGINFO)
+	REGISTER_LONG_CONSTANT("SIGINFO", LONG_CONST(SIGINFO), CONST_PERSISTENT);
 #endif
 #if defined(SIGSYS)
+	REGISTER_LONG_CONSTANT("SIGSYS", LONG_CONST(SIGSYS), CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIGBABY", LONG_CONST(SIGSYS), CONST_PERSISTENT);
+#endif
+#if defined(SIGCKPT)
+	REGISTER_LONG_CONSTANT("SIGCKPT", LONG_CONST(SIGCKPT), CONST_PERSISTENT);
+#endif
+#if defined(SIGCKPTEXIT)
+	REGISTER_LONG_CONSTANT("SIGCKPTEXIT", LONG_CONST(SIGCKPTEXIT), CONST_PERSISTENT);
 #endif
 #if defined(SIGRTMIN)
 	REGISTER_LONG_CONSTANT("SIGRTMIN", LONG_CONST(SIGRTMIN), CONST_PERSISTENT);
@@ -303,26 +403,16 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY)) && defined(PRIO_DARWIN_BG)
 	REGISTER_LONG_CONSTANT("PRIO_DARWIN_BG", PRIO_DARWIN_BG, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY)) && defined(PRIO_DARWIN_BG)
 	REGISTER_LONG_CONSTANT("PRIO_DARWIN_THREAD", PRIO_DARWIN_THREAD, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_BLOCK", SIG_BLOCK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_UNBLOCK", SIG_UNBLOCK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_SETMASK", SIG_SETMASK, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
@@ -336,14 +426,8 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_QUEUE", SI_QUEUE, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_TIMER", SI_TIMER, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_MESGQ", SI_MESGQ, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_ASYNCIO", SI_ASYNCIO, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)) && defined(SI_SIGIO)
@@ -501,8 +585,6 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_FORKX)
 	REGISTER_LONG_CONSTANT("FORK_NOSIGCHLD", FORK_NOSIGCHLD, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_FORKX)
 	REGISTER_LONG_CONSTANT("FORK_WAITPID", FORK_WAITPID, CONST_PERSISTENT);
 #endif
 #if defined(EINTR)
@@ -577,4 +659,21 @@ static void register_pcntl_symbols(int module_number)
 #if defined(ECAPMODE)
 	REGISTER_LONG_CONSTANT("PCNTL_ECAPMODE", ECAPMODE, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_Pcntl_QosClass(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Pcntl\\QosClass", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "UserInteractive", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "UserInitiated", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Default", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Utility", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Background", NULL);
+
+	return class_entry;
 }

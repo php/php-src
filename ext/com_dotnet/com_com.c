@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -28,7 +28,7 @@
 /* {{{ com_create_instance - ctor for COM class */
 PHP_METHOD(com, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	zend_string *server_name = NULL;
 	HashTable *server_params = NULL;
 	php_com_dotnet_object *obj;
@@ -38,8 +38,7 @@ PHP_METHOD(com, __construct)
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
-	HRESULT res = E_FAIL;
-	int mode = COMG(autoreg_case_sensitive) ? CONST_CS : 0;
+	HRESULT res = E_FAIL, res2;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -143,7 +142,7 @@ PHP_METHOD(com, __construct)
 		}
 	}
 
-	if (FAILED(CLSIDFromString(moniker, &clsid))) {
+	if (FAILED(res2 = CLSIDFromString(moniker, &clsid))) {
 		/* try to use it as a moniker */
 		IBindCtx *pBindCtx = NULL;
 		IMoniker *pMoniker = NULL;
@@ -182,6 +181,9 @@ PHP_METHOD(com, __construct)
 		}
 		if (pBindCtx) {
 			IBindCtx_Release(pBindCtx);
+		}
+		if (FAILED(res) && res2 == CO_E_CLASSSTRING && !wcspbrk(moniker, L"\\:")) {
+			res = res2;
 		}
 	} else if (server_name) {
 		MULTI_QI		qi;
@@ -235,7 +237,7 @@ PHP_METHOD(com, __construct)
 
 		if (TL) {
 			if (COMG(autoreg_on)) {
-				php_com_import_typelib(TL, mode, obj->code_page);
+				php_com_import_typelib(TL, 0, obj->code_page);
 			}
 
 			/* cross your fingers... there is no guarantee that this ITypeInfo
@@ -254,7 +256,7 @@ PHP_METHOD(com, __construct)
 				zend_string *typelib_str = php_com_olestring_to_string(name, obj->code_page);
 
 				if (NULL != php_com_cache_typelib(TL, ZSTR_VAL(typelib_str), ZSTR_LEN(typelib_str))) {
-					php_com_import_typelib(TL, mode, obj->code_page);
+					php_com_import_typelib(TL, 0, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
@@ -262,7 +264,7 @@ PHP_METHOD(com, __construct)
 				zend_string_release_ex(typelib_str, /* persistent */ false);
 			} else {
 				/* try it anyway */
-				php_com_import_typelib(TL, mode, obj->code_page);
+				php_com_import_typelib(TL, 0, obj->code_page);
 			}
 
 			ITypeLib_Release(TL);
@@ -279,7 +281,7 @@ PHP_FUNCTION(com_get_active_object)
 	char *module_name;
 	size_t module_name_len;
 	zend_long code_page;
-	bool code_page_is_null = 1;
+	bool code_page_is_null = true;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -307,7 +309,7 @@ PHP_FUNCTION(com_get_active_object)
 		if (FAILED(res)) {
 			php_com_throw_exception(res, NULL);
 		} else {
-			res = IUnknown_QueryInterface(unk, &IID_IDispatch, &obj);
+			res = IUnknown_QueryInterface(unk, &IID_IDispatch, (void **) &obj);
 
 			if (FAILED(res)) {
 				php_com_throw_exception(res, NULL);
@@ -393,7 +395,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 			default:
 				desc = php_win32_error_to_msg(hr);
-				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
+				spprintf(&msg, 0, "Error [0x%08lx] %s", hr, desc);
 				php_win32_error_msg_free(desc);
 				break;
 		}
@@ -536,7 +538,7 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0, 0);
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, false, false);
 
 	/* release variants */
 	if (vargs) {
@@ -640,14 +642,14 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(name), winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
 	}
 
-	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0, allow_noarg);
+	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, false, allow_noarg);
 }
 
 /* {{{ Generate a globally unique identifier (GUID) */
@@ -817,7 +819,7 @@ PHP_FUNCTION(com_load_typelib)
 	php_com_initialize();
 	pTL = php_com_load_typelib_via_cache(name, codepage);
 	if (pTL) {
-		if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
+		if (php_com_import_typelib(pTL, 0, codepage) == SUCCESS) {
 			RETVAL_TRUE;
 		}
 

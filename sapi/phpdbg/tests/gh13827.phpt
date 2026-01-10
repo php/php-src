@@ -25,6 +25,6 @@ prompt> [Uncaught GracefulExit in  on line 0: ]
 >00006:     Fiber::suspend();
  00007: });
  00008: 
-prompt> frame #0: {closure}() at %s:6
- => {closure} (internal function)
+prompt> frame #0: {closure:%s:%d}() at %s:6
+ => {closure:%s:%d} (internal function)
 prompt>

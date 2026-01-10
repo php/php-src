@@ -2,35 +2,47 @@
 Attributes AST can be exported.
 --INI--
 zend.assertions=1
-assert.exception=0
-assert.warning=1
 --FILE--
 <?php
 
-assert(0 && ($a = #[A1] #[A2] function ($a, #[A3(1)] $b) { }));
+try {
+    assert(0 && ($a = #[A1] #[A2] function ($a, #[A3(1)] $b) { }));
+} catch (AssertionError $e) {
+    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+}
 
-assert(0 && ($a = #[A1(1, 2, 1 + 2)] fn () => 1));
+try {
+    assert(0 && ($a = #[A1(1, 2, 1 + 2)] fn () => 1));
+} catch (AssertionError $e) {
+    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+}
 
+try {
 assert(0 && ($a = new #[A1] class() {
     #[A1]#[A2] const FOO = 'foo';
     #[A2] public $x;
     #[A3] function a() { }
 }));
+} catch (AssertionError $e) {
+    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function () {
     #[A1] class Test1 { }
     #[A2] interface Test2 { }
     #[A3] trait Test3 { }
 }));
+} catch (AssertionError $e) {
+    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: assert(): assert(0 && ($a = #[A1] #[A2] function ($a, #[A3(1)] $b) {
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = #[A1(1, 2, 1 + 2)] fn() => 1)) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = new #[A1] class {
+--EXPECT--
+assert(): assert(0 && ($a = #[A1] #[A2] function ($a, #[A3(1)] $b) {
+})) failed
+assert(): assert(0 && ($a = #[A1(1, 2, 1 + 2)] fn() => 1)) failed
+assert(): assert(0 && ($a = new #[A1] class {
     #[A1]
     #[A2]
     public const FOO = 'foo';
@@ -40,9 +52,8 @@ Warning: assert(): assert(0 && ($a = new #[A1] class {
     public function a() {
     }
 
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function () {
+})) failed
+assert(): assert(0 && ($a = function () {
     #[A1]
     class Test1 {
     }
@@ -55,4 +66,4 @@ Warning: assert(): assert(0 && ($a = function () {
     trait Test3 {
     }
 
-})) failed in %s on line %d
+})) failed

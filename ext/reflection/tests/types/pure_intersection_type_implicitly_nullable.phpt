@@ -24,7 +24,8 @@ function foo(X&Y $foo = null) {
 dumpType((new ReflectionFunction('foo'))->getParameters()[0]->getType());
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: foo(): Implicitly marking parameter $foo as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Type (X&Y)|null is ReflectionUnionType:
 Allows Null: true
   Type X&Y is ReflectionIntersectionType:

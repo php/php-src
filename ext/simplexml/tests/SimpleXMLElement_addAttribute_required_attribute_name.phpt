@@ -18,6 +18,6 @@ try {
 echo $a->asXML();
 ?>
 --EXPECT--
-SimpleXMLElement::addAttribute(): Argument #1 ($qualifiedName) cannot be empty
+SimpleXMLElement::addAttribute(): Argument #1 ($qualifiedName) must not be empty
 <?xml version="1.0"?>
 <php>testfest</php>

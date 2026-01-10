@@ -27,8 +27,8 @@ try {
 
 echo "Done\n";
 ?>
---EXPECT--
-gmp_scan0(): Argument #2 ($start) must be greater than or equal to 0
+--EXPECTF--
+gmp_scan0(): Argument #2 ($start) must be between 0 and %d * %d
 int(2)
 int(0)
 int(5)

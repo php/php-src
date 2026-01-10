@@ -12,6 +12,7 @@ CSV;
 file_put_contents($filename, $csv);
 
 $file = new SplFileObject($filename);
+$file->setCsvControl(escape: "");
 $file->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
 var_dump(iterator_to_array($file));
 

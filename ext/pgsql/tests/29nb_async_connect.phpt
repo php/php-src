@@ -4,13 +4,13 @@ PostgreSQL non-blocking async connect
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
 
-include('config.inc');
-include('nonblocking.inc');
+include('inc/config.inc');
+include('inc/nonblocking.inc');
 
 if (!$db = pg_connect($conn_str, PGSQL_CONNECT_ASYNC)) {
     die("pg_connect() error");

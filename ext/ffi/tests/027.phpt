@@ -6,8 +6,10 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
+$ffi = FFI::cdef();
+
 try {
-    $p = FFI::new("int[*]");
+    $p = $ffi->new("int[*]");
     echo "ok\n";
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
@@ -31,17 +33,17 @@ try {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump(FFI::sizeof(FFI::new("int[0]")));
+    var_dump(FFI::sizeof($ffi->new("int[0]")));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump(FFI::sizeof(FFI::new("int[]")));
+    var_dump(FFI::sizeof($ffi->new("int[]")));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump(FFI::sizeof(FFI::cast("int[]", FFI::new("int[2]"))));
+    var_dump(FFI::sizeof($ffi->cast("int[]", $ffi->new("int[2]"))));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }

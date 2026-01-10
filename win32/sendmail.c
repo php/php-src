@@ -29,7 +29,6 @@
 #include <winbase.h>
 #include "sendmail.h"
 #include "php_ini.h"
-#include "inet.h"
 
 #include "php_win32_globals.h"
 
@@ -66,28 +65,28 @@ char *php_mailer = "PHP 7 WIN32";
 /* Error messages */
 static char *ErrorMessages[] =
 {
-	{"Success"}, /* 0 */
-	{"Bad arguments from form"}, /* 1 */
-	{"Unable to open temporary mailfile for read"},
-	{"Failed to Start Sockets"},
-	{"Failed to Resolve Host"},
-	{"Failed to obtain socket handle"}, /* 5 */
-	{"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini"},
-	{"Failed to Send"},
-	{"Failed to Receive"},
-	{"Server Error"},
-	{"Failed to resolve the host IP name"}, /* 10 */
-	{"Out of memory"},
-	{"Unknown error"},
-	{"Bad Message Contents"},
-	{"Bad Message Subject"},
-	{"Bad Message destination"}, /* 15 */
-	{"Bad Message Return Path"},
-	{"Bad Mail Host"},
-	{"Bad Message File"},
-	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
-	{"Mailserver rejected our \"sendmail_from\" setting"}, /* 20 */
-	{"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues"} /* 21 */
+	"Success", /* 0 */
+	"Bad arguments from form", /* 1 */
+	"Unable to open temporary mailfile for read",
+	"Failed to Start Sockets",
+	"Failed to Resolve Host",
+	"Failed to obtain socket handle", /* 5 */
+	"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini",
+	"Failed to Send",
+	"Failed to Receive",
+	"Server Error",
+	"Failed to resolve the host IP name", /* 10 */
+	"Out of memory",
+	"Unknown error",
+	"Bad Message Contents",
+	"Bad Message Subject",
+	"Bad Message destination", /* 15 */
+	"Bad Message Return Path",
+	"Bad Mail Host",
+	"Bad Message File",
+	"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing",
+	"Mailserver rejected our \"sendmail_from\" setting", /* 20 */
+	"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues" /* 21 */
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
@@ -111,6 +110,15 @@ static char *ErrorMessages[] =
  * message body. */
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
+
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
+                    const char *headers, char *headers_lc, char **error_message);
+static int MailConnect();
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
+static int Post(LPCSTR msg);
+static int Ack(char **server_response);
+static unsigned long GetAddr(LPSTR szHost);
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
@@ -163,7 +171,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 	return result2;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  TSendMail
 // Input:   1) host:    Name of the mail host where the SMTP server resides
 //                      max accepted length of name = 256
@@ -175,7 +183,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //                      SUCCESS otherwise.
 //
 //  See SendText() for additional args!
-//********************************************************************/
+//*********************************************************************
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
@@ -196,8 +204,6 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	if (headers) {
-		char *pos = NULL;
-
 		/* Use PCRE to trim the header into the right format */
 		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
@@ -292,14 +298,14 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 }
 
-//********************************************************************
+//*********************************************************************
 // Name:  TSendMail::~TSendMail
 // Input:
 // Output:
 // Description: DESTRUCTOR
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 PHPAPI void TSMClose(void)
 {
 	Post("QUIT\r\n");
@@ -314,14 +320,14 @@ PHPAPI void TSMClose(void)
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  char *GetSMErrorText
 // Input:   Error index returned by the member functions
 // Output:  pointer to a string containing the error description
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//*******************************************************************/
+//*********************************************************************
 PHPAPI char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
@@ -365,7 +371,7 @@ static char *find_address(char *list, char **state)
 	return list;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  SendText
 // Input:       1) RPath:   return path of the message
 //                                  Is used to fill the "Return-Path" and the
@@ -382,7 +388,7 @@ static char *find_address(char *list, char **state)
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//*******************************************************************/
+//*********************************************************************
 static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
 			 const char *headers, char *headers_lc, char **error_message)
 {
@@ -692,12 +698,14 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 static int addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
-	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
-	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
+	size_t header_buffer_size = strlen(*header_buffer);
+	size_t total_size = header_buffer_size + strlen(specifier) + strlen(string) + 1;
+	*header_buffer = erealloc(*header_buffer, total_size);
+	snprintf(*header_buffer + header_buffer_size, total_size - header_buffer_size, specifier, string);
 	return 1;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
 //              2) Subject
@@ -707,7 +715,7 @@ static int addToHeader(char **header_buffer, const char *specifier, const char *
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
@@ -784,14 +792,14 @@ PostHeader_outofmem:
 
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  MailConnect
 // Input:   None
 // Output:  None
 // Description: Connect to the mail host and receive the welcome message.
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int MailConnect()
 {
 
@@ -880,14 +888,14 @@ return 0;
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  Post
 // Input:
 // Output:
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int Post(LPCSTR msg)
 {
 	int len = (int)strlen(msg);
@@ -911,7 +919,7 @@ static int Post(LPCSTR msg)
 
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  Ack
 // Input:
 // Output:
@@ -920,7 +928,7 @@ static int Post(LPCSTR msg)
 // last command was successful.
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int Ack(char **server_response)
 {
 	ZEND_TLS char buf[MAIL_BUFFER_SIZE];
@@ -973,7 +981,7 @@ again:
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  unsigned long GetAddr (LPSTR szHost)
 // Input:
 // Output:
@@ -984,7 +992,7 @@ again:
 // WARNING: gethostbyname() is a blocking function
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static unsigned long GetAddr(LPSTR szHost)
 {
 	LPHOSTENT lpstHost;
@@ -1051,7 +1059,7 @@ static char *get_angle_addr(char *address)
 	return estrndup(p1, p2 - p1);
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  int FormatEmailAddress
 // Input:
 // Output:
@@ -1063,7 +1071,7 @@ static char *get_angle_addr(char *address)
 //
 // Author/Date:  garretts 08/18/2009
 // History:
-//********************************************************************/
+//*********************************************************************
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
 	char *tmpAddress;
 	int result;

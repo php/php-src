@@ -9,14 +9,20 @@ odbc
 include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
-@odbc_exec($conn, 'CREATE DATABASE odbcTEST');
-odbc_exec($conn, 'CREATE TABLE FOO (ID INT, VARCHAR_COL NVARCHAR(MAX))');
-odbc_exec($conn, "INSERT INTO FOO VALUES (1, 'foo')");
+odbc_exec($conn, 'CREATE TABLE bug69975 (ID INT, VARCHAR_COL NVARCHAR(MAX))');
+odbc_exec($conn, "INSERT INTO bug69975 VALUES (1, 'foo')");
 
-$result = odbc_exec($conn, "SELECT VARCHAR_COL FROM FOO");
+$result = odbc_exec($conn, "SELECT VARCHAR_COL FROM bug69975");
 var_dump(odbc_fetch_array($result));
 
 echo "ready";
+?>
+--CLEAN--
+<?php
+include 'config.inc';
+
+$conn = odbc_connect($dsn, $user, $pass);
+odbc_exec($conn, 'DROP TABLE bug69975');
 ?>
 --EXPECT--
 array(1) {
@@ -24,11 +30,4 @@ array(1) {
   string(3) "foo"
 }
 ready
---CLEAN--
-<?php
-include 'config.inc';
 
-$conn = odbc_connect($dsn, $user, $pass);
-odbc_exec($conn, 'DROP TABLE FOO');
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
-?>

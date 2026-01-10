@@ -25,10 +25,8 @@
 #include "php.h"
 #include "main/php_streams.h"
 
-/* Enable per-module logging in Apache 2.4+ */
-#ifdef APLOG_USE_MODULE
+/* Enable per-module logging. */
 APLOG_USE_MODULE(php);
-#endif
 
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
 extern module AP_MODULE_DECLARE_DATA php_module;

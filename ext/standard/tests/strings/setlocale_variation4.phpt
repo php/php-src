@@ -28,7 +28,7 @@ var_dump($locale_info_before);
 
 //Testing setlocale()  by giving locale = null
 echo "Setting system locale, category = LC_ALL and locale = null\n";
-setlocale(LC_ALL, null);
+@setlocale(LC_ALL, null);
 
 echo "Locale info, after setting the locale\n";
 //Returns Current locale,after executing setlocale().

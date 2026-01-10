@@ -15,11 +15,11 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')');
+$db->exec('CREATE TABLE test013(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec("INSERT INTO test013 VALUES(1, 'A', 'Group1')");
+$db->exec("INSERT INTO test013 VALUES(2, 'B', 'Group2')");
 
-$SELECT = 'SELECT val, grp FROM test';
+$SELECT = 'SELECT val, grp FROM test013';
 
 $stmt = $db->prepare($SELECT);
 
@@ -30,7 +30,7 @@ foreach ($stmt as $data)
     var_dump($data);
 }
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -43,19 +43,25 @@ class Test
 
 unset($stmt);
 
-foreach ($db->query($SELECT, PDO::FETCH_CLASS, 'Test') as $data)
+foreach ($db->query($SELECT, PDO::FETCH_CLASS, TestClass::class) as $data)
 {
     var_dump($data);
 }
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class, array('WOW'));
 
 foreach($stmt as $data)
 {
     var_dump($data);
 }
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test013");
 ?>
 --EXPECTF--
 array(2) {
@@ -70,29 +76,29 @@ array(2) {
   [1]=>
   string(6) "Group2"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>
   string(6) "Group2"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

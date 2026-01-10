@@ -5,6 +5,7 @@ Test filesize() function: usage variations - file mode & holes in file
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip only valid for Linux');
 }
+?>
 --FILE--
 <?php
 /* Testing filesize() with data written using different file modes and by creating holes in file */

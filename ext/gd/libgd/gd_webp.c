@@ -152,7 +152,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 			*(p++) = a;
 		}
 	}
-	
+
 	if (quality >= gdWebpLossless) {
 		out_size = WebPEncodeLosslessRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, &out);
 	} else {

@@ -10,10 +10,6 @@ Test array_intersect() function : usage variations - assoc array with diff keys 
 
 echo "*** Testing array_intersect() : assoc array with diff keys to \$arr1 argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a heredoc string
 $heredoc = <<<EOT
 Hello world
@@ -37,13 +33,10 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with unset variable
-/*10*/ array( @$unset_var => "hello"),
-
        // array with mixed keys
 /*11*/ array('hello' => 1,  "fruit" => 2.2,
               133 => "int",
-             @$unset_var => "unset", $heredoc => "heredoc")
+              $heredoc => "heredoc")
 );
 
 // array to be passed to $arr2 argument
@@ -135,15 +128,6 @@ array(2) {
   string(6) "string"
 }
 -- Iterator 8 --
-array(1) {
-  [""]=>
-  string(5) "hello"
-}
-array(1) {
-  [""]=>
-  string(5) "hello"
-}
--- Iterator 9 --
 array(2) {
   ["hello"]=>
   int(1)

@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -249,7 +249,6 @@ static void function_dtor(zval *zv)
 static PHP_FUNCTION(com_method_handler)
 {
 	zval *object = getThis();
-	zend_string *method = EX(func)->common.function_name;
 	zval *args = NULL;
 	php_com_dotnet_object *obj = CDNO_FETCH(object);
 	int nargs;
@@ -307,10 +306,11 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		f.type = ZEND_INTERNAL_FUNCTION;
 		f.num_args = 0;
 		f.arg_info = NULL;
-		f.scope = obj->ce;
+		f.scope = obj->zo.ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
+		f.doc_comment = NULL;
 
 		fptr = &f;
 
@@ -352,7 +352,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							ITypeComp_Release(bindptr.lptcomp);
 							break;
 
-						case DESCKIND_NONE:
+						default:
 							break;
 					}
 					if (TI) {
@@ -391,7 +391,7 @@ static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return zend_string_copy(obj->ce->name);
+	return zend_string_copy(obj->zo.ce->name);
 }
 
 /* This compares two variants for equality */
@@ -514,6 +514,7 @@ zend_object_handlers php_com_object_handlers = {
 	php_com_object_free_storage,
 	zend_objects_destroy_object,
 	php_com_object_clone,
+	NULL, /* clone_with */
 	com_property_read,
 	com_property_write,
 	com_read_dimension,
@@ -624,10 +625,8 @@ zend_object* php_com_object_new(zend_class_entry *ce)
 
 	VariantInit(&obj->v);
 	obj->code_page = CP_ACP;
-	obj->ce = ce;
 
 	zend_object_std_init(&obj->zo, ce);
-	obj->zo.handlers = &php_com_object_handlers;
 
 	obj->typeinfo = NULL;
 

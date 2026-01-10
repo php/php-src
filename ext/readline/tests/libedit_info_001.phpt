@@ -4,9 +4,6 @@ readline_info(): Basic test
 readline
 --SKIPIF--
 <?php if (READLINE_LIB != "libedit") die("skip libedit only");
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-    die('skip not for windows');
-}
 if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
@@ -24,15 +21,11 @@ var_dump(readline_info('attempted_completion_over'));
 
 ?>
 --EXPECTF--
-array(6) {
+array(%d) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
-  int(0)
-  ["end"]=>
-  int(0)
-  ["library_version"]=>
-  string(%d) "%s"
+  int(0)%A
   ["readline_name"]=>
   string(0) ""
   ["attempted_completion_over"]=>

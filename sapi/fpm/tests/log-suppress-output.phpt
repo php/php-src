@@ -38,7 +38,7 @@ function doTestCalls(FPM\Tester &$tester, bool $expectSuppressableEntries)
     $tester->request(query: 'test=output', uri: '/ping')->expectBody('pong', 'text/plain');
     $tester->expectAccessLog("'GET /ping?test=output' 200", suppressable: false);
 
-    $tester->request(headers: ['X_ERROR' => 1])->expectBody('Not OK');
+    $tester->request(headers: ['X_ERROR' => 1])->expectStatus('500 Internal Server Error')->expectBody('Not OK');
     $tester->expectAccessLog("'GET /log-suppress-output.src.php' 500", suppressable: false);
 
     $tester->request()->expectBody('OK');
@@ -54,8 +54,8 @@ function doTestCalls(FPM\Tester &$tester, bool $expectSuppressableEntries)
 $src = <<<EOT
 <?php
 if (isset(\$_SERVER['X_ERROR'])) {
-    echo "Not OK";
     http_response_code(500);
+    echo "Not OK";
     exit;
 }
 echo \$_REQUEST['test'] ?? "OK";

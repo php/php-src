@@ -68,8 +68,8 @@ var_dump($phar->getAlias());
 Entry .phar/stub.php does not exist
 Entry .phar/alias.txt does not exist
 Cannot set stub ".phar/stub.php" directly in phar "%sphar_offset_check.phar.php", use setStub
-int(6643)
-int(6643)
+int(6661)
+int(6661)
 Cannot set alias ".phar/alias.txt" directly in phar "%sphar_offset_check.phar.php", use setAlias
 string(5) "susan"
 string(5) "susan"

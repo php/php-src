@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -32,7 +32,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
-	int keytype;
+	zend_hash_key_type keytype;
 	zend_string *strindex;
 	zend_ulong intindex = 0;
 	VARIANT *va;
@@ -60,7 +60,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
-	SafeArrayAccessData(sa, &va);
+	SafeArrayAccessData(sa, (void **) &va);
 	va = (VARIANT*)sa->pvData;
 
 	/* now fill it in */
@@ -96,7 +96,7 @@ bogus:
 static void php_com_variant_from_zval_ex(VARIANT *v, zval *z, int codepage, VARTYPE vt)
 {
 	php_com_dotnet_object *obj;
-	zend_uchar ztype = IS_NULL;
+	uint8_t ztype = IS_NULL;
 
 	if (z) {
 		ZVAL_DEREF(z);
@@ -247,7 +247,7 @@ PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, in
 			if (V_UNKNOWN(v) != NULL) {
 				IDispatch *disp;
 
-				if (SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(v), &IID_IDispatch, &disp))) {
+				if (SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(v), &IID_IDispatch, (void **) &disp))) {
 					php_com_wrap_dispatch(z, disp, codepage);
 					IDispatch_Release(disp);
 				} else {
@@ -436,7 +436,7 @@ PHP_METHOD(variant, __construct)
 {
 	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
 	zend_long codepage = CP_ACP;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	php_com_dotnet_object *obj;
 	zval *zvalue = NULL;
 	HRESULT res;

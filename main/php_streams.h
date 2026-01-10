@@ -90,7 +90,7 @@ END_EXTERN_C()
  * The only exceptions to this rule are that stream implementations can use
  * the php_stream->abstract pointer to hold their context, and streams
  * opened via stream_open_wrappers can use the zval ptr in
- * php_stream->wrapperdata to hold meta data for php scripts to
+ * php_stream->wrapperdata to hold metadata for php scripts to
  * retrieve using file_get_wrapper_data(). */
 
 typedef struct _php_stream php_stream;
@@ -108,6 +108,7 @@ typedef struct _php_stream_statbuf {
 
 typedef struct _php_stream_dirent {
 	char d_name[MAXPATHLEN];
+	unsigned char d_type;
 } php_stream_dirent;
 
 /* operations on streams that are file-handles */
@@ -182,7 +183,7 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_NO_FCLOSE					0x80
 
 /* Suppress generation of PHP warnings on stream read/write errors.
- * Currently for internal use only. */
+ * Currently, for internal use only. */
 #define PHP_STREAM_FLAG_SUPPRESS_ERRORS				0x100
 
 /* Do not close handle except it is explicitly closed by user (e.g. fclose) */
@@ -199,20 +200,27 @@ struct _php_stream  {
 	php_stream_filter_chain readfilters, writefilters;
 
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
-	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
+	void *wrapperthis;		/* convenience pointer for an instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
-	uint8_t is_persistent:1;
-	uint8_t in_free:2;			/* to prevent recursion during free */
-	uint8_t eof:1;
-	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+	uint16_t is_persistent:1;
+	uint16_t in_free:2;			/* to prevent recursion during free */
+	uint16_t eof:1;
+	uint16_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
 
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
-	uint8_t fclose_stdiocast:2;
+	uint16_t fclose_stdiocast:2;
+
+
+	/* flag to mark whether the stream has buffered data */
+	uint16_t has_buffered_data:1;
 
 	/* whether stdio cast flushing is in progress */
-	uint8_t fclose_stdiocast_flush_in_progress:1;
+	uint16_t fclose_stdiocast_flush_in_progress:1;
+
+	/* whether fatal error happened and all operations should terminates as soon as possible */
+	uint16_t fatal_error:1;
 
 	char mode[16];			/* "rwb" etc. ala stdio */
 
@@ -280,7 +288,50 @@ END_EXTERN_C()
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
+static zend_always_inline php_stream* php_stream_from_zval_no_verify_no_error(zval *zval) {
+	return (php_stream*)zend_fetch_resource2_ex(zval, NULL, php_file_le_stream(), php_file_le_pstream());
+}
+
 BEGIN_EXTERN_C()
+
+static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
+	zval *arg,
+	php_stream **destination_stream_ptr,
+	bool check_null,
+	uint32_t arg_num
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		zend_resource *res = Z_RES_P(arg);
+		/* We do not use zend_fetch_resource2() API,
+		 * as we want to be able to specify the argument number in the type error */
+		if (EXPECTED(res->type == php_file_le_stream() || res->type == php_file_le_pstream())) {
+			*destination_stream_ptr = (php_stream*)res->ptr;
+			return true;
+		} else {
+			zend_argument_type_error(arg_num, "must be an open stream resource");
+			return false;
+		}
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*destination_stream_ptr = NULL;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+#define PHP_Z_PARAM_STREAM_EX(destination_stream_ptr, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream(_arg, &destination_stream_ptr, check_null, _i))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+		} \
+		break; \
+	}
+#define PHP_Z_PARAM_STREAM(dest) PHP_Z_PARAM_STREAM_EX(dest, false)
+#define PHP_Z_PARAM_STREAM_OR_NULL(dest) PHP_Z_PARAM_STREAM_EX(dest, true)
+
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
 #define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options))
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);
@@ -292,7 +343,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
-#define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
+#define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close its underlying handle */
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
 #define PHP_STREAM_FREE_IGNORE_ENCLOSING	32 /* don't close the enclosing stream instead */
@@ -310,7 +361,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence))
 
-PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
+PHPAPI zend_off_t _php_stream_tell(const php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
@@ -443,7 +494,7 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize);
 #define php_stream_truncate_set_size(stream, size)	_php_stream_truncate_set_size((stream), (size))
 END_EXTERN_C()
 
-#define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add meta data information */
+#define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add metadata information */
 #define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
 /* Check if the stream is still "live"; for sockets/pipes this means the socket
@@ -480,7 +531,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 /* read all data from stream and put into a buffer. Caller must free buffer
  * when done. */
-PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC);
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool persistent STREAMS_DC);
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */
@@ -510,7 +561,7 @@ END_EXTERN_C()
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 BEGIN_EXTERN_C()
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
+PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
 END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0)
@@ -575,7 +626,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
-int php_init_stream_wrappers(int module_number);
+zend_result php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);
@@ -595,15 +646,18 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 /* pushes an error message onto the stack for a wrapper instance */
 PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
-#define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
-#define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
-#define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
-#define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
+typedef enum {
+	PHP_STREAM_UNCHANGED = 0, /* orig stream was seekable anyway */
+	PHP_STREAM_RELEASED = 1, /* newstream should be used; origstream is no longer valid */
+	PHP_STREAM_FAILED = 2, /* an error occurred while attempting conversion */
+	PHP_STREAM_CRITICAL = 3, /* an error occurred; origstream is in an unknown state; you should close origstream */
+} php_stream_make_seekable_status;
+
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
 #define PHP_STREAM_FORCE_CONVERSION	2
 /* DO NOT call this on streams that are referenced by resources! */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
+PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
@@ -614,6 +668,20 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
 extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
+
+static inline bool php_is_stream_path(const char *filename)
+{
+	const char *p;
+
+	for (p = filename;
+	     (*p >= 'a' && *p <= 'z') ||
+	     (*p >= 'A' && *p <= 'Z') ||
+	     (*p >= '0' && *p <= '9') ||
+	     *p == '+' || *p == '-' || *p == '.';
+	     p++);
+	return ((p != filename) && (p[0] == ':') && (p[1] == '/') && (p[2] == '/'));
+}
+
 END_EXTERN_C()
 #endif
 

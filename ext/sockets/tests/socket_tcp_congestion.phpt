@@ -7,6 +7,7 @@ sockets
 if (!defined('TCP_CONGESTION')) {
     die('skip TCP_CONGESTION test');
 }
+?>
 --FILE--
 <?php
 

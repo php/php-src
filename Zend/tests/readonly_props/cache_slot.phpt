@@ -88,35 +88,35 @@ $replaceProp3();
 var_dump($test->prop3);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "a"
 Cannot modify readonly property Test::$prop
 string(1) "a"
 
-Cannot modify readonly property Test::$prop2
-Cannot modify readonly property Test::$prop2
-array(0) {
-}
-
-object(stdClass)#3 (1) {
-  ["foo"]=>
-  int(1)
-}
-object(stdClass)#3 (1) {
-  ["foo"]=>
-  int(1)
-}
-
-Cannot modify readonly property Test::$prop2
+Cannot indirectly modify readonly property Test::$prop2
 Cannot modify readonly property Test::$prop2
 array(0) {
 }
 
-object(stdClass)#5 (1) {
+object(stdClass)#%d (1) {
   ["foo"]=>
   int(1)
 }
-object(stdClass)#5 (1) {
+object(stdClass)#%d (1) {
+  ["foo"]=>
+  int(1)
+}
+
+Cannot indirectly modify readonly property Test::$prop2
+Cannot indirectly modify readonly property Test::$prop2
+array(0) {
+}
+
+object(stdClass)#%d (1) {
+  ["foo"]=>
+  int(1)
+}
+object(stdClass)#%d (1) {
   ["foo"]=>
   int(1)
 }

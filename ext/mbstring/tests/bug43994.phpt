@@ -14,55 +14,24 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
  * pattern is supplied to mb_ereg. Similar error message to ereg().
  */
 
-$inputs = array(false, FALSE, "", '');
+$input = '';
+echo "Without \$regs arg:\n";
+try {
+    var_dump( mb_ereg($input, 'hello, world') );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$iterator = 1;
-foreach($inputs as $input) {
-    if(@is_array($mb_regs)){
-        $mb_regs = '';
-    }
-    echo "\n-- Iteration $iterator --\n";
-    echo "Without \$regs arg:\n";
-    try {
-        var_dump( mb_ereg($input, 'hello, world') );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
+echo "With \$regs arg:\n";
+try {
+    var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-    echo "With \$regs arg:\n";
-    try {
-        var_dump(mb_ereg($input, 'hello, world', $mb_regs));
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
-
-    var_dump($mb_regs);
-    $iterator++;
-};
+var_dump($mb_regs);
 ?>
 --EXPECT--
--- Iteration 1 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 2 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 3 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 4 --
 Without $regs arg:
 mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:

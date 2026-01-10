@@ -13,7 +13,7 @@ print_r($soap->__getTypes());
 Array
 (
     [0] => list listItem {anonymous1}
-    [1] => string anonymous1
-    [2] => string enumItem
+    [1] => string anonymous1 {test1, test2}
+    [2] => string enumItem {test1, test2}
     [3] => list listItem2 {enumItem}
 )

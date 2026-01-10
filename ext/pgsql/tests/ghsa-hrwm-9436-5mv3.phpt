@@ -3,11 +3,11 @@
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include 'config.inc';
+include 'inc/config.inc';
 define('FILE_NAME', __DIR__ . '/php.gif');
 
 $db = pg_connect($conn_str);

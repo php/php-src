@@ -54,7 +54,7 @@ array(3) {
   [2]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }

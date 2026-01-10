@@ -17,7 +17,6 @@
 #ifndef PHP_HASH_HAVAL_H
 #define PHP_HASH_HAVAL_H
 
-#include "ext/standard/basic_functions.h"
 /* HAVAL context. */
 typedef struct {
 	uint32_t state[8];

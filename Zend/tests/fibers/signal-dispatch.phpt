@@ -38,9 +38,9 @@ Fiber start
 FiberError: Cannot switch fibers in current execution context in %ssignal-dispatch.php:%d
 Stack trace:
 #0 %ssignal-dispatch.php(%d): Fiber::suspend()
-#1 [internal function]: {closure}(%d, Array)
+#1 [internal function]: {closure:%s:%d}(%d, Array)
 #2 %ssignal-dispatch.php(%d): pcntl_signal_dispatch()
-#3 [internal function]: {closure}()
+#3 [internal function]: {closure:%s:%d}()
 #4 %ssignal-dispatch.php(%d): Fiber->start()
 #5 {main}
 Fiber end

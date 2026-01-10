@@ -45,7 +45,7 @@ function test($case) {
     // The gzdecode() function applied to the corrupted compressed data always
     // detects the error:
     // --> gzdecode(): PHP Fatal error:  Uncaught ErrorException: gzdecode(): data error in ...
-    echo "gzdecode(): ", rawurldecode(gzdecode($compressed)), "\n";
+    echo "gzdecode(): ", rawurldecode((string) gzdecode($compressed)), "\n";
 
     file_put_contents($fn, $compressed);
 

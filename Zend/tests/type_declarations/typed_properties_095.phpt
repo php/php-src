@@ -75,6 +75,10 @@ object(_ZendTestClass)#1 (3) {
   uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
   uninitialized(int)
+  ["finalProp"]=>
+  uninitialized(int)
+  ["dnfProperty"]=>
+  uninitialized(Iterator|(Traversable&Countable))
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$intProp of type int
@@ -91,6 +95,10 @@ object(Test)#4 (3) {
   uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
   uninitialized(int)
+  ["finalProp"]=>
+  uninitialized(int)
+  ["dnfProperty"]=>
+  uninitialized(Iterator|(Traversable&Countable))
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$staticIntProp of type int
