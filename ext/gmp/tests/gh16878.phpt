@@ -6,8 +6,8 @@ gmp
 <?php
 echo "Test 1: Factorial of 2^50 + 1\n";
 try {
-    $value = 2**50 + 1;
-    echo "Calculating factorial of: $value\n";
+    $value = gmp_add(gmp_pow(2, 50), 1);
+    echo "Calculating factorial of: ", gmp_strval($value), "\n";
     $result = gmp_fact($value);
     echo "Result: " . gmp_strval($result) . "\n";
 } catch (\ValueError $e) {
@@ -18,8 +18,8 @@ try {
 
 echo "\nTest 2: Another large value\n";
 try {
-    $value = 1000000000000;  // 1 trillion
-    echo "Calculating factorial of: $value\n";
+    $value = gmp_init('1000000000000');  // 1 trillion
+    echo "Calculating factorial of: ", gmp_strval($value), "\n";
     $result = gmp_fact($value);
     echo "Result: " . gmp_strval($result) . "\n";
 } catch (\ValueError $e) {
