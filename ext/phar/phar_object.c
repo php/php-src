@@ -1828,7 +1828,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	zend_string *base = ZSTR_EMPTY_ALLOC();
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &obj, zend_ce_traversable, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|P!", &obj, zend_ce_traversable, &base) == FAILURE) {
 		RETURN_THROWS();
 	}
 
