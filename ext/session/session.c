@@ -50,7 +50,7 @@
 #include "mod_files.h"
 #include "mod_user.h"
 
-#ifdef HAVE_LIBMM
+#ifdef HAVE_LIBGLIB
 #include "mod_mm.h"
 #endif
 
@@ -2966,7 +2966,7 @@ static PHP_MINIT_FUNCTION(session)
 	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
 
-#ifdef HAVE_LIBMM
+#ifdef HAVE_LIBGLIB
 	PHP_MINIT(ps_mm) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	php_session_rfc1867_orig_callback = php_rfc1867_callback;
@@ -2991,7 +2991,7 @@ static PHP_MSHUTDOWN_FUNCTION(session)
 {
 	UNREGISTER_INI_ENTRIES();
 
-#ifdef HAVE_LIBMM
+#ifdef HAVE_LIBGLIB
 	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
 

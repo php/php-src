@@ -46,10 +46,7 @@ typedef struct ps_sd {
 } ps_sd;
 
 typedef struct {
-	GMappedFile *mm;
 	GHashTable *hash;
-	uint32_t hash_max;
-	uint32_t hash_cnt;
 	pid_t owner;
 } ps_mm;
 
@@ -84,15 +81,11 @@ static ps_sd *ps_sd_new(ps_mm *data, zend_string *key)
 
 	g_hash_table_insert(data->hash, key, sd);
 
-	data->hash_cnt++;
-
 	return sd;
 }
 
 static void ps_sd_destroy(ps_mm *data, zend_string *key, ps_sd *sd)
 {
-	data->hash_cnt--;
-
 	if (sd->data) {
 		g_free(sd->data);
 	}
@@ -114,19 +107,12 @@ static gboolean ps_mm_key_equals(gconstpointer a, gconstpointer b) {
         return zend_string_equals((const zend_string *)a, (const zend_string *)b);
 }
 
-static zend_result ps_mm_initialize(ps_mm *data, const char *path)
+static zend_result ps_mm_initialize(ps_mm *data)
 {
 	data->owner = getpid();
-	data->mm = g_mapped_file_new(path, TRUE, NULL);
-	if (!data->mm) {
-		return FAILURE;
-	}
-
-	data->hash_cnt = 0;
-	data->hash_max = 511;
 	data->hash = g_hash_table_new(ps_mm_hash, ps_mm_key_equals);
 	if (!data->hash) {
-		g_mapped_file_unref(data->mm);
+		php_error_docref(NULL, E_WARNING, "hash table created failed");
 		return FAILURE;
 	}
 
@@ -168,50 +154,18 @@ static void ps_mm_destroy(ps_mm *data)
 	g_hash_table_foreach_remove(data->hash, ps_mm_destroy_entry, NULL);
 
 	g_hash_table_destroy(data->hash);
-	g_mapped_file_unref(data->mm);
-	efree(data);
+	pefree(data, true);
 }
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	size_t save_path_len = ZSTR_LEN(PS(save_path));
-	size_t mod_name_len = strlen(sapi_module.name);
-	size_t euid_len;
-	char *ps_mm_path, euid[30];
-	zend_result ret;
-
-	ps_mm_instance = ecalloc(1, sizeof(*ps_mm_instance));
+	ps_mm_instance = pecalloc(1, sizeof(*ps_mm_instance), true);
 	if (!ps_mm_instance) {
 		return FAILURE;
 	}
 
-	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
-		efree(ps_mm_instance);
-		ps_mm_instance = NULL;
-		return FAILURE;
-	}
-
-	/* Directory + '/' + File + Module Name + Effective UID + \0 */
-	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
-
-	memcpy(ps_mm_path, ZSTR_VAL(PS(save_path)), save_path_len);
-	if (save_path_len && ZSTR_VAL(PS(save_path))[save_path_len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[save_path_len] = DEFAULT_SLASH;
-		save_path_len++;
-	}
-	memcpy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
-	save_path_len += sizeof(PS_MM_FILE) - 1;
-	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
-	save_path_len += mod_name_len;
-	memcpy(ps_mm_path + save_path_len, euid, euid_len);
-	ps_mm_path[save_path_len + euid_len] = '\0';
-
-	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
-
-	efree(ps_mm_path);
-
-	if (ret == FAILURE) {
-		free(ps_mm_instance);
+	if (ps_mm_initialize(ps_mm_instance) == FAILURE) {
+		pefree(ps_mm_instance, true);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
@@ -376,6 +330,13 @@ PS_CREATE_SID_FUNC(mm)
 
 	do {
 		sid = php_session_create_id((void **)&data);
+		if (!sid) {
+			if (--maxfail < 0) {
+				return NULL;
+			} else {
+				continue;
+			}
+		}
 		/* Check collision */
 		if (g_hash_table_contains(data->hash, sid) == SUCCESS) {
 			if (sid) {
@@ -387,7 +348,6 @@ PS_CREATE_SID_FUNC(mm)
 			}
 		}
 	} while(!sid);
-
 	return sid;
 }
 
