@@ -1,6 +1,5 @@
 --TEST--
 proc_open with PTY closes incorrect file descriptor
---FLAKY--
 --SKIPIF--
 <?php
 
