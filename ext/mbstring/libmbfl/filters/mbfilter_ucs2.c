@@ -30,7 +30,6 @@
 #include "mbfilter.h"
 #include "mbfilter_ucs2.h"
 
-static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_ucs2_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static size_t mb_ucs2be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_ucs2be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
@@ -53,8 +52,8 @@ const mbfl_encoding mbfl_encoding_ucs2 = {
 	mbfl_encoding_ucs2_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS2,
-	&vtbl_ucs2_wchar,
-	&vtbl_wchar_ucs2,
+	NULL,
+	NULL,
 	mb_ucs2_to_wchar,
 	mb_wchar_to_ucs2be,
 	NULL,
@@ -68,8 +67,8 @@ const mbfl_encoding mbfl_encoding_ucs2be = {
 	mbfl_encoding_ucs2be_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS2,
-	&vtbl_ucs2be_wchar,
-	&vtbl_wchar_ucs2be,
+	NULL,
+	NULL,
 	mb_ucs2be_to_wchar,
 	mb_wchar_to_ucs2be,
 	NULL,
@@ -83,157 +82,13 @@ const mbfl_encoding mbfl_encoding_ucs2le = {
 	mbfl_encoding_ucs2le_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS2,
-	&vtbl_ucs2le_wchar,
-	&vtbl_wchar_ucs2le,
+	NULL,
+	NULL,
 	mb_ucs2le_to_wchar,
 	mb_wchar_to_ucs2le,
 	NULL,
 	NULL,
 };
-
-const struct mbfl_convert_vtbl vtbl_ucs2_wchar = {
-	mbfl_no_encoding_ucs2,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_ucs2_wchar,
-	mbfl_filt_conv_ucs2_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_ucs2 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs2,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_ucs2be,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_ucs2be_wchar = {
-	mbfl_no_encoding_ucs2be,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_ucs2be_wchar,
-	mbfl_filt_conv_ucs2_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_ucs2be = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs2be,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_ucs2be,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_ucs2le_wchar = {
-	mbfl_no_encoding_ucs2le,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_ucs2le_wchar,
-	mbfl_filt_conv_ucs2_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_ucs2le = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs2le,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_ucs2le,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter)
-{
-	if (filter->status == 0) {
-		filter->status = 1;
-		filter->cache = c & 0xFF;
-	} else {
-		filter->status = 0;
-		int n = (filter->cache << 8) | (c & 0xFF);
-		if (n == 0xFFFE) {
-			/* Found little-endian byte order mark */
-			filter->filter_function = mbfl_filt_conv_ucs2le_wchar;
-		} else {
-			filter->filter_function = mbfl_filt_conv_ucs2be_wchar;
-			if (n != 0xFEFF) {
-				CK((*filter->output_function)(n, filter->data));
-			}
-		}
-	}
-	return 0;
-}
-
-int mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter)
-{
-	if (filter->status == 0) {
-		filter->status = 1;
-		filter->cache = (c & 0xFF) << 8;
-	} else {
-		filter->status = 0;
-		CK((*filter->output_function)((c & 0xFF) | filter->cache, filter->data));
-	}
-	return 0;
-}
-
-int mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter)
-{
-	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
-		CK((*filter->output_function)(c & 0xFF, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
-int mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter)
-{
-	if (filter->status == 0) {
-		filter->status = 1;
-		filter->cache = c & 0xFF;
-	} else {
-		filter->status = 0;
-		CK((*filter->output_function)(((c & 0xFF) << 8) | filter->cache, filter->data));
-	}
-	return 0;
-}
-
-int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
-{
-	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)(c & 0xFF, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xFF, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
-static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* Input string was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
 
 #define DETECTED_BE 1
 #define DETECTED_LE 2
