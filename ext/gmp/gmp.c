@@ -1276,6 +1276,7 @@ ZEND_FUNCTION(gmp_fact)
 {
 	zval *a_arg;
 	mpz_ptr gmpnum_result;
+	zend_long num_long;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
 		RETURN_THROWS();
@@ -1286,21 +1287,36 @@ ZEND_FUNCTION(gmp_fact)
 			zend_argument_value_error(1, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
+		num_long = Z_LVAL_P(a_arg);
 	} else {
 		mpz_ptr gmpnum;
 		gmp_temp_t temp_a;
 
 		FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
-		FREE_GMP_TEMP(temp_a);
 
 		if (mpz_sgn(gmpnum) < 0) {
+			FREE_GMP_TEMP(temp_a);
 			zend_argument_value_error(1, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
+
+		if (!mpz_fits_ulong_p(gmpnum)) {
+			FREE_GMP_TEMP(temp_a);
+			zend_argument_value_error(1, "is too large");
+			RETURN_THROWS();
+		}
+
+		num_long = (zend_long) mpz_get_ui(gmpnum);
+		FREE_GMP_TEMP(temp_a);
+	}
+
+	if (num_long > 100000) {
+		zend_argument_value_error(1, "is too large");
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	mpz_fac_ui(gmpnum_result, zval_get_long(a_arg));
+	mpz_fac_ui(gmpnum_result, (unsigned long) num_long);
 }
 /* }}} */
 
