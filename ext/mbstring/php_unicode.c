@@ -180,7 +180,9 @@ static unsigned php_unicode_totitle_raw(unsigned code, const mbfl_encoding *enc)
 
 static unsigned php_unicode_tofold_raw(unsigned code, const mbfl_encoding *enc)
 {
-	if (code < 0x80) {
+	/* After the ASCII characters, the first codepoint with an special case-folded version
+	 * is 0xB5 (MICRO SIGN) */
+	if (code < 0xB5) {
 		/* Fast path for ASCII */
 		if (code >= 0x41 && code <= 0x5A) {
 			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x49)) {
