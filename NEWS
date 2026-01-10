@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
 
+- Phar:
+  . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
+    (ndossche)
+
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
