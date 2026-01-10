@@ -678,7 +678,7 @@ static void throw_cannot_recompose_uri_to_string(php_uri_object *object)
 	zend_throw_exception_ex(php_uri_ce_error, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->std.ce->name));
 }
 
-static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object, zend_object *comparison_mode)
+static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object, const zend_string *comparison_mode)
 {
 	php_uri_object *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(this_object->uri != NULL);
@@ -693,8 +693,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object
 
 	bool exclude_fragment = true;
 	if (comparison_mode) {
-		zval *case_name = zend_enum_fetch_case_name(comparison_mode);
-		exclude_fragment = zend_string_equals_literal(Z_STR_P(case_name), "ExcludeFragment");
+		exclude_fragment = zend_string_equals_literal(comparison_mode, "ExcludeFragment");
 	}
 
 	zend_string *this_str = this_object->parser->to_string(
@@ -721,12 +720,12 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object
 PHP_METHOD(Uri_Rfc3986_Uri, equals)
 {
 	zend_object *that_object;
-	zend_object *comparison_mode = NULL;
+	const zend_string *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_rfc3986_uri)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(comparison_mode, php_uri_ce_comparison_mode)
+		Z_PARAM_ENUM_NAME(comparison_mode, php_uri_ce_comparison_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);
@@ -917,12 +916,12 @@ PHP_METHOD(Uri_WhatWg_Url, getFragment)
 PHP_METHOD(Uri_WhatWg_Url, equals)
 {
 	zend_object *that_object;
-	zend_object *comparison_mode = NULL;
+	const zend_string *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_whatwg_url)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(comparison_mode, php_uri_ce_comparison_mode)
+		Z_PARAM_ENUM_NAME(comparison_mode, php_uri_ce_comparison_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);

@@ -131,14 +131,14 @@ PHP_METHOD(Random_Randomizer, getFloat)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
-	zend_object *bounds = NULL;
+	const zend_string *bounds = NULL;
 	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
 		Z_PARAM_DOUBLE(max)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
+		Z_PARAM_ENUM_NAME(bounds, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_finite(min)) {
@@ -152,10 +152,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	}
 
 	if (bounds) {
-		zval *case_name = zend_enum_fetch_case_name(bounds);
-		zend_string *bounds_name = Z_STR_P(case_name);
-
-		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
+		bounds_type = ZSTR_VAL(bounds)[0] + ZSTR_LEN(bounds);
 	}
 
 	switch (bounds_type) {
