@@ -157,9 +157,11 @@ prof-use:
 		if test ! -z "$(PHP)"; then \
 			echo Parse $< to generate $@;\
 			$(PHP) $(top_srcdir)/build/gen_stub.php $<; \
+			touch $@; \
 		elif test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
 			echo Parse $< to generate $@;\
 			$(PHP_EXECUTABLE) $(top_srcdir)/build/gen_stub.php $<; \
+			touch $@; \
 		fi; \
 	fi;
 
