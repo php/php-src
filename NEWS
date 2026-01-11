@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
 
+- SPL:
+  . Fixed bug GH-20856 (heap-use-after-free in SplDoublyLinkedList iterator
+    when modifying during iteration). (ndossche)
+
 - Standard:
   . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
     (Jakub Zelenka)

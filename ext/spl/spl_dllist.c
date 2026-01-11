@@ -764,11 +764,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		/* connect the neighbors */
+		/* disconnect the neighbours */
 		if (element->prev) {
 			element->prev->next = element->next;
 		}
-
 		if (element->next) {
 			element->next->prev = element->prev;
 		}
@@ -781,6 +780,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 		if (element == llist->tail) {
 			llist->tail = element->prev;
 		}
+
+		/* Keep consistency if element is kept alive. */
+		element->prev = NULL;
+		element->next = NULL;
 
 		/* finally, delete the element */
 		llist->count--;
