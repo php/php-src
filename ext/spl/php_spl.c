@@ -485,11 +485,12 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (fcc.function_handler && zend_string_equals_literal(
-			fcc.function_handler->common.function_name, "spl_autoload_call")) {
+	if (zend_string_equals_literal(fcc.function_handler->common.function_name, "spl_autoload_call")) {
+		/* Release trampoline */
+		zend_release_fcall_info_cache(&fcc);
 		php_error_docref(NULL, E_DEPRECATED,
 			"Using spl_autoload_call() as a callback for spl_autoload_unregister() is deprecated,"
 			" to remove all registered autoloaders, call spl_autoload_unregister()"
@@ -502,13 +503,6 @@ PHP_FUNCTION(spl_autoload_unregister)
 			zend_hash_clean(spl_autoload_functions);
 		}
 		RETURN_TRUE;
-	}
-
-	if (!fcc.function_handler) {
-		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-		 * with it ourselves. It is important that it is not refetched on every call,
-		 * because calls may occur from different scopes. */
-		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}
 
 	Bucket *p = spl_find_registered_function(&fcc);
