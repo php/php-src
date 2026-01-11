@@ -1229,7 +1229,7 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 		}
 		next_block++;
 	}
-	while (next_block->len == 0 && !(next_block->flags & ZEND_BB_PROTECTED)) {
+	while (next_block->len == 0 && !(next_block->flags & (ZEND_BB_TARGET|ZEND_BB_PROTECTED))) {
 		next_block = cfg->blocks + next_block->successors[0];
 	}
 	return next_block;
