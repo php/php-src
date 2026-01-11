@@ -2594,6 +2594,20 @@ static void zend_short_circuiting_commit(uint32_t checkpoint, znode *result, con
 	}
 }
 
+/* Same value as ZEND_SHORT_CIRCUITING_INNER, AST kinds must not clash. */
+#define ZEND_CONST_OBJECT_FETCH 0x8000
+
+static void zend_mark_const_object_fetch(zend_ast *ast)
+{
+	while (ast->kind == ZEND_AST_DIM) {
+		ast = ast->child[0];
+	}
+
+	if (ast->kind == ZEND_AST_CONST || ast->kind == ZEND_AST_CLASS_CONST) {
+		ast->attr |= ZEND_CONST_OBJECT_FETCH;
+	}
+}
+
 static void zend_emit_jmp_null(znode *obj_node, uint32_t bp_type)
 {
 	uint32_t jmp_null_opnum = get_next_op_number();
@@ -3186,6 +3200,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
+		zend_mark_const_object_fetch(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, false);
 		if (opline && (opline->opcode == ZEND_FETCH_DIM_W
 				|| opline->opcode == ZEND_FETCH_DIM_RW
@@ -11576,9 +11591,14 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_emit_fetch_constant(znode *result, zend_string *resolved_name, bool unqualified_in_namespace)
+static void zend_emit_fetch_constant(znode *result, zend_string *resolved_name, bool unqualified_in_namespace, uint8_t type)
 {
-	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
+	zend_op *opline = zend_emit_op(result, ZEND_FETCH_CONSTANT, NULL, NULL);
+	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		opline->result_type = IS_TMP_VAR;
+		result->op_type = IS_TMP_VAR;
+	}
+
 	opline->op2_type = IS_CONST;
 
 	if (unqualified_in_namespace) {
@@ -11591,7 +11611,7 @@ static void zend_emit_fetch_constant(znode *result, zend_string *resolved_name, 
 	opline->extended_value = zend_alloc_cache_slot();
 }
 
-static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
+static void zend_compile_const(znode *result, const zend_ast *ast, uint8_t type) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 
@@ -11624,19 +11644,19 @@ static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
 	}
 
 	zend_emit_fetch_constant(result, resolved_name,
-		!is_fully_qualified && FC(current_namespace));
+		!is_fully_qualified && FC(current_namespace), type);
 }
 /* }}} */
 
-static void zend_compile_constant(znode *result, zend_ast *ast)
+static void zend_compile_constant(znode *result, zend_ast *ast, uint8_t type)
 {
 	zend_string *name = zend_ast_get_constant_name(ast);
 
 	zend_emit_fetch_constant(result, zend_string_copy(name),
-		(ast->attr & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) != 0);
+		(ast->attr & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) != 0, type);
 }
 
-static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
+static void zend_compile_class_const(znode *result, zend_ast *ast, uint8_t type) /* {{{ */
 {
 	zend_ast *class_ast;
 	zend_ast *const_ast;
@@ -11667,7 +11687,11 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&const_node, const_ast);
 
-	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_CONSTANT, NULL, &const_node);
+	opline = zend_emit_op(result, ZEND_FETCH_CLASS_CONSTANT, NULL, &const_node);
+	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		opline->result_type = IS_TMP_VAR;
+		result->op_type = IS_TMP_VAR;
+	}
 
 	zend_set_class_name_op1(opline, &class_node);
 
@@ -12517,13 +12541,13 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_array(result, ast);
 			return;
 		case ZEND_AST_CONST:
-			zend_compile_const(result, ast);
+			zend_compile_const(result, ast, BP_VAR_R);
 			return;
 		case ZEND_AST_CONSTANT:
-			zend_compile_constant(result, ast);
+			zend_compile_constant(result, ast, BP_VAR_R);
 			return;
 		case ZEND_AST_CLASS_CONST:
-			zend_compile_class_const(result, ast);
+			zend_compile_class_const(result, ast, BP_VAR_R);
 			return;
 		case ZEND_AST_CLASS_NAME:
 			zend_compile_class_name(result, ast);
@@ -12665,9 +12689,21 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 		}
 		case ZEND_AST_STATIC_PROP:
 			return zend_compile_static_prop(result, ast, type, by_ref, true);
-		default:
-			return zend_compile_var(result, ast, type, false);
+		case ZEND_AST_CONST:
+			if (!(ast->attr & ZEND_CONST_OBJECT_FETCH)) {
+				break;
+			}
+			zend_compile_const(result, ast, type);
+			return NULL;
+		case ZEND_AST_CLASS_CONST:
+			if (!(ast->attr & ZEND_CONST_OBJECT_FETCH)) {
+				break;
+			}
+			zend_compile_class_const(result, ast, type);
+			return NULL;
 	}
+
+	return zend_compile_var(result, ast, type, false);
 }
 /* }}} */
 
