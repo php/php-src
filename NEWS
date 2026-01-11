@@ -81,6 +81,7 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
+  . Added ReflectionConstant::inNamespace(). (Khaled Alam)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and represented
