@@ -49,7 +49,9 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 ZEND_END_MODULE_GLOBALS(intl)
 
 #if defined(ZTS) && defined(COMPILE_DL_INTL)
+extern "C" {
 ZEND_TSRMLS_CACHE_EXTERN()
+}
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(intl)
