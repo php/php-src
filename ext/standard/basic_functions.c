@@ -1768,7 +1768,7 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		if (php_output_start_default() != SUCCESS) {
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
 			zend_throw_error(NULL, "Unable to start output handler");
 			RETURN_THROWS();
 		}
@@ -1806,7 +1806,7 @@ PHP_FUNCTION(php_strip_whitespace)
 		Z_PARAM_PATH_STR(filename)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_output_start_default() != SUCCESS) {
+	if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
 		zend_throw_error(NULL, "Unable to start output handler");
 		RETURN_THROWS();
 	}
@@ -1846,7 +1846,7 @@ PHP_FUNCTION(highlight_string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (i) {
-		if (php_output_start_default() != SUCCESS) {
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
 			zend_throw_error(NULL, "Unable to start output handler");
 			RETURN_THROWS();
 		}
