@@ -912,6 +912,8 @@ class ReflectionConstant implements Reflector
 
     public function getName(): string {}
 
+    public function inNamespace(): bool {}
+
     public function getNamespaceName(): string {}
 
     public function getShortName(): string {}
