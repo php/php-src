@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #471533782 (Infinite loop in GC destructor fiber). (ilutov)
   . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
   . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
+  . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
