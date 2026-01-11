@@ -546,7 +546,7 @@ optimize_type_check:
 					}
 				}
 				break;
-	
+
 			case ZEND_BOOL:
 			case ZEND_BOOL_NOT:
 			optimize_bool:
@@ -1800,6 +1800,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		}
 
 		/* Eliminate NOPs */
+		bool recompute_successors = false;
 		for (b = blocks; b < end; b++) {
 			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
 				/* In unreachable_free blocks only preserve loop var frees. */
@@ -1812,6 +1813,19 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 				strip_nops(op_array, b);
+			}
+			if (b->len == 0 && (b->flags & ZEND_BB_TARGET)) {
+				recompute_successors = true;
+			}
+		}
+		if (recompute_successors) {
+			for (b = blocks; b < end; b++) {
+				for (int s = 0; s < b->successors_count; s++) {
+					get_target_block(&cfg, b, s, &opt_count);
+				}
+				if (b->len == 0 && (b->flags & ZEND_BB_TARGET)) {
+					b->flags &= ~ZEND_BB_TARGET;
+				}
 			}
 		}
 
