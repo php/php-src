@@ -18,12 +18,12 @@ print_r($output2);
 --EXPECTF--
 Array
 (
-    [0] => PHP:  syntax error, unexpected '=' in -d option on line 0
+    [0] => PHP:  syntax error, unexpected '=' in INI command line parameter '-d'
     [1] => hello
 )
 
 Array
 (
-    [0] => PHP:  syntax error, unexpected '!' in -d option on line 0
+    [0] => PHP:  syntax error, unexpected '!' in INI command line parameter '-d'
     [1] => world
 )
