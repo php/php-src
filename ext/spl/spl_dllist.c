@@ -75,12 +75,7 @@ struct _spl_dllist_object {
 	spl_ptr_llist_element *traverse_pointer;
 	int                    traverse_position;
 	int                    flags;
-	zend_function         *fptr_offset_get;
-	zend_function         *fptr_offset_set;
-	zend_function         *fptr_offset_has;
-	zend_function         *fptr_offset_del;
 	zend_function         *fptr_count;
-	zend_class_entry      *ce_get_iterator;
 	zend_object            std;
 };
 
@@ -322,7 +317,6 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 
 	if (orig) {
 		spl_dllist_object *other = spl_dllist_from_obj(orig);
-		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
 			intern->llist = spl_ptr_llist_init();
@@ -360,22 +354,6 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
-		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
-		if (intern->fptr_offset_get->common.scope == parent) {
-			intern->fptr_offset_get = NULL;
-		}
-		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
-		if (intern->fptr_offset_set->common.scope == parent) {
-			intern->fptr_offset_set = NULL;
-		}
-		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
-		if (intern->fptr_offset_has->common.scope == parent) {
-			intern->fptr_offset_has = NULL;
-		}
-		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
-		if (intern->fptr_offset_del->common.scope == parent) {
-			intern->fptr_offset_del = NULL;
-		}
 		/* Find count() method */
 		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
