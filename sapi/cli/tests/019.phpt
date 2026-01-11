@@ -26,8 +26,8 @@ License
 PHP is free software: you can redistribute it and/or modify it under the
 terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause):
 
-Copyright © 1999–2025, The PHP Group and Contributors.
-Copyright © 1999–2025, Zend by Perforce.
+Copyright © The PHP Group and Contributors.
+Copyright © Zend by Perforce.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
