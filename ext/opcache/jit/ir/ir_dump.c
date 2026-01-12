@@ -8,6 +8,14 @@
 #include "ir.h"
 #include "ir_private.h"
 
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+# include "ir_x86.h"
+#elif defined(IR_TARGET_AARCH64)
+# include "ir_aarch64.h"
+#else
+# error "Unknown IR target"
+#endif
+
 void ir_dump(const ir_ctx *ctx, FILE *f)
 {
 	ir_ref i, j, n, ref, *p;
@@ -456,8 +464,8 @@ void ir_dump_live_ranges(const ir_ctx *ctx, FILE *f)
 		}
 	}
 #if 1
-	n = ctx->vregs_count + ir_regs_number() + 2;
-	for (i = ctx->vregs_count + 1; i <= n; i++) {
+	n = ctx->vregs_count + 1 + IR_REG_SET_NUM;
+	for (i = ctx->vregs_count + 1; i < n; i++) {
 		ir_live_interval *ival = ctx->live_intervals[i];
 
 		if (ival) {
