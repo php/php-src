@@ -541,14 +541,15 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 static zend_ast_ref *create_enum_case_ast(
 		zend_string *class_name, zend_string *case_name, zval *value) {
 	// TODO: Use custom node type for enum cases?
-	size_t size = sizeof(zend_ast_ref) + zend_ast_size(3)
-		+ (value ? 3 : 2) * sizeof(zend_ast_zval);
+	const size_t num_children = ZEND_AST_CONST_ENUM_INIT >> ZEND_AST_NUM_CHILDREN_SHIFT;
+	size_t size = sizeof(zend_ast_ref) + zend_ast_size(num_children)
+		+ (value ? num_children : num_children-1) * sizeof(zend_ast_zval);
 	char *p = pemalloc(size, 1);
 	zend_ast_ref *ref = (zend_ast_ref *) p; p += sizeof(zend_ast_ref);
 	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = GC_CONSTANT_AST | GC_PERSISTENT | GC_IMMUTABLE;
 
-	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(3);
+	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(num_children);
 	ast->kind = ZEND_AST_CONST_ENUM_INIT;
 	ast->attr = 0;
 	ast->lineno = 0;
@@ -563,19 +564,25 @@ static zend_ast_ref *create_enum_case_ast(
 	ast->child[1] = (zend_ast *) p; p += sizeof(zend_ast_zval);
 	ast->child[1]->kind = ZEND_AST_ZVAL;
 	ast->child[1]->attr = 0;
-	ZEND_ASSERT(ZSTR_IS_INTERNED(case_name));
-	ZVAL_STR(zend_ast_get_zval(ast->child[1]), case_name);
+	ZVAL_NULL(zend_ast_get_zval(ast->child[1]));
 	Z_LINENO_P(zend_ast_get_zval(ast->child[1])) = 0;
 
+	ast->child[2] = (zend_ast *) p; p += sizeof(zend_ast_zval);
+	ast->child[2]->kind = ZEND_AST_ZVAL;
+	ast->child[2]->attr = 0;
+	ZEND_ASSERT(ZSTR_IS_INTERNED(case_name));
+	ZVAL_STR(zend_ast_get_zval(ast->child[2]), case_name);
+	Z_LINENO_P(zend_ast_get_zval(ast->child[2])) = 0;
+
 	if (value) {
-		ast->child[2] = (zend_ast *) p; p += sizeof(zend_ast_zval);
-		ast->child[2]->kind = ZEND_AST_ZVAL;
-		ast->child[2]->attr = 0;
+		ast->child[3] = (zend_ast *) p; p += sizeof(zend_ast_zval);
+		ast->child[3]->kind = ZEND_AST_ZVAL;
+		ast->child[3]->attr = 0;
 		ZEND_ASSERT(!Z_REFCOUNTED_P(value));
-		ZVAL_COPY_VALUE(zend_ast_get_zval(ast->child[2]), value);
-		Z_LINENO_P(zend_ast_get_zval(ast->child[2])) = 0;
+		ZVAL_COPY_VALUE(zend_ast_get_zval(ast->child[3]), value);
+		Z_LINENO_P(zend_ast_get_zval(ast->child[3])) = 0;
 	} else {
-		ast->child[2] = NULL;
+		ast->child[3] = NULL;
 	}
 
 	return ref;

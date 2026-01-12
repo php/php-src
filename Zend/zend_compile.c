@@ -9773,7 +9773,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 			ZSTR_VAL(enum_class_name));
 	}
 
-	zend_ast *const_enum_init_ast = zend_ast_create(ZEND_AST_CONST_ENUM_INIT, class_name_ast, case_name_ast, case_value_ast);
+	zend_ast *const_enum_init_ast = zend_ast_create(ZEND_AST_CONST_ENUM_INIT, class_name_ast, NULL, case_name_ast, case_value_ast);
 
 	zval value_zv;
 	zend_const_expr_to_zval(&value_zv, &const_enum_init_ast, /* allow_dynamic */ false);
@@ -12669,7 +12669,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[1]);
 			return;
 		case ZEND_AST_CONST_ENUM_INIT:
-			zend_eval_const_expr(&ast->child[2]);
+			zend_eval_const_expr(&ast->child[3]);
 			return;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:

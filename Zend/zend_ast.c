@@ -995,10 +995,10 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			zend_ast *class_name_ast = ast->child[0];
 			zend_string *class_name = zend_ast_get_str(class_name_ast);
 
-			zend_ast *case_name_ast = ast->child[1];
+			zend_ast *case_name_ast = ast->child[2];
 			zend_string *case_name = zend_ast_get_str(case_name_ast);
 
-			zend_ast *case_value_ast = ast->child[2];
+			zend_ast *case_value_ast = ast->child[3];
 
 			zval case_value_zv;
 			ZVAL_UNDEF(&case_value_zv);
