@@ -30,6 +30,16 @@ extern ZEND_API zend_class_entry *zend_ce_unit_enum;
 extern ZEND_API zend_class_entry *zend_ce_backed_enum;
 extern ZEND_API zend_object_handlers zend_enum_object_handlers;
 
+typedef struct _zend_enum_obj {
+	zend_long   case_id;
+	zend_object std;
+} zend_enum_obj;
+
+static inline zend_enum_obj *zend_enum_obj_from_obj(zend_object *zobj) {
+	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);
+	return (zend_enum_obj*)((char*)(zobj) - XtOffsetOf(zend_enum_obj, std));
+}
+
 void zend_enum_startup(void);
 void zend_register_enum_ce(void);
 void zend_enum_add_interfaces(zend_class_entry *ce);
@@ -47,6 +57,12 @@ ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zv
 ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name);
 ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try_from);
+
+static zend_always_inline zend_long zend_enum_fetch_case_id(zend_object *zobj)
+{
+	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);
+	return zend_enum_obj_from_obj(zobj)->case_id;
+}
 
 static zend_always_inline zval *zend_enum_fetch_case_name(zend_object *zobj)
 {
