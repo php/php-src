@@ -36,13 +36,25 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
+typedef struct _zend_enum_obj {
+	zend_long   case_id;
+	zend_object std;
+} zend_enum_obj;
+
 static zend_arg_info zarginfo_class_UnitEnum_cases[sizeof(arginfo_class_UnitEnum_cases)/sizeof(zend_internal_arg_info)];
 static zend_arg_info zarginfo_class_BackedEnum_from[sizeof(arginfo_class_BackedEnum_from)/sizeof(zend_internal_arg_info)];
 static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_BackedEnum_tryFrom)/sizeof(zend_internal_arg_info)];
 
-zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
+zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_long case_id, zend_string *case_name, zval *backing_value_zv)
 {
-	zend_object *zobj = zend_objects_new(ce);
+	zend_enum_obj *intern = zend_object_alloc(sizeof(zend_enum_obj), ce);
+
+	zend_object_std_init(&intern->std, ce);
+	object_properties_init(&intern->std, ce);
+
+	intern->case_id = case_id;
+
+	zend_object *zobj = &intern->std;
 	GC_ADD_FLAGS(zobj, GC_NOT_COLLECTABLE);
 	ZVAL_OBJ(result, zobj);
 
@@ -170,6 +182,7 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
 	memcpy(&zend_enum_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_enum_object_handlers.offset = XtOffsetOf(zend_enum_obj, std);
 	zend_enum_object_handlers.clone_obj = NULL;
 	zend_enum_object_handlers.compare = zend_objects_not_comparable;
 }
