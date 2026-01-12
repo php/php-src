@@ -25,6 +25,7 @@
 #include "php_ini.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_enum.h"
 #include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
@@ -787,20 +788,18 @@ PHP_FUNCTION(bcround)
 {
 	zend_string *numstr;
 	zend_long precision = 0;
-	zend_long mode = PHP_ROUND_HALF_UP;
-	zend_object *mode_object = NULL;
+	zend_long mode;
+	zend_enum_RoundingMode mode_enum = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(numstr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
-		Z_PARAM_OBJ_OF_CLASS(mode_object, rounding_mode_ce)
+		Z_PARAM_ENUM(mode_enum, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode_object != NULL) {
-		mode = php_math_round_mode_from_enum(mode_object);
-	}
+	mode = php_math_round_mode_from_enum(mode_enum);
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
@@ -1796,18 +1795,16 @@ PHP_METHOD(BcMath_Number, ceil)
 PHP_METHOD(BcMath_Number, round)
 {
 	zend_long precision = 0;
-	zend_long rounding_mode = PHP_ROUND_HALF_UP;
-	zend_object *mode_object = NULL;
+	zend_long rounding_mode;
+	zend_enum_RoundingMode mode_enum = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision);
-		Z_PARAM_OBJ_OF_CLASS(mode_object, rounding_mode_ce);
+		Z_PARAM_ENUM(mode_enum, rounding_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode_object != NULL) {
-		rounding_mode = php_math_round_mode_from_enum(mode_object);
-	}
+	rounding_mode = php_math_round_mode_from_enum(mode_enum);
 
 	switch (rounding_mode) {
 		case PHP_ROUND_HALF_UP:
@@ -1823,6 +1820,7 @@ PHP_METHOD(BcMath_Number, round)
 			zend_argument_value_error(2, "is an unsupported rounding mode");
 			RETURN_THROWS();
 	}
+
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
