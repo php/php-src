@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "random_decl.h"
 
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
@@ -132,7 +133,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
 	zend_object *bounds = NULL;
-	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
+	zend_enum_Random_IntervalBoundary bounds_type = ZEND_ENUM_Random_IntervalBoundary_ClosedOpen;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
@@ -152,35 +153,32 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	}
 
 	if (bounds) {
-		zval *case_name = zend_enum_fetch_case_name(bounds);
-		zend_string *bounds_name = Z_STR_P(case_name);
-
-		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
+		bounds_type = zend_enum_fetch_case_id(bounds);
 	}
 
 	switch (bounds_type) {
-	case 'C' + sizeof("ClosedOpen") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_ClosedOpen:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->engine, min, max));
-	case 'C' + sizeof("ClosedClosed") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_ClosedClosed:
 		if (UNEXPECTED(max < min)) {
 			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->engine, min, max));
-	case 'O' + sizeof("OpenClosed") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_OpenClosed:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->engine, min, max));
-	case 'O' + sizeof("OpenOpen") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_OpenOpen:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
