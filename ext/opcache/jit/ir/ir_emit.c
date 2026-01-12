@@ -63,18 +63,7 @@ typedef struct _ir_dessa_copy {
 	int32_t to;   /* [0..IR_REG_NUM) - CPU reg, [IR_REG_NUM...) - virtual reg  */
 } ir_dessa_copy;
 
-#if IR_REG_INT_ARGS
-static const int8_t _ir_int_reg_params[IR_REG_INT_ARGS];
-#else
-static const int8_t *_ir_int_reg_params;
-#endif
-#if IR_REG_FP_ARGS
-static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS];
-#else
-static const int8_t *_ir_fp_reg_params;
-#endif
-
-static const ir_proto_t *ir_call_proto(const ir_ctx *ctx, ir_insn *insn)
+const ir_proto_t *ir_call_proto(const ir_ctx *ctx, const ir_insn *insn)
 {
 	if (IR_IS_CONST_REF(insn->op2)) {
 		const ir_insn *func = &ctx->ir_base[insn->op2];
@@ -88,49 +77,6 @@ static const ir_proto_t *ir_call_proto(const ir_ctx *ctx, ir_insn *insn)
 		return (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
 	}
 	return NULL;
-}
-
-#ifdef IR_HAVE_FASTCALL
-static const int8_t _ir_int_fc_reg_params[IR_REG_INT_FCARGS];
-static const int8_t *_ir_fp_fc_reg_params;
-
-bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
-{
-	if (sizeof(void*) == 4) {
-		if (IR_IS_CONST_REF(insn->op2)) {
-			const ir_insn *func = &ctx->ir_base[insn->op2];
-
-			if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
-				if (func->proto) {
-					const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
-
-					return (proto->flags & IR_FASTCALL_FUNC) != 0;
-				}
-			}
-		} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
-			const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
-
-			return (proto->flags & IR_FASTCALL_FUNC) != 0;
-		}
-		return 0;
-	}
-	return 0;
-}
-#else
-bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
-{
-	return 0;
-}
-#endif
-
-bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
-{
-	const ir_proto_t *proto = ir_call_proto(ctx, insn);
-
-	if (proto) {
-		return (proto->flags & IR_VARARG_FUNC) != 0;
-	}
-	return 0;
 }
 
 IR_ALWAYS_INLINE uint32_t ir_rule(const ir_ctx *ctx, ir_ref ref)
@@ -153,19 +99,7 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 	ir_insn *insn;
 	int int_param = 0;
 	int fp_param = 0;
-	int int_reg_params_count = IR_REG_INT_ARGS;
-	int fp_reg_params_count = IR_REG_FP_ARGS;
-	const int8_t *int_reg_params = _ir_int_reg_params;
-	const int8_t *fp_reg_params = _ir_fp_reg_params;
-
-#ifdef IR_HAVE_FASTCALL
-	if (sizeof(void*) == 4 && (ctx->flags & IR_FASTCALL_FUNC)) {
-		int_reg_params_count = IR_REG_INT_FCARGS;
-		fp_reg_params_count = IR_REG_FP_FCARGS;
-		int_reg_params = _ir_int_fc_reg_params;
-		fp_reg_params = _ir_fp_fc_reg_params;
-	}
-#endif
+	const ir_call_conv_dsc *cc = ir_get_call_conv_dsc(ctx->flags);
 
 	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		use = *p;
@@ -173,70 +107,48 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 		if (insn->op == IR_PARAM) {
 			if (IR_IS_TYPE_INT(insn->type)) {
 				if (use == ref) {
-#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
-					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
+					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align && cc->pass_struct_by_val) {
 						/* struct passed by value on stack */
 						return IR_REG_NONE;
-					} else
-#endif
-					if (int_param < int_reg_params_count) {
-						return int_reg_params[int_param];
+					} else if (int_param < cc->int_param_regs_count) {
+						return cc->int_param_regs[int_param];
 					} else {
 						return IR_REG_NONE;
 					}
-#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
-				} else {
-					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
-						/* struct passed by value on stack */
-						continue;
-					}
-#endif
+				} else if (ctx->value_params && ctx->value_params[insn->op3 - 1].align && cc->pass_struct_by_val) {
+					/* struct passed by value on stack */
+					continue;
 				}
 				int_param++;
-#ifdef _WIN64
-				/* WIN64 calling convention use common couter for int and fp registers */
-				fp_param++;
-#endif
+				if (cc->shadow_param_regs) {
+					fp_param++;
+				}
 			} else {
 				IR_ASSERT(IR_IS_TYPE_FP(insn->type));
 				if (use == ref) {
-					if (fp_param < fp_reg_params_count) {
-						return fp_reg_params[fp_param];
+					if (fp_param < cc->fp_param_regs_count) {
+						return cc->fp_param_regs[fp_param];
 					} else {
 						return IR_REG_NONE;
 					}
 				}
 				fp_param++;
-#ifdef _WIN64
-				/* WIN64 calling convention use common couter for int and fp registers */
-				int_param++;
-#endif
+				if (cc->shadow_param_regs) {
+					int_param++;
+				}
 			}
 		}
 	}
 	return IR_REG_NONE;
 }
 
-static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs)
+static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, const ir_call_conv_dsc *cc, int8_t *regs)
 {
 	int j, n;
 	ir_type type;
 	int int_param = 0;
 	int fp_param = 0;
 	int count = 0;
-	int int_reg_params_count = IR_REG_INT_ARGS;
-	int fp_reg_params_count = IR_REG_FP_ARGS;
-	const int8_t *int_reg_params = _ir_int_reg_params;
-	const int8_t *fp_reg_params = _ir_fp_reg_params;
-
-#ifdef IR_HAVE_FASTCALL
-	if (sizeof(void*) == 4 && ir_is_fastcall(ctx, insn)) {
-		int_reg_params_count = IR_REG_INT_FCARGS;
-		fp_reg_params_count = IR_REG_FP_FCARGS;
-		int_reg_params = _ir_int_fc_reg_params;
-		fp_reg_params = _ir_fp_fc_reg_params;
-	}
-#endif
 
 	n = insn->inputs_count;
 	n = IR_MIN(n, IR_MAX_REG_ARGS + 2);
@@ -244,27 +156,25 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 		ir_insn *arg = &ctx->ir_base[ir_insn_op(insn, j)];
 		type = arg->type;
 		if (IR_IS_TYPE_INT(type)) {
-			if (int_param < int_reg_params_count && arg->op != IR_ARGVAL) {
-				regs[j] = int_reg_params[int_param];
+			if (int_param < cc->int_param_regs_count && arg->op != IR_ARGVAL) {
+				regs[j] = cc->int_param_regs[int_param];
 				count = j + 1;
 				int_param++;
-#ifdef _WIN64
-				/* WIN64 calling convention use common couter for int and fp registers */
-				fp_param++;
-#endif
+				if (cc->shadow_param_regs) {
+					fp_param++;
+				}
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
 		} else {
 			IR_ASSERT(IR_IS_TYPE_FP(type));
-			if (fp_param < fp_reg_params_count) {
-				regs[j] = fp_reg_params[fp_param];
+			if (fp_param < cc->fp_param_regs_count) {
+				regs[j] = cc->fp_param_regs[fp_param];
 				count = j + 1;
 				fp_param++;
-#ifdef _WIN64
-				/* WIN64 calling convention use common couter for int and fp registers */
-				int_param++;
-#endif
+				if (cc->shadow_param_regs) {
+					int_param++;
+				}
 			} else {
 				regs[j] = IR_REG_NONE;
 			}
@@ -419,7 +329,6 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb);
 
 typedef struct _ir_common_backend_data {
     ir_reg_alloc_data  ra_data;
-	uint32_t           dessa_from_block;
 	dasm_State        *dasm_state;
 	ir_bitset          emit_constants;
 } ir_common_backend_data;
@@ -1070,4 +979,33 @@ int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref)
 	offset = ctx->live_intervals[ctx->vregs[ref]]->stack_spill_pos;
 	IR_ASSERT(offset != -1);
 	return IR_SPILL_POS_TO_OFFSET(offset);
+}
+
+const ir_call_conv_dsc *ir_get_call_conv_dsc(uint32_t flags)
+{
+#ifdef IR_TARGET_X86
+	if ((flags & IR_CALL_CONV_MASK) == IR_CC_FASTCALL) {
+		return &ir_call_conv_x86_fastcall;
+	}
+#elif defined(IR_TARGET_X64)
+	switch (flags & IR_CALL_CONV_MASK) {
+		case IR_CC_DEFAULT:              return &ir_call_conv_default;
+		case IR_CC_FASTCALL:             return &ir_call_conv_default;
+		case IR_CC_PRESERVE_NONE:        return &ir_call_conv_x86_64_preserve_none;
+		case IR_CC_X86_64_SYSV:          return &ir_call_conv_x86_64_sysv;
+		case IR_CC_X86_64_MS:            return &ir_call_conv_x86_64_ms;
+		default: break;
+	}
+#elif defined(IR_TARGET_AARCH64)
+	switch (flags & IR_CALL_CONV_MASK) {
+		case IR_CC_DEFAULT:              return &ir_call_conv_default;
+		case IR_CC_FASTCALL:             return &ir_call_conv_default;
+		case IR_CC_PRESERVE_NONE:        return &ir_call_conv_aarch64_preserve_none;
+		case IR_CC_AARCH64_SYSV:         return &ir_call_conv_aarch64_sysv;
+		case IR_CC_AARCH64_DARWIN:       return &ir_call_conv_aarch64_darwin;
+		default: break;
+	}
+#endif
+	IR_ASSERT((flags & IR_CALL_CONV_MASK) == IR_CC_DEFAULT || (flags & IR_CALL_CONV_MASK) == IR_CC_BUILTIN);
+	return &ir_call_conv_default;
 }
