@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-20914: Internal enums can be cloned
+Enum disallows cloning (internal enum)
 --EXTENSIONS--
 zend_test
 --FILE--

@@ -201,6 +201,11 @@ namespace {
         case Baz = -1;
     }
 
+    enum ZendTestEnumWithInterface implements _ZendTestInterface {
+        case Foo;
+        case Bar;
+    }
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block
