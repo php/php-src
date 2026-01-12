@@ -363,8 +363,7 @@ static inline zend_result zval_to_string_offset(zend_long *result, zval *op) {
 static inline zend_result fetch_array_elem(zval **result, zval *op1, zval *op2) {
 	switch (Z_TYPE_P(op2)) {
 		case IS_NULL:
-			*result = zend_hash_find(Z_ARR_P(op1), ZSTR_EMPTY_ALLOC());
-			return SUCCESS;
+			return FAILURE;
 		case IS_FALSE:
 			*result = zend_hash_index_find(Z_ARR_P(op1), 0);
 			return SUCCESS;
@@ -428,6 +427,9 @@ static inline zend_result ct_eval_isset_isempty(zval *result, uint32_t extended_
 }
 
 static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
+	if (Z_TYPE_P(op2) == IS_NULL) {
+		return FAILURE;
+	}
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == FAILURE) {
@@ -1535,12 +1537,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (op2 && Z_TYPE_P(op2) == IS_NULL) {
-				/* Emits deprecation at run-time. */
-				SET_RESULT_BOT(result);
-				break;
-			}
-
 			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1551,12 +1547,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
-
-			if (op2 && Z_TYPE_P(op2) == IS_NULL) {
-				/* Emits deprecation at run-time. */
-				SET_RESULT_BOT(result);
-				break;
-			}
 
 			if (ct_eval_isset_dim(&zv, opline->extended_value, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
