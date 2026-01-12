@@ -82,6 +82,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
             $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
+            $declFile = "{$stubFilenameWithoutExtension}_decl.h";
 
             $stubCode = file_get_contents($stubFile);
             $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
@@ -122,7 +123,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             return $fileInfo;
         }
 
-        $arginfoCode = generateArgInfoCode(
+        [$arginfoCode, $declCode] = generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
             $fileInfo,
             $context->allConstInfos,
@@ -130,12 +131,17 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         );
         if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
             reportFilePutContents($arginfoFile, $arginfoCode);
+            if ($declCode !== '') {
+                reportFilePutContents($declFile, $declCode);
+            } else if (file_exists($declCode)) {
+                unlink($declCode);
+            }
         }
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
             $legacyFileInfo = $fileInfo->getLegacyVersion();
 
-            $arginfoCode = generateArgInfoCode(
+            [$arginfoCode] = generateArgInfoCode(
                 basename($stubFilenameWithoutExtension),
                 $legacyFileInfo,
                 $context->allConstInfos,
@@ -3278,7 +3284,7 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    private /* readonly */ string $name;
+    public /* readonly */ string $name;
     private /* readonly */ ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
@@ -3655,6 +3661,38 @@ class ClassInfo {
         }
 
         if ($this->type === "enum" && !$php81MinimumCompatibility) {
+            $code .= "#endif\n";
+        }
+
+        return $code;
+    }
+
+    public function getCDeclarations(): string
+    {
+        if ($this->type !== "enum") {
+            return '';
+        }
+
+        $code = '';
+
+        if ($this->cond) {
+            $code .= "#if {$this->cond}\n";
+        }
+
+        $cEnumName = 'zend_enum_' . str_replace('\\', '_', $this->name->toString());
+
+        $code .= "typedef enum _{$cEnumName} {\n";
+
+        $i = 1;
+        foreach ($this->enumCaseInfos as $case) {
+            $cName = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString()) . '_' . $case->name;
+            $code .= "\t{$cName} = {$i},\n";
+            $i++;
+        }
+
+        $code .= "} {$cEnumName};\n";
+
+        if ($this->cond) {
             $code .= "#endif\n";
         }
 
@@ -4515,6 +4553,19 @@ class FileInfo {
 
         return $code;
     }
+
+    public function generateClassEntryCDeclarations(): string {
+        $code = "";
+
+        foreach ($this->classInfos as $class) {
+            $cdecl = $class->getCDeclarations();
+            if ($cdecl !== '') {
+                $code .= "\n" . $cdecl;
+            }
+        }
+
+        return $code;
+    }
 }
 
 class DocCommentTag {
@@ -5150,13 +5201,14 @@ function generateCodeWithConditions(
 
 /**
  * @param array<string, ConstInfo> $allConstInfos
+ * @return array{string, string}
  */
 function generateArgInfoCode(
     string $stubFilenameWithoutExtension,
     FileInfo $fileInfo,
     array $allConstInfos,
     string $stubHash
-): string {
+): array {
     $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
           . " * Stub hash: $stubHash */\n";
 
@@ -5250,7 +5302,13 @@ function generateArgInfoCode(
         $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
-    return $code;
+
+    $declCode = $fileInfo->generateClassEntryCDeclarations();
+    if ($declCode !== '') {
+        $declCode = "/* This is a generated file, edit the .stub.php file instead. */\n" . $declCode;
+    }
+
+    return [$code, $declCode];
 }
 
 /** @param FuncInfo[] $funcInfos */
