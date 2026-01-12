@@ -539,38 +539,38 @@ void ir_strtab_apply(const ir_strtab *strtab, ir_strtab_apply_t func);
 void ir_strtab_free(ir_strtab *strtab);
 
 /* IR Context Flags */
-#define IR_FUNCTION            (1<<0) /* Generate a function. */
-#define IR_FASTCALL_FUNC       (1<<1) /* Generate a function with fastcall calling convention, x86 32-bit only. */
-#define IR_VARARG_FUNC         (1<<2)
-#define IR_BUILTIN_FUNC        (1<<3)
-#define IR_STATIC              (1<<4)
-#define IR_EXTERN              (1<<5)
-#define IR_CONST               (1<<6)
+#define IR_PROTO_MASK          0xff
+#define IR_CALL_CONV_MASK      0x0f
 
-#define IR_CONST_FUNC          (1<<6)
-#define IR_PURE_FUNC           (1<<7)
+#define IR_VARARG_FUNC         (1<<4)
+#define IR_CONST_FUNC          (1<<5)
+#define IR_PURE_FUNC           (1<<6)
 
-#define IR_INITIALIZED         (1<<7) /* sym data flag: constant or an initialized variable */
-#define IR_CONST_STRING        (1<<8) /* sym data flag: constant string */
+#define IR_CONST               (1<<5)
+#define IR_INITIALIZED         (1<<6) /* sym data flag: constant or an initialized variable */
+#define IR_CONST_STRING        (1<<7) /* sym data flag: constant string */
 
-#define IR_SKIP_PROLOGUE       (1<<8) /* Don't generate function prologue. */
-#define IR_USE_FRAME_POINTER   (1<<9)
-#define IR_PREALLOCATED_STACK  (1<<10)
-#define IR_NO_STACK_COMBINE    (1<<11)
-#define IR_START_BR_TARGET     (1<<12)
-#define IR_ENTRY_BR_TARGET     (1<<13)
-#define IR_GEN_ENDBR           (1<<14)
-#define IR_MERGE_EMPTY_ENTRIES (1<<15)
+#define IR_FUNCTION            (1<<8) /* Generate a function. */
+#define IR_STATIC              (1<<9)
+#define IR_EXTERN              (1<<10)
 
-#define IR_OPT_INLINE          (1<<16)
-#define IR_OPT_FOLDING         (1<<17)
-#define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_MEM2SSA         (1<<19)
-#define IR_OPT_CODEGEN         (1<<20)
-#define IR_GEN_NATIVE          (1<<21)
-#define IR_GEN_CODE            (1<<22) /* C or LLVM */
+#define IR_USE_FRAME_POINTER   (1<<11)
+#define IR_NO_STACK_COMBINE    (1<<12)
+#define IR_GEN_ENDBR           (1<<13)
+#define IR_GEN_CACHE_DEMOTE    (1<<14) /* Demote the generated code from closest CPU caches */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<23) /* Demote the generated code from closest CPU caches */
+#define IR_SKIP_PROLOGUE       (1<<15) /* Don't generate function prologue. */
+#define IR_START_BR_TARGET     (1<<16)
+#define IR_ENTRY_BR_TARGET     (1<<17)
+#define IR_MERGE_EMPTY_ENTRIES (1<<18)
+
+#define IR_OPT_INLINE          (1<<19)
+#define IR_OPT_FOLDING         (1<<20)
+#define IR_OPT_CFG             (1<<21) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_MEM2SSA         (1<<22)
+#define IR_OPT_CODEGEN         (1<<23)
+#define IR_GEN_NATIVE          (1<<24)
+#define IR_GEN_CODE            (1<<25)
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -581,6 +581,24 @@ void ir_strtab_free(ir_strtab *strtab);
 # define IR_DEBUG_RA           (1<<30)
 # define IR_DEBUG_BB_SCHEDULE  (1U<<31)
 #endif
+
+/* Calling Conventions */
+#define IR_CC_DEFAULT          0x00
+#define IR_CC_BUILTIN          0x01
+#define IR_CC_FASTCALL         0x02
+#define	IR_CC_PRESERVE_NONE    0x03
+
+#if defined(IR_TARGET_X64)
+# define IR_CC_X86_64_SYSV     0x08
+# define IR_CC_X86_64_MS       0x09
+#elif defined(IR_TARGET_AARCH64)
+# define IR_CC_AARCH64_SYSV    0x08
+# define IR_CC_AARCH64_DARWIN  0x09
+#endif
+
+/* Deprecated constants */
+#define IR_BUILTIN_FUNC        IR_CC_BUILTIN
+#define IR_FASTCALL_FUNC       IR_CC_FASTCALL
 
 typedef struct _ir_ctx           ir_ctx;
 typedef struct _ir_use_list      ir_use_list;
@@ -728,7 +746,7 @@ const char *ir_get_strl(const ir_ctx *ctx, ir_ref idx, size_t *len);
 #define IR_MAX_PROTO_PARAMS 255
 
 typedef struct _ir_proto_t {
-	uint8_t flags;
+	uint8_t flags; /* first 8 bits of ir_ctx.flags */
 	uint8_t ret_type;
 	uint8_t params_count;
 	uint8_t param_types[5];
