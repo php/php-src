@@ -132,14 +132,13 @@ PHP_METHOD(Random_Randomizer, getFloat)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
-	zend_object *bounds = NULL;
 	zend_enum_Random_IntervalBoundary bounds_type = ZEND_ENUM_Random_IntervalBoundary_ClosedOpen;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
 		Z_PARAM_DOUBLE(max)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
+		Z_PARAM_ENUM(bounds_type, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_finite(min)) {
@@ -150,10 +149,6 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	if (!zend_finite(max)) {
 		zend_argument_value_error(2, "must be finite");
 		RETURN_THROWS();
-	}
-
-	if (bounds) {
-		bounds_type = zend_enum_fetch_case_id(bounds);
 	}
 
 	switch (bounds_type) {
