@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     function triggered by bailout in php_output_lock_error()). (timwolla)
   . Fix OSS-Fuzz #471533782 (Infinite loop in GC destructor fiber). (ilutov)
   . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
+  . Fix deprecation now showing when accessing null key of an array with JIT.
+    (alexandre-daubois)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
