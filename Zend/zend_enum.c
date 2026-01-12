@@ -36,11 +36,6 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
-typedef struct _zend_enum_obj {
-	zend_long   case_id;
-	zend_object std;
-} zend_enum_obj;
-
 static zend_arg_info zarginfo_class_UnitEnum_cases[sizeof(arginfo_class_UnitEnum_cases)/sizeof(zend_internal_arg_info)];
 static zend_arg_info zarginfo_class_BackedEnum_from[sizeof(arginfo_class_BackedEnum_from)/sizeof(zend_internal_arg_info)];
 static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_BackedEnum_tryFrom)/sizeof(zend_internal_arg_info)];
