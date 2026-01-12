@@ -38,6 +38,7 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 void zend_verify_enum(const zend_class_entry *ce);
 void zend_enum_register_funcs(zend_class_entry *ce);
 void zend_enum_register_props(zend_class_entry *ce);
+zend_long zend_enum_next_case_id(zend_class_entry *enum_class);
 
 ZEND_API zend_class_entry *zend_register_internal_enum(
 	const char *name, uint8_t type, const zend_function_entry *functions);

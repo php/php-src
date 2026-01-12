@@ -539,7 +539,8 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 }
 
 static zend_ast_ref *create_enum_case_ast(
-		zend_string *class_name, zend_string *case_name, zval *value) {
+		zend_string *class_name, zend_long case_id, zend_string *case_name,
+		zval *value) {
 	// TODO: Use custom node type for enum cases?
 	const size_t num_children = ZEND_AST_CONST_ENUM_INIT >> ZEND_AST_NUM_CHILDREN_SHIFT;
 	size_t size = sizeof(zend_ast_ref) + zend_ast_size(num_children)
@@ -564,7 +565,7 @@ static zend_ast_ref *create_enum_case_ast(
 	ast->child[1] = (zend_ast *) p; p += sizeof(zend_ast_zval);
 	ast->child[1]->kind = ZEND_AST_ZVAL;
 	ast->child[1]->attr = 0;
-	ZVAL_NULL(zend_ast_get_zval(ast->child[1]));
+	ZVAL_LONG(zend_ast_get_zval(ast->child[1]), case_id);
 	Z_LINENO_P(zend_ast_get_zval(ast->child[1])) = 0;
 
 	ast->child[2] = (zend_ast *) p; p += sizeof(zend_ast_zval);
@@ -588,6 +589,23 @@ static zend_ast_ref *create_enum_case_ast(
 	return ref;
 }
 
+zend_long zend_enum_next_case_id(zend_class_entry *enum_class)
+{
+	ZEND_HASH_REVERSE_FOREACH_VAL(&enum_class->constants_table, zval *zv) {
+		zend_class_constant *c = Z_PTR_P(zv);
+		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
+			continue;
+		}
+		ZEND_ASSERT(Z_TYPE(c->value) == IS_CONSTANT_AST);
+		zend_ast *ast = Z_ASTVAL(c->value);
+
+		ZEND_ASSERT(ast->kind == ZEND_AST_CONST_ENUM_INIT);
+		return Z_LVAL_P(zend_ast_get_zval(ast->child[1])) + 1;
+	} ZEND_HASH_FOREACH_END();
+
+	return 1;
+}
+
 ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, zval *value)
 {
 	if (value) {
@@ -609,9 +627,11 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 		ZEND_ASSERT(ce->enum_backing_type == IS_UNDEF);
 	}
 
+	zend_long case_id = zend_enum_next_case_id(ce);
+
 	zval ast_zv;
 	Z_TYPE_INFO(ast_zv) = IS_CONSTANT_AST;
-	Z_AST(ast_zv) = create_enum_case_ast(ce->name, case_name, value);
+	Z_AST(ast_zv) = create_enum_case_ast(ce->name, case_id, case_name, value);
 	zend_class_constant *c = zend_declare_class_constant_ex(
 		ce, case_name, &ast_zv, ZEND_ACC_PUBLIC, NULL);
 	ZEND_CLASS_CONST_FLAGS(c) |= ZEND_CLASS_CONST_IS_CASE;
