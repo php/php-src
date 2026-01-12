@@ -19,6 +19,7 @@
 
 #include "php.h"
 #include "php_math.h"
+#include "basic_functions_decl.h"
 #include "zend_bitset.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
@@ -304,27 +305,24 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
+PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode)
 {
-	zval *case_name = zend_enum_fetch_case_name(mode);
-	zend_string *mode_name = Z_STR_P(case_name);
-
-	switch (ZSTR_VAL(mode_name)[0] + ZSTR_VAL(mode_name)[4]) {
-		case 'H' + 'A':
+	switch (mode) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 			return PHP_ROUND_HALF_UP;
-		case 'H' + 'T':
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
 			return PHP_ROUND_HALF_DOWN;
-		case 'H' + 'E':
+		case ZEND_ENUM_RoundingMode_HalfEven:
 			return PHP_ROUND_HALF_EVEN;
-		case 'H' + 'O':
+		case ZEND_ENUM_RoundingMode_HalfOdd:
 			return PHP_ROUND_HALF_ODD;
-		case 'T' + 'r':
+		case ZEND_ENUM_RoundingMode_TowardsZero:
 			return PHP_ROUND_TOWARD_ZERO;
-		case 'A' + 'F':
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
 			return PHP_ROUND_AWAY_FROM_ZERO;
-		case 'N' + 't':
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
 			return PHP_ROUND_FLOOR;
-		case 'P' + 't':
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			return PHP_ROUND_CEILING;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -355,7 +353,7 @@ PHP_FUNCTION(round)
 	}
 
 	if (mode_object != NULL) {
-		mode = php_math_round_mode_from_enum(mode_object);
+		mode = php_math_round_mode_from_enum(zend_enum_fetch_case_id(mode_object));
 	}
 
 	switch (mode) {
