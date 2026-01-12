@@ -33,6 +33,7 @@
 #include "php_ticks.h"
 #include "zend_fibers.h"
 #include "main/php_main.h"
+#include "pcntl_decl.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
@@ -1823,19 +1824,28 @@ PHP_FUNCTION(pcntl_getcpu)
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 {
-	qos_class_t qos_class = QOS_CLASS_DEFAULT;
-	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
+	qos_class_t qos_class;
 
-	if (zend_string_equals_literal(entry, "UserInteractive")) {
+	switch (entry) {
+	cse ZEND_ENUM_Pcntl_QosClass_UserInteractive:
 		qos_class = QOS_CLASS_USER_INTERACTIVE;
-	} else if (zend_string_equals_literal(entry, "UserInitiated")) {
+		break;
+	case ZEND_ENUM_Pcntl_QosClass_UserInitiated:
 		qos_class = QOS_CLASS_USER_INITIATED;
-	} else if (zend_string_equals_literal(entry, "Utility")) {
+		break;
+	case ZEND_ENUM_Pcntl_QosClass_Utility:
 		qos_class = QOS_CLASS_UTILITY;
-	} else if (zend_string_equals_literal(entry, "Background")) {
+		break;
+	case ZEND_ENUM_Pcntl_QosClass_Background:
 		qos_class = QOS_CLASS_BACKGROUND;
+		break;
+	case ZEND_ENUM_Pcntl_QosClass_Default:
+		qos_class = QOS_CLASS_DEFAULT;
+		break;
+	default:
+		ZEND_UNREACHABLE();
 	}
 
 	return qos_class;
@@ -1886,13 +1896,13 @@ PHP_FUNCTION(pcntl_getqos_class)
 
 PHP_FUNCTION(pcntl_setqos_class)
 {
-	zval *qos_obj;
+	zend_enum_Pcntl_QosClass qos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+		Z_PARAM_ENUM(qos, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+	qos_class_t qos_class = qos_enum_to_pthread(qos);
 
 	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{
