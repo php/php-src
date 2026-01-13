@@ -11101,7 +11101,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_op *zend_compile_const_inner(znode *result, const zend_ast *ast, bool use_tmp) /* {{{ */
+static void zend_compile_const(znode *result, const zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 
@@ -11125,17 +11125,17 @@ static zend_op *zend_compile_const_inner(znode *result, const zend_ast *ast, boo
 			result->op_type = IS_CONST;
 			ZVAL_LONG(&result->u.constant, Z_LVAL_P(zend_ast_get_zval(last->child[0])));
 			zend_string_release_ex(resolved_name, 0);
-			return NULL;
+			return;
 		}
 	}
 
 	if (zend_try_ct_eval_const(&result->u.constant, resolved_name, is_fully_qualified)) {
 		result->op_type = IS_CONST;
 		zend_string_release_ex(resolved_name, 0);
-		return NULL;
+		return;
 	}
 
-	if (use_tmp) {
+	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	} else {
 		opline = zend_emit_op(result, ZEND_FETCH_CONSTANT, NULL, NULL);
@@ -11152,13 +11152,6 @@ static zend_op *zend_compile_const_inner(znode *result, const zend_ast *ast, boo
 			resolved_name, true);
 	}
 	opline->extended_value = zend_alloc_cache_slot();
-	return opline;
-}
-/* }}} */
-
-static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
-{
-	zend_compile_const_inner(result, ast, true);
 }
 /* }}} */
 
@@ -12012,7 +12005,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_array(result, ast);
 			return;
 		case ZEND_AST_CONST:
-			zend_compile_const(result, ast);
+			zend_compile_const(result, ast, BP_VAR_R);
 			return;
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_class_const(result, ast);
@@ -12097,7 +12090,8 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			*result = *zend_ast_get_znode(ast);
 			return NULL;
 		case ZEND_AST_CONST:
-			return zend_compile_const_inner(result, ast, false);
+			zend_compile_const(result, ast, type);
+			return NULL;
 		default:
 			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
 				zend_error_noreturn(E_COMPILE_ERROR,
