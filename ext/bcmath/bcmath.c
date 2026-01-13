@@ -1821,7 +1821,6 @@ PHP_METHOD(BcMath_Number, round)
 			RETURN_THROWS();
 	}
 
-
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
 	bc_num ret = NULL;
