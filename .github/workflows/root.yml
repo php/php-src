@@ -46,7 +46,6 @@ jobs:
         || '22.04' }}
       branch: ${{ matrix.branch.ref }}
       community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      libmysqlclient_with_mysqli: false
       run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       run_linux_ppc64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       run_macos_arm64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
