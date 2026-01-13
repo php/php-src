@@ -165,7 +165,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				stream->eof = 0;
 				stream->fatal_error = 0;
 				return 0;
-			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
+			} else if (ZSTR_LEN(ms->data) < (size_t)(-(zend_ulong)offset)) {
 				ms->fpos = 0;
 				*newoffs = -1;
 				return -1;
