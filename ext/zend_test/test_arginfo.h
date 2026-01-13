@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a8dae89983ccbcd5dd36d1cdee736d40af4fd33c */
+ * Stub hash: 25b63d5be5822cf0b717150dde07625cdd503c24 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -1260,6 +1260,20 @@ static zend_class_entry *register_class_ZendTestIntEnum(void)
 	zval enum_case_Baz_value;
 	ZVAL_LONG(&enum_case_Baz_value, -1);
 	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
+
+	return class_entry;
+}
+#endif
+
+#if (PHP_VERSION_ID >= 80100)
+static zend_class_entry *register_class_ZendTestEnumWithInterface(zend_class_entry *class_entry__ZendTestInterface)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestEnumWithInterface", IS_UNDEF, NULL);
+	zend_class_implements(class_entry, 1, class_entry__ZendTestInterface);
+
+	zend_enum_add_case_cstr(class_entry, "Foo", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Bar", NULL);
 
 	return class_entry;
 }
