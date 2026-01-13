@@ -28,7 +28,6 @@
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"
-#include "php_dom_decl.h"
 
 /*
 * class DOMElement extends DOMNode
