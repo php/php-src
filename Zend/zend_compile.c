@@ -8078,6 +8078,16 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				if (override_attribute) {
 					prop->flags |= ZEND_ACC_OVERRIDE;
 				}
+
+				zend_attribute *no_serialize_attribute = zend_get_attribute_str(prop->attributes, "noserialize", sizeof("noserialize")-1);
+				if (no_serialize_attribute) {
+					if (prop->flags & ZEND_ACC_VIRTUAL) {
+						zend_error(E_COMPILE_ERROR,
+						"Cannot apply #[\\NoSerialize] to virtual property %s::$%s",
+						ZSTR_VAL(scope->name), ZSTR_VAL(name));
+					}
+					prop->flags |= ZEND_ACC_NO_SERIALIZE;
+				}
 			}
 		}
 	}
@@ -9066,6 +9076,21 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			const zend_attribute *override_attribute = zend_get_attribute_str(info->attributes, "override", sizeof("override")-1);
 			if (override_attribute) {
 				info->flags |= ZEND_ACC_OVERRIDE;
+			}
+
+			zend_attribute *no_serialize_attribute = zend_get_attribute_str(info->attributes, "noserialize", sizeof("noserialize")-1);
+			if (no_serialize_attribute) {
+				if (info->flags & ZEND_ACC_STATIC) {
+					zend_error(E_COMPILE_ERROR,
+					"Cannot apply #[\\NoSerialize] to static property %s::$%s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
+				if (info->flags & ZEND_ACC_VIRTUAL) {
+					zend_error(E_COMPILE_ERROR,
+					"Cannot apply #[\\NoSerialize] to virtual property %s::$%s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				}
+				info->flags |= ZEND_ACC_NO_SERIALIZE;
 			}
 		}
 

@@ -1254,7 +1254,7 @@ again:
 					count = ce->default_properties_count;
 					for (i = 0; i < ce->default_properties_count; i++) {
 						prop_info = ce->properties_info_table[i];
-						if (!prop_info) {
+						if (!prop_info || prop_info->flags & ZEND_ACC_NO_SERIALIZE) {
 							count--;
 							continue;
 						}
@@ -1269,7 +1269,7 @@ again:
 						smart_str_appendl(buf, ":{", 2);
 						for (i = 0; i < ce->default_properties_count; i++) {
 							prop_info = ce->properties_info_table[i];
-							if (!prop_info) {
+							if (!prop_info || prop_info->flags & ZEND_ACC_NO_SERIALIZE) {
 								continue;
 							}
 							prop = OBJ_PROP(obj, prop_info->offset);
