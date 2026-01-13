@@ -5305,7 +5305,13 @@ function generateArgInfoCode(
 
     $declCode = $fileInfo->generateClassEntryCDeclarations();
     if ($declCode !== '') {
-        $declCode = "/* This is a generated file, edit the .stub.php file instead. */\n" . $declCode;
+        $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
+        $declCode = "/* This is a generated file, edit the .stub.php file instead. */\n"
+            . "\n"
+            . "#ifndef {$headerName}\n"
+            . "#define {$headerName}\n"
+            . $declCode . "\n"
+            . "#endif /* {$headerName} */\n";
     }
 
     return [$code, $declCode];

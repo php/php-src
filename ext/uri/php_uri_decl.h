@@ -1,5 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
+#ifndef ZEND_PHP_URI_DECL_f3c524798d1933a400cc9377cfbfdcbaf77b87f0_H
+#define ZEND_PHP_URI_DECL_f3c524798d1933a400cc9377cfbfdcbaf77b87f0_H
+
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
 	ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment = 2,
@@ -36,3 +39,5 @@ typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetter = 28,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetterHost = 29,
 } zend_enum_Uri_WhatWg_UrlValidationErrorType;
+
+#endif /* ZEND_PHP_URI_DECL_f3c524798d1933a400cc9377cfbfdcbaf77b87f0_H */
