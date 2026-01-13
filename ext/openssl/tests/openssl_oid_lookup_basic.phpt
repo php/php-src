@@ -9,7 +9,7 @@ var_dump(openssl_oid_lookup("unstructuredAddress"));
 var_dump(openssl_oid_lookup("1.2.3.4.5"));
 var_dump(openssl_oid_lookup("junk"));
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   ["oid"]=>
   string(7) "2.5.4.3"

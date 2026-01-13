@@ -4589,7 +4589,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 }
 /* }}} */
 
-/* {{{ Given an Object ID, or object short or long name, return an associative
+/* Given an Object ID, or object short or long name, return an associative
    array containing any known OID, short name, and long name, or false if the
    object is not known.
 */
@@ -4597,8 +4597,9 @@ PHP_FUNCTION(openssl_oid_lookup)
 {
 	zend_string * txt;
 	ASN1_OBJECT *obj;
-	char buf[1024];
+	char buf[256];
 	int nid;
+	bool found = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &txt) == FAILURE) {
 		return;
@@ -4609,13 +4610,12 @@ PHP_FUNCTION(openssl_oid_lookup)
 		RETURN_FALSE;
 	}
 
-	OBJ_obj2txt(buf, sizeof(buf)-1, obj, 1);
-	if (*buf == '\0') {
-		RETURN_FALSE;
-	}
-
 	array_init(return_value);
-	add_assoc_string(return_value, "oid", buf);
+
+	if (OBJ_obj2txt(buf, sizeof(buf)-1, obj, 1) > 0 && *buf != '\0') {
+		add_assoc_string(return_value, "oid", buf);
+		found = TRUE;
+	}
 
 	if ((nid = OBJ_obj2nid(obj)) != NID_undef) {
 		const char *l;
@@ -4624,14 +4624,18 @@ PHP_FUNCTION(openssl_oid_lookup)
 		l = OBJ_nid2ln(nid);
 		if (l != NULL) {
 			add_assoc_string(return_value, "lname", (char *) l);
+			found = TRUE;
 		}
 
 		s = OBJ_nid2sn(nid);
-		if (s != NULL && (l == NULL || strcmp(s,l) != 0)) {
+		if (s != NULL) {
 			add_assoc_string(return_value, "sname", (char *) s);
+			found = TRUE;
 		}
 	}
-
 	ASN1_OBJECT_free(obj);
+
+	if (!found) {
+		RETURN_FALSE;
+	}
 }
-/* }}} */
