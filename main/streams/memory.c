@@ -128,7 +128,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
-				if (ms->fpos < -(size_t)(offset)) {
+				if (ms->fpos < -(size_t)offset) {
 					ms->fpos = 0;
 					*newoffs = -1;
 					return -1;
