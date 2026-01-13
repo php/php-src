@@ -1829,7 +1829,7 @@ static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 	qos_class_t qos_class;
 
 	switch (entry) {
-	cse ZEND_ENUM_Pcntl_QosClass_UserInteractive:
+	case ZEND_ENUM_Pcntl_QosClass_UserInteractive:
 		qos_class = QOS_CLASS_USER_INTERACTIVE;
 		break;
 	case ZEND_ENUM_Pcntl_QosClass_UserInitiated:
