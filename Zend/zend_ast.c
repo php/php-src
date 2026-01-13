@@ -1238,6 +1238,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 					break;
 				}
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 
 			zend_create_fake_closure(result, fptr, fptr->common.scope, called_scope, NULL);
