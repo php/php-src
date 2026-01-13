@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
   . Fixed bug GH-20914 (Internal enums can be cloned and compared). (Arnaud)
   . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
+  . Fixed bug GH-20895 (ReflectionProperty does not return the PHPDoc of a
+    property if it contains an attribute with a Closure). (timwolla)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
