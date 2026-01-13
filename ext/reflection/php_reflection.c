@@ -31,7 +31,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_reflection.h"
-#include "php_reflection_decl.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
 #include "ext/random/php_random_csprng.h"

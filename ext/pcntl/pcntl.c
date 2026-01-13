@@ -33,7 +33,6 @@
 #include "php_ticks.h"
 #include "zend_fibers.h"
 #include "main/php_main.h"
-#include "pcntl_decl.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>

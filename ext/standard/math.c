@@ -19,7 +19,6 @@
 
 #include "php.h"
 #include "php_math.h"
-#include "basic_functions_decl.h"
 #include "zend_bitset.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"

@@ -26,7 +26,6 @@
 #include "ext/standard/info.h"
 
 #include "php_uri.h"
-#include "php_uri_decl.h"
 #include "uri_parser_whatwg.h"
 #include "uri_parser_rfc3986.h"
 #include "uri_parser_php_parse_url.h"

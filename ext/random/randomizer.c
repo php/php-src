@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "php_random.h"
-#include "random_decl.h"
 
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
