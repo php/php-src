@@ -1,6 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-typedef enum _zend_enum_RoundingMode {
+typedef enum zend_enum_RoundingMode {
 	ZEND_ENUM_RoundingMode_HalfAwayFromZero = 1,
 	ZEND_ENUM_RoundingMode_HalfTowardsZero = 2,
 	ZEND_ENUM_RoundingMode_HalfEven = 3,

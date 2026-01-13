@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-typedef enum _zend_enum_Uri_UriComparisonMode {
+typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
 	ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment = 2,
 } zend_enum_Uri_UriComparisonMode;
 
-typedef enum _zend_enum_Uri_WhatWg_UrlValidationErrorType {
+typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToAscii = 1,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToUnicode = 2,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainInvalidCodePoint = 3,
