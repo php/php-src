@@ -9,14 +9,26 @@ PHP                                                                        NEWS
     on macOs). (David Carlier)
   . Fixed bug GH-20837 (NULL dereference when calling ob_start() in shutdown
     function triggered by bailout in php_output_lock_error()). (timwolla)
+  . Fix OSS-Fuzz #471533782 (Infinite loop in GC destructor fiber). (ilutov)
+  . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
+  . Fixed bug GH-20914 (Internal enums can be cloned and compared). (Arnaud)
+  . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
 
+- Phar:
+  . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
+    (ndossche)
+
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
+
+- SPL:
+  . Fixed bug GH-20856 (heap-use-after-free in SplDoublyLinkedList iterator
+    when modifying during iteration). (ndossche)
 
 - Standard:
   . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)

@@ -208,6 +208,11 @@ namespace {
         case Baz = -1;
     }
 
+    enum ZendTestEnumWithInterface implements _ZendTestInterface {
+        case Foo;
+        case Bar;
+    }
+
     function zend_trigger_bailout(): never {}
 
     function zend_test_array_return(): array {}
