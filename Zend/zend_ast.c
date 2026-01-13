@@ -996,7 +996,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			zend_string *class_name = zend_ast_get_str(class_name_ast);
 
 			zend_ast *case_id_ast = ast->child[1];
-			zend_long case_id = Z_LVAL_P(zend_ast_get_zval(case_id_ast));
+			int case_id = (int)Z_LVAL_P(zend_ast_get_zval(case_id_ast));
 
 			zend_ast *case_name_ast = ast->child[2];
 			zend_string *case_name = zend_ast_get_str(case_name_ast);
