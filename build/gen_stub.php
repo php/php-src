@@ -3681,7 +3681,7 @@ class ClassInfo {
 
         $cEnumName = 'zend_enum_' . str_replace('\\', '_', $this->name->toString());
 
-        $code .= "typedef enum _{$cEnumName} {\n";
+        $code .= "typedef enum {$cEnumName} {\n";
 
         $i = 1;
         foreach ($this->enumCaseInfos as $case) {
