@@ -801,15 +801,15 @@ PHP_FUNCTION(bcround)
 
 	mode = php_math_round_mode_from_enum(mode_enum);
 
-	switch (mode) {
-		case PHP_ROUND_HALF_UP:
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_TOWARD_ZERO:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+	switch (mode_enum) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_HalfEven:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
+		case ZEND_ENUM_RoundingMode_TowardsZero:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			break;
 		default:
 			/* This is currently unreachable, but might become reachable when new modes are added. */
@@ -1806,15 +1806,15 @@ PHP_METHOD(BcMath_Number, round)
 
 	rounding_mode = php_math_round_mode_from_enum(mode_enum);
 
-	switch (rounding_mode) {
-		case PHP_ROUND_HALF_UP:
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_TOWARD_ZERO:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+	switch (mode_enum) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_HalfEven:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
+		case ZEND_ENUM_RoundingMode_TowardsZero:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			break;
 		default:
 			zend_argument_value_error(2, "is an unsupported rounding mode");
