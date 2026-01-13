@@ -324,8 +324,9 @@ PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode)
 			return PHP_ROUND_FLOOR;
 		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			return PHP_ROUND_CEILING;
-		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
+	ZEND_UNREACHABLE();
 }
 
 /* {{{ Returns the number rounded to specified precision */

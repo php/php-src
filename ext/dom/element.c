@@ -1643,8 +1643,6 @@ static xmlNodePtr dom_insert_adjacent(zend_enum_Dom_AdjacentPosition where, xmlN
 			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
 		break;
-	default:
-		ZEND_UNREACHABLE();
 	}
 	return otherp;
 }
