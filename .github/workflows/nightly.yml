@@ -436,7 +436,7 @@ jobs:
           FIREBIRD_DATABASE: test.fdb
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -877,7 +877,7 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   PECL:
     if: inputs.branch == 'master'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       CC: ccache gcc
       CXX: ccache g++
@@ -924,6 +924,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             ccache \
             libmemcached-dev \
+            imagemagick \
+            libmagickwand-dev \
             bison \
             re2c
       - name: ccache
