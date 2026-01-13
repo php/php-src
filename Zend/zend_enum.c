@@ -40,7 +40,7 @@ static zend_arg_info zarginfo_class_UnitEnum_cases[sizeof(arginfo_class_UnitEnum
 static zend_arg_info zarginfo_class_BackedEnum_from[sizeof(arginfo_class_BackedEnum_from)/sizeof(zend_internal_arg_info)];
 static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_BackedEnum_tryFrom)/sizeof(zend_internal_arg_info)];
 
-zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_long case_id, zend_string *case_name, zval *backing_value_zv)
+zend_object *zend_enum_new(zval *result, zend_class_entry *ce, int case_id, zend_string *case_name, zval *backing_value_zv)
 {
 	zend_enum_obj *intern = zend_object_alloc(sizeof(zend_enum_obj), ce);
 
@@ -547,7 +547,7 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 }
 
 static zend_ast_ref *create_enum_case_ast(
-		zend_string *class_name, zend_long case_id, zend_string *case_name,
+		zend_string *class_name, int case_id, zend_string *case_name,
 		zval *value) {
 	// TODO: Use custom node type for enum cases?
 	const size_t num_children = ZEND_AST_CONST_ENUM_INIT >> ZEND_AST_NUM_CHILDREN_SHIFT;
@@ -597,7 +597,7 @@ static zend_ast_ref *create_enum_case_ast(
 	return ref;
 }
 
-zend_long zend_enum_next_case_id(zend_class_entry *enum_class)
+int zend_enum_next_case_id(zend_class_entry *enum_class)
 {
 	ZEND_HASH_REVERSE_FOREACH_VAL(&enum_class->constants_table, zval *zv) {
 		zend_class_constant *c = Z_PTR_P(zv);
@@ -635,7 +635,7 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 		ZEND_ASSERT(ce->enum_backing_type == IS_UNDEF);
 	}
 
-	zend_long case_id = zend_enum_next_case_id(ce);
+	int case_id = zend_enum_next_case_id(ce);
 
 	zval ast_zv;
 	Z_TYPE_INFO(ast_zv) = IS_CONSTANT_AST;

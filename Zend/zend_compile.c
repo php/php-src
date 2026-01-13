@@ -9757,7 +9757,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 	zend_ast *class_name_ast = zend_ast_create_zval(&class_name_zval);
 
 	zval case_id_zval;
-	zend_long case_id = zend_enum_next_case_id(enum_class);
+	int case_id = zend_enum_next_case_id(enum_class);
 	ZVAL_LONG(&case_id_zval, case_id);
 	zend_ast *case_id_ast = zend_ast_create_zval(&case_id_zval);
 
