@@ -187,8 +187,6 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		}
 
 		return;
-	default:
-		ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

@@ -1844,8 +1844,6 @@ static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 	case ZEND_ENUM_Pcntl_QosClass_Default:
 		qos_class = QOS_CLASS_DEFAULT;
 		break;
-	default:
-		ZEND_UNREACHABLE();
 	}
 
 	return qos_class;
