@@ -1,5 +1,5 @@
 --TEST--
-memory stream seek edge case: PHP_INT_MIN with SEEK_END
+Bug #20921 - Memory stream seek edge case: PHP_INT_MIN with SEEK_END
 --FILE--
 <?php
 $cls = new SplTempFileObject();
