@@ -2024,7 +2024,7 @@ static char *zend_accel_uintptr_hex(char *dest, uintptr_t n)
  * a scheme, except file:// and phar://. */
 #define PFA_KEY_PREFIX "pfa://"
 
-static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
+static zend_string *zend_accel_pfa_key(const uint32_t *declaring_lineno_ptr,
 		const zend_function *called_function)
 {
 	const size_t max_key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
@@ -2032,7 +2032,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 
 	char *dest = ZSTR_VAL(key);
 	dest = zend_mempcpy(dest, PFA_KEY_PREFIX, strlen(PFA_KEY_PREFIX));
-	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_opline);
+	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_lineno_ptr);
 	*dest++ = ':';
 
 	const void *ptr;
@@ -2055,9 +2055,9 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 }
 
 const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, const zend_function *called_function)
+		const uint32_t *declaring_lineno_ptr, const zend_function *called_function)
 {
-	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
+	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
 	zend_op_array *op_array = NULL;
 
 	/* A PFA is SHM-cacheable if the declaring_op_array and called_function are
@@ -2085,7 +2085,7 @@ const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_
 
 zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline,
+		const uint32_t *declaring_lineno_ptr,
 		const zend_function *called_function,
 		zend_string *pfa_func_name)
 {
@@ -2121,7 +2121,7 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 	zend_string_release(op_array->dynamic_func_defs[0]->function_name);
 	op_array->dynamic_func_defs[0]->function_name = pfa_func_name;
 
-	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
+	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
 
 	/* Cache op_array only if the declaring op_array and the called function
 	 * are cached */

@@ -9881,7 +9881,7 @@ ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NU
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, opline, cache_slot,
+		&EX(func)->op_array, &opline->lineno, cache_slot,
 		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {

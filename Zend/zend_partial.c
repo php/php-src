@@ -503,14 +503,14 @@ static zend_ast *zp_param_attributes_to_ast(zend_function *function,
 }
 
 static zend_string *zp_pfa_name(const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline)
+		const uint32_t *declaring_lineno_ptr)
 {
 	/* We attempt to generate a name that hints at where the PFA was created,
 	 * similarly to Closures (GH-13550).
 	 * We do not attempt to make the name unique. */
 
 	zend_string *filename = declaring_op_array->filename;
-	uint32_t start_lineno = declaring_opline->lineno;
+	uint32_t start_lineno = *declaring_lineno_ptr;
 
 	zend_string *class = zend_empty_string;
 	zend_string *separator = zend_empty_string;
@@ -702,7 +702,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
 		bool uses_variadic_placeholder) {
 
 	zend_op_array *op_array = NULL;
@@ -1012,10 +1012,10 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	}
 #endif
 
-	zend_string *pfa_name = zp_pfa_name(declaring_op_array, declaring_opline);
+	zend_string *pfa_name = zp_pfa_name(declaring_op_array, declaring_lineno_ptr);
 
 	op_array = zend_accel_compile_pfa(closure_ast, declaring_op_array,
-			declaring_opline, function, pfa_name);
+			declaring_lineno_ptr, function, pfa_name);
 
 	zend_ast_destroy(closure_ast);
 
@@ -1041,7 +1041,7 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
 		bool uses_variadic_placeholder) {
 
 	if (EXPECTED(function->type == ZEND_INTERNAL_FUNCTION
@@ -1052,11 +1052,11 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 	}
 
 	const zend_op_array *op_array = zend_accel_pfa_cache_get(declaring_op_array,
-			declaring_opline, function);
+			declaring_lineno_ptr, function);
 
 	if (UNEXPECTED(!op_array)) {
 		op_array = zp_compile(this_ptr, function, argc, argv,
-			extra_named_params, named_positions, declaring_op_array, declaring_opline,
+			extra_named_params, named_positions, declaring_op_array, declaring_lineno_ptr,
 			cache_slot, uses_variadic_placeholder);
 	}
 
@@ -1136,12 +1136,12 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
 		bool uses_variadic_placeholder) {
 
 	const zend_op_array *op_array = zp_get_op_array(this_ptr, function, argc, argv,
 			extra_named_params, named_positions,
-			declaring_op_array, declaring_opline,
+			declaring_op_array, declaring_lineno_ptr,
 			cache_slot, uses_variadic_placeholder);
 
 	if (UNEXPECTED(!op_array)) {
