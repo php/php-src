@@ -60,7 +60,7 @@ jobs:
   REAL_TIME_BENCHMARK:
     name: REAL_TIME_BENCHMARK
     if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       REPOSITORY: ${{ github.repository }}
       BRANCH: "master"
@@ -82,7 +82,7 @@ jobs:
           echo "YEAR=$YEAR" >> $GITHUB_ENV
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            PR_INFO=$(gh pr view ${{ inputs.pull_request }} --json headRepositoryOwner,headRepository,headRefName,headRefOid,baseRefOid --repo ${{ github.repository }} | jq -r '.headRepositoryOwner.login, .headRepository.name, .headRefName, .headRefOid, .baseRefOid')
+            PR_INFO=$(gh pr view ${{ inputs.pull_request }} --json headRepositoryOwner,headRepository,headRefName,headRefOid,baseRefName --repo ${{ github.repository }} | jq -r '.headRepositoryOwner.login, .headRepository.name, .headRefName, .headRefOid, .baseRefName')
 
             REPOSITORY="$(echo "$PR_INFO" | sed -n '1p')/$(echo "$PR_INFO" | sed -n '2p')"
             echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
@@ -93,7 +93,9 @@ jobs:
             COMMIT=$(echo "$PR_INFO" | sed -n '4p')
             echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
-            BASELINE_COMMIT=$(echo "$PR_INFO" | sed -n '5p')
+            BASELINE_BRANCH=$(echo "$PR_INFO" | sed -n '5p')
+
+            BASELINE_COMMIT=$(gh api /repos/${{ github.repository }}/compare/$BASELINE_BRANCH...$COMMIT --jq '.merge_base_commit.sha')
             echo "BASELINE_COMMIT=$BASELINE_COMMIT" >> $GITHUB_ENV
 
             echo "ID=benchmarked" >> $GITHUB_ENV
@@ -288,12 +290,14 @@ jobs:
           fi
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
-      - name: Upload artifact
+      - name: Upload artifacts
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v6
         with:
           name: results
-          path: ./php-version-benchmarks/docs/results/${{ env.YEAR }}
+          path: |
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/*/*.*
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/*/*/*.log
           retention-days: 30
       - name: Comment results
         if: github.event_name == 'workflow_dispatch'
