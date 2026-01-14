@@ -1998,7 +1998,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 }
 /* }}} */
 
-/* {{{ Returns an array of the fields/values of the Certificate Request */
+/* Returns an array of the fields/values of the Certificate Request */
 PHP_FUNCTION(openssl_csr_parse)
 {
 	X509_REQ * csr = NULL;
@@ -2007,6 +2007,8 @@ PHP_FUNCTION(openssl_csr_parse)
 	int i, sig_nid;
 	bool useshortnames = 1;
 	zval subitem;
+	zval critext;
+	int critcount = 0;
 	X509_EXTENSION *extension;
 	X509_NAME *subject_name;
 	char *csr_name;
@@ -2015,8 +2017,6 @@ PHP_FUNCTION(openssl_csr_parse)
 	BUF_MEM *bio_buf;
 	char buf[256];
 	STACK_OF(X509_EXTENSION) *exts = NULL;
-	char *crit_name = NULL;
-	int crit_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
@@ -2026,7 +2026,7 @@ PHP_FUNCTION(openssl_csr_parse)
 
 	csr = php_openssl_csr_from_param(csr_obj, csr_str, 1);
 	if (csr == NULL) {
-		// TODO Add Warning?
+		php_error_docref(NULL, E_WARNING, "First parameter must be a valid CSR");
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -2054,11 +2054,13 @@ PHP_FUNCTION(openssl_csr_parse)
 	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
 
 	array_init(&subitem);
+	array_init(&critext);
+
 	int attrcnt = X509_REQ_get_attr_count(csr);
 	if (attrcnt > 0) {
+		const char unknown[] = "Unknown";
 		for (i = 0; i < attrcnt; i++) {
 			X509_ATTRIBUTE *attr = X509_REQ_get_attr(csr,i);
-			char unknown[] = "Unknown";
 			if (attr) {
 				char objbuf[80];
 				/* Adapted from openssl's "req" app */
@@ -2112,25 +2114,17 @@ get_next:
 			extension = sk_X509_EXTENSION_value(exts, i);
 			nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
 			if (nid != NID_undef) {
-				extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+				extname = (char *)OBJ_nid2sn(nid);
 			} else {
-				OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
+				if (OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1) < 0) {
+					php_openssl_store_errors();
+					goto err_subitem;
+				}
 				extname = buf;
 			}
 			if (X509_EXTENSION_get_critical(extension)) {
-				int new_len = strlen(extname) + 10;
-				if (new_len > crit_len) {
-					if (crit_name) {
-						efree(crit_name);
-					}
-					crit_len = new_len;
-					crit_name = emalloc(crit_len);
-				}
-				if (crit_name) {
-					strcpy(crit_name, extname);
-					strcat(crit_name, ":critical");
-					add_assoc_bool(&subitem, crit_name, 1);
-				}
+				add_next_index_string(&critext, extname);
+				critcount++;
 			}
 			bio_out = BIO_new(BIO_s_mem());
 			if (bio_out == NULL) {
@@ -2155,8 +2149,10 @@ get_next:
 			BIO_free(bio_out);
 		}
 		add_assoc_zval(return_value, "extensions", &subitem);
-		if (crit_name) {
-			efree(crit_name);
+		if (critcount > 0) {
+			add_assoc_zval(return_value, "criticalExtensions", &critext);
+		} else {
+			zval_ptr_dtor(&critext);
 		}
 		sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
 		exts = NULL;
@@ -2168,9 +2164,7 @@ get_next:
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
-	if (crit_name) {
-		efree(crit_name);
-	}
+	zval_ptr_dtor(&critext);
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (csr) {
 		X509_REQ_free(csr);
@@ -2180,7 +2174,6 @@ err_subitem:
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* }}} */
 
