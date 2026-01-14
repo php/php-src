@@ -11898,7 +11898,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_NAMED_ARG
 		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
 		|| kind == ZEND_AST_CLOSURE
-		|| kind == ZEND_AST_CALL || kind == ZEND_AST_STATIC_CALL || kind == ZEND_AST_CALLABLE_CONVERT;
+		|| kind == ZEND_AST_CALL || kind == ZEND_AST_STATIC_CALL || kind == ZEND_AST_CALLABLE_CONVERT
+		|| kind == ZEND_AST_PLACEHOLDER_ARG;
 }
 /* }}} */
 
@@ -12063,17 +12064,9 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 
 static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 {
-	zend_ast **args_ast;
-	switch ((*ast_ptr)->kind) {
-		case ZEND_AST_CALL:
-			args_ast = &(*ast_ptr)->child[1];
-			break;
-		case ZEND_AST_STATIC_CALL:
-			args_ast = &(*ast_ptr)->child[2];
-			break;
-		default: ZEND_UNREACHABLE();
-	}
-	if ((*args_ast)->kind != ZEND_AST_CALLABLE_CONVERT) {
+	zend_ast *args_ast = zend_ast_call_get_args(*ast_ptr);
+
+	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
 	}
 
@@ -12126,6 +12119,7 @@ static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 {
 	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
 	bool uses_named_args = false;
+	bool uses_variadic_placeholder = false;
 	for (uint32_t i = 0; i < list->children; i++) {
 		const zend_ast *arg = list->child[i];
 		if (arg->kind == ZEND_AST_UNPACK) {
@@ -12134,11 +12128,31 @@ static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 		}
 		if (arg->kind == ZEND_AST_NAMED_ARG) {
 			uses_named_args = true;
-		} else if (uses_named_args) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use positional argument after named argument");
+			if (uses_variadic_placeholder) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder must be last");
+			}
+		} else {
+			bool is_variadic_placeholder = arg->kind == ZEND_AST_PLACEHOLDER_ARG
+				&& arg->attr == ZEND_PLACEHOLDER_VARIADIC;
+
+			if (uses_named_args && !is_variadic_placeholder) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use positional argument after named argument");
+			}
+
+			if (uses_variadic_placeholder) {
+				if (is_variadic_placeholder) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder may only appear once");
+				} else {
+					zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder must be last");
+				}
+			}
+
+			if (is_variadic_placeholder) {
+				uses_variadic_placeholder = true;
+			}
 		}
 	}
+
 	if (uses_named_args) {
 		list->attr = 1;
 	}
