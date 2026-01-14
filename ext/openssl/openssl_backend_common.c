@@ -681,7 +681,7 @@ static void print_asn1_type(BIO *bio, ASN1_TYPE *ptr)
 /* Special handling of subjectAltName, see CVE-2013-4073
  * Christian Heimes
  */
-int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension, zval **altname)
+int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension, zval *altname)
 {
 	GENERAL_NAMES *names;
 	const X509V3_EXT_METHOD *method = NULL;
@@ -710,12 +710,6 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 	}
 
 	num = sk_GENERAL_NAME_num(names);
-	if (altname != NULL) {
-		if (*altname == NULL) {
-			*altname = (zval *)safe_emalloc(1, sizeof(zval), 0);
-		}
-		array_init(*altname);
-	}
 	for (i = 0; i < num; i++) {
 		GENERAL_NAME *name;
 		ASN1_STRING *as;
@@ -731,7 +725,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				if (altname != NULL) {
 					add_assoc_string(&entry, "type", "email");
 					php_openssl_add_assoc_asn1_string(&entry, "value", as);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_DNS:
@@ -742,7 +736,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				if (altname != NULL) {
 					add_assoc_string(&entry, "type", "DNS");
 					php_openssl_add_assoc_asn1_string(&entry, "value", as);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_URI:
@@ -753,7 +747,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				if (altname != NULL) {
 					add_assoc_string(&entry, "type", "URI");
 					php_openssl_add_assoc_asn1_string(&entry, "value", as);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_DIRNAME:
@@ -761,7 +755,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				if (altname != NULL) {
 					add_assoc_string(&entry, "type", "DirName");
 					php_openssl_add_assoc_name_entry(&entry, "value", name->d.dirn, PHP_OPENSSL_OID);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_RID:
@@ -771,7 +765,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					OBJ_obj2txt(buf, sizeof(buf)-1, name->d.rid, 1);
 					add_assoc_string(&entry, "type", "Registered ID");
 					add_assoc_string(&entry, "value", buf);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_IPADD:
@@ -787,7 +781,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					}
 					add_assoc_string(&entry, "type", "IP Address");
 					add_assoc_string(&entry, "value", buf);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 				}
 				break;
 			case GEN_OTHERNAME:
@@ -808,7 +802,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_assoc_stringl(&value, oid, bio_buf->data, bio_buf->length);
 					add_assoc_string(&entry, "type", "othername");
 					add_assoc_zval(&entry, "value", &value);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 					BIO_free(bio_out);
 				}
 				break;
@@ -832,7 +826,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 							break;
 					}
 					add_assoc_stringl(&entry, "value", bio_buf->data, bio_buf->length);
-					add_index_zval(*altname, index++, &entry);
+					add_index_zval(altname, index++, &entry);
 					BIO_free(bio_out);
 				}
 		}
