@@ -9866,14 +9866,15 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NUM)
+ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CONST, CONST|UNUSED, NUM)
 {
 	USE_OPLINE
 	SAVE_OPLINE();
 
 	zend_execute_data *call = EX(call);
-	void **cache_slot = CACHE_ADDR(opline->op1.num);
+	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
 	zval *named_positions = GET_OP2_ZVAL_PTR();
+	zend_string *pfa_name = Z_STR_P(GET_OP1_ZVAL_PTR());
 
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
@@ -9881,8 +9882,8 @@ ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NU
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, &opline->lineno, cache_slot,
-		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
+		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_array_release(call->extra_named_params);

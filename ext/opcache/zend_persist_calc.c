@@ -92,6 +92,12 @@ static void zend_persist_ast_calc(zend_ast *ast)
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast;
 		ADD_SIZE(sizeof(zend_ast_fcc));
+		if (fcc_ast->filename) {
+			ADD_INTERNED_STRING(fcc_ast->filename);
+		}
+		if (fcc_ast->name) {
+			ADD_INTERNED_STRING(fcc_ast->name);
+		}
 		zend_persist_ast_calc(fcc_ast->args);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
