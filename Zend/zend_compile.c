@@ -5041,8 +5041,16 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	if (callback->kind != ZEND_AST_CALL) {
 		return FAILURE;
 	}
+
 	zend_ast *args_ast = zend_ast_call_get_args(callback);
 	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
+		return FAILURE;
+	}
+
+	/* Bail out if the callback is assert() due to the AST stringification logic
+	 * breaking for the generated call.
+	 */
+	if (zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
 		return FAILURE;
 	}
 
