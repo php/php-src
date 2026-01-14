@@ -1946,6 +1946,7 @@ static zend_string *date_create_tz_offset_str(timelib_sll offset)
 	int seconds = offset % 60;
 	size_t size;
 	const char *format;
+
 	if (seconds == 0) {
 		size = sizeof("+05:00");
 		format = "%c%02d:%02d";
@@ -1953,6 +1954,7 @@ static zend_string *date_create_tz_offset_str(timelib_sll offset)
 		size = sizeof("+05:00:01");
 		format = "%c%02d:%02d:%02d";
 	}
+
 	zend_string *tmpstr = zend_string_alloc(size - 1, 0);
 
 	/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
