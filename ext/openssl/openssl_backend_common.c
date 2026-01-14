@@ -25,6 +25,11 @@
 
 /* Common */
 #include <time.h>
+#ifdef PHP_WIN32
+# include <Ws2tcpip.h>
+#else
+# include <arpa/inet.h>
+#endif
 
 #if (defined(PHP_WIN32) && defined(_MSC_VER))
 #define timezone _timezone	/* timezone is called _timezone in LibC */
@@ -35,12 +40,14 @@
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
 
-void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname)
+void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name,
+				      enum php_openssl_name_type nametype)
 {
 	zval *data;
 	zval subitem, tmp;
 	int i;
-	char *sname;
+	char *sname = NULL;
+	char oname[1024];
 	int nid;
 	X509_NAME_ENTRY * ne;
 	ASN1_STRING * str = NULL;
@@ -59,12 +66,20 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, 
 
 		ne = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
-		nid = OBJ_obj2nid(obj);
 
-		if (shortname) {
-			sname = (char *) OBJ_nid2sn(nid);
-		} else {
-			sname = (char *) OBJ_nid2ln(nid);
+		switch (nametype) {
+			case PHP_OPENSSL_SHORT_NAME:
+				nid = OBJ_obj2nid(obj);
+				sname = (char *) OBJ_nid2sn(nid);
+				break;
+			case PHP_OPENSSL_LONG_NAME:
+				nid = OBJ_obj2nid(obj);
+				sname = (char *) OBJ_nid2ln(nid);
+				break;
+			case PHP_OPENSSL_OID:
+				OBJ_obj2txt(oname, sizeof(oname)-1, obj, 1);
+				sname = oname;
+				break;
 		}
 
 		str = X509_NAME_ENTRY_get_data(ne);
@@ -613,16 +628,60 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 	return ret;
 }
 
+/* proto void print_asn1_type(BIO *bio, ASN1_TYPE *ptr)
+   Print the value of an ASN1_TYPE to a BIO */
+static void print_asn1_type(BIO *bio, ASN1_TYPE *ptr)
+{
+	char objbuf[1024];
+
+	switch (ptr->type) {
+		case V_ASN1_BOOLEAN:
+			BIO_puts(bio, ptr->value.boolean ? "true" : "false");
+			break;
+
+		case V_ASN1_INTEGER:
+			BIO_puts(bio, i2s_ASN1_INTEGER(NULL, ptr->value.integer));
+			break;
+
+		case V_ASN1_ENUMERATED:
+			BIO_puts(bio, i2s_ASN1_INTEGER(NULL, ptr->value.enumerated));
+			break;
+
+		case V_ASN1_NULL:
+			BIO_puts(bio, "NULL");
+			break;
+
+		case V_ASN1_UTCTIME:
+			ASN1_UTCTIME_print(bio, ptr->value.utctime);
+			break;
+
+		case V_ASN1_GENERALIZEDTIME:
+			ASN1_GENERALIZEDTIME_print(bio, ptr->value.generalizedtime);
+			break;
+
+		case V_ASN1_OBJECT:
+			OBJ_obj2txt(objbuf, sizeof(objbuf), ptr->value.object, 1);
+			BIO_puts(bio, objbuf);
+			break;
+
+		default :
+			ASN1_STRING_print_ex(bio, ptr->value.visiblestring,
+					     ASN1_STRFLGS_DUMP_UNKNOWN);
+			break;
+	}
+}
+
 /* Special handling of subjectAltName, see CVE-2013-4073
  * Christian Heimes
  */
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
+int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension, zval *altname)
 {
 	GENERAL_NAMES *names;
 	const X509V3_EXT_METHOD *method = NULL;
 	ASN1_OCTET_STRING *extension_data;
 	long i, length, num;
 	const unsigned char *p;
+	zend_ulong index = 0;
 
 	method = X509V3_EXT_get(extension);
 	if (method == NULL) {
@@ -647,6 +706,8 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 	for (i = 0; i < num; i++) {
 		GENERAL_NAME *name;
 		ASN1_STRING *as;
+		zval entry;
+		array_init(&entry);
 		name = sk_GENERAL_NAME_value(names, i);
 		switch (name->type) {
 			case GEN_EMAIL:
@@ -654,29 +715,118 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 				as = name->d.rfc822Name;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
+				if (altname != NULL) {
+					add_assoc_string(&entry, "type", "email");
+					php_openssl_add_assoc_asn1_string(&entry, "value", as);
+					add_index_zval(altname, index++, &entry);
+				}
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
+				if (altname != NULL) {
+					add_assoc_string(&entry, "type", "DNS");
+					php_openssl_add_assoc_asn1_string(&entry, "value", as);
+					add_index_zval(altname, index++, &entry);
+				}
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
+				if (altname != NULL) {
+					add_assoc_string(&entry, "type", "URI");
+					php_openssl_add_assoc_asn1_string(&entry, "value", as);
+					add_index_zval(altname, index++, &entry);
+				}
+				break;
+			case GEN_DIRNAME:
+				GENERAL_NAME_print(bio, name);
+				if (altname != NULL) {
+					add_assoc_string(&entry, "type", "DirName");
+					php_openssl_add_assoc_name_entry(&entry, "value", name->d.dirn, PHP_OPENSSL_OID);
+					add_index_zval(altname, index++, &entry);
+				}
+				break;
+			case GEN_RID:
+				GENERAL_NAME_print(bio, name);
+				if (altname != NULL) {
+					char buf[1024];
+					OBJ_obj2txt(buf, sizeof(buf)-1, name->d.rid, 1);
+					add_assoc_string(&entry, "type", "Registered ID");
+					add_assoc_string(&entry, "value", buf);
+					add_index_zval(altname, index++, &entry);
+				}
+				break;
+			case GEN_IPADD:
+				GENERAL_NAME_print(bio, name);
+				if (altname != NULL) {
+					char buf[1024];
+					if (name->d.ip->length == 4) {
+						inet_ntop(AF_INET, name->d.ip->data, buf, sizeof(buf)-1);
+					} else if (name->d.ip->length == 16) {
+						inet_ntop(AF_INET6, name->d.ip->data, buf, sizeof(buf)-1);
+					} else {
+						sprintf(buf, "<invalid>");
+					}
+					add_assoc_string(&entry, "type", "IP Address");
+					add_assoc_string(&entry, "value", buf);
+					add_index_zval(altname, index++, &entry);
+				}
+				break;
+			case GEN_OTHERNAME:
+				GENERAL_NAME_print(bio, name);
+				if (altname != NULL) {
+					char oid[1024];
+					zval value;
+					array_init(&value);
+
+					OBJ_obj2txt(oid, sizeof(oid)-1, name->d.otherName->type_id, 1);
+
+					BIO *bio_out;
+					BUF_MEM *bio_buf;
+					bio_out = BIO_new(BIO_s_mem());
+					print_asn1_type(bio_out, name->d.otherName->value);
+					BIO_get_mem_ptr(bio_out, &bio_buf);
+
+					add_assoc_stringl(&value, oid, bio_buf->data, bio_buf->length);
+					add_assoc_string(&entry, "type", "othername");
+					add_assoc_zval(&entry, "value", &value);
+					add_index_zval(altname, index++, &entry);
+					BIO_free(bio_out);
+				}
 				break;
 			default:
-				/* use builtin print for GEN_OTHERNAME, GEN_X400,
-				 * GEN_EDIPARTY, GEN_DIRNAME, GEN_IPADD and GEN_RID
-				 */
 				GENERAL_NAME_print(bio, name);
-			}
-			/* trailing ', ' except for last element */
-			if (i < (num - 1)) {
-				BIO_puts(bio, ", ");
-			}
+				if (altname != NULL) {
+					BIO *bio_out;
+					BUF_MEM *bio_buf;
+					bio_out = BIO_new(BIO_s_mem());
+					GENERAL_NAME_print(bio_out, name);
+					BIO_get_mem_ptr(bio_out, &bio_buf);
+					switch (name->type) {
+						case GEN_X400:
+							add_assoc_string(&entry, "type", "X400Name");
+							break;
+						case GEN_EDIPARTY:
+							add_assoc_string(&entry, "type", "EdiPartyName");
+							break;
+						default:
+							add_assoc_string(&entry, "type", "Unknown");
+							break;
+					}
+					add_assoc_stringl(&entry, "value", bio_buf->data, bio_buf->length);
+					add_index_zval(altname, index++, &entry);
+					BIO_free(bio_out);
+				}
+		}
+		/* trailing ', ' except for last element */
+		if (i < (num - 1)) {
+			BIO_puts(bio, ", ");
+		}
 	}
 	sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
 

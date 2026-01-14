@@ -99,6 +99,13 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_AES_128_CBC
 };
 
+/* Name display options for php_openssl_add_assoc_name_entry */
+enum php_openssl_name_type {
+	PHP_OPENSSL_LONG_NAME,
+	PHP_OPENSSL_SHORT_NAME,
+	PHP_OPENSSL_OID
+};
+
 /* Add some encoding rules.  This is normally handled through filters
  * in the OpenSSL code, but we will do that part as if we were one
  * of the OpenSSL binaries along the lines of -outform {DER|CMS|PEM}
@@ -168,7 +175,8 @@ struct php_x509_request {
 	const EVP_CIPHER * priv_key_encrypt_cipher;
 };
 
-void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname);
+void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name,
+				      enum php_openssl_name_type nametype);
 void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str);
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr);
 int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, CONF *config);
@@ -266,7 +274,7 @@ X509 *php_openssl_x509_from_zval(
 
 zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
 
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension);
+int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension, zval *altname);
 
 STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
