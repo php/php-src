@@ -1014,7 +1014,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	char *str_serial;
 	char *hex_serial;
 	char buf[256];
-	zval *altname = NULL;
+	zval altname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
@@ -1118,8 +1118,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_zval(return_value, "purposes", &subitem);
 
 	array_init(&subitem);
-
-
+	array_init(&altname);
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
 		int nid;
 		extension = X509_get_ext(cert, i);
@@ -1153,8 +1152,9 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
-	if (altname != NULL) {
-	    add_assoc_zval(return_value, "subjectAlternativeName", altname);
+	ulong altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
+	if (altcount > 0) {
+		add_assoc_zval(return_value, "subjectAlternativeName", &altname);
 	}
 	if (cert_str) {
 		X509_free(cert);
@@ -1163,10 +1163,7 @@ PHP_FUNCTION(openssl_x509_parse)
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
-	if (altname != NULL) {
-	    zval_ptr_dtor(altname);
-	    efree(altname);
-	}
+	zval_ptr_dtor(&altname);
 err:
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (cert_str) {

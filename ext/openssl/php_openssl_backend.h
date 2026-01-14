@@ -274,7 +274,7 @@ X509 *php_openssl_x509_from_zval(
 
 zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
 
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension, zval **altname);
+int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension, zval *altname);
 
 STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
