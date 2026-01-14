@@ -4614,7 +4614,7 @@ PHP_FUNCTION(openssl_oid_lookup)
 
 	if (OBJ_obj2txt(buf, sizeof(buf)-1, obj, 1) > 0 && *buf != '\0') {
 		add_assoc_string(return_value, "oid", buf);
-		found = TRUE;
+		found = true;
 	}
 
 	if ((nid = OBJ_obj2nid(obj)) != NID_undef) {
@@ -4624,13 +4624,13 @@ PHP_FUNCTION(openssl_oid_lookup)
 		l = OBJ_nid2ln(nid);
 		if (l != NULL) {
 			add_assoc_string(return_value, "lname", (char *) l);
-			found = TRUE;
+			found = true;
 		}
 
 		s = OBJ_nid2sn(nid);
 		if (s != NULL) {
 			add_assoc_string(return_value, "sname", (char *) s);
-			found = TRUE;
+			found = true;
 		}
 	}
 	ASN1_OBJECT_free(obj);
