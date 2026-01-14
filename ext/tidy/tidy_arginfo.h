@@ -1,5 +1,5 @@
 /* This is a generated file, edit tidy.stub.php instead.
- * Stub hash: 0e6561410a63658f76011c1ddcecdd1e68757f0a */
+ * Stub hash: f48fb5549e50b4e7660fc432d42a5cc1ba13f43f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit soap.stub.php instead.
- * Stub hash: 24e266bf0933d5622f2a341db5b694ecb1740f13 */
+ * Stub hash: 930749f784ddffa81320728b739757a531405d52 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")

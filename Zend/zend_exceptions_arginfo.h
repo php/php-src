@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_exceptions.stub.php instead.
- * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
+ * Stub hash: 9f58693def15b468244d89bb9feaa5078b391bfa */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()

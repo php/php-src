@@ -1,5 +1,5 @@
 /* This is a generated file, edit odbc.stub.php instead.
- * Stub hash: f9ba28767b256dbcea087a65aa4bb5f5b509d6f3 */
+ * Stub hash: a1187e18d88bb80e459fb50ba26b4133ac185dfa */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()

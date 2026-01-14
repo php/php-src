@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_weakrefs.stub.php instead.
- * Stub hash: d91889851d9732d41e43fffddb6235d033c67534 */
+ * Stub hash: 85e62bf02485a388738e33524a784399edd98d9f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_WeakReference___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_enum.stub.php instead.
- * Stub hash: 7092f1d4ba651f077cff37050899f090f00abf22 */
+ * Stub hash: e67dfb1377650d3537440bc4ebcd7d9b9f1cf9d2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UnitEnum_cases, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()

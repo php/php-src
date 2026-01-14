@@ -1,5 +1,6 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
+ * Stub hash: 5d5d372367a3e962a03dafbf52c6e519931d9d91
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

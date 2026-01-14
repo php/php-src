@@ -1,5 +1,6 @@
 /* This is a generated file, edit random.stub.php instead.
- * Stub hash: 416be19494555016195600e488d79f0dd35f2620 */
+ * Stub hash: 16b1be2da92880feb28676c64dcdac8b3d0689d1
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()

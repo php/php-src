@@ -1,5 +1,5 @@
 /* This is a generated file, edit breakiterator_iterators.stub.php instead.
- * Stub hash: 5dc9ab2cc5862b2082fb9cd5cec909298921b115 */
+ * Stub hash: 79bded38c8da25cc83e35804dd12fa0728bebbcd */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, IntlBreakIterator, 0)
 ZEND_END_ARG_INFO()

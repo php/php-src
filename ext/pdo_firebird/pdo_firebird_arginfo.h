@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_firebird.stub.php instead.
- * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
+ * Stub hash: e4697aebda9fb60ad32209fecdc242a81c03174c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

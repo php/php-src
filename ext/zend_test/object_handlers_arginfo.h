@@ -1,5 +1,5 @@
 /* This is a generated file, edit object_handlers.stub.php instead.
- * Stub hash: 81be60f2c465ffe5c036739d072ab80d9c388907 */
+ * Stub hash: 8d882ddca17f778f41eca9945fb26da6db1a5105 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DoOperationNoCast___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)

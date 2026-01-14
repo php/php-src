@@ -84,10 +84,20 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
             $declFile = "{$stubFilenameWithoutExtension}_decl.h";
 
+            /* Check if the stub file changed, by checking that the hash stored
+             * in the generated arginfo.h matches.
+             * Also check that the decl.h file has the same hash. At this point
+             * we don't know if a decl.h file is supposed to exist, so extract
+             * this information (whether a decl file should exist) from the
+             * arginfo.h file. */
             $stubCode = file_get_contents($stubFile);
-            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
+            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode) . '_v2');
             $oldStubHash = extractStubHash($arginfoFile);
-            if ($stubHash === $oldStubHash && !$context->forceParse) {
+            $hasDeclHeader = extractHasDeclHeader($arginfoFile);
+            $oldStubHashDecl = extractStubHash($declFile);
+            $generatedFilesUpToDate = $stubHash === $oldStubHash
+                    && ($hasDeclHeader ? $stubHash === $oldStubHashDecl : $oldStubHashDecl === null);
+            if ($generatedFilesUpToDate && !$context->forceParse) {
                 /* Stub file did not change, do not regenerate. */
                 return null;
             }
@@ -129,12 +139,12 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $context->allConstInfos,
             $stubHash
         );
-        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+        if ($context->forceRegeneration || !$generatedFilesUpToDate) {
             reportFilePutContents($arginfoFile, $arginfoCode);
             if ($declCode !== '') {
                 reportFilePutContents($declFile, $declCode);
-            } else if (file_exists($declCode)) {
-                unlink($declCode);
+            } else if (file_exists($declFile)) {
+                unlink($declFile);
             }
         }
 
@@ -147,7 +157,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
                 $context->allConstInfos,
                 $stubHash
             );
-            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+            if ($context->forceRegeneration || !$generatedFilesUpToDate) {
                 reportFilePutContents($legacyFile, $arginfoCode);
             }
         }
@@ -165,11 +175,20 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: ([0-9a-f]+) \*/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: ([0-9a-f]+)/', $arginfoCode, $matches)) {
         return null;
     }
 
     return $matches[1];
+}
+
+function extractHasDeclHeader(string $arginfoFile): bool {
+    if (!file_exists($arginfoFile)) {
+        return false;
+    }
+
+    $arginfoCode = file_get_contents($arginfoFile);
+    return str_contains($arginfoCode, '* Has decl header: yes *');
 }
 
 class Context {
@@ -5209,8 +5228,7 @@ function generateArgInfoCode(
     array $allConstInfos,
     string $stubHash
 ): array {
-    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
-          . " * Stub hash: $stubHash */\n";
+    $code = "";
 
     $generatedFuncInfos = [];
 
@@ -5303,16 +5321,24 @@ function generateArgInfoCode(
     }
 
 
+    $hasDeclFile = false;
     $declCode = $fileInfo->generateClassEntryCDeclarations();
     if ($declCode !== '') {
+        $hasDeclFile = true;
         $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
-        $declCode = "/* This is a generated file, edit the .stub.php file instead. */\n"
+        $declCode = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+            . " * Stub hash: $stubHash */\n"
             . "\n"
             . "#ifndef {$headerName}\n"
             . "#define {$headerName}\n"
             . $declCode . "\n"
             . "#endif /* {$headerName} */\n";
     }
+
+    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+          . " * Stub hash: $stubHash"
+          . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+          . $code;
 
     return [$code, $declCode];
 }

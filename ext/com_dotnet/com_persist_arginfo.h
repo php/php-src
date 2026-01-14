@@ -1,5 +1,5 @@
 /* This is a generated file, edit com_persist.stub.php instead.
- * Stub hash: d14d30fb232f08da37ba0df0b9186eb8bac5e1a4 */
+ * Stub hash: 46c8263791804a343e28af5ff7fe91eb9eaf08bf */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, variant, variant, 1, "null")

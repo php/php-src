@@ -1,5 +1,5 @@
 /* This is a generated file, edit bcmath.stub.php instead.
- * Stub hash: 687d6fb392a9b0c1329152cc0f62341a73e427f4 */
+ * Stub hash: 92823a89d2683efb741b1e48389a73d809f9efa8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit collator.stub.php instead.
- * Stub hash: cbe3c5f4c35d93f90c3e7164bdfc4e2fefc88c83 */
+ * Stub hash: a12372cc2813498491364d9792aaf6d43f374dec */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
