@@ -30,7 +30,7 @@ $_main:
 0002 SEND_VAL int(10) 2
 0003 V2 = DO_ICALL
 0004 ASSIGN CV0($array) V2
-0005 TYPE_ASSERT 2 string("array_map") CV0($array)
+0005 TYPE_ASSERT 131079 string("array_map") CV0($array)
 0006 V2 = INIT_ARRAY 0 (packed) NEXT
 0007 V3 = FE_RESET_R CV0($array) 0014
 0008 T5 = FE_FETCH_R V3 T4 0014

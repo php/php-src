@@ -36,7 +36,7 @@ $_main:
 0005 V5 = NEW 1 string("ArrayIterator")
 0006 SEND_VAR%S CV0($array) 1
 0007 DO_FCALL
-0008 TYPE_ASSERT 2 string("array_map") V5
+0008 TYPE_ASSERT 131079 string("array_map") V5
 0009 V2 = INIT_ARRAY 0 (packed) NEXT
 0010 V3 = FE_RESET_R V5 0017
 0011 T5 = FE_FETCH_R V3 T4 0017

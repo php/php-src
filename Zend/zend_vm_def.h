@@ -8852,20 +8852,26 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 
 	zval *value = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	zend_function *fbc;
-	{
-		zval *fname = (zval*)RT_CONSTANT(opline, opline->op1);
-		ZEND_ASSERT(Z_EXTRA_P(fname) != 0);
-		fbc = Z_FUNC(EG(function_table)->arData[Z_EXTRA_P(fname)].val);
-		ZEND_ASSERT(fbc->type != ZEND_USER_FUNCTION);
-	}
+	uint8_t actual_type = Z_TYPE_P(value);
+	uint8_t expected_type = opline->extended_value & 0xff;
+	/* Simple types can be checked directly. */
+	if (UNEXPECTED(actual_type != expected_type)) {
+		zend_function *fbc;
+		{
+			zval *fname = (zval*)RT_CONSTANT(opline, opline->op1);
+			ZEND_ASSERT(Z_EXTRA_P(fname) != 0);
+			fbc = Z_FUNC(EG(function_table)->arData[Z_EXTRA_P(fname)].val);
+			ZEND_ASSERT(fbc->type != ZEND_USER_FUNCTION);
+		}
+		uint16_t argno = opline->extended_value >> 16;
+		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
-	zend_arg_info *arginfo = &fbc->common.arg_info[opline->extended_value - 1];
-	if (UNEXPECTED(!ZEND_TYPE_CONTAINS_CODE(arginfo->type, Z_TYPE_P(value)))) {
-		const char *param_name = get_function_arg_name(fbc, opline->extended_value);
-		zend_string *expected = zend_type_to_string(arginfo->type);
-		zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), opline->extended_value, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
-		zend_string_release(expected);
+		if (!zend_check_user_type_slow(&arginfo->type, value, /* ref */ NULL, /* is_return_type */ false)) {
+			const char *param_name = get_function_arg_name(fbc, argno);
+			zend_string *expected = zend_type_to_string(arginfo->type);
+			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_string_release(expected);
+		}
 	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

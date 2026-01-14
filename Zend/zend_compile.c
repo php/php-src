@@ -5080,7 +5080,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	ZVAL_STR_COPY(&name.u.constant, lcname);
 	opline = zend_emit_op(NULL, ZEND_TYPE_ASSERT, &name, &array);
 	opline->lineno = lineno;
-	opline->extended_value = 2;
+	opline->extended_value = (2 << 16) | IS_ARRAY;
 	const zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
 	const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
 	Z_EXTRA_P(CT_CONSTANT(opline->op1)) = fbc_bucket - CG(function_table)->arData;
