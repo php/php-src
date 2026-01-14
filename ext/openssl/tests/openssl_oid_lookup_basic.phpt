@@ -18,9 +18,11 @@ array(3) {
   ["sname"]=>
   string(2) "CN"
 }
-array(2) {
+array(3) {
   ["oid"]=>
   string(20) "1.2.840.113549.1.9.8"
+  ["sname"]=>
+  string(19) "unstructuredAddress"
   ["lname"]=>
   string(19) "unstructuredAddress"
 }
