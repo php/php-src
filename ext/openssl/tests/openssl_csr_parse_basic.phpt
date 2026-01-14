@@ -11,7 +11,7 @@ var_dump($parsedCSR === openssl_csr_parse(file_get_contents($csr)));
 var_dump($parsedCSR);
 var_dump(openssl_csr_parse($csr, false));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(9) {
   ["name"]=>
