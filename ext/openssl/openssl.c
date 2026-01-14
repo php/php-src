@@ -1152,7 +1152,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
-	ulong altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
+	zend_long altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
 	if (altcount > 0) {
 		add_assoc_zval(return_value, "subjectAlternativeName", &altname);
 	}
