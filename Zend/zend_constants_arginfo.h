@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_constants.stub.php instead.
- * Stub hash: 569ccba4e0a93a9ce49c81c76955413188df390e */
+ * Stub hash: 6e262e3a0bf0cff42c8360457aec18c746e4e868 */
 
 static void register_zend_constants_symbols(int module_number)
 {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit ctype.stub.php instead.
- * Stub hash: 155783e1858a7f24dbc1c3e810d5cffee5468bf7 */
+ * Stub hash: 63fb33e0c4f505ddce2442219cd17b0d9054db48 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ctype_alnum, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_MIXED, 0)

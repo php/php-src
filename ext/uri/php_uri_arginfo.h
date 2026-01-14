@@ -1,5 +1,6 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: f3c524798d1933a400cc9377cfbfdcbaf77b87f0 */
+ * Stub hash: 06559ef117bcd8c91c6fdeb35a5bc85227c1196a
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)

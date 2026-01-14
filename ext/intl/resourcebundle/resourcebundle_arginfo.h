@@ -1,5 +1,5 @@
 /* This is a generated file, edit resourcebundle.stub.php instead.
- * Stub hash: e302e5ca1abcb9b52e3c14abbd38b9e8f1461390 */
+ * Stub hash: 6c1faed4ac86bc10157a8becbb47c7bf1853c5d6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)

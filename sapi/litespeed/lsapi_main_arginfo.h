@@ -1,5 +1,5 @@
 /* This is a generated file, edit lsapi_main.stub.php instead.
- * Stub hash: 3419f4e77bd091e09e0cfc55d81f443d5a3396ff */
+ * Stub hash: 582b137a2788ae1b15853c4b78da551419390da9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_litespeed_request_headers, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()

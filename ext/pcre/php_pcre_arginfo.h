@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_pcre.stub.php instead.
- * Stub hash: 63de1d37ab303e1d6af7c96eaeeba09d7f35d116 */
+ * Stub hash: 27f8c4f7d847b5d1ee85c11987941148d9555da9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_match, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)

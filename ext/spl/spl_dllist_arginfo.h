@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_dllist.stub.php instead.
- * Stub hash: 45e42d3a0589031651daee5653900d5a4fb61c3d */
+ * Stub hash: d2718f331b5b8cfbb43d1225ee9e5acf4cd78764 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit opcache.stub.php instead.
- * Stub hash: a8de025fa96a78db3a26d53a18bb2b365d094eca */
+ * Stub hash: 52868e3b6e4e59d78ca99b86a78c0b5203421b60 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

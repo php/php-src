@@ -1,5 +1,5 @@
 /* This is a generated file, edit msgformat.stub.php instead.
- * Stub hash: d595f5c582996ebb96ab39df8cb56c4cf6c8dfcf */
+ * Stub hash: b0afb28094334b63df28bd77199170c9dbf916d1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)

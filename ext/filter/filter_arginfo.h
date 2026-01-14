@@ -1,5 +1,5 @@
 /* This is a generated file, edit filter.stub.php instead.
- * Stub hash: c3eb55dfec619af1e46be206f51a2b0893ed399f */
+ * Stub hash: 6bfb91c6d21755ee8abd316683bfe6b6b417b7a3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input_type, IS_LONG, 0)
