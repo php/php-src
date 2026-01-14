@@ -3697,10 +3697,25 @@ next_option:
 	RETVAL_STR(jp_kana_convert(str, enc, opt));
 }
 
+static zend_always_inline bool mb_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return true;
+	}
+#endif
+	return false;
+}
+
 static unsigned int mb_recursive_count_strings(zval *var)
 {
 	unsigned int count = 0;
 	ZVAL_DEREF(var);
+
+	if (mb_check_stack_limit()) {
+		return 0;
+	}
 
 	if (Z_TYPE_P(var) == IS_STRING) {
 		count++;
@@ -3731,6 +3746,10 @@ static unsigned int mb_recursive_count_strings(zval *var)
 static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list, size_t *len_list, unsigned int *count)
 {
 	ZVAL_DEREF(var);
+
+	if (mb_check_stack_limit()) {
+		return true;
+	}
 
 	if (Z_TYPE_P(var) == IS_STRING) {
 		val_list[*count] = (const unsigned char*)Z_STRVAL_P(var);
@@ -3769,6 +3788,10 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 {
 	zval *entry, *orig_var;
 
+	if (mb_check_stack_limit()) {
+		return true;
+	}
+
 	orig_var = var;
 	ZVAL_DEREF(var);
 
@@ -3777,17 +3800,25 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 		zval_ptr_dtor(orig_var);
 		ZVAL_STR(orig_var, ret);
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-		if (Z_TYPE_P(var) == IS_ARRAY) {
-			SEPARATE_ARRAY(var);
-		}
-		if (Z_REFCOUNTED_P(var)) {
-			if (Z_IS_RECURSIVE_P(var)) {
+		HashTable *ht = HASH_OF(var);
+		HashTable *orig_ht = ht;
+
+		if (ht) {
+			if (GC_IS_RECURSIVE(ht)) {
 				return true;
 			}
-			Z_PROTECT_RECURSION_P(var);
+
+			GC_TRY_PROTECT_RECURSION(ht);
 		}
 
-		HashTable *ht = HASH_OF(var);
+		if (Z_TYPE_P(var) == IS_ARRAY) {
+			SEPARATE_ARRAY(var);
+			ht = Z_ARRVAL_P(var);
+
+			if (ht && ht != orig_ht && !GC_IS_RECURSIVE(ht)) {
+				GC_TRY_PROTECT_RECURSION(ht);
+			}
+		}
 		if (ht != NULL) {
 			ZEND_HASH_FOREACH_VAL(ht, entry) {
 				/* Can be a typed property declaration, in which case we need to remove the reference from the source list.
@@ -3806,16 +3837,22 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 				}
 
 				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
-					if (Z_REFCOUNTED_P(var)) {
-						Z_UNPROTECT_RECURSION_P(var);
+					if (ht && ht != orig_ht) {
+						GC_TRY_UNPROTECT_RECURSION(ht);
+					}
+					if (orig_ht) {
+						GC_TRY_UNPROTECT_RECURSION(orig_ht);
 					}
 					return true;
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
 
-		if (Z_REFCOUNTED_P(var)) {
-			Z_UNPROTECT_RECURSION_P(var);
+		if (ht && ht != orig_ht) {
+			GC_TRY_UNPROTECT_RECURSION(ht);
+		}
+		if (orig_ht) {
+			GC_TRY_UNPROTECT_RECURSION(orig_ht);
 		}
 	}
 
@@ -3889,7 +3926,9 @@ PHP_FUNCTION(mb_convert_variables)
 				efree(ZEND_VOIDP(elist));
 				efree(ZEND_VOIDP(val_list));
 				efree(len_list);
-				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+				if (!EG(exception)) {
+					php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+				}
 				RETURN_FALSE;
 			}
 		}
@@ -3911,7 +3950,9 @@ PHP_FUNCTION(mb_convert_variables)
 		zval *zv = &args[n];
 		ZVAL_DEREF(zv);
 		if (mb_recursive_convert_variable(zv, from_encoding, to_encoding)) {
-			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+			if (!EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+			}
 			RETURN_FALSE;
 		}
 	}
