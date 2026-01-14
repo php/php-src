@@ -24,24 +24,6 @@ on:
         options:
           - "0"
           - "1"
-      opcache:
-        description: 'Whether opcache is enabled for the benchmarked commit'
-        required: true
-        default: "1"
-        type: choice
-        options:
-          - "0"
-          - "1"
-          - "2"
-      baseline_opcache:
-        description: 'Whether opcache is enabled for the baseline commit'
-        required: true
-        default: "1"
-        type: choice
-        options:
-          - "0"
-          - "1"
-          - "2"
       run_micro_bench:
         description: 'Whether to run the micro_bench.php test'
         required: true
@@ -67,8 +49,6 @@ jobs:
       COMMIT: ${{ github.sha }}
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
-      OPCACHE: "1"
-      BASELINE_OPCACHE: "2"
       JIT: "1"
       INSTRUCTION_COUNT: "1"
       RUN_MICRO_BENCH: "0"
@@ -100,8 +80,6 @@ jobs:
 
             echo "ID=benchmarked" >> $GITHUB_ENV
 
-            echo "OPCACHE=${{ inputs.opcache }}" >> $GITHUB_ENV
-            echo "BASELINE_OPCACHE=${{ inputs.baseline_opcache }}" >> $GITHUB_ENV
             echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
             echo "INSTRUCTION_COUNT=${{ inputs.instruction_count }}" >> $GITHUB_ENV
             echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
@@ -179,7 +157,6 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=${{ env.BASELINE_OPCACHE }}
             PHP_JIT=0
           EOF
       - name: Setup PHP config - baseline PHP version with JIT
@@ -197,7 +174,6 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=${{ env.BASELINE_OPCACHE }}
             PHP_JIT=${{ env.JIT }}
           EOF
 
@@ -223,7 +199,6 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=$LAST_RESULT_SHA
 
-            PHP_OPCACHE=1
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version
@@ -238,7 +213,6 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.COMMIT }}
 
-            PHP_OPCACHE=${{ env.OPCACHE }}
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version with JIT
@@ -254,7 +228,6 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.COMMIT }}
 
-            PHP_OPCACHE=${{ env.OPCACHE }}
             PHP_JIT=${{ env.JIT }}
           EOF
 
