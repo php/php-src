@@ -634,7 +634,6 @@ static void print_asn1_type(BIO *bio, ASN1_TYPE *ptr)
 {
 	char objbuf[1024];
 
-	// Collect the things from the ASN1_TYPE structure
 	switch (ptr->type) {
 		case V_ASN1_BOOLEAN:
 			BIO_puts(bio, ptr->value.boolean ? "true" : "false");
