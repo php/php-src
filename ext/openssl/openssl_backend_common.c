@@ -46,7 +46,7 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name,
 	zval *data;
 	zval subitem, tmp;
 	int i;
-	char *sname;
+	char *sname = NULL;
 	char oname[1024];
 	int nid;
 	X509_NAME_ENTRY * ne;
