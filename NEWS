@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
   . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
 
+- Date:
+  . Update timelib to 2022.16. (Derick)
+
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
