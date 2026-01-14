@@ -1163,6 +1163,10 @@ PHP_FUNCTION(openssl_x509_parse)
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
+	if (altname != NULL) {
+	    zval_ptr_dtor(altname);
+	    efree(altname);
+	}
 err:
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (cert_str) {
