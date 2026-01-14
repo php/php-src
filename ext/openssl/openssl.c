@@ -1155,6 +1155,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	zend_long altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
 	if (altcount > 0) {
 		add_assoc_zval(return_value, "subjectAlternativeName", &altname);
+	} else {
+		zval_ptr_dtor(&altname);
 	}
 	if (cert_str) {
 		X509_free(cert);
