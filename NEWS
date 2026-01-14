@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
     (David Carlier)
 
+- Date:
+  . Fixed bug GH-20936 (DatePeriod::__set_state() cannot handle null start).
+    (ndossche)
+
 - DOM:
   . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
     (ndossche)
