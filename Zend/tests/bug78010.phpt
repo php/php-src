@@ -1,5 +1,10 @@
 --TEST--
 Bug #78010: Segmentation fault during GC
+--SKIPIF--
+<?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+?>
 --INI--
 memory_limit=2G
 --FILE--

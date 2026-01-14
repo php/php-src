@@ -2,6 +2,7 @@
 Bug #55509 (segfault on x86_64 using more than 2G memory)
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE == 4) {
   die('skip Not for 32-bits OS');
 }
