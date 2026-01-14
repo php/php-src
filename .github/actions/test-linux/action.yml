@@ -39,6 +39,7 @@ runs:
           export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres"
         fi
         export SKIP_IO_CAPTURE_TESTS=1
+        export RUN_RESOURCE_HEAVY_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           ${{ inputs.enableOpcache == 'true' && '-d zend_extension=opcache.so -d opcache.enable_cli=1' || '' }} \
           -d opcache.jit=${{ inputs.jitType }} \
