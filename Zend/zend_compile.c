@@ -5035,7 +5035,6 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	}
 
 	zend_ast *callback = args->child[0];
-	zend_eval_const_expr(&callback);
 
 	/* Bail out if the callback is not a FCC/PFA. */
 	if (callback->kind != ZEND_AST_CALL) {
