@@ -60,6 +60,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args) {
 	ast->kind = ZEND_AST_CALLABLE_CONVERT;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
+	ast->filename = NULL;
+	ast->name = NULL;
 	ast->args = args;
 	ZEND_MAP_PTR_INIT(ast->fptr, NULL);
 
@@ -1425,6 +1427,16 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = old->kind;
 		new->attr = old->attr;
 		new->lineno = old->lineno;
+		if (old->filename) {
+			new->filename = zend_string_copy(old->filename);
+		} else {
+			new->filename = NULL;
+		}
+		if (old->name) {
+			new->name = zend_string_copy(old->name);
+		} else {
+			new->name = NULL;
+		}
 		ZEND_MAP_PTR_INIT(new->fptr, ZEND_MAP_PTR(old->fptr));
 		buf = (void*)((char*)buf + sizeof(zend_ast_fcc));
 		new->args = buf;
@@ -1525,6 +1537,12 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CALLABLE_CONVERT)) {
 		zend_ast_fcc *fcc_ast = (zend_ast_fcc*) ast;
 
+		if (fcc_ast->filename) {
+			zend_string_release_ex(fcc_ast->filename, 0);
+		}
+		if (fcc_ast->name) {
+			zend_string_release_ex(fcc_ast->name, 0);
+		}
 		ast = fcc_ast->args;
 		goto tail_call;
 	}

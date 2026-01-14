@@ -40,6 +40,7 @@
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
+#include "zend_partial.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -4088,7 +4089,50 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, const zend_function *f
 }
 /* }}} */
 
-static void zend_compile_call_partial(znode *result, uint32_t arg_count,
+static zend_string *zend_compile_partial_name(const zend_op_array *declaring_op_array,
+		const uint32_t declaring_lineno)
+{
+	/* We attempt to generate a name that hints at where the PFA was created,
+	 * similarly to Closures (GH-13550).
+	 * We do not attempt to make the name unique. */
+
+	zend_string *filename = declaring_op_array->filename;
+	uint32_t start_lineno = declaring_lineno;
+
+	zend_string *class = zend_empty_string;
+	zend_string *separator = zend_empty_string;
+	zend_string *function = filename;
+	const char *parens = "";
+
+	if (declaring_op_array->function_name) {
+		function = declaring_op_array->function_name;
+		if (declaring_op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			/* If the parent function is a closure, don't redundantly
+			 * add the classname and parentheses. */
+		} else {
+			parens = "()";
+
+			if (declaring_op_array->scope && declaring_op_array->scope->name) {
+				class = declaring_op_array->scope->name;
+				separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
+			}
+		}
+	}
+
+	zend_string *name = zend_strpprintf_unchecked(
+		0,
+		"{closure:pfa:%S%S%S%s:%" PRIu32 "}",
+		class,
+		separator,
+		function,
+		parens,
+		start_lineno
+	);
+
+	return name;
+}
+
+static void zend_compile_call_partial(znode *result, zend_ast_fcc *fcc_ast, uint32_t arg_count,
 		bool may_have_extra_named_args, bool uses_variadic_placeholder,
 		zval *named_positions, uint32_t opnum_init, const zend_function *fbc) {
 
@@ -4105,14 +4149,15 @@ static void zend_compile_call_partial(znode *result, uint32_t arg_count,
 	zend_op *opline = zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT_PARTIAL,
 				NULL, NULL);
 
-	opline->op1.num = zend_alloc_cache_slots(2);
+	opline->extended_value = zend_alloc_cache_slots(2);
 
-	if (may_have_extra_named_args) {
-		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
-	}
 	if (uses_variadic_placeholder) {
-		opline->extended_value |= ZEND_FCALL_USES_VARIADIC_PLACEHOLDER;
+		opline->extended_value |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 	}
+
+	zend_string *name = zend_compile_partial_name(CG(active_op_array), opline->lineno);
+	opline->op1.constant = zend_add_literal_string(&name);
+	opline->op1_type = IS_CONST;
 
 	if (!Z_ISUNDEF_P(named_positions)) {
 		opline->op2.constant = zend_add_literal(named_positions);
@@ -4156,7 +4201,8 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 			return true;
 		}
 
-		args_ast = ((zend_ast_fcc*)args_ast)->args;
+		zend_ast_fcc *fcc_ast = (zend_ast_fcc*)args_ast;
+		args_ast = fcc_ast->args;
 
 		bool may_have_extra_named_args;
 		bool uses_variadic_placeholder;
@@ -4168,7 +4214,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 				&may_have_extra_named_args, true, &uses_variadic_placeholder,
 				&named_positions);
 
-		zend_compile_call_partial(result, arg_count,
+		zend_compile_call_partial(result, fcc_ast, arg_count,
 				may_have_extra_named_args, uses_variadic_placeholder,
 				&named_positions, opnum_init, fbc);
 
@@ -12031,10 +12077,14 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
 	}
 
-	zend_ast_list *args = zend_ast_get_list(((zend_ast_fcc*)*args_ast)->args);
-	if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-		// TODO: PFAs
-		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+	zend_ast_fcc *fcc = (zend_ast_fcc*)args_ast;
+
+	zend_ast_list *args = zend_ast_get_list(fcc->args);
+	bool is_fcc = args->children == 1 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC;
+
+	if (!is_fcc) {
+		fcc->filename = zend_string_copy(CG(active_op_array)->filename);
+		fcc->name = zend_compile_partial_name(CG(active_op_array), fcc->lineno);
 	}
 
 	switch ((*ast_ptr)->kind) {
