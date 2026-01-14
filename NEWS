@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     needing to be present beforehand. (ndossche)
   . Added `clamp()`. (kylekatarnls, thinkverse)
 
+- Date:
+  . Update timelib to 2022.16. (Derick)
+
 - DOM:
   . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
     as it was a no-op. (ndossche)
