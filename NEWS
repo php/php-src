@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20895 (ReflectionProperty does not return the PHPDoc of a
     property if it contains an attribute with a Closure). (timwolla)
 
+- Date:
+  . Update timelib to 2022.16. (Derick)
+
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
