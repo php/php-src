@@ -1,5 +1,5 @@
 --TEST--
-PFA pipe optimization: PFA with only one placeholder can be optimized
+PFA pipe optimization: PFA with only one placeholder can be optimized (placeholder first)
 --EXTENSIONS--
 opcache
 --INI--
