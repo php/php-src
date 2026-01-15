@@ -50,7 +50,7 @@ jobs:
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
       JIT: "1"
-      INSTRUCTION_COUNT: "1"
+      INSTRUCTION_COUNT: "0"
       RUN_MICRO_BENCH: "0"
       YEAR: ""
     steps:
