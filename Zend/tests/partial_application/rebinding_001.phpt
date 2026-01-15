@@ -26,22 +26,18 @@ echo "# Cannot be rebound to an unrelated class:\n";
 try {
     $f->bindTo(new Unrelated)(1);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 echo "# Cannot unbind \$this on instance method:\n";
 try {
     $f->bindTo(null)(1);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 echo "# Can unbind \$this on static method:\n";
-try {
-    $g->bindTo(null)(1);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$g->bindTo(null)(1);
 
 ?>
 --EXPECTF--
@@ -54,10 +50,10 @@ object(SubClass)#%d (0) {
 # Cannot be rebound to an unrelated class:
 
 Warning: Cannot bind method C::{closure:%s:%d}() to object of class Unrelated, this will be an error in PHP 9 in %s on line %d
-Value of type null is not callable
+Error: Value of type null is not callable
 # Cannot unbind $this on instance method:
 
 Warning: Cannot unbind $this of method, this will be an error in PHP 9 in %s on line %d
-Value of type null is not callable
+Error: Value of type null is not callable
 # Can unbind $this on static method:
 string(1) "C"
