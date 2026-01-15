@@ -78,7 +78,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '*' '/' '%'
 %precedence '!'
 %precedence T_INSTANCEOF
-%precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST T_NULLABLE_INT_CAST T_NULLABLE_DOUBLE_CAST T_NULLABLE_STRING_CAST T_NULLABLE_ARRAY_CAST T_NULLABLE_OBJECT_CAST T_NULLABLE_BOOL_CAST T_NONNULL_INT_CAST T_NONNULL_DOUBLE_CAST T_NONNULL_STRING_CAST T_NONNULL_ARRAY_CAST T_NONNULL_OBJECT_CAST T_NONNULL_BOOL_CAST '@'
 %right T_POW
 %precedence T_CLONE
 
@@ -219,6 +219,18 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_BOOL_CAST   "'(bool)'"
 %token T_UNSET_CAST  "'(unset)'"
 %token T_VOID_CAST   "'(void)'"
+%token T_NULLABLE_INT_CAST    "'(?int)'"
+%token T_NULLABLE_DOUBLE_CAST "'(?float)'"
+%token T_NULLABLE_STRING_CAST "'(?string)'"
+%token T_NULLABLE_ARRAY_CAST  "'(?array)'"
+%token T_NULLABLE_OBJECT_CAST "'(?object)'"
+%token T_NULLABLE_BOOL_CAST   "'(?bool)'"
+%token T_NONNULL_INT_CAST     "'(!int)'"
+%token T_NONNULL_DOUBLE_CAST  "'(!float)'"
+%token T_NONNULL_STRING_CAST  "'(!string)'"
+%token T_NONNULL_ARRAY_CAST   "'(!array)'"
+%token T_NONNULL_OBJECT_CAST  "'(!object)'"
+%token T_NONNULL_BOOL_CAST    "'(!bool)'"
 %token T_OBJECT_OPERATOR "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
 %token T_DOUBLE_ARROW    "'=>'"
@@ -1371,6 +1383,18 @@ expr:
 	|	T_OBJECT_CAST expr	{ $$ = zend_ast_create_cast(IS_OBJECT, $2); }
 	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(_IS_BOOL, $2); }
 	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $2); }
+	|	T_NULLABLE_INT_CAST expr	{ $$ = zend_ast_create_nullable_cast(IS_LONG, $2); }
+	|	T_NULLABLE_DOUBLE_CAST expr	{ $$ = zend_ast_create_nullable_cast(IS_DOUBLE, $2); }
+	|	T_NULLABLE_STRING_CAST expr	{ $$ = zend_ast_create_nullable_cast(IS_STRING, $2); }
+	|	T_NULLABLE_ARRAY_CAST expr	{ $$ = zend_ast_create_nullable_cast(IS_ARRAY, $2); }
+	|	T_NULLABLE_OBJECT_CAST expr	{ $$ = zend_ast_create_nullable_cast(IS_OBJECT, $2); }
+	|	T_NULLABLE_BOOL_CAST expr	{ $$ = zend_ast_create_nullable_cast(_IS_BOOL, $2); }
+	|	T_NONNULL_INT_CAST expr		{ $$ = zend_ast_create_nonnull_cast(IS_LONG, $2); }
+	|	T_NONNULL_DOUBLE_CAST expr	{ $$ = zend_ast_create_nonnull_cast(IS_DOUBLE, $2); }
+	|	T_NONNULL_STRING_CAST expr	{ $$ = zend_ast_create_nonnull_cast(IS_STRING, $2); }
+	|	T_NONNULL_ARRAY_CAST expr	{ $$ = zend_ast_create_nonnull_cast(IS_ARRAY, $2); }
+	|	T_NONNULL_OBJECT_CAST expr	{ $$ = zend_ast_create_nonnull_cast(IS_OBJECT, $2); }
+	|	T_NONNULL_BOOL_CAST expr	{ $$ = zend_ast_create_nonnull_cast(_IS_BOOL, $2); }
 	|	T_EXIT ctor_arguments {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_EXIT));
 			name->attr = ZEND_NAME_FQ;

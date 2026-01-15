@@ -86,6 +86,8 @@ enum _zend_ast_kind {
 	ZEND_AST_UNARY_MINUS,
 	ZEND_AST_CAST,
 	ZEND_AST_CAST_VOID,
+	ZEND_AST_NULLABLE_CAST,
+	ZEND_AST_NONNULL_CAST,
 	ZEND_AST_EMPTY,
 	ZEND_AST_ISSET,
 	ZEND_AST_SILENCE,
@@ -429,6 +431,12 @@ static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, z
 }
 static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
+}
+static zend_always_inline zend_ast *zend_ast_create_nullable_cast(uint32_t type, zend_ast *op0) {
+	return zend_ast_create_ex(ZEND_AST_NULLABLE_CAST, type, op0);
+}
+static zend_always_inline zend_ast *zend_ast_create_nonnull_cast(uint32_t type, zend_ast *op0) {
+	return zend_ast_create_ex(ZEND_AST_NONNULL_CAST, type, op0);
 }
 static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	zend_ast_list *list = zend_ast_get_list(ast);

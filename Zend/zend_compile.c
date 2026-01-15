@@ -10570,6 +10570,30 @@ static void zend_compile_cast(znode *result, const zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_nullable_cast(znode *result, zend_ast *ast)
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+	zend_op *opline;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	opline = zend_emit_op_tmp(result, ZEND_NULLABLE_CAST, &expr_node, NULL);
+	opline->extended_value = ast->attr;
+}
+
+static void zend_compile_nonnull_cast(znode *result, zend_ast *ast)
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+	zend_op *opline;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	opline = zend_emit_op_tmp(result, ZEND_NONNULL_CAST, &expr_node, NULL);
+	opline->extended_value = ast->attr;
+}
+
 static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *cond_ast = ast->child[0];
@@ -11701,6 +11725,13 @@ static void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
 					"Object casts are not supported in this context");
 			}
 			break;
+		case ZEND_AST_NULLABLE_CAST:
+		case ZEND_AST_NONNULL_CAST:
+			if (ast->attr == IS_OBJECT && !ctx->allow_dynamic) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Object casts are not supported in this context");
+			}
+			break;
 		case ZEND_AST_NEW:
 			if (!ctx->allow_dynamic) {
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -11965,6 +11996,12 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CAST:
 			zend_compile_cast(result, ast);
+			return;
+		case ZEND_AST_NULLABLE_CAST:
+			zend_compile_nullable_cast(result, ast);
+			return;
+		case ZEND_AST_NONNULL_CAST:
+			zend_compile_nonnull_cast(result, ast);
 			return;
 		case ZEND_AST_CONDITIONAL:
 			zend_compile_conditional(result, ast);
@@ -12461,6 +12498,11 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			 && zend_try_ct_eval_cast(&result, ast->attr, zend_ast_get_zval(ast->child[0]))) {
 				break;
 			}
+			return;
+		case ZEND_AST_NULLABLE_CAST:
+		case ZEND_AST_NONNULL_CAST:
+			/* Nullable and non-null casts require runtime validation, cannot be const-folded */
+			zend_eval_const_expr(&ast->child[0]);
 			return;
 		default:
 			return;

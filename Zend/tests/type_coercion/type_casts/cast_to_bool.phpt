@@ -36,7 +36,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(false)
@@ -47,7 +47,11 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+
+Deprecated: Implicit conversion from null to bool is deprecated in %s on line %d
 bool(false)
 bool(true)
+
+Deprecated: Implicit conversion from test to bool is deprecated in %s on line %d
 bool(true)
 Done

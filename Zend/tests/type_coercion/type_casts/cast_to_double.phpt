@@ -39,9 +39,14 @@ foreach ($vars as $var) {
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from malformed string "string" to float is deprecated in %s on line %d
 float(0)
 float(8754456)
+
+Deprecated: Implicit conversion from malformed string "" to float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Implicit conversion from malformed string "%c" to float is deprecated in %s on line %d
 float(0)
 float(9876545)
 float(0.1)
@@ -49,8 +54,12 @@ float(0)
 float(1)
 float(0)
 float(1)
+
+Deprecated: Implicit conversion from null to float is deprecated in %s on line %d
 float(0)
 float(%f)
+
+Deprecated: Implicit conversion from test to float is deprecated in %s on line %d
 
 Warning: Object of class test could not be converted to float in %s on line %d
 float(1)

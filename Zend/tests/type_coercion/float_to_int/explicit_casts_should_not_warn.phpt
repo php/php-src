@@ -42,4 +42,6 @@ int(3)
 int(3)
 int(9223372036854775807)
 int(9223372036854775807)
+
+Deprecated: Implicit conversion from malformed string "NAN" to int is deprecated in %s on line %d
 int(0)

@@ -79,6 +79,8 @@ object(stdClass)#%d (1) {
   ["scalar"]=>
   bool(true)
 }
+
+Deprecated: Implicit conversion from null to object is deprecated in %s on line %d
 object(stdClass)#%d (0) {
 }
 object(stdClass)#%d (1) {
