@@ -18,15 +18,15 @@ if (time() > 0) {
 }
 
 try {
-2 |> foo(?, ?);
+    2 |> foo(?, ?);
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=19, args=0, vars=1, tmps=2)
+     ; (lines=22, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %spipe_optimization_004.php:1-16
 0000 INIT_FCALL 0 %d string("time")
@@ -43,11 +43,14 @@ $_main:
 0011 DO_FCALL
 0012 RETURN int(1)
 0013 CV0($e) = CATCH string("Throwable")
-0014 INIT_METHOD_CALL 0 CV0($e) string("getMessage")
-0015 V1 = DO_FCALL
-0016 ECHO V1
-0017 ECHO string("\n")
-0018 RETURN int(1)
+0014 T1 = FETCH_CLASS_NAME CV0($e)
+0015 ECHO T1
+0016 ECHO string(": ")
+0017 INIT_METHOD_CALL 0 CV0($e) string("getMessage")
+0018 V1 = DO_FCALL
+0019 ECHO V1
+0020 ECHO string("\n")
+0021 RETURN int(1)
 EXCEPTION TABLE:
      0005, 0013, -, -
 
@@ -82,4 +85,4 @@ $_main:
 0004 SEND_VAR CV1($b) 2
 0005 V2 = DO_UCALL
 0006 RETURN V2
-Too few arguments to function {closure:%s:%d}(), 1 passed in %s on line %d and exactly 2 expected
+ArgumentCountError: Too few arguments to function {closure:pfa:%s:%d}(), 1 passed in %s on line %d and exactly 2 expected
