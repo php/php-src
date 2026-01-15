@@ -823,6 +823,11 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 		case IPC_RMID:
 			if (shm->descriptor->shm_nattch < 1) {
 				shm->descriptor->shm_perm.key = -1;
+				/* Close handle to allow Windows to destroy the named mapping object */
+				if (shm->segment && shm->segment != INVALID_HANDLE_VALUE) {
+					CloseHandle(shm->segment);
+					shm->segment = INVALID_HANDLE_VALUE;
+				}
 			}
 			return 0;
 
