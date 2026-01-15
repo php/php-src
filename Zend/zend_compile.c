@@ -6939,11 +6939,11 @@ static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg)
 				return NULL;
 			}
 			if (arg->attr == ZEND_PLACEHOLDER_VARIADIC && uses_named_args) {
-				/* PFAs with both a variadic placeholder and named args can not
-				 * be optimized because the named arg may resolve to the
-				 * position of the placeholder: f(..., name: $v).
-				 * Arg placeholders ('?') are safe, as named args are not
-				 * allowed to override them. */
+				/* A PFA with both a variadic placeholder and named args can not
+				 * be optimized because this would result in a positional arg
+				 * after a named arg: f(name: $v, ...) -> f(name: $v, pipe_arg).
+				 * Arg placeholders ('?') are safe since they are not allowed
+				 * after named args. */
 				return NULL;
 			}
 		}

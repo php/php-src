@@ -1,0 +1,52 @@
+--TEST--
+PFA optimization: PFA with named args and placeholders can be optimized
+--EXTENSIONS--
+opcache
+--INI--
+opcache.opt_debug_level=0x20000
+opcache.enable=1
+opcache.enable_cli=1
+opcache.file_cache=
+opcache.file_cache_only=0
+--FILE--
+<?php
+
+if (time() > 0) {
+    function foo($a, $b) {
+        var_dump($a, $b);
+    }
+}
+
+1 |> foo(?, b: 2);
+
+?>
+--EXPECTF--
+$_main:
+     ; (lines=11, args=0, vars=0, tmps=2)
+     ; (after optimizer)
+     ; %s:1-12
+0000 INIT_FCALL 0 %d string("time")
+0001 V1 = DO_ICALL
+0002 T0 = IS_SMALLER int(0) V1
+0003 JMPZ T0 0005
+0004 DECLARE_FUNCTION string("foo") 0
+0005 INIT_FCALL_BY_NAME 1 string("foo")
+0006 SEND_VAL_EX int(1) 1
+0007 SEND_VAL_EX int(2) string("b")
+0008 CHECK_UNDEF_ARGS
+0009 DO_FCALL_BY_NAME
+0010 RETURN int(1)
+
+foo:
+     ; (lines=7, args=2, vars=2, tmps=0)
+     ; (after optimizer)
+     ; %s:4-6
+0000 CV0($a) = RECV 1
+0001 CV1($b) = RECV 2
+0002 INIT_FCALL 2 %d string("var_dump")
+0003 SEND_VAR CV0($a) 1
+0004 SEND_VAR CV1($b) 2
+0005 DO_ICALL
+0006 RETURN null
+int(1)
+int(2)
