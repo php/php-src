@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
   . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
   . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
+  . Fix OSS-Fuzz #471486164 (Broken by-ref assignment to uninitialized hooked
+    backing value). (ilutov)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
