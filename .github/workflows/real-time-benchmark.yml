@@ -269,8 +269,7 @@ jobs:
         with:
           name: results
           path: |
-            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/*/*.*
-            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/*/*/*.log
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
           retention-days: 30
       - name: Comment results
         if: github.event_name == 'workflow_dispatch'
