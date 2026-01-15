@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
   . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
   . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
+  . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
