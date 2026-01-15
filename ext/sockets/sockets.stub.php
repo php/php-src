@@ -19,6 +19,13 @@ const AF_INET = UNKNOWN;
  */
 const AF_INET6 = UNKNOWN;
 #endif
+#ifdef AF_UNSPEC
+/**
+ * @var int
+ * @cvalue AF_UNSPEC
+ */
+const AF_UNSPEC = UNKNOWN;
+#endif
 #ifdef AF_DIVERT
 /**
  * @var int
