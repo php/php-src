@@ -780,6 +780,7 @@ TSRM_API int shmdt(const void *shmaddr)
 	int ret;
 
 	if (!shm || !shm->segment) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -789,7 +790,10 @@ TSRM_API int shmdt(const void *shmaddr)
 
 	ret = 0;
 	if (shm->descriptor->shm_nattch <= 0) {
-		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+		if (!UnmapViewOfFile(shm->descriptor)) {
+			tsrm_set_errno_from_win32_error(GetLastError());
+			ret = -1;
+		}
 		shm->descriptor = NULL;
 	}
 	return ret;
@@ -800,6 +804,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	shm_pair *shm = shm_get(key, NULL);
 
 	if (!shm || !shm->segment) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -822,6 +827,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 			return 0;
 
 		default:
+			errno = EINVAL;
 			return -1;
 	}
 }/*}}}*/
