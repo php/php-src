@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
   . Fixed bug GH-20895 (ReflectionProperty does not return the PHPDoc of a
     property if it contains an attribute with a Closure). (timwolla)
+  . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
