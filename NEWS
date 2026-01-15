@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
     (ndossche)
 
+- PGSQL:
+  . Fixed INSERT/UPDATE queries building with PQescapeIdentifier() and possible
+    UB. (David Carlier)
+
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)

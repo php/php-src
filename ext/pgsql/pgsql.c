@@ -5632,7 +5632,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				goto cleanup;
@@ -5817,7 +5817,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				return -1;
