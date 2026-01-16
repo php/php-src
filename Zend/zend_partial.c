@@ -225,7 +225,7 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 	}
 }
 
-static bool zp_is_power_of_two(uint32_t x)
+static inline bool zp_is_power_of_two(uint32_t x)
 {
 	return (x > 0) && !(x & (x - 1));
 }
