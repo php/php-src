@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20895 (ReflectionProperty does not return the PHPDoc of a
     property if it contains an attribute with a Closure). (timwolla)
   . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
+  . Fix OSS-Fuzz #471486164 (Broken by-ref assignment to uninitialized hooked
+    backing value). (ilutov)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
