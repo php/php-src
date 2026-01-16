@@ -6480,7 +6480,6 @@ PHP_FUNCTION(array_filter)
 		RETVAL_EMPTY_ARRAY();
 		return;
 	}
-
 	array_init(return_value);
 
 	if (ZEND_FCI_INITIALIZED(fci)) {
