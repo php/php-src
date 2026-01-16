@@ -430,6 +430,14 @@ PHP 8.6 UPGRADE NOTES
     SNMP::setStringOutputFormat() methods. (eskyuu)
     RFC: https://wiki.php.net/rfc/snmp_improvements_2026#implement_more_mib_parsing_and_value_output_controls
 
+- Standard:
+  . pack() and unpack() now accept the "<" and ">" endianness modifiers on
+    the signed and unsigned integer format codes.
+    RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
+  . pack() and unpack() now accept the "<" and ">" endianness modifiers on
+    the float and double format codes.
+    RFC: https://wiki.php.net/rfc/pack-unpack-float-endianness-modifier
+
 - Streams:
   . Added new stream errors API including new classes, enums, functions and
     internal API. It is controlled using error_mode, error_store and
