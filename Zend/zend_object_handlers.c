@@ -2576,5 +2576,6 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 
 void zend_object_handlers_startup(void) {
 	zend_call_trampoline_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_ARGUMENTS);
+	zend_call_trampoline_arginfo[0].type = (zend_type)ZEND_TYPE_INIT_CODE(IS_MIXED, false, _ZEND_ARG_INFO_FLAGS(false, 1, 0));
 	zend_property_hook_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_VALUE);
 }
