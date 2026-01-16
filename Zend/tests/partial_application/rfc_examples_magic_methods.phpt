@@ -18,7 +18,7 @@ check_equivalence([
     'Test 1' => [
         $f->method(?, ?),
         (function ($f) {
-            return fn($args0, $args1) => $f->method($args0, $args1);
+            return fn(mixed $arguments0, mixed $arguments1) => $f->method($arguments0, $arguments1);
         })($f)->bindTo($f),
     ],
 ]);
