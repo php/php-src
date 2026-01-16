@@ -5037,19 +5037,24 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	zend_ast *callback = args->child[0];
 
 	/* Bail out if the callback is not a FCC/PFA. */
-	if (callback->kind != ZEND_AST_CALL) {
-		return FAILURE;
-	}
+	zend_ast *args_ast;
+	switch (callback->kind) {
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL:
+			args_ast = zend_ast_call_get_args(callback);
+			if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
+				return FAILURE;
+			}
 
-	zend_ast *args_ast = zend_ast_call_get_args(callback);
-	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
-		return FAILURE;
+			break;
+		default:
+			return FAILURE;
 	}
 
 	/* Bail out if the callback is assert() due to the AST stringification logic
 	 * breaking for the generated call.
 	 */
-	if (zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
+	if (callback->kind == ZEND_AST_CALL && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
 		return FAILURE;
 	}
 
@@ -5104,7 +5109,14 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	/* loop body */
 	znode call_result;
-	zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_CALL, callback->child[0], call_args));
+	switch (callback->kind) {
+		case ZEND_AST_CALL:
+			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_CALL, callback->child[0], call_args));
+			break;
+		case ZEND_AST_STATIC_CALL:
+			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_STATIC_CALL, callback->child[0], callback->child[1], call_args));
+			break;
+	}
 	opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &call_result, &key);
 	SET_NODE(opline->result, result);
 	/* end loop body */
