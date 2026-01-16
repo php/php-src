@@ -3,6 +3,7 @@ GH-8086 (Mail() function not working correctly in PHP 8.x)
 --INI--
 sendmail_path={MAIL:gh8086.out}
 mail.mixed_lf_and_crlf=on
+mail.add_x_header=off
 --FILE--
 <?php
 var_dump(mail('user@example.com', 'Test Subject', 'A Message', 'KHeaders'));
