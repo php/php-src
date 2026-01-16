@@ -1231,10 +1231,9 @@ static zend_always_inline bool zend_check_type(
 }
 
 ZEND_API bool zend_check_type_ex(
-		const zend_type *type, zval *arg, zend_class_entry *scope,
-		bool is_return_type, bool is_internal)
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
 {
-	return zend_check_type(type, arg, scope, is_return_type, is_internal);
+	return zend_check_type(type, arg, is_return_type, is_internal);
 }
 
 ZEND_API bool zend_check_user_type_slow(
