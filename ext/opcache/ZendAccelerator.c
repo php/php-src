@@ -2071,7 +2071,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	return key;
 }
 
-zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
+const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
 		const zend_op *declaring_opline, const zend_function *called_function)
 {
 	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
