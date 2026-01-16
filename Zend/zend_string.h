@@ -563,6 +563,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
 	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
+	_(ZEND_STR_ARGUMENTS,              "arguments") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
 	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
 	_(ZEND_STR_EXIT,                   "exit") \
