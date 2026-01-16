@@ -1032,7 +1032,7 @@ error:
 	goto clean;
 }
 
-static zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *function,
+static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		const zend_op_array *declaring_op_array,
@@ -1045,7 +1045,7 @@ static zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *function,
 		return cache_slot[1];
 	}
 
-	zend_op_array *op_array = zend_accel_pfa_cache_get(declaring_op_array,
+	const zend_op_array *op_array = zend_accel_pfa_cache_get(declaring_op_array,
 			declaring_opline, function);
 
 	if (UNEXPECTED(!op_array)) {
@@ -1058,7 +1058,7 @@ static zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *function,
 		cache_slot[0] = function->type == ZEND_INTERNAL_FUNCTION
 			? (void*)function
 			: (void*)function->op_array.opcodes;
-		cache_slot[1] = op_array;
+		cache_slot[1] = (zend_op_array*)op_array;
 	}
 
 	return op_array;
@@ -1119,7 +1119,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		const zend_op *declaring_opline, void **cache_slot,
 		bool uses_variadic_placeholder) {
 
-	zend_op_array *op_array = zp_get_op_array(this_ptr, function, argc, argv,
+	const zend_op_array *op_array = zp_get_op_array(this_ptr, function, argc, argv,
 			extra_named_params, named_positions,
 			declaring_op_array, declaring_opline,
 			cache_slot, uses_variadic_placeholder);

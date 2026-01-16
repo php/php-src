@@ -336,7 +336,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
 
-zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
+const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
 		const zend_op *declaring_opline,
 		const zend_function *called_function);
 
