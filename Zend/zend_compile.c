@@ -5090,7 +5090,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	Z_EXTRA_P(CT_CONSTANT(opline->op1)) = fbc_bucket - CG(function_table)->arData;
 
 	/* Initialize the result array. */
-	zend_emit_op(result, ZEND_INIT_ARRAY, NULL, NULL);
+	zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
 
 	/* foreach loop starts here. */
 	znode key;
