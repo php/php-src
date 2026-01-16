@@ -2050,7 +2050,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_opline);
 	*dest++ = ':';
 
-	void *ptr;
+	const void *ptr;
 	if ((called_function->common.fn_flags & ZEND_ACC_CLOSURE)
 			&& called_function->type == ZEND_USER_FUNCTION) {
 		/* Can not use 'called_function' as part of the key, as it's an inner
@@ -2059,7 +2059,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 		 * in this case. */
 		ptr = called_function->op_array.opcodes;
 	} else {
-		ptr = (void*) called_function;
+		ptr = called_function;
 	}
 	dest = zend_accel_uintptr_hex(dest, (uintptr_t)ptr);
 
