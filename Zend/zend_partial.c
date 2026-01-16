@@ -167,17 +167,15 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 		if (!Z_IS_PLACEHOLDER_P(&argv[offset])) {
 			continue;
 		}
-		uint32_t n = offset - function->common.num_args;
 		zend_string *orig_name = zp_get_param_name(function, function->common.num_args);
 		zend_string *new_name;
-		do {
+		for (uint32_t n = offset - function->common.num_args;; n++) {
 			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
 			if (!zp_name_exists(names, num_names, new_name)) {
 				break;
 			}
-			n++;
 			zend_string_release(new_name);
-		} while (true);
+		}
 		names[offset] = new_name;
 		zend_string_release(orig_name);
 	}
