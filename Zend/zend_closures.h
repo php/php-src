@@ -28,7 +28,6 @@ BEGIN_EXTERN_C()
 #define ZEND_CLOSURE_OBJECT(op_array) \
 	((zend_object*)((char*)(op_array) - sizeof(zend_object)))
 
-void zend_closure_startup(void);
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
 void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
