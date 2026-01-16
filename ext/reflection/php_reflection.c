@@ -6547,16 +6547,16 @@ ZEND_METHOD(ReflectionProperty, hasHook)
 
 	reflection_object *intern;
 	property_reference *ref;
-	zend_object *type;
+	const zend_string *type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+		Z_PARAM_ENUM_NAME(type, reflection_property_hook_type_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	zend_property_hook_kind kind;
-	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+	if (zend_string_equals_literal(type, "Get")) {
 		kind = ZEND_PROPERTY_HOOK_GET;
 	} else {
 		kind = ZEND_PROPERTY_HOOK_SET;
@@ -6569,10 +6569,10 @@ ZEND_METHOD(ReflectionProperty, getHook)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zend_object *type;
+	const zend_string *type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+		Z_PARAM_ENUM_NAME(type, reflection_property_hook_type_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
@@ -6583,7 +6583,7 @@ ZEND_METHOD(ReflectionProperty, getHook)
 	}
 
 	zend_function *hook;
-	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+	if (zend_string_equals_literal(type, "Get")) {
 		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_GET];
 	} else {
 		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_SET];

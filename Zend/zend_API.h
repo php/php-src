@@ -2009,6 +2009,13 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(dest_obj, _ce, dest_long, is_null) \
 	Z_PARAM_OBJ_OF_CLASS_OR_LONG_EX(dest_obj, _ce, dest_long, is_null, 1)
 
+#define Z_PARAM_ENUM_NAME(dest, _ce) \
+	{ \
+		zend_object *_tmp = NULL; \
+		Z_PARAM_OBJ_OF_CLASS(_tmp, _ce); \
+		dest = Z_STR_P(zend_enum_fetch_case_name(_tmp)); \
+	}
+
 /* old "p" */
 #define Z_PARAM_PATH_EX(dest, dest_len, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \

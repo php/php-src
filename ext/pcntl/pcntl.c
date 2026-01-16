@@ -1823,10 +1823,9 @@ PHP_FUNCTION(pcntl_getcpu)
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+static qos_class_t qos_zval_to_lval(const zend_string *entry)
 {
 	qos_class_t qos_class = QOS_CLASS_DEFAULT;
-	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
 
 	if (zend_string_equals_literal(entry, "UserInteractive")) {
 		qos_class = QOS_CLASS_USER_INTERACTIVE;
@@ -1886,13 +1885,13 @@ PHP_FUNCTION(pcntl_getqos_class)
 
 PHP_FUNCTION(pcntl_setqos_class)
 {
-	zval *qos_obj;
+	const zend_string *qos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+		Z_PARAM_ENUM_NAME(qos, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+	qos_class_t qos_class = qos_zval_to_lval(qos);
 
 	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{

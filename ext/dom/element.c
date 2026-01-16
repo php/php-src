@@ -1680,14 +1680,14 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 
 PHP_METHOD(Dom_Element, insertAdjacentElement)
 {
-	zval *element_zval, *where_zv;
+	zval *element_zval;
+	const zend_string *where;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM_NAME(where, dom_adjacent_position_class_entry)
 		Z_PARAM_OBJECT_OF_CLASS(element_zval, dom_modern_element_class_entry)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, element_zval);
 }
 /* }}} end DOMElement::insertAdjacentElement */
@@ -1728,15 +1728,14 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 
 PHP_METHOD(Dom_Element, insertAdjacentText)
 {
-	zval *where_zv;
+	const zend_string *where;
 	zend_string *data;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM_NAME(where, dom_adjacent_position_class_entry)
 		Z_PARAM_STR(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 	dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, data);
 }
 /* }}} end DOMElement::insertAdjacentText */
@@ -1744,7 +1743,7 @@ PHP_METHOD(Dom_Element, insertAdjacentText)
 /* https://html.spec.whatwg.org/#dom-element-insertadjacenthtml */
 PHP_METHOD(Dom_Element, insertAdjacentHTML)
 {
-	zval *where_zv;
+	const zend_string *where;
 	zend_string *string;
 
 	dom_object *this_intern;
@@ -1754,13 +1753,11 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 	bool created_context = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM_NAME(where, dom_adjacent_position_class_entry)
 		Z_PARAM_STR(string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
-
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 
 	/* 1. We don't do injection sinks. */
 
