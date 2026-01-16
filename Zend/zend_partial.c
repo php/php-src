@@ -1091,7 +1091,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			arg_info = NULL;
 		}
 		if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
-				&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, var, function->common.scope, 0, 0))) {
+				&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, var, 0, 0))) {
 			zend_verify_arg_error(function, arg_info, offset+1, var);
 			zval_ptr_dtor(result);
 			ZVAL_NULL(result);
