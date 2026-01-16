@@ -3,10 +3,10 @@ __callStatic() can be partially applied
 --FILE--
 <?php
 class Foo {
-    public static function __callStatic($method, $args) {
+    public static function __callStatic($method, $arguments) {
         printf("%s::%s\n", __CLASS__, $method);
 
-        var_dump(...$args);
+        var_dump(...$arguments);
     }
 }
 
@@ -33,7 +33,7 @@ Closure [ <user> static public method {closure:%s:%d} ] {
   @@ %s 10 - 10
 
   - Parameters [1] {
-    Parameter #0 [ <required> $args0 ]
+    Parameter #0 [ <required> mixed $arguments0 ]
   }
 }
 Foo::method
@@ -42,8 +42,8 @@ Closure [ <user> static public method {closure:%s:%d} ] {
   @@ %s 16 - 16
 
   - Parameters [2] {
-    Parameter #0 [ <required> $args0 ]
-    Parameter #1 [ <optional> ...$args ]
+    Parameter #0 [ <required> mixed $arguments0 ]
+    Parameter #1 [ <optional> mixed ...$arguments ]
   }
 }
 Foo::method
@@ -52,11 +52,11 @@ Closure [ <user> static public method {closure:%s:%d} ] {
   @@ %s 22 - 22
 
   - Bound Variables [1] {
-      Variable #0 [ $args0 ]
+      Variable #0 [ $arguments0 ]
   }
 
   - Parameters [1] {
-    Parameter #0 [ <optional> ...$args ]
+    Parameter #0 [ <optional> mixed ...$arguments ]
   }
 }
 Foo::method
