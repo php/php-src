@@ -1685,7 +1685,6 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
-	static const zend_arg_info arg_info[1] = {{0}};
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline).op_array;
@@ -1732,7 +1731,7 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 	func->prop_info = NULL;
 	func->num_args = 0;
 	func->required_num_args = 0;
-	func->arg_info = (zend_arg_info *) arg_info;
+	func->arg_info = zend_call_trampoline_arginfo;
 
 	return (zend_function*)func;
 }
