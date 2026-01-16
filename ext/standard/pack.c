@@ -24,6 +24,7 @@
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		efree(formatcodes);	\
 		efree(formatargs);	\
+		efree(formatendian);	\
 		zend_value_error("Type %c: integer overflow in format string", code); \
 		RETURN_THROWS(); \
 	} \
@@ -32,6 +33,7 @@
 typedef enum {
 	PHP_LITTLE_ENDIAN,
 	PHP_BIG_ENDIAN,
+	PHP_NO_ENDIAN_MODIFIER,
 } php_pack_endianness;
 
 #ifdef WORDS_BIGENDIAN
@@ -220,12 +222,27 @@ PHP_FUNCTION(pack)
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
 	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
+	php_pack_endianness *formatendian = safe_emalloc(formatlen, sizeof(*formatendian), 0);
 	currentarg = 0;
 
 	/* Preprocess format into formatcodes and formatargs */
 	for (i = 0; i < formatlen; formatcount++) {
 		char code = format[i++];
 		int arg = 1;
+		php_pack_endianness endian = PHP_NO_ENDIAN_MODIFIER;
+
+		/* Handle endianness modifier if any */
+		if (i < formatlen) {
+			char c = format[i];
+
+			if (c == '<') {
+				endian = PHP_LITTLE_ENDIAN;
+				i++;
+			} else if (c == '>') {
+				endian = PHP_BIG_ENDIAN;
+				i++;
+			}
+		}
 
 		/* Handle format arguments if any */
 		if (i < formatlen) {
@@ -250,6 +267,13 @@ PHP_FUNCTION(pack)
 			case 'x':
 			case 'X':
 			case '@':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					efree(formatcodes);
+					efree(formatargs);
+					efree(formatendian);
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				if (arg < 0) {
 					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", code);
 					arg = 1;
@@ -262,9 +286,17 @@ PHP_FUNCTION(pack)
 			case 'Z':
 			case 'h':
 			case 'H':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					efree(formatcodes);
+					efree(formatargs);
+					efree(formatendian);
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				if (currentarg >= num_args) {
 					efree(formatcodes);
 					efree(formatargs);
+					efree(formatendian);
 					zend_value_error("Type %c: not enough arguments", code);
 					RETURN_THROWS();
 				}
@@ -273,6 +305,7 @@ PHP_FUNCTION(pack)
 					if (!try_convert_to_string(&argv[currentarg])) {
 						efree(formatcodes);
 						efree(formatargs);
+						efree(formatendian);
 						RETURN_THROWS();
 					}
 
@@ -288,35 +321,121 @@ PHP_FUNCTION(pack)
 				currentarg++;
 				break;
 
-			/* Use as many args as specified */
-			case 'q':
-			case 'Q':
+			/* 64-bit codes with explicit endianness, endianness modifiers not allowed */
 			case 'J':
 			case 'P':
 #if SIZEOF_ZEND_LONG < 8
+				efree(formatcodes);
+				efree(formatargs);
+				efree(formatendian);
+				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+				RETURN_THROWS();
+#else
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
 					efree(formatcodes);
 					efree(formatargs);
-					zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+					efree(formatendian);
+					zend_value_error("Endianness modifier not allowed for this format code");
 					RETURN_THROWS();
+				}
+				if (arg < 0) {
+					arg = num_args - currentarg;
+				}
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
+				currentarg += arg;
+
+				if (currentarg > num_args) {
+					goto too_few_args;
+				}
+				break;
 #endif
-			case 'c':
-			case 'C':
-			case 's':
-			case 'S':
-			case 'i':
-			case 'I':
-			case 'l':
-			case 'L':
+
+			/* 64-bit codes that support endianness modifiers */
+			case 'q':
+			case 'Q':
+#if SIZEOF_ZEND_LONG < 8
+				efree(formatcodes);
+				efree(formatargs);
+				efree(formatendian);
+				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+				RETURN_THROWS();
+#else
+				if (arg < 0) {
+					arg = num_args - currentarg;
+				}
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
+				currentarg += arg;
+
+				if (currentarg > num_args) {
+					goto too_few_args;
+				}
+				break;
+#endif
+
+			/* Codes with explicit endianness, endianness modifiers not allowed */
 			case 'n':
 			case 'N':
 			case 'v':
 			case 'V':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					efree(formatcodes);
+					efree(formatargs);
+					efree(formatendian);
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
+				if (arg < 0) {
+					arg = num_args - currentarg;
+				}
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
+				currentarg += arg;
+
+				if (currentarg > num_args) {
+					goto too_few_args;
+				}
+				break;
+
+			/* Codes that support endianness modifiers */
+			case 's':
+			case 'S':
+			case 'l':
+			case 'L':
+				if (arg < 0) {
+					arg = num_args - currentarg;
+				}
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
+				currentarg += arg;
+
+				if (currentarg > num_args) {
+					goto too_few_args;
+				}
+				break;
+
+			case 'c':
+			case 'C':
+			case 'i':
+			case 'I':
 			case 'f': /* float */
 			case 'g': /* little endian float */
 			case 'G': /* big endian float */
 			case 'd': /* double */
 			case 'e': /* little endian double */
 			case 'E': /* big endian double */
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					efree(formatcodes);
+					efree(formatargs);
+					efree(formatendian);
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
@@ -329,6 +448,7 @@ PHP_FUNCTION(pack)
 too_few_args:
 					efree(formatcodes);
 					efree(formatargs);
+					efree(formatendian);
 					zend_value_error("Type %c: too few arguments", code);
 					RETURN_THROWS();
 				}
@@ -337,12 +457,14 @@ too_few_args:
 			default:
 				efree(formatcodes);
 				efree(formatargs);
+				efree(formatendian);
 				zend_value_error("Type %c: unknown format code", code);
 				RETURN_THROWS();
 		}
 
 		formatcodes[formatcount] = code;
 		formatargs[formatcount] = arg;
+		formatendian[formatcount] = endian;
 	}
 
 	if (currentarg < num_args) {
@@ -509,12 +631,16 @@ too_few_args:
 			case 'S':
 			case 'n':
 			case 'v': {
-				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
+				php_pack_endianness endianness;
 
 				if (code == 'n') {
 					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'v') {
 					endianness = PHP_LITTLE_ENDIAN;
+				} else if (formatendian[i] != PHP_NO_ENDIAN_MODIFIER) {
+					endianness = formatendian[i];
+				} else {
+					endianness = PHP_MACHINE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
@@ -536,12 +662,16 @@ too_few_args:
 			case 'L':
 			case 'N':
 			case 'V': {
-				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
+				php_pack_endianness endianness;
 
 				if (code == 'N') {
 					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'V') {
 					endianness = PHP_LITTLE_ENDIAN;
+				} else if (formatendian[i] != PHP_NO_ENDIAN_MODIFIER) {
+					endianness = formatendian[i];
+				} else {
+					endianness = PHP_MACHINE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
@@ -556,12 +686,16 @@ too_few_args:
 			case 'Q':
 			case 'J':
 			case 'P': {
-				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
+				php_pack_endianness endianness;
 
 				if (code == 'J') {
 					endianness = PHP_BIG_ENDIAN;
 				} else if (code == 'P') {
 					endianness = PHP_LITTLE_ENDIAN;
+				} else if (formatendian[i] != PHP_NO_ENDIAN_MODIFIER) {
+					endianness = formatendian[i];
+				} else {
+					endianness = PHP_MACHINE_ENDIAN;
 				}
 
 				while (arg-- > 0) {
@@ -654,6 +788,7 @@ too_few_args:
 
 	efree(formatcodes);
 	efree(formatargs);
+	efree(formatendian);
 	ZSTR_VAL(output)[outputpos] = '\0';
 	ZSTR_LEN(output) = outputpos;
 	RETURN_NEW_STR(output);
@@ -712,6 +847,21 @@ PHP_FUNCTION(unpack)
 		char *name;
 		int namelen;
 		int size = 0;
+		php_pack_endianness endian = PHP_NO_ENDIAN_MODIFIER;
+
+		if (formatlen > 0) {
+			char c = *format;
+
+			if (c == '<') {
+				endian = PHP_LITTLE_ENDIAN;
+				format++;
+				formatlen--;
+			} else if (c == '>') {
+				endian = PHP_BIG_ENDIAN;
+				format++;
+				formatlen--;
+			}
+		}
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
@@ -757,6 +907,10 @@ PHP_FUNCTION(unpack)
 		switch (type) {
 			/* Never use any input */
 			case 'X':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = -1;
 				if (repetitions < 0) {
 					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", type);
@@ -765,18 +919,30 @@ PHP_FUNCTION(unpack)
 				break;
 
 			case '@':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = 0;
 				break;
 
 			case 'a':
 			case 'A':
 			case 'Z':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = repetitions;
 				repetitions = 1;
 				break;
 
 			case 'h':
 			case 'H':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = (repetitions > 0) ? ((unsigned int) repetitions + 1) / 2 : repetitions;
 				repetitions = 1;
 				break;
@@ -785,37 +951,74 @@ PHP_FUNCTION(unpack)
 			case 'c':
 			case 'C':
 			case 'x':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = 1;
 				break;
 
-			/* Use 2 bytes of input */
+			/* Use 2 bytes of input, endianness modifiers allowed */
 			case 's':
 			case 'S':
+				size = 2;
+				break;
+
+			/* Use 2 bytes of input with inherent endianness */
 			case 'n':
 			case 'v':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = 2;
 				break;
 
 			/* Use sizeof(int) bytes of input */
 			case 'i':
 			case 'I':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = sizeof(int);
 				break;
 
-			/* Use 4 bytes of input */
+			/* Use 4 bytes of input, endianness modifiers allowed */
 			case 'l':
 			case 'L':
-			case 'N':
-			case 'V':
 				size = 4;
 				break;
 
-			/* Use 8 bytes of input */
+			/* Use 4 bytes of input with inherent endianness */
+			case 'N':
+			case 'V':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
+				size = 4;
+				break;
+
+			/* Use 8 bytes of input, endianness modifiers allowed */
 			case 'q':
 			case 'Q':
+#if SIZEOF_ZEND_LONG > 4
+				size = 8;
+				break;
+#else
+				zend_value_error("64-bit format codes are not available for 32-bit versions of PHP");
+				RETURN_THROWS();
+#endif
+
+			/* Use 8 bytes of input with inherent endianness */
 			case 'J':
 			case 'P':
 #if SIZEOF_ZEND_LONG > 4
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = 8;
 				break;
 #else
@@ -827,6 +1030,10 @@ PHP_FUNCTION(unpack)
 			case 'f':
 			case 'g':
 			case 'G':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = sizeof(float);
 				break;
 
@@ -834,6 +1041,10 @@ PHP_FUNCTION(unpack)
 			case 'd':
 			case 'e':
 			case 'E':
+				if (endian != PHP_NO_ENDIAN_MODIFIER) {
+					zend_value_error("Endianness modifier not allowed for this format code");
+					RETURN_THROWS();
+				}
 				size = sizeof(double);
 				break;
 
@@ -998,17 +1209,30 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 's':   /* signed machine endian   */
-					case 'S':   /* unsigned machine endian */
+					case 's':   /* signed, machine endian or explicit */
+					case 'S':   /* unsigned, machine endian or explicit */
 					case 'n':   /* unsigned big endian     */
 					case 'v': { /* unsigned little endian  */
 						zend_long v = 0;
 						uint16_t x = *((unaligned_uint16_t*) &input[inputpos]);
 
+						bool need_swap = false;
+						if (type == 'n') {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						} else if (type == 'v') {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_LITTLE_ENDIAN) {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_BIG_ENDIAN) {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						}
+
+						if (need_swap) {
+							x = php_pack_reverse_int16(x);
+						}
+
 						if (type == 's') {
 							v = (int16_t) x;
-						} else if ((type == 'n' && MACHINE_LITTLE_ENDIAN) || (type == 'v' && !MACHINE_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int16(x);
 						} else {
 							v = x;
 						}
@@ -1032,17 +1256,30 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 'l':   /* signed machine endian   */
-					case 'L':   /* unsigned machine endian */
+					case 'l':   /* signed, machine endian or explicit */
+					case 'L':   /* unsigned, machine endian or explicit */
 					case 'N':   /* unsigned big endian     */
 					case 'V': { /* unsigned little endian  */
 						zend_long v = 0;
 						uint32_t x = *((unaligned_uint32_t*) &input[inputpos]);
 
+						bool need_swap = false;
+						if (type == 'N') {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						} else if (type == 'V') {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_LITTLE_ENDIAN) {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_BIG_ENDIAN) {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						}
+
+						if (need_swap) {
+							x = php_pack_reverse_int32(x);
+						}
+
 						if (type == 'l') {
 							v = (int32_t) x;
-						} else if ((type == 'N' && MACHINE_LITTLE_ENDIAN) || (type == 'V' && !MACHINE_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int32(x);
 						} else {
 							v = x;
 						}
@@ -1052,17 +1289,30 @@ PHP_FUNCTION(unpack)
 					}
 
 #if SIZEOF_ZEND_LONG > 4
-					case 'q':   /* signed machine endian   */
-					case 'Q':   /* unsigned machine endian */
+					case 'q':   /* signed, machine endian or explicit */
+					case 'Q':   /* unsigned, machine endian or explicit */
 					case 'J':   /* unsigned big endian     */
 					case 'P': { /* unsigned little endian  */
 						zend_long v = 0;
 						uint64_t x = *((unaligned_uint64_t*) &input[inputpos]);
 
+						bool need_swap = false;
+						if (type == 'J') {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						} else if (type == 'P') {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_LITTLE_ENDIAN) {
+							need_swap = !MACHINE_LITTLE_ENDIAN;
+						} else if (endian == PHP_BIG_ENDIAN) {
+							need_swap = MACHINE_LITTLE_ENDIAN;
+						}
+
+						if (need_swap) {
+							x = php_pack_reverse_int64(x);
+						}
+
 						if (type == 'q') {
 							v = (int64_t) x;
-						} else if ((type == 'J' && MACHINE_LITTLE_ENDIAN) || (type == 'P' && !MACHINE_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int64(x);
 						} else {
 							v = x;
 						}
