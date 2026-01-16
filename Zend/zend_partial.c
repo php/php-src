@@ -399,7 +399,7 @@ static zend_result zp_get_param_default_value(zval *result, zend_function *funct
 		} else {
 			ZEND_ASSERT(opline->opcode == ZEND_RECV);
 		}
-	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
+	} else {
 		if (function->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 			goto error;
 		}
