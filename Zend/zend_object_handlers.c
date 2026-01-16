@@ -1391,6 +1391,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 
+	ZEND_ASSERT(type != BP_VAR_R && type != BP_VAR_IS);
+
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
 #endif
@@ -1412,7 +1414,7 @@ try_again:
 
 					return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot);
 				}
-				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+				if (UNEXPECTED(type == BP_VAR_RW)) {
 					if (prop_info) {
 						zend_typed_property_uninitialized_access(prop_info, name);
 						retval = &EG(error_zval);
@@ -1473,7 +1475,7 @@ try_again:
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties_internal(zobj);
 			}
-			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+			if (UNEXPECTED(type == BP_VAR_RW)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
