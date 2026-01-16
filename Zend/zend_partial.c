@@ -54,8 +54,9 @@
 
 #define Z_IS_PLACEHOLDER_P(p) (Z_TYPE_P(p) == _IS_PLACEHOLDER)
 
-#define IS_STATIC_CLOSURE(function) \
-	(((function)->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE)) == (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE))
+static zend_always_inline bool zp_is_static_closure(const zend_function *function) {
+	return ((function->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE)) == (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE));
+}
 
 static zend_never_inline ZEND_COLD void zp_args_underflow(
 		const zend_function *function, uint32_t args, uint32_t expected)
@@ -119,7 +120,7 @@ static zend_result zp_args_check(const zend_function *function,
 	return SUCCESS;
 }
 
-static bool zp_name_exists(zend_string **names, uint32_t num_names, zend_string *name)
+static bool zp_name_exists(zend_string **names, uint32_t num_names, const zend_string *name)
 {
 	for (uint32_t i = 0; i < num_names; i++) {
 		if (names[i] && zend_string_equals(names[i], name)) {
@@ -987,7 +988,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 			NULL, params_ast, lexical_vars_ast, stmts_ast,
 			return_type_ast, attributes_ast);
 
-	if (Z_TYPE_P(this_ptr) != IS_OBJECT || IS_STATIC_CLOSURE(function)) {
+	if (Z_TYPE_P(this_ptr) != IS_OBJECT || zp_is_static_closure(function)) {
 		((zend_ast_decl*)closure_ast)->flags |= ZEND_ACC_STATIC;
 	}
 
@@ -1138,7 +1139,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		called_scope = Z_CE_P(this_ptr);
 	}
 
-	if (Z_TYPE_P(this_ptr) == IS_OBJECT && !IS_STATIC_CLOSURE(function)) {
+	if (Z_TYPE_P(this_ptr) == IS_OBJECT && !zp_is_static_closure(function)) {
 		ZVAL_COPY_VALUE(&object, this_ptr);
 	} else {
 		ZVAL_UNDEF(&object);
