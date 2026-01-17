@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20818 (Segfault in Tracing JIT with object reference).
     (khasinski)
 
+- OpenSSL:
+  . Fix memory leaks when sk_X509_new_null() fails. (ndossche)
+
 - Phar:
   . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
     (ndossche)
