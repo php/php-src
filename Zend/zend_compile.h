@@ -355,6 +355,9 @@ typedef struct _zend_oparray_context {
 /* Function has a return type                             |     |     |     */
 #define ZEND_ACC_HAS_RETURN_TYPE         (1 << 13) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Function uses `defer` blocks (user only)               |     |     |     */
+#define ZEND_ACC_HAS_DEFER               (1U << 30) /*    |  X  |     |     */
+/*                                                        |     |     |     */
 /* Function with variable number of arguments             |     |     |     */
 #define ZEND_ACC_VARIADIC                (1 << 14) /*     |  X  |     |     */
 /*                                                        |     |     |     */
@@ -522,6 +525,18 @@ typedef struct _zend_internal_function_info {
 	const char *default_value;
 } zend_internal_function_info;
 
+typedef struct _zend_defer_entry {
+	uint32_t opline_num;
+	uint32_t length;
+} zend_defer_entry;
+
+typedef struct _zend_defer_stack {
+	uint32_t count;
+	uint32_t capacity;
+	zend_defer_entry *entries;
+	zend_object *unwinding_exception;
+} zend_defer_stack;
+
 struct _zend_op_array {
 	/* Common elements */
 	uint8_t type;
@@ -645,6 +660,7 @@ struct _zend_execute_data {
 	zend_array          *symbol_table;
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
 	zend_array          *extra_named_params;
+	zend_defer_stack    *defer_stack;      /* defer stack for this execution */
 };
 
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
