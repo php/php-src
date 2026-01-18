@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Update timelib to 2022.16. (Derick)
+  . Fixed bug GH-20967 (DateTime[Immutable]::createFromTimestamp(float) misses
+    support for 64bit integers or 32bit environments). (marc-mabe) 
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
