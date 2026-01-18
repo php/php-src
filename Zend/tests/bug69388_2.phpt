@@ -12,4 +12,3 @@ eval('namespace {use Exception;}');
 
 ?>
 --EXPECT--
-The use statement with non-compound name 'Exception' has no effect
