@@ -8,4 +8,4 @@ $result = fseek($stream, PHP_INT_MIN, SEEK_END);
 var_dump($result);
 ?>
 --EXPECTF--
-int(%d)
+int(-1)
