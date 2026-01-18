@@ -237,27 +237,32 @@ jobs:
       - name: Setup infra config
         run: |
           set -e
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            WORKSPACE="manual"
+            BASE_COMMIT="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-6)"
+          else
+            WORKSPACE="nightly"
+            BASE_COMMIT="$(echo "${{ env.LAST_RESULT_SHA }}" | cut -c 1-6)"
+          fi
+          COMPARE_COMMIT="$(echo "${{ env.COMMIT }}" | cut -c 1-6)"
 
           cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
-          sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s|INFRA_DOCKER_REGISTRY=public.ecr.aws/abcdefgh|INFRA_DOCKER_REGISTRY=${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s|INFRA_WORKSPACE=|INFRA_WORKSPACE=$WORKSPACE|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s/INFRA_MEASURE_INSTRUCTION_COUNT=0/INFRA_MEASURE_INSTRUCTION_COUNT=${{ env.INSTRUCTION_COUNT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+
           cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/state_bucket = ""/state_bucket = "${{ secrets.PHP_VERSION_BENCHMARK_STATE_BUCKET }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/github_token = ""/github_token = "${{ secrets.GITHUB_TOKEN }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
 
           WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           sed -i "s|log_url = \"\"|log_url = \"$WORKFLOW_RUN_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's|artifact_url = ""|artifact_url = "#ARTIFACT_URL#"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
 
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            BASE_COMMIT="${{ env.BASELINE_COMMIT }}"
-          else
-            BASE_COMMIT="${{ env.LAST_RESULT_SHA }}"
-          fi
-          CHANGESET_URL="${{ github.server_url }}/${{ github.repository }}/compare/$BASE_COMMIT..${{ env.COMMIT }}"
-
+          CHANGESET_URL="${{ github.server_url }}/${{ github.repository }}/compare/$BASE_COMMIT..$COMPARE_COMMIT"
           sed -i 's|extra_title = ""|extra_title = "Changeset"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i "s|extra_text = \"\"|extra_text = \"$CHANGESET_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
       - name: Run benchmark
