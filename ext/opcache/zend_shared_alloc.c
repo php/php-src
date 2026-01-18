@@ -19,13 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-# endif
-# include <sys/mman.h>
-#endif
-
 #include <errno.h>
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
@@ -40,7 +33,7 @@
 # include <stdio.h>
 #endif
 
-#ifdef HAVE_MPROTECT
+#if defined(HAVE_MPROTECT) || defined(HAVE_MEMFD_CREATE)
 # include "sys/mman.h"
 #endif
 
