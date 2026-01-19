@@ -1575,7 +1575,6 @@ ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_class_entry *old_ce);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce);
 
-
 #define ZPP_ERROR_OK                            0
 #define ZPP_ERROR_FAILURE                       1
 #define ZPP_ERROR_WRONG_CALLBACK                2
