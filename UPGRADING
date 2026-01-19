@@ -151,6 +151,11 @@ PHP 8.6 UPGRADE NOTES
     parsing the format string.
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
+  . array_map() using a first-class callable or partial function application
+    callback will be compiled into the equivalent foreach-loop, avoiding the
+    creation of intermediate Closures, the overhead of calling userland
+    callbacks from internal functions and providing for better insight for the
+    JIT.
 
 - DOM:
   . Made splitText() faster and consume less memory.
