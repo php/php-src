@@ -74,6 +74,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 
+- ext/mysqlnd:
+  . Dropped session_options parameter from all methods in mysqlnd_auth.
+    The same information is present in conn->options and should be used instead.
+
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.
   . _php_error_log() now accepts zend_string* values instead of char*.
