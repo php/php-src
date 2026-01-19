@@ -19,6 +19,6 @@ class Bar {
 var_dump(foo());
 ?>
 --EXPECTF--
-Warning: Can't preload unlinked class Bar@anonymous: Unknown parent Bar in %spreload_bug78937.inc on line 3
-object(Bar@anonymous)#%d (0) {
+Warning: Can't preload unlinked class class@anonymous: Unknown parent Bar in %spreload_bug78937.inc on line 3
+object(class@anonymous)#1 (0) {
 }
