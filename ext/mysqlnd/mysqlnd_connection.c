@@ -1484,14 +1484,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			DBG_INF_FMT("charset=%s", conn->options->charset_name);
 			break;
 		}
-		case MYSQL_OPT_NAMED_PIPE:
-			conn->options->protocol = MYSQL_PROTOCOL_PIPE;
-			break;
-		case MYSQL_OPT_PROTOCOL:
-			if (*(unsigned int*) value < MYSQL_PROTOCOL_LAST) {
-				conn->options->protocol = *(unsigned int*) value;
-			}
-			break;
 		case MYSQLND_OPT_MAX_ALLOWED_PACKET:
 			if (*(unsigned int*) value > (1<<16)) {
 				conn->options->max_allowed_packet = *(unsigned int*) value;
