@@ -4044,6 +4044,7 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 			opline->result.num = zend_alloc_cache_slot();
 		}
 	} else {
+		CG(context).closure_may_use_this = true;
 		zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);
 	}
 
@@ -5342,7 +5343,6 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
 		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
-		CG(context).closure_may_use_this = true;
 		return;
 	}
 
