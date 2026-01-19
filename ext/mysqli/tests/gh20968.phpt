@@ -29,13 +29,8 @@ var_dump($value);
 --EXPECTF--
 bool(false)
 
-Fatal error: Uncaught ValueError: mysqli_options(): Invalid option %i in %s:%d
+Fatal error: Uncaught ValueError: mysqli_options(): Invalid option %d in %s:%d
 Stack trace:
-#0 %s(%d): mysqli->options(%i, 'invalid_option')
-#1 {main}
-
-Next ValueError: mysqli_options(): Invalid option %i in %s:%d
-Stack trace:
-#0 %s(%d): mysqli->options(%i, 'invalid_option')
+#0 %s(%d): mysqli->options(%d, 'invalid_option')
 #1 {main}
   thrown in %s on line %d
