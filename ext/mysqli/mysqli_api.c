@@ -1228,7 +1228,7 @@ PHP_FUNCTION(mysqli_options)
 			}
 			break;
 		default:
-			ret = 1;		
+			ret = 1;
 			break;
 	}
 
