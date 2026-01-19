@@ -125,6 +125,11 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
+	if (offset == ZEND_LONG_MIN) {
+		zend_argument_value_error(2, "must be greater than " ZEND_LONG_FMT, ZEND_LONG_MIN);
+		return FAILURE;
+	}
+
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
@@ -165,7 +170,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				stream->eof = 0;
 				stream->fatal_error = 0;
 				return 0;
-			} else if (ZSTR_LEN(ms->data) < -(size_t)offset) {
+			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
 				ms->fpos = 0;
 				*newoffs = -1;
 				return -1;

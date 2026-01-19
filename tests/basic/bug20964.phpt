@@ -8,4 +8,8 @@ $result = fseek($stream, PHP_INT_MIN, SEEK_END);
 var_dump($result);
 ?>
 --EXPECTF--
-int(-1)
+Fatal error: Uncaught ValueError: fseek(): Argument #2 ($offset) must be greater than -%d in %s:%d
+Stack trace:
+#0 %s(%d): fseek(Resource id #%d, -%d, %d)
+#1 {main}
+  thrown in %s on line %d
