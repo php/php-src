@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a8dae89983ccbcd5dd36d1cdee736d40af4fd33c */
+ * Stub hash: 9e1fda9f4ac6fd742869cb0553326ffac3356321 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -215,6 +215,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
 
+#define arginfo_class__ZendTestTraitForInternalClass_traitMethod arginfo_zend_test_nodiscard
+
 #define arginfo_class__ZendTestClass_is_object arginfo_zend_test_nodiscard
 
 #define arginfo_class__ZendTestClass___toString arginfo_zend_get_current_func_name
@@ -348,6 +350,7 @@ static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
+static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
@@ -527,6 +530,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class__ZendTestTraitForInternalClass_methods[] = {
+	ZEND_ME(_ZendTestTraitForInternalClass, traitMethod, arginfo_class__ZendTestTraitForInternalClass_traitMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
 static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
@@ -693,6 +701,48 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
 	zend_string_release_ex(const_DUMMY_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestTraitForInternalClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTraitForInternalClass", class__ZendTestTraitForInternalClass_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+#endif
+
+	zval const_ZEND_TRAIT_CONST_value;
+	ZVAL_LONG(&const_ZEND_TRAIT_CONST_value, 123);
+	zend_string *const_ZEND_TRAIT_CONST_name = zend_string_init_interned("ZEND_TRAIT_CONST", sizeof("ZEND_TRAIT_CONST") - 1, true);
+	zend_declare_class_constant_ex(class_entry, const_ZEND_TRAIT_CONST_name, &const_ZEND_TRAIT_CONST_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(const_ZEND_TRAIT_CONST_name, true);
+
+	zval property_traitProp_default_value;
+	ZVAL_LONG(&property_traitProp_default_value, 456);
+	zend_string *property_traitProp_name = zend_string_init("traitProp", sizeof("traitProp") - 1, true);
+	zend_declare_typed_property(class_entry, property_traitProp_name, &property_traitProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_traitProp_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestClassWithTrait(zend_class_entry *class_entry__ZendTestTraitForInternalClass)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestClassWithTrait", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+	zend_class_use_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
 
 	return class_entry;
 }

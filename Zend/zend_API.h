@@ -392,6 +392,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(const zend_class_entr
 ZEND_API zend_class_entry *zend_register_internal_class_with_flags(const zend_class_entry *class_entry, zend_class_entry *parent_ce, uint32_t flags);
 ZEND_API zend_class_entry *zend_register_internal_interface(const zend_class_entry *orig_class_entry);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
+ZEND_API void zend_class_use_traits(zend_class_entry *class_entry, int num_traits, ...);
 
 ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, bool persistent);
 
