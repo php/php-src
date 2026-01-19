@@ -1866,7 +1866,7 @@ ZEND_VM_INLINE_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 		&prop_info, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
 		type == BP_VAR_W ? opline->extended_value : 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
-		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
+		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS) || (type == BP_VAR_UNSET));
 		prop = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
@@ -4797,10 +4797,8 @@ ZEND_VM_COLD_CONST_HANDLER(108, ZEND_THROW, CONST|TMPVAR|CV, ANY)
 		}
 	} while (0);
 
-	zend_exception_save();
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
-	zend_exception_restore();
 	FREE_OP1();
 	HANDLE_EXCEPTION();
 }
@@ -4813,7 +4811,6 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
-	zend_exception_restore();
 	if (EG(exception) == NULL) {
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}
@@ -8624,6 +8621,10 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 		zval *return_value = EX_VAR(EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2.var);
 
 		zval_ptr_dtor(return_value);
+		/* Clear return value in case we hit both DISCARD_EXCEPTION and
+		 * zend_dispatch_try_catch_finally_helper, which will free the return
+		 * value again. See OSS-Fuzz #438780145. */
+		ZVAL_NULL(return_value);
 	}
 
 	/* cleanup delayed exception */

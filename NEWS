@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (ndossche)
   . Added `clamp()`. (kylekatarnls, thinkverse)
+  . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
+    container). (ilutov)
+  . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
 
 - Date:
   . Update timelib to 2022.16. (Derick)

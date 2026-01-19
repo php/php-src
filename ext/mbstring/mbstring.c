@@ -2107,8 +2107,34 @@ static zend_string* mb_get_substr_slow(unsigned char *in, size_t in_len, size_t 
 	uint32_t wchar_buf[128];
 	unsigned int state = 0;
 
+	/* For the below call to mb_convert_buf_init, we need to estimate how many bytes the output of this operation will need.
+	 * If possible, we want to initialize the output buffer with enough space, so it is not necessary to grow it dynamically;
+	 * At the same time, we don't want to make it huge and waste a lot of memory.
+	 *
+	 * `len` is the requested number of codepoints; we optimistically guess that each codepoint can be encoded in one byte.
+	 * However, the caller may have requested a huge number of codepoints, more than are actually present in the input string;
+	 * so we also use a 2nd estimate to avoid unnecessary, huge allocations:
+	 *
+	 * `in_len` is the number of input bytes, `from` is the number of codepoints to skip; again, if each leading codepoint is
+	 * encoded in one byte, then there may be as many as `in_len - from` bytes remaining after skipping leading codepoints;
+	 * that gives our 2nd estimate of the needed output buffer size.
+	 *
+	 * If `len == MBFL_SUBSTR_UNTIL_END`, then `len` will be the largest possible `size_t` value, and the `in_len - from`
+	 * estimate will certainly be used instead. */
+
+	size_t initial_buf_size;
+	if (from > in_len) {
+		/* Normally, if `from > in_len`, then the output will definitely be empty, and in fact, `mb_get_substr` uses
+		 * this fact to (usually) just return an empty string in such situations.
+		 * But for SJIS-Mac, one byte can decode to more than one codepoint, so we can't assume the output will
+		 * definitely be empty. If it's not... then our output buffer will be dynamically resized. */
+		initial_buf_size = 0;
+	} else {
+		initial_buf_size = MIN(len, in_len - from);
+	}
+
 	mb_convert_buf buf;
-	mb_convert_buf_init(&buf, MIN(len, in_len - from), MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+	mb_convert_buf_init(&buf, initial_buf_size, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
 	while (in_len && len) {
 		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
