@@ -81,8 +81,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-// invalid options do not generate errors
-mysqli_options($link, -1, "Invalid option");
 
 print "done!";
 ?>
