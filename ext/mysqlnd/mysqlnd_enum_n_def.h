@@ -206,7 +206,7 @@ typedef enum mysqlnd_client_option
 	MYSQL_OPT_PROTOCOL, /* Unsupported by mysqlnd */
 	MYSQL_SHARED_MEMORY_BASE_NAME, /* Unsupported by mysqlnd */
 	MYSQL_OPT_READ_TIMEOUT,
-	MYSQL_OPT_WRITE_TIMEOUT,
+	MYSQL_OPT_WRITE_TIMEOUT, /* Unsupported by mysqlnd */
 	MYSQL_OPT_USE_RESULT, /* Unsupported by mysqlnd */
 	MYSQL_OPT_USE_REMOTE_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
 	MYSQL_OPT_USE_EMBEDDED_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */

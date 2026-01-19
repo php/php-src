@@ -1411,7 +1411,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 
 	switch (option) {
 		case MYSQL_OPT_READ_TIMEOUT:
-		case MYSQL_OPT_WRITE_TIMEOUT:
 		case MYSQLND_OPT_SSL_KEY:
 		case MYSQLND_OPT_SSL_CERT:
 		case MYSQLND_OPT_SSL_CA:
