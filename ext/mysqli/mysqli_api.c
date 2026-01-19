@@ -1209,6 +1209,9 @@ PHP_FUNCTION(mysqli_options)
 				convert_to_long(mysql_value);
 				break;
 			default:
+				if (MyG(report_mode) & MYSQLI_REPORT_INDEX){
+					zend_value_error("mysqli_options(): Invalid option %d", (int)mysql_option);
+				}
 				break;
 		}
 	}
@@ -1226,6 +1229,9 @@ PHP_FUNCTION(mysqli_options)
 			break;
 		default:
 			ret = 1;
+			if (MyG(report_mode) & MYSQLI_REPORT_INDEX){
+				zend_value_error("mysqli_options(): Invalid option %d", (int)mysql_option);
+			}			
 			break;
 	}
 
