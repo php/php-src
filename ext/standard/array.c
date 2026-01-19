@@ -6472,7 +6472,7 @@ PHP_FUNCTION(array_filter)
 		case ARRAY_FILTER_USE_KEY:
 			break;
 		default:
-			zend_argument_value_error(3, "must be a valid mode");
+			zend_argument_value_error(3, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
 		RETURN_THROWS();
 	}
 
@@ -6496,7 +6496,7 @@ PHP_FUNCTION(array_filter)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
-			if (use_type) {
+			if (use_type != ARRAY_FILTER_USE_VALUE) {
 				/* Set up the key */
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);

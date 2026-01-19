@@ -12,5 +12,5 @@ try {
 echo "Done"
 ?>
 --EXPECT--
-ValueError: array_filter(): Argument #3 ($mode) must be a valid mode
+ValueError: array_filter(): Argument #3 ($mode) must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH
 Done
