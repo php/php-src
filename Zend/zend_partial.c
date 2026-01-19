@@ -363,28 +363,6 @@ static zend_ast *zp_type_to_ast(const zend_type type)
 	return zp_simple_type_to_ast(type_mask);
 }
 
-/* Can not use zend_argument_error() as the function is not on the stack */
-static zend_never_inline ZEND_COLD void zp_argument_error(zend_class_entry *error_ce,
-		zend_function *function, uint32_t arg_num, const char *format, ...)
-{
-	zend_string *func_name = get_function_or_method_name(function);
-	const char *arg_name = get_function_arg_name(function, arg_num);
-
-	char *message = NULL;
-
-	va_list va;
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	va_end(va);
-
-	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
-		ZSTR_VAL(func_name), arg_num,
-		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
-	);
-	efree(message);
-	zend_string_release(func_name);
-}
-
 static zend_result zp_get_param_default_value(zval *result, zend_function *function, uint32_t arg_offset)
 {
 	ZEND_ASSERT(arg_offset < function->common.num_args);
@@ -410,7 +388,8 @@ static zend_result zp_get_param_default_value(zval *result, zend_function *funct
 	}
 
 error:
-	zp_argument_error(zend_ce_argument_count_error, function, arg_offset + 1,
+	zend_argument_error_ex(function, arg_offset + 1,
+			zend_ce_argument_count_error,
 			"must be passed explicitly, because the default value is not known");
 
 	return FAILURE;
@@ -544,8 +523,8 @@ static zend_ast *zp_compile_forwarding_call(
 				/* Required param was not passed. This can happen due to named
 				 * args. Using the same exception CE and message as
 				 * zend_handle_undef_args(). */
-				zp_argument_error(zend_ce_argument_count_error, function,
-						offset + 1, "not passed");
+				zend_argument_error_ex(function, offset + 1,
+						zend_ce_argument_count_error, "not passed");
 				goto error;
 			}
 			zval default_value;
