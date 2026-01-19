@@ -1272,6 +1272,7 @@ PHP_METHOD(SQLite3, openBlob)
 
 	// since it is not persistent, php_stream_alloc can't fail
 	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, mode);
+	ZEND_ASSERT(stream != NULL);
 	php_stream_to_zval(stream, return_value);
 }
 /* }}} */
