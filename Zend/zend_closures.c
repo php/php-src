@@ -878,8 +878,6 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 }
 /* }}} */
 
-static zend_arg_info trampoline_arg_info[1];
-
 void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
 	zend_internal_function trampoline;
@@ -904,9 +902,7 @@ void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) 
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
 		trampoline.doc_comment = NULL;
-		if (trampoline.fn_flags & ZEND_ACC_VARIADIC) {
-			trampoline.arg_info = trampoline_arg_info;
-		}
+		trampoline.arg_info = mptr->common.arg_info;
 		trampoline.attributes = mptr->common.attributes;
 
 		zend_free_trampoline(mptr);
@@ -943,11 +939,3 @@ void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {
 	ZVAL_COPY_VALUE(var, val);
 }
 /* }}} */
-
-void zend_closure_startup(void)
-{
-	/* __call and __callStatic name the arguments "$arguments" in the docs. */
-	trampoline_arg_info[0].name = zend_string_init_interned("arguments", strlen("arguments"), true);
-	trampoline_arg_info[0].type = (zend_type)ZEND_TYPE_INIT_CODE(IS_MIXED, false, _ZEND_ARG_INFO_FLAGS(false, 1, 0));
-	trampoline_arg_info[0].default_value = NULL;
-}

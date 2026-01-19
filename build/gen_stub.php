@@ -2185,7 +2185,7 @@ OUPUT_EXAMPLE
                 $defaultValue = $arg->getDefaultValueAsMethodSynopsisString();
                 if ($defaultValue !== null) {
                     $initializer = $doc->createElement('initializer');
-                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9]*$/', $defaultValue)) {
+                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9\:\\\\]*$/', $defaultValue)) {
                         $constant = $doc->createElement('constant', $defaultValue);
                         $initializer->appendChild($constant);
                     } else {
@@ -2216,11 +2216,11 @@ OUPUT_EXAMPLE
             $this->numRequiredArgs,
             $minPHPCompatability === null || $minPHPCompatability >= PHP_81_VERSION_ID
         );
-    
+
         foreach ($this->args as $argInfo) {
             $code .= $argInfo->toZendInfo();
         }
-    
+
         $code .= "ZEND_END_ARG_INFO()";
         return $code . "\n";
     }
@@ -4330,13 +4330,13 @@ class FileInfo {
                 return implode('\\', $node->getParts());
             }
         };
-    
+
         $stmts = $parser->parse($code);
         $nodeTraverser->traverse($stmts);
-    
+
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
-    
+
         $fileInfo->handleStatements($stmts, $prettyPrinter);
         return $fileInfo;
     }
@@ -4357,16 +4357,16 @@ class FileInfo {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
-    
+
             if ($stmt instanceof Stmt\Nop) {
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Const_) {
                 foreach ($stmt->consts as $const) {
                     $this->constInfos[] = parseConstLike(
@@ -4384,7 +4384,7 @@ class FileInfo {
                 }
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Function_) {
                 $this->funcInfos[] = parseFunctionLike(
                     $prettyPrinter,
@@ -4398,7 +4398,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\ClassLike) {
                 $className = $stmt->namespacedName;
                 $constInfos = [];
@@ -4487,7 +4487,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Expression) {
                 $expr = $stmt->expr;
                 if ($expr instanceof Expr\Include_) {
@@ -4495,7 +4495,7 @@ class FileInfo {
                     continue;
                 }
             }
-    
+
             throw new Exception("Unexpected node {$stmt->getType()}");
         }
         if (!empty($conds)) {
@@ -4527,7 +4527,7 @@ class FileInfo {
                 throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
-    
+
         return empty($conds) ? null : implode(' && ', $conds);
     }
 
@@ -4566,7 +4566,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|(\.\.\.)?\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -4588,7 +4588,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*(\.\.\.)?\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }

@@ -50,12 +50,20 @@ typedef struct _php_json_parser_methods {
 	php_json_parser_func_object_end_t object_end;
 } php_json_parser_methods;
 
+ typedef struct _php_json_parser_location {
+	size_t first_line;
+	size_t first_column;
+	size_t last_line;
+	size_t last_column;
+} php_json_parser_location;
+
 struct _php_json_parser {
 	php_json_scanner scanner;
 	zval *return_value;
 	int depth;
 	int max_depth;
 	php_json_parser_methods methods;
+	php_json_parser_location *location;
 };
 
 PHP_JSON_API void php_json_parser_init_ex(
@@ -76,6 +84,10 @@ PHP_JSON_API void php_json_parser_init(
 		int max_depth);
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
+
+PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser);
+
+PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser);
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 

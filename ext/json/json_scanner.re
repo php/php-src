@@ -52,6 +52,8 @@
 
 #define PHP_JSON_INT_MAX_LENGTH (MAX_LENGTH_OF_LONG - 1)
 
+#define PHP_JSON_TOKEN_LENGTH() ((size_t) (s->cursor - s->token))
+#define PHP_JSON_TOKEN_LOCATION(location) (s)->errloc.location
 
 static void php_json_scanner_copy_string(php_json_scanner *s, size_t esc_size)
 {
@@ -96,6 +98,10 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
+	PHP_JSON_TOKEN_LOCATION(first_column) = 1;
+	PHP_JSON_TOKEN_LOCATION(first_line) = 1;
+	PHP_JSON_TOKEN_LOCATION(last_column) = 1;
+	PHP_JSON_TOKEN_LOCATION(last_line) = 1;
 	PHP_JSON_CONDITION_SET(JS);
 }
 
@@ -104,6 +110,8 @@ int php_json_scan(php_json_scanner *s)
 	ZVAL_NULL(&s->value);
 
 std:
+	PHP_JSON_TOKEN_LOCATION(first_column) = s->errloc.last_column;
+	PHP_JSON_TOKEN_LOCATION(first_line) = s->errloc.last_line;
 	s->token = s->cursor;
 
 /*!re2c
@@ -149,27 +157,50 @@ std:
 	UTF16_3 = UTFPREF ( ( ( HEXC | [efEF] ) HEX ) | ( [dD] HEX7 ) ) HEX{2} ;
 	UTF16_4 = UTFPREF [dD] [89abAB] HEX{2} UTFPREF [dD] [c-fC-F] HEX{2} ;
 
-	<JS>"{"                  { return '{'; }
-	<JS>"}"                  { return '}'; }
-	<JS>"["                  { return '['; }
-	<JS>"]"                  { return ']'; }
-	<JS>":"                  { return ':'; }
-	<JS>","                  { return ','; }
+	<JS>"{"                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return '{'; 
+	}
+	<JS>"}"                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return '}';
+	}
+	<JS>"["                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return '['; 
+	}
+	<JS>"]"                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return ']'; 
+	}
+	<JS>":"                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return ':'; 
+	}
+	<JS>","                  { 
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		return ','; 
+	}
 	<JS>"null"               {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 4;
 		ZVAL_NULL(&s->value);
 		return PHP_JSON_T_NUL;
 	}
 	<JS>"true"               {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 4;
 		ZVAL_TRUE(&s->value);
 		return PHP_JSON_T_TRUE;
 	}
 	<JS>"false"              {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 5;
 		ZVAL_FALSE(&s->value);
 		return PHP_JSON_T_FALSE;
 	}
 	<JS>INT                  {
 		bool bigint = 0, negative = s->token[0] == '-';
-		size_t digits = (size_t) (s->cursor - s->token - negative);
+		size_t digits = PHP_JSON_TOKEN_LENGTH();
+		PHP_JSON_TOKEN_LOCATION(last_column) += digits;
+		digits -= negative;
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {
 				int cmp = strncmp((char *) (s->token + negative), LONG_MIN_DIGITS, PHP_JSON_INT_MAX_LENGTH);
@@ -192,10 +223,19 @@ std:
 		}
 	}
 	<JS>FLOAT|EXP            {
+		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH();
 		ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));
 		return PHP_JSON_T_DOUBLE;
 	}
-	<JS>NL|WS                { goto std; }
+	<JS>NL                   {
+		PHP_JSON_TOKEN_LOCATION(last_line)++;
+		PHP_JSON_TOKEN_LOCATION(last_column) = 1;
+		goto std;
+	}
+	<JS>WS                   {
+		PHP_JSON_TOKEN_LOCATION(last_column) += PHP_JSON_TOKEN_LENGTH();
+		goto std;
+	}
 	<JS>EOI                  {
 		if (s->limit < s->cursor) {
 			return PHP_JSON_T_EOI;
@@ -205,6 +245,7 @@ std:
 		}
 	}
 	<JS>["]                  {
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
 		s->str_start = s->cursor;
 		s->str_esc = 0;
 		s->utf8_invalid = 0;
@@ -229,18 +270,22 @@ std:
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>UTF16_1          {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 5;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_2          {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 4;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_3          {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 3;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UTF16_4          {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
 		s->str_esc += 8;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
@@ -249,6 +294,7 @@ std:
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>ESC              {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 2;
 		s->str_esc++;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
@@ -257,6 +303,7 @@ std:
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>["]              {
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
 		zend_string *str;
 		size_t len = (size_t)(s->cursor - s->str_start - s->str_esc - 1 + s->utf8_invalid_count);
 		if (len == 0) {
@@ -277,7 +324,22 @@ std:
 			return PHP_JSON_T_STRING;
 		}
 	}
-	<STR_P1>UTF8             { PHP_JSON_CONDITION_GOTO(STR_P1); }
+	<STR_P1>UTF8_1           {
+		PHP_JSON_TOKEN_LOCATION(last_column)++;
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
+	<STR_P1>UTF8_2           {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
+	<STR_P1>UTF8_3           {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
+	<STR_P1>UTF8_4           {
+		PHP_JSON_TOKEN_LOCATION(last_column) += 1;
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
@@ -295,7 +357,6 @@ std:
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
-
 	<STR_P2_UTF,STR_P2_BIN>UTF16_1             {
 		int utf16 = php_json_ucs2_to_int(s, 2);
 		PHP_JSON_SCANNER_COPY_UTF();

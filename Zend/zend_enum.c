@@ -533,6 +533,8 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 		zend_class_implements(ce, 1, zend_ce_backed_enum);
 	}
 
+	ce->default_object_handlers = &zend_enum_object_handlers;
+
 	return ce;
 }
 

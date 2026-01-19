@@ -1315,6 +1315,20 @@ static zend_class_entry *register_class_ZendTestIntEnum(void)
 }
 #endif
 
+#if (PHP_VERSION_ID >= 80100)
+static zend_class_entry *register_class_ZendTestEnumWithInterface(zend_class_entry *class_entry__ZendTestInterface)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestEnumWithInterface", IS_UNDEF, NULL);
+	zend_class_implements(class_entry, 1, class_entry__ZendTestInterface);
+
+	zend_enum_add_case_cstr(class_entry, "Foo", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Bar", NULL);
+
+	return class_entry;
+}
+#endif
+
 static zend_class_entry *register_class_ZendTestNS_Foo(void)
 {
 	zend_class_entry ce, *class_entry;

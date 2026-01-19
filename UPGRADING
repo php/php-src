@@ -31,11 +31,18 @@ PHP 8.6 UPGRADE NOTES
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
 
+- Fileinfo:
+  . finfo_file() now works with remote streams.
+
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
+
+- JSON:
+  . Added extra info about error location to the JSON error messages returned
+    from json_last_error_msg() and JsonException message.
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
@@ -46,6 +53,10 @@ PHP 8.6 UPGRADE NOTES
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
+  . Added stream socket context options so_keepalive, tcp_keepidle,
+    tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
+    options.
+  . Allowed casting casting filtered streams as file descriptor for select.
 
 ========================================
 3. Changes in SAPI modules
@@ -58,6 +69,10 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- OpenSSL:
+  . Output of openssl_x509_parse() contains criticalExtensions listing all
+    critical certificate extensions.
 
 - Phar:
   . Phar::mungServer() now supports reference values.
@@ -96,6 +111,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
+  . AF_UNSPEC.
 
 ========================================
 11. Changes to INI File Handling
@@ -135,6 +151,11 @@ PHP 8.6 UPGRADE NOTES
     parsing the format string.
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
+  . array_map() using a first-class callable or partial function application
+    callback will be compiled into the equivalent foreach-loop, avoiding the
+    creation of intermediate Closures, the overhead of calling userland
+    callbacks from internal functions and providing for better insight for the
+    JIT.
 
 - DOM:
   . Made splitText() faster and consume less memory.

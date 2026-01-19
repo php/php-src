@@ -32,6 +32,7 @@
 
 #include "php_win32_globals.h"
 
+#include "Zend/zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
@@ -63,7 +64,7 @@ char seps[] = " ,\t\n";
 char *php_mailer = "PHP 7 WIN32";
 
 /* Error messages */
-static char *ErrorMessages[] =
+static const char *ErrorMessages[] =
 {
 	"Success", /* 0 */
 	"Bad arguments from form", /* 1 */
@@ -111,16 +112,16 @@ static char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
-                    const char *headers, char *headers_lc, char **error_message);
+static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+                    zend_string *headers, zend_string *headers_lc, char **error_message);
 static int MailConnect();
-static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders);
-static int Post(LPCSTR msg);
+static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
+static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 
-/* This function is meant to unify the headers passed to to mail()
+/* This function is meant to unify the headers passed to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
  * As a second step we also eliminate all \r\n occurrences which are:
  * 1) At the start of the header
@@ -140,8 +141,8 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 		return NULL;
 	}
 
-	replace = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE), 0);
-	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
+	replace = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_UNIFY_REPLACE, false);
+	regex = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_UNIFY_PATTERN, false);
 
 	result = php_pcre_replace(regex,
 				  NULL, header, strlen(header),
@@ -149,24 +150,24 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 				  -1,
 				  NULL);
 
-	zend_string_release_ex(replace, 0);
-	zend_string_release_ex(regex, 0);
+	zend_string_release_ex(replace, false);
+	zend_string_release_ex(regex, false);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
-	replace = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, strlen(PHP_WIN32_MAIL_RMVDBL_PATTERN), 0);
-	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
+	replace = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_RMVDBL_PATTERN, false);
+	regex = ZSTR_INIT_LITERAL(PHP_WIN32_MAIL_RMVDBL_PATTERN, false);
 
 	result2 = php_pcre_replace(regex,
 				   result, ZSTR_VAL(result), ZSTR_LEN(result),
 				   replace,
 				  -1,
 				  NULL);
-	zend_string_release_ex(replace, 0);
-	zend_string_release_ex(regex, 0);
-	zend_string_release_ex(result, 0);
+	zend_string_release_ex(replace, false);
+	zend_string_release_ex(regex, false);
+	zend_string_release_ex(result, false);
 
 	return result2;
 }
@@ -185,8 +186,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //  See SendText() for additional args!
 //*********************************************************************
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
-			  const char *headers, const char *Subject, const char *mailTo, const char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath)
+			  const char *headers, const char *Subject, const char *mailTo, const char *data)
 {
 	int ret;
 	char *RPath = NULL;
@@ -216,9 +216,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
-	if (mailRPath && *mailRPath) {
-		RPath = estrdup(mailRPath);
-	} else if (INI_STR("sendmail_from")) {
+	if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
@@ -281,7 +279,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers ? ZSTR_VAL(headers_trim) : NULL, headers ? ZSTR_VAL(headers_lc) : NULL, error_message);
+		ret = SendText(RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -328,7 +326,7 @@ PHPAPI void TSMClose(void)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-PHPAPI char *GetSMErrorText(int index)
+PHPAPI const char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
@@ -389,15 +387,15 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
-			 const char *headers, char *headers_lc, char **error_message)
+static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
 	char *tempMailTo, *token, *token_state;
 	const char *pos1, *pos2;
 	char *server_response = NULL;
-	char *stripped_header  = NULL;
+	zend_string *stripped_header  = NULL;
 	zend_string *data_cln;
 
 	/* check for NULL parameters */
@@ -421,14 +419,14 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
-	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+	if (!Post(PW32G(mail_buffer))) {
 		int err = MailConnect();
 		if (0 != err) {
 			return (FAILED_TO_SEND);
 		}
 
-		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-			return (res);
+		if (!Post(PW32G(mail_buffer))) {
+			return (FAILED_TO_SEND);
 		}
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
@@ -438,8 +436,8 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 	SMTP_SKIP_SPACE(RPath);
 	FormatEmailAddress(PW32G(mail_buffer), RPath, "MAIL FROM:<%s>\r\n");
-	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-		return (res);
+	if (!Post(PW32G(mail_buffer))) {
+		return (FAILED_TO_SEND);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
@@ -453,9 +451,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	{
 		SMTP_SKIP_SPACE(token);
 		FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+		if (!Post(PW32G(mail_buffer))) {
 			efree(tempMailTo);
-			return (res);
+			return (FAILED_TO_SEND);
 		}
 		if ((res = Ack(&server_response)) != SUCCESS) {
 			SMTP_ERROR_RESPONSE(server_response);
@@ -466,33 +464,12 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	}
 	efree(tempMailTo);
 
-	if (mailCc && *mailCc) {
-		tempMailTo = estrdup(mailCc);
-		/* Send mail to all rcpt's */
-		token = find_address(tempMailTo, &token_state);
-		while (token != NULL)
-		{
-			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-				efree(tempMailTo);
-				return (res);
-			}
-			if ((res = Ack(&server_response)) != SUCCESS) {
-				SMTP_ERROR_RESPONSE(server_response);
-				efree(tempMailTo);
-				return (res);
-			}
-			token = find_address(NULL, &token_state);
-		}
-		efree(tempMailTo);
-	}
 	/* Send mail to all Cc rcpt's */
-	else if (headers && (pos1 = strstr(headers_lc, "cc:")) && ((pos1 == headers_lc) || (*(pos1-1) == '\n'))) {
+	if (headers && (pos1 = strstr(ZSTR_VAL(headers_lc), "cc:")) && ((pos1 == ZSTR_VAL(headers_lc)) || (*(pos1-1) == '\n'))) {
 		/* Real offset is memaddress from the original headers + difference of
 		 * string found in the lowercase headers + 3 characters to jump over
 		 * the cc: */
-		pos1 = headers + (pos1 - headers_lc) + 3;
+		pos1 = ZSTR_VAL(headers) + (pos1 - ZSTR_VAL(headers_lc)) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 			tempMailTo = estrndup(pos1, strlen(pos1));
 		} else {
@@ -514,9 +491,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		{
 			SMTP_SKIP_SPACE(token);
 			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+			if (!Post(PW32G(mail_buffer))) {
 				efree(tempMailTo);
-				return (res);
+				return (FAILED_TO_SEND);
 			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
@@ -528,36 +505,23 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 		efree(tempMailTo);
 	}
 
+	if (!Post("DATA\r\n")) {
+		return (FAILED_TO_SEND);
+	}
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
+		return (res);
+	}
+
 	/* Send mail to all Bcc rcpt's
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
-	if (mailBcc && *mailBcc) {
-		tempMailTo = estrdup(mailBcc);
-		/* Send mail to all rcpt's */
-		token = find_address(tempMailTo, &token_state);
-		while (token != NULL)
-		{
-			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
-				efree(tempMailTo);
-				return (res);
-			}
-			if ((res = Ack(&server_response)) != SUCCESS) {
-				SMTP_ERROR_RESPONSE(server_response);
-				efree(tempMailTo);
-				return (res);
-			}
-			token = find_address(NULL, &token_state);
-		}
-		efree(tempMailTo);
-	}
-	else if (headers) {
-		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
+	if (headers) {
+		if ((pos1 = strstr(ZSTR_VAL(headers_lc), "bcc:")) && (pos1 == ZSTR_VAL(headers_lc) || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headers + 4 characters to jump over
 			 * the bcc: */
-			pos1 = headers + (pos1 - headers_lc) + 4;
+			pos1 = ZSTR_VAL(headers) + (pos1 - ZSTR_VAL(headers_lc)) + 4;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 				tempMailTo = estrndup(pos1, strlen(pos1));
 				/* Later, when we remove the Bcc: out of the
@@ -587,9 +551,9 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			{
 				SMTP_SKIP_SPACE(token);
 				FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
-				if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+				if (!Post(PW32G(mail_buffer))) {
 					efree(tempMailTo);
-					return (res);
+					return (FAILED_TO_SEND);
 				}
 				if ((res = Ack(&server_response)) != SUCCESS) {
 					SMTP_ERROR_RESPONSE(server_response);
@@ -602,54 +566,41 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 			/* Now that we've identified that we've a Bcc list,
 			   remove it from the current header. */
-			stripped_header = ecalloc(1, strlen(headers));
 			/* headers = point to string start of header
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
 			   Because we've added +4 above for parsing the Emails
 			   we've to subtract them here. */
-			memcpy(stripped_header, headers, pos1 - headers - 4);
+			size_t header_length_prior_to_bcc = pos1 - ZSTR_VAL(headers) - 4;
 			if (pos1 != pos2) {
 				/* if pos1 != pos2 , pos2 points to the rest of the headers.
 				   Since pos1 != pos2 if "\r\n" was found, we know those characters
 				   are there and so we jump over them (else we would generate a new header
 				   which would look like "\r\n\r\n". */
-				memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
+				stripped_header = zend_string_concat2(ZSTR_VAL(headers), header_length_prior_to_bcc, pos2 + 2, strlen(pos2) - 2);
+			} else {
+				stripped_header = zend_string_truncate(headers, header_length_prior_to_bcc, false);
+				ZSTR_VAL(stripped_header)[ZSTR_LEN(stripped_header)] = '\0';
 			}
+		} else {
+			/* Simplify the code that we create a copy of stripped_header no matter if
+			   we actually strip something or not. So we've a single zend_string_release() later. */
+			stripped_header = zend_string_copy(headers);
 		}
-	}
-
-	/* Simplify the code that we create a copy of stripped_header no matter if
-	   we actually strip something or not. So we've a single efree() later. */
-	if (headers && !stripped_header) {
-		stripped_header = estrndup(headers, strlen(headers));
-	}
-
-	if ((res = Post("DATA\r\n")) != SUCCESS) {
-		if (stripped_header) {
-			efree(stripped_header);
-		}
-		return (res);
-	}
-	if ((res = Ack(&server_response)) != SUCCESS) {
-		SMTP_ERROR_RESPONSE(server_response);
-		if (stripped_header) {
-			efree(stripped_header);
-		}
-		return (res);
 	}
 
 	/* send message header */
+	bool PostHeaderIsSuccessful = false;
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
+		PostHeaderIsSuccessful = PostHeader(RPath, "No Subject", mailTo, stripped_header);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header);
+		PostHeaderIsSuccessful = PostHeader(RPath, Subject, mailTo, stripped_header);
 	}
 	if (stripped_header) {
-		efree(stripped_header);
+		zend_string_release_ex(stripped_header, false);
 	}
-	if (res != SUCCESS) {
-		return (res);
+	if (!PostHeaderIsSuccessful) {
+		return FAILED_TO_SEND;
 	}
 
 	/* Escape \n. sequences
@@ -670,39 +621,30 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			e2 = p + 1024;
 			c = *e2;
 			*e2 = '\0';
-			if ((res = Post(p)) != SUCCESS) {
+			if (!Post(p)) {
 				zend_string_free(data_cln);
-				return(res);
+				return(FAILED_TO_SEND);
 			}
 			*e2 = c;
 			p = e2;
 		}
-		if ((res = Post(p)) != SUCCESS) {
+		if (!Post(p)) {
 			zend_string_free(data_cln);
-			return(res);
+			return(FAILED_TO_SEND);
 		}
 	}
 
 	zend_string_free(data_cln);
 
 	/*send termination dot */
-	if ((res = Post("\r\n.\r\n")) != SUCCESS)
-		return (res);
+	if (!Post("\r\n.\r\n"))
+		return (FAILED_TO_SEND);
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
 	}
 
 	return (SUCCESS);
-}
-
-static int addToHeader(char **header_buffer, const char *specifier, const char *string)
-{
-	size_t header_buffer_size = strlen(*header_buffer);
-	size_t total_size = header_buffer_size + strlen(specifier) + strlen(string) + 1;
-	*header_buffer = erealloc(*header_buffer, total_size);
-	snprintf(*header_buffer + header_buffer_size, total_size - header_buffer_size, specifier, string);
-	return 1;
 }
 
 //*********************************************************************
@@ -716,78 +658,58 @@ static int addToHeader(char **header_buffer, const char *specifier, const char *
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
+static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
 
-	int res;
-	char *header_buffer;
-	char *headers_lc = NULL;
-	size_t i;
+	zend_string *headers_lc = NULL;
+	smart_str combined_headers = {0};
 
 	if (xheaders) {
-		size_t headers_lc_len;
-
-		headers_lc = estrdup(xheaders);
-		headers_lc_len = strlen(headers_lc);
-
-		for (i = 0; i < headers_lc_len; i++) {
-			headers_lc[i] = tolower(headers_lc[i]);
-		}
+		headers_lc = zend_string_tolower(xheaders);
 	}
 
-	header_buffer = ecalloc(1, MAIL_BUFFER_SIZE);
-
-	if (!xheaders || !strstr(headers_lc, "date:")) {
+	if (!xheaders || !strstr(ZSTR_VAL(headers_lc), "date:")) {
 		time_t tNow = time(NULL);
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
-		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", ZSTR_VAL(dt));
+		smart_str_appends(&combined_headers, "Date: ");
+		smart_str_append(&combined_headers, dt);
+		smart_str_appends(&combined_headers, "\r\n");
 		zend_string_free(dt);
 	}
 
-	if (!headers_lc || !strstr(headers_lc, "from:")) {
-		if (!addToHeader(&header_buffer, "From: %s\r\n", RPath)) {
-			goto PostHeader_outofmem;
-		}
+	if (!headers_lc || !strstr(ZSTR_VAL(headers_lc), "from:")) {
+		smart_str_appends(&combined_headers, "From: ");
+		smart_str_appends(&combined_headers, RPath);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
-	if (!addToHeader(&header_buffer, "Subject: %s\r\n", Subject)) {
-		goto PostHeader_outofmem;
-	}
+	smart_str_appends(&combined_headers, "Subject: ");
+	smart_str_appends(&combined_headers, Subject);
+	smart_str_appends(&combined_headers, "\r\n");
 
 	/* Only add the To: field from the $to parameter if isn't in the custom headers */
-	if ((headers_lc && (!strstr(headers_lc, "\r\nto:") && (strncmp(headers_lc, "to:", 3) != 0))) || !headers_lc) {
-		if (!addToHeader(&header_buffer, "To: %s\r\n", mailTo)) {
-			goto PostHeader_outofmem;
-		}
+	if (!headers_lc || (!strstr(ZSTR_VAL(headers_lc), "\r\nto:") && (strncmp(ZSTR_VAL(headers_lc), "to:", 3) != 0))) {
+		smart_str_appends(&combined_headers, "To: ");
+		smart_str_appends(&combined_headers, mailTo);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
 	if (xheaders) {
-		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
-			goto PostHeader_outofmem;
-		}
+		smart_str_append(&combined_headers, xheaders);
+		smart_str_appends(&combined_headers, "\r\n");
 	}
+	/* End of headers */
+	smart_str_appends(&combined_headers, "\r\n");
+	zend_string *combined_headers_str = smart_str_extract(&combined_headers);
 
 	if (headers_lc) {
-		efree(headers_lc);
-	}
-	if ((res = Post(header_buffer)) != SUCCESS) {
-		efree(header_buffer);
-		return (res);
-	}
-	efree(header_buffer);
-
-	if ((res = Post("\r\n")) != SUCCESS) {
-		return (res);
+		zend_string_release_ex(headers_lc, false);
 	}
 
-	return (SUCCESS);
-
-PostHeader_outofmem:
-	if (headers_lc) {
-		efree(headers_lc);
-	}
-	return OUT_OF_MEMORY;
+	bool header_post_status = Post(ZSTR_VAL(combined_headers_str));
+	zend_string_efree(combined_headers_str);
+	return header_post_status;
 }
 
 
@@ -896,7 +818,7 @@ return 0;
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int Post(LPCSTR msg)
+static bool Post(LPCSTR msg)
 {
 	int len = (int)strlen(msg);
 	int slen;
@@ -905,16 +827,16 @@ static int Post(LPCSTR msg)
 #if SENDMAIL_DEBUG
 	if (msg)
 		printf("POST: '%s'\n", msg);
-	return (SUCCESS);
+	return true;
 #endif
 
 	while (len > 0) {
 		if ((slen = send(PW32G(mail_socket), msg + index, len, 0)) < 1)
-			return (FAILED_TO_SEND);
+			return false;
 		len -= slen;
 		index += slen;
 	}
-	return (SUCCESS);
+	return true;
 }
 
 
