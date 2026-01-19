@@ -17,12 +17,12 @@ $driver = new mysqli_driver();
 $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 $driver->report_mode = MYSQLI_REPORT_OFF;
-$value = $mysqli->options(-1, 'invalid_option');
+$value = $mysqli->options(10, 'invalid_option');
 
 var_dump($value);
 
 $driver->report_mode = MYSQLI_REPORT_ALL;
-$value = $mysqli->options(-1, 'invalid_option');
+$value = $mysqli->options(10, 'invalid_option');
 var_dump($value);
 
 ?>
