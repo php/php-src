@@ -1229,7 +1229,7 @@ PHP_FUNCTION(mysqli_options)
 			break;
 		default:
 			ret = 1;
-			if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+			if (MyG(report_mode) & MYSQLI_REPORT_ERROR){
 				zend_value_error("mysqli_options(): Invalid option %d", (int)mysql_option);
 			}			
 			break;
