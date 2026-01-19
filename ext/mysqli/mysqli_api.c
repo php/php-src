@@ -1209,7 +1209,7 @@ PHP_FUNCTION(mysqli_options)
 				convert_to_long(mysql_value);
 				break;
 			default:
-				if (MyG(report_mode) & MYSQLI_REPORT_ERROR){
+				if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
 					zend_value_error("mysqli_options(): Invalid option %d", (int)mysql_option);
 				}
 				break;
