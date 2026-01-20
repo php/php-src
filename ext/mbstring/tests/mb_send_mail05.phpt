@@ -7,7 +7,7 @@ mbstring
 if (!function_exists("mb_send_mail") || !mb_language("Simplified Chinese")) {
     die("skip mb_send_mail() not available");
 }
-if (!@mb_internal_encoding('GB2312')) {
+if (!@ini_set('internal_encoding','GB2312')) {
     die("skip GB2312 encoding is not available on this platform");
 }
 ?>
@@ -24,8 +24,8 @@ readfile(__DIR__ . "/mb_send_mail05.eml");
 
 /* Simplified Chinese (HK-GB-2312) */
 if (mb_language("simplified chinese")) {
-    mb_internal_encoding('GB2312');
-    mb_send_mail($to, "²âÑé ".mb_language(), "²âÑé");
+    ini_set('internal_encoding','GB2312');
+    mb_send_mail($to, "ï¿½ï¿½ï¿½ï¿½ ".mb_language(), "ï¿½ï¿½ï¿½ï¿½");
     readfile(__DIR__ . "/mb_send_mail05.eml");
 }
 ?>

@@ -21,7 +21,7 @@ readfile(__DIR__ . "/mb_send_mail01.eml");
 
 /* neutral (UTF-8) */
 if (mb_language("neutral")) {
-    mb_internal_encoding("UTF-8");
+    ini_set('internal_encoding', 'UTF-8');
     mb_send_mail($to, "test ".mb_language(), "test");
     readfile(__DIR__ . "/mb_send_mail01.eml");
 }

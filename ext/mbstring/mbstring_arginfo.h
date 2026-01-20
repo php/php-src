@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 03c07f68bea7d7b96e6dc11f180f45663b859ed3 */
+ * Stub hash: 65f39a3821d61adec378cf6ae28dfe8cd9e8ec2d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -364,9 +364,9 @@ ZEND_FUNCTION(mb_regex_set_options);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_language, arginfo_mb_language)
-	ZEND_FE(mb_internal_encoding, arginfo_mb_internal_encoding)
+	ZEND_RAW_FENTRY("mb_internal_encoding", zif_mb_internal_encoding, arginfo_mb_internal_encoding, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mb_http_input, arginfo_mb_http_input)
-	ZEND_FE(mb_http_output, arginfo_mb_http_output)
+	ZEND_RAW_FENTRY("mb_http_output", zif_mb_http_output, arginfo_mb_http_output, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mb_detect_order, arginfo_mb_detect_order)
 	ZEND_FE(mb_substitute_character, arginfo_mb_substitute_character)
 	ZEND_FE(mb_preferred_mime_name, arginfo_mb_preferred_mime_name)
@@ -446,4 +446,19 @@ static void register_mbstring_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MB_CASE_LOWER_SIMPLE", PHP_UNICODE_CASE_LOWER_SIMPLE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_TITLE_SIMPLE", PHP_UNICODE_CASE_TITLE_SIMPLE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_FOLD_SIMPLE", PHP_UNICODE_CASE_FOLD_SIMPLE, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_mb_internal_encoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_internal_encoding", sizeof("mb_internal_encoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mb_internal_encoding_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_mb_internal_encoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mb_internal_encoding_0_arg1_str = zend_string_init("use internal_encoding INI settings instead", strlen("use internal_encoding INI settings instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mb_internal_encoding_0->args[1].value, attribute_Deprecated_func_mb_internal_encoding_0_arg1_str);
+	attribute_Deprecated_func_mb_internal_encoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_mb_http_output_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_http_output", sizeof("mb_http_output") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mb_http_output_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_mb_http_output_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mb_http_output_0_arg1_str = zend_string_init("use output_encoding INI settings instead", strlen("use output_encoding INI settings instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mb_http_output_0->args[1].value, attribute_Deprecated_func_mb_http_output_0_arg1_str);
+	attribute_Deprecated_func_mb_http_output_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
