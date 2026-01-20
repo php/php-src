@@ -1469,7 +1469,10 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	mysql_stmt_data_seek(stmt->stmt, offset);
+	if (mysql_stmt_data_seek(stmt->stmt, offset)) {
+		zend_throw_error(NULL, "The result set buffer is empty");
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
