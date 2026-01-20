@@ -19,6 +19,13 @@ ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", ""
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
 AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1, "Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt library.");
 
+/* Check whether ENGINE_cleanup() exists in the OpenSSL */
+if (CHECK_HEADER_ADD_INCLUDE("openssl/engine.h", "CFLAGS")) {
+    if (CHECK_FUNC_IN_HEADER("openssl/engine.h", "ENGINE_cleanup", null, "CFLAGS")) {
+        AC_DEFINE("HAVE_ENGINE_CLEANUP", 1, "Define to 1 if ENGINE_cleanup is available.");
+    }
+}
+
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 
 ADD_FLAG("LIBS_STANDARD", "iphlpapi.lib");

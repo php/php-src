@@ -51,8 +51,10 @@ void php_openssl_backend_shutdown(void)
 	/* prevent accessing locking callback from unloaded extension */
 	CRYPTO_set_locking_callback(NULL);
 
+#ifdef HAVE_ENGINE_CLEANUP
 	/* Free engine list initialized by OPENSSL_config */
 	ENGINE_cleanup();
+#endif
 
 	/* free allocated error strings */
 	ERR_free_strings();

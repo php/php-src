@@ -181,12 +181,13 @@ const PKCS7_CRLFEOL = UNKNOWN;
  * @cvalue PKCS7_NOCRL
  */
 const PKCS7_NOCRL = UNKNOWN;
+#ifndef OPENSSL_NO_RMD160
 /**
  * @var int
  * @cvalue PKCS7_NO_DUAL_CONTENT
  */
 const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
-
+#endif
 /**
  * @var int
  * @cvalue CMS_DETACHED

@@ -383,6 +383,21 @@ AS_VAR_IF([php_cv_func_getifaddrs], [yes],
   [AC_DEFINE([HAVE_GETIFADDRS], [1],
     [Define to 1 if you have the 'getifaddrs' function.])])
 
+dnl Check whether ENGINE_cleanup() exists in the OpenSSL/LibreSSL we build against
+AC_CHECK_HEADERS([openssl/engine.h])
+
+AC_CHECK_FUNCS([ENGINE_cleanup], [], [
+  AC_MSG_CHECKING([for ENGINE_cleanup in libcrypto])
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[#include <openssl/engine.h>]],
+      [[ENGINE_cleanup();]]
+    )],
+    [AC_MSG_RESULT([yes]); AC_DEFINE([HAVE_ENGINE_CLEANUP], [1], [Define if ENGINE_cleanup is available])],
+    [AC_MSG_RESULT([no])]
+  )
+])
+
 dnl
 dnl Setup extension sources
 dnl
