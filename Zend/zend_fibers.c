@@ -834,7 +834,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 		HashTable *symTable;
 		if (ZEND_CALL_INFO(ex) & ZEND_CALL_GENERATOR) {
 			/* The generator object is stored in ex->return_value */
-			zend_generator *generator = (zend_generator*)ex->return_value;
+			zend_generator *generator = zend_generator_from_obj((zend_object *)ex->return_value);
 			/* There are two cases to consider:
 			 * - If the generator is currently running, the Generator's GC
 			 *   handler will ignore it because it is not collectable. However,

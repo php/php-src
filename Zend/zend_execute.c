@@ -4614,7 +4614,7 @@ zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32
 static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DATA_D) /* {{{ */
 {
 	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_generator_from_obj((zend_object *)EX(return_value));
 	/* However control may currently be delegated to another generator.
 	 * That's the one we're interested in. */
 	return generator;

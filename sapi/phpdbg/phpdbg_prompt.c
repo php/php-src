@@ -1010,7 +1010,7 @@ PHPDBG_COMMAND(generator) /* {{{ */
 		i = param->num;
 		zend_object **obj = EG(objects_store).object_buckets + i;
 		if (i < EG(objects_store).top && *obj && IS_OBJ_VALID(*obj) && (*obj)->ce == zend_ce_generator) {
-			zend_generator *gen = (zend_generator *) *obj;
+			zend_generator *gen = zend_generator_from_obj(*obj);
 			if (gen->execute_data) {
 				if (zend_generator_get_current(gen)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
 					phpdbg_error("Generator currently running");
@@ -1027,7 +1027,7 @@ PHPDBG_COMMAND(generator) /* {{{ */
 		for (i = 0; i < EG(objects_store).top; i++) {
 			zend_object *obj = EG(objects_store).object_buckets[i];
 			if (obj && IS_OBJ_VALID(obj) && obj->ce == zend_ce_generator) {
-				zend_generator *gen = (zend_generator *) obj, *current = zend_generator_get_current(gen);
+				zend_generator *gen = zend_generator_from_obj(obj), *current = zend_generator_get_current(gen);
 				if (gen->execute_data) {
 					zend_string *s = phpdbg_compile_stackframe(gen->execute_data);
 					phpdbg_out("#%d: %.*s", i, (int) ZSTR_LEN(s), ZSTR_VAL(s));
