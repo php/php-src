@@ -1,9 +1,13 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b49f527064695c812cd204d9efc63c13681d942 */
+ * Stub hash: 8bf058e5242b205a1934e0167b4c37b6e1623f09 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, withProperties, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, entries, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_exit, 0, 0, IS_NEVER, 0)
@@ -249,6 +253,7 @@ static const zend_frameless_function_info frameless_function_infos_class_exists[
 };
 
 ZEND_FUNCTION(clone);
+ZEND_FUNCTION(array);
 ZEND_FUNCTION(exit);
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -313,6 +318,7 @@ ZEND_FUNCTION(gc_status);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(clone, arginfo_clone)
+	ZEND_FE(array, arginfo_array)
 	ZEND_FE(exit, arginfo_exit)
 	ZEND_RAW_FENTRY("die", zif_exit, arginfo_die, 0, NULL, NULL)
 	ZEND_FE(zend_version, arginfo_zend_version)

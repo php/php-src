@@ -3633,6 +3633,7 @@ static void zend_disable_function(const char *function_name, size_t function_nam
 		(function_name_length == strlen("exit") && !memcmp(function_name, "exit", strlen("exit")))
 		|| (function_name_length == strlen("die") && !memcmp(function_name, "die", strlen("die")))
 		|| (function_name_length == strlen("clone") && !memcmp(function_name, "clone", strlen("clone")))
+		|| (function_name_length == strlen("array") && !memcmp(function_name, "array", strlen("array")))
 	)) {
 		zend_error(E_WARNING, "Cannot disable function %s()", function_name);
 		return;

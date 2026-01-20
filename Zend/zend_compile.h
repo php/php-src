@@ -1068,6 +1068,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_ARRAY_SYNTAX_LIST 1  /* list() */
 #define ZEND_ARRAY_SYNTAX_LONG 2  /* array() */
 #define ZEND_ARRAY_SYNTAX_SHORT 3 /* [] */
+#define ZEND_ARRAY_SYNTAX_FUNCTION 4 /* array(key: "val") */
 
 /* var status for backpatching */
 #define BP_VAR_R			0

@@ -287,7 +287,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
+%type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list non_empty_array_function_argument_list array_function_argument
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -1494,9 +1494,28 @@ ctor_arguments:
 
 dereferenceable_scalar:
 		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LONG; }
+	|	T_ARRAY '(' non_empty_array_function_argument_list possible_comma ')'
+			{ $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_FUNCTION; }
+	|	T_ARRAY '(' T_ELLIPSIS ')' {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_ARRAY));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_fcc());
+	}
 	|	'[' array_pair_list ']'			{ $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$ = $1; }
 	|	'"' encaps_list '"'			 	{ $$ = $2; }
+;
+
+non_empty_array_function_argument_list:
+		array_function_argument
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARRAY, $1); }
+	|	non_empty_array_function_argument_list ',' array_function_argument
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+array_function_argument:
+		identifier ':' expr
+			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 ;
 
 scalar:

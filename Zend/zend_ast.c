@@ -2277,9 +2277,20 @@ simple_list:
 			zend_ast_export_list(str, zend_ast_get_list(ast), true, 20, indent);
 			break;
 		case ZEND_AST_ARRAY:
-			smart_str_appendc(str, '[');
-			zend_ast_export_list(str, zend_ast_get_list(ast), true, 20, indent);
-			smart_str_appendc(str, ']');
+			switch (ast->attr) {
+				case ZEND_ARRAY_SYNTAX_LONG:
+				case ZEND_ARRAY_SYNTAX_FUNCTION:
+					smart_str_appends(str, "array(");
+					zend_ast_export_list(str, zend_ast_get_list(ast), true, 20, indent);
+					smart_str_appendc(str, ')');
+					break;
+				case ZEND_ARRAY_SYNTAX_SHORT:
+				default:
+					smart_str_appendc(str, '[');
+					zend_ast_export_list(str, zend_ast_get_list(ast), true, 20, indent);
+					smart_str_appendc(str, ']');
+					break;
+			}
 			break;
 		case ZEND_AST_ENCAPS_LIST:
 			smart_str_appendc(str, '"');
