@@ -24,7 +24,6 @@ require_once 'skipifconnectfailure.inc';
     var_dump(mysqli_set_opt($link, MYSQLI_OPT_CONNECT_TIMEOUT, 10));
     var_dump(mysqli_set_opt($link, MYSQLI_OPT_LOCAL_INFILE, 1));
     var_dump(mysqli_set_opt($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=0'));
-    var_dump(mysqli_set_opt($link, MYSQLI_CLIENT_SSL, 'not an mysqli_option'));
 
     mysqli_close($link);
 
@@ -48,6 +47,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
 mysqli object is already closed
 done!

@@ -1198,6 +1198,10 @@ PHP_FUNCTION(mysqli_options)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
+	if (expected_type == IS_NULL) {
+		zend_value_error("Argument #1 ($option) is not a valid mysqli option");
+		RETURN_THROWS();
+	}
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
@@ -1209,10 +1213,6 @@ PHP_FUNCTION(mysqli_options)
 				convert_to_long(mysql_value);
 				break;
 			default:
-				if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
-					zend_value_error("mysqli_options(): Invalid option %d", (int)mysql_option);
-				}
-				ret = 1;
 				break;
 		}
 	}

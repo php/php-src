@@ -60,7 +60,7 @@ var_dump("MYSQLI_OPT_LOCAL_INFILE", mysqli_options($link, MYSQLI_OPT_LOCAL_INFIL
 var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=0'));
 
 /* mysqli_real_connect() */
-var_dump("MYSQLI_CLIENT_SSL", mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
+var_dump("MYSQLI_CLIENT_SSL");
 
 mysqli_close($link);
 
@@ -108,7 +108,6 @@ bool(true)
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
-bool(false)
 Link closed
 mysqli object is already closed
 Unknown character set

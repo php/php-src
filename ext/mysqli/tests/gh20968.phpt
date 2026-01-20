@@ -12,24 +12,15 @@ require_once 'skipifconnectfailure.inc';
 <?php
 require_once 'connect.inc';
 
-$driver = new mysqli_driver();
-
 $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
-$driver->report_mode = MYSQLI_REPORT_OFF;
 $value = $mysqli->options(10, 'invalid_option');
 
-var_dump($value);
-
-$driver->report_mode = MYSQLI_REPORT_ALL;
-$value = $mysqli->options(10, 'invalid_option');
 var_dump($value);
 
 ?>
 --EXPECTF--
-bool(false)
-
-Fatal error: Uncaught ValueError: mysqli_options(): Invalid option %d in %s:%d
+Fatal error: Uncaught ValueError: Argument #1 ($option) is not a valid mysqli option in %s:%d
 Stack trace:
 #0 %s(%d): mysqli->options(%d, 'invalid_option')
 #1 {main}
