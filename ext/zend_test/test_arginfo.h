@@ -1,5 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 96a1797dd5d481752d5502e0e50fc9cf31636e13 */
+ * Stub hash: 8e7a71a91bffaf61361d183be14f42205b7359da */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_use_internal_traits_not_trait arginfo_zend_test_use_internal_traits_zero
+
+#define arginfo_zend_test_use_internal_traits_abstract_trait arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -10,8 +17,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nullable_array_return, 0, 0, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_void_return, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_zend_test_void_return arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_compile_string, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, source_string, IS_STRING, 0)
@@ -23,16 +29,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated, 0, 0, IS_V
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_deprecated_attr arginfo_zend_test_void_return
+#define arginfo_zend_test_deprecated_attr arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
 
-#define arginfo_zend_test_aliased arginfo_zend_test_void_return
+#define arginfo_zend_test_aliased arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_zend_test_deprecated_aliased arginfo_zend_test_void_return
+#define arginfo_zend_test_deprecated_aliased arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_create_unterminated_string, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -99,7 +105,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_parameter_with_attribu
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_attribute_with_named_argument arginfo_zend_test_void_return
+#define arginfo_zend_test_attribute_with_named_argument arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -188,7 +194,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_compile_to_ast arginfo_zend_create_unterminated_string
 
-#define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
+#define arginfo_zend_test_gh18756 arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
 
@@ -197,25 +203,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_A
 	ZEND_ARG_TYPE_INFO(0, parser, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
+#define arginfo_zend_test_gh19792 arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
-#define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_namespaced_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_aliased_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_test_is_pcre_bundled
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_class__ZendTestTraitForInternalClass_traitMethod arginfo_zend_test_nodiscard
+
+#define arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_class__ZendTestClass_is_object arginfo_zend_test_nodiscard
 
@@ -265,9 +273,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
 
-#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_void_return
+#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
+#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_use_internal_traits_zero
 
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, IS_LONG, 0)
@@ -282,10 +290,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, 0, 0, ZendTestNS\\\116otUnlikelyCompileError, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
+#define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
+#define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_use_internal_traits_zero
 
+static ZEND_FUNCTION(zend_test_use_internal_traits_zero);
+static ZEND_FUNCTION(zend_test_use_internal_traits_not_trait);
+static ZEND_FUNCTION(zend_test_use_internal_traits_abstract_trait);
 static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -351,7 +362,7 @@ static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
 static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod);
-static ZEND_METHOD(_ZendTestClass, is_object);
+static static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestClass, returnsThrowable);
@@ -377,6 +388,9 @@ static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
 static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_test_use_internal_traits_zero, arginfo_zend_test_use_internal_traits_zero)
+	ZEND_FE(zend_test_use_internal_traits_not_trait, arginfo_zend_test_use_internal_traits_not_trait)
+	ZEND_FE(zend_test_use_internal_traits_abstract_trait, arginfo_zend_test_use_internal_traits_abstract_trait)
 	ZEND_FE(zend_trigger_bailout, arginfo_zend_trigger_bailout)
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 #if (PHP_VERSION_ID >= 80400)
@@ -532,6 +546,15 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class__ZendTestTraitForInternalClass_methods[] = {
 	ZEND_ME(_ZendTestTraitForInternalClass, traitMethod, arginfo_class__ZendTestTraitForInternalClass_traitMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class__ZendTestAbstractTraitForInternalTraits_methods[] = {
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("abstractMethod", NULL, arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("abstractMethod", NULL, arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#endif
 	ZEND_FE_END
 };
 
@@ -743,6 +766,49 @@ static zend_class_entry *register_class__ZendTestClassWithTrait(zend_class_entry
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 #endif
 	zend_class_use_internal_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestAbstractTraitForInternalTraits(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestAbstractTraitForInternalTraits", class__ZendTestAbstractTraitForInternalTraits_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestNotATraitForInternalTraits(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestNotATraitForInternalTraits", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestInternalTraitsDriver(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestInternalTraitsDriver", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
 
 	return class_entry;
 }

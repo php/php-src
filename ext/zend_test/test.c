@@ -59,6 +59,9 @@ static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_trait_for_internal_class;
 static zend_class_entry *zend_test_class_with_trait;
+static zend_class_entry *zend_test_abstract_trait_for_internal_traits;
+static zend_class_entry *zend_test_not_a_trait_for_internal_traits;
+static zend_class_entry *zend_test_internal_traits_driver;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
@@ -1243,6 +1246,27 @@ static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod)
 	RETURN_LONG(789);
 }
 
+static ZEND_FUNCTION(zend_test_use_internal_traits_zero)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_class_use_internal_traits(zend_test_internal_traits_driver, 0);
+}
+
+static ZEND_FUNCTION(zend_test_use_internal_traits_not_trait)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_class_use_internal_traits(zend_test_internal_traits_driver, 1, zend_test_not_a_trait_for_internal_traits);
+}
+
+static ZEND_FUNCTION(zend_test_use_internal_traits_abstract_trait)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_class_use_internal_traits(zend_test_internal_traits_driver, 1, zend_test_abstract_trait_for_internal_traits);
+}
+
 static ZEND_METHOD(ZendTestNS_Foo, method)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1544,9 +1568,11 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
-
 	zend_test_trait_for_internal_class = register_class__ZendTestTraitForInternalClass();
 	zend_test_class_with_trait = register_class__ZendTestClassWithTrait(zend_test_trait_for_internal_class);
+	zend_test_abstract_trait_for_internal_traits = register_class__ZendTestAbstractTraitForInternalTraits();
+	zend_test_not_a_trait_for_internal_traits = register_class__ZendTestNotATraitForInternalTraits();
+	zend_test_internal_traits_driver = register_class__ZendTestInternalTraitsDriver();
 
 	register_test_symbols(module_number);
 

@@ -3021,6 +3021,7 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 	bool contains_abstract_methods = false;
 
 	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
+	ZEND_ASSERT(num_traits != 0);
 
 	if (num_traits == 0) {
 		return;
@@ -3038,9 +3039,8 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 
 		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
 			efree(traits);
-			zend_error_noreturn(E_ERROR, "Class %s cannot use %s - it is not a trait",
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot use %s - it is not a trait",
 				ZSTR_VAL(class_entry->name), ZSTR_VAL(trait_entry->name));
-			return;
 		}
 		traits[i] = trait_entry;
 	}
@@ -3056,14 +3056,15 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 		zend_fixup_trait_method(fn, class_entry);
 	} ZEND_HASH_FOREACH_END();
 
-	if (contains_abstract_methods) {
-		zend_do_traits_method_binding(class_entry, traits, NULL, NULL, true, &contains_abstract_methods);
-		ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
-			zend_fixup_trait_method(fn, class_entry);
-		} ZEND_HASH_FOREACH_END();
-	}
-
 	efree(traits);
+
+	/* TODO: Add second binding pass for abstract trait methods if needed in the future. */
+	ZEND_ASSERT(!contains_abstract_methods);
+	if (contains_abstract_methods) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Internal trait binding does not support abstract trait methods in %s",
+			ZSTR_VAL(class_entry->name));
+	}
 }
 /* }}} */
 
