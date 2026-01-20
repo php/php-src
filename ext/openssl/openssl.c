@@ -2280,21 +2280,13 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	X509_INFO *xi;
 	char cert_path[MAXPATHLEN];
 
-	if(!(stack = sk_X509_new_null())) {
-		php_openssl_store_errors();
-		php_error_docref(NULL, E_ERROR, "Memory allocation failure");
-		goto end;
-	}
-
 	if (!php_openssl_check_path(cert_file, cert_file_len, cert_path, arg_num)) {
-		sk_X509_free(stack);
 		goto end;
 	}
 
 	if (!(in = BIO_new_file(cert_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY)))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening the file, %s", cert_path);
-		sk_X509_free(stack);
 		goto end;
 	}
 
@@ -2302,7 +2294,11 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	if (!(sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error reading the file, %s", cert_path);
-		sk_X509_free(stack);
+		goto end;
+	}
+
+	if(!(stack = sk_X509_new_reserve(NULL, sk_X509_INFO_num(sk)))) {
+		php_openssl_store_errors();
 		goto end;
 	}
 
