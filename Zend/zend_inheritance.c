@@ -3059,7 +3059,6 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 	efree(traits);
 
 	/* TODO: Add second binding pass for abstract trait methods if needed in the future. */
-	ZEND_ASSERT(!contains_abstract_methods);
 	if (contains_abstract_methods) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Internal trait binding does not support abstract trait methods in %s",
