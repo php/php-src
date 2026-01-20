@@ -1199,7 +1199,7 @@ PHP_FUNCTION(mysqli_options)
 
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
 	if (expected_type == IS_NULL) {
-		zend_value_error("Argument #1 ($option) is not a valid mysqli option");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of predefined options");
 		RETURN_THROWS();
 	}
 	
