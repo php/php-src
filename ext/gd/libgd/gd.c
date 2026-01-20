@@ -1406,7 +1406,11 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 
 		d = 2 * dy - dx;
 		incr1 = 2 * dy;
-		incr2 = 2 * (dy - dx);
+		long long tmp = 2LL * (dy - dx);
+		if (tmp < INT_MIN || tmp > INT_MAX)
+			incr2 = 0;
+		else
+			incr2 = (int)tmp;
 		if (x1 > x2) {
 			x = x2;
 			y = y2;
@@ -1455,7 +1459,11 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 
 		d = 2 * dx - dy;
 		incr1 = 2 * dx;
-		incr2 = 2 * (dx - dy);
+		long long tmp = 2LL * (dx - dy);
+		if (tmp < INT_MIN || tmp > INT_MAX)
+			incr2 = 0;
+		else
+			incr2 = (int)tmp;
 		if (y1 > y2) {
 			y = y2;
 			x = x2;
