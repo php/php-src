@@ -117,13 +117,8 @@ class PharCommand extends CLICommand
             'p' => array(
                 'typ' => 'loader',
                 'val' => NULL,
-                'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).'
-                         .'You can use \'0\' or \'1\' to locate it automatically using the mentioned '
-                         .'pear command. When using \'0\' the command does not error out when the '
-                         .'class file cannot be located. This switch also adds some code around the '
-                         .'stub so that class PHP_Archive gets registered as phar:// stream wrapper '
-                         .'if necessary. And finally this switch will add the file phar.inc from '
-                         .'this package and load it to ensure class Phar is present.'
+                'inf' => '<loader> Used to be used for PHP_Archive class file which is no longer '
+                         .'supported.'
                          ,
             ),
             's' => array(
@@ -213,53 +208,11 @@ class PharCommand extends CLICommand
     static function cli_arg_typ_loader($arg, $cfg, $key)
     {
         if (($arg == '0' || $arg == '1') && !file_exists($arg) && substr(PHP_OS, 0, 3) != 'WIN') {
-            $found = NULL;
-            $apiver = false;
-            $path = explode(PATH_SEPARATOR, $_ENV['PATH']);
-            $pear = false;
-            foreach ($path as $component) {
-                if (file_exists($component . DIRECTORY_SEPARATOR . 'pear')
-                    && is_executable($component . DIRECTORY_SEPARATOR . 'pear')) {
-                    $pear = true;
-                    break;
-                }
-            }
-            if ($pear) {
-                $apiver = (string) shell_exec("pear -q info PHP_Archive 2>/dev/null|grep 'API Version'");
-                $apiver = trim(substr($apiver, strlen('API Version')));
-            }
-            if ($apiver) {
-                self::notice("PEAR package PHP_Archive: API Version: $apiver.\n");
-                $files  = explode("\n", (string) shell_exec("pear list-files PHP_Archive"));
-                $phpdir = (string) shell_exec("pear config-get php_dir 2>/dev/null");
-                $phpdir = trim($phpdir);
-                self::notice("PEAR package PHP_Archive: $phpdir.\n");
-                if (is_dir($phpdir)) {
-                    foreach($files as $ent) {
-                        $matches = NULL;
-                        if (preg_match(",^php[ \t]+([^ \t].*[\\\\/]PHP[\\\\/]Archive\.php)$,", $ent, $matches)) {
-                            $sub = $matches[1];
-                            if (strpos($sub, $phpdir) !== 0) {
-                                $found = NULL;
-                                break;
-                            }
-                            $found = $sub;
-                            break;
-                        }
-                    }
-                } else {
-                    self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $phpdir.\n");
-                }
-            }
-            if (isset($found)) {
-                self::notice("PEAR package PHP_Archive: $found.\n");
+            $msg = "PEAR package PHP_Archive is no longer supported: generated phar requires PHP's phar extension enabled\n";
+            if ($arg == '0') {
+                self::notice($msg);
             } else {
-                $msg = "PEAR package PHP_Archive not installed: generated phar will require PHP's phar extension be enabled.\n";
-                if ($arg == '0') {
-                    self::notice($msg);
-                } else {
-                    self::error($msg);
-                }
+                self::error($msg);
             }
             return null;
         }
@@ -454,9 +407,7 @@ class PharCommand extends CLICommand
     {
         return "Pack files into a PHAR archive.\n" .
                "When using -s <stub>, then the stub file is being " .
-               "excluded from the list of input files/dirs." .
-               "To create an archive that contains PEAR class PHP_Archive " .
-               "then point -p argument to PHP/Archive.php.\n";
+               "excluded from the list of input files/dirs.\n";
     }
     // }}}
     // {{{ static function cli_cmd_arg_pack
@@ -483,7 +434,7 @@ class PharCommand extends CLICommand
     /**
      * Set the stub
      */
-    public function phar_set_stub_begin(Phar $phar, $stub, $loader = NULL, $hashbang = NULL)
+    public function phar_set_stub_begin(Phar $phar, $stub, $hashbang = NULL)
     {
         if (isset($stub)) {
             $c = file_get_contents($stub);
@@ -512,46 +463,12 @@ class PharCommand extends CLICommand
             } else {
                 $hashbang = "";
             }
-
-            if (isset($loader)) {
-                $s = "<?php if (!class_exists('PHP_Archive')) {\n?>";
-                if (is_file($loader)) {
-                    $s .= file_get_contents($loader);
-                }
-                $s .= "<?php\n";
-                $s .= "}\n";
-                $s .= "if (!in_array('phar', stream_get_wrappers())) {\n";
-                $s .= "\tstream_wrapper_register('phar', 'PHP_Archive');\n";
-                $s .= "}\n";
-                $s .= "if (!class_exists('Phar',0)) {\n";
-                $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
-                $s .= "}\n";
-                $s .= '?>';
-                $s .= $c;
-
-                $phar->setStub($hashbang . $s);
-            } else {
                 $phar->setStub($hashbang . $c);
-            }
             return new SplFileInfo($stub);
         }
         return NULL;
     }
     // }}}
-    // {{{ function phar_set_stub_end
-    /**
-     * Set stub end
-     */
-    public function phar_set_stub_end(Phar $phar, $stub, $loader = NULL)
-    {
-        if (isset($stub) && isset($loader)) {
-            if (substr(__FILE__, -15) == 'pharcommand.inc') {
-                self::phar_add_file($phar, 0, 'phar.inc', 'phar://'.__FILE__.'/phar.inc', NULL);
-            } else {
-                self::phar_add_file($phar, 0, 'phar.inc', dirname(__FILE__).'/phar/phar.inc', NULL);
-            }
-        }
-    }
     // }}}
     // {{{ function cli_cmd_run_pack
     /**
@@ -578,7 +495,6 @@ class PharCommand extends CLICommand
         $privkey  = $this->args['y']['val'] ?? null;
         $regex    = $this->args['i']['val'];
         $level    = $this->args['l']['val'];
-        $loader   = $this->args['p']['val'];
         $stub     = $this->args['s']['val'];
         $invregex = $this->args['x']['val'];
         $input    = $this->args['']['val'];
@@ -598,8 +514,6 @@ class PharCommand extends CLICommand
                 $this->phar_add($phar, $level, $i, $regex, $invregex, $stub, NULL, isset($loader));
             }
         }
-
-        $this->phar_set_stub_end($phar, $stub, $loader);
 
         switch($this->args['c']['val']) {
             case 'gz':
@@ -685,9 +599,9 @@ class PharCommand extends CLICommand
             $entry = substr($entry, $p+1);
         }
 
-    if ($noloader && $entry == 'phar.inc') {
-        return;
-    }
+        if ($noloader && $entry == 'phar.inc') {
+            return;
+        }
 
         echo "$entry\n";
 
@@ -1063,10 +977,8 @@ class PharCommand extends CLICommand
         $hashbang = $this->args['b']['val'];
         $phar     = $this->args['f']['val'];
         $stub     = $this->args['s']['val'];
-        $loader   = $this->args['p']['val'];
 
-        $this->phar_set_stub_begin($phar, $stub, $loader, $hashbang);
-        $this->phar_set_stub_end($phar, $stub, $loader);
+        $this->phar_set_stub_begin($phar, $stub, $hashbang);
     }
     // }}}
     // {{{ public function cli_cmd_inf_stub_get
