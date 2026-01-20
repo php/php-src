@@ -24,6 +24,13 @@ require_once 'skipifconnectfailure.inc';
     var_dump(mysqli_set_opt($link, MYSQLI_OPT_CONNECT_TIMEOUT, 10));
     var_dump(mysqli_set_opt($link, MYSQLI_OPT_LOCAL_INFILE, 1));
     var_dump(mysqli_set_opt($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=0'));
+    
+
+    try {
+        var_dump(mysqli_set_opt($link, MYSQLI_CLIENT_SSL, 'not an mysqli_option'));
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     mysqli_close($link);
 
@@ -47,5 +54,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+Argument #1 ($option) is not a valid mysqli option
 mysqli object is already closed
 done!

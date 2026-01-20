@@ -62,6 +62,12 @@ var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET 
 /* mysqli_real_connect() */
 var_dump("MYSQLI_CLIENT_SSL");
 
+try {
+    var_dump(mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 mysqli_close($link);
 
 echo "Link closed\n";
@@ -108,6 +114,7 @@ bool(true)
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
+Argument #1 ($option) is not a valid mysqli option
 Link closed
 mysqli object is already closed
 Unknown character set
