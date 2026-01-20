@@ -22,7 +22,7 @@ array(8) {
   ["default_default_cert_area"]=>
   string(%d) "%s"
   ["ini_cafile"]=>
-  string(%d) ""
+  string(%d) "%S"
   ["ini_capath"]=>
-  string(%d) ""
+  string(%d) "%S"
 }
