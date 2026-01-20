@@ -531,6 +531,16 @@ ZEND_API const char *zend_get_type_by_const(int type);
 
 #define array_init(arg)				ZVAL_ARR((arg), zend_new_array(0))
 #define array_init_size(arg, size)	ZVAL_ARR((arg), zend_new_array(size))
+#define array_init_packed(arg)					\
+	do {							\
+		array_init(arg);				\
+		zend_hash_real_init_packed(Z_ARRVAL_P(arg));	\
+	} while (0)
+#define array_init_packed_size(arg, size)			\
+	do {							\
+		array_init_size(arg, size);			\
+		zend_hash_real_init_packed(Z_ARRVAL_P(arg));	\
+	} while (0)
 ZEND_API void object_init(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params);
