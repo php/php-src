@@ -4,7 +4,6 @@ PFA magic null ptr deref in arginfo
 <?php
 class Foo {
     function __call($name, $args) {
-        var_dump($args);
     }
 }
 $foo = new Foo;
