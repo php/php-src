@@ -3601,7 +3601,7 @@ class ClassInfo {
         );
 
         if (!empty($traits)) {
-            $code .= "\tzend_class_use_traits(class_entry, " . count($traits) . ", " . implode(", ", $traits) . ");\n";
+            $code .= "\tzend_class_use_internal_traits(class_entry, " . count($traits) . ", " . implode(", ", $traits) . ");\n";
         }
 
         if ($this->alias) {

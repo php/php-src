@@ -2247,66 +2247,6 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases, bool verify_abstract, bool *contains_abstract_methods);
-static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_entry **traits);
-static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_entry **traits);
-static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce);
-
-ZEND_API void zend_class_use_traits(zend_class_entry *class_entry, int num_traits, ...) /* {{{ */
-{
-	zend_class_entry *trait_entry;
-	va_list trait_list;
-	zend_class_entry **traits;
-	zend_function *fn;
-	bool contains_abstract_methods = false;
-
-	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
-
-	if (num_traits == 0) {
-		return;
-	}
-
-	traits = safe_emalloc(num_traits, sizeof(zend_class_entry *), 0);
-	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, 1);
-	class_entry->num_traits = num_traits;
-
-	va_start(trait_list, num_traits);
-	for (int i = 0; i < num_traits; i++) {
-		trait_entry = va_arg(trait_list, zend_class_entry *);
-		class_entry->trait_names[i].name = zend_string_copy(trait_entry->name);
-		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), 1);
-
-		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
-			efree(traits);
-			zend_error_noreturn(E_ERROR, "Class %s cannot use %s - it is not a trait",
-				ZSTR_VAL(class_entry->name), ZSTR_VAL(trait_entry->name));
-			return;
-		}
-		traits[i] = trait_entry;
-	}
-	va_end(trait_list);
-
-	zend_do_traits_method_binding(class_entry, traits, NULL, NULL, false, &contains_abstract_methods);
-
-	zend_do_traits_constant_binding(class_entry, traits);
-
-	zend_do_traits_property_binding(class_entry, traits);
-
-	ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
-		zend_fixup_trait_method(fn, class_entry);
-	} ZEND_HASH_FOREACH_END();
-
-	if (contains_abstract_methods) {
-		zend_do_traits_method_binding(class_entry, traits, NULL, NULL, true, &contains_abstract_methods);
-		ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
-			zend_fixup_trait_method(fn, class_entry);
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	efree(traits);
-}
-/* }}} */
-
 static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry **interfaces) /* {{{ */
 {
 	uint32_t num_parent_interfaces = ce->parent ? ce->parent->num_interfaces : 0;
@@ -3069,6 +3009,61 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+}
+/* }}} */
+
+ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int num_traits, ...) /* {{{ */
+{
+	zend_class_entry *trait_entry;
+	va_list trait_list;
+	zend_class_entry **traits;
+	zend_function *fn;
+	bool contains_abstract_methods = false;
+
+	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
+
+	if (num_traits == 0) {
+		return;
+	}
+
+	traits = safe_emalloc(num_traits, sizeof(zend_class_entry *), 0);
+	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, 1);
+	class_entry->num_traits = num_traits;
+
+	va_start(trait_list, num_traits);
+	for (int i = 0; i < num_traits; i++) {
+		trait_entry = va_arg(trait_list, zend_class_entry *);
+		class_entry->trait_names[i].name = zend_string_copy(trait_entry->name);
+		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), 1);
+
+		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
+			efree(traits);
+			zend_error_noreturn(E_ERROR, "Class %s cannot use %s - it is not a trait",
+				ZSTR_VAL(class_entry->name), ZSTR_VAL(trait_entry->name));
+			return;
+		}
+		traits[i] = trait_entry;
+	}
+	va_end(trait_list);
+
+	zend_do_traits_method_binding(class_entry, traits, NULL, NULL, false, &contains_abstract_methods);
+
+	zend_do_traits_constant_binding(class_entry, traits);
+
+	zend_do_traits_property_binding(class_entry, traits);
+
+	ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
+		zend_fixup_trait_method(fn, class_entry);
+	} ZEND_HASH_FOREACH_END();
+
+	if (contains_abstract_methods) {
+		zend_do_traits_method_binding(class_entry, traits, NULL, NULL, true, &contains_abstract_methods);
+		ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
+			zend_fixup_trait_method(fn, class_entry);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	efree(traits);
 }
 /* }}} */
 

@@ -742,7 +742,7 @@ static zend_class_entry *register_class__ZendTestClassWithTrait(zend_class_entry
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 #endif
-	zend_class_use_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
+	zend_class_use_internal_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
 
 	return class_entry;
 }

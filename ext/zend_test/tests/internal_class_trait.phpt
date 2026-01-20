@@ -1,5 +1,5 @@
 --TEST--
-Test internal class using trait via zend_class_use_traits
+Test internal class using trait via zend_class_use_internal_traits
 --EXTENSIONS--
 zend_test
 --FILE--
