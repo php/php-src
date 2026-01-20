@@ -692,8 +692,21 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		CloseHandle(shm_handle);
 		return -1;
 	}
-	shm->segment = shm_handle;
-	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	if (NULL == shm->segment || INVALID_HANDLE_VALUE == shm->segment) {
+		shm->segment = shm_handle;
+		shm->created = created;
+	}
+	else if (TRUE == created) {
+		CloseHandle(shm->segment);
+		shm->segment = shm_handle;
+		shm->created = TRUE;
+	}
+	else {
+		CloseHandle(shm_handle);
+	}
+	if(NULL == shm->descriptor){
+		shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	}
 
 	if (NULL != shm->descriptor && created) {
 		shm->descriptor->shm_perm.key	= key;
@@ -734,6 +747,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
+	shm->shm_nattch++;
 
 	return shm->addr;
 }/*}}}*/
@@ -750,12 +764,22 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_dtime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
+	shm->shm_nattch--;
 
 	ret = 0;
-	if (shm->descriptor->shm_nattch <= 0) {
-		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
-		shm->descriptor = NULL;
+	if (shm->shm_nattch <= 0) {
+		shm->shm_nattch = 0;
+		if (NULL != shm->segment && INVALID_HANDLE_VALUE != shm->segment && FALSE == shm->created) {
+			if(NULL != shm->descriptor){
+				ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+			}
+			shm->descriptor = NULL;
+			CloseHandle(shm->segment);
+			shm->segment = INVALID_HANDLE_VALUE;
+			shm->addr = NULL;
+		}	
 	}
+
 	return ret;
 }/*}}}*/
 

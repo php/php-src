@@ -51,6 +51,8 @@ typedef struct {
 typedef struct {
 	void	*addr;
 	HANDLE	segment;
+	BOOL created;
+	int shm_nattch;
 	struct	shmid_ds	*descriptor;
 } shm_pair;
 
