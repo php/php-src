@@ -2267,10 +2267,15 @@ ZEND_API void zend_class_use_traits(zend_class_entry *class_entry, int num_trait
 	}
 
 	traits = safe_emalloc(num_traits, sizeof(zend_class_entry *), 0);
+	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, 1);
+	class_entry->num_traits = num_traits;
 
 	va_start(trait_list, num_traits);
 	for (int i = 0; i < num_traits; i++) {
 		trait_entry = va_arg(trait_list, zend_class_entry *);
+		class_entry->trait_names[i].name = zend_string_copy(trait_entry->name);
+		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), 1);
+
 		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
 			efree(traits);
 			zend_error_noreturn(E_ERROR, "Class %s cannot use %s - it is not a trait",
@@ -2457,7 +2462,11 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		}
 	}
 
-	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		ZEND_ASSERT(fn->type == ZEND_INTERNAL_FUNCTION);
+		new_fn = (zend_function*)(uintptr_t)malloc(sizeof(zend_internal_function));
+		memcpy(new_fn, fn, sizeof(zend_internal_function));
+	} else if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
 		memcpy(new_fn, fn, sizeof(zend_internal_function));
 		new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
@@ -2878,7 +2887,11 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 			if (do_trait_constant_check(ce, constant, constant_name, traits, i)) {
 				zend_class_constant *ct = NULL;
 
-				ct = zend_arena_alloc(&CG(arena),sizeof(zend_class_constant));
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					ct = malloc(sizeof(zend_class_constant));
+				} else {
+					ct = zend_arena_alloc(&CG(arena),sizeof(zend_class_constant));
+				}
 				memcpy(ct, constant, sizeof(zend_class_constant));
 				constant = ct;
 

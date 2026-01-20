@@ -486,7 +486,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_string_release_ex(ce->name, 1);
 
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				if (fn->common.scope == ce) {
+				if (fn->common.scope == ce && !(fn->common.fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 					zend_free_internal_arg_info(&fn->internal_function, true);
 
 					if (fn->common.attributes) {
@@ -535,6 +535,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
+			}
+			if (ce->num_traits > 0) {
+				for (uint32_t i = 0; i < ce->num_traits; i++) {
+					zend_string_release(ce->trait_names[i].name);
+					zend_string_release(ce->trait_names[i].lc_name);
+				}
+				free(ce->trait_names);
 			}
 			free(ce);
 			break;

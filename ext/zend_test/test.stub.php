@@ -41,10 +41,7 @@ namespace {
 
         public int $traitProp = 456;
 
-        public function traitMethod(): int
-        {
-            return 789;
-        }
+        public function traitMethod(): int {}
     }
 
     class _ZendTestClassWithTrait
