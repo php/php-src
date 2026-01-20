@@ -169,6 +169,9 @@ jobs:
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
+      - name: Verify directories are not too big
+        if: ${{ !matrix.asan }}
+        uses: ./.github/actions/verify-directory-sizes
   LINUX_X32:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: LINUX_X32_DEBUG_ZTS
