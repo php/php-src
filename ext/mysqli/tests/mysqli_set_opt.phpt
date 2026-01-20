@@ -28,7 +28,7 @@ require_once 'skipifconnectfailure.inc';
 
     try {
         var_dump(mysqli_set_opt($link, MYSQLI_CLIENT_SSL, 'not an mysqli_option'));
-    } catch (Error $exception) {
+    } catch (ValueError $exception) {
         echo $exception->getMessage() . "\n";
     }
 
