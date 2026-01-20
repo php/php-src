@@ -238,7 +238,6 @@ typedef struct st_mysqlnd_vio_options
 	/* timeouts */
 	unsigned int timeout_connect;
 	unsigned int timeout_read;
-	unsigned int timeout_write;
 
 	size_t		net_read_buffer_size;
 
