@@ -1178,7 +1178,21 @@ CACHE_LIMITER_FUNC(public) /* {{{ */
 	time_t now;
 
 	gettimeofday(&tv, NULL);
-	now = tv.tv_sec + PS(cache_expire) * 60;
+	zend_long cache_expire = PS(cache_expire);
+
+#if SIZEOF_TIME_T == 4 || SIZEOF_TIME_T == 8
+	const time_t max = (time_t)((zend_ulong)~0 >> 1);
+#else
+	const time_t max = (time_t)((~(time_t)0) >> 1);
+#endif
+
+	if (cache_expire < 0) {
+		now = tv.tv_sec;
+	} else if ((cache_expire / 60) > (max - (zend_long)max)) {
+		now = max;
+	} else {
+		now = tv.tv_sec + cache_expire * 60;
+	}
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
