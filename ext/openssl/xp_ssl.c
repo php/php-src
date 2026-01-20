@@ -206,32 +206,6 @@ typedef struct _php_openssl_netstream_data_t {
 	unsigned _spare:31;
 } php_openssl_netstream_data_t;
 
-/* it doesn't matter that we do some hash traversal here, since it is done only
- * in an error condition arising from a network connection problem */
-static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ */
-{
-	if (Z_TYPE(stream->wrapperdata) == IS_ARRAY &&
-		stream->wrapper &&
-		strcasecmp(stream->wrapper->wops->label, "HTTP") == 0
-	) {
-		/* the wrapperdata is an array zval containing the headers */
-		zval *tmp;
-
-#define SERVER_MICROSOFT_IIS	"Server: Microsoft-IIS"
-#define SERVER_GOOGLE "Server: GFE/"
-
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(stream->wrapperdata), tmp) {
-			if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_MICROSOFT_IIS)) {
-				return 1;
-			} else if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_GOOGLE)) {
-				return 1;
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	return 0;
-}
-/* }}} */
-
 static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool is_init) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -256,7 +230,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
 				if (nr_bytes == 0) {
-					if (!php_openssl_is_http_stream_talking_to_iis(stream) && ERR_get_error() != 0) {
+					if (ERR_get_error() != 0) {
 						php_error_docref(NULL, E_WARNING, "SSL: fatal protocol error");
 					}
 					SSL_set_shutdown(sslsock->ssl_handle, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
