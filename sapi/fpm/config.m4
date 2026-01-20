@@ -356,6 +356,8 @@ if test "$PHP_FPM" != "no"; then
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
   AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
   AC_CHECK_HEADER([port.h], [AC_CHECK_FUNCS([port_create])])
+  AC_CHECK_HEADER([sched.h], [AC_CHECK_FUNCS([sched_setaffinity])])
+  AC_CHECK_HEADER([sys/cpuset.h], [AC_CHECK_FUNCS([cpuset_setaffinity])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
