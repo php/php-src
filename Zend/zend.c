@@ -892,8 +892,17 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
 
-#if defined(__FreeBSD__) || defined(__DragonFly__)
-	/* FreeBSD and DragonFly floating point precision fix */
+#if (defined(__FreeBSD__) || defined(__DragonFly__)) && !defined(__SANITIZE_UNDEFINED_BEHAVIOR__)
+	/**
+	 * FreeBSD and DragonFly floating point precision fix
+	 * we disable this hack with ubsan enabled as __fpsetmask does the following
+	 * with the mask, leading to a bitshift operation with a negative left operand.
+	 *
+	 * static __inline fp_except_t __fpsetmask(fp_except_t _m) {
+	 * ...
+	 * _newcw |= (~_m << FP_MSKS_OFF) & FP_MSKS_FLD;
+	 *
+	 **/
 	fpsetmask(0);
 #endif
 
