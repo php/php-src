@@ -44,7 +44,46 @@
 # include <Ws2tcpip.h>
 # include <iphlpapi.h>
 #else
+# ifdef HAVE_SYS_IOCTL_H
+#  define BSD_COMP 1
+#  include <sys/ioctl.h>
+#  include <fcntl.h>
+# endif
 # include <netdb.h>
+#endif
+
+#ifndef PHP_WIN32
+static zend_result net_get_mtu(char *ifname, zend_long *mtu)
+{
+#ifdef SIOCGIFMTU
+	struct ifreq ifr = {0};
+	zend_result status = FAILURE;
+#ifndef __sun
+	int local = socket(AF_UNIX, SOCK_DGRAM, 0);
+#else
+	int local = open("/dev/ip", O_RDONLY);
+#endif
+	if (local == -1) {
+		return FAILURE;
+	}
+
+	strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	if (ioctl(local, SIOCGIFMTU, &ifr) < 0) {
+		goto end;
+	}
+
+// TODO: a tad harder but mac address could be obtained
+// in the same movement.
+
+	*mtu = (zend_long)ifr.ifr_mtu;
+	status = SUCCESS;
+end:
+	close(local);
+	return status;
+#else
+	return FAILURE;
+#endif
+}
 #endif
 
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
@@ -274,7 +313,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	array_init(return_value);
 	for (p = addrs; p; p = p->ifa_next) {
 		zval *iface = zend_hash_str_find(Z_ARR_P(return_value), p->ifa_name, strlen(p->ifa_name));
-		zval *unicast, *status;
+		zval *unicast, *status, *mtu;
 
 		if (!iface) {
 			zval newif;
@@ -297,6 +336,13 @@ PHP_FUNCTION(net_get_interfaces) {
 		status = zend_hash_str_find(Z_ARR_P(iface), "up", sizeof("up") - 1);
 		if (!status) {
 			add_assoc_bool(iface, "up", ((p->ifa_flags & IFF_UP) != 0));
+		}
+		mtu = zend_hash_str_find(Z_ARR_P(iface), "mtu", sizeof("mtu") - 1);
+		if (!mtu) {
+			zend_long val;
+			if (net_get_mtu(p->ifa_name, &val) == SUCCESS) {
+				add_assoc_long(iface, "mtu", val);
+			}
 		}
 	}
 
