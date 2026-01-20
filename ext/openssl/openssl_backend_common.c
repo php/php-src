@@ -1637,10 +1637,14 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 {
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
+
 	switch (cipher_mode) {
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
-		/* We check for EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
+		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_SIV_MODE, because LibreSSL does not support it. */
+#ifdef EVP_CIPH_SIV_MODE
+		case EVP_CIPH_SIV_MODE:
+#endif
 #ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
 			/* For OCB mode, explicitly set the tag length even when decrypting,
@@ -1650,6 +1654,7 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 			php_openssl_set_aead_flags(mode);
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
+			mode->aad_supports_vector = cipher_mode == EVP_CIPH_SIV_MODE;
 			break;
 #ifdef NID_chacha20_poly1305
 		default:
@@ -1791,13 +1796,21 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 {
 	int i = 0;
 
+	/* For AEAD modes that do not support vector AAD, treat NULL AAD as zero-length AAD */
+	if (!mode->aad_supports_vector && aad == NULL) {
+		aad_len = 0;
+		aad = "";
+	}
+
 	if (mode->is_single_run_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of data length failed");
 		return FAILURE;
 	}
 
-	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *) aad, (int) aad_len)) {
+	/* Only pass AAD to OpenSSL if caller provided it.
+	   This makes NULL mean zero AAD items, while "" with len 0 means one empty AAD item. */
+	if (mode->is_aead && aad != NULL && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *)aad, (int)aad_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
