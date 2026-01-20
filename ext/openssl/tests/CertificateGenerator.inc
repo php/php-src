@@ -102,7 +102,7 @@ class CertificateGenerator
 [ req ]
 distinguished_name = req_distinguished_name
 default_md = sha256
-default_bits = 1024
+default_bits = 2048
 
 [ req_distinguished_name ]
 
