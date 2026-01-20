@@ -298,11 +298,15 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 		}
 	}
 
+	ZT_G(observer_nesting_depth)++;
+
 	if (zend_test_prev_execute_internal) {
 		zend_test_prev_execute_internal(execute_data, return_value);
 	} else {
 		fbc->internal_function.handler(execute_data, return_value);
 	}
+
+	ZT_G(observer_nesting_depth)--;
 
 	if (fbc->common.function_name) {
 		if (EG(exception)) {

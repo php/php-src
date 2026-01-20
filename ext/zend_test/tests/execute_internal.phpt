@@ -14,6 +14,8 @@ function f($a) {
 
 f(time() > 0 ? [1, 2, 3] : []);
 
+array_map("count", [[], [1, 2]]);
+
 ?>
 --EXPECTF--
 <!-- internal enter time() -->
@@ -23,3 +25,13 @@ f(time() > 0 ? [1, 2, 3] : []);
 <!-- internal enter var_dump() -->
 int(6)
 <!-- internal leave var_dump():NULL -->
+<!-- internal enter array_map() -->
+  <!-- internal enter count() -->
+  <!-- internal leave count():0 -->
+  <!-- internal enter count() -->
+  <!-- internal leave count():2 -->
+<!-- internal leave array_map():
+  array (
+    0 => 0,
+    1 => 2,
+  ) -->
