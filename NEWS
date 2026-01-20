@@ -31,10 +31,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
     recursive array references). (alexandre-daubois)
 
-- Opcache:
-  . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple
-    property hook with minimal tracing JIT). (ndossche)
-
 - Phar:
   . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
     (ndossche)
