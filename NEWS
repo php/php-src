@@ -1073,6 +1073,10 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-17112 (Macro redefinitions). (nielsdos, cmb)
 
+- mysqli:
+  . Fixed failed assertion when accessing mysqli property after failed
+    reconnection. (Kamil Tekiela)
+
 - Opcache:
   . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
   . Fixed bug GH-17246 (GC during SCCP causes segfault). (Dmitry)
