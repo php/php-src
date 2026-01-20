@@ -2670,6 +2670,9 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 
 	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
 		ca = php_array_to_X509_sk(item, 5, "extracerts");
+		if (!ca) {
+			goto cleanup;
+		}
 	}
 	/* end parse extra config */
 
@@ -2763,6 +2766,9 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
 		ca = php_array_to_X509_sk(item, 5, "extracerts");
+		if (!ca) {
+			goto cleanup;
+		}
 	}
 	/* end parse extra config */
 
