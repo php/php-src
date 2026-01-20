@@ -288,14 +288,14 @@ static void (*zend_test_prev_execute_internal)(zend_execute_data *execute_data, 
 static void zend_test_execute_internal(zend_execute_data *execute_data, zval *return_value) {
 	zend_function *fbc = execute_data->func;
 
+	ZEND_ASSERT(!ZEND_USER_CODE(fbc->type));
+
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
 			php_printf("%*s<!-- internal enter %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else if (ZEND_USER_CODE(fbc->type)) {
-		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
 
 	if (zend_test_prev_execute_internal) {
