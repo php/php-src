@@ -11485,7 +11485,6 @@ static void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 		case ZEND_FETCH_CLASS_STATIC:
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"static::class cannot be used for compile-time class name resolution");
-			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
