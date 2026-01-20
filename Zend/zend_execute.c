@@ -1097,9 +1097,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 }
 
 static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
-	if (Z_TYPE_P(zv) != IS_OBJECT) {
-		return 0;
-	}
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
 
 	zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 	if (!called_scope) {
@@ -1153,9 +1151,24 @@ static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
 {
-	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		zend_class_entry *ce;
-		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
+	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
+
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		if (EXPECTED(ZEND_TYPE_HAS_NAME(*type))) {
+			zend_class_entry *ce = zend_fetch_ce_from_type(type);
+			/* If we have a CE we check if it satisfies the type constraint,
+			 * otherwise it will check if a standard type satisfies it. */
+			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+				return true;
+			}
+		}
+		if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
+			return true;
+		}
+		if ((type_mask & MAY_BE_CALLABLE) && EXPECTED(Z_OBJCE_P(arg) == zend_ce_closure)) {
+			return true;
+		}
+		if (EXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
 				return zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg));
 			} else {
@@ -1167,7 +1180,7 @@ static zend_always_inline bool zend_check_type_slow(
 						}
 					} else {
 						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-						ce = zend_fetch_ce_from_type(list_type);
+						zend_class_entry *ce = zend_fetch_ce_from_type(list_type);
 						/* Instance of a single type part of a union is sufficient to pass the type check */
 						if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
 							return true;
@@ -1175,22 +1188,11 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 				} ZEND_TYPE_LIST_FOREACH_END();
 			}
-		} else {
-			ce = zend_fetch_ce_from_type(type);
-			/* If we have a CE we check if it satisfies the type constraint,
-			 * otherwise it will check if a standard type satisfies it. */
-			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return true;
-			}
 		}
 	}
 
-	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
 		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
 		return 1;
 	}
 	if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
