@@ -65,6 +65,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- ext/random:
+  . The {un}serialize function pointer fields of the php_random_algo struct
+    now have const qualifiers.
+
 - ext/xml:
   . Removed the XML_ExpatVersion() libxml compatibility wrapper,
     as it was unused.

@@ -127,7 +127,7 @@ static inline void mt19937_reload(php_random_status_state_mt19937 *state)
 
 PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed)
 {
-	uint32_t i, prev_state;
+	uint32_t i;
 
 	/* Initialize generator state with seed
 	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
@@ -135,7 +135,7 @@ PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *st
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 	state->state[0] = seed;
 	for (i = 1; i < N; i++) {
-		prev_state = state->state[i - 1];
+		uint32_t prev_state = state->state[i - 1];
 		state->state[i] = (1812433253U * (prev_state  ^ (prev_state  >> 30)) + i) & 0xffffffffU;
 	}
 	state->count = i;
@@ -171,9 +171,9 @@ static zend_long range(void *state, zend_long min, zend_long max)
 	}, min, max);
 }
 
-static bool serialize(void *state, HashTable *data)
+static bool serialize(const void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = state;
+	const php_random_status_state_mt19937 *s = state;
 	zval t;
 
 	for (uint32_t i = 0; i < N; i++) {
@@ -188,7 +188,7 @@ static bool serialize(void *state, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *state, HashTable *data)
+static bool unserialize(void *state, const HashTable *data)
 {
 	php_random_status_state_mt19937 *s = state;
 	zval *t;
