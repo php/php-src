@@ -1202,6 +1202,7 @@ PHP_FUNCTION(mysqli_options)
 		zend_value_error("Argument #1 ($option) is not a valid mysqli option");
 		RETURN_THROWS();
 	}
+	
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
