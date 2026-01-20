@@ -657,6 +657,11 @@ again:
 			if (Z_OBJCE_P(val)->ce_flags & ZEND_ACC_ENUM) {
 				return php_json_encode_serializable_enum(buf, val, options, encoder);
 			}
+			if (Z_OBJCE_P(val)->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+				if (!(Z_OBJCE_P(val)->ce_flags & ZEND_ACC_ANON_CLASS) || (Z_OBJCE_P(val)->parent && Z_OBJCE_P(val)->parent->ce_flags & ZEND_ACC_NOT_SERIALIZABLE)) {
+					zend_error(E_DEPRECATED, "json_encode() of non-serializable class %s is deprecated", ZSTR_VAL(Z_OBJCE_P(val)->name));
+				}
+			}
 			/* fallthrough -- Non-serializable object */
 			ZEND_FALLTHROUGH;
 		case IS_ARRAY: {
