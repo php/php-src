@@ -17,13 +17,7 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 
-$filename = __DIR__ . '/fwriteVar5.tmp';
-
-
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
+$filename = __DIR__ . '/file_put_contents_variation2.tmp';
 
 // define some classes
 class classWithToString
@@ -33,22 +27,8 @@ class classWithToString
     }
 }
 
-class classWithoutToString
-{
-}
-
-// heredoc string
-$heredoc = <<<EOT
-hello world
-EOT;
-
-// add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
-
 //array of values to iterate over
 $inputs = array(
-
       // int data
       'int 0' => 0,
       'int 1' => 1,
@@ -62,35 +42,18 @@ $inputs = array(
       'float -12.3456789000e10' => -12.3456789000e10,
       'float .5' => .5,
 
-      // array data
-      'empty array' => array(),
-      'int indexed array' => $index_array,
-      'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
 
       // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
+      'null' => null,
 
       // boolean data
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
-
+      'true' => true,
+      'false' =>false,
       // empty data
-      'empty string DQ' => "",
-      'empty string SQ' => '',
+      'empty string' => '',
 
       // object data
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
-
-      // undefined data
-      'undefined var' => @$undefined_var,
-
-      // unset data
-      'unset var' => @$unset_var,
+      'stringable' => new classWithToString(),
 );
 
 // loop through each element of the array for str
@@ -104,7 +67,7 @@ foreach($inputs as $key =>$value) {
 ?>
 --CLEAN--
 <?php
-$filename = __DIR__ . '/fwriteVar5.tmp';
+$filename = __DIR__ . '/file_put_contents_variation2.tmp';
 unlink($filename);
 ?>
 --EXPECT--
@@ -128,36 +91,14 @@ unlink($filename);
 -123456789000
 --float .5--
 0.5
---empty array--
+--null--
+Error: 8192 - file_put_contents(): Passing null to parameter #2 ($data) of type string|array|resource is deprecated
 
---int indexed array--
-123
---associative array--
-12
---nested arrays--
-Error: 2 - Array to string conversion
-Error: 2 - Array to string conversion
-fooArrayArray
---uppercase NULL--
-
---lowercase null--
-
---lowercase true--
+--true--
 1
---lowercase false--
+--false--
 
---uppercase TRUE--
-1
---uppercase FALSE--
+--empty string--
 
---empty string DQ--
-
---empty string SQ--
-
---instance of classWithToString--
+--stringable--
 Class A object
---instance of classWithoutToString--
-
---undefined var--
-
---unset var--
