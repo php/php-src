@@ -251,7 +251,7 @@ ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /*
 }
 /* }}} */
 
-ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+ZEND_API bool zend_verify_const_access(const zend_class_constant *c, const zend_class_entry *scope) /* {{{ */
 {
 	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
@@ -312,9 +312,9 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	return NULL;
 }
 
-ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags)
+ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, const zend_class_entry *scope, uint32_t flags)
 {
-	zend_class_entry *ce = NULL;
+	const zend_class_entry *ce = NULL;
 	zend_class_constant *c = NULL;
 	zval *ret_constant = NULL;
 
@@ -413,7 +413,7 @@ failure:
 	return ret_constant;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, const zend_class_entry *scope, uint32_t flags)
 {
 	zend_constant *c;
 	const char *colon;
@@ -495,7 +495,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	return &c->value;
 }
 
-static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
+static void* zend_hash_add_constant(HashTable *ht, zend_string *key, const zend_constant *c)
 {
 	void *ret;
 	zend_constant *copy = pemalloc(sizeof(zend_constant), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
