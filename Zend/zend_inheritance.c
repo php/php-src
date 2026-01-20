@@ -2124,6 +2124,12 @@ static bool do_inherit_constant_check(
 		);
 	}
 
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE)) {
+		if (child_constant->ce == ce) {
+			ZEND_CLASS_CONST_FLAGS(child_constant) &= ~ZEND_ACC_OVERRIDE;
+		}
+	}
+
 	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
 		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
 		if (status == INHERITANCE_ERROR) {
@@ -2328,6 +2334,15 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 				E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
 				"%s::%s() has #[\\Override] attribute, but no matching parent method exists",
 				ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, zend_string *name, zend_class_constant *c) {
+		if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_OVERRIDE) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR,
+				"%s::%s has #[\\Override] attribute, but no matching parent constant exists",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	} ZEND_HASH_FOREACH_END();
 
