@@ -5832,7 +5832,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 					goto clean_exit;
 				}
 			}
-			sk_X509_push(recipcerts, cert);
+			if (sk_X509_push(recipcerts, cert) <= 0) {
+				X509_free(cert);
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -5853,7 +5856,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(recipcerts, cert);
+		if (sk_X509_push(recipcerts, cert) <= 0) {
+			X509_free(cert);
+			goto clean_exit;
+		}
 	}
 
 	/* sanity check the cipher */
