@@ -526,11 +526,11 @@ ZEND_API void zend_reset_lc_ctype_locale(void);
 #define ZVAL_OFFSETOF_TYPE	\
 	(offsetof(zval, u1.type_info) - offsetof(zval, value))
 
-#if defined(HAVE_ASM_GOTO) && !__has_feature(memory_sanitizer)
-# define ZEND_USE_ASM_ARITHMETIC 1
-#else
+//#if defined(HAVE_ASM_GOTO) && !__has_feature(memory_sanitizer)
+//# define ZEND_USE_ASM_ARITHMETIC 1
+//#else
 # define ZEND_USE_ASM_ARITHMETIC 0
-#endif
+//#endif
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {

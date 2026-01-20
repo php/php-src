@@ -179,7 +179,7 @@ static void zend_generator_remove_child(zend_generator_node *node, zend_generato
 		node->child.single = NULL;
 	} else {
 		HashTable *ht = node->child.ht;
-		zend_hash_index_del(ht, (zend_ulong) child);
+		zend_hash_index_del(ht, ZEND_PTR2ULONG(child));
 		if (node->children == 2) {
 			zend_generator *other_child;
 			ZEND_HASH_FOREACH_PTR(ht, other_child) {
@@ -554,11 +554,11 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 			HashTable *ht = emalloc(sizeof(HashTable));
 			zend_hash_init(ht, 0, NULL, NULL, 0);
 			zend_hash_index_add_new_ptr(ht,
-				(zend_ulong) node->child.single, node->child.single);
+				ZEND_PTR2ULONG(node->child.single), node->child.single);
 			node->child.ht = ht;
 		}
 
-		zend_hash_index_add_new_ptr(node->child.ht, (zend_ulong) child, child);
+		zend_hash_index_add_new_ptr(node->child.ht, ZEND_PTR2ULONG(child), child);
 	}
 
 	++node->children;

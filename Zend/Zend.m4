@@ -211,6 +211,7 @@ AX_CHECK_COMPILE_FLAG([-fno-common],
   [CFLAGS="-fno-common $CFLAGS"])
 
 ZEND_CHECK_ALIGNMENT
+ZEND_CHECK_INT64
 ZEND_CHECK_SIGNALS
 ZEND_CHECK_MAX_EXECUTION_TIMERS
 ])
@@ -412,6 +413,43 @@ AS_VAR_IF([php_cv_align_mm], [failed],
     [$zend_mm_8byte_realign],
     [Define to 1 if ZEND_MM needs 8-byte realignment, and to 0 if not.])
 ])
+])
+
+dnl
+dnl ZEND_CHECK_INT64
+dnl
+dnl Check whether to enable 64 bit integer if supported by the system.
+dnl
+AC_DEFUN([ZEND_CHECK_INT64], [dnl
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[]],
+      [[
+      #if !(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64))
+      #error "Not a 64-bit platform"
+      #endif
+      ]]
+    )],
+    [ZEND_INT64=yes],
+    [ZEND_INT64=no])
+
+  AC_ARG_ENABLE([zend-int64],
+    [AS_HELP_STRING([--enable-zend-int64], [Enable 64bit integer support (enabled by default on 64bit arch)])],
+    [ZEND_INT64=$enableval],
+    [ZEND_INT64=$ZEND_INT64])
+
+  AS_VAR_IF([ZEND_INT64], [yes],
+    AC_CHECK_TYPE([int64_t],,
+      [AC_MSG_ERROR([int64_t not found])],
+      [#include <stdint.h>]))
+
+  AS_VAR_IF([ZEND_INT64], [yes],
+    [AC_DEFINE([ZEND_INT64], [1],
+      [Define to 1 if zend_long as int64 is supported and enabled.])
+    AS_VAR_APPEND([CFLAGS], [" -DZEND_INT64"])])
+
+  AC_MSG_CHECKING([whether to enable 64 bit integer support])
+  AC_MSG_RESULT([$ZEND_INT64])
 ])
 
 dnl

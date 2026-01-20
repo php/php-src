@@ -406,7 +406,7 @@ static zend_always_inline zend_ulong zend_rotr3(zend_ulong key)
 int zend_shared_memdup_size(void *source, size_t size)
 {
 	void *old_p;
-	zend_ulong key = (zend_ulong)source;
+	zend_ulong key = (zend_ulong)(uintptr_t)source;
 
 	key = zend_rotr3(key);
 	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
@@ -423,7 +423,7 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, b
 	zend_ulong key;
 
 	if (get_xlat) {
-		key = (zend_ulong)source;
+		key = (zend_ulong)(uintptr_t)source;
 		key = zend_rotr3(key);
 		if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) != NULL) {
 			/* we already duplicated this pointer */
@@ -435,7 +435,7 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, b
 	memcpy(retval, source, size);
 	if (set_xlat) {
 		if (!get_xlat) {
-			key = (zend_ulong)source;
+			key = (zend_ulong)(uintptr_t)source;
 			key = zend_rotr3(key);
 		}
 		zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, retval);
@@ -578,7 +578,7 @@ void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint)
 
 void zend_shared_alloc_register_xlat_entry(const void *key_pointer, const void *value)
 {
-	zend_ulong key = (zend_ulong)key_pointer;
+	zend_ulong key = (zend_ulong)(uintptr_t)key_pointer;
 
 	key = zend_rotr3(key);
 	zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, (void*)value);
@@ -587,7 +587,7 @@ void zend_shared_alloc_register_xlat_entry(const void *key_pointer, const void *
 void *zend_shared_alloc_get_xlat_entry(const void *key_pointer)
 {
 	void *retval;
-	zend_ulong key = (zend_ulong)key_pointer;
+	zend_ulong key = (zend_ulong)(uintptr_t)key_pointer;
 
 	key = zend_rotr3(key);
 	if ((retval = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) == NULL) {
