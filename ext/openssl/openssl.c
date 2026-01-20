@@ -4878,7 +4878,21 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	 */
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 	zval ary;
-	switch (EVP_PKEY_base_id(pkey)) {
+	int base_id = 0;
+
+	if (EVP_PKEY_id(pkey) != EVP_PKEY_KEYMGMT) {
+		base_id = EVP_PKEY_base_id(pkey);
+	} else {
+		const char *type_name = EVP_PKEY_get0_type_name(pkey);
+		if (type_name) {
+			int nid = OBJ_txt2nid(type_name);
+			if (nid != NID_undef) {
+				base_id = EVP_PKEY_type(nid);
+			}
+		}
+	}
+
+	switch (base_id) {
 		case EVP_PKEY_RSA:
 			ktype = OPENSSL_KEYTYPE_RSA;
 			array_init(&ary);
@@ -4941,7 +4955,9 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			break;
 		}
 #endif
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default:
+			ktype = -1;
+			break;
 	}
 #else
 	switch (EVP_PKEY_base_id(pkey)) {
