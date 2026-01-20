@@ -4817,14 +4817,8 @@ ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) 
 
 ZEND_API bool zend_is_iterable(zval *iterable) /* {{{ */
 {
-	switch (Z_TYPE_P(iterable)) {
-		case IS_ARRAY:
-			return 1;
-		case IS_OBJECT:
-			return zend_class_implements_interface(Z_OBJCE_P(iterable), zend_ce_traversable);
-		default:
-			return 0;
-	}
+	return EXPECTED(Z_TYPE_P(iterable) == IS_ARRAY)
+		|| EXPECTED(Z_TYPE_P(iterable) == IS_OBJECT);
 }
 /* }}} */
 

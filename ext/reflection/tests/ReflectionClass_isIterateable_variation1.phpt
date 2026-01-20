@@ -21,5 +21,5 @@ dump_iterateable($stdClass);
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+bool(true)
+bool(true)

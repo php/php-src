@@ -14,14 +14,14 @@ class IteratorClass implements Iterator {
     function rewind(): void {}
 }
 class DerivedClass extends IteratorClass {}
-class NonIterator {}
+class RegularClass {}
 
 function dump_iterateable($class) {
     $reflection = new ReflectionClass($class);
     var_dump($reflection->isIterateable());
 }
 
-$classes = array("ArrayObject", "IteratorClass", "DerivedClass", "NonIterator");
+$classes = array("ArrayObject", "IteratorClass", "DerivedClass", "RegularClass");
 foreach ($classes as $class) {
     echo "Is $class iterateable? ";
     dump_iterateable($class);
@@ -31,4 +31,4 @@ foreach ($classes as $class) {
 Is ArrayObject iterateable? bool(true)
 Is IteratorClass iterateable? bool(true)
 Is DerivedClass iterateable? bool(true)
-Is NonIterator iterateable? bool(false)
+Is RegularClass iterateable? bool(true)
