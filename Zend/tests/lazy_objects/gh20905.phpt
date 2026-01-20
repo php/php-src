@@ -1,5 +1,7 @@
 --TEST--
 GH-20905: Lazy proxy bailing __clone assertion
+--CREDITS--
+Viet Hoang Luu (@vi3tL0u1s)
 --FILE--
 <?php
 
