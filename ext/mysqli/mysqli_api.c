@@ -300,6 +300,11 @@ PHP_FUNCTION(mysqli_commit)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
+	if (!MYSQLI_IS_IN_TRANSACTION(mysql)) {
+		php_mysqli_report_error(NULL, 0, "There is no active transaction");
+		RETURN_FALSE;
+	}
+
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
@@ -1376,6 +1381,10 @@ PHP_FUNCTION(mysqli_rollback)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
+	if (!MYSQLI_IS_IN_TRANSACTION(mysql)) {
+		php_mysqli_report_error(NULL, 0, "There is no active transaction");
+		RETURN_FALSE;
+	}
 
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
