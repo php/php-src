@@ -572,7 +572,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	zend_fiber *fiber = EG(active_fiber);
 
 	/* Determine the current error_reporting ini setting. */
-	zend_long error_reporting = INI_INT("error_reporting");
+	int error_reporting = INI_INT("error_reporting");
 	/* If error_reporting is 0 and not explicitly set to 0, INI_STR returns a null pointer. */
 	if (!error_reporting && !INI_STR("error_reporting")) {
 		error_reporting = E_ALL;
