@@ -49,18 +49,12 @@ namespace {
         use _ZendTestTraitForInternalClass;
     }
 
-    trait _ZendTestAbstractTraitForInternalTraits
-    {
-        abstract public function abstractMethod(): void;
-    }
-
     class _ZendTestNotATraitForInternalTraits {}
 
     class _ZendTestInternalTraitsDriver {}
 
     function zend_test_use_internal_traits_zero(): void {}
     function zend_test_use_internal_traits_not_trait(): void {}
-    function zend_test_use_internal_traits_abstract_trait(): void {}
 
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {

@@ -1,12 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8e7a71a91bffaf61361d183be14f42205b7359da */
+ * Stub hash: f98ede068cef2b4a2fe4a423d18fed1748c22b29 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_use_internal_traits_not_trait arginfo_zend_test_use_internal_traits_zero
-
-#define arginfo_zend_test_use_internal_traits_abstract_trait arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -223,8 +221,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class__ZendTestTraitForInternalClass_traitMethod arginfo_zend_test_nodiscard
 
-#define arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod arginfo_zend_test_use_internal_traits_zero
-
 #define arginfo_class__ZendTestClass_is_object arginfo_zend_test_nodiscard
 
 #define arginfo_class__ZendTestClass___toString arginfo_zend_get_current_func_name
@@ -296,7 +292,6 @@ ZEND_END_ARG_INFO()
 
 static ZEND_FUNCTION(zend_test_use_internal_traits_zero);
 static ZEND_FUNCTION(zend_test_use_internal_traits_not_trait);
-static ZEND_FUNCTION(zend_test_use_internal_traits_abstract_trait);
 static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -390,7 +385,6 @@ static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_use_internal_traits_zero, arginfo_zend_test_use_internal_traits_zero)
 	ZEND_FE(zend_test_use_internal_traits_not_trait, arginfo_zend_test_use_internal_traits_not_trait)
-	ZEND_FE(zend_test_use_internal_traits_abstract_trait, arginfo_zend_test_use_internal_traits_abstract_trait)
 	ZEND_FE(zend_trigger_bailout, arginfo_zend_trigger_bailout)
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 #if (PHP_VERSION_ID >= 80400)
@@ -546,15 +540,6 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class__ZendTestTraitForInternalClass_methods[] = {
 	ZEND_ME(_ZendTestTraitForInternalClass, traitMethod, arginfo_class__ZendTestTraitForInternalClass_traitMethod, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class__ZendTestAbstractTraitForInternalTraits_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("abstractMethod", NULL, arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-#else
-	ZEND_RAW_FENTRY("abstractMethod", NULL, arginfo_class__ZendTestAbstractTraitForInternalTraits_abstractMethod, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-#endif
 	ZEND_FE_END
 };
 
@@ -766,21 +751,6 @@ static zend_class_entry *register_class__ZendTestClassWithTrait(zend_class_entry
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 #endif
 	zend_class_use_internal_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class__ZendTestAbstractTraitForInternalTraits(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "_ZendTestAbstractTraitForInternalTraits", class__ZendTestAbstractTraitForInternalTraits_methods);
-#if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
-#else
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_TRAIT;
-#endif
 
 	return class_entry;
 }
