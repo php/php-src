@@ -104,8 +104,8 @@ listen = 127.0.0.1:9000
 ;                                    state (waiting to process). If the number
 ;                                    of 'idle' processes is greater than this
 ;                                    number then some children will be killed.
-;             pm.max_spawn_rate    - the maximum number of rate to spawn child
-;                                    processes at once.
+;             pm.max_spawn_rate    - the maximum number of child processes to
+;                                    spawn at once.
 ;  ondemand - no children are created at startup. Children will be forked when
 ;             new requests will connect. The following parameter are used:
 ;             pm.max_children           - the maximum number of children that
@@ -141,7 +141,7 @@ pm.min_spare_servers = 1
 ; Note: Mandatory when pm is set to 'dynamic'
 pm.max_spare_servers = 3
 
-; The number of rate to spawn child processes at once.
+; The maximum number of child processes to spawn at once.
 ; Note: Used only when pm is set to 'dynamic'
 ; Note: Mandatory when pm is set to 'dynamic'
 ; Default Value: 32
