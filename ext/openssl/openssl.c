@@ -4599,3 +4599,54 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 }
 /* }}} */
+
+/* Given an Object ID, or object short or long name, return an associative
+   array containing any known OID, short name, and long name, or false if the
+   object is not known.
+*/
+PHP_FUNCTION(openssl_oid_lookup)
+{
+	zend_string * txt;
+	ASN1_OBJECT *obj;
+	char buf[256];
+	int nid;
+	bool found = false;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &txt) == FAILURE) {
+		return;
+	}
+
+	obj = OBJ_txt2obj(ZSTR_VAL(txt), 0);
+	if (obj == NULL) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	if (OBJ_obj2txt(buf, sizeof(buf)-1, obj, 1) > 0 && *buf != '\0') {
+		add_assoc_string(return_value, "oid", buf);
+		found = true;
+	}
+
+	if ((nid = OBJ_obj2nid(obj)) != NID_undef) {
+		const char *l;
+		const char *s;
+
+		l = OBJ_nid2ln(nid);
+		if (l != NULL) {
+			add_assoc_string(return_value, "lname", (char *) l);
+			found = true;
+		}
+
+		s = OBJ_nid2sn(nid);
+		if (s != NULL) {
+			add_assoc_string(return_value, "sname", (char *) s);
+			found = true;
+		}
+	}
+	ASN1_OBJECT_free(obj);
+
+	if (!found) {
+		RETURN_FALSE;
+	}
+}
