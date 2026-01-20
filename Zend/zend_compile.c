@@ -2646,7 +2646,6 @@ static void zend_emit_return_type_check(
 			ZEND_ASSERT(!implicit);
 			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning %s must not return",
 				CG(active_class_entry) != NULL ? "method" : "function");
-			return;
 		}
 
 		if (!expr && !implicit) {
@@ -7480,14 +7479,12 @@ static zend_type zend_compile_typename_ex(
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
-				zend_string_release_ex(standard_type_str, false);
 			}
 			/* An intersection of standard types cannot exist so invalidate it */
 			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
-				zend_string_release_ex(standard_type_str, false);
 			}
 			/* Check for "self" and "parent" too */
 			if (
@@ -7720,7 +7717,6 @@ static void zend_compile_attributes(
 				if (error != NULL) {
 					if (delayed_target_validation == NULL) {
 						zend_error_noreturn(E_COMPILE_ERROR, "%s", ZSTR_VAL(error));
-						zend_string_efree(error);
 					} else {
 						attr->validation_error = error;
 					}

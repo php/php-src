@@ -2274,7 +2274,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 						zend_get_object_type_uc(ce),
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(iface->name));
-					return;
 				}
 				/* skip duplications */
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
@@ -2525,7 +2524,6 @@ static uint32_t zend_check_trait_usage(const zend_class_entry *ce, const zend_cl
 {
 	if (UNEXPECTED((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", ZSTR_VAL(trait->name));
-		return 0;
 	}
 
 	for (uint32_t i = 0; i < ce->num_traits; i++) {
@@ -2534,7 +2532,6 @@ static uint32_t zend_check_trait_usage(const zend_class_entry *ce, const zend_cl
 		}
 	}
 	zend_error_noreturn(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", ZSTR_VAL(trait->name), ZSTR_VAL(ce->name));
-	return 0;
 }
 /* }}} */
 
