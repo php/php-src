@@ -16,4 +16,4 @@ wordwrap($str, 1, $str2);
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 134217728 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted by %d bytes%S. Allocated %d bytes and need to allocate %d bytes in %s on line %d

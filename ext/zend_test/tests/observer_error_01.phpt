@@ -31,7 +31,7 @@ echo 'You should not see this.';
     <!-- init str_repeat() -->
     <str_repeat>
 
-Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted by %d bytes%S. Allocated %d bytes and need to allocate %d bytes in %s on line %d
     </str_repeat:NULL>
   </foo:NULL>
 </file '%s%eobserver_error_%d.php'>
