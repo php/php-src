@@ -201,17 +201,13 @@ static ZEND_COLD void ini_error(const char *msg)
 	int error_buf_len;
 
 	const char *const currently_parsed_filename = zend_ini_scanner_get_filename();
-	if (currently_parsed_filename) {
-		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
-		error_buf = (char *) emalloc(error_buf_len);
+	error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
+	error_buf = (char *) emalloc(error_buf_len);
 
-		if (strcmp(currently_parsed_filename, "Unknown") == 0 && CG(ini_parser_unbuffered_errors)) {
-			sprintf(error_buf, "%s in INI command line parameter '-d'\n", msg);
-		} else {
-			sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
-		}
+	if (!INI_SCNG(filename) && CG(ini_parser_unbuffered_errors)) {
+		sprintf(error_buf, "%s in INI command line parameter '-d'\n", msg);
 	} else {
-		error_buf = estrdup("Invalid configuration directive\n");
+		sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
 	}
 
 	if (CG(ini_parser_unbuffered_errors)) {
