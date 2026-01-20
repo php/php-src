@@ -127,6 +127,9 @@ static const struct ini_value_parser_s ini_fpm_pool_options[] = {
 #ifdef SO_SETFIB
 	{ "listen.setfib",             &fpm_conf_set_integer,     WPO(listen_setfib) },
 #endif
+#ifdef SO_RTABLE
+	{ "listen.rtable",             &fpm_conf_set_integer,     WPO(listen_rtable) },
+#endif
 	{ "process.priority",          &fpm_conf_set_integer,     WPO(process_priority) },
 	{ "process.dumpable",          &fpm_conf_set_boolean,     WPO(process_dumpable) },
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
@@ -638,6 +641,9 @@ static void *fpm_worker_pool_config_alloc(void)
 	wp->config->decorate_workers_output = 1;
 #ifdef SO_SETFIB
 	wp->config->listen_setfib = -1;
+#endif
+#ifdef SO_RTABLE
+	wp->config->listen_rtable = -1;
 #endif
 
 	if (!fpm_worker_all_pools) {
@@ -1762,6 +1768,9 @@ static void fpm_conf_dump(void)
 		zlog(ZLOG_NOTICE, "\tlisten.allowed_clients = %s",     STR2STR(wp->config->listen_allowed_clients));
 #ifdef SO_SETFIB
 		zlog(ZLOG_NOTICE, "\tlisten.setfib = %d",              wp->config->listen_setfib);
+#endif
+#ifdef SO_RTABLE
+		zlog(ZLOG_NOTICE, "\tlisten.rtable = %d",              wp->config->listen_rtable);
 #endif
 		if (wp->config->process_priority == 64) {
 			zlog(ZLOG_NOTICE, "\tprocess.priority = undefined");
