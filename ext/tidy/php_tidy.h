@@ -17,6 +17,7 @@
 #ifndef PHP_TIDY_H
 #define PHP_TIDY_H
 
+extern zend_class_entry *tidy_ce_exception;
 extern zend_module_entry tidy_module_entry;
 #define phpext_tidy_ptr &tidy_module_entry
 
