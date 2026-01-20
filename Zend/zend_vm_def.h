@@ -7620,7 +7620,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMP|VAR|CV, JMP_ADDR)
 	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
 	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (OP1_TYPE == IS_CV 
+		if (OP1_TYPE == IS_CV
 			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
 			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
 		) {
@@ -8196,6 +8196,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|CV|UNUSED
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
