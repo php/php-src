@@ -2722,4 +2722,22 @@ xmlDocPtr php_dom_create_html_doc(void)
 	return lxml_doc;
 }
 
+xmlNodePtr dom_scan_id(const xmlNode *base, const xmlChar *idname)
+{
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		if (node->type == XML_ELEMENT_NODE) {
+			for (const xmlAttr *attr = node->properties; attr != NULL; attr = attr->next) {
+				if (attr->atype == XML_ATTRIBUTE_ID && dom_compare_value(attr, BAD_CAST idname)) {
+					return node;
+				}
+			}
+		}
+
+		node = php_dom_next_in_tree_order(node, base);
+	}
+
+	return NULL;
+}
+
 #endif /* HAVE_DOM */

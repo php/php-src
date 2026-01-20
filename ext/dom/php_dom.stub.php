@@ -1899,6 +1899,8 @@ namespace Dom
         public function querySelector(string $selectors): ?Element {}
         /** @implementation-alias Dom\Element::querySelectorAll */
         public function querySelectorAll(string $selectors): NodeList {}
+
+        public function getElementById(string $elementId): ?Element {}
     }
 
     class Entity extends Node

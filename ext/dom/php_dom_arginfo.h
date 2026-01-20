@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e3495cb89e4466d9102abb10bf6461989b7c8ba9 */
+ * Stub hash: f0ef8e4f5b6568a53a1789c0a8b17c3d3124f9ca */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -898,6 +898,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_DocumentFragment_querySelectorAll arginfo_class_Dom_ParentNode_querySelectorAll
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_DocumentFragment_getElementById, 0, 1, Dom\\Element, 1)
+	ZEND_ARG_TYPE_INFO(0, elementId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Dom_Document_getElementsByTagName arginfo_class_Dom_Element_getElementsByTagName
 
 #define arginfo_class_Dom_Document_getElementsByTagNameNS arginfo_class_Dom_Element_getElementsByTagNameNS
@@ -949,9 +953,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Document_createAttribut
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Document_getElementById, 0, 1, Dom\\Element, 1)
-	ZEND_ARG_TYPE_INFO(0, elementId, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Dom_Document_getElementById arginfo_class_Dom_DocumentFragment_getElementById
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_registerNodeClass, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, baseClass, IS_STRING, 0)
@@ -1290,6 +1292,7 @@ ZEND_METHOD(Dom_CharacterData, appendData);
 ZEND_METHOD(Dom_CharacterData, insertData);
 ZEND_METHOD(Dom_CharacterData, deleteData);
 ZEND_METHOD(Dom_CharacterData, replaceData);
+ZEND_METHOD(Dom_DocumentFragment, getElementById);
 ZEND_METHOD(Dom_Document, createElement);
 ZEND_METHOD(Dom_Document, createElementNS);
 ZEND_METHOD(Dom_Document, createProcessingInstruction);
@@ -1711,6 +1714,7 @@ static const zend_function_entry class_Dom_DocumentFragment_methods[] = {
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_Dom_DocumentFragment_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("querySelector", zim_Dom_Element_querySelector, arginfo_class_Dom_DocumentFragment_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("querySelectorAll", zim_Dom_Element_querySelectorAll, arginfo_class_Dom_DocumentFragment_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_DocumentFragment, getElementById, arginfo_class_Dom_DocumentFragment_getElementById, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
