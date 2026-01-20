@@ -54,13 +54,22 @@ PHP_FUNCTION(uniqid)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* This implementation needs current microsecond to change,
-	 * hence we poll time until it does. This is much faster than
-	 * calling usleep(1) which may cause the kernel to schedule
-	 * another process, causing a pause of around 10ms.
+	 * If system clock lags and report the same time again,
+	 * we just return the previous value +1us.
+	 * This is much faster than calling usleep(1) which may 
+	 * cause the kernel to schedule another process, causing 
+	 * a pause of around 10ms.
 	 */
-	do {
-		(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
-	} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
+	(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
+	if (tv.tv_sec < prev_tv.tv_sec ||
+            (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec <= prev_tv.tv_usec)) {
+		tv.tv_sec = prev_tv.tv_sec;
+		tv.tv_usec = prev_tv.tv_usec + 1;
+		if (tv.tv_usec >= 1000000) {
+			tv.tv_sec++;
+			tv.tv_usec -= 1000000;
+		}
+	}
 
 	prev_tv.tv_sec = tv.tv_sec;
 	prev_tv.tv_usec = tv.tv_usec;
