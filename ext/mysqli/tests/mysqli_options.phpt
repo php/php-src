@@ -114,7 +114,7 @@ bool(true)
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
-Argument #1 ($option) is not a valid mysqli option
+mysqli_options(): Argument #2 ($option) must be one of predefined options
 Link closed
 mysqli object is already closed
 Unknown character set

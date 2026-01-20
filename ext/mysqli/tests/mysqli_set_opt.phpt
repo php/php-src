@@ -54,6 +54,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Argument #1 ($option) is not a valid mysqli option
+mysqli_set_opt(): Argument #2 ($option) must be one of predefined options
 mysqli object is already closed
 done!
