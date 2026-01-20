@@ -29,7 +29,7 @@ $_main:
 0003 V1 = DO_ICALL
 0004 ASSIGN CV0($array) V1
 0005 TYPE_ASSERT 131079 string("array_map") CV0($array)
-0006 T1 = INIT_ARRAY 0 (packed) NEXT
+0006 T1 = INIT_ARRAY 0 NEXT
 0007 V2 = FE_RESET_R CV0($array) 0014
 0008 T4 = FE_FETCH_R V2 T3 0014
 0009 INIT_FCALL 1 %d string("stdclass")
