@@ -2581,7 +2581,10 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 				}
 
 			}
-			sk_X509_push(sk, cert);
+			if (sk_X509_push(sk, cert) <= 0) {
+				X509_free(cert);
+				goto push_fail_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -2599,11 +2602,20 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(sk, cert);
+		if (sk_X509_push(sk, cert) <= 0) {
+			X509_free(cert);
+			goto push_fail_exit;
+		}
 	}
 
 clean_exit:
 	return sk;
+
+push_fail_exit:
+	php_openssl_store_errors();
+	php_sk_X509_free(sk);
+	sk = NULL;
+	goto clean_exit;
 }
 /* }}} */
 
