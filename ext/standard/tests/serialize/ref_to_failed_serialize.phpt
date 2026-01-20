@@ -3,7 +3,7 @@ References to objects for which Serializable::serialize() returned NULL should u
 --FILE--
 <?php
 
-class NotSerializable implements Serializable {
+class NotSerializableCls implements Serializable {
     public function serialize() {
         return null;
     }
@@ -12,7 +12,7 @@ class NotSerializable implements Serializable {
     }
 }
 
-$obj = new NotSerializable();
+$obj = new NotSerializableCls();
 $data = [$obj, $obj];
 var_dump($s = serialize($data));
 var_dump(unserialize($s));
