@@ -20,7 +20,7 @@ var_dump($value);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: Argument #1 ($option) is not a valid mysqli option in %s:%d
+Fatal error: Uncaught ValueError: mysqli::options(): Argument #1 ($option) must be one of predefined options in %s:%d
 Stack trace:
 #0 %s(%d): mysqli->options(%d, 'invalid_option')
 #1 {main}
