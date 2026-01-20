@@ -303,6 +303,21 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 	} else {
 		fbc->internal_function.handler(execute_data, return_value);
 	}
+
+	if (fbc->common.function_name) {
+		if (EG(exception)) {
+			php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
+		}
+
+		smart_str retval_info = {0};
+		get_retval_info(return_value, &retval_info);
+		if (fbc->common.scope) {
+			php_printf("%*s<!-- internal leave %s::%s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		} else {
+			php_printf("%*s<!-- internal leave %s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		}
+		smart_str_free(&retval_info);
+	}
 }
 
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
