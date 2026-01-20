@@ -529,7 +529,8 @@ PHP_FUNCTION(inet_ntop)
 	char *address;
 	size_t address_len;
 	int af = AF_INET;
-	char buffer[40];
+	socklen_t buffersize = INET6_ADDRSTRLEN;
+	char buffer[INET6_ADDRSTRLEN];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(address, address_len)
@@ -540,11 +541,13 @@ PHP_FUNCTION(inet_ntop)
 		af = AF_INET6;
 	} else
 #endif
-	if (address_len != 4) {
+	if (address_len == 4) {
+		buffersize = INET_ADDRSTRLEN;
+	} else {
 		RETURN_FALSE;
 	}
 
-	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
+	if (!inet_ntop(af, address, buffer, buffersize)) {
 		RETURN_FALSE;
 	}
 
