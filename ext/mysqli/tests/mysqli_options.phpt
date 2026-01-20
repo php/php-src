@@ -64,7 +64,7 @@ var_dump("MYSQLI_CLIENT_SSL");
 
 try {
     var_dump(mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
-} catch (Error $exception) {
+} catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
