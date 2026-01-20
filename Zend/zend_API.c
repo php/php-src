@@ -728,58 +728,58 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 	return true;
 }
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, uint32_t arg_num) /* {{{ */
+ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string", arg_num)) {
-			return 0;
+			return NULL;
 		}
 		convert_to_string(arg);
-		*dest = Z_STR_P(arg);
+		return Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
 		zval obj;
 		if (zobj->handlers->cast_object(zobj, &obj, IS_STRING) == SUCCESS) {
 			OBJ_RELEASE(zobj);
 			ZVAL_COPY_VALUE(arg, &obj);
-			*dest = Z_STR_P(arg);
-			return 1;
+			return Z_STR_P(arg);
 		}
-		return 0;
+		return NULL;
 	} else {
-		return 0;
+		return NULL;
 	}
-	return 1;
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num) /* {{{ */
+ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
-		return 0;
+		return NULL;
 	}
-	return zend_parse_arg_str_weak(arg, dest, arg_num);
+	return zend_parse_arg_str_weak(arg, arg_num);
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num)
+ZEND_API zend_string* ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, uint32_t arg_num)
 {
 	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
-		return 0;
+		return NULL;
 	}
-	return zend_parse_arg_str_weak(arg, dest, arg_num);
+	return zend_parse_arg_str_weak(arg, arg_num);
 }
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num) /* {{{ */
 {
+	zend_string *str;
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
 	}
 	if (zend_parse_arg_long_weak(arg, dest_long, arg_num)) {
 		*dest_str = NULL;
 		return 1;
-	} else if (zend_parse_arg_str_weak(arg, dest_str, arg_num)) {
+	} else if ((str = zend_parse_arg_str_weak(arg, arg_num)) != NULL) {
 		*dest_long = 0;
+		*dest_str = str;
 		return 1;
 	} else {
 		return 0;

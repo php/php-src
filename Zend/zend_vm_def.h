@@ -8779,8 +8779,8 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -8793,7 +8793,7 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
