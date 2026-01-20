@@ -49,6 +49,7 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     if (extension_loaded('mysqlnd')) {
         $expected['MYSQL_ATTR_SSL_VERIFY_SERVER_CERT']  = true;
         $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
+        $expected['MYSQL_ATTR_SEND_CLEAR_PASSWORD']     = true;
     } else if (get_client_version() > 50605) {
         $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']	= true;
     }

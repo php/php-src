@@ -67,15 +67,17 @@ mysqlnd_run_authentication(
 	memcpy(plugin_data, auth_plugin_data.s, plugin_data_len);
 	plugin_data[plugin_data_len] = '\0';
 
-	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+	requested_protocol = mnd_pestrdup(mysql_flags & CLIENT_SEND_CLEAR_PASSWORD ? MYSQLND_CLEAR_PASSWORD_AUTH_PROTOCOL : (auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL), FALSE);
 	if (!requested_protocol) {
 		goto end;
 	}
-
+php_log_err_with_severity(requested_protocol, LOG_NOTICE);
+php_log_err_with_severity((char*) plugin_data, LOG_NOTICE);
 	do {
 		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
 		if (!auth_plugin) {
+php_log_err_with_severity("auth plugin not found", LOG_NOTICE);
 			if (first_call) {
 				mnd_pefree(requested_protocol, FALSE);
 				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
@@ -111,6 +113,7 @@ mysqlnd_run_authentication(
 					passwd_len, plugin_data, plugin_data_len,
 					conn->protocol_frame_codec->data,
 					mysql_flags);
+php_log_err_with_severity((char*) scrambled_data, LOG_NOTICE);
 			}
 
 			if (conn->error_info->error_no) {
