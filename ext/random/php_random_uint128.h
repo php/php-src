@@ -81,7 +81,7 @@ static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_
 		v = (num.hi ^ num.lo),
 		s = num.hi >> 58U;
 
-	return (v >> s) | (v << ((-s) & 63));
+	return (v >> s) | (v << ((~s + 1) & 63));
 }
 # else
 typedef __uint128_t php_random_uint128_t;
@@ -121,7 +121,7 @@ static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_
 		v = ((uint64_t) (num >> 64U)) ^ (uint64_t) num,
 		s = num >> 122U;
 
-	return (v >> s) | (v << ((-s) & 63));
+	return (v >> s) | (v << ((~s + 1) & 63));
 }
 # endif
 
