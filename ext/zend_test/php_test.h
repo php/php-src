@@ -18,6 +18,7 @@
 #define PHP_TEST_H
 
 #include "fiber.h"
+#include "Zend/zend_alloc.h"
 
 extern zend_module_entry zend_test_module_entry;
 #define phpext_zend_test_ptr &zend_test_module_entry
@@ -75,6 +76,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	// this is our heap that we install our custom handlers on and inject into
 	// ZendMM
 	zend_mm_heap* observed_heap;
+	int zend_mm_observer_enabled;
+	zend_mm_observer *observer;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)
