@@ -23,6 +23,10 @@ PHP 8.6 UPGRADE NOTES
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
 
+- Standard:
+  . Invalid mode values now throw in array_filter() instead of being silently
+    defaulted to 0.
+
 ========================================
 2. New Features
 ========================================
