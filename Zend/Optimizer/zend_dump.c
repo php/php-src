@@ -618,7 +618,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 		}
 		if (ZEND_VM_EXT_ARRAY_INIT & flags) {
 			fprintf(stderr, " %u", opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT);
-			if (!(opline->extended_value & ZEND_ARRAY_NOT_PACKED)) {
+			if (opline->op1_type != IS_UNUSED && !(opline->extended_value & ZEND_ARRAY_NOT_PACKED)) {
 				fprintf(stderr, " (packed)");
 			}
 		}
