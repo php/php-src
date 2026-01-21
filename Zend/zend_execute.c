@@ -1073,7 +1073,9 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	zval tmp;
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+		if ((info->flags & ZEND_ACC_READONLY)
+		 && (!zend_readonly_property_is_reinitable_for_context(property_val, info)
+		     || zend_is_foreign_cpp_overwrite(property_val, info))) {
 			zend_readonly_property_modification_error(info);
 			return &EG(uninitialized_zval);
 		}
@@ -1091,7 +1093,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 		return &EG(uninitialized_zval);
 	}
 
-	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
@@ -5896,6 +5898,53 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 /* This callback disables optimization of "vm_stack_data" variable in VM */
 ZEND_API void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data) = NULL;
+
+static zend_always_inline bool zend_has_more_derived_promoted_override(
+	const zend_class_entry *runtime_ce, const zend_class_entry *ctor_scope, zend_string *property_name)
+{
+	for (const zend_class_entry *ce = runtime_ce; ce != NULL && ce != ctor_scope; ce = ce->parent) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&ce->properties_info, property_name);
+		if (prop_info != NULL && (prop_info->flags & ZEND_ACC_PROMOTED)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/* Outlined slow path: clear IS_PROP_REINITABLE from promoted readonly properties
+ * of the exiting constructor's scope.  Skips properties that a child class has
+ * redefined with its own CPP (the child owns that reassignment window). */
+static zend_never_inline void zend_ctor_clear_promoted_readonly_reinitable_slow(zend_execute_data *ex)
+{
+	zend_object *obj = Z_OBJ(ex->This);
+	zend_class_entry *ctor_scope = ex->func->common.scope;
+	zend_property_info *prop_info;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ctor_scope->properties_info, prop_info) {
+		if ((prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
+		 && IS_VALID_PROPERTY_OFFSET(prop_info->offset)) {
+			/* When the object is an instance of a descendant class, do not clear the
+			 * window if a more-derived class owns the property through its own CPP,
+			 * even if the runtime class itself redeclared it without CPP. */
+			if (obj->ce != ctor_scope
+			 && zend_has_more_derived_promoted_override(obj->ce, ctor_scope, prop_info->name)) {
+				continue;
+			}
+			Z_PROP_FLAG_P(OBJ_PROP(obj, prop_info->offset)) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* Clear IS_PROP_REINITABLE from all promoted readonly properties of the exiting
+ * constructor's scope. Called for both 'new Foo()' and 'parent::__construct()'. */
+ZEND_API void ZEND_FASTCALL zend_ctor_clear_promoted_readonly_reinitable(zend_execute_data *ex, uint32_t call_info)
+{
+	if ((call_info & ZEND_CALL_HAS_THIS)
+	 && (ex->func->common.fn_flags & ZEND_ACC_CTOR)
+	 && ZEND_CLASS_HAS_PROMOTED_READONLY_PROPS(ex->func->common.scope)) {
+		zend_ctor_clear_promoted_readonly_reinitable_slow(ex);
+	}
+}
 
 #include "zend_vm_execute.h"
 

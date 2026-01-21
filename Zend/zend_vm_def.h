@@ -3000,6 +3000,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -3034,6 +3035,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {

@@ -1068,7 +1068,8 @@ try_again:
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
-				 && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) {
+				 && (!zend_readonly_property_is_reinitable_for_context(variable_ptr, prop_info)
+				     || zend_is_foreign_cpp_overwrite(variable_ptr, prop_info))) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
 					goto exit;
@@ -1102,7 +1103,42 @@ typed_property:
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
+				/* For readonly properties initialized for the first time via CPP, set
+				 * IS_PROP_REINITABLE to allow one reassignment in the constructor body.
+				 * The flag is cleared by zend_leave_helper when the constructor exits.
+				 *
+				 * Classical case: the property is promoted in the declaring class and the
+				 * executing constructor belongs to that class (scope == prop_info->ce).
+				 *
+				 * Extended case: a child class redeclared the property without CPP, so
+				 * prop_info->ce is the child but the property isn't promoted there. CPP
+				 * "ownership" still belongs to the ancestor whose constructor has CPP for
+				 * this property name, so its body is allowed to reassign once. The clearing
+				 * loop in zend_leave_helper iterates the exiting ctor's own promoted props,
+				 * which share the same object slot, so cleanup happens automatically. */
+				bool reinitable = false;
+				if ((prop_info->flags & ZEND_ACC_READONLY)
+				 && (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT)
+				 && EG(current_execute_data)
+				 && (EG(current_execute_data)->func->common.fn_flags & ZEND_ACC_CTOR)) {
+					zend_class_entry *ctor_scope = EG(current_execute_data)->func->common.scope;
+					if (prop_info->flags & ZEND_ACC_PROMOTED) {
+						reinitable = (ctor_scope == prop_info->ce);
+					} else if (ctor_scope != prop_info->ce) {
+						/* Child redeclared without CPP: check if the executing ctor's class
+						 * has a CPP declaration for this property name. */
+						zend_property_info *scope_prop = zend_hash_find_ptr(
+							&ctor_scope->properties_info, prop_info->name);
+						reinitable = scope_prop != NULL
+							&& (scope_prop->flags & (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED))
+							   == (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED);
+					}
+				}
+				if (reinitable) {
+					Z_PROP_FLAG_P(variable_ptr) = IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE;
+				} else {
+					Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE|IS_PROP_CTOR_REINITABLE);
+				}
 				value = &tmp;
 			}
 
@@ -1520,7 +1556,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(slot) != IS_UNDEF
-				 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE)) {
+				 && !zend_readonly_property_is_reinitable_for_context(slot, prop_info)) {
 					zend_readonly_property_unset_error(prop_info->ce, name);
 					return;
 				}

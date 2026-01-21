@@ -583,7 +583,113 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
+#define ZEND_CLASS_HAS_PROMOTED_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_PROMOTED_READONLY_PROPS))
 
+static zend_always_inline bool zend_scope_is_derived_from(
+	const zend_class_entry *scope, const zend_class_entry *ancestor)
+{
+	for (const zend_class_entry *ce = scope; ce != NULL; ce = ce->parent) {
+		if (ce == ancestor) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static zend_always_inline bool zend_has_active_derived_ctor_with_promoted_property(
+	const zend_execute_data *ex, zend_object *obj, const zend_property_info *prop_info)
+{
+	for (const zend_execute_data *prev = ex->prev_execute_data; prev != NULL; prev = prev->prev_execute_data) {
+		if (!(ZEND_CALL_INFO(prev) & ZEND_CALL_HAS_THIS)
+		 || !(prev->func->common.fn_flags & ZEND_ACC_CTOR)
+		 || Z_OBJ(prev->This) != obj) {
+			continue;
+		}
+
+		zend_class_entry *scope = prev->func->common.scope;
+		if (scope == NULL || !zend_scope_is_derived_from(scope, ex->func->common.scope)) {
+			continue;
+		}
+
+		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(
+			&scope->properties_info, prop_info->name);
+		if (scope_prop != NULL
+		 && (scope_prop->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED))
+			== (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static zend_always_inline bool zend_has_active_ctor_with_promoted_property(
+	const zend_execute_data *ex, zend_object *obj, zend_string *property_name)
+{
+	for (const zend_execute_data *frame = ex; frame != NULL; frame = frame->prev_execute_data) {
+		if (!(ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_THIS)
+		 || !(frame->func->common.fn_flags & ZEND_ACC_CTOR)
+		 || Z_OBJ(frame->This) != obj) {
+			continue;
+		}
+
+		zend_class_entry *scope = frame->func->common.scope;
+		if (scope == NULL) {
+			continue;
+		}
+
+		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(
+			&scope->properties_info, property_name);
+		if (scope_prop != NULL
+		 && (scope_prop->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED))
+			== (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static zend_always_inline bool zend_readonly_property_is_reinitable_for_context(
+	const zval *property_val, const zend_property_info *prop_info)
+{
+	if (!(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+		return false;
+	}
+	if (!(Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REINITABLE)) {
+		return true;
+	}
+	zend_execute_data *ex = EG(current_execute_data);
+	return ex
+		&& (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
+		&& zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name);
+}
+
+/* Check if a foreign constructor is attempting a CPP initial assignment on an
+ * already-initialized property owned by a different class (e.g., child has CPP
+ * for $x, parent's CPP also tries to set $x on the child's object). */
+static zend_always_inline bool zend_is_foreign_cpp_overwrite(
+	const zval *property_val, const zend_property_info *prop_info)
+{
+	if (Z_PROP_FLAG_P(property_val) & IS_PROP_UNINIT) {
+		return false;
+	}
+	zend_execute_data *ex = EG(current_execute_data);
+	if (!ex
+	 || !(ex->func->common.fn_flags & ZEND_ACC_CTOR)
+	 || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
+		return false;
+	}
+	if ((prop_info->flags & ZEND_ACC_PROMOTED) && ex->func->common.scope != prop_info->ce) {
+		return true;
+	}
+	if (!(prop_info->flags & ZEND_ACC_PROMOTED)
+	 && (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)
+	 && zend_has_active_derived_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info)) {
+		return true;
+	}
+	return false;
+}
 
 ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);
 ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
@@ -591,6 +697,7 @@ ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
 ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property);
+ZEND_API void ZEND_FASTCALL zend_ctor_clear_promoted_readonly_reinitable(zend_execute_data *ex, uint32_t call_info);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
 	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)

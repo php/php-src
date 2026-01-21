@@ -2806,7 +2806,9 @@ static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_str
 static zend_always_inline bool verify_readonly_and_avis(zval *property_val, zend_property_info *info, bool indirect)
 {
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+		if ((info->flags & ZEND_ACC_READONLY)
+		 && (!zend_readonly_property_is_reinitable_for_context(property_val, info)
+		     || zend_is_foreign_cpp_overwrite(property_val, info))) {
 			zend_readonly_property_modification_error(info);
 			return false;
 		}
@@ -2850,7 +2852,7 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 		return;
 	}
 
-	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 
 	value = zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), &garbage);
 	if (result) {
@@ -2907,7 +2909,7 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 
 	binary_op(&z_copy, zptr, value);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
-		Z_PROP_FLAG_P(zptr) &= ~IS_PROP_REINITABLE;
+		Z_PROP_FLAG_P(zptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		zval_ptr_dtor(zptr);
 		ZVAL_COPY_VALUE(zptr, &z_copy);
 	} else {
@@ -3004,13 +3006,13 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, &tmp);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		zval_ptr_dtor(&tmp);
 	}
 }
@@ -3036,13 +3038,13 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, &tmp);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		zval_ptr_dtor(&tmp);
 	}
 }
@@ -3084,14 +3086,14 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_prope
 			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, result);
 		ZVAL_UNDEF(result);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 	}
 }
 
@@ -3118,14 +3120,14 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_prope
 			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, result);
 		ZVAL_UNDEF(result);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 	}
 }
 

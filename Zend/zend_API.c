@@ -1744,7 +1744,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 				zval *slot = OBJ_PROP(object, property_info->offset);
 				if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY) && !Z_ISUNDEF_P(slot))) {
 					if (Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE) {
-						Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
+						Z_PROP_FLAG_P(slot) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
 					} else {
 						zend_readonly_property_modification_error(property_info);
 						return;
@@ -4422,6 +4422,9 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 
 		if (access_type & ZEND_ACC_READONLY) {
 			ce->ce_flags |= ZEND_ACC_HAS_READONLY_PROPS;
+			if (access_type & ZEND_ACC_PROMOTED) {
+				ce->ce_flags |= ZEND_ACC_HAS_PROMOTED_READONLY_PROPS;
+			}
 		}
 	}
 
