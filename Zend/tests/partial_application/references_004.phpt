@@ -28,11 +28,11 @@ Closure [ <user> static function {closure:%s:%d} ] {
 
   - Bound Variables [2] {
       Variable #0 [ $a ]
-      Variable #1 [ $args0 ]
+      Variable #1 [ $args1 ]
   }
 
   - Parameters [2] {
-    Parameter #0 [ <required> &$args1 ]
+    Parameter #0 [ <required> &$args0 ]
     Parameter #1 [ <optional> &...$args ]
   }
 }

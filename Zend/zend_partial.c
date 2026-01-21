@@ -169,7 +169,7 @@ static void zp_assign_names(zend_string **names, uint32_t num_names,
 		}
 		zend_string *orig_name = zp_get_param_name(function, function->common.num_args);
 		zend_string *new_name;
-		for (uint32_t n = offset - function->common.num_args;; n++) {
+		for (uint32_t n = 0;; n++) {
 			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
 			if (!zp_name_exists(names, num_names, new_name)) {
 				break;
