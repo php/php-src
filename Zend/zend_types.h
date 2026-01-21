@@ -1594,6 +1594,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define IS_PROP_UNINIT (1<<0)
 #define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
 #define IS_PROP_LAZY (1<<2)
+#define IS_PROP_CPP_REINITABLE (1<<3) /* Allows one reassignment of promoted readonly property in constructor */
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)
