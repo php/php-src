@@ -23,9 +23,6 @@
 
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
-# include "win32/time.h"
-#else
-# include <sys/time.h>
 #endif
 
 #include <sys/stat.h>
@@ -41,6 +38,7 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
+#include "zend_time.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
@@ -1261,13 +1259,12 @@ static inline void last_modified(void)
 CACHE_LIMITER_FUNC(public)
 {
 	char buf[MAX_STR + 1];
-	struct timeval tv;
-	time_t now;
+	time_t expire_at;
 
-	gettimeofday(&tv, NULL);
-	now = tv.tv_sec + PS(cache_expire) * 60;
+
+	expire_at = zend_time_real_get() + PS(cache_expire) * 60;
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
-	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
+	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &expire_at);
 	ADD_HEADER(buf);
 
 	snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=" ZEND_LONG_FMT, PS(cache_expire) * 60); /* SAFE */
@@ -1386,11 +1383,9 @@ static zend_result php_session_send_cookie(void)
 	zend_string_release_ex(e_id, 0);
 
 	if (PS(cookie_lifetime) > 0) {
-		struct timeval tv;
 		time_t t;
 
-		gettimeofday(&tv, NULL);
-		t = tv.tv_sec + PS(cookie_lifetime);
+		t = zend_time_real_get() + PS(cookie_lifetime);
 
 		if (t > 0) {
 			date_fmt = php_format_date(ZEND_STRL("D, d M Y H:i:s \\G\\M\\T"), t, false);
@@ -3121,18 +3116,18 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, b
 		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
 			return;
 		}
-#ifdef HAVE_GETTIMEOFDAY
+
 		if (PS(rfc1867_min_freq) > 0.0) {
-			struct timeval tv = {0};
+			struct timespec ts;
 			double dtv;
-			gettimeofday(&tv, NULL);
-			dtv = (double) tv.tv_sec + tv.tv_usec / 1000000.0;
+			zend_time_real_spec(&ts);
+			dtv = (double)(ts.tv_sec + ts.tv_nsec / 1000000000.0);
 			if (dtv < progress->next_update_time) {
 				return;
 			}
 			progress->next_update_time = dtv + PS(rfc1867_min_freq);
 		}
-#endif
+
 		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
 	}
 
@@ -3266,7 +3261,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("error"), 0);
 
 			add_assoc_bool_ex(&progress->current_file, ZEND_STRL("done"), 0);
-			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)time(NULL));
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)zend_time_real_get());
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("bytes_processed"), 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);

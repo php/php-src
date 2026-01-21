@@ -17,13 +17,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <time.h>
 #include "php.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
+#include "zend_time.h"
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -470,8 +470,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 			zend_string *date_str;
 			size_t len;
 
-
-			time(&curtime);
+			curtime = zend_time_real_get();
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
 

@@ -27,6 +27,7 @@
 #include "ext/standard/php_string.h" /* For php_stristr() */
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
+#include "zend_time.h"
 
 static void destroy_phar_data(zval *zv);
 
@@ -2872,7 +2873,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			4: metadata-len
 			+: metadata
 		*/
-		mytime = time(NULL);
+		mytime = zend_time_real_get();
 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
 		phar_set_32(entry_buffer+4, mytime);
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);

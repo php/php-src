@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include "php_network.h"
+#include "zend_time.h"
 #include "file.h"
 
 static size_t php_fsockopen_format_host_port(char **message, const char *prefix, size_t prefix_len,
@@ -55,11 +56,6 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout;
 	bool timeout_is_null = 1;
-#ifndef PHP_WIN32
-	time_t conv;
-#else
-	long conv;
-#endif
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -108,14 +104,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		zend_argument_value_error(6, "must be -1 or between 0 and " ZEND_ULONG_FMT, ((double) PHP_TIMEOUT_ULL_MAX / 1000000.0));
 		RETURN_THROWS();
 	} else {
-#ifndef PHP_WIN32
-		conv = (time_t) (timeout * 1000000.0);
-		tv.tv_sec = conv / 1000000;
-#else
-		conv = (long) (timeout * 1000000.0);
-		tv.tv_sec = conv / 1000000;
-#endif
-		tv.tv_usec = conv % 1000000;
+		zend_time_dbl2val(timeout, &tv);
 	}
 
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,

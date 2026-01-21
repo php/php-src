@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
     container). (ilutov)
   . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
+  . Improved accuracy of microtime() and gettimeofday(), up-to 10ns. (marc-mabe)
 
 - Date:
   . Update timelib to 2022.16. (Derick)

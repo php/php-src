@@ -21,7 +21,7 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "head.h"
-#include <time.h>
+#include "zend_time.h"
 
 #include "php_globals.h"
 #include "zend_smart_str.h"
@@ -155,7 +155,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			smart_str_append(&buf, dt);
 			zend_string_free(dt);
 
-			diff = difftime(expires, php_time());
+			diff = difftime(expires, zend_time_real_get());
 			if (diff < 0) {
 				diff = 0;
 			}

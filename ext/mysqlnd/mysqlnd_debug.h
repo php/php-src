@@ -80,18 +80,14 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
 
 #if defined(__GNUC__) || defined(PHP_WIN32)
-#ifdef PHP_WIN32
-#include "win32/time.h"
-#else
-#include <sys/time.h>
-#endif
+#include "zend_time.h"
 
 #ifndef MYSQLND_PROFILING_DISABLED
-#define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)	((tp.tv_sec * 1000000LL)+ tp.tv_usec)
-#define DBG_PROFILE_START_TIME()		gettimeofday(&__dbg_prof_tp, NULL); __dbg_prof_start = DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp);
-#define DBG_PROFILE_END_TIME(duration)	gettimeofday(&__dbg_prof_tp, NULL); (duration) = (DBG_PROFILE_TIMEVAL_TO_DOUBLE(__dbg_prof_tp) - __dbg_prof_start);
+#define DBG_PROFILE_START_TIME() \
+	__dbg_prof_start = zend_time_mono_fallback();
+#define DBG_PROFILE_END_TIME(duration) \
+	(duration) = zend_time_mono_fallback() - __dbg_prof_start;
 #else
-#define DBG_PROFILE_TIMEVAL_TO_DOUBLE(tp)
 #define DBG_PROFILE_START_TIME()
 #define DBG_PROFILE_END_TIME(duration)
 #endif
@@ -117,7 +113,6 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #define DBG_LEAVE_EX(dbg_obj, leave)		DBG_LEAVE_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, leave)
 
 #define DBG_ENTER_EX2(dbg_obj1, dbg_obj2, func_name) \
-					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					bool dbg_skip_trace = TRUE; \
 					((void)__dbg_prof_start); \

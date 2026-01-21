@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+#include "zend_time.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -29,7 +30,6 @@
 #endif
 #include <fcntl.h>
 #include <string.h>
-#include <time.h>
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #else
@@ -42,10 +42,6 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -1112,7 +1108,7 @@ time_t ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	tm.tm_isdst = -1;
 
 	/* figure out the GMT offset */
-	stamp = time(NULL);
+	stamp = zend_time_real_get();
 	gmt = php_gmtime_r(&stamp, &tmbuf);
 	if (!gmt) {
 		return -1;
@@ -1374,22 +1370,21 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 
 static int my_poll(php_socket_t fd, int events, int timeout) {
 	int n;
-	zend_hrtime_t timeout_hr = (zend_hrtime_t) timeout * 1000000;
+	uint64_t timeout_ns = (uint64_t) timeout * 1000000;
 
 	while (true) {
-		zend_hrtime_t start_ns = zend_hrtime();
-		n = php_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
+		uint64_t start_ns = zend_time_mono_fallback();
+		n = php_pollfd_for_ms(fd, events, (int) (timeout_ns / 1000000));
 
 		if (n == -1 && php_socket_errno() == EINTR) {
-			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;
-			/* delta_ns == 0 is only possible with a platform that does not support a high-res timer. */
-			if (delta_ns > timeout_hr || UNEXPECTED(delta_ns == 0)) {
+			uint64_t delta_ns = zend_time_mono_fallback() - start_ns;
+			if (delta_ns > timeout_ns) {
 #ifndef PHP_WIN32
 				errno = ETIMEDOUT;
 #endif
 				break;
 			}
-			timeout_hr -= delta_ns;
+			timeout_ns -= delta_ns;
 		} else {
 			break;
 		}
@@ -1612,8 +1607,7 @@ static databuf_t* ftp_getdata(ftpbuf_t *ftp)
 		/* connect */
 		/* Win 95/98 seems not to like size > sizeof(sockaddr_in) */
 		size = php_sockaddr_size(&ftp->pasvaddr);
-		tv.tv_sec = ftp->timeout_sec;
-		tv.tv_usec = 0;
+		zend_time_sec2val(ftp->timeout_sec, &tv);
 		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
 			php_error_docref(NULL, E_WARNING, "php_connect_nonb() failed: %s (%d)", strerror(errno), errno);
 			goto bail;

@@ -18,10 +18,10 @@
  */
 
 #include "php.h"				/*php specific */
+#include "zend_time.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <winsock2.h>
-#include "time.h"
 # include <Ws2tcpip.h>
 #include <string.h>
 #include <math.h>
@@ -671,7 +671,7 @@ static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zen
 	}
 
 	if (!xheaders || !strstr(ZSTR_VAL(headers_lc), "date:")) {
-		time_t tNow = time(NULL);
+		time_t tNow = zend_time_real_get();
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
 		smart_str_appends(&combined_headers, "Date: ");

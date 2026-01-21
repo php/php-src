@@ -60,6 +60,7 @@
 #endif
 
 #include "php_network.h"
+#include "zend_time.h"
 
 #if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
@@ -72,7 +73,6 @@
 #include "ext/standard/file.h"
 
 #ifdef PHP_WIN32
-# include "win32/time.h"
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define PHP_TIMEOUT_ERROR_VALUE		WSAETIMEDOUT
@@ -297,37 +297,6 @@ typedef int php_non_blocking_flags_t;
 	 fcntl(sock, F_SETFL, save)
 #endif
 
-#ifdef HAVE_GETTIMEOFDAY
-/* Subtract times */
-static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
-{
-	result->tv_usec = a.tv_usec - b.tv_usec;
-	if (result->tv_usec < 0L) {
-		a.tv_sec--;
-		result->tv_usec += 1000000L;
-	}
-	result->tv_sec = a.tv_sec - b.tv_sec;
-	if (result->tv_sec < 0L) {
-		result->tv_sec++;
-		result->tv_usec -= 1000000L;
-	}
-}
-
-static inline void php_network_set_limit_time(struct timeval *limit_time,
-		struct timeval *timeout)
-{
-	gettimeofday(limit_time, NULL);
-	const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
-	ZEND_ASSERT(limit_time->tv_sec < (timeoutmax - timeout->tv_sec));
-	limit_time->tv_sec += timeout->tv_sec;
-	limit_time->tv_usec += timeout->tv_usec;
-	if (limit_time->tv_usec >= 1000000) {
-		limit_time->tv_usec -= 1000000;
-		limit_time->tv_sec++;
-	}
-}
-#endif
-
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -385,34 +354,29 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	int events = PHP_POLLREADABLE|POLLOUT;
 #endif
 	struct timeval working_timeout;
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval limit_time, time_now;
-#endif
-	if (timeout) {
+	uint64_t now_us, limit_us;
+	int has_timeout = timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec > 0));
+	if (has_timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#ifdef HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
-#endif
+		limit_us = (zend_time_mono_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
 	}
 
 	while (true) {
-		n = php_pollfd_for(sockfd, events, timeout ? &working_timeout : NULL);
+		n = php_pollfd_for(sockfd, events, has_timeout ? &working_timeout : NULL);
 		if (n < 0) {
 			if (errno == EINTR) {
-#ifdef HAVE_GETTIMEOFDAY
-				if (timeout) {
-					gettimeofday(&time_now, NULL);
+				if (has_timeout) {
+					now_us = zend_time_mono_fallback() / 1000;
 
-					if (!timercmp(&time_now, &limit_time, <)) {
+					if (now_us > limit_us) {
 						/* time limit expired; no need for another poll */
 						error = PHP_TIMEOUT_ERROR_VALUE;
 						break;
 					} else {
 						/* work out remaining time */
-						sub_times(limit_time, time_now, &working_timeout);
+						zend_time_usec2val(limit_us - now_us, &working_timeout);
 					}
 				}
-#endif
 				continue;
 			}
 			ret = -1;
@@ -898,10 +862,9 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
 	struct timeval working_timeout;
+	uint64_t now_us, limit_us;
 	socklen_t socklen;
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval limit_time, time_now;
-#endif
+	int has_timeout = timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec > 0));
 
 	num_addrs = php_network_getaddresses(host, socktype, &psal, error_string);
 
@@ -910,11 +873,9 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		return -1;
 	}
 
-	if (timeout) {
+	if (has_timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#ifdef HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
-#endif
+		limit_us = (zend_time_mono_fallback() / 1000) + (working_timeout.tv_sec * ZEND_MICRO_IN_SEC) + working_timeout.tv_usec;
 	}
 
 	for (sal = psal; !fatal && *sal != NULL; sal++) {
@@ -1050,7 +1011,7 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		}
 
 		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
-				timeout ? &working_timeout : NULL,
+				has_timeout ? &working_timeout : NULL,
 				error_string, error_code);
 
 		if (n != -1) {
@@ -1058,32 +1019,17 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		}
 
 		/* adjust timeout for next attempt */
-#ifdef HAVE_GETTIMEOFDAY
-		if (timeout) {
-			gettimeofday(&time_now, NULL);
+		if (has_timeout) {
+			now_us = zend_time_mono_fallback() / 1000;
 
-			if (!timercmp(&time_now, &limit_time, <)) {
+			if (now_us > limit_us) {
 				/* time limit expired; don't attempt any further connections */
 				fatal = 1;
 			} else {
 				/* work out remaining time */
-				sub_times(limit_time, time_now, &working_timeout);
+				zend_time_usec2val(limit_us - now_us, &working_timeout);
 			}
 		}
-#else
-		if (error_code && *error_code == PHP_TIMEOUT_ERROR_VALUE) {
-			/* Don't even bother trying to connect to the next alternative;
-				* we have no way to determine how long we have already taken
-				* and it is quite likely that the next attempt will fail too. */
-			fatal = 1;
-		} else {
-			/* re-use the same initial timeout.
-				* Not the best thing, but in practice it should be good-enough */
-			if (timeout) {
-				memcpy(&working_timeout, timeout, sizeof(working_timeout));
-			}
-		}
-#endif
 
 		closesocket(sock);
 	}

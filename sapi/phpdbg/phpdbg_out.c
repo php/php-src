@@ -21,11 +21,8 @@
 #include "spprintf.h"
 #include "phpdbg.h"
 #include "phpdbg_io.h"
+#include "zend_time.h"
 #include "ext/standard/html.h"
-
-#ifdef _WIN32
-#	include "win32/time.h"
-#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -101,12 +98,9 @@ int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 		/* no formatting on logging output */
 		case P_LOG:
 			if (msg) {
-				struct timeval tp;
-				if (gettimeofday(&tp, NULL) == SUCCESS) {
-					msgoutlen = phpdbg_asprintf(&msgout, "[%ld %.8F]: %.*s\n", tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
-				} else {
-					msgoutlen = FAILURE;
-				}
+				struct timespec ts;
+				zend_time_real_spec(&ts);
+				msgoutlen = phpdbg_asprintf(&msgout, "[%lld %.8F]: %.*s\n", (long long)ts.tv_sec, ts.tv_nsec / 1000000000., msglen, msg);
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()

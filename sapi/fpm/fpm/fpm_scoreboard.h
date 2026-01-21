@@ -30,10 +30,10 @@ struct fpm_scoreboard_proc_s {
 	pid_t pid;
 	unsigned long requests;
 	enum fpm_request_stage_e request_stage;
-	struct timeval accepted;
-	struct timeval duration;
+	uint64_t accepted_ns;
+	uint64_t duration_ns;
 	time_t accepted_epoch;
-	struct timeval tv;
+	uint64_t last_activity_ns;
 	char request_uri[512];
 	char query_string[2048];
 	char request_method[16];
@@ -42,7 +42,7 @@ struct fpm_scoreboard_proc_s {
 	char auth_user[32];
 #ifdef HAVE_TIMES
 	struct tms cpu_accepted;
-	struct timeval cpu_duration;
+	uint64_t cpu_duration_ns;
 	struct tms last_request_cpu;
 	struct timeval last_request_cpu_duration;
 #endif

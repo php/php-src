@@ -62,12 +62,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <grp.h>
 #include <pwd.h>
-#include <time.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -93,6 +91,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <Zend/zend_portability.h>
+#include <Zend/zend_time.h>
 
 struct lsapi_MD5Context {
     uint32 buf[4];
@@ -246,15 +245,15 @@ void LSAPI_Log(int flag, const char * fmt, ...)
     if ((flag & LSAPI_LOG_TIMESTAMP_BITS)
         && !(s_stderr_is_pipe))
     {
-        struct timeval  tv;
+        struct timespec ts;
         struct tm       tm;
-        gettimeofday(&tv, NULL);
-        localtime_r(&tv.tv_sec, &tm);
+        zend_time_real_spec(&ts);
+        localtime_r(&ts.tv_sec, &tm);
         if (flag & LSAPI_LOG_TIMESTAMP_FULL)
         {
-            p += snprintf(p, 1024, "%04d-%02d-%02d %02d:%02d:%02d.%06d ",
+            p += snprintf(p, 1024, "%04d-%02d-%02d %02d:%02d:%02d.%09ld ",
                 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-                tm.tm_hour, tm.tm_min, tm.tm_sec, (int)tv.tv_usec);
+                tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
         }
         else if (flag & LSAPI_LOG_TIMESTAMP_HMS)
         {
@@ -3115,7 +3114,7 @@ static void lsapi_check_child_status( long tmCur )
 //
 //    while( g_prefork_server->m_iCurChildren && (sec < maxWait) )
 //    {
-//        lsapi_check_child_status(time(NULL));
+//        lsapi_check_child_status(zend_time_real_get());
 //        sleep( 1 );
 //        sec++;
 //    }
@@ -3187,7 +3186,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
             s_proc_group_timer_cb(&s_ignore_pid);
         }
 
-        curTime = time( NULL );
+        curTime = zend_time_real_get();
         if (curTime != lastTime )
         {
             lastTime = curTime;
@@ -3405,7 +3404,7 @@ int LSAPI_Postfork_Parent(LSAPI_Request * pReq)
     ++g_prefork_server->m_iCurChildren;
     if (pReq->child_status)
     {
-        time_t curTime = time( NULL );
+        time_t curTime = zend_time_real_get();
         pReq->child_status->m_tmWaitBegin = curTime;
         pReq->child_status->m_tmStart = curTime;
     }
@@ -3460,7 +3459,7 @@ int LSAPI_Accept_Before_Fork(LSAPI_Request * pReq)
             s_proc_group_timer_cb(&s_ignore_pid);
         }
 
-        curTime = time(NULL);
+        curTime = zend_time_real_get();
         if (curTime != lastTime)
         {
             lastTime = curTime;
@@ -3593,7 +3592,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
 
     if ( s_worker_status )
     {
-        s_worker_status->m_tmWaitBegin = time( NULL );
+        s_worker_status->m_tmWaitBegin = zend_time_real_get();
     }
 
 
@@ -3724,7 +3723,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                 s_worker_status->m_inProcess = 1;
                 ++s_worker_status->m_iReqCounter;
                 s_worker_status->m_tmReqBegin =
-                s_worker_status->m_tmLastCheckPoint = time(NULL);
+                s_worker_status->m_tmLastCheckPoint = zend_time_real_get();
             }
             ++s_req_processed;
             return 0;

@@ -24,6 +24,7 @@
 #include "php_streams.h"
 #include "php_network.h"
 #include "php_ini.h"
+#include "zend_time.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
@@ -471,20 +472,9 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			php_uri_struct_free(resource);
 			return NULL;
 		}
-#ifndef PHP_WIN32
-		timeout.tv_sec = (time_t) d;
-		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
-#else
-		timeout.tv_sec = (long) d;
-		timeout.tv_usec = (long) ((d - timeout.tv_sec) * 1000000);
-#endif
+		zend_time_dbl2val(d, &timeout);
 	} else {
-#ifndef PHP_WIN32
-		timeout.tv_sec = FG(default_socket_timeout);
-#else
-		timeout.tv_sec = (long)FG(default_socket_timeout);
-#endif
-		timeout.tv_usec = 0;
+		zend_time_sec2val(FG(default_socket_timeout), &timeout);
 	}
 
 	stream = php_stream_xport_create(ZSTR_VAL(transport_string), ZSTR_LEN(transport_string), options,

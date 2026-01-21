@@ -482,7 +482,7 @@ static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
     int     iRestored = 0;
     do {
         usleep(1000);
-        time(&iTimeNow);
+        iTimeNow = zend_time_real_get();
         if (!iTimeStart) {
             iTimeStart = iTimeNow;
         }

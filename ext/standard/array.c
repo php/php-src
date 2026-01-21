@@ -24,7 +24,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #include <string.h>
 #include "zend_globals.h"
 #include "zend_interfaces.h"

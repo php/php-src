@@ -34,10 +34,6 @@
 #include <stdio.h>
 #include "php.h"
 
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif

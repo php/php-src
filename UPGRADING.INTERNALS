@@ -56,6 +56,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     node.
   . The zend_exception_save() and zend_exception_restore() functions were
     removed.
+  . Introduced a new time-retrieval API zend_time_*. Use this API instead of
+    time(), gettimeofday(), clock_gettime() and timespec_get().
 
 ========================
 2. Build system changes
@@ -70,6 +72,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     as it was unused.
   . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
     as it was unused and could return the wrong result.
+
+- ext/date
+  . Deprecated php_time(), Use zend_time_real_get() instead.
 
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.

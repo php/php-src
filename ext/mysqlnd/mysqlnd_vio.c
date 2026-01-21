@@ -204,8 +204,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 	}
 
 	if (vio->data->options.timeout_connect) {
-		tv.tv_sec = vio->data->options.timeout_connect;
-		tv.tv_usec = 0;
+		zend_time_sec2val(vio->data->options.timeout_connect, &tv);
 	}
 
 	DBG_INF_FMT("calling php_stream_xport_create");

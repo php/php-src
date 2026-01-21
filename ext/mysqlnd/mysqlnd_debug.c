@@ -16,6 +16,7 @@
 */
 
 #include "php.h"
+#include "zend_time.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
@@ -76,21 +77,19 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-		struct timeval tv;
+		struct timespec ts;
 		struct tm *tm_p;
-		if (gettimeofday(&tv, NULL) != -1) {
-			const time_t sec = tv.tv_sec;
-			if ((tm_p = localtime((const time_t *)&sec))) {
-				snprintf(time_buffer, sizeof(time_buffer) - 1,
-						 /* "%04d-%02d-%02d " */
-						 "%02d:%02d:%02d.%06d ",
-						 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
-						 (int) (tv.tv_usec));
-				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-			} else {
-				time_buffer[0] = '\0';
-			}
+		zend_time_real_spec(&ts);
+		if ((tm_p = localtime((const time_t *)&ts.tv_sec))) {
+			snprintf(time_buffer, sizeof(time_buffer) - 1,
+						/* "%04d-%02d-%02d " */
+						"%02d:%02d:%02d.%06d ",
+						/*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
+						tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
+						(int) (ts.tv_nsec / 1000));
+			time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+		} else {
+			time_buffer[0] = '\0';
 		}
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
@@ -163,21 +162,19 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-		struct timeval tv;
+		struct timespec ts;
 		struct tm *tm_p;
-		if (gettimeofday(&tv, NULL) != -1) {
-			const time_t sec = tv.tv_sec;
-			if ((tm_p = localtime((const time_t *)&sec))) {
-				snprintf(time_buffer, sizeof(time_buffer) - 1,
-						 /* "%04d-%02d-%02d " */
-						 "%02d:%02d:%02d.%06d ",
-						 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
-						 (int) (tv.tv_usec));
-				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-			} else {
-				time_buffer[0] = '\0';
-			}
+		zend_time_real_spec(&ts);
+		if ((tm_p = localtime((const time_t *)&ts.tv_sec))) {
+			snprintf(time_buffer, sizeof(time_buffer) - 1,
+						/* "%04d-%02d-%02d " */
+						"%02d:%02d:%02d.%06d ",
+						/*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
+						tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
+						(int)(ts.tv_nsec / 1000));
+			time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+		} else {
+			time_buffer[0] = '\0';
 		}
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
@@ -329,8 +326,8 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 			uint64_t own_time = call_time - mine_non_own_time;
 			uint32_t func_name_len = strlen(*func_name);
 
-			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
-						*func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
+			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%"PRIu64" own=%"PRIu64" in_calls=%"PRIu64")",
+						*func_name, call_time, own_time, mine_non_own_time
 					);
 
 			if ((f_profile = zend_hash_str_find_ptr(&self->function_profiles, *func_name, func_name_len)) != NULL) {

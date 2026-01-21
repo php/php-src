@@ -35,7 +35,6 @@
 #  include <crypt.h>
 # endif
 #endif
-#include <time.h>
 #include <string.h>
 
 #ifdef PHP_WIN32

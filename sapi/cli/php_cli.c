@@ -33,14 +33,10 @@
 #include <stdio.h>
 #include "php.h"
 #ifdef PHP_WIN32
-#include "win32/time.h"
 #include "win32/signal.h"
 #include "win32/console.h"
 #include <process.h>
 #include <shellapi.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -50,6 +46,7 @@
 #include <locale.h>
 #include "zend.h"
 #include "zend_extensions.h"
+#include "zend_time.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
@@ -230,8 +227,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 
 	PHP_SAFE_FD_SET(fd, &wfd);
 
-	tv.tv_sec = (long)FG(default_socket_timeout);
-	tv.tv_usec = 0;
+	zend_time_sec2val(FG(default_socket_timeout), &tv);
 
 	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
 

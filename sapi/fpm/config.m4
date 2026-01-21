@@ -529,7 +529,6 @@ if test "$PHP_FPM" != "no"; then
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
     fpm/fpm_cleanup.c \
-    fpm/fpm_clock.c \
     fpm/fpm_conf.c \
     fpm/fpm_env.c \
     fpm/fpm_events.c \

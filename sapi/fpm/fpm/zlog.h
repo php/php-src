@@ -9,7 +9,7 @@
 #define zlog(flags,...) zlog_ex(__func__, __LINE__, flags, __VA_ARGS__)
 #define zlog_msg(flags, prefix, msg) zlog_msg_ex(__func__, __LINE__, flags, prefix, msg)
 
-struct timeval;
+struct timespec;
 
 typedef unsigned char zlog_bool;
 
@@ -24,7 +24,7 @@ int zlog_set_buffering(zlog_bool buffering);
 const char *zlog_get_level_name(int log_level);
 void zlog_set_launched(void);
 
-size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len);
+size_t zlog_print_time(struct timespec *ts, char *timebuf, size_t timebuf_len);
 
 void vzlog(const char *function, int line, int flags, const char *fmt, va_list args);
 void zlog_ex(const char *function, int line, int flags, const char *fmt, ...)
