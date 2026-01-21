@@ -12,7 +12,7 @@ if (getenv('SKIP_ASAN')) {
 }
 ?>
 --INI--
-zend.max_allowed_stack_size=512K
+zend.max_allowed_stack_size=128K
 --FILE--
 <?php
 class Node {
