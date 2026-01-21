@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit datepatterngenerator.stub.php instead.
  * Stub hash: 4456b13f7ed59847bbf129cd45b0d1f63ce70108 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDatePatternGenerator___construct, 0, 0, 0)
