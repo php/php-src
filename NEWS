@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #438780145 (Nested finally with repeated return type check may
     uaf). (ilutov)
   . Fixed bug GH-20905 (Lazy proxy bailing __clone assertion). (ilutov)
+  . Fixed bug GH-20479 (Hooked object properties overflow). (ndossche)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
