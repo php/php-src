@@ -85,11 +85,6 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
 
             $stubCode = file_get_contents($stubFile);
             $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
-            $oldStubHash = extractStubHash($arginfoFile);
-            if ($stubHash === $oldStubHash && !$context->forceParse) {
-                /* Stub file did not change, do not regenerate. */
-                return null;
-            }
         }
 
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
@@ -128,9 +123,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $context->allConstInfos,
             $stubHash
         );
-        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
-            reportFilePutContents($arginfoFile, $arginfoCode);
-        }
+        reportFilePutContents($arginfoFile, $arginfoCode);
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
             $legacyFileInfo = $fileInfo->getLegacyVersion();
@@ -141,9 +134,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
                 $context->allConstInfos,
                 $stubHash
             );
-            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
-                reportFilePutContents($legacyFile, $arginfoCode);
-            }
+            reportFilePutContents($legacyFile, $arginfoCode);
         }
 
         return $fileInfo;
@@ -167,8 +158,6 @@ function extractStubHash(string $arginfoFile): ?string {
 }
 
 class Context {
-    public bool $forceParse = false;
-    public bool $forceRegeneration = false;
     /** @var array<string, ConstInfo> */
     public array $allConstInfos = [];
     /** @var FileInfo[] */
@@ -6118,11 +6107,9 @@ $replaceClassSynopses = isset($options["replace-classsynopses"]);
 $generateMethodSynopses = isset($options["generate-methodsynopses"]);
 $replaceMethodSynopses = isset($options["replace-methodsynopses"]);
 $generateOptimizerInfo = isset($options["generate-optimizer-info"]);
-$context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $verifyManual || $replacePredefinedConstants || $generateClassSynopses || $generateOptimizerInfo || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
 
 if (isset($options["h"]) || isset($options["help"])) {
-    die("\nUsage: gen_stub.php [ -f | --force-regeneration ] [ --replace-predefined-constants ] [ --generate-classsynopses ] [ --replace-classsynopses ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ]  [ --verify-manual ] [ --generate-optimizer-info ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
+    die("\nUsage: gen_stub.php [ --replace-predefined-constants ] [ --generate-classsynopses ] [ --replace-classsynopses ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ]  [ --verify-manual ] [ --generate-optimizer-info ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
 }
 
 $locations = array_slice($argv, $optind);
