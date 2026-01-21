@@ -269,6 +269,16 @@ const T_FN = UNKNOWN;
 const T_CONST = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_TYPE
+ */
+const T_TYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_TYPES
+ */
+const T_TYPES = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_RETURN
  */
 const T_RETURN = UNKNOWN;
