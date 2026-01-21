@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit com_persist.stub.php instead.
  * Stub hash: d14d30fb232f08da37ba0df0b9186eb8bac5e1a4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 0)
