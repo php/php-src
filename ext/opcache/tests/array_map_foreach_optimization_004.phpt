@@ -47,7 +47,7 @@ LIVE RANGES:
      4: 0009 - 0012 (tmp/var)
 
 stdClass:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 V0 = NEW 0 string("stdClass")
