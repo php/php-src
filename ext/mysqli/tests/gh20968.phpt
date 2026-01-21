@@ -1,5 +1,5 @@
 --TEST--
-Bug #20968 mysqli_options() with invalid option triggers ValueError
+GH-20968 mysqli_options() with invalid option should triggers ValueError
 --EXTENSIONS--
 mysqli
 --CONFLICTS--
@@ -13,15 +13,14 @@ require_once 'skipifconnectfailure.inc';
 require_once 'connect.inc';
 
 $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
-
-$value = $mysqli->options(10, 'invalid_option');
-
-var_dump($value);
+   
+try {
+  $value = $mysqli->options(10, 'invalid_option');
+  var_dump($value);
+} catch (ValueError $exception) {
+  echo $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: mysqli::options(): Argument #1 ($option) must be one of predefined options in %s:%d
-Stack trace:
-#0 %s(%d): mysqli->options(%d, 'invalid_option')
-#1 {main}
-  thrown in %s on line %d
+mysqli::options(): Argument #1 ($option) must be one of predefined options
