@@ -15,6 +15,7 @@ function skipFunction($function): bool {
      || $function === 'zend_test_array_return'
      || $function === 'zend_test_crash'
      || $function === 'zend_leak_bytes'
+     || $function === 'zend_test_use_internal_traits_not_trait'
         /* mess with output */
      || (is_string($function) && str_starts_with($function, 'ob_'))
      || $function === 'output_add_rewrite_var'

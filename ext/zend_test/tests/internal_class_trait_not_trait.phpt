@@ -5,7 +5,6 @@ zend_test
 --FILE--
 <?php
 
-// This should produce a fatal error because _ZendTestNotATraitForInternalTraits is not a trait
 zend_test_use_internal_traits_not_trait();
 
 echo "Should not reach here\n";
