@@ -17,7 +17,7 @@ object(Closure)#%d (%d) {
   ["file"]=>
   string(%d) "%smagic_005.php"
   ["line"]=>
-  int(8)
+  int(7)
   ["this"]=>
   object(Foo)#%d (0) {
   }
