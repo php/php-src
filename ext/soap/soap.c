@@ -1011,8 +1011,10 @@ PHP_METHOD(SoapServer, __construct)
 
 	service->version = version;
 	service->type = SOAP_FUNCTIONS;
-	service->soap_functions.functions_all = FALSE;
-	service->soap_functions.ft = zend_new_array(0);
+	service->soap_functions.functions_all = false;
+	ALLOC_HASHTABLE(service->soap_functions.ft);
+	/* This hashtable contains zend_function pointers so doesn't need a destructor */
+	zend_hash_init(service->soap_functions.ft, 0, NULL, NULL, false);
 
 	if (wsdl) {
 		zend_try {
@@ -1132,7 +1134,7 @@ PHP_METHOD(SoapServer, setObject)
 PHP_METHOD(SoapServer, getFunctions)
 {
 	soapServicePtr  service;
-	HashTable      *ft = NULL;
+	const HashTable *ft = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1145,14 +1147,10 @@ PHP_METHOD(SoapServer, getFunctions)
 		ft = &(Z_OBJCE(service->soap_object)->function_table);
 	} else if (service->type == SOAP_CLASS) {
 		ft = &service->soap_class.ce->function_table;
-	} else if (service->soap_functions.functions_all == TRUE) {
+	} else if (service->soap_functions.functions_all) {
 		ft = EG(function_table);
 	} else if (service->soap_functions.ft != NULL) {
-		zval *name;
-
-		ZEND_HASH_MAP_FOREACH_VAL(service->soap_functions.ft, name) {
-			add_next_index_str(return_value, zend_string_copy(Z_STR_P(name)));
-		} ZEND_HASH_FOREACH_END();
+		ft = service->soap_functions.ft;
 	}
 	if (ft != NULL) {
 		zend_function *f;
@@ -1171,7 +1169,7 @@ PHP_METHOD(SoapServer, getFunctions)
 PHP_METHOD(SoapServer, addFunction)
 {
 	soapServicePtr service;
-	zval *function_name, function_copy;
+	zval *function_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &function_name) == FAILURE) {
 		RETURN_THROWS();
@@ -1186,8 +1184,10 @@ PHP_METHOD(SoapServer, addFunction)
 			zval *tmp_function;
 
 			if (service->soap_functions.ft == NULL) {
-				service->soap_functions.functions_all = FALSE;
-				service->soap_functions.ft = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(function_name)));
+				service->soap_functions.functions_all = false;
+				ALLOC_HASHTABLE(service->soap_functions.ft);
+				/* This hashtable contains zend_function pointers so doesn't need a destructor */
+				zend_hash_init(service->soap_functions.ft, zend_hash_num_elements(Z_ARRVAL_P(function_name)), NULL, NULL, false);
 			}
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(function_name), tmp_function) {
@@ -1200,15 +1200,15 @@ PHP_METHOD(SoapServer, addFunction)
 				}
 
 				key = zend_string_tolower(Z_STR_P(tmp_function));
+				f = zend_hash_find_ptr(EG(function_table), key);
 
-				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
+				if (f == NULL) {
 					zend_string_release_ex(key, false);
 					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
 					RETURN_THROWS();
 				}
 
-				ZVAL_STR_COPY(&function_copy, f->common.function_name);
-				zend_hash_update(service->soap_functions.ft, key, &function_copy);
+				zend_hash_update_ptr(service->soap_functions.ft, key, f);
 
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END();
@@ -1218,19 +1218,20 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_function *f;
 
 		key = zend_string_tolower(Z_STR_P(function_name));
-
-		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
+		f = zend_hash_find_ptr(EG(function_table), key);
+		if (f == NULL) {
 			zend_string_release_ex(key, false);
 			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
-			service->soap_functions.functions_all = FALSE;
-			service->soap_functions.ft = zend_new_array(0);
+			service->soap_functions.functions_all = false;
+			ALLOC_HASHTABLE(service->soap_functions.ft);
+			/* This hashtable contains zend_function pointers so doesn't need a destructor */
+			zend_hash_init(service->soap_functions.ft, 0, NULL, NULL, false);
 		}
 
-		ZVAL_STR_COPY(&function_copy, f->common.function_name);
-		zend_hash_update(service->soap_functions.ft, key, &function_copy);
+		zend_hash_update_ptr(service->soap_functions.ft, key, f);
 		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
@@ -1244,7 +1245,7 @@ PHP_METHOD(SoapServer, addFunction)
 				efree(service->soap_functions.ft);
 				service->soap_functions.ft = NULL;
 			}
-			service->soap_functions.functions_all = TRUE;
+			service->soap_functions.functions_all = true;
 		} else {
 			zend_argument_value_error(1, "must be SOAP_FUNCTIONS_ALL when an integer is passed");
 		}
@@ -1282,12 +1283,11 @@ PHP_METHOD(SoapServer, handle)
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
 	xmlDocPtr doc_request = NULL, doc_return = NULL;
-	zval function_name, *params, *soap_obj, retval;
+	zval function_name, *params, retval;
 	char cont_len[30];
 	uint32_t num_params = 0;
-	int size, i, call_status = 0;
+	int size, i;
 	xmlChar *buf;
-	HashTable *function_table;
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	char *arg = NULL;
@@ -1462,10 +1462,10 @@ PHP_METHOD(SoapServer, handle)
 
 	service->soap_headers_ptr = &soap_headers;
 
-	soap_obj = NULL;
+	zval *soap_obj = NULL;
+	HashTable *function_table = NULL;
 	if (service->type == SOAP_OBJECT) {
 		soap_obj = &service->soap_object;
-		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else if (service->type == SOAP_CLASS) {
 		/* If persistent then set soap_obj from the previous created session (if available) */
 #ifdef SOAP_HAS_SESSION_SUPPORT
@@ -1489,7 +1489,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 #endif
 
-		/* If new session or something weird happned */
+		/* If new session or something weird happened */
 		if (soap_obj == NULL) {
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
@@ -1523,9 +1523,8 @@ PHP_METHOD(SoapServer, handle)
 				soap_obj = &tmp_soap;
 			}
 		}
-		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else {
-		if (service->soap_functions.functions_all == TRUE) {
+		if (service->soap_functions.functions_all) {
 			function_table = EG(function_table);
 		} else {
 			function_table = service->soap_functions.ft;
@@ -1548,52 +1547,72 @@ PHP_METHOD(SoapServer, handle)
 				}
 			}
 #endif
-			if (zend_hash_find_ptr_lc(function_table, Z_STR(h->function_name)) != NULL ||
-			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
-			     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
-				if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
-					call_status = call_user_function(NULL, soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters);
-				} else {
-					call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters);
+
+			if (soap_obj) {
+				/* This is because the object might define a __call() magic method */
+				zend_result method_call_result = zend_call_method_if_exists(Z_OBJ_P(soap_obj), Z_STR(h->function_name), &h->retval, h->num_params, h->parameters);
+				if (UNEXPECTED(method_call_result == FAILURE)) {
+					if (h->mustUnderstand) {
+						soap_server_fault_en("MustUnderstand","Header not understood", NULL, NULL, NULL);
+						goto fail;
+					}
+					continue;
 				}
-				if (call_status != SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Function '%s' call failed", Z_STRVAL(h->function_name));
-					return;
+			} else {
+				zend_function *header_fn = zend_hash_find_ptr_lc(function_table, Z_STR(h->function_name));
+				if (UNEXPECTED(header_fn == NULL)) {
+					if (h->mustUnderstand) {
+						soap_server_fault_en("MustUnderstand","Header not understood", NULL, NULL, NULL);
+						goto fail;
+					}
+					continue;
 				}
-				if (Z_TYPE(h->retval) == IS_OBJECT &&
-				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
-					php_output_discard();
-					soap_server_fault_ex(function, &h->retval, h);
-					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
-					goto fail;
-				} else if (EG(exception)) {
-					php_output_discard();
-					_soap_server_exception(service, function, ZEND_THIS);
-					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
-					goto fail;
-				}
-			} else if (h->mustUnderstand) {
-				soap_server_fault_en("MustUnderstand","Header not understood", NULL, NULL, NULL);
+				zend_call_known_function(header_fn, NULL, NULL, &h->retval, h->num_params, h->parameters, NULL);
+			}
+
+			if (Z_TYPE(h->retval) == IS_OBJECT &&
+			    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
+				php_output_discard();
+				soap_server_fault_ex(function, &h->retval, h);
+				if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
+				goto fail;
+			} else if (EG(exception)) {
+				php_output_discard();
+				_soap_server_exception(service, function, ZEND_THIS);
+				if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
+				goto fail;
 			}
 		}
 	}
 
-	if (zend_hash_find_ptr_lc(function_table, Z_STR(function_name)) != NULL ||
-	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
-	     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
-		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
-			call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
+	if (soap_obj) {
+		/* This is because the object might define a __call() magic method */
+		zend_result method_call_result = zend_call_method_if_exists(Z_OBJ_P(soap_obj), Z_STR(function_name), &retval, num_params, params);
+		if (UNEXPECTED(method_call_result == FAILURE)) {
+			zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(Z_OBJCE_P(soap_obj)->name),  Z_STRVAL(function_name));
+			php_output_discard();
+			_soap_server_exception(service, function, ZEND_THIS);
 			if (service->type == SOAP_CLASS) {
-				if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-					zval_ptr_dtor(soap_obj);
-					soap_obj = NULL;
-				}
+				zval_ptr_dtor(soap_obj);
 			}
-		} else {
-			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params);
+			goto fail;
 		}
 	} else {
-		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
+		zend_function *fn = zend_hash_find_ptr_lc(function_table, Z_STR(function_name));
+		if (UNEXPECTED(fn == NULL)) {
+			zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL(function_name));
+			php_output_discard();
+			_soap_server_exception(service, function, ZEND_THIS);
+			goto fail;
+		}
+		zend_call_known_function(fn, NULL, NULL, &retval, num_params, params, NULL);
+	}
+
+	if (service->type == SOAP_CLASS) {
+		if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+			zval_ptr_dtor(soap_obj);
+			soap_obj = NULL;
+		}
 	}
 
 	if (EG(exception)) {
@@ -1609,32 +1628,27 @@ PHP_METHOD(SoapServer, handle)
 		goto fail;
 	}
 
-	if (call_status == SUCCESS) {
-		char *response_name;
+	char *response_name;
 
-		if (Z_TYPE(retval) == IS_OBJECT &&
-		    instanceof_function(Z_OBJCE(retval), soap_fault_class_entry)) {
-			php_output_discard();
-			soap_server_fault_ex(function, &retval, NULL);
-			goto fail;
-		}
+	if (Z_TYPE(retval) == IS_OBJECT &&
+	    instanceof_function(Z_OBJCE(retval), soap_fault_class_entry)) {
+		php_output_discard();
+		soap_server_fault_ex(function, &retval, NULL);
+		goto fail;
+	}
 
-		bool has_response_name = function && function->responseName;
-		if (has_response_name) {
-			response_name = function->responseName;
-		} else {
-			response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
-			memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
-			memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
-		}
-		doc_return = serialize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version);
-
-		if (!has_response_name) {
-			efree(response_name);
-		}
+	bool has_response_name = function && function->responseName;
+	if (has_response_name) {
+		response_name = function->responseName;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Function '%s' call failed", Z_STRVAL(function_name));
-		return;
+		response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
+		memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
+		memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
+	}
+	doc_return = serialize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version);
+
+	if (!has_response_name) {
+		efree(response_name);
 	}
 
 	if (EG(exception)) {
