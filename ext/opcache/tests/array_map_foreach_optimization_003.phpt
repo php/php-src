@@ -43,7 +43,7 @@ LIVE RANGES:
      2: 0003 - 0009 (loop)
 
 plus1:
-     ; (lines=3, args=1, vars=1, tmps=1)
+     ; (lines=3, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($x) = RECV 1

@@ -77,6 +77,11 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now supports reference values.
 
+- Sockets:
+  . socket_addrinfo_lookup() now has an additional optional argument $error
+    when not null, and on failure, gives the error code (one of the EAI_*
+    constants).
+
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
     files argument if one or more of the entries is not
@@ -105,6 +110,9 @@ PHP 8.6 UPGRADE NOTES
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
 
+- mysqli
+  . Added new constant MYSQLI_OPT_COMPRESS.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -112,6 +120,23 @@ PHP 8.6 UPGRADE NOTES
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
   . AF_UNSPEC.
+  . EAI_BADFLAGS.
+  . EAI_NONAME.
+  . EAI_AGAIN.
+  . EAI_FAIL.
+  . EAI_NODATA.
+  . EAI_FAMILY.
+  . EAI_SOCKTYPE.
+  . EAI_SERVICE.
+  . EAI_ADDRFAMILY.
+  . EAI_SYSTEM.
+  . EAI_OVERFLOW
+  . EAI_INPROGRESS.
+  . EAI_CANCELED.
+  . EAI_NOTCANCELED.
+  . EAI_ALLDONE.
+  . EAI_INTR.
+  . EAI_IDN_ENCODE.
 
 ========================================
 11. Changes to INI File Handling

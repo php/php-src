@@ -1,5 +1,5 @@
 --TEST--
-array_map(): foreach optimization - static call
+array_map(): foreach optimization
 --EXTENSIONS--
 opcache
 --INI--
@@ -9,15 +9,13 @@ opcache.opt_debug_level=0x20000
 --FILE--
 <?php
 
-class Adder {
-    static function plus1($x) {
-        return $x + 1;
-    }
+function plus1($x) {
+    return $x + 1;
 }
 
 $array = range(1, 10);
 
-$foo = array_map(Adder::plus1(...), $array);
+$foo = array_map(plus1(...), $array);
 
 var_dump($foo);
 
@@ -36,7 +34,7 @@ $_main:
 0006 T2 = INIT_ARRAY 0 (packed) NEXT
 0007 V3 = FE_RESET_R CV0($array) 0014
 0008 T5 = FE_FETCH_R V3 T4 0014
-0009 INIT_STATIC_METHOD_CALL 1 string("Adder") string("plus1")
+0009 INIT_FCALL 1 %d string("plus1")
 0010 SEND_VAL T4 1
 0011 V4 = DO_UCALL
 0012 T2 = ADD_ARRAY_ELEMENT V4 T5
@@ -53,8 +51,8 @@ LIVE RANGES:
      4: 0009 - 0010 (tmp/var)
      5: 0009 - 0012 (tmp/var)
 
-Adder::plus1:
-     ; (lines=3, args=1, vars=1, tmps=1)
+plus1:
+     ; (lines=3, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($x) = RECV 1

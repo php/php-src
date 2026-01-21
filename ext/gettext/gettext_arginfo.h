@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit gettext.stub.php instead.
  * Stub hash: c675dc9492943bbac106c5906b75c31436964423 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_textdomain, 0, 0, IS_STRING, 0)

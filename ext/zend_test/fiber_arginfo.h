@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit fiber.stub.php instead.
  * Stub hash: 8cd7626122b050585503ccebe370a61781ff83f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class__ZendTestFiber___construct, 0, 0, 1)

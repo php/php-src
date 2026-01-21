@@ -5186,7 +5186,7 @@ function generateArgInfoCode(
     array $allConstInfos,
     string $stubHash
 ): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead.\n"
+    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
           . " * Stub hash: $stubHash */\n";
 
     $generatedFuncInfos = [];

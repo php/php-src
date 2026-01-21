@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     transmitted data can remain unacknowledged. (James Lucas)
   . Added AF_UNSPEC support for sock_addrinfo_lookup() as a sole umbrella for
     AF_INET* family only. (David Carlier)
+  . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new optional
+    parameter). (David Carlier)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger

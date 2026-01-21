@@ -36,7 +36,7 @@ permissions:
   contents: read
   pull-requests: write
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event_name }}
   cancel-in-progress: false
 jobs:
   REAL_TIME_BENCHMARK:
@@ -135,7 +135,7 @@ jobs:
         run: |
           set -e
 
-          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c1-4)"
+          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline.ini
             PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA"
@@ -152,7 +152,7 @@ jobs:
         run: |
           set -e
 
-          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c1-4)"
+          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline_jit.ini
             PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA (JIT)"
@@ -240,12 +240,12 @@ jobs:
           
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             WORKSPACE="manual"
-            BASE_COMMIT="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-6)"
+            BASE_COMMIT="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-10)"
           else
             WORKSPACE="nightly"
-            BASE_COMMIT="$(echo "${{ env.LAST_RESULT_SHA }}" | cut -c 1-6)"
+            BASE_COMMIT="$(echo "${{ env.LAST_RESULT_SHA }}" | cut -c 1-10)"
           fi
-          COMPARE_COMMIT="$(echo "${{ env.COMMIT }}" | cut -c 1-6)"
+          COMPARE_COMMIT="$(echo "${{ env.COMMIT }}" | cut -c 1-10)"
 
           cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s|INFRA_DOCKER_REGISTRY=public.ecr.aws/abcdefgh|INFRA_DOCKER_REGISTRY=${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
@@ -301,16 +301,3 @@ jobs:
           NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)
           sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
           gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}
-      - name: Cleanup
-        if: always()
-        run: |
-          set -ex
-
-          rm -rf ./php-version-benchmarks/tmp/
-          rm -f ./php-version-benchmarks/build/infrastructure/config/*.tfvars
-          rm -rf ./php-version-benchmarks/build/infrastructure/aws/.terraform/
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/.terraform.lock.hcl
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/aws.tfplan
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate.backup
-          rm -f ./php-version-benchmarks/config/infra/aws/*.ini

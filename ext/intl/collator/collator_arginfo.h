@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit collator.stub.php instead.
  * Stub hash: cbe3c5f4c35d93f90c3e7164bdfc4e2fefc88c83 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)

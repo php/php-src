@@ -2067,6 +2067,136 @@ const SHUT_WR = UNKNOWN;
 const SHUT_RDWR = UNKNOWN;
 #endif
 
+
+#ifdef EAI_BADFLAGS
+/**
+ * @var int
+ * @cvalue EAI_BADFLAGS
+ */
+const EAI_BADFLAGS = UNKNOWN;
+#endif
+#ifdef EAI_NONAME
+/**
+ * @var int
+ * @cvalue EAI_NONAME
+ */
+const EAI_NONAME = UNKNOWN;
+#endif
+#ifdef EAI_AGAIN
+/**
+ * @var int
+ * @cvalue EAI_AGAIN
+ */
+const EAI_AGAIN = UNKNOWN;
+#endif
+#ifdef EAI_FAIL
+/**
+ * @var int
+ * @cvalue EAI_FAIL
+ */
+const EAI_FAIL = UNKNOWN;
+#endif
+#ifdef EAI_NODATA
+/**
+ * @var int
+ * @cvalue EAI_NODATA
+ */
+const EAI_NODATA = UNKNOWN;
+#endif
+#ifdef EAI_FAMILY
+/**
+ * @var int
+ * @cvalue EAI_FAMILY
+ */
+const EAI_FAMILY = UNKNOWN;
+#endif
+#ifdef EAI_SOCKTYPE
+/**
+ * @var int
+ * @cvalue EAI_SOCKTYPE
+ */
+const EAI_SOCKTYPE = UNKNOWN;
+#endif
+#ifdef EAI_SERVICE
+/**
+ * @var int
+ * @cvalue EAI_SERVICE
+ */
+const EAI_SERVICE = UNKNOWN;
+#endif
+#ifdef EAI_ADDRFAMILY
+/**
+ * @var int
+ * @cvalue EAI_ADDRFAMILY
+ */
+const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#ifdef EAI_FAMILY
+/**
+ * @var int
+ * @cvalue EAI_FAMILY
+ */
+const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#endif
+#endif
+#ifdef EAI_SYSTEM
+/**
+ * @var int
+ * @cvalue EAI_SYSTEM
+ */
+const EAI_SYSTEM = UNKNOWN;
+#endif
+#ifdef EAI_OVERFLOW
+/**
+ * @var int
+ * @cvalue EAI_OVERFLOW
+ */
+const EAI_OVERFLOW = UNKNOWN;
+#endif
+#ifdef EAI_INPROGRESS
+/**
+ * @var int
+ * @cvalue EAI_INPROGRESS
+ */
+const EAI_INPROGRESS = UNKNOWN;
+#endif
+#ifdef EAI_CANCELED
+/**
+ * @var int
+ * @cvalue EAI_CANCELED
+ */
+const EAI_CANCELED = UNKNOWN;
+#endif
+#ifdef EAI_NOTCANCELED
+/**
+ * @var int
+ * @cvalue EAI_NOTCANCELED
+ */
+const EAI_NOTCANCELED = UNKNOWN;
+#endif
+#ifdef EAI_ALLDONE
+/**
+ * @var int
+ * @cvalue EAI_ALLDONE
+ */
+const EAI_ALLDONE = UNKNOWN;
+#endif
+#ifdef EAI_INTR
+/**
+ * @var int
+ * @cvalue EAI_INTR
+ */
+const EAI_INTR = UNKNOWN;
+#endif
+#ifdef EAI_IDN_ENCODE
+/**
+ * @var int
+ * @cvalue EAI_IDN_ENCODE
+ */
+const EAI_IDN_ENCODE = UNKNOWN;
+#endif
+
 /**
  * @strict-properties
  * @not-serializable
@@ -2187,9 +2317,10 @@ function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
 
 /**
  * @return array<int, AddressInfo>|false
+ * @param int $error_code
  * @refcount 1
  */
-function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = []): array|false {}
+function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = [], &$error_code = null): array|false {}
 
 function socket_addrinfo_connect(AddressInfo $address): Socket|false {}
 
