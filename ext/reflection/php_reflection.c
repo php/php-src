@@ -7714,6 +7714,20 @@ ZEND_METHOD(ReflectionConstant, getName)
 	RETURN_STR_COPY(const_->name);
 }
 
+ZEND_METHOD(ReflectionConstant, inNamespace)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	const char *backslash = zend_memrchr(ZSTR_VAL(const_->name), '\\', ZSTR_LEN(const_->name));
+	RETURN_BOOL(backslash);
+}
+/* }}} */
+
 ZEND_METHOD(ReflectionConstant, getNamespaceName)
 {
 	reflection_object *intern;
