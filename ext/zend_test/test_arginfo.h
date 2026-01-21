@@ -1,5 +1,10 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 25b63d5be5822cf0b717150dde07625cdd503c24 */
+ * Stub hash: f98ede068cef2b4a2fe4a423d18fed1748c22b29 */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_use_internal_traits_not_trait arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
