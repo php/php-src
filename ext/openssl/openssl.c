@@ -2762,7 +2762,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	if (p12 != NULL) {
 		bio_out = BIO_new(BIO_s_mem());
-		if (i2d_PKCS12_bio(bio_out, p12)) {
+		if (bio_out && i2d_PKCS12_bio(bio_out, p12)) {
 			BUF_MEM *bio_buf;
 
 			BIO_get_mem_ptr(bio_out, &bio_buf);
