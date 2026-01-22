@@ -1,21 +1,44 @@
 --TEST--
-Promoted readonly property reassignment in constructor - child class cannot reassign parent's property
+Promoted readonly property reassignment in constructor - child class can reassign parent's property
 --FILE--
 <?php
 
-class Parent_ {
+// Case 1: Parent does NOT use reassignment, child CAN reassign
+class Parent1 {
     public function __construct(
         public readonly string $prop = 'parent default',
     ) {
-        // Parent can reassign its own promoted property
-        $this->prop = 'parent set';
+        // Parent does NOT reassign here - leaves opportunity for child
     }
 }
 
-class Child extends Parent_ {
+class Child1 extends Parent1 {
     public function __construct() {
         parent::__construct();
-        // Child cannot reassign parent's promoted property
+        // Child CAN reassign since parent didn't use the one reassignment
+        $this->prop = 'child override';
+    }
+}
+
+$parent = new Parent1();
+var_dump($parent->prop);
+
+$child = new Child1();
+var_dump($child->prop);
+
+// Case 2: Parent USES reassignment, child cannot
+class Parent2 {
+    public function __construct(
+        public readonly string $prop = 'parent default',
+    ) {
+        $this->prop = 'parent set';  // Uses the one reassignment
+    }
+}
+
+class Child2 extends Parent2 {
+    public function __construct() {
+        parent::__construct();
+        // Child cannot reassign - parent already used the one reassignment
         try {
             $this->prop = 'child override';
         } catch (Error $e) {
@@ -24,45 +47,37 @@ class Child extends Parent_ {
     }
 }
 
-$parent = new Parent_();
-var_dump($parent->prop);
+$child2 = new Child2();
+var_dump($child2->prop);
 
-$child = new Child();
-var_dump($child->prop);
-
-// Even when child has its own promoted property
-class Parent2 {
+// Case 3: Child with its own promoted property
+class Parent3 {
     public function __construct(
         public readonly string $parentProp = 'parent default',
     ) {
-        $this->parentProp = 'parent set';
+        // Parent doesn't reassign
     }
 }
 
-class Child2 extends Parent2 {
+class Child3 extends Parent3 {
     public function __construct(
         public readonly string $childProp = 'child default',
     ) {
         parent::__construct();
-        // Child can reassign its own promoted property
-        $this->childProp = 'child set';
-        // But cannot reassign parent's promoted property
-        try {
-            $this->parentProp = 'child override';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
-        }
+        // Child can reassign both: parent's (not yet used) and its own
+        $this->parentProp = 'child set parent';
+        $this->childProp = 'child set own';
     }
 }
 
-$child2 = new Child2();
-var_dump($child2->parentProp, $child2->childProp);
+$child3 = new Child3();
+var_dump($child3->parentProp, $child3->childProp);
 
 ?>
 --EXPECT--
+string(14) "parent default"
+string(14) "child override"
+Cannot modify readonly property Parent2::$prop
 string(10) "parent set"
-Cannot modify readonly property Parent_::$prop
-string(10) "parent set"
-Cannot modify readonly property Parent2::$parentProp
-string(10) "parent set"
-string(9) "child set"
+string(16) "child set parent"
+string(13) "child set own"
