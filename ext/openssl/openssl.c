@@ -2134,6 +2134,11 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	subject_name = X509_get_subject_name(cert);
 	cert_name = X509_NAME_oneline(subject_name, NULL, 0);
+	if (cert_name == NULL) {
+		php_openssl_store_errors();
+		goto err;
+	}
+
 	add_assoc_string(return_value, "name", cert_name);
 	OPENSSL_free(cert_name);
 
