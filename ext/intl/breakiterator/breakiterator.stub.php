@@ -48,22 +48,22 @@ class IntlBreakIterator implements IteratorAggregate
     public const int SENTENCE_SEP_LIMIT = UNKNOWN;
 
     /** @tentative-return-type */
-    public static function createCharacterInstance(?string $locale = null): ?IntlBreakIterator {}
+    public static function createCharacterInstance(?string $locale = null): IntlBreakIterator {}
 
     /** @tentative-return-type */
     public static function createCodePointInstance(): IntlCodePointBreakIterator {}
 
     /** @tentative-return-type */
-    public static function createLineInstance(?string $locale = null): ?IntlBreakIterator {}
+    public static function createLineInstance(?string $locale = null): IntlBreakIterator {}
 
     /** @tentative-return-type */
-    public static function createSentenceInstance(?string $locale = null): ?IntlBreakIterator {}
+    public static function createSentenceInstance(?string $locale = null): IntlBreakIterator {}
 
     /** @tentative-return-type */
-    public static function createTitleInstance(?string $locale = null): ?IntlBreakIterator {}
+    public static function createTitleInstance(?string $locale = null): IntlBreakIterator {}
 
     /** @tentative-return-type */
-    public static function createWordInstance(?string $locale = null): ?IntlBreakIterator {}
+    public static function createWordInstance(?string $locale = null): IntlBreakIterator {}
 
     private function __construct() {}
 
