@@ -370,8 +370,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
-	zend_argument_count_error("%s%s%s() does not accept unknown named parameters",
-		class_name, space, get_active_function_name());
+	zend_argument_count_error("%s%s%s() does not accept named arguments for variadic parameters",
+		class_name, space, get_active_function_name()
+	);
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
