@@ -1895,8 +1895,8 @@ PHP_FUNCTION(str_prefix_ensure)
 	zend_string *subject, *prefix;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(prefix)
 		Z_PARAM_STR(subject)
+		Z_PARAM_STR(prefix)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(prefix) == 0) {
@@ -1922,8 +1922,8 @@ PHP_FUNCTION(str_prefix_remove)
 	zend_string *subject, *prefix;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(prefix)
 		Z_PARAM_STR(subject)
+		Z_PARAM_STR(prefix)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(prefix) > ZSTR_LEN(subject)) {
@@ -1972,8 +1972,8 @@ PHP_FUNCTION(str_suffix_ensure)
 	zend_string *subject, *suffix;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(suffix)
 		Z_PARAM_STR(subject)
+		Z_PARAM_STR(suffix)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(suffix) == 0) {
@@ -2001,8 +2001,8 @@ PHP_FUNCTION(str_suffix_remove)
 	zend_string *subject, *suffix;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(suffix)
 		Z_PARAM_STR(subject)
+		Z_PARAM_STR(suffix)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(suffix) > ZSTR_LEN(subject)) {

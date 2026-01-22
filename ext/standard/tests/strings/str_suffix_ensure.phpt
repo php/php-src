@@ -8,39 +8,39 @@ echo "*** Testing str_suffix_ensure() : various strings ***\n";
 $testStr = "BeginningMiddleEnd";
 
 // Does not end with suffix - should be added
-var_dump(str_suffix_ensure("ing", $testStr));
+var_dump(str_suffix_ensure($testStr, "ing"));
 
 // Already ends with suffix - should return original
-var_dump(str_suffix_ensure("End", $testStr));
+var_dump(str_suffix_ensure($testStr, "End"));
 
 // Empty suffix - should return original
-var_dump(str_suffix_ensure("", $testStr));
+var_dump(str_suffix_ensure($testStr, ""));
 
 // Empty source - should add suffix
-var_dump(str_suffix_ensure("suffix", ""));
+var_dump(str_suffix_ensure("", "suffix"));
 
 // Both empty strings
 var_dump(str_suffix_ensure("", ""));
 
 // Add suffix to empty string with space
-var_dump(str_suffix_ensure(" ", ""));
+var_dump(str_suffix_ensure("", " "));
 
 // Source shorter than suffix but doesn't end with it
-var_dump(str_suffix_ensure("abc", "a"));
+var_dump(str_suffix_ensure("a", "abc"));
 
 // Source equals suffix - should return original
 var_dump(str_suffix_ensure("test", "test"));
 
 // Null byte handling
-var_dump(str_suffix_ensure("\x00", $testStr));
-var_dump(str_suffix_ensure("", "\x00"));
+var_dump(str_suffix_ensure($testStr, "\x00"));
+var_dump(str_suffix_ensure("\x00", ""));
 var_dump(str_suffix_ensure("\x00", "\x00"));
-var_dump(str_suffix_ensure("\x00", "a\x00"));
-var_dump(str_suffix_ensure("\x00", "a"));
-var_dump(str_suffix_ensure("\x00c", "ab\x00c"));
-var_dump(str_suffix_ensure("\x00c", "ab\x00"));
-var_dump(str_suffix_ensure("d\x00a", "b\x00a"));
-var_dump(str_suffix_ensure("z\x00a", "b\x00a"));
+var_dump(str_suffix_ensure("a\x00", "\x00"));
+var_dump(str_suffix_ensure("a", "\x00"));
+var_dump(str_suffix_ensure("ab\x00c", "\x00c"));
+var_dump(str_suffix_ensure("ab\x00", "\x00c"));
+var_dump(str_suffix_ensure("b\x00a", "d\x00a"));
+var_dump(str_suffix_ensure("b\x00a", "z\x00a"));
 
 ?>
 --EXPECTF--

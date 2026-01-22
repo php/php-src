@@ -2433,13 +2433,13 @@ function str_ends_with(string $haystack, string $needle): bool {}
  * @compile-time-eval
  * @refcount 1
  */
-function str_prefix_ensure(string $prefix, string $subject): string {}
+function str_prefix_ensure(string $subject, string $prefix): string {}
 
 /**
  * @compile-time-eval
  * @refcount 1
  */
-function str_prefix_remove(string $prefix, string $subject): string {}
+function str_prefix_remove(string $subject, string $prefix): string {}
 
 /**
  * @compile-time-eval
@@ -2451,13 +2451,13 @@ function str_prefix_replace(string $prefix, string $replace, string $subject): s
  * @compile-time-eval
  * @refcount 1
  */
-function str_suffix_ensure(string $suffix, string $subject): string {}
+function str_suffix_ensure(string $subject, string $suffix): string {}
 
 /**
  * @compile-time-eval
  * @refcount 1
  */
-function str_suffix_remove(string $suffix, string $subject): string {}
+function str_suffix_remove(string $subject, string $suffix): string {}
 
 /**
  * @compile-time-eval
