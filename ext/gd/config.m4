@@ -223,6 +223,7 @@ if test "$PHP_GD" != "no"; then
     extra_sources=m4_normalize(["
       libgd/gd_avif.c
       libgd/gd_bmp.c
+      libgd/gd_color.c
       libgd/gd_color_match.c
       libgd/gd_crop.c
       libgd/gd_filter.c
