@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-13857 (Unexpected Results with date_diff for Different Timezones)
+Bug GH-13857 (Unexpected Results with date_diff for Different Timezones) wall-clock dates are inverted.
 --FILE--
 <?php
 date_default_timezone_set('Asia/Tokyo');
