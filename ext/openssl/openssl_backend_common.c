@@ -864,6 +864,9 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 	bool free_cert;
 
 	sk = sk_X509_new_null();
+	if (sk == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zcerts) == IS_ARRAY) {

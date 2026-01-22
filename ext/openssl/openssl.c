@@ -2627,6 +2627,9 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	}
 
 	recipcerts = sk_X509_new_null();
+	if (recipcerts == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
@@ -3241,6 +3244,9 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	}
 
 	recipcerts = sk_X509_new_null();
+	if (recipcerts == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
