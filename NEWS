@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fix memory leaks when sk_X509_new_null() fails. (ndossche)
+  . Fix crash when in openssl_x509_parse() when i2s_ASN1_INTEGER() fails.
+    (ndossche)
 
 - Phar:
   . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).

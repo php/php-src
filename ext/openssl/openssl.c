@@ -2166,6 +2166,12 @@ PHP_FUNCTION(openssl_x509_parse)
 	}
 
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
+	/* Can return NULL on error or memory allocation failure */
+	if (!str_serial) {
+		php_openssl_store_errors();
+		goto err;
+	}
+
 	add_assoc_string(return_value, "serialNumber", str_serial);
 	OPENSSL_free(str_serial);
 
