@@ -46,16 +46,23 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
-/* Check if we're in the constructor of the class that declared the property.
- * Ensures that a child class cannot reassign a parent's promoted readonly property. */
+/* Check if we're within a constructor call chain for the class that declared the property.
+ * Walks up the call stack to find if any frame is a constructor for zobj with the right scope.
+ * This allows reassignment from methods/closures called by the constructor. */
 ZEND_API bool zend_is_in_property_declaring_class_constructor(const zend_property_info *prop_info, const zend_object *zobj)
 {
 	zend_execute_data *ex = EG(current_execute_data);
-	return ex && ex->func
-		&& (ex->func->common.fn_flags & ZEND_ACC_CTOR)
-		&& (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
-		&& Z_OBJ(ex->This) == zobj
-		&& ex->func->common.scope == prop_info->ce;
+	while (ex) {
+		if (ex->func
+		    && (ex->func->common.fn_flags & ZEND_ACC_CTOR)
+		    && (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
+		    && Z_OBJ(ex->This) == zobj
+		    && ex->func->common.scope == prop_info->ce) {
+			return true;
+		}
+		ex = ex->prev_execute_data;
+	}
+	return false;
 }
 
 static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
