@@ -1138,8 +1138,6 @@ object ":" uiv ":" ["]	{
 	bool custom_object = 0;
 	bool has_unserialize = 0;
 
-	zval user_func;
-	zval retval;
 	zval args[1];
 
     if (!var_hash) return 0;
@@ -1243,37 +1241,39 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
+		if ((PG(unserialize_callback_func) == NULL) || (ZSTR_LEN(PG(unserialize_callback_func)) == 0)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
 
-		/* Call unserialize callback */
-		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
+        /* Find unserialize callback */
+        zend_function *callback_fn = zend_hash_find_ptr_lc(EG(function_table), PG(unserialize_callback_func));
+        if (callback_fn == NULL) {
+		    zend_string_release_ex(class_name, 0);
+            zend_throw_error(NULL, "Unserialization function %s is not defined", ZSTR_VAL(PG(unserialize_callback_func)));
+            return 0;
+        }
 
+		/* Call unserialize callback */
 		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;
-		call_user_function(NULL, NULL, &user_func, &retval, 1, args);
+		zend_call_known_function(callback_fn, NULL, NULL, NULL, 1, args, NULL);
 		BG(serialize_lock)--;
-		zval_ptr_dtor(&retval);
 
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
-			zval_ptr_dtor(&user_func);
 			return 0;
 		}
 
 		/* The callback function may have defined the class */
 		BG(serialize_lock)++;
 		if ((ce = zend_lookup_class(class_name)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", Z_STRVAL(user_func));
+			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", ZSTR_VAL(PG(unserialize_callback_func)));
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		}
 		BG(serialize_lock)--;
-
-		zval_ptr_dtor(&user_func);
 	} while (0);
 
 	*p = YYCURSOR;

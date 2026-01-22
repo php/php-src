@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid callback Nonexistent, function "Nonexistent" not found or invalid function name
+Unserialization function Nonexistent is not defined
