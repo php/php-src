@@ -126,10 +126,6 @@
 #define GET_VER_OPT_LONG(_name, _num) \
 	if (GET_VER_OPT(_name)) _num = zval_get_long(val)
 
-/* Used for peer verification in windows */
-#define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
-	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
-
 #ifdef HAVE_IPV6
 /* Used for IPv6 Address peer verification */
 #define EXPAND_IPV6_ADDRESS(_str, _bytes) \
@@ -476,7 +472,10 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
 
 		if (san->type == GEN_DNS) {
-			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+			if (ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName) < 0) {
+				/* TODO: warn ? */
+				continue;
+			}
 			if ((size_t)ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
