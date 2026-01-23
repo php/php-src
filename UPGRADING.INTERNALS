@@ -88,6 +88,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+- Added ZEND_TYPE_ASSERT to check a value's type against the parameter
+  type of a function, throwing a TypeError on failure as if the function
+  was called. Used in optimizations that elide function calls.
+
 ========================
 5. SAPI changes
 ========================
