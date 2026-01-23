@@ -195,7 +195,7 @@ static zend_always_inline uint32_t prop_get_flags(const property_reference *ref)
 
 static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
 	return ce == zend_ce_closure
-		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
+		&& zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
 }
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
