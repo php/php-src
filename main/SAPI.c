@@ -614,7 +614,7 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t hea
 		 * header_len is set for DELETE_PREFIX (used in cookies)
 		 * look for the : otherwise
 		 */
-		if (header->header_len > header_len
+		if (header->header_len > len
 				&& (header->header[len] == ':' || (header_len && len > header_len))
 				&& !strncasecmp(header->header, name, len)) {
 			if (current->prev) {
