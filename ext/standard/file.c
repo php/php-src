@@ -640,6 +640,31 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
+				if (skip_blank_lines) {
+					size_t eol_len = 1;
+
+					if (eol_marker == '\n') {
+						if (p - ZSTR_VAL(target_buf) >= 2 && *(p - 2) == '\r' && *(p - 1) == '\n') {
+							eol_len = 2;
+						} else if (p == e && p > s) {
+							const char *check = p - 1;
+							while (check > s && *check == '\r') {
+								check--;
+							}
+							if (check == s && *check == '\r') {
+								s = p;
+								continue;
+							}
+							eol_len = 1;
+						}
+					}
+
+					size_t line_len = p - s;
+					if (line_len == eol_len) {
+						s = p;
+						continue;
+					}
+				}
 				add_index_stringl(return_value, i++, s, p-s);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
