@@ -10281,7 +10281,6 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					goto fail;
 				default:
 					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
-					break;
 			}
 		} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
 fail:

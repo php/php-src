@@ -56500,7 +56500,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_HANDLER(
 
 	SAVE_OPLINE();
 	zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 
@@ -111864,7 +111863,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_TAILCALL_HAND
 
 	SAVE_OPLINE();
 	zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
