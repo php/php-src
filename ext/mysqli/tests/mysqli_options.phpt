@@ -87,7 +87,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-
 print "done!";
 ?>
 --EXPECTF--
@@ -114,7 +113,7 @@ bool(true)
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
-mysqli_options(): Argument #2 ($option) must be one of predefined options
+mysqli_options(): Argument #%d ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME,  MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants
 Link closed
 mysqli object is already closed
 Unknown character set
