@@ -610,8 +610,12 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t hea
 	while (current) {
 		header = (sapi_header_struct *)(current->data);
 		next = current->next;
+		/*
+		 * header_len is set for DELETE_PREFIX (used in cookies)
+		 * look for the : otherwise
+		 */
 		if (header->header_len > header_len
-				&& (header->header[header_len] == ':' || len > header_len)
+				&& (header->header[len] == ':' || (header_len && len > header_len))
 				&& !strncasecmp(header->header, name, len)) {
 			if (current->prev) {
 				current->prev->next = next;
