@@ -5145,7 +5145,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	EVP_PKEY *pkey = Z_OPENSSL_PKEY_P(key)->pkey;
 
 	BIO *out = BIO_new(BIO_s_mem());
-	if (!PEM_write_bio_PUBKEY(out, pkey)) {
+	if (!out || !PEM_write_bio_PUBKEY(out, pkey)) {
 		BIO_free(out);
 		php_openssl_store_errors();
 		RETURN_FALSE;
