@@ -7625,7 +7625,8 @@ PHP_FUNCTION(openssl_digest)
 	sigbuf = zend_string_alloc(siglen, 0);
 
 	md_ctx = EVP_MD_CTX_create();
-	if (EVP_DigestInit(md_ctx, mdtype) &&
+	if (md_ctx &&
+			EVP_DigestInit(md_ctx, mdtype) &&
 			EVP_DigestUpdate(md_ctx, (unsigned char *)data, data_len) &&
 			EVP_DigestFinal (md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
