@@ -540,6 +540,10 @@ finish:
 		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
 
 		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
+			if (reset_ssl_peer_name) {
+				php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
+			}
+
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
