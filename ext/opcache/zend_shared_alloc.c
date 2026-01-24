@@ -628,7 +628,7 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
-void zend_accel_shared_protect(bool protected)
+ZEND_API void zend_accel_shared_protect(bool protected)
 {
 #ifdef HAVE_MPROTECT
 	int i;
