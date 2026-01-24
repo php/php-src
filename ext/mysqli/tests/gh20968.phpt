@@ -23,4 +23,4 @@ try {
 
 ?>
 --EXPECTF--
-mysqli::options(): Argument #%d ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME,  MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants
+mysqli::options(): Argument #%d ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants

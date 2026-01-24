@@ -53,6 +53,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-mysqli_set_opt(): Argument #2 ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME,  MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants
+mysqli_set_opt(): Argument #2 ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants
 mysqli object is already closed
 done!
