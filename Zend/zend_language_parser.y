@@ -1354,6 +1354,8 @@ expr:
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
 			if ($$->kind == ZEND_AST_ARROW_FUNC) $$->attr = ZEND_PARENTHESIZED_ARROW_FUNC;
+			if ($$->kind == ZEND_AST_NULLSAFE_PROP) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
+			if ($$->kind == ZEND_AST_NULLSAFE_METHOD_CALL) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
 		}
 	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }
@@ -1549,6 +1551,8 @@ fully_dereferenceable:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_STATIC_PROP) $$->attr = ZEND_PARENTHESIZED_STATIC_PROP;
+			if ($$->kind == ZEND_AST_NULLSAFE_PROP) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
+			if ($$->kind == ZEND_AST_NULLSAFE_METHOD_CALL) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
 		}
 	|	dereferenceable_scalar	{ $$ = $1; }
 	|	class_constant			{ $$ = $1; }
@@ -1562,7 +1566,11 @@ array_object_dereferenceable:
 
 callable_expr:
 		callable_variable		{ $$ = $1; }
-	|	'(' expr ')'			{ $$ = $2; }
+	|	'(' expr ')' {
+			$$ = $2;
+			if ($$->kind == ZEND_AST_NULLSAFE_PROP) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
+			if ($$->kind == ZEND_AST_NULLSAFE_METHOD_CALL) $$->attr = ZEND_PARENTHESIZED_NULLSAFE;
+		}
 	|	dereferenceable_scalar	{ $$ = $1; }
 	|	new_dereferenceable		{ $$ = $1; }
 ;
