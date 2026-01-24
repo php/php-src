@@ -87,7 +87,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          set -ex
+          set -e
           sudo apt-get update
           sudo apt-get install gpg
 
@@ -266,11 +266,26 @@ jobs:
           sed -i 's|extra_title = ""|extra_title = "Changeset"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i "s|extra_text = \"\"|extra_text = \"$CHANGESET_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
       - name: Run benchmark
-        run: ./php-version-benchmarks/benchmark.sh run aws
-      - name: Store results
+        run: |
+          set -e
+          
+          ./php-version-benchmarks/benchmark.sh run aws
+          
+          echo "NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)" >> $GITHUB_ENV
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: results
+          path: |
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
+          retention-days: 30
+      - name: Commit results
         if: github.repository == 'php/php-src' && github.event_name != 'workflow_dispatch'
         run: |
           set -ex
+
+          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
 
           cd ./php-version-benchmarks/docs/results
           git pull --autostash
@@ -284,20 +299,10 @@ jobs:
           fi
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
-      - name: Upload artifacts
-        id: upload
-        uses: actions/upload-artifact@v6
-        with:
-          name: results
-          path: |
-            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
-          retention-days: 30
       - name: Comment results
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ./php-version-benchmarks/tmp/php_${{ env.ID }}
-          NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)
-          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
           gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}
