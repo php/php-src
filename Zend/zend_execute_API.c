@@ -39,6 +39,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_autoload.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -451,6 +452,8 @@ void shutdown_executor(void) /* {{{ */
 		zend_stream_shutdown();
 	} zend_end_try();
 
+	/* Shutdown autoloader prior to releasing values as it may hold references to objects */
+	zend_autoload_shutdown();
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
