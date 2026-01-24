@@ -418,7 +418,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		if (UNEXPECTED(EG(exception))) {
 			RETURN_THROWS();
 		}
-		zend_autoload_drop_autoload_map();
+		zend_autoload_clean_class_loaders();
 		RETURN_TRUE;
 	}
 
@@ -432,7 +432,7 @@ PHP_FUNCTION(spl_autoload_functions)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_autoload_fcc_map_to_callable_zval_map(return_value);
+	RETURN_ARR(zend_autoload_fcc_map_to_callable_zval_map());
 } /* }}} */
 
 /* {{{ Return hash id for given object */

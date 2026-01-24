@@ -17,15 +17,14 @@
 */
 
 #include "zend_string.h"
+#include "zend_hash.h"
 #include "zend_API.h"
 #include "zend.h"
 
 ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, zend_string *lc_name);
-ZEND_API zend_class_entry *zend_perform_class_map_autoload(zend_string *class_name, zend_string *lc_name);
-ZEND_API void zend_autoload_callback_zval_destroy(zval *entry);
 ZEND_API void zend_autoload_register_class_loader(zend_fcall_info_cache *fcc, bool prepend);
 ZEND_API bool zend_autoload_unregister_class_loader(const zend_fcall_info_cache *fcc);
-ZEND_API void zend_autoload_fcc_map_to_callable_zval_map(zval *return_value);
+ZEND_API zend_array* zend_autoload_fcc_map_to_callable_zval_map(void);
 /* Only for deprecated strange behaviour of spl_autoload_unregister() */
-ZEND_API void zend_autoload_drop_autoload_map(void);
+ZEND_API void zend_autoload_clean_class_loaders(void);
 void zend_autoload_shutdown(void);
