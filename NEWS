@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-21029 (zend_mm_heap corrupted on Aarch64, LTO builds). (Arnaud)
 
+- Curl:
+  . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
+    (David Carlier)
+
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
