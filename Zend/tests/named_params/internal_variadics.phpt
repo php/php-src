@@ -23,6 +23,6 @@ try {
 }
 ?>
 --EXPECT--
-array_merge() does not accept named arguments for variadic parameters
-array_diff_key() does not accept named arguments for variadic parameters
-array_push() does not accept named arguments for variadic parameters
+Internal function array_merge() does not accept named variadic arguments
+Internal function array_diff_key() does not accept named variadic arguments
+Internal function array_push() does not accept named variadic arguments
