@@ -1502,7 +1502,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		info->message = zend_string_copy(message);
 		EG(errors->size)++;
 		if (EG(errors->size) >= EG(errors->capacity)) {
-			// not sure we can get high number of errors so safe `might be` over cautious here
 			uint32_t capacity = EG(errors->capacity) + (EG(errors->capacity) >> 1);
 			EG(errors) = safe_perealloc(EG(errors), sizeof(zend_error_info *), capacity, XtOffsetOf(struct zend_err_buf, buf), true);
 			EG(errors->capacity) = capacity;

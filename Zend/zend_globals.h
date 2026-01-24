@@ -305,6 +305,7 @@ struct _zend_executor_globals {
 	 * and their processing is delayed until zend_emit_recorded_errors()
 	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
+	struct zend_err_buf *errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
@@ -327,7 +328,6 @@ struct _zend_executor_globals {
 	HashTable callable_convert_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
-	struct zend_err_buf *errors;
 };
 
 #define EG_FLAGS_INITIAL				(0)
