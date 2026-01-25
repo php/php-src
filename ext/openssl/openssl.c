@@ -3079,13 +3079,15 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 				}
 			}
 		}
+
+		if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
+			php_openssl_store_errors();
+		}
 	} else {
 		php_openssl_store_errors();
+		return FAILURE;
 	}
 
-	if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
-		php_openssl_store_errors();
-	}
 	return SUCCESS;
 }
 
