@@ -628,7 +628,7 @@ static zend_always_inline void import_environment_variable(HashTable *ht, char *
 
 static void _php_import_environment_variables(zval *array_ptr)
 {
-	tsrm_env_lock();
+	tsrm_env_lock(false);
 
 #ifndef PHP_WIN32
 	for (char **env = environ; env != NULL && *env != NULL; env++) {
@@ -646,7 +646,7 @@ static void _php_import_environment_variables(zval *array_ptr)
 	FreeEnvironmentStringsW(environmentw);
 #endif
 
-	tsrm_env_unlock();
+	tsrm_env_unlock(false);
 }
 
 static void _php_load_environment_variables(zval *array_ptr)
