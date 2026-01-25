@@ -605,6 +605,45 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	return tmp_nr;
 }
 
+static double timelib_get_decimal_nr(const char **ptr, int max_length)
+{
+	const char *begin;
+	char *str;
+	double tmp_nr = 0.0;
+	int len = 0;
+	int sign = 1;
+
+	while ((**ptr == '+') || (**ptr == '-') || (**ptr == ' ') || (**ptr == '\t')) {
+		if (**ptr == '-') {
+			sign = -sign;
+		}
+		++*ptr;
+	}
+
+	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '.')) {
+		if (**ptr == '\0') {
+			return 0.0;
+		}
+		++*ptr;
+	}
+
+	begin = *ptr;
+	while (((**ptr >= '0') && (**ptr <= '9')) || (**ptr == '.')) {
+		if (len >= max_length) {
+			break;
+		}
+		++*ptr;
+		++len;
+	}
+
+	str = timelib_calloc(1, len + 1);
+	memcpy(str, begin, len);
+	tmp_nr = strtod(str, NULL);
+	timelib_free(str);
+
+	return tmp_nr * sign;
+}
+
 static timelib_sll timelib_lookup_relative_text(const char **ptr, int *behavior)
 {
 	char *word;
@@ -774,6 +813,49 @@ static void timelib_set_relative(const char **ptr, timelib_sll amount, int behav
 			s->time->relative.special.type = relunit->multiplier;
 			s->time->relative.special.amount = amount;
 	}
+}
+
+/*
+ * Set relative time from a decimal value.
+ * Converts decimal units (e.g., 2.5 weeks) to seconds for precision.
+ */
+static void timelib_set_relative_decimal(const char **ptr, double amount, Scanner *s)
+{
+	const timelib_relunit* relunit;
+	double seconds = 0.0;
+
+	if (!(relunit = timelib_lookup_relunit(ptr))) {
+		return;
+	}
+
+	switch (relunit->unit) {
+		case TIMELIB_MICROSEC:
+			s->time->relative.us += (timelib_sll)(amount * relunit->multiplier);
+			return;
+		case TIMELIB_SECOND:
+			seconds = amount * relunit->multiplier;
+			break;
+		case TIMELIB_MINUTE:
+			seconds = amount * relunit->multiplier * 60;
+			break;
+		case TIMELIB_HOUR:
+			seconds = amount * relunit->multiplier * 3600;
+			break;
+		case TIMELIB_DAY:
+			seconds = amount * relunit->multiplier * 86400;
+			break;
+		case TIMELIB_MONTH:
+			seconds = amount * relunit->multiplier * 2629746;
+			break;
+		case TIMELIB_YEAR:
+			seconds = amount * relunit->multiplier * 31556952;
+			break;
+		default:
+			timelib_set_relative(ptr, (timelib_sll)amount, 1, s, TIMELIB_TIME_PART_KEEP);
+			return;
+	}
+
+	s->time->relative.s += (timelib_sll)seconds;
 }
 
 static const timelib_tz_lookup_table* abbr_search(const char *word, timelib_long gmtoffset, int isdst)
@@ -1152,7 +1234,9 @@ reltexttext = 'next'|'last'|'previous'|'this';
 reltextunit = 'ms' | 'µs' | (('msec'|'millisecond'|'µsec'|'microsecond'|'usec'|'sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
 relnumber = ([+-]*[ \t]*[0-9]{1,13});
+relnumberdec = ([+-]*[ \t]*[0-9]+[.][0-9]+);
 relative = relnumber space? (reltextunit | 'week' );
+relativedec = relnumberdec space? (reltextunit | 'week' );
 relativetext = (reltextnumber|reltexttext) space reltextunit;
 relativetextweek = reltexttext space 'week';
 
@@ -1962,6 +2046,22 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_SHORTDATE_WITH_TIME;
+	}
+
+	relativedec
+	{
+		double amount;
+		DEBUG_OUTPUT("relativedec");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+
+		while(*ptr) {
+			amount = timelib_get_decimal_nr(&ptr, 24);
+			timelib_eat_spaces(&ptr);
+			timelib_set_relative_decimal(&ptr, amount, s);
+		}
+		TIMELIB_DEINIT;
+		return TIMELIB_RELATIVE;
 	}
 
 	relative
