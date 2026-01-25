@@ -1,5 +1,7 @@
 --TEST--
 Object free handler must call zend_weakrefs_notify
+--EXTENSIONS--
+*
 --FILE--
 <?php
 

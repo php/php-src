@@ -858,8 +858,13 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         <?php
         $exts = get_loaded_extensions();
         $ext_dir = ini_get('extension_dir');
+        if (PHP_OS_FAMILY !== "Windows") {
+            $regex = '/^([_a-zA-Z0-9]+)\.so$/';
+        } else {
+            $regex = '/^(?:php_)([_a-zA-Z0-9]+)\.dll$/';
+        }
         foreach (scandir($ext_dir) as $file) {
-            if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+            if (preg_match($regex, $file, $matches)) {
                 if (!extension_loaded($matches[1])) {
                     $exts[] = $matches[1];
                 }
@@ -1808,6 +1813,7 @@ function run_test(string $php, $file, array $env): string
     global $slow_min_ms;
     global $preload, $file_cache;
     global $num_repeats;
+    global $exts_to_test;
     // Parallel testing
     global $workerID;
     global $show_progress;
@@ -2024,6 +2030,9 @@ TEST $file
     $extensions = [];
     if ($test->hasSection('EXTENSIONS')) {
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
+        if (in_array("*", $extensions, true)) {
+            $extensions = $exts_to_test;
+        }
     }
     if (is_array($IN_REDIRECT) && $IN_REDIRECT['EXTENSIONS'] != []) {
         $extensions = array_merge($extensions, $IN_REDIRECT['EXTENSIONS']);
