@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Date:
   . Update timelib to 2022.16. (Derick)
 
+- DOM:
+  . Fixed GH-21041 (Dom\HTMLDocument corrupts closing tags within scripts).
+    (lexborisov)
+
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
