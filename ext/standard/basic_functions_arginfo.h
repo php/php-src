@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 1a1667a5c59111f096a758d5bb4aa7cf3ec09cfe */
+ * Stub hash: 209b67970308b916c3c1c3fc717408275efef73e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -927,6 +927,32 @@ ZEND_END_ARG_INFO()
 #define arginfo_str_starts_with arginfo_str_contains
 
 #define arginfo_str_ends_with arginfo_str_contains
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_prefix_ensure, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_str_prefix_remove arginfo_str_prefix_ensure
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_prefix_replace, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, replace, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_suffix_ensure, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, suffix, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_str_suffix_remove arginfo_str_suffix_ensure
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_suffix_replace, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, suffix, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, replace, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chunk_split, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -2560,6 +2586,12 @@ ZEND_FUNCTION(strrchr);
 ZEND_FUNCTION(str_contains);
 ZEND_FUNCTION(str_starts_with);
 ZEND_FUNCTION(str_ends_with);
+ZEND_FUNCTION(str_prefix_ensure);
+ZEND_FUNCTION(str_prefix_remove);
+ZEND_FUNCTION(str_prefix_replace);
+ZEND_FUNCTION(str_suffix_ensure);
+ZEND_FUNCTION(str_suffix_remove);
+ZEND_FUNCTION(str_suffix_replace);
 ZEND_FUNCTION(chunk_split);
 ZEND_FUNCTION(substr);
 ZEND_FUNCTION(substr_replace);
@@ -3162,6 +3194,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("str_contains", zif_str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains, NULL)
 	ZEND_RAW_FENTRY("str_starts_with", zif_str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with, NULL)
 	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_prefix_ensure", zif_str_prefix_ensure, arginfo_str_prefix_ensure, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_prefix_remove", zif_str_prefix_remove, arginfo_str_prefix_remove, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_prefix_replace", zif_str_prefix_replace, arginfo_str_prefix_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_suffix_ensure", zif_str_suffix_ensure, arginfo_str_suffix_ensure, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_suffix_remove", zif_str_suffix_remove, arginfo_str_suffix_remove, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_suffix_replace", zif_str_suffix_replace, arginfo_str_suffix_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("chunk_split", zif_chunk_split, arginfo_chunk_split, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("substr", zif_substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr, NULL)
 	ZEND_RAW_FENTRY("substr_replace", zif_substr_replace, arginfo_substr_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

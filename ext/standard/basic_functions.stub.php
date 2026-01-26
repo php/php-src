@@ -2433,6 +2433,42 @@ function str_ends_with(string $haystack, string $needle): bool {}
  * @compile-time-eval
  * @refcount 1
  */
+function str_prefix_ensure(string $subject, string $prefix): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function str_prefix_remove(string $subject, string $prefix): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function str_prefix_replace(string $prefix, string $replace, string $subject): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function str_suffix_ensure(string $subject, string $suffix): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function str_suffix_remove(string $subject, string $suffix): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function str_suffix_replace(string $suffix, string $replace, string $subject): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
 /**
