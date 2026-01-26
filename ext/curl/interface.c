@@ -621,6 +621,10 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 	zval argv[3];
 	zval retval;
 
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
+		return rval;
+	}
+
 	GC_ADDREF(&ch->std);
 	ZVAL_OBJ(&argv[0], &ch->std);
 	ZVAL_STRING(&argv[1], pattern);
