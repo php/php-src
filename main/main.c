@@ -2014,7 +2014,7 @@ void php_request_shutdown(void *dummy)
 		php_free_shutdown_functions();
 	}
 
-	/* 8. Shutdown autoloader, freeing all hold functions/closures */
+	/* 8. Shutdown autoloader, freeing all held functions/closures */
 	zend_autoload_shutdown();
 
 	/* 9. Destroy super-globals */

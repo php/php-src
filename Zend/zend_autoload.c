@@ -130,7 +130,9 @@ ZEND_API bool zend_autoload_unregister_class_loader(const zend_fcall_info_cache 
    return false;
 }
 
-ZEND_API zend_array* zend_autoload_fcc_map_to_callable_zval_map(void) {
+/* We do not return a HashTable* because zend_empty_array is not collectable,
+ * therefore the zval holding this value must do so. Something that ZVAL_EMPTY_ARRAY(); does. */
+ZEND_API void zend_autoload_fcc_map_to_callable_zval_map(zval *return_value) {
    if (zend_class_autoload_functions) {
       zend_fcall_info_cache *fcc;
 
@@ -140,9 +142,9 @@ ZEND_API zend_array* zend_autoload_fcc_map_to_callable_zval_map(void) {
          zend_get_callable_zval_from_fcc(fcc, &tmp);
          zend_hash_next_index_insert(map, &tmp);
       } ZEND_HASH_FOREACH_END();
-      return map;
+      RETURN_ARR(map);
    }
-   return (zend_array*)&zend_empty_array;
+   RETURN_EMPTY_ARRAY();
 }
 
 /* Only for deprecated strange behaviour of spl_autoload_unregister() */

@@ -432,7 +432,7 @@ PHP_FUNCTION(spl_autoload_functions)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_ARR(zend_autoload_fcc_map_to_callable_zval_map());
+	zend_autoload_fcc_map_to_callable_zval_map(return_value);
 } /* }}} */
 
 /* {{{ Return hash id for given object */
