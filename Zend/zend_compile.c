@@ -5054,25 +5054,23 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	/* Bail out if the callback is assert() due to the AST stringification logic
 	 * breaking for the generated call.
 	 */
-	if (callback->kind == ZEND_AST_CALL && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
+	if (callback->kind == ZEND_AST_CALL
+	 && callback->child[0]->kind == ZEND_AST_ZVAL 
+	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
+	 && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
+		return FAILURE;
+	}
+
+	zend_ast_list *callback_args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
+	if (callback_args->children != 1 || callback_args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
+		/* Full PFA is not yet implemented, will fail in zend_compile_call_common(). */
 		return FAILURE;
 	}
 
 	znode value;
 	value.op_type = IS_TMP_VAR;
 	value.u.op.var = get_temporary_variable();
-
-	zend_ast_list *callback_args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
-	zend_ast *call_args = zend_ast_create_list(0, ZEND_AST_ARG_LIST);
-	for (uint32_t i = 0; i < callback_args->children; i++) {
-		zend_ast *child = callback_args->child[i];
-		if (child->kind == ZEND_AST_PLACEHOLDER_ARG) {
-			call_args = zend_ast_list_add(call_args, zend_ast_create_znode(&value));
-		} else {
-			ZEND_ASSERT(0 && "not implemented");
-			call_args = zend_ast_list_add(call_args, child);
-		}
-	}
+	zend_ast *call_args = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&value));
 
 	zend_op *opline;
 
