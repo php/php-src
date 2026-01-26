@@ -149,8 +149,8 @@ slightly different steps. We'll call attention where the steps differ.
 
    > 💬 **Hint** \
    > The *patch-level version branch* for GA (PHP X.Y.0) is created as part of the
-   > last *planned* RC release (currently PHP X.Y.0RC4). After the last RC is released
-   > additional bug fixes in the branch will not be a part of PHP X.Y.0. If a regression
+   > last *planned* RC release (currently PHP X.Y.0RC4). After the last RC is released,
+   > additional bug fixes in the PHP X.Y branch will not be a part of PHP X.Y.0. If a regression
    > is found that warrants including a fix in PHP X.Y.0, use the same process as
    > for other patch releases - merge the patch as normal to PHP X.Y, and then cherry-pick
    > the patch to the patch-level PHP X.Y.0 branch.
@@ -305,6 +305,9 @@ slightly different steps. We'll call attention where the steps differ.
     the conflicts, ignore the changes from PHP-X.Y in higher branches. It
     means using something like `git checkout --ours .` when on PHP.X.Y+1 or
     master after the merge resulting in the conflicts.
+
+    Be sure to set up a merge driver for the NEWS file as described in
+    the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
 11. Push the changes to the `php-src`.
 
@@ -1207,5 +1210,6 @@ volunteers to begin the selection process for the next release managers.
 [GPG key]: https://en.wikipedia.org/wiki/GNU_Privacy_Guard
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
+[gitfaq-mandatory]: https://wiki.php.net/vcs/gitfaq#mandatory_git_settings
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
 [security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt
