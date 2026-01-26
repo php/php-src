@@ -5,11 +5,8 @@ GH-12102: Incorrect "Cannot use temporary expression in write context" error for
 
 function test() {
     byVal(C[0]);
-    try {
-        byRef(C[0]);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
-    }
+    byRef(C[0]);
+    var_dump(C);
 }
 
 /* Intentionally declared after test() to avoid compile-time checking of ref args. */
@@ -21,6 +18,7 @@ function byVal($arg) {
 }
 
 function byRef(&$arg) {
+    $arg = 'modified';
     var_dump($arg);
 }
 
@@ -29,4 +27,8 @@ test('y');
 ?>
 --EXPECT--
 string(3) "foo"
-Cannot use temporary expression in write context
+string(8) "modified"
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
