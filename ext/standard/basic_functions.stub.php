@@ -111,6 +111,11 @@ const COUNT_RECURSIVE = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
+/**
+ * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
  */
 const ARRAY_FILTER_USE_BOTH = UNKNOWN;
