@@ -50,7 +50,10 @@ ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_clas
 static zend_always_inline zval *zend_enum_fetch_case_name(zend_object *zobj)
 {
 	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);
-	return OBJ_PROP_NUM(zobj, 0);
+
+	zval *name = OBJ_PROP_NUM(zobj, 0);
+	ZEND_ASSERT(Z_TYPE_P(name) == IS_STRING);
+	return name;
 }
 
 static zend_always_inline zval *zend_enum_fetch_case_value(zend_object *zobj)
