@@ -108,6 +108,28 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 }
 /* }}} */
 
+/* This helper handles the hybrid zend_{extension,module_entry} fallback path.
+ * It unloads the handle on failure but it does not free libpath. */
+static zend_result php_try_load_hybrid_zend_extension(
+	DL_HANDLE handle, const char *filename, char *libpath, int error_type)
+{
+	zend_extension *zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+	if (!zend_extension_entry) {
+		zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
+	}
+	if (zend_extension_entry && zend_extension_entry->module_entry) {
+		return zend_load_extension_handle(handle, libpath);
+	}
+	if (zend_extension_entry) {
+		php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
+		DL_UNLOAD(handle);
+		return FAILURE;
+	}
+	php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
+	DL_UNLOAD(handle);
+	return FAILURE;
+}
+
 /* {{{ php_load_extension */
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
@@ -196,31 +218,17 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	}
 
 	if (!get_module) {
-		zend_extension *zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
-		if (!zend_extension_entry) {
-			zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
-		}
-		if (zend_extension_entry && zend_extension_entry->module_entry) {
-			zend_result result = zend_load_extension_handle(handle, libpath);
-			efree(libpath);
-			return result;
-		}
-		if (zend_extension_entry) {
-			DL_UNLOAD(handle);
-			efree(libpath);
-			php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
-			return FAILURE;
-		}
-		DL_UNLOAD(handle);
+		// If get_module still isn't found, maybe it's a zend_extension with a module entry.
+		zend_result result = php_try_load_hybrid_zend_extension(handle, filename, libpath, error_type);
 		efree(libpath);
-		php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
-		return FAILURE;
+		return result;
 	}
+	efree(libpath);
+
 	module_entry = get_module();
 	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);
 		DL_UNLOAD(handle);
-		efree(libpath);
 		return FAILURE;
 	}
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
@@ -231,7 +239,6 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 					"These options need to match\n",
 					module_entry->name, module_entry->zend_api, ZEND_MODULE_API_NO);
 			DL_UNLOAD(handle);
-			efree(libpath);
 			return FAILURE;
 	}
 	if(strcmp(module_entry->build_id, ZEND_MODULE_BUILD_ID)) {
@@ -242,18 +249,15 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 				"These options need to match\n",
 				module_entry->name, module_entry->build_id, ZEND_MODULE_BUILD_ID);
 		DL_UNLOAD(handle);
-		efree(libpath);
 		return FAILURE;
 	}
 
 	if ((module_entry = zend_register_module_ex(module_entry, type)) == NULL) {
 		DL_UNLOAD(handle);
-		efree(libpath);
 		return FAILURE;
 	}
 
 	module_entry->handle = handle;
-	efree(libpath);
 
 	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry) == FAILURE) {
 		DL_UNLOAD(handle);
