@@ -46,7 +46,6 @@ jobs:
         || '22.04' }}
       branch: ${{ matrix.branch.ref }}
       community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      libmysqlclient_with_mysqli: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1) }}
       macos_arm64_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '15' || '14' }}
       run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
       run_linux_ppc64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
@@ -57,8 +56,8 @@ jobs:
         || '22.04' }}
       windows_version: '2022'
       vs_crt_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) && 'vs17') || 'vs16' }}
-      skip_laravel: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
+      skip_laravel: false
       symfony_version: ${{ (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '8.1') || '7.4' }}
-      skip_wordpress: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
+      skip_wordpress: false
       variation_enable_zend_max_execution_timers: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9 }}
     secrets: inherit
