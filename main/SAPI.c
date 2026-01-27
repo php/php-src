@@ -601,7 +601,7 @@ static void sapi_update_response_code(int ncode)
  * since zend_llist_del_element only removes one matched item once,
  * we should remove them manually
  */
-static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t header_len)
+static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t prefix_len)
 {
 	sapi_header_struct *header;
 	zend_llist_element *next;
@@ -611,11 +611,12 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t hea
 		header = (sapi_header_struct *)(current->data);
 		next = current->next;
 		/*
-		 * header_len is set for DELETE_PREFIX (used in cookies)
+		 * prefix_len is set for DELETE_PREFIX (used for deleting i.e.
+		 * "Set-Cookie: PHPSESSID=", where we need more than just key)
 		 * look for the : otherwise
 		 */
 		if (header->header_len > len
-				&& (header->header[len] == ':' || (header_len && len > header_len))
+				&& (header->header[len] == ':' || (prefix_len && len > prefix_len))
 				&& !strncasecmp(header->header, name, len)) {
 			if (current->prev) {
 				current->prev->next = next;
