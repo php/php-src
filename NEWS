@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.18
+29 Jan 2026, PHP 8.4.18RC1
 
 - Core:
   . Fixed bug GH-20837 (NULL dereference when calling ob_start() in shutdown
