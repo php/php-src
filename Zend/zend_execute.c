@@ -3637,7 +3637,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		ZVAL_ERROR(result);
 		goto end;
 	}
-	
+
 	ZVAL_INDIRECT(result, ptr);
 	flags &= ZEND_FETCH_OBJ_FLAGS;
 	if (flags) {

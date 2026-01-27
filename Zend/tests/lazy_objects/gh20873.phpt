@@ -27,5 +27,3 @@ Stack trace:
 #1 %s(%d): A->__get('p')
 #2 {main}
   thrown in %s on line %d
-
-
