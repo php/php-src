@@ -19,6 +19,8 @@
 
 #include "zend_extensions.h"
 #include "zend_system_id.h"
+#include "zend_API.h"
+#include "zend_modules.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
@@ -151,6 +153,7 @@ void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
+	zend_module_entry *module;
 
 	extension = *new_extension;
 	extension.handle = handle;
@@ -158,6 +161,36 @@ void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension);
 
 	zend_llist_add_element(&zend_extensions, &extension);
+
+	module = extension.module_entry;
+	if (module) {
+		if (module->zend_api != ZEND_MODULE_API_NO) {
+			zend_error(E_CORE_WARNING,
+				"Hybrid module \"%s\" from Zend extension \"%s\" cannot be initialized: "
+				"Module API=%d, PHP API=%d",
+				module->name ? module->name : "<unknown>",
+				extension.name ? extension.name : "<unknown>",
+				module->zend_api, ZEND_MODULE_API_NO);
+			return;
+		}
+
+		if (!module->build_id || strcmp(module->build_id, ZEND_MODULE_BUILD_ID)) {
+			zend_error(E_CORE_WARNING,
+				"Hybrid module \"%s\" from Zend extension \"%s\" cannot be initialized: "
+				"Module build ID=%s, PHP build ID=%s",
+				module->name ? module->name : "<unknown>",
+				extension.name ? extension.name : "<unknown>",
+				module->build_id ? module->build_id : "<unknown>",
+				ZEND_MODULE_BUILD_ID);
+			return;
+		}
+
+		module->handle = NULL;
+		if (zend_register_module_ex(module, MODULE_PERSISTENT) == NULL) {
+			/* Errors already reported by zend_register_module_ex(). */
+			return;
+		}
+	}
 
 	if (extension.op_array_ctor) {
 		zend_extension_flags |= ZEND_EXTENSIONS_HAVE_OP_ARRAY_CTOR;

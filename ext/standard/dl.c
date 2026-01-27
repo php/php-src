@@ -21,6 +21,8 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_API.h"
+#include "Zend/zend_extensions.h"
 
 #include "SAPI.h"
 
@@ -173,13 +175,12 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 		efree(orig_libpath);
 		efree(err1);
 	}
-	efree(libpath);
-
 #ifdef PHP_WIN32
 	if (!php_win32_image_compatible(handle, &err1)) {
 			php_error_docref(NULL, error_type, "%s", err1);
 			efree(err1);
 			DL_UNLOAD(handle);
+			efree(libpath);
 			return FAILURE;
 	}
 #endif
@@ -195,12 +196,23 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	}
 
 	if (!get_module) {
-		if (DL_FETCH_SYMBOL(handle, "zend_extension_entry") || DL_FETCH_SYMBOL(handle, "_zend_extension_entry")) {
+		zend_extension *zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+		if (!zend_extension_entry) {
+			zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
+		}
+		if (zend_extension_entry && zend_extension_entry->module_entry) {
+			zend_result result = zend_load_extension_handle(handle, libpath);
+			efree(libpath);
+			return result;
+		}
+		if (zend_extension_entry) {
 			DL_UNLOAD(handle);
+			efree(libpath);
 			php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
 			return FAILURE;
 		}
 		DL_UNLOAD(handle);
+		efree(libpath);
 		php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
 		return FAILURE;
 	}
@@ -208,6 +220,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);
 		DL_UNLOAD(handle);
+		efree(libpath);
 		return FAILURE;
 	}
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
@@ -218,6 +231,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 					"These options need to match\n",
 					module_entry->name, module_entry->zend_api, ZEND_MODULE_API_NO);
 			DL_UNLOAD(handle);
+			efree(libpath);
 			return FAILURE;
 	}
 	if(strcmp(module_entry->build_id, ZEND_MODULE_BUILD_ID)) {
@@ -228,15 +242,18 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 				"These options need to match\n",
 				module_entry->name, module_entry->build_id, ZEND_MODULE_BUILD_ID);
 		DL_UNLOAD(handle);
+		efree(libpath);
 		return FAILURE;
 	}
 
 	if ((module_entry = zend_register_module_ex(module_entry, type)) == NULL) {
 		DL_UNLOAD(handle);
+		efree(libpath);
 		return FAILURE;
 	}
 
 	module_entry->handle = handle;
+	efree(libpath);
 
 	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry) == FAILURE) {
 		DL_UNLOAD(handle);

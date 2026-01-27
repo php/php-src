@@ -54,6 +54,7 @@ typedef struct _zend_extension_version_info {
 #define ZEND_EXTENSION_BUILD_ID "API" ZEND_TOSTR(ZEND_EXTENSION_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
 typedef struct _zend_extension zend_extension;
+typedef struct _zend_module_entry zend_module_entry;
 
 /* Typedef's for zend_extension function pointers */
 typedef int (*startup_func_t)(zend_extension *extension);
@@ -101,7 +102,7 @@ struct _zend_extension {
 	int (*build_id_check)(const char* build_id);
 	op_array_persist_calc_func_t op_array_persist_calc;
 	op_array_persist_func_t op_array_persist;
-	void *reserved5;
+	zend_module_entry *module_entry;
 	void *reserved6;
 	void *reserved7;
 	void *reserved8;
