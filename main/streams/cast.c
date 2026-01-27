@@ -79,10 +79,10 @@ static int stream_cookie_writer(void *cookie, const char *buffer, int size)
 	return php_stream_write((php_stream *)cookie, (char *)buffer, size);
 }
 
-static PHP_FPOS_T stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
+static PHP_FPOS_T stream_cookie_seeker(void *cookie, PHP_FPOS_T position, int whence)
 {
 
-	return (PHP_FPOS_T)php_stream_seek((php_stream *)cookie, position, whence);
+	return (PHP_FPOS_T)php_stream_seek((php_stream *)cookie, (zend_off_t)position, whence);
 }
 
 static int stream_cookie_closer(void *cookie)
