@@ -58,12 +58,9 @@ static zend_result zend_try_register_hybrid_module(zend_extension *extension)
 		return FAILURE;
 	}
 
+	// The handle is owned by the zend_extension for hybrid extensions.
 	module->handle = NULL;
-	if (zend_register_module_ex(module, MODULE_PERSISTENT) == NULL) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return zend_register_module_ex(module, MODULE_PERSISTENT) ? SUCCESS : FAILURE;
 }
 
 zend_result zend_load_extension(const char *path)
