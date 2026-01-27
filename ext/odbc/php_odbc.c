@@ -1344,11 +1344,8 @@ static void php_odbc_fetch(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
 
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4
-	 * for functions other than odbc_fetch_row (see GH-13910)
-	 */
-	if (!result_type && !pv_row_is_null && pv_row < 1) {
-		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
+	if (!pv_row_is_null && pv_row < 1) {
+		php_error_docref(NULL, E_WARNING, "Last argument ($row) must be greater than or equal to 1");
 		RETURN_FALSE;
 	}
 
