@@ -171,9 +171,9 @@ zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path)
 		return FAILURE;
 	}
 
-	// The module_entry is loaded registered before the extension is registered
+	// The module_entry is registered before the extension is registered
 	// because zend_register_extension() returns void and is ZEND_API, so
-	// operations which can fail need to be peformed before it.
+	// operations which can fail need to be performed before it.
 	if (zend_try_register_hybrid_module(new_extension) != SUCCESS) {
 		DL_UNLOAD(handle);
 		return FAILURE;
