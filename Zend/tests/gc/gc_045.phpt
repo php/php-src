@@ -56,13 +56,13 @@ array(12) {
   ["runs"]=>
   int(10)
   ["collected"]=>
-  int(25000)
+  int(25005)
   ["threshold"]=>
   int(10001)
   ["buffer_size"]=>
-  int(16384)
+  int(%d)
   ["roots"]=>
-  int(10000)
+  int(9990)
   ["application_time"]=>
   float(%f)
   ["collector_time"]=>
