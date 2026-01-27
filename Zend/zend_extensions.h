@@ -102,6 +102,18 @@ struct _zend_extension {
 	int (*build_id_check)(const char* build_id);
 	op_array_persist_calc_func_t op_array_persist_calc;
 	op_array_persist_func_t op_array_persist;
+
+	/* Setting a module_entry indicates a hybrid extension, meaning an
+	 * extension which is also a module. Such extensions can be loaded with
+	 * either "zend_extension=<name>" or "extension=<name>" by INI.
+	 *
+	 * The symbol "get_module" must _not_ be exported, i.e. don't call
+	 * ZEND_GET_MODULE(), and instead use ZEND_MODULE_ENTRY() to assign a value
+	 * to `.module_entry`.
+	 *
+	 * The DL_HANDLE is owned by the zend_extension for hybrid extensions, so
+	 * the handle should be null for the module entry.
+	 */
 	zend_module_entry *module_entry;
 	void *reserved6;
 	void *reserved7;
