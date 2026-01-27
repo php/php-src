@@ -20,7 +20,7 @@ $arr = [];
 var_dump(odbc_fetch_into($res, $arr));
 var_dump($arr);
 $arr = [];
-var_dump(odbc_fetch_into($res, $arr, 0));
+var_dump(odbc_fetch_into($res, $arr));
 var_dump($arr);
 $arr = [];
 var_dump(odbc_fetch_into($res, $arr, 2));

@@ -17,7 +17,7 @@ odbc_exec($conn, 'INSERT INTO fetch_object VALUES (1), (2)');
 $res = odbc_exec($conn, 'SELECT * FROM fetch_object');
 
 var_dump(odbc_fetch_object($res));
-var_dump(odbc_fetch_object($res, 0));
+var_dump(odbc_fetch_object($res));
 var_dump(odbc_fetch_object($res, 2));
 var_dump(odbc_fetch_object($res, 4));
 
