@@ -472,7 +472,7 @@ else
   lt_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
   for dir in $PATH /usr/ucb; do
     IFS="$lt_save_ifs"
-    if (test -f $dir/echo || test -f $dir/echo$ac_exeext) &&
+    if (test -f "$dir/echo" || test -f "$dir/echo$ac_exeext") &&
        test "X`($dir/echo '\t') 2>/dev/null`" = 'X\t' &&
        echo_testing_string=`($dir/echo "$echo_test_string") 2>/dev/null` &&
        test "X$echo_testing_string" = "X$echo_test_string"; then
