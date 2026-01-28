@@ -32,17 +32,9 @@ Prints API version information
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co The PHP Group
+Copyright \(co The PHP Group and Contributors
 .LP
-This source file is subject to version 3.01 of the PHP license,
-that is bundled with this package in the file LICENSE, and is
-available through the world-wide-web at the following url:
-.PD 0
-.P
-.B https://www.php.net/license/3_01.txt
-.PD 1
-.P
-If you did not receive a copy of the PHP license and are unable to
-obtain it through the world-wide-web, please send a note to
-.B license@php.net
-so we can mail you a copy immediately.
+This source file is subject to the Modified BSD License that is
+bundled with this package in the file LICENSE, and is available
+through the World Wide Web at
+.B https://www.php.net/license/
