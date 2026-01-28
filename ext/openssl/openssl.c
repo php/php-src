@@ -4083,7 +4083,14 @@ static bool php_openssl_pkey_init_legacy_dsa(DSA *dsa, zval *data, bool *is_priv
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
-	if (!p || !q || !g || !DSA_set0_pqg(dsa, p, q, g)) {
+	if (!p || !q || !g) {
+		BN_free(p);
+		BN_free(q);
+		BN_free(g);
+		return 0;
+	}
+
+	if (!DSA_set0_pqg(dsa, p, q, g)) {
 		return 0;
 	}
 
