@@ -12236,6 +12236,12 @@ static void zend_compile_expr(znode *result, zend_ast *ast)
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
 	zend_short_circuiting_commit(checkpoint, result, ast);
+#if ZEND_DEBUG
+	if (result) {
+		/* BP_VAR_R is not allowed to produce IS_VAR. */
+		ZEND_ASSERT(result->op_type != IS_VAR);
+	}
+#endif
 }
 
 static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t type, bool by_ref)
@@ -12304,6 +12310,16 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_op *opcode = zend_compile_var_inner(result, ast, type, by_ref);
 	zend_short_circuiting_commit(checkpoint, result, ast);
+#if ZEND_DEBUG
+	if (result
+	 && (type == BP_VAR_R || type == BP_VAR_IS)
+	 /* Don't check memoized result, as it will force BP_VAR_W even for BP_VAR_IS. */
+	 && CG(memoize_mode) == ZEND_MEMOIZE_NONE
+	) {
+		/* BP_VAR_{R,IS} is not allowed to produce IS_VAR. */
+		ZEND_ASSERT(result->op_type != IS_VAR);
+	}
+#endif
 	return opcode;
 }
 
