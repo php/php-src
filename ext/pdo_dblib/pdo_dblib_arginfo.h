@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo_dblib.stub.php instead.
  * Stub hash: 95f297028aee0675523d6984c03a518e4fc431df */
 
 static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_PDO)

@@ -31,8 +31,6 @@
 * Since:
 */
 
-/* {{{ attribute protos, not implemented yet */
-
 /* {{{ publicId	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-54F2B4D0
@@ -70,8 +68,6 @@ zend_result dom_notation_system_id_read(dom_object *obj, zval *retval)
 
 	return SUCCESS;
 }
-
-/* }}} */
 
 /* }}} */
 

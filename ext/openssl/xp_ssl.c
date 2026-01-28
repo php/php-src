@@ -1335,7 +1335,7 @@ static zend_result php_openssl_enable_server_sni(
 	zend_ulong key_index;
 	int i = 0;
 	char resolved_path_buff[MAXPATHLEN];
-	SSL_CTX *ctx;
+	SSL_CTX *ctx = NULL;
 
 	/* If the stream ctx disables SNI we're finished here */
 	if (GET_VER_OPT("SNI_enabled") && !zend_is_true(val)) {
@@ -1376,6 +1376,8 @@ static zend_result php_openssl_enable_server_sni(
 			);
 			return FAILURE;
 		}
+
+		ZVAL_DEREF(current);
 
 		if (Z_TYPE_P(current) == IS_ARRAY) {
 			zval *local_pk, *local_cert;
@@ -1431,17 +1433,17 @@ static zend_result php_openssl_enable_server_sni(
 			zend_string_release(local_pk_str);
 
 			ctx = php_openssl_create_sni_server_ctx(resolved_cert_path_buff, resolved_pk_path_buff);
-
-		} else if (php_openssl_check_path_str_ex(
-				Z_STR_P(current), resolved_path_buff, 0, false, false,
-				"SNI_server_certs in ssl stream context")) {
-			ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
+		} else if (Z_TYPE_P(current) == IS_STRING) {
+			if (php_openssl_check_path_str_ex(Z_STR_P(current), resolved_path_buff, 0, false, false, "SNI_server_certs in ssl stream context")) {
+				ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
+			} else {
+				php_error_docref(NULL, E_WARNING,
+						"Failed setting local cert chain file `%s'; file not found",
+						Z_STRVAL_P(current)
+				);
+			}
 		} else {
-			php_error_docref(NULL, E_WARNING,
-				"Failed setting local cert chain file `%s'; file not found",
-				Z_STRVAL_P(current)
-			);
-			return FAILURE;
+			php_error_docref(NULL, E_WARNING, "SNI_server_certs options values must be of type array|string");
 		}
 
 		if (ctx == NULL) {
@@ -2219,25 +2221,32 @@ static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb) 
 static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)  /* {{{ */
 {
-	bool nodelay = false;
+	php_sockvals sockvals = {0};
 	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;
 
-	if (PHP_STREAM_CONTEXT(stream) &&
-		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
-		zend_is_true(tmpzval)) {
-		nodelay = true;
+	if (PHP_STREAM_CONTEXT(stream)) {
+		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay");
+		if (tmpzval != NULL && zend_is_true(tmpzval)) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_NODELAY;
+			sockvals.tcp_nodelay = 1;
+		}
+		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle");
+		if (tmpzval != NULL) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
+		}
 	}
 
-	php_socket_t clisock = php_network_accept_incoming(sock->s.socket,
+	php_socket_t clisock = php_network_accept_incoming_ex(sock->s.socket,
 		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 		xparam->want_addr ? &xparam->outputs.addr : NULL,
 		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
 		xparam->inputs.timeout,
 		xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 		&xparam->outputs.error_code,
-		nodelay);
+		&sockvals);
 
 	if (clisock != SOCK_ERR) {
 		php_openssl_netstream_data_t *clisockdata = (php_openssl_netstream_data_t*) emalloc(sizeof(*clisockdata));

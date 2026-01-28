@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit sqlite3.stub.php instead.
  * Stub hash: da91c32c6070c808d6e1b01894b5f8beedda7b45 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)

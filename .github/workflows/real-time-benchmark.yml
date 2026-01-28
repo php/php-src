@@ -24,24 +24,6 @@ on:
         options:
           - "0"
           - "1"
-      opcache:
-        description: 'Whether opcache is enabled for the benchmarked commit'
-        required: true
-        default: "1"
-        type: choice
-        options:
-          - "0"
-          - "1"
-          - "2"
-      baseline_opcache:
-        description: 'Whether opcache is enabled for the baseline commit'
-        required: true
-        default: "1"
-        type: choice
-        options:
-          - "0"
-          - "1"
-          - "2"
       run_micro_bench:
         description: 'Whether to run the micro_bench.php test'
         required: true
@@ -54,23 +36,21 @@ permissions:
   contents: read
   pull-requests: write
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event_name }}
   cancel-in-progress: false
 jobs:
   REAL_TIME_BENCHMARK:
     name: REAL_TIME_BENCHMARK
     if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       REPOSITORY: ${{ github.repository }}
       BRANCH: "master"
       COMMIT: ${{ github.sha }}
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
-      OPCACHE: "1"
-      BASELINE_OPCACHE: "2"
       JIT: "1"
-      INSTRUCTION_COUNT: "1"
+      INSTRUCTION_COUNT: "0"
       RUN_MICRO_BENCH: "0"
       YEAR: ""
     steps:
@@ -82,7 +62,7 @@ jobs:
           echo "YEAR=$YEAR" >> $GITHUB_ENV
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            PR_INFO=$(gh pr view ${{ inputs.pull_request }} --json headRepositoryOwner,headRepository,headRefName,headRefOid,baseRefOid --repo ${{ github.repository }} | jq -r '.headRepositoryOwner.login, .headRepository.name, .headRefName, .headRefOid, .baseRefOid')
+            PR_INFO=$(gh pr view ${{ inputs.pull_request }} --json headRepositoryOwner,headRepository,headRefName,headRefOid,baseRefName --repo ${{ github.repository }} | jq -r '.headRepositoryOwner.login, .headRepository.name, .headRefName, .headRefOid, .baseRefName')
 
             REPOSITORY="$(echo "$PR_INFO" | sed -n '1p')/$(echo "$PR_INFO" | sed -n '2p')"
             echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
@@ -93,13 +73,13 @@ jobs:
             COMMIT=$(echo "$PR_INFO" | sed -n '4p')
             echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
-            BASELINE_COMMIT=$(echo "$PR_INFO" | sed -n '5p')
+            BASELINE_BRANCH=$(echo "$PR_INFO" | sed -n '5p')
+
+            BASELINE_COMMIT=$(gh api /repos/${{ github.repository }}/compare/$BASELINE_BRANCH...$COMMIT --jq '.merge_base_commit.sha')
             echo "BASELINE_COMMIT=$BASELINE_COMMIT" >> $GITHUB_ENV
 
             echo "ID=benchmarked" >> $GITHUB_ENV
 
-            echo "OPCACHE=${{ inputs.opcache }}" >> $GITHUB_ENV
-            echo "BASELINE_OPCACHE=${{ inputs.baseline_opcache }}" >> $GITHUB_ENV
             echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
             echo "INSTRUCTION_COUNT=${{ inputs.instruction_count }}" >> $GITHUB_ENV
             echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
@@ -107,7 +87,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          set -ex
+          set -e
           sudo apt-get update
           sudo apt-get install gpg
 
@@ -118,21 +98,21 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y terraform=1.5.7-*
       - name: Checkout benchmark suite
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: 'kocsismate/php-version-benchmarks'
           ref: 'main'
           fetch-depth: 1
           path: 'php-version-benchmarks'
       - name: Checkout php-src (benchmarked version)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: '${{ env.REPOSITORY }}'
           ref: '${{ env.COMMIT }}'
           fetch-depth: 100
           path: 'php-version-benchmarks/tmp/php_${{ env.ID }}'
       - name: Checkout php-src (baseline version)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: '${{ env.REPOSITORY }}'
           ref: '${{ env.BASELINE_COMMIT }}'
@@ -146,38 +126,25 @@ jobs:
           rm -rf ./php-version-benchmarks/docs/results
       - name: Checkout benchmark data
         if: github.event_name != 'workflow_dispatch'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: php/real-time-benchmark-data
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
           path: 'php-version-benchmarks/docs/results'
-      - name: Setup infra config
-        run: |
-          set -e
-
-          cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
-          sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          sed -i "s/INFRA_MEASURE_INSTRUCTION_COUNT=0/INFRA_MEASURE_INSTRUCTION_COUNT=${{ env.INSTRUCTION_COUNT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-          sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-          sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-          sed -i 's/github_token = ""/github_token = "${{ secrets.GITHUB_TOKEN }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
       - name: Setup PHP config - baseline PHP version
         run: |
           set -e
 
-          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c1-4)"
+          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline.ini
             PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA"
             PHP_ID=php_baseline
 
-            PHP_REPO=https://github.com/${{ env.REPOSITORY }}.git
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=${{ env.BASELINE_OPCACHE }}
             PHP_JIT=0
           EOF
       - name: Setup PHP config - baseline PHP version with JIT
@@ -185,17 +152,16 @@ jobs:
         run: |
           set -e
 
-          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c1-4)"
+          BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline_jit.ini
             PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA (JIT)"
             PHP_ID=php_baseline_jit
 
-            PHP_REPO=https://github.com/${{ env.REPOSITORY }}.git
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=${{ env.BASELINE_OPCACHE }}
             PHP_JIT=${{ env.JIT }}
           EOF
 
@@ -213,15 +179,16 @@ jobs:
             LAST_RESULT_SHA="$(cd ./php-version-benchmarks/tmp/php_${{ env.ID }}/ && git --no-pager log --until="$YESTERDAY" -n 1 --pretty='%H')"
           fi
 
+          echo "LAST_RESULT_SHA=$LAST_RESULT_SHA" >> $GITHUB_ENV
+
           cat << EOF > ./php-version-benchmarks/config/php/previous.ini
             PHP_NAME="PHP - previous ${{ env.BRANCH }}"
             PHP_ID=php_previous
 
-            PHP_REPO=https://github.com/${{ env.REPOSITORY }}.git
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=$LAST_RESULT_SHA
 
-            PHP_OPCACHE=1
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version
@@ -232,11 +199,10 @@ jobs:
             PHP_NAME="PHP - ${{ env.BRANCH }}"
             PHP_ID=php_${{ env.ID }}
 
-            PHP_REPO=https://github.com/${{ env.REPOSITORY }}.git
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.COMMIT }}
 
-            PHP_OPCACHE=${{ env.OPCACHE }}
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version with JIT
@@ -248,11 +214,10 @@ jobs:
             PHP_NAME="PHP - ${{ env.BRANCH }} (JIT)"
             PHP_ID=php_${{ env.ID }}_jit
 
-            PHP_REPO=https://github.com/${{ env.REPOSITORY }}.git
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.COMMIT }}
 
-            PHP_OPCACHE=${{ env.OPCACHE }}
             PHP_JIT=${{ env.JIT }}
           EOF
 
@@ -269,12 +234,58 @@ jobs:
           if [ "${{ env.RUN_MICRO_BENCH }}" -eq "1" ]; then
             cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
           fi
+      - name: Setup infra config
+        run: |
+          set -e
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            WORKSPACE="manual"
+            BASE_COMMIT="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-10)"
+          else
+            WORKSPACE="nightly"
+            BASE_COMMIT="$(echo "${{ env.LAST_RESULT_SHA }}" | cut -c 1-10)"
+          fi
+          COMPARE_COMMIT="$(echo "${{ env.COMMIT }}" | cut -c 1-10)"
+
+          cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s|INFRA_DOCKER_REGISTRY=public.ecr.aws/abcdefgh|INFRA_DOCKER_REGISTRY=${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s|INFRA_WORKSPACE=|INFRA_WORKSPACE=$WORKSPACE|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s/INFRA_MEASURE_INSTRUCTION_COUNT=0/INFRA_MEASURE_INSTRUCTION_COUNT=${{ env.INSTRUCTION_COUNT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+
+          cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/state_bucket = ""/state_bucket = "${{ secrets.PHP_VERSION_BENCHMARK_STATE_BUCKET }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/github_token = ""/github_token = "${{ secrets.GITHUB_TOKEN }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+
+          WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          sed -i "s|log_url = \"\"|log_url = \"$WORKFLOW_RUN_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's|artifact_url = ""|artifact_url = "#ARTIFACT_URL#"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+
+          CHANGESET_URL="${{ github.server_url }}/${{ github.repository }}/compare/$BASE_COMMIT..$COMPARE_COMMIT"
+          sed -i 's|extra_title = ""|extra_title = "Changeset"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i "s|extra_text = \"\"|extra_text = \"$CHANGESET_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
       - name: Run benchmark
-        run: ./php-version-benchmarks/benchmark.sh run aws
-      - name: Store results
+        run: |
+          set -e
+          
+          ./php-version-benchmarks/benchmark.sh run aws
+          
+          echo "NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)" >> $GITHUB_ENV
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: results
+          path: |
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
+          retention-days: 30
+      - name: Commit results
         if: github.repository == 'php/php-src' && github.event_name != 'workflow_dispatch'
         run: |
           set -ex
+
+          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
 
           cd ./php-version-benchmarks/docs/results
           git pull --autostash
@@ -288,31 +299,10 @@ jobs:
           fi
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
-      - name: Upload artifact
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
-        with:
-          name: results
-          path: ./php-version-benchmarks/docs/results/${{ env.YEAR }}
-          retention-days: 30
       - name: Comment results
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ./php-version-benchmarks/tmp/php_${{ env.ID }}
-          NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)
           gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}
-      - name: Cleanup
-        if: always()
-        run: |
-          set -ex
-
-          rm -rf ./php-version-benchmarks/tmp/
-          rm -f ./php-version-benchmarks/build/infrastructure/config/*.tfvars
-          rm -rf ./php-version-benchmarks/build/infrastructure/aws/.terraform/
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/.terraform.lock.hcl
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/aws.tfplan
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate
-          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate.backup
-          rm -f ./php-version-benchmarks/config/infra/aws/*.ini

@@ -260,20 +260,26 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
+		/* This is a new phar that has perhaps had an alias/metadata set, but has never been flushed. */
+		bool remove_fname_cache = !zend_hash_num_elements(&phar->manifest);
+
 		if (phar->fp && (!(phar->flags & PHAR_FILE_COMPRESSION_MASK) || !phar->alias)) {
 			/* close open file handle - allows removal or rename of
 			the file on windows, which has greedy locking
-			only close if the archive was not already compressed.  If it
-			was compressed, then the fp does not refer to the original file.
-			We're also closing compressed files to save resources,
-			but only if the archive isn't aliased. */
+			only close if the archive was not already compressed.
+			We're also closing compressed files to save resources, but only if the archive isn't aliased.
+			If it was compressed, then the fp does not refer to the original compressed file:
+			it refers to the **uncompressed** filtered file stream.
+			Therefore, upon closing a compressed file we need to invalidate the phar archive such
+			that the code that reopens the phar will not try to use the **compressed** file as if it was uncompressed.
+			That would result in treating compressed file data as if it were compressed and using uncompressed file offsets
+			on the compressed file. */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
+			remove_fname_cache |= phar->flags & PHAR_FILE_COMPRESSION_MASK;
 		}
 
-		if (!zend_hash_num_elements(&phar->manifest)) {
-			/* this is a new phar that has perhaps had an alias/metadata set, but has never
-			been flushed */
+		if (remove_fname_cache) {
 			if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
@@ -420,7 +426,7 @@ ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **err
 
 	phar = idata->phar;
 
-	if (idata->internal_file->fp_refcount < 2) {
+	if (idata->internal_file->fp_refcount < 2 && idata->internal_file->fileinfo_lock_count == 0) {
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
@@ -1571,7 +1577,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 	const zend_long readsize = sizeof(buffer) - sizeof(token);
 	const zend_long tokenlen = sizeof(token) - 1;
 	zend_long halt_offset;
-	size_t got;
+	ssize_t got;
 	uint32_t compression = PHAR_FILE_COMPRESSED_NONE;
 
 	if (error) {
@@ -1589,7 +1595,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 	/* Maybe it's better to compile the file instead of just searching,  */
 	/* but we only want the offset. So we want a .re scanner to find it. */
 	while(!php_stream_eof(fp)) {
-		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < (size_t) tokenlen) {
+		if ((got = php_stream_read(fp, buffer+tokenlen, readsize)) < tokenlen) {
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 
@@ -2310,15 +2316,16 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 		/* verify local file header */
 		phar_zip_file_header local;
 		phar_zip_data_desc desc;
+		php_stream *stream = phar_open_archive_fp(idata->phar);
 
-		if (SUCCESS != phar_open_archive_fp(idata->phar)) {
+		if (!stream) {
 			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"",
 				idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
-		php_stream_seek(phar_get_entrypfp(idata->internal_file), entry->header_offset, SEEK_SET);
+		php_stream_seek(stream, entry->header_offset, SEEK_SET);
 
-		if (sizeof(local) != php_stream_read(phar_get_entrypfp(idata->internal_file), (char *) &local, sizeof(local))) {
+		if (sizeof(local) != php_stream_read(stream, (char *) &local, sizeof(local))) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")",
 				idata->phar->fname, ZSTR_VAL(entry->filename));
 			return FAILURE;
@@ -2326,12 +2333,12 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 
 		/* check for data descriptor */
 		if (((PHAR_ZIP_16(local.flags)) & 0x8) == 0x8) {
-			php_stream_seek(phar_get_entrypfp(idata->internal_file),
+			php_stream_seek(stream,
 					entry->header_offset + sizeof(local) +
 					PHAR_ZIP_16(local.filename_len) +
 					PHAR_ZIP_16(local.extra_len) +
 					entry->compressed_filesize, SEEK_SET);
-			if (sizeof(desc) != php_stream_read(phar_get_entrypfp(idata->internal_file),
+			if (sizeof(desc) != php_stream_read(stream,
 							    (char *) &desc, sizeof(desc))) {
 				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")",
 					idata->phar->fname, ZSTR_VAL(entry->filename));

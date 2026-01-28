@@ -7,6 +7,21 @@ PHP                                                                        NEWS
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (ndossche)
+  . Added `clamp()`. (kylekatarnls, thinkverse)
+  . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
+    container). (ilutov)
+  . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
+
+- Date:
+  . Update timelib to 2022.16. (Derick)
+
+- DOM:
+  . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
+    as it was a no-op. (ndossche)
+
+- Fileinfo:
+  . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
+    (ndossche)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
@@ -18,24 +33,32 @@ PHP                                                                        NEWS
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
 
-- Mbstring
-  . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
-    separator). (Yuya Hamada)
+- JSON:
+  . Enriched JSON last error / exception message with error location.
+    (Juan Morales)
 
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
+- Mail:
+  . Fixed bug GH-20862 (null pointer dereference in 
+    php_mail_detect_multiple_crlf via error_log (jordikroon)
+
 - Mbstring:
   . ini_set() with mbstring.detect_order changes the order of mb_detect_order
     as intended, since mbstring.detect_order is an INI_ALL setting. (tobee94)
   . Added GB18030-2022 to default encoding list for zh-CN. (HeRaNO)
-  . Fixed bug GH-20674 (Fix GH-20674 mb_decode_mimeheader does not handle
-    separator). (Yuya Hamada)
+  . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
+    recursive array references). (alexandre-daubois)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
+
+- OpenSSL:
+  . Implemented GH-20310 (No critical extension indication in
+    openssl_x509_parse() output). (StephenWall)
 
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
@@ -47,6 +70,8 @@ PHP                                                                        NEWS
     ignored. (ndossche)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
     when building a phar. (ndossche)
+  . Mark Phar::buildFromIterator() base directory argument as a path.
+    (ndossche)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
@@ -55,6 +80,14 @@ PHP                                                                        NEWS
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and represented
     as a string anymore but a int. (David Carlier)
+
+- Sockets:
+  . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in milliseconds
+    transmitted data can remain unacknowledged. (James Lucas)
+  . Added AF_UNSPEC support for sock_addrinfo_lookup() as a sole umbrella for
+    AF_INET* family only. (David Carlier)
+  . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new optional
+    parameter). (David Carlier)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
@@ -66,12 +99,17 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Invalid mode values now throw in array_filter() instead of being silently
+    defaulted to 0. (Jorg Sowa)
 
 - Streams:
+  . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
+    socket context options.
   . Added so_reuseaddr streams context socket option that allows disabling
     address resuse.
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
+  . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.

@@ -1773,7 +1773,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_THROWS();
 			}
 
-			memset(&sll, 0, sizeof(sll));			
+			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
 
@@ -2121,6 +2121,28 @@ PHP_FUNCTION(socket_set_option)
 
 			optlen = sizeof(tfs);
 			opt_ptr = &tfs;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
+#if defined(TCP_USER_TIMEOUT)
+		case TCP_USER_TIMEOUT: {
+			zend_long timeout = zval_get_long(arg4);
+
+			// TCP_USER_TIMEOUT unsigned int
+			if (timeout < 0 || timeout > UINT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
+				RETURN_THROWS();
+			}
+
+			unsigned int val = (unsigned int)timeout;
+			optlen = sizeof(val);
+			opt_ptr = &val;
 			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 				RETURN_FALSE;
@@ -2727,19 +2749,20 @@ PHP_FUNCTION(socket_export_stream)
 /* {{{ Gets array with contents of getaddrinfo about the given hostname. */
 PHP_FUNCTION(socket_addrinfo_lookup)
 {
-	char *service = NULL;
-	size_t service_len = 0;
+	zend_string *service = NULL;
 	zend_string *hostname, *key;
-	zval *hint, *zhints = NULL;
+	zval *hint, *zhints = NULL, *error_code = NULL;
+	int ret = 0;
 
 	struct addrinfo hints, *result, *rp;
 	php_addrinfo *res;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(hostname)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(service, service_len)
+		Z_PARAM_STR_OR_NULL(service)
 		Z_PARAM_ARRAY(zhints)
+		Z_PARAM_ZVAL_OR_NULL(error_code)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&hints, 0, sizeof(hints));
@@ -2802,14 +2825,16 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 					// Some platforms support also PF_LOCAL/AF_UNIX (e.g. FreeBSD) but the security concerns implied
 					// make it not worth handling it (e.g. unwarranted write permissions on the socket).
 					// Note existing socket_addrinfo* api already forbid such case.
+					if (val != AF_UNSPEC) {
 #ifdef HAVE_IPV6
-					if (val != AF_INET && val != AF_INET6) {
-						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
+						if (val != AF_INET && val != AF_INET6) {
+							zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
 #else
-					if (val != AF_INET) {
-						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET");
+						if (val != AF_INET) {
+							zend_argument_value_error(3, "\"ai_family\" key must be AF_INET");
 #endif
-						RETURN_THROWS();
+							RETURN_THROWS();
+						}
 					}
 					hints.ai_family = (int)val;
 				} else {
@@ -2825,7 +2850,10 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (getaddrinfo(ZSTR_VAL(hostname), service, &hints, &result) != 0) {
+	if ((ret = getaddrinfo(ZSTR_VAL(hostname), service ? ZSTR_VAL(service) : NULL, &hints, &result)) != 0) {
+		if (error_code) {
+			ZEND_TRY_ASSIGN_REF_LONG(error_code, ret);
+		}
 		RETURN_FALSE;
 	}
 
@@ -2833,7 +2861,11 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		if (rp->ai_family != AF_UNSPEC) {
+		if (rp->ai_family == AF_INET
+#ifdef HAVE_IPV6
+		 || rp->ai_family == AF_INET6
+#endif
+				) {
 			zval zaddr;
 
 			object_init_ex(&zaddr, address_info_ce);

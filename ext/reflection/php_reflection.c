@@ -7112,7 +7112,7 @@ ZEND_METHOD(ReflectionReference, getId)
 			RETURN_THROWS();
 		}
 
-		REFLECTION_G(key_initialized) = 1;
+		REFLECTION_G(key_initialized) = true;
 	}
 
 	/* SHA1(ref || key) to avoid directly exposing memory addresses. */
@@ -7970,7 +7970,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflection_property_hook_type_ptr = register_class_PropertyHookType();
 
-	REFLECTION_G(key_initialized) = 0;
+	REFLECTION_G(key_initialized) = false;
 
 	return SUCCESS;
 } /* }}} */

@@ -365,7 +365,7 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 				lxb_url_serialize_host_unicode(&lexbor_idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
 				lxb_unicode_idna_clean(&lexbor_idna);
 
-				ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
+				ZVAL_STR(retval, smart_str_extract(&host_str));
 				break;
 			}
 			case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII:

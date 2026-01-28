@@ -111,6 +111,11 @@ const COUNT_RECURSIVE = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
+/**
+ * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
  */
 const ARRAY_FILTER_USE_BOTH = UNKNOWN;
@@ -1605,6 +1610,12 @@ function min(mixed $value, mixed ...$values): mixed {}
  * @frameless-function {"arity": 2}
  */
 function max(mixed $value, mixed ...$values): mixed {}
+
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 3}
+ */
+function clamp(mixed $value, mixed $min, mixed $max): mixed {}
 
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 

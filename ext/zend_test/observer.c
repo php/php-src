@@ -288,20 +288,39 @@ static void (*zend_test_prev_execute_internal)(zend_execute_data *execute_data, 
 static void zend_test_execute_internal(zend_execute_data *execute_data, zval *return_value) {
 	zend_function *fbc = execute_data->func;
 
+	ZEND_ASSERT(!ZEND_USER_CODE(fbc->type));
+
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
 			php_printf("%*s<!-- internal enter %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else if (ZEND_USER_CODE(fbc->type)) {
-		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
+
+	ZT_G(observer_nesting_depth)++;
 
 	if (zend_test_prev_execute_internal) {
 		zend_test_prev_execute_internal(execute_data, return_value);
 	} else {
 		fbc->internal_function.handler(execute_data, return_value);
+	}
+
+	ZT_G(observer_nesting_depth)--;
+
+	if (fbc->common.function_name) {
+		if (EG(exception)) {
+			php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
+		}
+
+		smart_str retval_info = {0};
+		get_retval_info(return_value, &retval_info);
+		if (fbc->common.scope) {
+			php_printf("%*s<!-- internal leave %s::%s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		} else {
+			php_printf("%*s<!-- internal leave %s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		}
+		smart_str_free(&retval_info);
 	}
 }
 

@@ -52,6 +52,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
     zend_internal_arg_info on internal functions, unless the
     ZEND_ACC_USER_ARG_INFO flag was set.
+  . Added zend_ast_call_get_args() to fetch the argument node from any call
+    node.
+  . The zend_exception_save() and zend_exception_restore() functions were
+    removed.
 
 ========================
 2. Build system changes
@@ -70,9 +74,23 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 
+- ext/mysqlnd:
+  . Dropped session_options parameter from all methods in mysqlnd_auth.
+    The same information is present in conn->options and should be used instead.
+
+- ext/standard:
+  . _php_error_log() now has a formal return type of zend_result.
+  . _php_error_log() now accepts zend_string* values instead of char*.
+  . _php_error_log_ex() has been removed.
+  . php_mail()'s extra_cmd parameter is now a zend_string*.
+
 ========================
 4. OpCode changes
 ========================
+
+- Added ZEND_TYPE_ASSERT to check a value's type against the parameter
+  type of a function, throwing a TypeError on failure as if the function
+  was called. Used in optimizations that elide function calls.
 
 ========================
 5. SAPI changes

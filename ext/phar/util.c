@@ -107,11 +107,12 @@ php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links) /* {{{ */
 	}
 
 	if (phar_get_fp_type(entry) == PHAR_FP) {
-		if (!phar_get_entrypfp(entry)) {
+		php_stream *stream = phar_get_entrypfp(entry);
+		if (!stream) {
 			/* re-open just in time for cases where our refcount reached 0 on the phar archive */
-			phar_open_archive_fp(entry->phar);
+			stream = phar_open_archive_fp(entry->phar);
 		}
-		return phar_get_entrypfp(entry);
+		return stream;
 	} else if (phar_get_fp_type(entry) == PHAR_UFP) {
 		return phar_get_entrypufp(entry);
 	} else if (entry->fp_type == PHAR_MOD) {
@@ -708,24 +709,23 @@ static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
 }
 
-/* initialize a phar_archive_data's read-only fp for existing phar data */
-zend_result phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
+/* Initialize a phar_archive_data's read-only fp for existing phar data.
+ * The stream is owned by the `phar` object and must not be closed manually. */
+php_stream *phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 {
-	if (phar_get_pharfp(phar)) {
-		return SUCCESS;
+	php_stream *stream = phar_get_pharfp(phar);
+	if (stream) {
+		return stream;
 	}
 
 	if (php_check_open_basedir(phar->fname)) {
-		return FAILURE;
+		return NULL;
 	}
 
-	phar_set_pharfp(phar, php_stream_open_wrapper(phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL));
+	stream = php_stream_open_wrapper(phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, NULL);
+	phar_set_pharfp(phar, stream);
 
-	if (!phar_get_pharfp(phar)) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return stream;
 }
 /* }}} */
 
@@ -829,7 +829,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, ch
 	}
 
 	if (!phar_get_pharfp(phar)) {
-		if (FAILURE == phar_open_archive_fp(phar)) {
+		if (!phar_open_archive_fp(phar)) {
 			spprintf(error, 4096, "phar error: Cannot open phar archive \"%s\" for reading", phar->fname);
 			return FAILURE;
 		}
@@ -1881,7 +1881,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar
 
 			if (!EVP_SignInit(md_ctx, mdtype)) {
 				EVP_PKEY_free(key);
-				EVP_MD_CTX_free(md_ctx);
+				EVP_MD_CTX_destroy(md_ctx);
 				efree(sigbuf);
 				spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
 				return FAILURE;
@@ -1890,7 +1890,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar
 			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
 				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
 					EVP_PKEY_free(key);
-					EVP_MD_CTX_free(md_ctx);
+					EVP_MD_CTX_destroy(md_ctx);
 					efree(sigbuf);
 					spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
 					return FAILURE;
@@ -1899,7 +1899,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar
 
 			if (!EVP_SignFinal (md_ctx, sigbuf, &siglen, key)) {
 				EVP_PKEY_free(key);
-				EVP_MD_CTX_free(md_ctx);
+				EVP_MD_CTX_destroy(md_ctx);
 				efree(sigbuf);
 				spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
 				return FAILURE;
@@ -1907,7 +1907,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar
 
 			sigbuf[siglen] = '\0';
 			EVP_PKEY_free(key);
-			EVP_MD_CTX_free(md_ctx);
+			EVP_MD_CTX_destroy(md_ctx);
 #else
 			size_t siglen;
 			sigbuf = NULL;

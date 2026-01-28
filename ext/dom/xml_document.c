@@ -39,7 +39,6 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 								  | XML_PARSE_NOERROR
 								  | XML_PARSE_NOWARNING
 								  | XML_PARSE_NOBLANKS
-								  | XML_PARSE_XINCLUDE
 								  | XML_PARSE_NSCLEAN
 								  | XML_PARSE_NOCDATA
 								  | XML_PARSE_NONET
@@ -60,7 +59,6 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_NOWARNING, "
 										   "LIBXML_NOBLANKS, "
-										   "LIBXML_XINCLUDE, "
 										   "LIBXML_NSCLEAN, "
 										   "LIBXML_NOCDATA, "
 										   "LIBXML_NONET, "

@@ -3133,7 +3133,7 @@ const CURLOPT_PROXY_TLS13_CIPHERS = UNKNOWN;
  */
 const CURLOPT_TLS13_CIPHERS = UNKNOWN;
 
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 /**
  * @var int
  * @cvalue CURLOPT_DOH_URL
@@ -3769,7 +3769,7 @@ function curl_getinfo(CurlHandle $handle, ?int $option = null): mixed {}
 /** @refcount 1 */
 function curl_init(?string $url = null): CurlHandle|false {}
 
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 function curl_upkeep(CurlHandle $handle): bool {}
 #endif
 

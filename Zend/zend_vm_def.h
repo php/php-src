@@ -1866,7 +1866,7 @@ ZEND_VM_INLINE_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 		&prop_info, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
 		type == BP_VAR_W ? opline->extended_value : 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
-		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
+		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS) || (type == BP_VAR_UNSET));
 		prop = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
@@ -3246,7 +3246,7 @@ ZEND_VM_COLD_CONST_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 	ZEND_VM_JMP(opline);
 }
 
-ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, ANY)
+ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, LOOP_END)
 {
 	USE_OPLINE
 
@@ -3255,7 +3255,7 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HOT_HANDLER(127, ZEND_FE_FREE, TMPVAR, ANY)
+ZEND_VM_HOT_HANDLER(127, ZEND_FE_FREE, TMPVAR, LOOP_END)
 {
 	zval *var;
 	USE_OPLINE
@@ -4797,10 +4797,8 @@ ZEND_VM_COLD_CONST_HANDLER(108, ZEND_THROW, CONST|TMPVAR|CV, ANY)
 		}
 	} while (0);
 
-	zend_exception_save();
 	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
-	zend_exception_restore();
 	FREE_OP1();
 	HANDLE_EXCEPTION();
 }
@@ -4813,7 +4811,6 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
-	zend_exception_restore();
 	if (EG(exception) == NULL) {
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}
@@ -8185,24 +8182,11 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		&& throw_op->extended_value & ZEND_FREE_ON_RETURN) {
 		/* exceptions thrown because of loop var destruction on return/break/...
 		 * are logically thrown at the end of the foreach loop, so adjust the
-		 * throw_op_num.
+		 * throw_op_num to the final loop variable FREE.
 		 */
-		const zend_live_range *range = find_live_range(
-			&EX(func)->op_array, throw_op_num, throw_op->op1.var);
-		/* free op1 of the corresponding RETURN */
-		for (uint32_t i = throw_op_num; i < range->end; i++) {
-			if (EX(func)->op_array.opcodes[i].opcode == ZEND_FREE
-			 || EX(func)->op_array.opcodes[i].opcode == ZEND_FE_FREE) {
-				/* pass */
-			} else {
-				if (EX(func)->op_array.opcodes[i].opcode == ZEND_RETURN
-				 && (EX(func)->op_array.opcodes[i].op1_type & (IS_VAR|IS_TMP_VAR))) {
-					zval_ptr_dtor(EX_VAR(EX(func)->op_array.opcodes[i].op1.var));
-				}
-				break;
-			}
-		}
-		throw_op_num = range->end;
+		uint32_t new_throw_op_num = throw_op_num + throw_op->op2.opline_num;
+		cleanup_live_vars(execute_data, throw_op_num, new_throw_op_num);
+		throw_op_num = new_throw_op_num;
 	}
 
 	/* Find the innermost try/catch/finally the exception was thrown in */
@@ -8637,6 +8621,10 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 		zval *return_value = EX_VAR(EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2.var);
 
 		zval_ptr_dtor(return_value);
+		/* Clear return value in case we hit both DISCARD_EXCEPTION and
+		 * zend_dispatch_try_catch_finally_helper, which will free the return
+		 * value again. See OSS-Fuzz #438780145. */
+		ZVAL_NULL(return_value);
 	}
 
 	/* cleanup delayed exception */
@@ -8856,6 +8844,38 @@ ZEND_VM_C_LABEL(type_check_resource):
 	} else {
 		ZEND_VM_SMART_BRANCH(result, 0);
 	}
+}
+
+ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zval *value = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+
+	uint8_t actual_type = Z_TYPE_P(value);
+	uint8_t expected_type = opline->extended_value & 0xff;
+	/* Simple types can be checked directly. */
+	if (UNEXPECTED(actual_type != expected_type)) {
+		zend_function *fbc;
+		{
+			zval *fname = (zval*)RT_CONSTANT(opline, opline->op1);
+			ZEND_ASSERT(Z_EXTRA_P(fname) != 0);
+			fbc = Z_FUNC(EG(function_table)->arData[Z_EXTRA_P(fname)].val);
+			ZEND_ASSERT(fbc->type != ZEND_USER_FUNCTION);
+		}
+		uint16_t argno = opline->extended_value >> 16;
+		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
+
+		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
+			const char *param_name = get_function_arg_name(fbc, argno);
+			zend_string *expected = zend_type_to_string(arginfo->type);
+			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_string_release(expected);
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HOT_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)

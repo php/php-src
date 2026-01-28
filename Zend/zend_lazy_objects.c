@@ -744,12 +744,11 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 		}
 	}
 
-	OBJ_EXTRA_FLAGS(new_proxy) = OBJ_EXTRA_FLAGS(old_obj);
-
 	zend_lazy_object_info *new_info = emalloc(sizeof(*info));
 	*new_info = *info;
 	new_info->u.instance = zend_objects_clone_obj(info->u.instance);
 
+	OBJ_EXTRA_FLAGS(new_proxy) = OBJ_EXTRA_FLAGS(old_obj);
 	zend_lazy_object_set_info(new_proxy, new_info);
 
 	return new_proxy;

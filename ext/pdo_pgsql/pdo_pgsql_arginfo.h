@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo_pgsql.stub.php instead.
  * Stub hash: 0ea21010467d661416f0858f2bda095583ea3a36 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)

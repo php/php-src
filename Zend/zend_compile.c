@@ -816,8 +816,6 @@ static void zend_do_free(znode *op1) /* {{{ */
 			} else {
 				/* Frameless calls usually use the return value, so always emit a free. This should be
 				 * faster than checking RETURN_VALUE_USED inside the handler. */
-				// FIXME: We may actually look at the function signature to determine whether a free
-				// is necessary.
 				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
 			}
 		} else {
@@ -3950,6 +3948,11 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
+		zend_ast_list *args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
+		if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot create a Closure for call expression with more than one argument, or non-variadic placeholders");
+		}
+
 		if (opcode == ZEND_INIT_FCALL) {
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
@@ -5024,7 +5027,113 @@ static zend_result zend_compile_func_clone(znode *result, const zend_ast_list *a
 	return SUCCESS;
 }
 
-static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, uint32_t type) /* {{{ */
+static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno) /* {{{ */
+{
+	/* Bail out if we do not have exactly two parameters. */
+	if (args->children != 2) {
+		return FAILURE;
+	}
+
+	zend_ast *callback = args->child[0];
+
+	/* Bail out if the callback is not a FCC/PFA. */
+	zend_ast *args_ast;
+	switch (callback->kind) {
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL:
+			args_ast = zend_ast_call_get_args(callback);
+			if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
+				return FAILURE;
+			}
+
+			break;
+		default:
+			return FAILURE;
+	}
+
+	/* Bail out if the callback is assert() due to the AST stringification logic
+	 * breaking for the generated call.
+	 */
+	if (callback->kind == ZEND_AST_CALL
+	 && callback->child[0]->kind == ZEND_AST_ZVAL 
+	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
+	 && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
+		return FAILURE;
+	}
+
+	zend_ast_list *callback_args = zend_ast_get_list(((zend_ast_fcc*)args_ast)->args);
+	if (callback_args->children != 1 || callback_args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
+		/* Full PFA is not yet implemented, will fail in zend_compile_call_common(). */
+		return FAILURE;
+	}
+
+	znode value;
+	value.op_type = IS_TMP_VAR;
+	value.u.op.var = get_temporary_variable();
+	zend_ast *call_args = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&value));
+
+	zend_op *opline;
+
+	znode array;
+	zend_compile_expr(&array, args->child[1]);
+	/* array is an argument to both ZEND_TYPE_ASSERT and to ZEND_FE_RESET_R. */
+	if (array.op_type == IS_CONST) {
+		Z_TRY_ADDREF(array.u.constant);
+	}
+
+	/* Verify that the input array actually is an array. */
+	znode name;
+	name.op_type = IS_CONST;
+	ZVAL_STR_COPY(&name.u.constant, lcname);
+	opline = zend_emit_op(NULL, ZEND_TYPE_ASSERT, &name, &array);
+	opline->lineno = lineno;
+	opline->extended_value = (2 << 16) | IS_ARRAY;
+	const zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
+	const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+	Z_EXTRA_P(CT_CONSTANT(opline->op1)) = fbc_bucket - CG(function_table)->arData;
+
+	/* Initialize the result array. */
+	zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
+
+	/* foreach loop starts here. */
+	znode key;
+
+	uint32_t opnum_reset = get_next_op_number();
+	znode reset_node;
+	zend_emit_op(&reset_node, ZEND_FE_RESET_R, &array, NULL);
+	zend_begin_loop(ZEND_FE_FREE, &reset_node, false);
+	uint32_t opnum_fetch = get_next_op_number();
+	zend_emit_op_tmp(&key, ZEND_FE_FETCH_R, &reset_node, &value);
+
+	/* loop body */
+	znode call_result;
+	switch (callback->kind) {
+		case ZEND_AST_CALL:
+			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_CALL, callback->child[0], call_args));
+			break;
+		case ZEND_AST_STATIC_CALL:
+			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_STATIC_CALL, callback->child[0], callback->child[1], call_args));
+			break;
+	}
+	opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &call_result, &key);
+	SET_NODE(opline->result, result);
+	/* end loop body */
+
+	zend_emit_jump(opnum_fetch);
+
+	uint32_t opnum_loop_end = get_next_op_number();
+	opline = &CG(active_op_array)->opcodes[opnum_reset];
+	opline->op2.opline_num = opnum_loop_end;
+	opline = &CG(active_op_array)->opcodes[opnum_fetch];
+	opline->extended_value = opnum_loop_end;
+
+	zend_end_loop(opnum_fetch, &reset_node);
+	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
+
+	return SUCCESS;
+}
+
+static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, uint32_t type, uint32_t lineno) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
@@ -5096,12 +5205,14 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_printf(result, args);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_CLONE))) {
 		return zend_compile_func_clone(result, args);
+	} else if (zend_string_equals_literal(lcname, "array_map")) {
+		return zend_compile_func_array_map(result, args, lcname, lineno);
 	} else {
 		return FAILURE;
 	}
 }
 
-static zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, const zend_function *fbc, uint32_t type) /* {{{ */
+static zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, const zend_function *fbc, uint32_t type, uint32_t lineno) /* {{{ */
 {
 	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
 		return FAILURE;
@@ -5117,7 +5228,7 @@ static zend_result zend_try_compile_special_func(znode *result, zend_string *lcn
 		return FAILURE;
 	}
 
-	if (zend_try_compile_special_func_ex(result, lcname, args, type) == SUCCESS) {
+	if (zend_try_compile_special_func_ex(result, lcname, args, type, lineno) == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -5260,7 +5371,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 
 		if (!is_callable_convert &&
 		    zend_try_compile_special_func(result, lcname,
-				zend_ast_get_list(args_ast), fbc, type) == SUCCESS
+				zend_ast_get_list(args_ast), fbc, type, ast->lineno) == SUCCESS
 		) {
 			zend_string_release_ex(lcname, 0);
 			zval_ptr_dtor(&name_node.u.constant);

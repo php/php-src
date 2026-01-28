@@ -3350,9 +3350,8 @@ PHP_FUNCTION(pg_copy_to)
 	pgsql_link_handle *link;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = NULL;
+	char *pg_null_as = "\\\\N";
 	size_t pg_null_as_len = 0;
-	bool free_pg_null = false;
 	char *query;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -3377,10 +3376,6 @@ PHP_FUNCTION(pg_copy_to)
 		zend_argument_value_error(3, "must be one character");
 		RETURN_THROWS();
 	}
-	if (!pg_null_as) {
-		pg_null_as = estrdup("\\\\N");
-		free_pg_null = true;
-	}
 
 	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
 
@@ -3388,9 +3383,6 @@ PHP_FUNCTION(pg_copy_to)
 		PQclear(pgsql_result);
 	}
 	pgsql_result = PQexec(pgsql, query);
-	if (free_pg_null) {
-		efree(pg_null_as);
-	}
 	efree(query);
 
 	if (pgsql_result) {
@@ -3475,9 +3467,8 @@ PHP_FUNCTION(pg_copy_from)
 	zval *value;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = NULL;
+	char *pg_null_as = "\\\\N";
 	size_t pg_null_as_len;
-	bool pg_null_as_free = false;
 	char *query;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -3502,10 +3493,6 @@ PHP_FUNCTION(pg_copy_from)
 		zend_argument_value_error(4, "must be one character");
 		RETURN_THROWS();
 	}
-	if (!pg_null_as) {
-		pg_null_as = estrdup("\\\\N");
-		pg_null_as_free = true;
-	}
 
 	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
@@ -3513,9 +3500,6 @@ PHP_FUNCTION(pg_copy_from)
 	}
 	pgsql_result = PQexec(pgsql, query);
 
-	if (pg_null_as_free) {
-		efree(pg_null_as);
-	}
 	efree(query);
 
 	if (pgsql_result) {
@@ -5679,7 +5663,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				goto cleanup;
@@ -5864,7 +5848,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				return -1;

@@ -1384,12 +1384,12 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zval *value;
 	bool close_fp = true;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
+	size_t str_key_len, base_len = p_obj->base ? ZSTR_LEN(p_obj->base) : 0;
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t fname_len;
 	size_t contents_len;
-	char *fname = NULL, *error = NULL, *base = ZSTR_VAL(p_obj->base), *save = NULL, *temp = NULL;
+	char *fname = NULL, *error = NULL, *base = p_obj->base ? ZSTR_VAL(p_obj->base) : NULL, *save = NULL, *temp = NULL;
 	zend_string *opened;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
@@ -1828,7 +1828,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	zend_string *base = ZSTR_EMPTY_ALLOC();
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &obj, zend_ce_traversable, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|P!", &obj, zend_ce_traversable, &base) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -4441,7 +4441,7 @@ PHP_METHOD(PharFileInfo, __construct)
 
 	entry_obj->entry = entry_info;
 	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {
-		++entry_info->fp_refcount;
+		++entry_info->fileinfo_lock_count;
 		/* The phar data must exist to keep the alias locked. */
 		ZEND_ASSERT(!phar_data->is_persistent);
 		++phar_data->refcount;
@@ -4486,7 +4486,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 		efree(entry);
 		entry_obj->entry = NULL;
 	} else if (!entry->is_persistent) {
-		--entry->fp_refcount;
+		--entry->fileinfo_lock_count;
 		/* The entry itself still lives in the manifest,
 		 * which will either be freed here if the file info was the last reference; or freed later. */
 		entry_obj->entry = NULL;

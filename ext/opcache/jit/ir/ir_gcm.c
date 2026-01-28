@@ -361,20 +361,20 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
 					j = ctx->cfg_blocks[j].idom;
 				}
-				clone = ir_hashtab_find(&hash, j);
-				if (clone == IR_INVALID_VAL) {
-					clone = clones_count++;
-					ir_hashtab_add(&hash, j, clone);
-					clones[clone].block = j;
-					clones[clone].use_count = 0;
-					clones[clone].use = -1;
-				}
-				uses[uses_count].ref = use;
-				uses[uses_count].block = i;
-				uses[uses_count].next = clones[clone].use;
-				clones[clone].use_count++;
-				clones[clone].use = uses_count++;
 			}
+			clone = ir_hashtab_find(&hash, j);
+			if (clone == IR_INVALID_VAL) {
+				clone = clones_count++;
+				ir_hashtab_add(&hash, j, clone);
+				clones[clone].block = j;
+				clones[clone].use_count = 0;
+				clones[clone].use = -1;
+			}
+			uses[uses_count].ref = use;
+			uses[uses_count].block = i;
+			uses[uses_count].next = clones[clone].use;
+			clones[clone].use_count++;
+			clones[clone].use = uses_count++;
 		}
 	}
 
@@ -413,7 +413,8 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
-		if (clones[i].use_count == 1
+		if (clones[i].block
+		 && clones[i].use_count == 1
 		 && ctx->cfg_blocks[clones[i].block].loop_depth >= ctx->cfg_blocks[uses[clones[i].use].block].loop_depth) {
 			/* TOTALLY_USEFUL block may be a head of a diamond above the real usage.
 			 * Sink it down to the real usage block.

@@ -18,7 +18,6 @@ array_filter(
 --EXPECTF--
 Fatal error: Uncaught Exception: Test in %s:%d
 Stack trace:
-#0 [internal function]: foo('a')
-#1 %s(%d): array_map(Object(Closure), Array)
-#2 {main}
+#0 %s(%d): foo('a')
+#1 {main}
   thrown in %s on line %d
