@@ -127,6 +127,13 @@ AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 dnl Required programs.
 PHP_PROG_AWK
 
+dnl Check for obsolete configure options. The --with-pic configure option is
+dnl obsolete as of Libtool 2.5.3 in favor of the --enable-pic.
+AS_VAR_IF([with_pic], [], [], [AC_MSG_ERROR(m4_text_wrap([
+  The Libtool --with-pic/--without-pic configure option is obsolete. Use
+  --enable-pic/--disable-pic instead.
+]))])
+
 abs_srcdir=$(cd $srcdir && pwd)
 abs_builddir=$(pwd)
 
@@ -794,7 +801,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   php_cxx_post=
   php_lo=lo
 
-  case $with_pic in
+  case $enable_pic in
     yes) pic_setting='-prefer-pic';;
     no)  pic_setting='-prefer-non-pic';;
   esac
