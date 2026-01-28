@@ -1527,7 +1527,7 @@ static bool php_can_change_session_setting(const char *setting_name, bool check_
 
 		return false;
 	}
-	
+
 	if (SG(headers_sent) && (!check_cookies || PS(use_cookies))) {
 		char error_msg[256];
 		snprintf(error_msg, sizeof(error_msg), "Session %s cannot be changed after headers have already been sent", setting_name);
@@ -1535,7 +1535,7 @@ static bool php_can_change_session_setting(const char *setting_name, bool check_
 
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -3055,11 +3055,6 @@ static PHP_MINFO_FUNCTION(session)
 	DISPLAY_INI_ENTRIES();
 }
 
-static const zend_module_dep session_deps[] = {
-	ZEND_MOD_OPTIONAL("spl")
-	ZEND_MOD_END
-};
-
 /* ************************
    * Upload hook handling *
    ************************ */
@@ -3347,7 +3342,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 zend_module_entry session_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
-	session_deps,
+	NULL,
 	"session",
 	ext_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
