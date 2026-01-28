@@ -3153,7 +3153,11 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		if (this_guaranteed_exists()) {
 			obj_node.op_type = IS_UNUSED;
 		} else {
-			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+			opline = zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+			if ((type == BP_VAR_R) || (type == BP_VAR_IS)) {
+				opline->result_type = IS_TMP_VAR;
+				obj_node.op_type = IS_TMP_VAR;
+			}
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 
@@ -5479,7 +5483,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 		if (this_guaranteed_exists()) {
 			obj_node.op_type = IS_UNUSED;
 		} else {
-			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+			zend_emit_op_tmp(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 
