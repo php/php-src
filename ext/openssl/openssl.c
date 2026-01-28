@@ -4269,6 +4269,10 @@ static bool php_openssl_pkey_init_legacy_dh(DH *dh, zval *data, bool *is_private
 	if (priv_key) {
 		pub_key = php_openssl_dh_pub_from_priv(priv_key, g, p);
 		if (pub_key == NULL) {
+			BN_free(p);
+			BN_free(q);
+			BN_free(g);
+			BN_free(priv_key);
 			return 0;
 		}
 		return DH_set0_key(dh, pub_key, priv_key);
