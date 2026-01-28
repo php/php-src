@@ -4395,6 +4395,9 @@ static bool php_openssl_pkey_init_legacy_ec(EC_KEY *eckey, zval *data, bool *is_
 	EC_POINT *point_q = NULL;
 	EC_GROUP *group = NULL;
 	BN_CTX *bctx = BN_CTX_new();
+	if (!bctx) {
+		goto clean_exit;
+	}
 
 	*is_private = false;
 
