@@ -3340,9 +3340,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 }
 
 zend_module_entry session_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+	STANDARD_MODULE_HEADER,
 	"session",
 	ext_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
