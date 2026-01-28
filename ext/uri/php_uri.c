@@ -717,7 +717,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object
 PHP_METHOD(Uri_Rfc3986_Uri, equals)
 {
 	zend_object *that_object;
-	zend_enum_Uri_UriComparisonMode comparison_mode = ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment;
+	zend_enum_Uri_UriComparisonMode comparison_mode = ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_rfc3986_uri)
@@ -913,7 +913,7 @@ PHP_METHOD(Uri_WhatWg_Url, getFragment)
 PHP_METHOD(Uri_WhatWg_Url, equals)
 {
 	zend_object *that_object;
-	zend_enum_Uri_UriComparisonMode comparison_mode = ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment;
+	zend_enum_Uri_UriComparisonMode comparison_mode = ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_whatwg_url)
