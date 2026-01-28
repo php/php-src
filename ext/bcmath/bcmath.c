@@ -788,20 +788,17 @@ PHP_FUNCTION(bcround)
 {
 	zend_string *numstr;
 	zend_long precision = 0;
-	zend_long mode;
-	zend_enum_RoundingMode mode_enum = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
+	zend_enum_RoundingMode rounding_mode = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(numstr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
-		Z_PARAM_ENUM(mode_enum, rounding_mode_ce)
+		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	mode = php_math_round_mode_from_enum(mode_enum);
-
-	switch (mode_enum) {
+	switch (rounding_mode) {
 		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
 		case ZEND_ENUM_RoundingMode_HalfEven:
@@ -826,7 +823,7 @@ PHP_FUNCTION(bcround)
 		goto cleanup;
 	}
 
-	size_t scale = bc_round(num, precision, mode, &result);
+	size_t scale = bc_round(num, precision, rounding_mode, &result);
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
@@ -1795,18 +1792,15 @@ PHP_METHOD(BcMath_Number, ceil)
 PHP_METHOD(BcMath_Number, round)
 {
 	zend_long precision = 0;
-	zend_long rounding_mode;
-	zend_enum_RoundingMode mode_enum = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
+	zend_enum_RoundingMode rounding_mode = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision);
-		Z_PARAM_ENUM(mode_enum, rounding_mode_ce);
+		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
 
-	rounding_mode = php_math_round_mode_from_enum(mode_enum);
-
-	switch (mode_enum) {
+	switch (rounding_mode) {
 		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
 		case ZEND_ENUM_RoundingMode_HalfEven:
@@ -1817,6 +1811,7 @@ PHP_METHOD(BcMath_Number, round)
 		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			break;
 		default:
+			/* This is currently unreachable, but might become reachable when new modes are added. */
 			zend_argument_value_error(2, "is an unsupported rounding mode");
 			RETURN_THROWS();
 	}
