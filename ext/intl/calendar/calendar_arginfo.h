@@ -1,5 +1,5 @@
 /* This is a generated file, edit calendar.stub.php instead.
- * Stub hash: 456f22e15ab1ca5badc2706a4913af6016757736 */
+ * Stub hash: v2_2fc12d1fde65efbec4305f4934a3f4b25282a552 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

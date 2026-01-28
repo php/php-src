@@ -1,5 +1,5 @@
 /* This is a generated file, edit fpm_main.stub.php instead.
- * Stub hash: 41b70820e2cfecb8a611303d8e485193ee111637 */
+ * Stub hash: v2_b4ac4c0f1d91c354293e21185a2e6d9f99cc9fcc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fastcgi_finish_request, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

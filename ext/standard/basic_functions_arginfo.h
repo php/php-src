@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 08cd33a9bea02d47c815d4b30df1279ba868994e
+ * Stub hash: v2_a4324854949e2df355625c18a4e26d066c8f7a17
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)

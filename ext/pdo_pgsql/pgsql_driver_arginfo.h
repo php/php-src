@@ -1,5 +1,5 @@
 /* This is a generated file, edit pgsql_driver.stub.php instead.
- * Stub hash: 8664dac3e021991860b032d5ad4b0d415b22fabf */
+ * Stub hash: v2_30c01b4d2e7f836b81a31dc0c1a115883eb41568 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)

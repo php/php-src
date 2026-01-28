@@ -1,5 +1,5 @@
 /* This is a generated file, edit exif.stub.php instead.
- * Stub hash: a821c3755ce4e41b76d98eef7c605a4ff296cfa7 */
+ * Stub hash: v2_633b2db018fa1453845a854a6361f11f107f4653 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exif_tagname, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)

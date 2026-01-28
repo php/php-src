@@ -1,5 +1,5 @@
 /* This is a generated file, edit sysvsem.stub.php instead.
- * Stub hash: b735084b8a699b38aa9e1281e5a77a6203cd10e0 */
+ * Stub hash: v2_946ea9d0d2156ced1bac460d7d5fc3420e1934bb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, SysvSemaphore, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)

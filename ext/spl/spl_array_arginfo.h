@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_array.stub.php instead.
- * Stub hash: f5a3e2481c6b030899e9d4470c0b1506b137f18f */
+ * Stub hash: v2_c52e89992bd3c04877daab47f4328af0b6ce619e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")

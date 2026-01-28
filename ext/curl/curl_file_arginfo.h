@@ -1,5 +1,5 @@
 /* This is a generated file, edit curl_file.stub.php instead.
- * Stub hash: 43a6e8aaf38c6148f8f65231e70cd7a186536b82 */
+ * Stub hash: v2_0d09bd2f3b0a155cef25ca343319ecf470424d71 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)

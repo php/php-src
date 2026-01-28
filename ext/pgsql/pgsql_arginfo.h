@@ -1,5 +1,5 @@
 /* This is a generated file, edit pgsql.stub.php instead.
- * Stub hash: 04770d14ad49eb3f80668c9570a12eb7e8e74ef7 */
+ * Stub hash: v2_7c5c32d94c0ac05313d8b19915c6318b0678b75b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)

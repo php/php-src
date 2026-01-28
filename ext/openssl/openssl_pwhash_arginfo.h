@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl_pwhash.stub.php instead.
- * Stub hash: ed51d491aa59f3b39e39eb4a0c86bed15a37eb91 */
+ * Stub hash: v2_23ee957ba4945be3a21db58051e548729c3ff44e */
 
 static void register_openssl_pwhash_symbols(int module_number)
 {
