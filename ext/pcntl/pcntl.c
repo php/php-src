@@ -1825,27 +1825,20 @@ PHP_FUNCTION(pcntl_getcpu)
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 {
-	qos_class_t qos_class;
-
 	switch (entry) {
 	case ZEND_ENUM_Pcntl_QosClass_UserInteractive:
-		qos_class = QOS_CLASS_USER_INTERACTIVE;
-		break;
+		return QOS_CLASS_USER_INTERACTIVE;
 	case ZEND_ENUM_Pcntl_QosClass_UserInitiated:
-		qos_class = QOS_CLASS_USER_INITIATED;
-		break;
+		return QOS_CLASS_USER_INITIATED;
 	case ZEND_ENUM_Pcntl_QosClass_Utility:
-		qos_class = QOS_CLASS_UTILITY;
-		break;
+		return QOS_CLASS_UTILITY;
 	case ZEND_ENUM_Pcntl_QosClass_Background:
-		qos_class = QOS_CLASS_BACKGROUND;
-		break;
+		return QOS_CLASS_BACKGROUND;
 	case ZEND_ENUM_Pcntl_QosClass_Default:
-		qos_class = QOS_CLASS_DEFAULT;
-		break;
+		return QOS_CLASS_DEFAULT;
 	}
 
-	return qos_class;
+	ZEND_UNREACHABLE();
 }
 
 static zend_object *qos_lval_to_zval(qos_class_t qos_class)
