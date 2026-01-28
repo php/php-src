@@ -42,7 +42,7 @@ static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_Back
 
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, int case_id, zend_string *case_name, zval *backing_value_zv)
 {
-	zend_enum_obj *intern = zend_object_alloc(sizeof(zend_enum_obj), ce);
+	zend_enum_obj *intern = zend_object_alloc(sizeof(*intern), ce);
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);

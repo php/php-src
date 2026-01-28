@@ -30,7 +30,7 @@ extern ZEND_API zend_class_entry *zend_ce_unit_enum;
 extern ZEND_API zend_class_entry *zend_ce_backed_enum;
 extern ZEND_API zend_object_handlers zend_enum_object_handlers;
 
-typedef struct _zend_enum_obj {
+typedef struct zend_enum_obj {
 	int         case_id;
 	zend_object std;
 } zend_enum_obj;
