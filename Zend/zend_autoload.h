@@ -16,6 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef _ZEND_AUTOLOAD_H
+#define _ZEND_AUTOLOAD_H
+
 #include "zend_string.h"
 #include "zend_hash.h"
 #include "zend_API.h"
@@ -28,3 +31,5 @@ ZEND_API void zend_autoload_fcc_map_to_callable_zval_map(zval *return_value);
 /* Only for deprecated strange behaviour of spl_autoload_unregister() */
 ZEND_API void zend_autoload_clean_class_loaders(void);
 void zend_autoload_shutdown(void);
+
+#endif
