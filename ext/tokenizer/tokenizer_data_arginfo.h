@@ -1,5 +1,5 @@
 /* This is a generated file, edit tokenizer_data.stub.php instead.
- * Stub hash: 2b0986ae40ccb45e392b6d9c6d35eb34b25abef4 */
+ * Stub hash: v2_c5235344b7c651d27c2c33c90696a418a9c96837 */
 
 static void register_tokenizer_data_symbols(int module_number)
 {

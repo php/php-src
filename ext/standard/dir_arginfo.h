@@ -1,5 +1,5 @@
 /* This is a generated file, edit dir.stub.php instead.
- * Stub hash: 1b6f6f72ebf17ffabd6c362d901889478c44ec51 */
+ * Stub hash: v2_e21d382cd4001001874c49d8c5244efb57613910 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()

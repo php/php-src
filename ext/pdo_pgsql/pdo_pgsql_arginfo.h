@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_pgsql.stub.php instead.
- * Stub hash: e63b904e73f71fdfbb9b4cff27ef0227d90cac6c */
+ * Stub hash: v2_0ea21010467d661416f0858f2bda095583ea3a36 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)

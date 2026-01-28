@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_xmlreader.stub.php instead.
- * Stub hash: cd6f704bc5ef76588831982149d86bc71e1ef53a */
+ * Stub hash: v2_80288a0f40eabc7802a928963386616ea31e448d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()

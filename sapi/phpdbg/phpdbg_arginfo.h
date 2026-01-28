@@ -1,5 +1,5 @@
 /* This is a generated file, edit phpdbg.stub.php instead.
- * Stub hash: b70a58c682c96e8ba660738a0d157af58e44e384 */
+ * Stub hash: v2_08e29f02953f23bfce6ce04f435227b4e5e61545 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_break_next, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()

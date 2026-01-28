@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_dom.stub.php instead.
- * Stub hash: d91f2c59f62e07522e448bdfb7dc4bb4da3810f7
+ * Stub hash: v2_e3495cb89e4466d9102abb10bf6461989b7c8ba9
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)

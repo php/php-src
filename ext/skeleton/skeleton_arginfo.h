@@ -1,5 +1,5 @@
 /* This is a generated file, edit skeleton.stub.php instead.
- * Stub hash: 079118e7ab5e6309ff80f502efd463007f1767dd */
+ * Stub hash: v2_54b0ffc3af871b189435266df516f7575c1b9675 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()

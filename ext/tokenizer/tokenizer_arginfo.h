@@ -1,5 +1,5 @@
 /* This is a generated file, edit tokenizer.stub.php instead.
- * Stub hash: fb1463e1d6067621efde2f0bc44708b60b7a82a6 */
+ * Stub hash: v2_a89f03303f8a7d254509ae2bc46a36bb79a3c900 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)

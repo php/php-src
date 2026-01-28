@@ -91,7 +91,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
              * this information (whether a decl file should exist) from the
              * arginfo.h file. */
             $stubCode = file_get_contents($stubFile);
-            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode) . '_v2');
+            $stubHash = 'v2_' . sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
             $hasDeclHeader = extractHasDeclHeader($arginfoFile);
             $oldStubHashDecl = extractStubHash($declFile);
@@ -175,7 +175,7 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: ([0-9a-f]+)/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: (\\S+)/', $arginfoCode, $matches)) {
         return null;
     }
 

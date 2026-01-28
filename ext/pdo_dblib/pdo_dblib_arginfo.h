@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_dblib.stub.php instead.
- * Stub hash: ada550a5c626565e2521e94910cbe48edcb8283d */
+ * Stub hash: v2_95f297028aee0675523d6984c03a518e4fc431df */
 
 static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_PDO)
 {
