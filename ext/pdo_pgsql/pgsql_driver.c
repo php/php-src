@@ -520,7 +520,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 					break;
 #endif
 #ifdef CONNECTION_GSS_STARTUP
-				case CONNECTION_SSL_STARTUP:
+				case CONNECTION_GSS_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));
 					break;
 #endif
