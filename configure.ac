@@ -6,7 +6,13 @@ dnl ----------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
+
 m4_include([build/libtool.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
+m4_include([build/lt~obsolete.m4])
+
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
