@@ -1,5 +1,5 @@
 --TEST--
-(unset) cast must not be allowed in constant property initializer
+(unset) cast must not be allowed in constant expressions
 --FILE--
 <?php
 try {
