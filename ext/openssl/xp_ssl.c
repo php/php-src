@@ -2758,6 +2758,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				add_assoc_string(&tmp, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
 				add_assoc_long(&tmp, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 				add_assoc_string(&tmp, "cipher_version", SSL_CIPHER_get_version(cipher));
+				add_assoc_bool(&tmp, "session_reused", SSL_session_reused(sslsock->ssl_handle));
 
 #ifdef HAVE_TLS_ALPN
 				{
