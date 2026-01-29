@@ -2344,6 +2344,9 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   AC_CHECK_SIZEOF([long long])
   AC_CHECK_SIZEOF([size_t])
   AC_CHECK_SIZEOF([off_t])
+
+  AS_IF([test $ac_cv_sizeof_long = 4],
+    AC_MSG_WARN([Size of long type is 4 bytes. 32 bit builds are deprecated and will no longer be supported in PHP-9]))
 ])
 
 dnl
