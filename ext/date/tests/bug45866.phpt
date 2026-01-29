@@ -21,7 +21,7 @@ try {
 echo $date->format( 'r' ), "\n";
 ?>
 --EXPECTF--
-Thu, 14 Aug 168488594 16:44:23 +0100
+Fri, 31 Jul 2009 07:30:32 +0100
 Thu, 14 Aug 168488594 16:44:23 +0100
 DateMalformedStringException: DateTime::modify(): Failed to parse time string (£61538461538 day) at position 0 (%s): Unexpected character
 Wed, 29 Jul 2009 16:44:23 +0100
