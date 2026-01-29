@@ -153,7 +153,7 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
   undefine([AC_PROG_CXXCPP])
   AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
 ])
-AC_PROG_LIBTOOL
+LT_INIT
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
