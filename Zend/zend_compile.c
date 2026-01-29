@@ -7896,7 +7896,7 @@ static bool zend_property_hook_uses_property(const zend_string *property_name, c
 	return context.uses_property;
 }
 
-static bool zend_property_is_virtual(const zend_class_entry *ce, const zend_string *property_name, zend_ast *hooks_ast, uint32_t flags)
+static bool zend_property_is_virtual(const zend_class_entry *ce, const zend_string *property_name, zend_ast *hooks_ast)
 {
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		return true;
@@ -8172,7 +8172,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_property_info *prop = zend_declare_typed_property(
 				scope, name, &default_value,
-				property_flags | (zend_property_is_virtual(scope, name, hooks_ast, property_flags) ? ZEND_ACC_VIRTUAL : 0) | ZEND_ACC_PROMOTED,
+				property_flags | (zend_property_is_virtual(scope, name, hooks_ast) ? ZEND_ACC_VIRTUAL : 0) | ZEND_ACC_PROMOTED,
 				doc_comment, type);
 			if (hooks_ast) {
 				const zend_ast_list *hooks = zend_ast_get_list(hooks_ast);
@@ -9074,7 +9074,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_string *doc_comment = NULL;
 		zval value_zv;
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
-		flags |= zend_property_is_virtual(ce, name, hooks_ast, flags) ? ZEND_ACC_VIRTUAL : 0;
+		flags |= zend_property_is_virtual(ce, name, hooks_ast) ? ZEND_ACC_VIRTUAL : 0;
 
 		zend_string *old_active_property_info_name = CG(context).active_property_info_name;
 		CG(context).active_property_info_name = name;
