@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
 
+- Windows:
+  . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
+
 12 Feb 2026, PHP 8.4.18
 
 - Core:
