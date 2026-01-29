@@ -25,6 +25,6 @@ fclose($fd);
 Warning: posix_fpathconf(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
 bool(true)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"
 posix_fpathconf(): Argument #1 ($file_descriptor) must be of type int|resource, string given
 int(%d)
