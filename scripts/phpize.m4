@@ -4,7 +4,13 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
+
 m4_include([build/libtool.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
+m4_include([build/lt~obsolete.m4])
+
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
