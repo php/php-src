@@ -814,6 +814,11 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					case IS_OBJECT:
 						zend_cast_zval_to_object(result, &op1, IS_VAR);
 						break;
+					case IS_NULL:
+						zend_throw_error(NULL,
+							"Invalid cast in constant expression");
+						ret = FAILURE;
+						break;
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}
 				zval_ptr_dtor_nogc(&op1);
