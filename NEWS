@@ -101,6 +101,8 @@ PHP                                                                        NEWS
     while COW violation flag is still set). (alexandre-daubois)
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0. (Jorg Sowa)
+  . Add support for endianness modifier in pack()/unpack() integer format
+    codes. (alexandre-daubois)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
