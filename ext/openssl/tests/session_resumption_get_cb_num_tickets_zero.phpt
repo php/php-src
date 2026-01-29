@@ -64,6 +64,8 @@ $clientCode = <<<'CODE'
     // First connection
     $client1 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
     if ($client1) {
+        $meta1 = stream_get_meta_data($client1);
+        echo "Client first connection resumed: " . ($meta1['crypto']['session_reused'] ? "yes" : "no") . "\n";
         echo trim(fgets($client1)) . "\n";
         usleep(100000); // Wait for session storage
         fclose($client1);
@@ -80,6 +82,8 @@ $clientCode = <<<'CODE'
 
     $client2 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx2);
     if ($client2) {
+        $meta2 = stream_get_meta_data($client2);
+        echo "Client second connection resumed: " . ($meta2['crypto']['session_reused'] ? "yes" : "no") . "\n";
         echo trim(fgets($client2)) . "\n";
         fclose($client2);
     }
@@ -103,4 +107,5 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 Response 1
 Client received tickets on first connection: 0
 Response 2
+Client second connection resumed: yes
 Server: NEW_CB_CALLS:0
