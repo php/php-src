@@ -11,5 +11,5 @@ try {
     echo $e->getMessage();
 }
 ?>
---EXPECT--
-Invalid cast in constant expression
+--EXPECTF--
+Fatal error: The (unset) cast is no longer supported in %s on line %d
