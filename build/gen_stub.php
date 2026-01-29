@@ -2235,7 +2235,7 @@ OUPUT_EXAMPLE
 
 class EvaluatedValue
 {
-    public /* readonly */ mixed $value;
+    public /* readonly */ /* mixed */ $value;
     public SimpleType $type;
     public Expr $expr;
     public bool $isUnknownConstValue;
