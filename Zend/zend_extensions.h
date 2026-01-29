@@ -54,6 +54,7 @@ typedef struct _zend_extension_version_info {
 #define ZEND_EXTENSION_BUILD_ID "API" ZEND_TOSTR(ZEND_EXTENSION_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
 typedef struct _zend_extension zend_extension;
+typedef struct _zend_module_entry zend_module_entry;
 
 /* Typedef's for zend_extension function pointers */
 typedef int (*startup_func_t)(zend_extension *extension);
@@ -101,7 +102,19 @@ struct _zend_extension {
 	int (*build_id_check)(const char* build_id);
 	op_array_persist_calc_func_t op_array_persist_calc;
 	op_array_persist_func_t op_array_persist;
-	void *reserved5;
+
+	/* Setting a module_entry indicates a hybrid extension, meaning an
+	 * extension which is also a module. Such extensions can be loaded with
+	 * either "zend_extension=<name>" or "extension=<name>" by INI.
+	 *
+	 * The symbol "get_module" must _not_ be exported, i.e. don't call
+	 * ZEND_GET_MODULE(), and instead use ZEND_MODULE_ENTRY() to assign a value
+	 * to `.module_entry`.
+	 *
+	 * The DL_HANDLE is owned by the zend_extension for hybrid extensions, so
+	 * the handle should be null for the module entry.
+	 */
+	zend_module_entry *module_entry;
 	void *reserved6;
 	void *reserved7;
 	void *reserved8;
