@@ -1372,7 +1372,7 @@ namespace Dom
          * @readonly
          * @virtual
          */
-        public string $baseURI;
+        public ?string $baseURI;
 
         /**
          * @readonly
