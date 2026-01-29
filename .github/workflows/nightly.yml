@@ -11,9 +11,6 @@ on:
       community_verify_type_inference:
         required: true
         type: boolean
-      libmysqlclient_with_mysqli:
-        required: true
-        type: boolean
       run_alpine:
         required: true
         type: boolean
@@ -436,7 +433,7 @@ jobs:
           FIREBIRD_DATABASE: test.fdb
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -854,30 +851,22 @@ jobs:
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
-          configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
+          configurationParameters: '--enable-werror'
           libmysql: mysql-8.0.37-linux-glibc2.28-x86_64.tar.xz
-          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
-        with:
-          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Build mysql-8.4
-        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/build-libmysqlclient
         with:
-          configurationParameters: ${{ !inputs.libmysqlclient_with_mysqli && '--enable-werror' || '' }}
+          configurationParameters: '--enable-werror'
           libmysql: mysql-8.4.0-linux-glibc2.28-x86_64.tar.xz
-          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Test mysql-8.4
-        if: ${{ !inputs.libmysqlclient_with_mysqli }}
         uses: ./.github/actions/test-libmysqlclient
-        with:
-          withMysqli: ${{ inputs.libmysqlclient_with_mysqli }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   PECL:
     if: inputs.branch == 'master'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       CC: ccache gcc
       CXX: ccache g++
@@ -924,6 +913,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             ccache \
             libmemcached-dev \
+            imagemagick \
+            libmagickwand-dev \
             bison \
             re2c
       - name: ccache

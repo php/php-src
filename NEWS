@@ -1,22 +1,79 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.18
+?? ??? ????, PHP 8.4.19
+
+- Core:
+  . Fixed bug GH-21029 (zend_mm_heap corrupted on Aarch64, LTO builds). (Arnaud)
+
+- PDO_PGSQL:
+  . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
+    (lsaos)
+
+- Windows:
+  . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
+
+12 Feb 2026, PHP 8.4.18
+
+- Core:
+  . Fixed bug GH-20837 (NULL dereference when calling ob_start() in shutdown
+    function triggered by bailout in php_output_lock_error()). (timwolla)
+  . Fix OSS-Fuzz #471533782 (Infinite loop in GC destructor fiber). (ilutov)
+  . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
+  . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
+  . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
+  . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
+  . Fix OSS-Fuzz #471486164 (Broken by-ref assignment to uninitialized hooked
+    backing value). (ilutov)
+  . Fix OSS-Fuzz #438780145 (Nested finally with repeated return type check may
+    uaf). (ilutov)
+  . Fixed bug GH-20905 (Lazy proxy bailing __clone assertion). (ilutov)
+  . Fixed bug GH-20479 (Hooked object properties overflow). (ndossche)
+
+- Date:
+  . Update timelib to 2022.16. (Derick)
+
+- DOM:
+  . Fixed GH-21041 (Dom\HTMLDocument corrupts closing tags within scripts).
+    (lexborisov)
 
 - MbString:
   . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
     invalid in the encoding). (ndossche)
+  . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
+    recursive array references). (alexandre-daubois)
+
+- Opcache:
+  . Fixed bug GH-20818 (Segfault in Tracing JIT with object reference).
+    (khasinski)
+
+- OpenSSL:
+  . Fix memory leaks when sk_X509_new_null() fails. (ndossche)
+  . Fix crash when in openssl_x509_parse() when i2s_ASN1_INTEGER() fails.
+    (ndossche)
+  . Fix crash in openssl_x509_parse() when X509_NAME_oneline() fails.
+    (ndossche)
+
+- Phar:
+  . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
+    (ndossche)
+
+- PGSQL:
+  . Fixed INSERT/UPDATE queries building with PQescapeIdentifier() and possible
+    UB. (David Carlier)
 
 - Readline:
   . Fixed bug GH-18139 (Memory leak when overriding some settings
     via readline_info()). (ndossche)
 
+- SPL:
+  . Fixed bug GH-20856 (heap-use-after-free in SplDoublyLinkedList iterator
+    when modifying during iteration). (ndossche)
+
 - Standard:
   . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
     (Jakub Zelenka)
-
-- Windows:
-  . Fixed compilation with clang (missing intrin.h include).
-    (Kévin Dunglas)
+  . Fixed bug GH-20843 (var_dump() crash with nested objects)
+    (David Carlier)
 
 15 Jan 2026, PHP 8.4.17
 

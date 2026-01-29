@@ -2134,6 +2134,11 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	subject_name = X509_get_subject_name(cert);
 	cert_name = X509_NAME_oneline(subject_name, NULL, 0);
+	if (cert_name == NULL) {
+		php_openssl_store_errors();
+		goto err;
+	}
+
 	add_assoc_string(return_value, "name", cert_name);
 	OPENSSL_free(cert_name);
 
@@ -2166,6 +2171,12 @@ PHP_FUNCTION(openssl_x509_parse)
 	}
 
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
+	/* Can return NULL on error or memory allocation failure */
+	if (!str_serial) {
+		php_openssl_store_errors();
+		goto err;
+	}
+
 	add_assoc_string(return_value, "serialNumber", str_serial);
 	OPENSSL_free(str_serial);
 
@@ -2552,6 +2563,9 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 	bool free_cert;
 
 	sk = sk_X509_new_null();
+	if (sk == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zcerts) == IS_ARRAY) {
@@ -5797,6 +5811,9 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	}
 
 	recipcerts = sk_X509_new_null();
+	if (recipcerts == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
@@ -6404,6 +6421,9 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	}
 
 	recipcerts = sk_X509_new_null();
+	if (recipcerts == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {

@@ -1397,12 +1397,12 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zval *value;
 	bool close_fp = 1;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
+	size_t str_key_len, base_len = p_obj->base ? ZSTR_LEN(p_obj->base) : 0;
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t fname_len;
 	size_t contents_len;
-	char *fname, *error = NULL, *base = ZSTR_VAL(p_obj->base), *save = NULL, *temp = NULL;
+	char *fname, *error = NULL, *base = p_obj->base ? ZSTR_VAL(p_obj->base) : NULL, *save = NULL, *temp = NULL;
 	zend_string *opened;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
