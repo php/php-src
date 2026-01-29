@@ -1369,7 +1369,7 @@ PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const
 			return FAILURE;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(ZSTR_VAL(opt), "a", REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(opt ? ZSTR_VAL(opt) : NULL, "a", REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
