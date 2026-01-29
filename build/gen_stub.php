@@ -84,7 +84,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         }
 
         /* Because exit() and die() are proper token/keywords we need to hack-around */
-        $hasSpecialExitAsFunctionHandling = str_ends_with($stubFile, 'zend_builtin_functions.stub.php');
+        $hasSpecialExitAsFunctionHandling = (basename($stubFile) == 'zend_builtin_functions.stub.php');
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
             initPhpParser();
             $stubContent = $stubCode ?? file_get_contents($stubFile);
