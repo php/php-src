@@ -65,8 +65,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
-  . build/gen_stub.php may now generate an additional _decl.h file in addition
-    to the _arginfo.h file, if the stub declares enums. For each enum, the file
+  . build/gen_stub.php may now generate a _decl.h file in addition to
+    the _arginfo.h file, if the stub declares enums. For each enum, the file
     will contain a C enum. Enum values can be compared to the result of
     zend_enum_fetch_case_id(zend_object*).
 
