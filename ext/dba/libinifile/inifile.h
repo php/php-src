@@ -17,6 +17,9 @@
 #ifndef PHP_LIB_INIFILE_H
 #define PHP_LIB_INIFILE_H
 
+#include <stddef.h>
+#include <stdbool.h>
+
 typedef struct {
 	char *group;
 	char *name;
@@ -36,14 +39,14 @@ typedef struct {
 	char *lockfn;
 	int lockfd;
 	php_stream *fp;
-	int readonly;
+	bool readonly;
 	line_type curr;
 	line_type next;
 } inifile;
 
 val_type inifile_fetch(inifile *dba, const key_type *key, int skip);
-int inifile_firstkey(inifile *dba);
-int inifile_nextkey(inifile *dba);
+bool inifile_firstkey(inifile *dba);
+bool inifile_nextkey(inifile *dba);
 int inifile_delete(inifile *dba, const key_type *key);
 int inifile_delete_ex(inifile *dba, const key_type *key, bool *found);
 int inifile_replace(inifile *dba, const key_type *key, const val_type *val);
@@ -58,7 +61,7 @@ void inifile_key_free(key_type *key);
 void inifile_val_free(val_type *val);
 void inifile_line_free(line_type *ln);
 
-inifile * inifile_alloc(php_stream *fp, int readonly, int persistent);
-void inifile_free(inifile *dba, int persistent);
+inifile * inifile_alloc(php_stream *fp, bool readonly, bool persistent);
+void inifile_free(inifile *dba, bool persistent);
 
 #endif
