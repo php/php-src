@@ -37,7 +37,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 
 #ifdef PHP_AP_DEBUG
 #define phpapdebug(a) fprintf a

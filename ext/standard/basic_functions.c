@@ -102,7 +102,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #include "zend_globals.h"
-#include "php_globals.h"
 #include "SAPI.h"
 #include "php_ticks.h"
 

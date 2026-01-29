@@ -62,7 +62,6 @@
 #include "win32/php_registry.h"
 #include "ext/standard/flock_compat.h"
 #endif
-#include "php_syslog.h"
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
@@ -73,7 +72,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_extensions.h"
 #include "zend_ini.h"
 #include "zend_dtrace.h"
 #include "zend_observer.h"

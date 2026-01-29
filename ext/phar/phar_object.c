@@ -27,7 +27,6 @@
 #include "main/SAPI.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "zend_exceptions.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;

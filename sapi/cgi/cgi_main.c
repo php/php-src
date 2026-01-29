@@ -59,7 +59,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"

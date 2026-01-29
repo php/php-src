@@ -23,8 +23,6 @@
 #include "zend_inference.h"
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
-#include "zend_inference.h"
-#include "zend_call_graph.h"
 
 static void zend_op_array_calc(zend_op_array *op_array, void *context)
 {

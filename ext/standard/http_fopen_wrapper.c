@@ -44,7 +44,6 @@
 
 #include "php_standard.h"
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

@@ -1031,12 +1031,6 @@ void zend_assert_valid_class_name(const zend_string *const_name, const char *typ
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
 ZEND_API zend_string *zend_type_to_string(zend_type type);
 
-/* BEGIN: OPCODES */
-
-#include "zend_vm_opcodes.h"
-
-/* END: OPCODES */
-
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1

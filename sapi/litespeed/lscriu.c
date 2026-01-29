@@ -64,7 +64,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #endif
 
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
@@ -73,7 +72,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <dlfcn.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
@@ -81,7 +79,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <time.h>
 #include <sys/timeb.h>
-#include <unistd.h>
 #include "lscriu.h"
 
 #include <Zend/zend_portability.h>
