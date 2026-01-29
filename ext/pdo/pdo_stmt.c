@@ -2385,7 +2385,7 @@ static zend_function *row_get_ctor(zend_object *object)
 	return NULL;
 }
 
-static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	ZEND_IGNORE_VALUE(object);
 	ZEND_IGNORE_VALUE(name);

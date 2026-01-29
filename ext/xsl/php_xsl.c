@@ -185,13 +185,13 @@ static bool xsl_is_validated_property(const zend_string *member)
 	return zend_string_equals_literal(member, "maxTemplateDepth") || zend_string_equals_literal(member, "maxTemplateVars");
 }
 
-static zval *xsl_objects_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+static zval *xsl_objects_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container)
 {
 	if (xsl_is_validated_property(member)) {
 		return NULL;
 	}
 
-	return zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
+	return zend_std_get_property_ptr_ptr(object, member, type, cache_slot, container);
 }
 
 static zval *xsl_objects_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
