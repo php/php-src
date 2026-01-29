@@ -842,6 +842,9 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	struct sockaddr **res;
 	// TODO: Do not strip and re-add the port in peername?
 	unsigned remote_port = SNMP_PORT;
+#if defined(HAVE_GETADDRINFO)
+	char name[INET6_ADDRSTRLEN];
+#endif
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -888,18 +891,17 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
+#if defined(HAVE_GETADDRINFO)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
 		}
 		if ((*res)->sa_family == AF_INET6) {
-			strcpy(session->peername, "udp6:[");
-			pptr = session->peername + strlen(session->peername);
-			inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), pptr, MAX_NAME_LEN);
-			strcat(pptr, "]");
+			if (inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), name, sizeof(name))) {
+				snprintf(pptr, MAX_NAME_LEN, "udp6:[%s]", name);
+			}
 		} else if ((*res)->sa_family == AF_INET) {
-			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, MAX_NAME_LEN);
+			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, INET_ADDRSTRLEN);
 		} else {
 			res++;
 			continue;
