@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-21029 (zend_mm_heap corrupted on Aarch64, LTO builds). (Arnaud)
   . Fixed bug GH-21059 (Segfault when preloading constant AST closure). (ilutov)
+  . Fixed bug GH-21072 (Crash on (unset) cast in constant expression).
+    (arshidkv12)
 
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
