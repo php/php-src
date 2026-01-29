@@ -160,8 +160,8 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([1.0.3], [--no-generation-date])
-dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 7.4.
-PHP_PROG_PHP([7.4])
+dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 8.1.
+PHP_PROG_PHP([8.1])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto extension with re2c],
