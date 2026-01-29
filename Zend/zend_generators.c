@@ -654,7 +654,9 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 			} else {
 				zval_ptr_dtor(&new_root->value);
 				ZVAL_COPY(&new_root->value, &new_root_parent->value);
-				ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				if (yield_from->result_type != IS_UNUSED) {
+					ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				}
 			}
 		}
 	}
