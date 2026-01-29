@@ -12564,6 +12564,9 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[1]);
 			return;
 		case ZEND_AST_CAST:
+			if (ast->attr == IS_NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "The (unset) cast is no longer supported");
+			}
 			zend_eval_const_expr(&ast->child[0]);
 			if (ast->child[0]->kind == ZEND_AST_ZVAL
 			 && zend_try_ct_eval_cast(&result, ast->attr, zend_ast_get_zval(ast->child[0]))) {
