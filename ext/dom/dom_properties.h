@@ -134,6 +134,7 @@ zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval);
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval);
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_write(dom_object *obj, zval *newval);
 
