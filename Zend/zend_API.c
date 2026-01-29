@@ -2430,8 +2430,6 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {
 			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);
-			EG(current_module) = NULL;
-			return FAILURE;
 		}
 		EG(current_module) = NULL;
 	}
