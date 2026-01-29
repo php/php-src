@@ -46,6 +46,24 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
+/* Check if we're within a constructor call chain for the given object.
+ * Walks up the call stack to find if any frame is a constructor for zobj.
+ * This allows reassignment from the constructor or methods/closures called from it. */
+ZEND_API bool zend_is_in_constructor(const zend_object *zobj)
+{
+	zend_execute_data *ex = EG(current_execute_data);
+	while (ex) {
+		if (ex->func
+		    && (ex->func->common.fn_flags & ZEND_ACC_CTOR)
+		    && (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
+		    && Z_OBJ(ex->This) == zobj) {
+			return true;
+		}
+		ex = ex->prev_execute_data;
+	}
+	return false;
+}
+
 static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
 static zend_arg_info zend_property_hook_arginfo[1] = {{0}};
 
@@ -1066,7 +1084,7 @@ try_again:
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
-				 && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) {
+				 && !zend_is_readonly_property_modifiable(variable_ptr, prop_info, zobj)) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
 					goto exit;
@@ -1100,7 +1118,15 @@ typed_property:
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
+				/* For promoted readonly properties being initialized for the first time,
+				 * set IS_PROP_CPP_REINITABLE to allow one reassignment in the constructor. */
+				if ((prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
+				 && (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT)
+				 && zend_is_in_constructor(zobj)) {
+					Z_PROP_FLAG_P(variable_ptr) = IS_PROP_CPP_REINITABLE;
+				} else {
+					Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE|IS_PROP_CPP_REINITABLE);
+				}
 				value = &tmp;
 			}
 
