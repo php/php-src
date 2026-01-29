@@ -892,7 +892,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_modern_node_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeType", dom_node_node_type_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeName", dom_node_node_name_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_node_base_uri_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_modern_node_base_uri_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "isConnected", dom_node_is_connected_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "ownerDocument", dom_node_owner_document_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentNode", dom_node_parent_node_read, NULL);
