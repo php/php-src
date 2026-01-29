@@ -636,6 +636,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SINCE,                  "since") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
+	_(ZEND_STR_MEMORY_LIMIT,           "memory_limit") \
 	_(ZEND_STR_8_DOT_0,                "8.0") \
 	_(ZEND_STR_8_DOT_1,                "8.1") \
 	_(ZEND_STR_8_DOT_2,                "8.2") \
