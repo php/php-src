@@ -28,8 +28,6 @@ $serverCode = <<<'CODE'
             fclose($client);
         }
     }
-
-    phpt_notify(message: "CACHE_DISABLED_TEST_DONE");
 CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
@@ -49,6 +47,8 @@ $clientCode = <<<'CODE'
     $client1 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
     if ($client1) {
         echo trim(fgets($client1)) . "\n";
+        $meta1 = stream_get_meta_data($client1);
+        echo "First connection resumed: " . ($meta1['crypto']['session_reused'] ? "yes" : "no") . "\n";
         fclose($client1);
     }
 
@@ -62,11 +62,10 @@ $clientCode = <<<'CODE'
     $client2 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx2);
     if ($client2) {
         echo trim(fgets($client2)) . "\n";
+        $meta2 = stream_get_meta_data($client2);
+        echo "Second connection resumed: " . ($meta2['crypto']['session_reused'] ? "yes" : "no") . "\n";
         fclose($client2);
     }
-
-    $result = phpt_wait();
-    echo trim($result) . "\n";
 CODE;
 
 include 'CertificateGenerator.inc';
@@ -80,7 +79,8 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_cache_disabled.pem.tmp');
 ?>
---EXPECTF--
+--EXPECT--
 No cache connection 1
+First connection resumed: no
 No cache connection 2
-CACHE_DISABLED_TEST_DONE
+Second connection resumed: no

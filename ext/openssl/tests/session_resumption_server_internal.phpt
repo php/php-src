@@ -50,6 +50,8 @@ $clientCode = <<<'CODE'
     /* First connection */
     $client1 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
     if ($client1) {
+        $meta1 = stream_get_meta_data($client1);
+        echo "Client first connection resumed: " . ($meta1['crypto']['session_reused'] ? "yes" : "no") . "\n";
         echo trim(fgets($client1)) . "\n";
         fclose($client1);
     }
@@ -65,6 +67,8 @@ $clientCode = <<<'CODE'
 
     $client2 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx2);
     if ($client2) {
+        $meta2 = stream_get_meta_data($client2);
+        echo "Client second connection resumed: " . ($meta2['crypto']['session_reused'] ? "yes" : "no") . "\n";
         echo trim(fgets($client2)) . "\n";
         fclose($client2);
     }
@@ -86,7 +90,9 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_internal_cache.pem.tmp');
 ?>
 --EXPECTF--
+Client first connection resumed: no
 Connection 1
 Session data received: YES
+Client second connection resumed: yes
 Connection 2
 SERVER_DONE
