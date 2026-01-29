@@ -175,7 +175,7 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: (\\S+)/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: (v2_\\S+)/', $arginfoCode, $matches)) {
         return null;
     }
 
