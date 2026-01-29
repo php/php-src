@@ -4,6 +4,8 @@ The Closure object of a generator is freed when the generator is freed.
 <?php
 
 $genFactory = function() {
+  /* Avoid static inference and caching. */
+  static $dummy;
   yield 1;
   yield 2;
   yield 3;
@@ -25,23 +27,33 @@ var_dump($r->get());
 
 ?>
 --EXPECTF--
-object(Closure)#%d (3) {
+object(Closure)#%d (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>
   int(%d)
+  ["static"]=>
+  array(1) {
+    ["dummy"]=>
+    NULL
+  }
 }
 int(1)
 int(2)
 int(3)
-object(Closure)#%d (3) {
+object(Closure)#%d (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>
   int(%d)
+  ["static"]=>
+  array(1) {
+    ["dummy"]=>
+    NULL
+  }
 }
 NULL
