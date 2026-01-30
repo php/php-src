@@ -4256,7 +4256,12 @@ static bool php_openssl_pkey_init_legacy_dh(DH *dh, zval *data, bool *is_private
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
-	if (!p || !g || !DH_set0_pqg(dh, p, q, g)) {
+	if (!p || !q) {
+		BN_free(p);
+		return 0;
+	}
+
+	if (!DH_set0_pqg(dh, p, q, g)) {
 		return 0;
 	}
 
