@@ -60,6 +60,7 @@ static void add_property_hook_obligation(
 		zend_class_entry *ce, const zend_property_info *hooked_prop, const zend_function *hook_func);
 
 static void ZEND_COLD emit_incompatible_method_error(
+		const zend_class_entry *ce,
 		const zend_function *child, zend_class_entry *child_scope,
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status);
@@ -1054,6 +1055,7 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 }
 
 static void ZEND_COLD emit_incompatible_method_error(
+		const zend_class_entry *ce,
 		const zend_function *child, zend_class_entry *child_scope,
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status) {
@@ -1086,9 +1088,19 @@ static void ZEND_COLD emit_incompatible_method_error(
 			ZEND_ASSERT(!EG(exception));
 		}
 	} else {
-		zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-			"Declaration of %s must be compatible with %s",
-			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
+		if (child->op_array.scope->num_traits) {
+			zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
+				"Declaration of %s (from %s) must be compatible with %s",
+				ZSTR_VAL(child_prototype), ZSTR_VAL(child->op_array.scope->trait_names[0].name), ZSTR_VAL(parent_prototype));
+		} else if (ce && ce != child_scope && ce != parent_scope) {
+			zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
+				"While materializing %s: Declaration of %s must be compatible with %s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
+		} else {
+			zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
+				"Declaration of %s must be compatible with %s",
+				ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
+		}
 	}
 	zend_string_efree(child_prototype);
 	zend_string_efree(parent_prototype);
@@ -1106,7 +1118,7 @@ static void perform_delayable_implementation_check(
 			add_compatibility_obligation(ce, fe, fe_scope, proto, proto_scope);
 		} else {
 			ZEND_ASSERT(status == INHERITANCE_ERROR || status == INHERITANCE_WARNING);
-			emit_incompatible_method_error(fe, fe_scope, proto, proto_scope, status);
+			emit_incompatible_method_error(ce, fe, fe_scope, proto, proto_scope, status);
 		}
 	}
 }
@@ -3237,6 +3249,7 @@ static void check_variance_obligation(const variance_obligation *obligation) {
 			&obligation->parent_fn, obligation->parent_scope);
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			emit_incompatible_method_error(
+				obligation->parent_scope,
 				&obligation->child_fn, obligation->child_scope,
 				&obligation->parent_fn, obligation->parent_scope, status);
 		}
