@@ -363,8 +363,7 @@ static inline zend_result zval_to_string_offset(zend_long *result, zval *op) {
 static inline zend_result fetch_array_elem(zval **result, zval *op1, zval *op2) {
 	switch (Z_TYPE_P(op2)) {
 		case IS_NULL:
-			*result = zend_hash_find(Z_ARR_P(op1), ZSTR_EMPTY_ALLOC());
-			return SUCCESS;
+			return FAILURE;
 		case IS_FALSE:
 			*result = zend_hash_index_find(Z_ARR_P(op1), 0);
 			return SUCCESS;
