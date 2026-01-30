@@ -146,6 +146,7 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
+	timelib_sll sse_diff;
 
 	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		return timelib_diff_with_tzid(one, two);
@@ -171,6 +172,17 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->us = two->us - one->us;
 
 	rt->days = timelib_diff_days(one, two);
+
+	/* Use SSE diff when wall-clock dates are inverted */
+	if ((rt->y < 0 || (rt->y == 0 && rt->m < 0)) && (sse_diff = two->sse - one->sse) >= 0) {
+		rt->y = rt->m = rt->d = 0;
+		rt->h = sse_diff / 3600;
+		rt->i = (sse_diff % 3600) / 60;
+		rt->s = sse_diff % 60;
+		rt->days = sse_diff / 86400;
+		timelib_do_rel_normalize(two, rt);
+		return rt;
+	}
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
