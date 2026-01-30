@@ -306,12 +306,35 @@ slightly different steps. We'll call attention where the steps differ.
     >
     > Local-only release branches should not be pushed!
 
-    Do not forget to merge up PHP-X.Y all the way to master. When resolving
-    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
-    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
-    master after the merge resulting in the conflicts.
+11. Do not forget to merge up PHP-X.Y all the way to master, including any
+    intermediate version branches.
 
-11. Run the following using the release tag to export the tree, create the
+    ```shell
+    # No intermediate version, merge directly to master
+    git checkout master
+    git merge PHP-X.Y
+    ```
+
+    ```shell
+    # One intermediate version, merge upward into master
+    git checkout PHP-X.Y+1
+    git merge PHP-X.Y
+    git checkout master
+    git merge PHP-X.Y+1
+    ```
+
+    > 🗒 **Note** \
+    >  When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+    >  branches. It means using something like `git checkout --ours .` when on
+    >  PHP.X.Y+1 or master after the merge resulting in the conflicts.
+
+    >  ```shell
+    >  git checkout --ours .
+    >  git add -p
+    >  git commit
+    >  ```
+
+12. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
     `.tar.bz2` and `.tar.xz`).
 
@@ -319,7 +342,7 @@ slightly different steps. We'll call attention where the steps differ.
     ./scripts/dev/makedist php-X.Y.ZRCn
     ```
 
-12. Run the following using the release tag and your GPG key ID to sign the
+13. Run the following using the release tag and your GPG key ID to sign the
     tarballs and save the signatures to `php-X.Y.ZRCn.manifest`, which you can
     upload to GitHub and include in the announcement emails.
 
@@ -327,7 +350,7 @@ slightly different steps. We'll call attention where the steps differ.
     ./scripts/dev/gen_verify_stub X.Y.ZRCn YOURKEYID > php-X.Y.ZRCn.manifest
     ```
 
-13. If you have the [GitHub command line tool][] installed, run the following to
+14. If you have the [GitHub command line tool][] installed, run the following to
     create a public Gist for the manifest file:
 
     ```shell
@@ -336,7 +359,7 @@ slightly different steps. We'll call attention where the steps differ.
 
     Or you may go to https://gist.github.com to create it manually.
 
-14. Copy the tarballs (using scp, rsync, etc.) to your `public_html/` folder on
+15. Copy the tarballs (using scp, rsync, etc.) to your `public_html/` folder on
     downloads.php.net.
 
     ```shell
@@ -347,10 +370,10 @@ slightly different steps. We'll call attention where the steps differ.
     > If you do not have a `public_html` directory, create it and set its
     > permissions to `0755`.
 
-15. Now the tarballs and signatures may be found at
+16. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@php.net distribution
+17. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
