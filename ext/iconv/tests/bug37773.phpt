@@ -10,6 +10,9 @@ if ($test === false) {
     die("skip UTF-8 is not supported?");
 }
 
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
 ?>
 --FILE--
 <?php
