@@ -57,7 +57,7 @@ Environment
 %r(.*?)%r
 PHP Variables
 %r(.*?)%r
-PHP License
+License
 %r(.*?)%r
 bool(true)
 --
@@ -66,6 +66,6 @@ bool(true)
 --
 phpinfo()
 
-PHP License
+License
 %r(.+?)%r
 bool(true)
