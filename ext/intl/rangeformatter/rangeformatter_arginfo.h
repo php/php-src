@@ -1,5 +1,5 @@
 /* This is a generated file, edit rangeformatter.stub.php instead.
- * Stub hash: v2_7029642524e32984e893e1e050a5e0bbf275c416 */
+ * Stub hash: 7029642524e32984e893e1e050a5e0bbf275c416 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlNumberRangeFormatter___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

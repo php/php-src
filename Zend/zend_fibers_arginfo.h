@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_fibers.stub.php instead.
- * Stub hash: v2_e82bbc8e81fe98873a9a5697a4b38e63a24379da */
+ * Stub hash: e82bbc8e81fe98873a9a5697a4b38e63a24379da */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Fiber___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit gmp.stub.php instead.
- * Stub hash: v2_3aabd5a5d2db0df15b249a425465ae718c13ab6b */
+ * Stub hash: 3aabd5a5d2db0df15b249a425465ae718c13ab6b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)

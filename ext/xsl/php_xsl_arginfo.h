@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_xsl.stub.php instead.
- * Stub hash: v2_cb1005b601e72e8d36d0f6aa5d08872f5c7ea2e6 */
+ * Stub hash: cb1005b601e72e8d36d0f6aa5d08872f5c7ea2e6 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)

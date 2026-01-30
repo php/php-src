@@ -1,5 +1,5 @@
 /* This is a generated file, edit mbstring.stub.php instead.
- * Stub hash: v2_03c07f68bea7d7b96e6dc11f180f45663b859ed3 */
+ * Stub hash: 03c07f68bea7d7b96e6dc11f180f45663b859ed3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")

@@ -1,5 +1,5 @@
 /* This is a generated file, edit sodium_pwhash.stub.php instead.
- * Stub hash: v2_d1e804ceea5e18fc5a4eca50b318d98387b2a470 */
+ * Stub hash: d1e804ceea5e18fc5a4eca50b318d98387b2a470 */
 
 static void register_sodium_pwhash_symbols(int module_number)
 {

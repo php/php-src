@@ -1,5 +1,5 @@
 /* This is a generated file, edit bz2.stub.php instead.
- * Stub hash: v2_c2c8e0fe1e3244c8cadafe60b65b7235c105b3c9 */
+ * Stub hash: c2c8e0fe1e3244c8cadafe60b65b7235c105b3c9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, file)

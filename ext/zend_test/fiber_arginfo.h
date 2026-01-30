@@ -1,5 +1,5 @@
 /* This is a generated file, edit fiber.stub.php instead.
- * Stub hash: v2_8cd7626122b050585503ccebe370a61781ff83f2 */
+ * Stub hash: 8cd7626122b050585503ccebe370a61781ff83f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class__ZendTestFiber___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)

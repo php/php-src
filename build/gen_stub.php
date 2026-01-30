@@ -91,7 +91,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
              * this information (whether a decl file should exist) from the
              * arginfo.h file. */
             $stubCode = file_get_contents($stubFile);
-            $stubHash = 'v2_' . sha1(str_replace("\r\n", "\n", $stubCode));
+            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
             $hasDeclHeader = extractHasDeclHeader($arginfoFile);
             $oldStubHashDecl = extractStubHash($declFile);
@@ -175,7 +175,7 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: (v2_\\S+)/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: ([0-9a-f]+)/', $arginfoCode, $matches)) {
         return null;
     }
 
@@ -4249,6 +4249,7 @@ class FileInfo {
     public bool $generateFunctionEntries = false;
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
+    public bool $generateCEnums = false;
     private bool $isUndocumentable = false;
     private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
@@ -4274,6 +4275,8 @@ class FileInfo {
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
             } else if ($tag->name === 'undocumentable') {
                 $this->isUndocumentable = true;
+            } else if ($tag->name === 'generate-c-enums') {
+                $this->generateCEnums = true;
             }
         }
 
@@ -4573,8 +4576,12 @@ class FileInfo {
         return $code;
     }
 
-    public function generateClassEntryCDeclarations(): string {
+    public function generateCDeclarations(): string {
         $code = "";
+
+        if (!$this->generateCEnums) {
+            return $code;
+        }
 
         foreach ($this->classInfos as $class) {
             $cdecl = $class->getCDeclarations();
@@ -5320,9 +5327,8 @@ function generateArgInfoCode(
         $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
-
     $hasDeclFile = false;
-    $declCode = $fileInfo->generateClassEntryCDeclarations();
+    $declCode = $fileInfo->generateCDeclarations();
     if ($declCode !== '') {
         $hasDeclFile = true;
         $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";

@@ -1,5 +1,5 @@
 /* This is a generated file, edit transliterator.stub.php instead.
- * Stub hash: v2_300bcc64e5ddaf469bfe4a12e65a6677bf2aea88 */
+ * Stub hash: 300bcc64e5ddaf469bfe4a12e65a6677bf2aea88 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

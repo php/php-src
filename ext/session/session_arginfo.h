@@ -1,5 +1,5 @@
 /* This is a generated file, edit session.stub.php instead.
- * Stub hash: v2_6bbbdc8c4a33d1ff9984b3d81e4f5c9b76efcb14 */
+ * Stub hash: 6bbbdc8c4a33d1ff9984b3d81e4f5c9b76efcb14 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")

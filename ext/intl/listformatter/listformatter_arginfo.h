@@ -1,5 +1,5 @@
 /* This is a generated file, edit listformatter.stub.php instead.
- * Stub hash: v2_cdbbdb55d1e53f422c5854460c3c6cc3d01360d7 */
+ * Stub hash: cdbbdb55d1e53f422c5854460c3c6cc3d01360d7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlListFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)

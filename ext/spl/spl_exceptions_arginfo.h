@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_exceptions.stub.php instead.
- * Stub hash: v2_07475caecc81ab3b38a04905f874615af1126289 */
+ * Stub hash: 07475caecc81ab3b38a04905f874615af1126289 */
 
 static zend_class_entry *register_class_LogicException(zend_class_entry *class_entry_Exception)
 {

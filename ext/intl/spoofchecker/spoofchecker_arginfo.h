@@ -1,5 +1,5 @@
 /* This is a generated file, edit spoofchecker.stub.php instead.
- * Stub hash: v2_4834be57a3f0cb74dbc4422e609846139f09f6cb */
+ * Stub hash: 4834be57a3f0cb74dbc4422e609846139f09f6cb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
