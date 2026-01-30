@@ -927,17 +927,17 @@ PHPAPI PHP_FUNCTION(fgetc)
 /* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result, argc = 0;
-	size_t format_len;
+	uint32_t argc = 0;
 	zval *args = NULL;
 	zval *file_handle;
-	char *buf, *format;
+	char *buf;
+	zend_string *format;
 	size_t len;
 	void *what;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_RESOURCE(file_handle)
-		Z_PARAM_STRING(format, format_len)
+		Z_PARAM_STR(format)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -955,14 +955,9 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	result = php_sscanf_internal(buf, format, argc, args, 0, return_value);
+	php_sscanf_internal(buf, len, format, 2, argc, args, return_value);
 
 	efree(buf);
-
-	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		zend_wrong_param_count();
-		RETURN_THROWS();
-	}
 }
 /* }}} */
 
