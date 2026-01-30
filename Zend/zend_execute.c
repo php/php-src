@@ -4298,6 +4298,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
+	} else if (zend_atomic_bool_load_ex(&EG(gc_requested))) {
+		gc_run_from_fcall_interrupt();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(call);
 	}
