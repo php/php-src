@@ -326,11 +326,15 @@ try_again:
 }
 
 static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object *intern, const zend_string *ce_name,
-	zval *offset, int type) /* {{{ */
+	zval *offset, int type, zend_refcounted **container) /* {{{ */
 {
 	zval *retval;
 	spl_hash_key key;
 	HashTable *ht = spl_array_get_hash_table(intern);
+
+	if (container) {
+		*container = (zend_refcounted*)&intern->std;
+	}
 
 	if (!offset || Z_ISUNDEF_P(offset) || !ht) {
 		return &EG(uninitialized_zval);
@@ -444,7 +448,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *objec
 		}
 	}
 
-	ret = spl_array_get_dimension_ptr(check_inherited, intern, object->ce->name, offset, type);
+	ret = spl_array_get_dimension_ptr(check_inherited, intern, object->ce->name, offset, type, NULL);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
@@ -856,7 +860,7 @@ static zval *spl_array_write_property(zend_object *object, zend_string *name, zv
 	return zend_std_write_property(object, name, value, cache_slot);
 } /* }}} */
 
-static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
+static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 
@@ -873,9 +877,9 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 			return NULL;
 		}
 		ZVAL_STR(&member, name);
-		return spl_array_get_dimension_ptr(true, intern, object->ce->name, &member, type);
+		return spl_array_get_dimension_ptr(true, intern, object->ce->name, &member, type, container);
 	}
-	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 } /* }}} */
 
 static int spl_array_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */

@@ -3610,7 +3610,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	} else {
 		name = zval_get_tmp_string(prop_ptr, &tmp_name);
 	}
-	ptr = zobj->handlers->get_property_ptr_ptr(zobj, name, type, cache_slot);
+	ptr = zobj->handlers->get_property_ptr_ptr(zobj, name, type, cache_slot, NULL);
 	if (NULL == ptr) {
 		ptr = zobj->handlers->read_property(zobj, name, type, cache_slot, result);
 		if (ptr == result) {

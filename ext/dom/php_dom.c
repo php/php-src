@@ -351,12 +351,12 @@ static void dom_overwrite_prop_handler(HashTable *prop_handler, const char *name
 		dom_overwrite_prop_handler(prop_handler, "" name, sizeof("" name) - 1, &hnd); \
 	} while (0)
 
-static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, name)) {
-		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 	}
 
 	if (cache_slot) {

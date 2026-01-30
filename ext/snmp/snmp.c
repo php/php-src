@@ -1906,11 +1906,11 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 }
 /* }}} */
 
-static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	php_snmp_prop_handler *hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 	if (hnd == NULL) {
-		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 	}
 
 	if (cache_slot) {

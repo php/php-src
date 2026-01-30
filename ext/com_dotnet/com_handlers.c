@@ -177,7 +177,7 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
-static zval *com_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+static zval *com_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container)
 {
 	return NULL;
 }

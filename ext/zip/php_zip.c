@@ -845,7 +845,7 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 }
 /* }}} */
 
-static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
+static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container) /* {{{ */
 {
 	ze_zip_object *obj;
 	zval *retval = NULL;
@@ -858,7 +858,7 @@ static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name
 	}
 
 	if (hnd == NULL) {
-		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 	} else if (cache_slot) {
 		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}

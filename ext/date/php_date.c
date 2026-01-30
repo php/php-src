@@ -359,11 +359,11 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 static int date_interval_compare_objects(zval *o1, zval *o2);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
-static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
+static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot, zend_refcounted **container);
 static int date_period_has_property(zend_object *object, zend_string *name, int type, void **cache_slot);
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
-static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container);
 static void date_period_unset_property(zend_object *object, zend_string *name, void **cache_slot);
 static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static int date_object_compare_timezone(zval *tz1, zval *tz2);
@@ -4563,7 +4563,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 /* }}} */
 
 /* {{{ date_interval_get_property_ptr_ptr */
-static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	zval *ret;
 
@@ -4583,7 +4583,7 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 		}
 		ret = NULL;
 	} else {
-		ret = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		ret = zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 	}
 
 	return ret;
@@ -6041,14 +6041,14 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 	return zend_std_write_property(object, name, value, cache_slot);
 }
 
-static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot, zend_refcounted **container)
 {
 	if (date_period_is_internal_property(name)) {
 		zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
 
-	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot, container);
 }
 
 static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_purpose purpose)

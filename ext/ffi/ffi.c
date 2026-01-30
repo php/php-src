@@ -5196,7 +5196,7 @@ static ZEND_COLD void zend_fake_unset_property(zend_object *obj, zend_string *me
 }
 /* }}} */
 
-static zval *zend_fake_get_property_ptr_ptr(zend_object *obj, zend_string *member, int type, void **cache_slot) /* {{{ */
+static zval *zend_fake_get_property_ptr_ptr(zend_object *obj, zend_string *member, int type, void **cache_slot, zend_refcounted **container) /* {{{ */
 {
 	return NULL;
 }
