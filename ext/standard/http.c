@@ -46,7 +46,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append_long(form_str, index_int);
 	}
 	if (key_prefix) {
-		smart_str_appendl(form_str, "%5D", strlen("%5D"));
+		smart_str_appendl(form_str, "%5D", sizeof("%5D") - 1);
 	}
 	smart_str_appendc(form_str, '=');
 
@@ -170,9 +170,9 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				}
 
 				if (key_prefix) {
-					new_prefix = zend_string_concat3(ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix), ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5D%5B", strlen("%5D%5B"));
+					new_prefix = zend_string_concat3(ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix), ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5D%5B", sizeof("%5D%5B") - 1);
 				} else {
-					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", strlen("%5B"));
+					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", sizeof("%5B") - 1);
 				}
 				zend_string_efree(encoded_key);
 			} else { /* is integer index */
@@ -183,20 +183,20 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 				if (key_prefix && num_prefix) {
 					/* zend_string_concat4() */
-					size_t len = ZSTR_LEN(key_prefix) + num_prefix_len + index_int_as_str_len + strlen("%5D%5B");
+					size_t len = ZSTR_LEN(key_prefix) + num_prefix_len + index_int_as_str_len + sizeof("%5D%5B") - 1;
 					new_prefix = zend_string_alloc(len, 0);
 
 					memcpy(ZSTR_VAL(new_prefix), ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix));
 					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix), num_prefix, num_prefix_len);
 					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix) + num_prefix_len, index_int_as_str, index_int_as_str_len);
-					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix) + num_prefix_len +index_int_as_str_len, "%5D%5B", strlen("%5D%5B"));
+					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix) + num_prefix_len +index_int_as_str_len, "%5D%5B", sizeof("%5D%5B") - 1);
 					ZSTR_VAL(new_prefix)[len] = '\0';
 				} else if (key_prefix) {
-					new_prefix = zend_string_concat3(ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix), index_int_as_str, index_int_as_str_len, "%5D%5B", strlen("%5D%5B"));
+					new_prefix = zend_string_concat3(ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix), index_int_as_str, index_int_as_str_len, "%5D%5B", sizeof("%5D%5B") - 1);
 				} else if (num_prefix) {
-					new_prefix = zend_string_concat3(num_prefix, num_prefix_len, index_int_as_str, index_int_as_str_len, "%5B", strlen("%5B"));
+					new_prefix = zend_string_concat3(num_prefix, num_prefix_len, index_int_as_str, index_int_as_str_len, "%5B", sizeof("%5B") - 1);
 				} else {
-					new_prefix = zend_string_concat2(index_int_as_str, index_int_as_str_len, "%5B", strlen("%5B"));
+					new_prefix = zend_string_concat2(index_int_as_str, index_int_as_str_len, "%5B", sizeof("%5B") - 1);
 				}
 				efree(index_int_as_str);
 			}
