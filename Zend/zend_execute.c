@@ -2185,8 +2185,7 @@ static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *re
 	return NULL;
 }
 
-static ZEND_COLD zend_long zend_throw_incdec_ref_error(
-		zend_reference *ref, zend_property_info *error_prop OPLINE_DC)
+static ZEND_COLD zend_long zend_throw_incdec_ref_error(zend_property_info *error_prop OPLINE_DC)
 {
 	zend_string *type_str = zend_type_to_string(error_prop->type);
 	if (ZEND_IS_INCREMENT(opline->opcode)) {
@@ -2247,7 +2246,7 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXEC
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
 		zend_property_info *error_prop = zend_get_prop_not_accepting_double(ref);
 		if (UNEXPECTED(error_prop)) {
-			zend_long val = zend_throw_incdec_ref_error(ref, error_prop OPLINE_CC);
+			zend_long val = zend_throw_incdec_ref_error(error_prop OPLINE_CC);
 			ZVAL_LONG(var_ptr, val);
 		}
 	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
