@@ -238,7 +238,7 @@ jobs:
 
           cp ./php-version-benchmarks/config/test/1_laravel.ini.dist ./php-version-benchmarks/config/test/1_laravel.ini
           cp ./php-version-benchmarks/config/test/2_symfony_main.ini.dist ./php-version-benchmarks/config/test/2_symfony_main.ini
-          cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
+          #cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
           cp ./php-version-benchmarks/config/test/5_bench.php.ini.dist ./php-version-benchmarks/config/test/5_bench.php.ini
 
           if [ "${{ env.RUN_MICRO_BENCH }}" -eq "1" ]; then

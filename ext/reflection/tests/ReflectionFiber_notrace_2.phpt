@@ -5,7 +5,8 @@ ReflectionFiber should not segfault when inspecting fibers where the previous st
 
 namespace test;
 
-$f = new \Fiber(fn() => call_user_func(["Fiber", "suspend"]));
+$fn = 'call_user_func';
+$f = new \Fiber(fn() => $fn(["Fiber", "suspend"]));
 $f->start();
 
 $reflection = new \ReflectionFiber($f);
@@ -17,7 +18,7 @@ var_dump($reflection->getTrace());
 ?>
 --EXPECTF--
 string(%d) "%sReflectionFiber_notrace_2.php"
-int(5)
+int(6)
 array(3) {
   [0]=>
   array(4) {
@@ -36,7 +37,7 @@ array(3) {
     ["file"]=>
     string(%d) "%sReflectionFiber_notrace_2.php"
     ["line"]=>
-    int(5)
+    int(6)
     ["function"]=>
     string(14) "call_user_func"
     ["args"]=>
