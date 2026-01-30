@@ -1718,7 +1718,7 @@ static ZEND_COLD bool zend_ast_var_needs_braces(char ch)
 	return ch == '[' || zend_ast_valid_var_char(ch);
 }
 
-static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
+static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
@@ -2417,7 +2417,7 @@ simple_list:
 		/* 1 child node */
 		case ZEND_AST_VAR:
 			smart_str_appendc(str, '$');
-			zend_ast_export_var(str, ast->child[0], 0, indent);
+			zend_ast_export_var(str, ast->child[0], indent);
 			break;
 		case ZEND_AST_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
@@ -2532,12 +2532,12 @@ simple_list:
 		case ZEND_AST_NULLSAFE_PROP:
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			smart_str_appends(str, ast->kind == ZEND_AST_NULLSAFE_PROP ? "?->" : "->");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			zend_ast_export_var(str, ast->child[1], indent);
 			break;
 		case ZEND_AST_STATIC_PROP:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::$");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			zend_ast_export_var(str, ast->child[1], indent);
 			break;
 		case ZEND_AST_CALL: {
 			zend_ast *left = ast->child[0];
@@ -2857,7 +2857,7 @@ simple_list:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			smart_str_appends(str, ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL ? "?->" : "->");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			zend_ast_export_var(str, ast->child[1], indent);
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[2], 0, indent);
 			smart_str_appendc(str, ')');
@@ -2865,7 +2865,7 @@ simple_list:
 		case ZEND_AST_STATIC_CALL:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			zend_ast_export_var(str, ast->child[1], indent);
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[2], 0, indent);
 			smart_str_appendc(str, ')');
@@ -2901,7 +2901,7 @@ simple_list:
 			zend_ast_export_catch_name_list(str, zend_ast_get_list(ast->child[0]), indent);
 			if (ast->child[1]) {
 				smart_str_appends(str, " $");
-				zend_ast_export_var(str, ast->child[1], 0, indent);
+				zend_ast_export_var(str, ast->child[1], indent);
 			}
 			smart_str_appends(str, ") {\n");
 			zend_ast_export_stmt(str, ast->child[2], indent + 1);
