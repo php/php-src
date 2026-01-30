@@ -2206,7 +2206,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	for (i = 0; i < X509_PURPOSE_get_count(); i++) {
 		int id, purpset;
 		char * pname;
-		X509_PURPOSE * purp;
+		const X509_PURPOSE * purp;
 		zval subsub;
 
 		array_init(&subsub);
