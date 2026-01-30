@@ -15,18 +15,17 @@ $refVar2 = 4;
 $refVar3 = -2.989888;
 $refVar4 = NULL;
 $refVar5 = Sample::A;
-$arrays = array (
-  0 => array(0),
-  1 => array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"),
-  2 => array(4, array(1, 2 => 3), "one" => 1, "5" => 5 ),
-  3 => array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2 => "float2", "-.9" => -.9),
-  4 => array(TRUE, FALSE),
-  5 => array("", array()),
-  6 => array("abcd\x00abcd\x00abcd"),
-  7 => array("abcd\tabcd\nabcd\rabcd\0abcdefghij"),
-  8 => array(Sample::A),
-  9 => array(&$refVar2, &$refVar, &$refVar3, &$refVar4, &$refVar5),
-);
+$arrays = [
+  [0],
+  ["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"],
+  [4, [1, 2 => 3], "one" => 1, "5" => 5 ],
+  [-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2 => "float2", "-.9" => -.9],
+  [TRUE, FALSE],
+  ["", []],
+  ["abcd\x00abcd\x00abcd"],
+  ["abcd\tabcd\nabcd\rabcd\0abcdefghij"],
+  [Sample::A],
+];
 
 $array_compare = array (
   4,
@@ -40,7 +39,7 @@ $array_compare = array (
   "-.9",
   "True",
   "",
-  array(),
+  [],
   NULL,
   "ab",
   "abcd",
@@ -794,86 +793,6 @@ bool(true)
 bool(true)
 bool(true)
 -- Iteration 180 -- array 8 -- \Sample::B
-bool(false)
-bool(false)
-bool(false)
--- Iteration 181 -- array 9 -- integer:4
-bool(true)
-bool(true)
-bool(true)
--- Iteration 182 -- array 9 -- string:"4"
-bool(true)
-bool(false)
-bool(true)
--- Iteration 183 -- array 9 -- double:4
-bool(true)
-bool(false)
-bool(true)
--- Iteration 184 -- array 9 -- string:"b"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 185 -- array 9 -- string:"5"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 186 -- array 9 -- integer:-2
-bool(false)
-bool(false)
-bool(false)
--- Iteration 187 -- array 9 -- double:-2
-bool(false)
-bool(false)
-bool(false)
--- Iteration 188 -- array 9 -- double:-2.98989
-bool(false)
-bool(false)
-bool(false)
--- Iteration 189 -- array 9 -- string:"-.9"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 190 -- array 9 -- string:"True"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 191 -- array 9 -- string:""
-bool(true)
-bool(false)
-bool(true)
--- Iteration 192 -- array 9 -- array:[]
-bool(true)
-bool(false)
-bool(true)
--- Iteration 193 -- array 9 -- NULL:null
-bool(true)
-bool(true)
-bool(true)
--- Iteration 194 -- array 9 -- string:"ab"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 195 -- array 9 -- string:"abcd"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 196 -- array 9 -- double:0
-bool(true)
-bool(false)
-bool(true)
--- Iteration 197 -- array 9 -- integer:0
-bool(true)
-bool(false)
-bool(true)
--- Iteration 198 -- array 9 -- string:"abcd\u0000abcd\u0000abcd"
-bool(false)
-bool(false)
-bool(false)
--- Iteration 199 -- array 9 -- \Sample::A
-bool(true)
-bool(true)
-bool(true)
--- Iteration 200 -- array 9 -- \Sample::B
 bool(false)
 bool(false)
 bool(false)
