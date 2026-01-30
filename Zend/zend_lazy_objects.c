@@ -678,8 +678,6 @@ void zend_lazy_object_realize(zend_object *obj)
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
-	zend_lazy_object_del_info(obj);
-
 #if ZEND_DEBUG
 	for (int i = 0; i < obj->ce->default_properties_count; i++) {
 		ZEND_ASSERT(!(Z_PROP_FLAG_P(&obj->properties_table[i]) & IS_PROP_LAZY));
@@ -687,6 +685,7 @@ void zend_lazy_object_realize(zend_object *obj)
 #endif
 
 	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED | IS_OBJ_LAZY_PROXY);
+	zend_lazy_object_del_info(obj);
 }
 
 ZEND_API HashTable *zend_lazy_object_get_properties(zend_object *object)
