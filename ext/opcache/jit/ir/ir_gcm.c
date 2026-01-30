@@ -262,7 +262,7 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 #endif
 
 	/* 1.2. Iteratively check the predecessors of already found TOTALLY_USEFUL blocks and
-	 *      add them into TOTALLY_USEFUL set if all of their sucessors are already there.
+	 *      add them into TOTALLY_USEFUL set if all of their successors are already there.
 	 */
 	IR_SPARSE_SET_FOREACH(&data->totally_useful, i) {
 		_push_predecessors(ctx, &ctx->cfg_blocks[i], data);
