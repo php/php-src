@@ -1028,6 +1028,11 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		RETURN_THROWS();
 	}
 
+	if (MYSQLI_IS_IN_TRANSACTION(mysql)) {
+		php_mysqli_report_error(NULL, 0, "There is already an active transaction");
+		RETURN_FALSE;
+	}
+
 	if (FAIL == mysqlnd_begin_transaction(mysql->mysql, flags, name)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
