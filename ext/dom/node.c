@@ -659,14 +659,25 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 		ZVAL_STRING(retval, (const char *) baseuri);
 		xmlFree(baseuri);
 	} else {
-		if (php_dom_follow_spec_intern(obj)) {
-			if (nodep->doc->URL) {
-				ZVAL_STRING(retval, (const char *) nodep->doc->URL);
-			} else {
-				ZVAL_STRING(retval, "about:blank");
-			}
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
+	if (baseuri) {
+		ZVAL_STRING(retval, (const char *) baseuri);
+		xmlFree(baseuri);
+	} else {
+		if (nodep->doc && nodep->doc->URL) {
+			ZVAL_STRING(retval, (const char *) nodep->doc->URL);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_STRING(retval, "about:blank");
 		}
 	}
 

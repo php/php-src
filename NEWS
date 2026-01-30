@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fix deprecation now showing when accessing null key of an array with JIT.
     (alexandre-daubois)
 
+- DOM:
+  . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
+    (ndossche)
+
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
 
