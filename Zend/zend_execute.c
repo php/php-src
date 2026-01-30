@@ -1068,14 +1068,16 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr, zend_object *zobj EXECUTE_DATA_DC)
 {
 	zval tmp;
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
-			zend_readonly_property_modification_error(info);
-			return &EG(uninitialized_zval);
+		if (info->flags & ZEND_ACC_READONLY) {
+			if (!zend_is_readonly_property_modifiable(property_val, info, zobj)) {
+				zend_readonly_property_modification_error(info);
+				return &EG(uninitialized_zval);
+			}
 		}
 		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
 			zend_asymmetric_visibility_property_modification_error(info, "modify");
@@ -1091,7 +1093,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 		return &EG(uninitialized_zval);
 	}
 
-	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_REINITABLE|IS_PROP_CPP_REINITABLE);
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
