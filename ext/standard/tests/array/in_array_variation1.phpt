@@ -10,11 +10,6 @@ enum Sample {
 }
 
 echo "*** Testing in_array() with different needle values ***\n";
-$refVar = "B";
-$refVar2 = 4;
-$refVar3 = -2.989888;
-$refVar4 = NULL;
-$refVar5 = Sample::A;
 $arrays = [
   [0],
   ["a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"],
