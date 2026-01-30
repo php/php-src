@@ -144,15 +144,6 @@ enable_shared=yes
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART([Configuring libtool])
 
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
-dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
-dnl compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
 LT_INIT
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
