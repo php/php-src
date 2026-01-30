@@ -19,12 +19,49 @@
 
 #include "zend_extensions.h"
 #include "zend_system_id.h"
+#include "zend_API.h"
+#include "zend_modules.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
 ZEND_API int zend_op_array_extension_handles = 0;
 ZEND_API int zend_internal_function_extension_handles = 0;
 static int last_resource_number;
+
+// TODO: revisit this name if we want to make it ZEND_API.
+static zend_result zend_try_register_hybrid_module(zend_extension *extension)
+{
+	zend_module_entry *module = extension->module_entry;
+
+	if (!module) {
+		return SUCCESS;
+	}
+
+	if (module->zend_api != ZEND_MODULE_API_NO) {
+		zend_error(E_CORE_WARNING,
+			"Hybrid module \"%s\" from Zend extension \"%s\" cannot be initialized: "
+			"Module API=%d, PHP API=%d",
+			module->name ? module->name : "<unknown>",
+			extension->name ? extension->name : "<unknown>",
+			module->zend_api, ZEND_MODULE_API_NO);
+		return FAILURE;
+	}
+
+	if (!module->build_id || strcmp(module->build_id, ZEND_MODULE_BUILD_ID)) {
+		zend_error(E_CORE_WARNING,
+			"Hybrid module \"%s\" from Zend extension \"%s\" cannot be initialized: "
+			"Module build ID=%s, PHP build ID=%s",
+			module->name ? module->name : "<unknown>",
+			extension->name ? extension->name : "<unknown>",
+			module->build_id ? module->build_id : "<unknown>",
+			ZEND_MODULE_BUILD_ID);
+		return FAILURE;
+	}
+
+	// The handle is owned by the zend_extension for hybrid extensions.
+	module->handle = NULL;
+	return zend_register_module_ex(module, MODULE_PERSISTENT) ? SUCCESS : FAILURE;
+}
 
 zend_result zend_load_extension(const char *path)
 {
@@ -130,6 +167,14 @@ zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path)
 #ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
+		DL_UNLOAD(handle);
+		return FAILURE;
+	}
+
+	// The module_entry is registered before the extension is registered
+	// because zend_register_extension() returns void and is ZEND_API, so
+	// operations which can fail need to be performed before it.
+	if (zend_try_register_hybrid_module(new_extension) != SUCCESS) {
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
