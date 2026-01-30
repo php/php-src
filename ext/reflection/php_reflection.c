@@ -7316,7 +7316,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		);
 		ZEND_ASSERT(delayed_target_validation != NULL);
 #endif
-		zend_throw_exception(zend_ce_error, ZSTR_VAL(attr->data->validation_error), 0);
+		zend_throw_exception_zstr(zend_ce_error, attr->data->validation_error, 0);
 		RETURN_THROWS();
 	}
 
