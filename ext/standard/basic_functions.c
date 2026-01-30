@@ -395,6 +395,16 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BG(strtok_last) = NULL;
 	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE) && !defined(PHP_WIN32)
+	BG(thread_locale) = (locale_t)0;
+	BG(locale_cat_collate) = NULL;
+	BG(locale_cat_monetary) = NULL;
+	BG(locale_cat_numeric) = NULL;
+	BG(locale_cat_time) = NULL;
+# ifdef LC_MESSAGES
+	BG(locale_cat_messages) = NULL;
+# endif
+#endif
 	BG(user_compare_fci) = empty_fcall_info;
 	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 	BG(page_uid) = -1;
@@ -445,13 +455,36 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	/* Check if locale was changed and change it back
 	 * to the value in startup environment */
 	if (BG(locale_changed)) {
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE) && !defined(PHP_WIN32)
+		/* Restore to use the global locale for this thread and free the per-thread locale */
+#ifdef LC_GLOBAL_LOCALE
+		uselocale(LC_GLOBAL_LOCALE);
+#endif
+		if (BG(thread_locale)) {
+			freelocale(BG(thread_locale));
+			BG(thread_locale) = (locale_t)0;
+		}
+#else
 		setlocale(LC_ALL, "C");
+#endif
+#if !(defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE) && !defined(PHP_WIN32))
+		/* Only reset process-wide LC_CTYPE when per-thread locales are not used */
 		zend_reset_lc_ctype_locale();
+#endif
 		zend_update_current_locale();
 		if (BG(ctype_string)) {
 			zend_string_release_ex(BG(ctype_string), 0);
 			BG(ctype_string) = NULL;
 		}
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE) && !defined(PHP_WIN32)
+		if (BG(locale_cat_collate)) { zend_string_release_ex(BG(locale_cat_collate), 0); BG(locale_cat_collate) = NULL; }
+		if (BG(locale_cat_monetary)) { zend_string_release_ex(BG(locale_cat_monetary), 0); BG(locale_cat_monetary) = NULL; }
+		if (BG(locale_cat_numeric)) { zend_string_release_ex(BG(locale_cat_numeric), 0); BG(locale_cat_numeric) = NULL; }
+		if (BG(locale_cat_time)) { zend_string_release_ex(BG(locale_cat_time), 0); BG(locale_cat_time) = NULL; }
+# ifdef LC_MESSAGES
+		if (BG(locale_cat_messages)) { zend_string_release_ex(BG(locale_cat_messages), 0); BG(locale_cat_messages) = NULL; }
+# endif
+#endif
 	}
 
 	/* FG(stream_wrappers) and FG(stream_filters) are destroyed

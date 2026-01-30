@@ -4862,7 +4862,8 @@ PHP_FUNCTION(strip_tags)
 /* }}} */
 
 static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
-	const char *retval;
+	const char *retval = NULL;
+	zend_string *ret_str = NULL;
 
 	if (zend_string_equals_literal(loc, "0")) {
 		loc = NULL;
@@ -4873,9 +4874,294 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 		}
 	}
 
-# ifndef PHP_WIN32
-	retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+#ifndef PHP_WIN32
+# if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
+	/* Use per-thread locales on POSIX if available */
+	if (loc) {
+		int mask = 0;
+		switch ((int)cat) {
+#ifdef LC_ALL
+# ifdef LC_ALL_MASK
+			case LC_ALL: mask = LC_ALL_MASK; break;
 # else
+			case LC_ALL:
+#  ifdef LC_COLLATE_MASK
+				mask |= LC_COLLATE_MASK;
+#  endif
+#  ifdef LC_CTYPE_MASK
+				mask |= LC_CTYPE_MASK;
+#  endif
+#  ifdef LC_MONETARY_MASK
+				mask |= LC_MONETARY_MASK;
+#  endif
+#  ifdef LC_NUMERIC_MASK
+				mask |= LC_NUMERIC_MASK;
+#  endif
+#  ifdef LC_TIME_MASK
+				mask |= LC_TIME_MASK;
+#  endif
+#  ifdef LC_MESSAGES_MASK
+				mask |= LC_MESSAGES_MASK;
+#  endif
+				break;
+# endif
+#endif
+#ifdef LC_COLLATE
+			case LC_COLLATE:
+# ifdef LC_COLLATE_MASK
+				mask = LC_COLLATE_MASK; break;
+# endif
+#endif
+#ifdef LC_CTYPE
+			case LC_CTYPE:
+# ifdef LC_CTYPE_MASK
+				mask = LC_CTYPE_MASK; break;
+# endif
+#endif
+#ifdef LC_MONETARY
+			case LC_MONETARY:
+# ifdef LC_MONETARY_MASK
+				mask = LC_MONETARY_MASK; break;
+# endif
+#endif
+#ifdef LC_NUMERIC
+			case LC_NUMERIC:
+# ifdef LC_NUMERIC_MASK
+				mask = LC_NUMERIC_MASK; break;
+# endif
+#endif
+#ifdef LC_TIME
+			case LC_TIME:
+# ifdef LC_TIME_MASK
+				mask = LC_TIME_MASK; break;
+# endif
+#endif
+#ifdef LC_MESSAGES
+			case LC_MESSAGES:
+# ifdef LC_MESSAGES_MASK
+				mask = LC_MESSAGES_MASK; break;
+# endif
+#endif
+			default:
+				mask = 0; /* Unknown/unsupported category mask on this platform */
+		}
+
+		if (mask == 0) {
+			/* Fallback to process-wide setlocale if masks not available */
+			retval = setlocale(cat, ZSTR_VAL(loc));
+			if (!retval) {
+				return NULL;
+			}
+		} else {
+			locale_t oldloc = BG(thread_locale);
+			/* Create an independent locale object; do not use oldloc as base to avoid facet sharing
+			 * that could make oldloc still referenced by newloc and cause UAF when freeing oldloc. */
+			locale_t newloc = newlocale(mask, ZSTR_VAL(loc), (locale_t)0);
+			if (!newloc) {
+				return NULL;
+			}
+			/* Activate the new per-thread locale before freeing the old one. */
+			if (uselocale(newloc) == (locale_t)0) {
+				/* uselocale() failed; free the new handle if it differs and leave state unchanged */
+				if (newloc != oldloc) {
+					freelocale(newloc);
+				}
+				return NULL;
+			}
+			/* Now it is safe to free the previous per-thread locale handle, if it was distinct. */
+			if (oldloc && newloc != oldloc) {
+				freelocale(oldloc);
+			}
+			BG(thread_locale) = newloc;
+
+			/* Mark that we changed locale in this request */
+			BG(locale_changed) = 1;
+
+			/* Keep Zend locale-related flags in sync after LC_CTYPE/LC_ALL changes */
+			if (cat == LC_CTYPE
+#ifdef LC_ALL
+				|| cat == LC_ALL
+#endif
+			) {
+				zend_update_current_locale();
+			}
+
+			/* Cache the provided locale name per-category. */
+			switch ((int)cat) {
+#ifdef LC_ALL
+				case LC_ALL:
+					/* When LC_ALL is set, assume the same name applies to all facets we manage. */
+					if (BG(ctype_string)) { zend_string_release_ex(BG(ctype_string), 0); }
+					BG(ctype_string) = zend_string_copy(loc);
+#ifdef LC_COLLATE
+					if (BG(locale_cat_collate)) { zend_string_release_ex(BG(locale_cat_collate), 0); }
+					BG(locale_cat_collate) = zend_string_copy(loc);
+#endif
+#ifdef LC_MONETARY
+					if (BG(locale_cat_monetary)) { zend_string_release_ex(BG(locale_cat_monetary), 0); }
+					BG(locale_cat_monetary) = zend_string_copy(loc);
+#endif
+#ifdef LC_NUMERIC
+					if (BG(locale_cat_numeric)) { zend_string_release_ex(BG(locale_cat_numeric), 0); }
+					BG(locale_cat_numeric) = zend_string_copy(loc);
+#endif
+#ifdef LC_TIME
+					if (BG(locale_cat_time)) { zend_string_release_ex(BG(locale_cat_time), 0); }
+					BG(locale_cat_time) = zend_string_copy(loc);
+#endif
+#ifdef LC_MESSAGES
+					if (BG(locale_cat_messages)) { zend_string_release_ex(BG(locale_cat_messages), 0); }
+					BG(locale_cat_messages) = zend_string_copy(loc);
+#endif
+					break;
+#endif /* LC_ALL */
+#ifdef LC_CTYPE
+				case LC_CTYPE:
+					if (BG(ctype_string)) { zend_string_release_ex(BG(ctype_string), 0); }
+					BG(ctype_string) = zend_string_copy(loc);
+					break;
+#endif
+#ifdef LC_COLLATE
+				case LC_COLLATE:
+					if (BG(locale_cat_collate)) { zend_string_release_ex(BG(locale_cat_collate), 0); }
+					BG(locale_cat_collate) = zend_string_copy(loc);
+					break;
+#endif
+#ifdef LC_MONETARY
+				case LC_MONETARY:
+					if (BG(locale_cat_monetary)) { zend_string_release_ex(BG(locale_cat_monetary), 0); }
+					BG(locale_cat_monetary) = zend_string_copy(loc);
+					break;
+#endif
+#ifdef LC_NUMERIC
+				case LC_NUMERIC:
+					if (BG(locale_cat_numeric)) { zend_string_release_ex(BG(locale_cat_numeric), 0); }
+					BG(locale_cat_numeric) = zend_string_copy(loc);
+					break;
+#endif
+#ifdef LC_TIME
+				case LC_TIME:
+					if (BG(locale_cat_time)) { zend_string_release_ex(BG(locale_cat_time), 0); }
+					BG(locale_cat_time) = zend_string_copy(loc);
+					break;
+#endif
+#ifdef LC_MESSAGES
+				case LC_MESSAGES:
+					if (BG(locale_cat_messages)) { zend_string_release_ex(BG(locale_cat_messages), 0); }
+					BG(locale_cat_messages) = zend_string_copy(loc);
+					break;
+#endif
+			}
+
+			if (!retval) {
+				/* Prefer returning our cached LC_CTYPE name when setting LC_CTYPE/LC_ALL */
+				if (cat == LC_CTYPE || cat == LC_ALL) {
+					if (BG(ctype_string)) {
+						retval = ZSTR_VAL(BG(ctype_string));
+					}
+				}
+			}
+			if (!retval) {
+				/* Avoid calling process-wide setlocale() in per-thread mode. */
+				if (cat == LC_CTYPE || cat == LC_ALL) {
+					if (BG(ctype_string)) {
+						retval = ZSTR_VAL(BG(ctype_string));
+					} else {
+						retval = "C";
+					}
+				} else {
+					/* For specific categories, prefer the provided name as best-effort. */
+					retval = ZSTR_VAL(loc);
+				}
+			}
+		}
+    } else {
+        /* Query current setting without changing it */
+        if (!retval) {
+            if (cat == LC_ALL) {
+                smart_str composite = {0};
+
+                /* Helper macro: append cached or process value for a category */
+#define APPEND_CAT(PREFIX, CACHE_ZSTR, CAT_MACRO) do { \
+    const char *v_ = (CACHE_ZSTR) ? ZSTR_VAL((CACHE_ZSTR)) : setlocale((CAT_MACRO), NULL); \
+    smart_str_appends(&composite, (PREFIX)); \
+    smart_str_appends(&composite, v_ ? v_ : "C"); \
+} while (0)
+
+#ifdef LC_CTYPE
+                /* LC_CTYPE: treat explicit per-thread "C" correctly */
+                {
+                    const char *v = NULL;
+                    if (BG(ctype_string)) {
+                        v = ZSTR_VAL(BG(ctype_string));
+                    } else if (BG(locale_changed) && BG(thread_locale)) {
+                        v = "C";
+                    } else {
+                        v = setlocale(LC_CTYPE, NULL);
+                        if (!v) v = "C";
+                    }
+                    smart_str_appends(&composite, "LC_CTYPE=");
+                    smart_str_appends(&composite, v);
+                }
+#endif
+
+#ifdef LC_NUMERIC
+                APPEND_CAT(";LC_NUMERIC=", BG(locale_cat_numeric), LC_NUMERIC);
+#endif
+#ifdef LC_TIME
+                APPEND_CAT(";LC_TIME=",    BG(locale_cat_time),    LC_TIME);
+#endif
+#ifdef LC_COLLATE
+                APPEND_CAT(";LC_COLLATE=", BG(locale_cat_collate), LC_COLLATE);
+#endif
+#ifdef LC_MONETARY
+                APPEND_CAT(";LC_MONETARY=", BG(locale_cat_monetary), LC_MONETARY);
+#endif
+#ifdef LC_MESSAGES
+                APPEND_CAT(";LC_MESSAGES=", BG(locale_cat_messages), LC_MESSAGES);
+#endif
+
+                smart_str_0(&composite);
+                if (composite.s) { ret_str = composite.s; return ret_str; }
+                return NULL;
+            } else {
+                switch ((int)cat) {
+#ifdef LC_COLLATE
+                    case LC_COLLATE:
+                        if (BG(locale_cat_collate)) { retval = ZSTR_VAL(BG(locale_cat_collate)); break; }
+                        break;
+#endif
+#ifdef LC_MONETARY
+                    case LC_MONETARY:
+                        if (BG(locale_cat_monetary)) { retval = ZSTR_VAL(BG(locale_cat_monetary)); break; }
+                        break;
+#endif
+#ifdef LC_NUMERIC
+                    case LC_NUMERIC:
+                        if (BG(locale_cat_numeric)) { retval = ZSTR_VAL(BG(locale_cat_numeric)); break; }
+                        break;
+#endif
+#ifdef LC_TIME
+                    case LC_TIME:
+                        if (BG(locale_cat_time)) { retval = ZSTR_VAL(BG(locale_cat_time)); break; }
+                        break;
+#endif
+#ifdef LC_MESSAGES
+                    case LC_MESSAGES:
+                        if (BG(locale_cat_messages)) { retval = ZSTR_VAL(BG(locale_cat_messages)); break; }
+                        break;
+#endif
+                }
+                if (!retval) {
+                    retval = setlocale(cat, NULL);
+                }
+            }
+        }
+    }
+# else /* no per-thread locale support */
+	retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+# endif
+#else /* PHP_WIN32 */
 	if (loc) {
 		/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
 		char *locp = ZSTR_VAL(loc);
@@ -4899,32 +5185,37 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 		return NULL;
 	}
 
+	/* Always construct a stable zend_string copy of retval before touching caches. */
+	size_t len = strlen(retval);
+	ret_str = zend_string_init(retval, len, 0);
+
 	if (loc) {
 		/* Remember if locale was changed */
-		size_t len = strlen(retval);
-
 		BG(locale_changed) = 1;
-		if (cat == LC_CTYPE || cat == LC_ALL) {
+#ifdef LC_CTYPE
+		if (cat == LC_CTYPE
+# ifdef LC_ALL
+			|| cat == LC_ALL
+# endif
+		) {
 			zend_update_current_locale();
+			/* Update BG(ctype_string) to reflect the effective LC_CTYPE name. */
 			if (BG(ctype_string)) {
 				zend_string_release_ex(BG(ctype_string), 0);
 			}
 			if (len == 1 && *retval == 'C') {
 				/* C locale is represented as NULL. */
 				BG(ctype_string) = NULL;
-				return ZSTR_CHAR('C');
-			} else if (zend_string_equals_cstr(loc, retval, len)) {
+			} else if (zend_string_equals(loc, ret_str)) {
 				BG(ctype_string) = zend_string_copy(loc);
-				return zend_string_copy(BG(ctype_string));
 			} else {
-				BG(ctype_string) = zend_string_init(retval, len, 0);
-				return zend_string_copy(BG(ctype_string));
+				BG(ctype_string) = zend_string_copy(ret_str);
 			}
-		} else if (zend_string_equals_cstr(loc, retval, len)) {
-			return zend_string_copy(loc);
 		}
+#endif
 	}
-	return zend_string_init(retval, strlen(retval), 0);
+
+	return ret_str;
 }
 
 static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {

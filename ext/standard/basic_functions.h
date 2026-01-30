@@ -27,6 +27,12 @@
 
 #include "url_scanner_ex.h"
 
+/* Locale headers for per-thread locale support */
+#include <locale.h>
+#ifdef HAVE_XLOCALE_H
+# include <xlocale.h>
+#endif
+
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
@@ -54,6 +60,16 @@ typedef struct _php_basic_globals {
 	zend_string *strtok_string;
 	zend_string *ctype_string; /* current LC_CTYPE locale (or NULL for 'C') */
 	bool locale_changed;   /* locale was changed and has to be restored */
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE) && !defined(PHP_WIN32)
+	locale_t thread_locale;
+	zend_string *locale_cat_collate;
+	zend_string *locale_cat_monetary;
+	zend_string *locale_cat_numeric;
+	zend_string *locale_cat_time;
+#ifdef LC_MESSAGES
+	zend_string *locale_cat_messages;
+#endif
+#endif
 	char *strtok_last;
 	char strtok_table[256];
 	size_t strtok_len;
