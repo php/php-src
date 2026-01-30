@@ -668,8 +668,14 @@ zend_long php_openssl_pkey_get_details(zval *return_value, EVP_PKEY *pkey)
 						// OpenSSL recommends a buffer length of 80.
 						char oir_buf[80];
 						int oir_len = OBJ_obj2txt(oir_buf, sizeof(oir_buf), obj, 1);
-						add_assoc_stringl(&ary, "curve_oid", oir_buf, oir_len);
-						ASN1_OBJECT_free(obj);
+						if (oir_len < 0) {
+							ktype = -2;
+							ASN1_OBJECT_free(obj);
+							break;
+						} else {
+							add_assoc_stringl(&ary, "curve_oid", oir_buf, oir_len);
+							ASN1_OBJECT_free(obj);
+						}
 					}
 				}
 			}
