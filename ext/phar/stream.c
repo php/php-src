@@ -474,7 +474,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	if (data->internal_file->is_modified) {
-		data->internal_file->timestamp = time(0);
+		data->internal_file->timestamp = source_date_epoch_time(0);
 		ret = phar_flush(data->phar, 0, 0, 0, &error);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS, "%s", error);
