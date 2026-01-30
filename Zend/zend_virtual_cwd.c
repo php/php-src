@@ -315,39 +315,24 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 #ifdef ZEND_WIN32
 static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
-	zend_ulong h;
 	size_t bucket_key_len;
-	const char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
-	const char *bucket_key = bucket_key_start;
-	const char *e;
+	const char *bucket_key = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
 
 	if (!bucket_key) {
 		return 0;
 	}
 
-	e = bucket_key + bucket_key_len;
-	for (h = Z_UL(2166136261); bucket_key < e;) {
-		h *= Z_UL(16777619);
-		h ^= *bucket_key++;
-	}
-	if (bucket_key_start != path) {
-		HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
+	zend_ulong h = zend_hash_func(bucket_key, bucket_key_len);
+	if (bucket_key != path) {
+		HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key);
 	}
 	return h;
 }
 /* }}} */
 #else
-static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
+static zend_always_inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
-	zend_ulong h;
-	const char *e = path + path_len;
-
-	for (h = Z_UL(2166136261); path < e;) {
-		h *= Z_UL(16777619);
-		h ^= *path++;
-	}
-
-	return h;
+	return zend_hash_func(path, path_len);
 }
 /* }}} */
 #endif /* defined(ZEND_WIN32) */
