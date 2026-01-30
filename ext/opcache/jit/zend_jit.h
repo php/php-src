@@ -19,6 +19,10 @@
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
+#include <stdbool.h>
+#include <stdint.h>
+#include "ext/opcache/ZendAccelerator.h"
+
 #if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 # define ZEND_JIT_TARGET_X86   1
 # define ZEND_JIT_TARGET_ARM64 0
