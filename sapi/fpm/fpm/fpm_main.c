@@ -24,7 +24,6 @@
 #include "php_variables.h"
 #include "php_ini_builder.h"
 #include "zend_modules.h"
-#include "php.h"
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 #include "zend_stream.h"
@@ -32,7 +31,6 @@
 #include "SAPI.h"
 
 #include <stdio.h>
-#include "php.h"
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -61,7 +59,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"

@@ -44,7 +44,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #ifdef HAVE_DLFCN_H
