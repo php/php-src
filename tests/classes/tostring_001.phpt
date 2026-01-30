@@ -12,7 +12,7 @@ class test2
     function __toString()
     {
         echo __METHOD__ . "()\n";
-        return "Converted\n";
+        return "\fConverted\n";
     }
 }
 
