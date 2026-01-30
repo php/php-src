@@ -196,17 +196,17 @@ typedef enum mysqlnd_client_option
 {
 	MYSQL_OPT_CONNECT_TIMEOUT,
 	MYSQL_OPT_COMPRESS,
-	MYSQL_OPT_NAMED_PIPE,
+	MYSQL_OPT_NAMED_PIPE, /* Unsupported by mysqlnd */
 	MYSQL_INIT_COMMAND,
 	MYSQL_READ_DEFAULT_FILE,
 	MYSQL_READ_DEFAULT_GROUP,
 	MYSQL_SET_CHARSET_DIR, /* Unsupported by mysqlnd */
 	MYSQL_SET_CHARSET_NAME,
 	MYSQL_OPT_LOCAL_INFILE,
-	MYSQL_OPT_PROTOCOL,
+	MYSQL_OPT_PROTOCOL, /* Unsupported by mysqlnd */
 	MYSQL_SHARED_MEMORY_BASE_NAME, /* Unsupported by mysqlnd */
 	MYSQL_OPT_READ_TIMEOUT,
-	MYSQL_OPT_WRITE_TIMEOUT,
+	MYSQL_OPT_WRITE_TIMEOUT, /* Unsupported by mysqlnd */
 	MYSQL_OPT_USE_RESULT, /* Unsupported by mysqlnd */
 	MYSQL_OPT_USE_REMOTE_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
 	MYSQL_OPT_USE_EMBEDDED_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
@@ -251,16 +251,6 @@ typedef enum mysqlnd_client_option
 	MYSQLND_OPT_MAX_ALLOWED_PACKET = 210,
 	MYSQLND_OPT_AUTH_PROTOCOL = 211
 } enum_mysqlnd_client_option;
-
-typedef enum mysqlnd_session_protocol_type
-{
-	MYSQL_PROTOCOL_DEFAULT = 0,
-	MYSQL_PROTOCOL_TCP,		/* all, supported */
-	MYSQL_PROTOCOL_SOCKET,	/* unix, supported */
-	MYSQL_PROTOCOL_PIPE,	/* win32, not-supported */
-	MYSQL_PROTOCOL_MEMORY,	/* win32, not-supported */
-	MYSQL_PROTOCOL_LAST
-} enum_mysqlnd_session_protocol_type;
 
 typedef enum mysqlnd_field_types
 {
