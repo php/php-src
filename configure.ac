@@ -25,7 +25,7 @@ dnl ----------------------------------------------------------------------------
 AC_PREREQ([2.68])
 AC_INIT([PHP],[8.6.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
-AC_CONFIG_MACRO_DIRS([build])
+AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
