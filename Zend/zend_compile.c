@@ -7199,6 +7199,11 @@ static void zend_compile_declare(const zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must not "
+					"use block mode");
+			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
