@@ -1,5 +1,5 @@
 /* This is a generated file, edit userspace.stub.php instead.
- * Stub hash: v2_9198095c858c95fcb31252ddfa24fe04787d0460 */
+ * Stub hash: 9198095c858c95fcb31252ddfa24fe04787d0460 */
 
 static void register_userspace_symbols(int module_number)
 {

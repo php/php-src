@@ -1,5 +1,5 @@
 /* This is a generated file, edit shmop.stub.php instead.
- * Stub hash: v2_e7f250077b6721539caee96afe4ed392396018f9 */
+ * Stub hash: e7f250077b6721539caee96afe4ed392396018f9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)

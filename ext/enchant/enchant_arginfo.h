@@ -1,5 +1,5 @@
 /* This is a generated file, edit enchant.stub.php instead.
- * Stub hash: v2_31974eb901477da53ede7476953d461d32f772ba */
+ * Stub hash: 31974eb901477da53ede7476953d461d32f772ba */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()

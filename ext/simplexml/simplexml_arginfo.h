@@ -1,5 +1,5 @@
 /* This is a generated file, edit simplexml.stub.php instead.
- * Stub hash: v2_cee51320f0f09f14962fb72125ef8ff6073a642a */
+ * Stub hash: cee51320f0f09f14962fb72125ef8ff6073a642a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)

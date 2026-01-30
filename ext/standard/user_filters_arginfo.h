@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_filters.stub.php instead.
- * Stub hash: v2_33264435fe01a2cc9aa21a4a087dbbf3c4007206 */
+ * Stub hash: 33264435fe01a2cc9aa21a4a087dbbf3c4007206 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)

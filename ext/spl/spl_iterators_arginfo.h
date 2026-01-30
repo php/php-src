@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_iterators.stub.php instead.
- * Stub hash: v2_ab66d2fff7ac7556d4244582a2bd3e83a3f95243 */
+ * Stub hash: ab66d2fff7ac7556d4244582a2bd3e83a3f95243 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()

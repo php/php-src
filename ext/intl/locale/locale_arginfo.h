@@ -1,5 +1,5 @@
 /* This is a generated file, edit locale.stub.php instead.
- * Stub hash: v2_ff1f75bd34a52f57210734e2f5e29efb87566137 */
+ * Stub hash: ff1f75bd34a52f57210734e2f5e29efb87566137 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()

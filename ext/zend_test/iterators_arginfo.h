@@ -1,5 +1,5 @@
 /* This is a generated file, edit iterators.stub.php instead.
- * Stub hash: v2_f9558686a7393ddd4ba3302e811f70d4496317ee */
+ * Stub hash: f9558686a7393ddd4ba3302e811f70d4496317ee */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTest_Iterators_TraversableTest___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()

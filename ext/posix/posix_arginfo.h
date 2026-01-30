@@ -1,5 +1,5 @@
 /* This is a generated file, edit posix.stub.php instead.
- * Stub hash: v2_25e0aa769d72988ebca07fff96c8ed1fcb6b7d5e */
+ * Stub hash: 25e0aa769d72988ebca07fff96c8ed1fcb6b7d5e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)

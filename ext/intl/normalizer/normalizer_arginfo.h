@@ -1,5 +1,5 @@
 /* This is a generated file, edit normalizer.stub.php instead.
- * Stub hash: v2_908a9587edd132a41100be09c9908e088f3fa055 */
+ * Stub hash: 908a9587edd132a41100be09c9908e088f3fa055 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)

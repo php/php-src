@@ -1,5 +1,5 @@
 /* This is a generated file, edit xml.stub.php instead.
- * Stub hash: v2_c7838fb209d601be280dfdebfd135906afa36e8c */
+ * Stub hash: c7838fb209d601be280dfdebfd135906afa36e8c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")

@@ -1,5 +1,5 @@
 /* This is a generated file, edit tmp_methods.stub.php instead.
- * Stub hash: v2_7fd99c0b5a1957cb3a8c08a74421a720475bb46d */
+ * Stub hash: 7fd99c0b5a1957cb3a8c08a74421a720475bb46d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestTmpMethods_testTmpMethodWithArgInfo, 0, 0, IS_VOID, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, tmpMethodParamName, Foo|Bar, MAY_BE_NULL, "null")
