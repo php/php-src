@@ -427,9 +427,6 @@ static inline zend_result ct_eval_isset_isempty(zval *result, uint32_t extended_
 }
 
 static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
-	if (Z_TYPE_P(op2) == IS_NULL) {
-		return FAILURE;
-	}
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == FAILURE) {

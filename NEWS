@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21059 (Segfault when preloading constant AST closure). (ilutov)
   . Fixed bug GH-21072 (Crash on (unset) cast in constant expression).
     (arshidkv12)
+  . Fix deprecation now showing when accessing null key of an array with JIT.
+    (alexandre-daubois)
 
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
