@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21029 (zend_mm_heap corrupted on Aarch64, LTO builds). (Arnaud)
   . Fixed bug GH-20657 (Assertion failure in zend_lazy_object_get_info triggered
     by setRawValueWithoutLazyInitialization() and newLazyGhost()). (Arnaud)
+  . Fixed bug GH-20504 (Assertion failure in zend_get_property_guard when
+    accessing properties on Reflection LazyProxy via isset()). (Arnaud)
 
 - Curl:
   . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
