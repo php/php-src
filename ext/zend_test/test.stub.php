@@ -2,6 +2,7 @@
 
 /**
  * @generate-class-entries static
+ * @generate-c-enums
  * @generate-legacy-arginfo 80000
  * @undocumentable
  */
