@@ -40,9 +40,7 @@ static zend_class_entry *php_ftp_ce = NULL;
 static zend_object_handlers ftp_object_handlers;
 
 zend_module_entry php_ftp_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+	STANDARD_MODULE_HEADER,
 	"ftp",
 	ext_functions,
 	PHP_MINIT(ftp),
