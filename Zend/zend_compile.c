@@ -101,7 +101,7 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref);
 static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
-static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt);
+static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type);
 
 #ifdef ZEND_CHECK_STACK_LIMIT
 zend_never_inline static void zend_stack_limit_error(void)
@@ -2735,14 +2735,24 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 }
 /* }}} */
 
+static bool zend_propagate_list_refs(zend_ast *ast);
+
 static inline bool zend_is_variable(const zend_ast *ast) /* {{{ */
 {
-	return ast->kind == ZEND_AST_VAR
+	if (ast->kind == ZEND_AST_VAR
 		|| ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP
 		|| ast->kind == ZEND_AST_NULLSAFE_PROP
 		|| ast->kind == ZEND_AST_STATIC_PROP
-		|| ast->kind == ZEND_AST_ASSIGN_REF;
+		|| ast->kind == ZEND_AST_ASSIGN_REF) {
+		return true;
+	}
+	if (ast->kind == ZEND_AST_ASSIGN
+	 && UNEXPECTED(ast->child[0]->kind == ZEND_AST_ARRAY)
+	 && zend_propagate_list_refs(ast->child[0])) {
+		return true;
+	}
+	return false;
 }
 /* }}} */
 
@@ -3483,7 +3493,7 @@ static void zend_compile_expr_with_potential_assign_to_self(
 	}
 }
 
-static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt) /* {{{ */
+static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
 	zend_ast *expr_ast = ast->child[1];
@@ -3573,7 +3583,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt) /* {{{ 
 				}
 			}
 
-			zend_compile_list_assign(!stmt ? result : NULL, var_ast, &expr_node, var_ast->attr, BP_VAR_R);
+			zend_compile_list_assign(!stmt ? result : NULL, var_ast, &expr_node, var_ast->attr, type);
 			if (stmt) {
 				result->op_type = IS_UNUSED;
 			}
@@ -12068,7 +12078,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_ASSIGN: {
 			znode result;
-			zend_compile_assign(&result, ast, /* stmt */ true);
+			zend_compile_assign(&result, ast, /* stmt */ true, BP_VAR_R);
 			zend_do_free(&result);
 			return;
 		}
@@ -12121,7 +12131,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_var(result, ast, BP_VAR_R, false);
 			return;
 		case ZEND_AST_ASSIGN:
-			zend_compile_assign(result, ast, /* stmt */ false);
+			zend_compile_assign(result, ast, /* stmt */ false, BP_VAR_R);
 			return;
 		case ZEND_AST_ASSIGN_REF:
 			zend_compile_assign_ref(result, ast, BP_VAR_R);
@@ -12291,6 +12301,10 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			return NULL;
 		case ZEND_AST_ASSIGN_REF:
 			zend_compile_assign_ref(result, ast, type);
+			return NULL;
+		case ZEND_AST_ASSIGN:
+			ZEND_ASSERT(ast->child[0]->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(ast->child[0]));
+			zend_compile_assign(result, ast, false, type);
 			return NULL;
 		default:
 			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
