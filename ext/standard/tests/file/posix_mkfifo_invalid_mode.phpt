@@ -1,5 +1,11 @@
 --TEST--
 posix_mkfifo(): invalid mode argument
+--SKIPIF--
+<?php
+if (!function_exists("posix_mkfifo")) {
+    die("skip no posix_mkfifo()");
+}
+?>
 --FILE--
 <?php
 
