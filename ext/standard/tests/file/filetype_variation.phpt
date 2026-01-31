@@ -71,6 +71,6 @@ link
 dir
 -- Checking with fifo --
 fifo
-posix_mkfifo(): Argument #2 ($permissions) must be a valid file permission mode
+posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 07777
 
 *** Done ***

@@ -624,7 +624,7 @@ PHP_FUNCTION(posix_mkfifo)
 	if (mode < 0 || (mode & ~0777)) {
 		zend_argument_value_error(
 			2,
-			"must be a valid file permission mode"
+			"must be between 0 and 07777"
 		);
 		RETURN_THROWS();
 	}
