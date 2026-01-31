@@ -142,6 +142,9 @@ PHP 8.6 UPGRADE NOTES
   . EAI_INTR.
   . EAI_IDN_ENCODE.
 
+- Standard
+  . ARRAY_FILTER_USE_KEY.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
