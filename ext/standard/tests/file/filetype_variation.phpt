@@ -48,7 +48,7 @@ print( filetype( $file3) )."\n";
 unlink($file3);
 
 try {
-    posix_mkfifo('zz.txt', 1000 );
+    posix_mkfifo('zz.txt', 10000 );
 } catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
@@ -71,6 +71,6 @@ link
 dir
 -- Checking with fifo --
 fifo
-posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 0777
+posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 07777
 
 *** Done ***
