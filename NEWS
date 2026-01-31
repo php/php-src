@@ -78,6 +78,9 @@ PHP                                                                        NEWS
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
 
+- Posix:
+  . Added validity check to the flags argument for posix_access(). (arshidkv12)
+
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
