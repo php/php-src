@@ -31,7 +31,7 @@ class IntlDateFormatter
     /** @cvalue UCAL_TRADITIONAL */
     public const int TRADITIONAL = UNKNOWN;
 
-    public const int PROLEPTIC_GREGORIAN = -1;
+    public const int PROLEPTIC_GREGORIAN = -16;
 
     /**
      * @param IntlCalendar|int|null $calendar

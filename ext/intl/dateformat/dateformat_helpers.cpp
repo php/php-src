@@ -27,7 +27,7 @@ extern "C" {
 }
 
 // Artificial value to set for a pure proleptic gregorian calendar (until icu provides it eventually)
-#define UCAL_PHP_PROLEPTIC_GREGORIAN -1
+#define UCAL_PHP_PROLEPTIC_GREGORIAN -16
 
 using icu::GregorianCalendar;
 

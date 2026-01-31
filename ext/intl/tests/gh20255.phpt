@@ -2,11 +2,13 @@
 IntlDateFormatter with PROLEPTIC_GREGORIAN calendar
 --EXTENSIONS--
 intl
+--SKIPIF--
+<?php if (PHP_INT_SIZE < 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
 var_dump(IntlDateFormatter::PROLEPTIC_GREGORIAN);
 
-// A pre-cutover date: DateTime uses proleptic Gregorian internally
+// A pre-cutover date: DateTime uses proleptic Gregorian internally (cannot be represented in 32 bits systems)
 $dt = new DateTime('1200-03-01 12:00:00 UTC');
 
 // New constant
@@ -46,7 +48,7 @@ var_dump($proleptic !== $hybrid);
 
 ?>
 --EXPECT--
-int(-1)
+int(-16)
 Proleptic: 1200-03-01
 Matches workaround: bool(true)
 Differs from hybrid: bool(true)
