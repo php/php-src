@@ -1782,7 +1782,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	bool has_get_cb = false;
 	bool has_new_cb = false;
 	bool has_remove_cb = false;
-	bool has_session_context_id = false;
+	bool has_session_id_context = false;
 	bool is_persistent = php_stream_is_persistent(stream);
 
 	/* Check for session_get_cb first (determines cache mode) */
@@ -1795,14 +1795,14 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 		has_get_cb = true;
 	}
 
-	if (GET_VER_OPT("session_context_id")) {
+	if (GET_VER_OPT("session_id_context")) {
 		if (Z_TYPE_P(val) != IS_STRING || Z_STRLEN_P(val) == 0) {
-			zend_type_error("session_context_id must be a non empty string");
+			zend_type_error("session_id_context must be a non empty string");
 			return FAILURE;
 		}
 		SSL_CTX_set_session_id_context(sslsock->ctx, (const unsigned char *) Z_STRVAL_P(val),
 				Z_STRLEN_P(val));
-		has_session_context_id = true;
+		has_session_id_context = true;
 	}
 
 	/* Check for session_new_cb */
@@ -1814,10 +1814,10 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 		ZVAL_COPY(&sslsock->session_callbacks->new_cb, val);
 		has_new_cb = true;
 
-		if (!has_session_context_id &&
+		if (!has_session_id_context &&
 				(SSL_CTX_get_verify_mode(sslsock->ctx) & SSL_VERIFY_PEER) != 0) {
 			php_error_docref(NULL, E_WARNING,
-				"session_new_cb is ignored as no session_context_id is set and verify_peer is enabled");
+				"session_new_cb is ignored as no session_id_context is set and verify_peer is enabled");
 		}
 	}
 
@@ -1862,6 +1862,20 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	} else if (php_openssl_is_session_cache_enabled(stream, true)) {
 		 /* Internal cache mode */
 		SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_SERVER);
+
+		/* Set ID context */
+		char *session_id_context = NULL;
+		GET_VER_OPT_STRING("session_id_context", session_id_context);
+
+		if (session_id_context == NULL) {
+			/* Default context - could also use script path or similar */
+			static const unsigned char default_ctx[] = "PHP";
+			SSL_CTX_set_session_id_context(sslsock->ctx, default_ctx, sizeof(default_ctx) - 1);
+		} else {
+			SSL_CTX_set_session_id_context(sslsock->ctx,
+				(unsigned char *)session_id_context,
+				strlen(session_id_context));
+		}
 
 		/* Handle session_cache_size */
 		if (GET_VER_OPT("session_cache_size")) {
