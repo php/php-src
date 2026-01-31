@@ -2287,6 +2287,12 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		}
 #endif
 
+#ifdef PHP_OPENSSL_TLS_DEBUG
+		BIO *b_out = BIO_new_fp(stdout, BIO_NOCLOSE | BIO_FP_TEXT);
+		SSL_set_msg_callback(sslsock->ssl_handle, SSL_trace);
+		SSL_set_msg_callback_arg(sslsock->ssl_handle, b_out);
+#endif
+
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
 				SSL_set_connect_state(sslsock->ssl_handle);
