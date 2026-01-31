@@ -621,6 +621,14 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
+	if (mode < 0 || (mode & ~0777)) {
+		zend_argument_value_error(
+			2,
+			"must be a valid file permission mode"
+		);
+		RETURN_THROWS();
+	}
+
 	result = mkfifo(ZSTR_VAL(path), mode);
 	if (result < 0) {
 		POSIX_G(last_error) = errno;

@@ -47,6 +47,12 @@ posix_mkfifo( $file3, 0755);
 print( filetype( $file3) )."\n";
 unlink($file3);
 
+try {
+    posix_mkfifo('zz.txt', 1000 );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
 /* Checking with block in file */
 /* To test this PEAR package should be installed */
 
@@ -65,5 +71,6 @@ link
 dir
 -- Checking with fifo --
 fifo
+posix_mkfifo(): Argument #2 ($permissions) must be a valid file permission mode
 
 *** Done ***
