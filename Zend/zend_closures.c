@@ -339,7 +339,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fcc.called_scope = zend_get_called_scope(EG(current_execute_data));
 
 	zend_call_function(&fci, &fcc);
-
+	zend_return_unwrap_ref(EG(current_execute_data), return_value);
 	zval_ptr_dtor(&fci.params[1]);
 }
 /* }}} */

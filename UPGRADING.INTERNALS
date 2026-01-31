@@ -56,6 +56,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     node.
   . The zend_exception_save() and zend_exception_restore() functions were
     removed.
+  . Internal functions that return by reference are now expected to
+    automatically unwrap references when the result of the call is stored in an
+    IS_TMP_VAR variable. This may be achieved by calling the
+    zend_return_unwrap_ref() function.
 
 ========================
 2. Build system changes

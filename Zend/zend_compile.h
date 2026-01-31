@@ -1324,4 +1324,6 @@ ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
 
 bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1);
 
+bool zend_op_may_elide_result(uint8_t opcode);
+
 #endif /* ZEND_COMPILE_H */

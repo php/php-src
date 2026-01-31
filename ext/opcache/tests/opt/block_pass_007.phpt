@@ -24,8 +24,8 @@ $_main:
 0000 INIT_FCALL 2 %d string("random_int")
 0001 SEND_VAL int(1) 1
 0002 SEND_VAL int(2) 2
-0003 V1 = DO_ICALL
-0004 ASSIGN CV0($f) V1
+0003 T1 = DO_ICALL
+0004 ASSIGN CV0($f) T1
 0005 INIT_FCALL 1 %d string("var_dump")
 0006 T1 = BOOL_NOT CV0($f)
 0007 SEND_VAL T1 1

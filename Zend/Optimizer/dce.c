@@ -162,10 +162,16 @@ static inline bool may_have_side_effects(
 		case ZEND_EXT_FCALL_END:
 		case ZEND_TICKS:
 		case ZEND_YIELD:
-		case ZEND_YIELD_FROM:
 		case ZEND_VERIFY_NEVER_TYPE:
 			/* Intrinsic side effects */
 			return true;
+		case ZEND_YIELD_FROM: {
+			uint32_t t1 = OP1_INFO();
+			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY && MAY_BE_EMPTY_ONLY(t1)) {
+				return false;
+			}
+			return true;
+		}
 		case ZEND_DO_FCALL:
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_ICALL:
