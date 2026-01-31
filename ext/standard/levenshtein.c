@@ -32,6 +32,7 @@ static zend_long reference_levdist(const zend_string *string1, const zend_string
 		return ZSTR_LEN(string1) * cost_del;
 	}
 
+
 	p1 = safe_emalloc((ZSTR_LEN(string2) + 1), sizeof(zend_long), 0);
 	p2 = safe_emalloc((ZSTR_LEN(string2) + 1), sizeof(zend_long), 0);
 
@@ -78,6 +79,39 @@ PHP_FUNCTION(levenshtein)
 		RETURN_THROWS();
 	}
 
+	if (ZSTR_LEN(string1) > 0 || ZSTR_LEN(string2) > 0) {
+		zend_long lc = MAX(cost_ins, MAX(cost_rep, cost_del));
+		zend_long ml = MAX(ZSTR_LEN(string1), ZSTR_LEN(string2));
+		zend_long ovl = ZEND_LONG_MAX / ml;
+
+
+		if (lc > ovl) {
+			int arg = 3;
+			if (lc == cost_rep) {
+				arg = 4;
+			} else if (lc == cost_del) {
+				arg = 5;
+			}
+
+			zend_argument_value_error(arg, "must be at most " ZEND_LONG_FMT, ovl);
+			RETURN_THROWS();
+		}
+
+		zend_long mc = MIN(cost_ins, MIN(cost_rep, cost_del));
+		zend_long uvl = ZEND_LONG_MIN / ml;
+
+		if (mc < uvl) {
+			int arg = 3;
+			if (mc == cost_rep) {
+				arg = 4;
+			} else if (mc == cost_del) {
+				arg = 5;
+			}
+
+			zend_argument_value_error(arg, "must be at least " ZEND_LONG_FMT, uvl);
+			RETURN_THROWS();
+		}
+	}
 
 	RETURN_LONG(reference_levdist(string1, string2, cost_ins, cost_rep, cost_del));
 }
