@@ -2,8 +2,8 @@
 posix_access() flag (mode) validation
 --SKIPIF--
 <?php
-if (!function_exists("posix_mkfifo")) {
-    die("skip no posix_mkfifo()");
+if (!function_exists("posix_access")) {
+    die("skip no posix_access()");
 }
 ?>
 --FILE--
