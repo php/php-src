@@ -1757,6 +1757,21 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 	return SUCCESS;
 }
 
+static bool php_openssl_is_session_cache_enabled(php_stream *stream, bool internal_only)
+{
+	zval *val;
+
+	if (GET_VER_OPT("session_cache")) {
+		return zend_is_true(val);
+	}
+
+	if (internal_only) {
+		return false;
+	}
+
+	return GET_VER_OPT("session_get_cb");
+}
+
 /**
  * Configure session resumption options for server connections
  */
@@ -1844,52 +1859,43 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 			php_error_docref(NULL, E_WARNING,
 					"Session tickets cannot be enabled when session_get_cb is set");
 		}
-	} else {
-		/* Internal cache mode (default) */
+	} else if (php_openssl_is_session_cache_enabled(stream, true)) {
+		 /* Internal cache mode */
+		SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_SERVER);
 
-		/* Handle session_cache option */
-		bool session_cache_enabled = true;
-		if (GET_VER_OPT("session_cache")) {
-			session_cache_enabled = zend_is_true(val);
-		}
-
-		if (session_cache_enabled) {
-			SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_SERVER);
-
-			/* Handle session_cache_size */
-			if (GET_VER_OPT("session_cache_size")) {
-				zend_long cache_size = zval_get_long(val);
-				if (cache_size > 0) {
-					SSL_CTX_sess_set_cache_size(sslsock->ctx, cache_size);
-				} else {
-					php_error_docref(NULL, E_WARNING, "session_cache_size must be positive");
-				}
+		/* Handle session_cache_size */
+		if (GET_VER_OPT("session_cache_size")) {
+			zend_long cache_size = zval_get_long(val);
+			if (cache_size > 0) {
+				SSL_CTX_sess_set_cache_size(sslsock->ctx, cache_size);
 			} else {
-				/* Default cache size from RFC */
-				SSL_CTX_sess_set_cache_size(sslsock->ctx, 20480);
-			}
-
-			/* Handle session_timeout */
-			if (GET_VER_OPT("session_timeout")) {
-				zend_long timeout = zval_get_long(val);
-				if (timeout > 0) {
-					SSL_CTX_set_timeout(sslsock->ctx, timeout);
-				} else {
-					php_error_docref(NULL, E_WARNING, "session_timeout must be positive");
-				}
-			} else {
-				/* Default timeout from RFC */
-				SSL_CTX_set_timeout(sslsock->ctx, 300);
-			}
-
-			/* Optional notification callback for internal cache */
-			if (has_new_cb) {
-				SSL_CTX_sess_set_new_cb(sslsock->ctx, php_openssl_session_new_cb);
+				php_error_docref(NULL, E_WARNING, "session_cache_size must be positive");
 			}
 		} else {
-			/* Session caching disabled */
-			SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_OFF);
+			/* Default cache size from RFC */
+			SSL_CTX_sess_set_cache_size(sslsock->ctx, 20480);
 		}
+
+		/* Handle session_timeout */
+		if (GET_VER_OPT("session_timeout")) {
+			zend_long timeout = zval_get_long(val);
+			if (timeout > 0) {
+				SSL_CTX_set_timeout(sslsock->ctx, timeout);
+			} else {
+				php_error_docref(NULL, E_WARNING, "session_timeout must be positive");
+			}
+		} else {
+			/* Default timeout from RFC */
+			SSL_CTX_set_timeout(sslsock->ctx, 300);
+		}
+
+		/* Optional notification callback for internal cache */
+		if (has_new_cb) {
+			SSL_CTX_sess_set_new_cb(sslsock->ctx, php_openssl_session_new_cb);
+		}
+	} else {
+		/* Session caching disabled */
+		SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_OFF);
 	}
 
 	return SUCCESS;
@@ -1928,39 +1934,13 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 	return SUCCESS;
 }
 
-static zend_result php_openssl_setup_crypto(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock,
-		php_stream_xport_crypto_param *cparam) /* {{{ */
+
+static zend_result php_openssl_create_server_ctx(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock, int method_flags)
 {
-	const SSL_METHOD *method;
-	int ssl_ctx_options;
-	int method_flags;
-	zend_long min_version = 0;
-	zend_long max_version = 0;
-	char *cipherlist = NULL;
-	char *alpn_protocols = NULL;
 	zval *val;
-	bool verify_peer = false;
 
-	if (sslsock->ssl_handle) {
-		if (sslsock->s.is_blocked) {
-			php_error_docref(NULL, E_WARNING, "SSL/TLS already set-up for this stream");
-			return FAILURE;
-		} else {
-			return SUCCESS;
-		}
-	}
-
-	sslsock->session_callbacks = NULL;
-
-	ERR_clear_error();
-
-	/* We need to do slightly different things based on client/server method
-	 * so let's remember which method was selected */
-	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
-	method_flags = cparam->inputs.method & ~STREAM_CRYPTO_IS_CLIENT;
-
-	method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
+	const SSL_METHOD *method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
 	sslsock->ctx = SSL_CTX_new(method);
 
 	if (sslsock->ctx == NULL) {
@@ -1970,10 +1950,12 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), stream);
 
+	zend_long min_version = 0;
+	zend_long max_version = 0;
 	GET_VER_OPT_LONG("min_proto_version", min_version);
 	GET_VER_OPT_LONG("max_proto_version", max_version);
 	method_flags = php_openssl_get_proto_version_flags(method_flags, min_version, max_version);
-	ssl_ctx_options = SSL_OP_ALL;
+	int ssl_ctx_options = SSL_OP_ALL;
 
 	if (GET_VER_OPT("no_ticket") && zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_TICKET;
@@ -1996,6 +1978,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		ssl_ctx_options |= SSL_OP_NO_COMPRESSION;
 	}
 
+	bool verify_peer = false;
 	if (GET_VER_OPT("verify_peer") && !zend_is_true(val)) {
 		php_openssl_disable_peer_verification(sslsock->ctx, stream);
 	} else {
@@ -2011,6 +1994,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		SSL_CTX_set_default_passwd_cb(sslsock->ctx, php_openssl_passwd_callback);
 	}
 
+	char *cipherlist = NULL;
 	GET_VER_OPT_STRING("ciphers", cipherlist);
 #ifndef USE_OPENSSL_SYSTEM_CIPHERS
 	if (!cipherlist) {
@@ -2033,6 +2017,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 #endif
 	}
 
+	char *alpn_protocols = NULL;
 	GET_VER_OPT_STRING("alpn_protocols", alpn_protocols);
 	if (alpn_protocols) {
 #ifdef HAVE_TLS_ALPN
@@ -2096,6 +2081,82 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		}
 	}
 
+#ifdef HAVE_TLS_SNI
+	/* Enable server-side SNI */
+	if (!sslsock->is_client && php_openssl_enable_server_sni(stream, sslsock, verify_peer) == FAILURE) {
+		return FAILURE;
+	}
+#endif
+
+	return SUCCESS;
+}
+
+static zend_result php_openssl_setup_crypto(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock,
+		php_stream_xport_crypto_param *cparam) /* {{{ */
+{
+	if (sslsock->ssl_handle) {
+		if (sslsock->s.is_blocked) {
+			php_error_docref(NULL, E_WARNING, "SSL/TLS already set-up for this stream");
+			return FAILURE;
+		} else {
+			return SUCCESS;
+		}
+	}
+
+	sslsock->session_callbacks = NULL;
+
+	ERR_clear_error();
+
+	/* We need to do slightly different things based on client/server method
+	 * so let's remember which method was selected */
+	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
+	int method_flags = cparam->inputs.method & ~STREAM_CRYPTO_IS_CLIENT;
+
+	/* Re-use SSL_CTX if session is set */
+	if (cparam->inputs.session) {
+		php_openssl_netstream_data_t *parent_sslsock;
+
+		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
+			php_error_docref(NULL, E_WARNING, "Supplied session stream must be an SSL enabled stream");
+		} else if ((parent_sslsock = cparam->inputs.session->abstract)->ctx == NULL) {
+			php_error_docref(NULL, E_WARNING, "Supplied SSL session stream is not set up");
+		} else if (sslsock->is_client && parent_sslsock->ssl_handle == NULL) {
+			php_error_docref(NULL, E_WARNING, "Supplied SSL session stream is not initialized");
+		} else {
+			SSL_CTX_up_ref(parent_sslsock->ctx);
+			sslsock->ctx = parent_sslsock->ctx;
+
+			sslsock->ssl_handle = SSL_new(sslsock->ctx);
+			if (!sslsock->ssl_handle) {
+				php_error_docref(NULL, E_WARNING, "SSL handle creation failure");
+				SSL_CTX_free(sslsock->ctx);
+				sslsock->ctx = NULL;
+				return FAILURE;
+			}
+
+			SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
+
+			if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
+				php_openssl_handle_ssl_error(stream, 0, true);
+			}
+
+			if (sslsock->is_client) {
+				if (SSL_copy_session_id(sslsock->ssl_handle, parent_sslsock->ssl_handle)) {
+					SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_CLIENT);
+				} else {
+					php_error_docref(NULL, E_WARNING, "SSL session copying failed creation failure");
+				}
+			}
+
+			return SUCCESS;
+		}
+	}
+
+	if (php_openssl_create_server_ctx(stream, sslsock, method_flags) == FAILURE) {
+		return FAILURE;
+	}
+
 	sslsock->ssl_handle = SSL_new(sslsock->ctx);
 
 	if (sslsock->ssl_handle == NULL) {
@@ -2115,37 +2176,6 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
 		php_openssl_handle_ssl_error(stream, 0, true);
-	}
-
-	/* Set session data for client */
-	if (sslsock->is_client && php_openssl_apply_client_session_data(stream, sslsock)) {
-		return FAILURE;
-	}
-
-#ifdef HAVE_TLS_SNI
-	/* Enable server-side SNI */
-	if (!sslsock->is_client && php_openssl_enable_server_sni(stream, sslsock, verify_peer) == FAILURE) {
-		return FAILURE;
-	}
-#endif
-
-	/* Enable server-side handshake renegotiation rate-limiting */
-	if (!sslsock->is_client) {
-		php_openssl_init_server_reneg_limit(stream, sslsock);
-	}
-
-#ifdef SSL_MODE_RELEASE_BUFFERS
-	SSL_set_mode(sslsock->ssl_handle, SSL_MODE_RELEASE_BUFFERS);
-#endif
-
-	if (cparam->inputs.session) {
-		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
-			php_error_docref(NULL, E_WARNING, "Supplied session stream must be an SSL enabled stream");
-		} else if (((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle == NULL) {
-			php_error_docref(NULL, E_WARNING, "Supplied SSL session stream is not initialized");
-		} else {
-			SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle);
-		}
 	}
 
 	return SUCCESS;
@@ -2228,9 +2258,18 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		struct timeval start_time, *timeout;
 		bool blocked = sslsock->s.is_blocked, has_timeout = false;
 
+		if (!sslsock->is_client) {
+			php_openssl_init_server_reneg_limit(stream, sslsock);
+		}
+
 #ifdef HAVE_TLS_SNI
 		if (sslsock->is_client) {
 			php_openssl_enable_client_sni(stream, sslsock);
+
+			/* Set session data for client */
+			if ( php_openssl_apply_client_session_data(stream, sslsock)) {
+				return FAILURE;
+			}
 		}
 #endif
 
@@ -2242,6 +2281,8 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			}
 			sslsock->state_set = 1;
 		}
+
+		SSL_set_mode(sslsock->ssl_handle, SSL_MODE_RELEASE_BUFFERS);
 
 		if (SUCCESS == php_openssl_set_blocking(sslsock, 0)) {
 			/* The following mode are added only if we are able to change socket
@@ -2699,7 +2740,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 			clisockdata->method = sock->method;
 
 			if (php_stream_xport_crypto_setup(xparam->outputs.client, clisockdata->method,
-					NULL) < 0 || php_stream_xport_crypto_enable(
+					sock->ctx ? stream : NULL) < 0 || php_stream_xport_crypto_enable(
 					xparam->outputs.client, 1) < 0) {
 				php_error_docref(NULL, E_WARNING, "Failed to enable crypto");
 
@@ -2961,10 +3002,32 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						(xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC &&
 						xparam->outputs.returncode == 1 && xparam->outputs.error_code == EINPROGRESS)))
 					{
-						if (php_stream_xport_crypto_setup(stream, sslsock->method, NULL) < 0 ||
+						zval *val;
+						php_stream *session_stream = NULL;
+
+						if (GET_VER_OPT("session_stream")) {
+							php_stream_from_zval_no_verify(session_stream, val);
+						}
+
+						if (php_stream_xport_crypto_setup(stream, sslsock->method, session_stream) < 0 ||
 								php_stream_xport_crypto_enable(stream, 1) < 0) {
 							php_error_docref(NULL, E_WARNING, "Failed to enable crypto");
 							xparam->outputs.returncode = -1;
+						}
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+				case STREAM_XPORT_OP_LISTEN:
+					/* Do normal listen first */
+					xparam->outputs.returncode = php_stream_socket_ops.set_option(
+						stream, option, value, ptrparam);
+
+					if (xparam->outputs.returncode == 0 && sslsock->enable_on_connect) {
+						/* Check if we should create SSL_CTX early for session resumption */
+						if (php_openssl_is_session_cache_enabled(stream, false)) {
+							if (FAILURE == php_openssl_create_server_ctx(stream, sslsock, sslsock->method)) {
+								xparam->outputs.returncode = -1;
+							}
 						}
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
