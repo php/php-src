@@ -1,5 +1,11 @@
 --TEST--
 posix_access() flag (mode) validation
+--SKIPIF--
+<?php
+if (!function_exists("posix_mkfifo")) {
+    die("skip no posix_mkfifo()");
+}
+?>
 --FILE--
 <?php
 
@@ -43,8 +49,8 @@ if (posix_access($testfile, POSIX_F_OK)) {
 unlink($testfile);
 ?>
 --EXPECTF--
-posix_access(): Argument #2 ($flags) must be a combination of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
-posix_access(): Argument #2 ($flags) must be a combination of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
-posix_access(): Argument #2 ($flags) must be a combination of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
 Read/write access OK
 File exists OK

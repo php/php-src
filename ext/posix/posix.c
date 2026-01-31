@@ -747,7 +747,7 @@ PHP_FUNCTION(posix_access)
 	if (mode < 0 || (mode & ~(F_OK | R_OK | W_OK | X_OK))) {
 		zend_argument_value_error(
 			2,
-			"must be a combination of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK"
+			"must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK"
 		);
 		efree(path);
 		RETURN_THROWS();
