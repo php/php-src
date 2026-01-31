@@ -1,5 +1,5 @@
 /* This is a generated file, edit dateformat.stub.php instead.
- * Stub hash: 160d05ec65c45b66b13eaecbef20b3c59bfb33d1 */
+ * Stub hash: 4648fa60e269507946ef15db7be1493e16528d45 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -218,6 +218,12 @@ static zend_class_entry *register_class_IntlDateFormatter(void)
 	zend_string *const_TRADITIONAL_name = zend_string_init_interned("TRADITIONAL", sizeof("TRADITIONAL") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_TRADITIONAL_name, &const_TRADITIONAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_TRADITIONAL_name, true);
+
+	zval const_PROLEPTIC_GREGORIAN_value;
+	ZVAL_LONG(&const_PROLEPTIC_GREGORIAN_value, -1);
+	zend_string *const_PROLEPTIC_GREGORIAN_name = zend_string_init_interned("PROLEPTIC_GREGORIAN", sizeof("PROLEPTIC_GREGORIAN") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_PROLEPTIC_GREGORIAN_name, &const_PROLEPTIC_GREGORIAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_PROLEPTIC_GREGORIAN_name, true);
 
 	return class_entry;
 }
