@@ -110,6 +110,9 @@ PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 #define _DO_THROW(msg) \
 	zend_throw_exception(reflection_exception_ptr, msg, 0);
 
+#define _DO_THROW_EX(msg, ...) \
+    zend_throw_exception_ex(reflection_exception_ptr, 0, msg, __VA_ARGS__);
+
 #define GET_REFLECTION_OBJECT() do { \
 	intern = Z_REFLECTION_P(ZEND_THIS); \
 	if (intern->ptr == NULL) { \
@@ -1654,6 +1657,28 @@ static zend_result get_parameter_default(zval *result, parameter_reference *para
 	}
 }
 
+static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, uint32_t num_args) {
+    struct _zend_arg_info *arg_info = func->common.arg_info;
+    uint32_t i;
+    bool internal = has_internal_arg_info(func);
+
+    for (i = 0; i < num_args; i++) {
+        if (arg_info[i].name) {
+            if (internal) {
+                if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
+                    return i;
+                }
+            } else {
+                if (zend_string_equals(arg_name, arg_info[i].name)) {
+                    return i;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
 /* {{{ Preventing __clone from being called */
 ZEND_METHOD(ReflectionClass, __clone)
 {
@@ -2211,7 +2236,136 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNumberOfRequiredParameters)
 }
 /* }}} */
 
-/* {{{ Returns an array of parameter objects for this function */
+/* {{{ Returns whether a parameter exists or not */
+ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
+{
+    reflection_object *intern;
+    zend_function *fptr;
+    zend_string *arg_name = NULL;
+    zend_long position;
+    uint32_t num_args;
+
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(arg_name, position)
+    ZEND_PARSE_PARAMETERS_END();
+
+    GET_REFLECTION_OBJECT_PTR(fptr);
+
+    num_args = fptr->common.num_args;
+
+    if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+        num_args++;
+    }
+
+    if (!num_args) {
+        RETURN_FALSE;
+    }
+
+    if (arg_name != NULL) {
+        if (ZSTR_LEN(arg_name) == 0) {
+            zend_argument_value_error(1, "must not be empty");
+            RETURN_THROWS();
+        }
+
+        if (get_parameter_position(fptr, arg_name, num_args) > -1) {
+            RETURN_TRUE;
+        }
+
+        RETURN_FALSE;
+    } else {
+        if (position < 0) {
+            zend_argument_value_error(1, "must be greater than or equal to 0");
+            RETURN_THROWS();
+        }
+
+        RETURN_BOOL(position < num_args);
+    }
+}
+/* }}} */
+
+/* {{{ Returns a parameter specified by its name */
+ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
+{
+    reflection_object *intern;
+    zend_function *fptr;
+    zend_string *arg_name = NULL;
+    zend_long position;
+    struct _zend_arg_info *arg_info;
+    uint32_t num_args;
+    zval reflection;
+
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(arg_name, position)
+    ZEND_PARSE_PARAMETERS_END();
+
+    GET_REFLECTION_OBJECT_PTR(fptr);
+
+    num_args = fptr->common.num_args;
+    arg_info = fptr->common.arg_info;
+
+    if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+        num_args++;
+    }
+
+    if (num_args < 1) {
+        if (fptr->common.scope) {
+            _DO_THROW_EX("Method %s::%s() has no parameters", ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
+        } else {
+            _DO_THROW_EX("Function %s() has no parameters", ZSTR_VAL(fptr->common.function_name));
+        }
+
+        RETURN_THROWS();
+    }
+
+    if (arg_name != NULL) {
+        if (ZSTR_LEN(arg_name) == 0) {
+            zend_argument_value_error(1, "must not be empty");
+            RETURN_THROWS();
+        }
+
+        position = get_parameter_position(fptr, arg_name, num_args);
+
+        if (position == -1) {
+            if (fptr->common.scope) {
+                _DO_THROW_EX("Method %s::%s() has no parameter named \"%s\"",
+                             ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name), ZSTR_VAL(arg_name));
+            } else {
+                _DO_THROW_EX("Function %s() has no parameter named \"%s\"",
+                             ZSTR_VAL(fptr->common.function_name), ZSTR_VAL(arg_name));
+            }
+            RETURN_THROWS();
+        }
+    } else {
+        if (position < 0) {
+            zend_argument_value_error(1, "must be greater than or equal to 0");
+            RETURN_THROWS();
+        }
+        if (position >= num_args) {
+            if (fptr->common.scope) {
+                _DO_THROW_EX("Method %s::%s() has no parameter at offset " ZEND_LONG_FMT,
+                             ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name), position);
+            } else {
+                _DO_THROW_EX("Function %s() has no parameter at offset " ZEND_LONG_FMT,
+                             ZSTR_VAL(fptr->common.function_name), position);
+            }
+            RETURN_THROWS();
+        }
+    }
+
+    reflection_parameter_factory(
+        _copy_function(fptr),
+        Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+        &arg_info[position],
+        position,
+        position < fptr->common.required_num_args,
+        &reflection
+    );
+
+    RETURN_OBJ(Z_OBJ(reflection));
+}
+/* }}} */
+
+/* {{{ Returns the function/method specified by its name */
 ZEND_METHOD(ReflectionFunctionAbstract, getParameters)
 {
 	reflection_object *intern;
