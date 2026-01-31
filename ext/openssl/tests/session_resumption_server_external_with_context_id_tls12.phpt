@@ -18,7 +18,7 @@ $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
-        'session_context_id' => 'test-server',  // Proper configuration
+        'session_id_context' => 'test-server',  // Proper configuration
         'session_new_cb' => function($stream, $sessionId, $sessionData) use (&$sessionStore, &$newCbCalled) {
             $key = bin2hex($sessionId);
             $sessionStore[$key] = $sessionData;

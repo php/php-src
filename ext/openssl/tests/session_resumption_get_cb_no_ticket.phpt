@@ -16,7 +16,7 @@ $serverCode = <<<'CODE'
     /* Trying to enable tickets with external cache - should warn */
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
-        'session_context_id' => 'test-app',
+        'session_id_context' => 'test-app',
         'no_ticket' => false,  // Explicitly trying to enable tickets
         'session_new_cb' => function($stream, $sessionId, $sessionData) {
             // Store session

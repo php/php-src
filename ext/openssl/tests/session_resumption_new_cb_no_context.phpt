@@ -1,5 +1,5 @@
 --TEST--
-TLS session resumption - warning when session_new_cb without session_context_id and verify_peer enabled
+TLS session resumption - warning when session_new_cb without session_id_context and verify_peer enabled
 --EXTENSIONS--
 openssl
 --SKIPIF--
@@ -14,7 +14,7 @@ $caCertFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_no_context_ca.pem.tmp';
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
 
-    /* session_new_cb without session_context_id, with verify_peer - should warn */
+    /* session_new_cb without session_id_context, with verify_peer - should warn */
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
         'verify_peer' => true,
@@ -22,7 +22,7 @@ $serverCode = <<<'CODE'
         'session_new_cb' => function($stream, $sessionId, $sessionData) {
             echo "Callback might not be called\n";
         }
-        /* Missing: 'session_context_id' => 'myapp' */
+        /* Missing: 'session_id_context' => 'myapp' */
     ]]);
 
     $server = @stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
