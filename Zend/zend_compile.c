@@ -12303,7 +12303,6 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			zend_compile_assign_ref(result, ast, type);
 			return NULL;
 		case ZEND_AST_ASSIGN:
-			ZEND_ASSERT(ast->child[0]->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(ast->child[0]));
 			zend_compile_assign(result, ast, false, type);
 			return NULL;
 		default:
