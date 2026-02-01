@@ -106,4 +106,12 @@ zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
 	return dom_node_child_nodes_read(obj, retval);
 }
 
+zend_result dom_modern_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	dom_entity_reference_fetch_and_sync_declaration(nodep);
+	return dom_modern_node_child_nodes_read(obj, retval);
+}
+
 #endif
