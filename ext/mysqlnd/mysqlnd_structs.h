@@ -222,7 +222,6 @@ typedef struct st_mysqlnd_session_options
 	char		* unused2;
 	char		* unused3;
 
-	enum_mysqlnd_session_protocol_type protocol;
 
 	char 		*charset_name;
 	/* maximum allowed packet size for communication */
@@ -239,7 +238,6 @@ typedef struct st_mysqlnd_vio_options
 	/* timeouts */
 	unsigned int timeout_connect;
 	unsigned int timeout_read;
-	unsigned int timeout_write;
 
 	size_t		net_read_buffer_size;
 

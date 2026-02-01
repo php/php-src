@@ -438,11 +438,6 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 		case MYSQL_OPT_READ_TIMEOUT:
 			net->data->options.timeout_read = *(unsigned int*) value;
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_OPT_WRITE_TIMEOUT:
-			net->data->options.timeout_write = *(unsigned int*) value;
-			break;
-#endif
 		default:
 			DBG_RETURN(FAIL);
 	}

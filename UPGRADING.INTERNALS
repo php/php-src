@@ -81,6 +81,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - ext/mysqlnd:
   . Dropped session_options parameter from all methods in mysqlnd_auth.
     The same information is present in conn->options and should be used instead.
+  . Dropped unused protocol element from st_mysqlnd_session_options.
 
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.
