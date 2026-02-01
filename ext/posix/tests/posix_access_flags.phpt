@@ -45,7 +45,9 @@ if (posix_access($testfile, POSIX_R_OK | POSIX_W_OK)) {
 if (posix_access($testfile, POSIX_F_OK)) {
     echo "File exists OK\n";
 }
-
+?>
+--CLEAN--
+<?php
 unlink($testfile);
 ?>
 --EXPECTF--
