@@ -670,13 +670,21 @@ static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib
 }
 /* }}} */
 
+static void smart_str_append_long_outline(smart_str *dest, zend_long num)
+{
+	smart_str_append_long(dest, num);
+}
+
+static void smart_str_appends_outline(smart_str *dest, const char *src)
+{
+	smart_str_appends(dest, src);
+}
+
 /* {{{ date_format - (gm)date helper */
 static zend_string *date_format(const char *format, size_t format_len, const timelib_time *t, bool localtime)
 {
 	smart_str            string = {0};
 	size_t               i;
-	int                  length = 0;
-	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
 	bool                 rfc_colon;
@@ -715,40 +723,40 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 		rfc_colon = false;
 		switch (format[i]) {
 			/* day */
-			case 'd': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->d); break;
-			case 'D': length = slprintf(buffer, sizeof(buffer), "%s", php_date_short_day_name(t->y, t->m, t->d)); break;
-			case 'j': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->d); break;
-			case 'l': length = slprintf(buffer, sizeof(buffer), "%s", php_date_full_day_name(t->y, t->m, t->d)); break;
-			case 'S': length = slprintf(buffer, sizeof(buffer), "%s", english_suffix(t->d)); break;
-			case 'w': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'N': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': smart_str_append_printf(&string, "%02d", (int) t->d); break;
+			case 'D': smart_str_appends_outline(&string, php_date_short_day_name(t->y, t->m, t->d)); break;
+			case 'j': smart_str_append_long_outline(&string, (int) t->d); break;
+			case 'l': smart_str_appends_outline(&string, php_date_full_day_name(t->y, t->m, t->d)); break;
+			case 'S': smart_str_appends_outline(&string, english_suffix(t->d)); break;
+			case 'w': smart_str_append_long_outline(&string, (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'N': smart_str_append_long_outline(&string, (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': smart_str_append_long_outline(&string, (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
 			case 'W':
 				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
-				length = slprintf(buffer, sizeof(buffer), "%02d", (int) isoweek); break; /* iso weeknr */
+				smart_str_append_printf(&string, "%02d", (int) isoweek); break; /* iso weeknr */
 			case 'o':
 				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
-				length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) isoyear); break; /* iso year */
+				smart_str_append_long_outline(&string, (zend_long) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': length = slprintf(buffer, sizeof(buffer), "%s", mon_full_names[t->m - 1]); break;
-			case 'm': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->m); break;
-			case 'M': length = slprintf(buffer, sizeof(buffer), "%s", mon_short_names[t->m - 1]); break;
-			case 'n': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->m); break;
-			case 't': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': smart_str_appends_outline(&string, mon_full_names[t->m - 1]); break;
+			case 'm': smart_str_append_printf(&string, "%02d", (int) t->m); break;
+			case 'M': smart_str_appends_outline(&string, mon_short_names[t->m - 1]); break;
+			case 'n': smart_str_append_long_outline(&string, (int) t->m); break;
+			case 't': smart_str_append_long_outline(&string, (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) (t->y % 100)); break;
-			case 'Y': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
-			case 'x': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : (t->y >= 10000 ? "+" : ""), php_date_llabs((timelib_sll) t->y)); break;
-			case 'X': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "+", php_date_llabs((timelib_sll) t->y)); break;
+			case 'L': smart_str_append_long_outline(&string, timelib_is_leap((int) t->y)); break;
+			case 'y': smart_str_append_printf(&string, "%02d", (int) (t->y % 100)); break;
+			case 'Y': smart_str_append_printf(&string, "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
+			case 'x': smart_str_append_printf(&string, "%s%04lld", t->y < 0 ? "-" : (t->y >= 10000 ? "+" : ""), php_date_llabs((timelib_sll) t->y)); break;
+			case 'X': smart_str_append_printf(&string, "%s%04lld", t->y < 0 ? "-" : "+", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
-			case 'a': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "pm" : "am"); break;
-			case 'A': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "PM" : "AM"); break;
+			case 'a': smart_str_appends_outline(&string, t->h >= 12 ? "pm" : "am"); break;
+			case 'A': smart_str_appends_outline(&string, t->h >= 12 ? "PM" : "AM"); break;
 			case 'B': {
 				int retval = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
 				if (retval < 0) {
@@ -756,47 +764,47 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 				}
 				/* Make sure to do this on a positive int to avoid rounding errors */
 				retval = (retval / 864)  % 1000;
-				length = slprintf(buffer, sizeof(buffer), "%03d", retval);
+				smart_str_append_printf(&string, "%03d", retval);
 				break;
 			}
-			case 'g': length = slprintf(buffer, sizeof(buffer), "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->h); break;
-			case 'h': length = slprintf(buffer, sizeof(buffer), "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->h); break;
-			case 'i': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->i); break;
-			case 's': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->s); break;
-			case 'u': length = slprintf(buffer, sizeof(buffer), "%06d", (int) floor(t->us)); break;
-			case 'v': length = slprintf(buffer, sizeof(buffer), "%03d", (int) floor(t->us / 1000)); break;
+			case 'g': smart_str_append_long_outline(&string, (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': smart_str_append_long_outline(&string, (int) t->h); break;
+			case 'h': smart_str_append_printf(&string, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': smart_str_append_printf(&string, "%02d", (int) t->h); break;
+			case 'i': smart_str_append_printf(&string, "%02d", (int) t->i); break;
+			case 's': smart_str_append_printf(&string, "%02d", (int) t->s); break;
+			case 'u': smart_str_append_printf(&string, "%06d", (int) floor(t->us)); break;
+			case 'v': smart_str_append_printf(&string, "%03d", (int) floor(t->us / 1000)); break;
 
 			/* timezone */
-			case 'I': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0); break;
+			case 'I': smart_str_append_long_outline(&string, localtime ? offset->is_dst : 0); break;
 			case 'p':
 				if (!localtime || strcmp(offset->abbr, "UTC") == 0 || strcmp(offset->abbr, "Z") == 0 || strcmp(offset->abbr, "GMT+0000") == 0) {
-					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
+					smart_str_appendc(&string, 'Z');
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 'P': rfc_colon = true; ZEND_FALLTHROUGH;
-			case 'O': length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
+			case 'O': smart_str_append_printf(&string, "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											rfc_colon ? ":" : "",
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': length = slprintf(buffer, sizeof(buffer), "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'T': smart_str_appends_outline(&string, localtime ? offset->abbr : "GMT"); break;
 			case 'e': if (!localtime) {
-					      length = slprintf(buffer, sizeof(buffer), "%s", "UTC");
+					      smart_str_appends_outline(&string, "UTC");
 					  } else {
 						  switch (t->zone_type) {
 							  case TIMELIB_ZONETYPE_ID:
-								  length = slprintf(buffer, sizeof(buffer), "%s", t->tz_info->name);
+								  smart_str_appends_outline(&string, t->tz_info->name);
 								  break;
 							  case TIMELIB_ZONETYPE_ABBR:
-								  length = slprintf(buffer, sizeof(buffer), "%s", offset->abbr);
+								  smart_str_appends_outline(&string, offset->abbr);
 								  break;
 							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
+								  smart_str_append_printf(&string, "%c%02d:%02d",
 												((offset->offset < 0) ? '-' : '+'),
 												abs(offset->offset / 3600),
 												abs((offset->offset % 3600) / 60)
@@ -805,10 +813,10 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 						  }
 					  }
 					  break;
-			case 'Z': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->offset : 0); break;
+			case 'Z': smart_str_append_long_outline(&string, localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, sizeof(buffer), "%04" ZEND_LONG_FMT_SPEC "-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': smart_str_append_printf(&string, "%04" ZEND_LONG_FMT_SPEC "-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (zend_long) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -816,7 +824,7 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04" ZEND_LONG_FMT_SPEC " %02d:%02d:%02d %c%02d%02d",
+			case 'r': smart_str_append_printf(&string, "%3s, %02d %3s %04" ZEND_LONG_FMT_SPEC " %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(zend_long) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -825,13 +833,12 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': length = slprintf(buffer, sizeof(buffer), "%lld", (timelib_sll) t->sse); break;
+			case 'U': smart_str_append_printf(&string, "%lld", (timelib_sll) t->sse); break;
 
 			case '\\': if (i < format_len) i++; ZEND_FALLTHROUGH;
 
-			default: buffer[0] = format[i]; buffer[1] = '\0'; length = 1; break;
+			default: smart_str_appendc(&string, format[i]); break;
 		}
-		smart_str_appendl(&string, buffer, length);
 	}
 
 	smart_str_0(&string);
@@ -4927,8 +4934,7 @@ static zend_string *date_interval_format(const char *format, size_t format_len, 
 {
 	smart_str            string = {0};
 	size_t               i;
-	int                  length, have_format_spec = 0;
-	char                 buffer[33];
+	int                  have_format_spec = 0;
 
 	if (!format_len) {
 		return ZSTR_EMPTY_ALLOC();
@@ -4937,41 +4943,40 @@ static zend_string *date_interval_format(const char *format, size_t format_len, 
 	for (i = 0; i < format_len; i++) {
 		if (have_format_spec) {
 			switch (format[i]) {
-				case 'Y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->y); break;
-				case 'y': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->y); break;
+				case 'Y': smart_str_append_printf(&string, "%02d", (int) t->y); break;
+				case 'y': smart_str_append_long_outline(&string, (int) t->y); break;
 
-				case 'M': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->m); break;
-				case 'm': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->m); break;
+				case 'M': smart_str_append_printf(&string, "%02d", (int) t->m); break;
+				case 'm': smart_str_append_long_outline(&string, (int) t->m); break;
 
-				case 'D': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->d); break;
-				case 'd': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->d); break;
+				case 'D': smart_str_append_printf(&string, "%02d", (int) t->d); break;
+				case 'd': smart_str_append_long_outline(&string, (int) t->d); break;
 
-				case 'H': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->h); break;
-				case 'h': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->h); break;
+				case 'H': smart_str_append_printf(&string, "%02d", (int) t->h); break;
+				case 'h': smart_str_append_long_outline(&string, (int) t->h); break;
 
-				case 'I': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->i); break;
-				case 'i': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->i); break;
+				case 'I': smart_str_append_printf(&string, "%02d", (int) t->i); break;
+				case 'i': smart_str_append_long_outline(&string, (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, sizeof(buffer), "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
-				case 's': length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) t->s); break;
+				case 'S': smart_str_append_printf(&string, "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
+				case 's': smart_str_append_long_outline(&string, (zend_long) t->s); break;
 
-				case 'F': length = slprintf(buffer, sizeof(buffer), "%06" ZEND_LONG_FMT_SPEC, (zend_long) t->us); break;
-				case 'f': length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) t->us); break;
+				case 'F': smart_str_append_printf(&string, "%06" ZEND_LONG_FMT_SPEC, (zend_long) t->us); break;
+				case 'f': smart_str_append_long_outline(&string, (zend_long) t->us); break;
 
 				case 'a': {
 					if ((int) t->days != TIMELIB_UNSET) {
-						length = slprintf(buffer, sizeof(buffer), "%d", (int) t->days);
+						smart_str_append_long_outline(&string, (int) t->days);
 					} else {
-						length = slprintf(buffer, sizeof(buffer), "(unknown)");
+						smart_str_appends_outline(&string, "(unknown)");
 					}
 				} break;
-				case 'r': length = slprintf(buffer, sizeof(buffer), "%s", t->invert ? "-" : ""); break;
-				case 'R': length = slprintf(buffer, sizeof(buffer), "%c", t->invert ? '-' : '+'); break;
+				case 'r': if (t->invert) smart_str_appendc(&string, '-'); break;
+				case 'R': smart_str_appendc(&string, t->invert ? '-' : '+'); break;
 
-				case '%': length = slprintf(buffer, sizeof(buffer), "%%"); break;
-				default: buffer[0] = '%'; buffer[1] = format[i]; buffer[2] = '\0'; length = 2; break;
+				case '%': smart_str_appendc(&string, '%'); break;
+				default: smart_str_appendc(&string, '%'); smart_str_appendc(&string, format[i]); break;
 			}
-			smart_str_appendl(&string, buffer, length);
 			have_format_spec = 0;
 		} else {
 			if (format[i] == '%') {
