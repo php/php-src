@@ -304,7 +304,7 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zend_object *current_object, zend_class_entry *called_scope, zval *new_zval_object)
 {
 	pdo_dbh_t *dbh = NULL;
-	bool is_persistent = 0;
+	bool is_persistent = 0, new_persistent_connection = 0;
 	char *data_source;
 	size_t data_source_len;
 	char *colon;
@@ -408,6 +408,16 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 						username ? username : "",
 						password ? password : "");
 			}
+
+			/*
+			 * Sometimes, a persistent DBH may be in a wedged
+			 * (that liveness checks may fail to catch) or
+			 * otherwise undesirable state, so provide for a way
+			 * to reset the persistent DBH by making a new one.
+			 */
+			if ((v = zend_hash_index_find_deref(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT_NEW_CONNECTION)) != NULL) {
+				new_persistent_connection = zval_get_long(v) ? 1 : 0;
+			}
 		}
 
 		if (is_persistent) {
@@ -416,8 +426,8 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 				if (le->type == php_pdo_list_entry()) {
 					pdbh = (pdo_dbh_t*)le->ptr;
 
-					/* is the connection still alive ? */
-					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+					/* is the connection still alive (or force a new one)? */
+					if (new_persistent_connection || (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh))) {
 						/* nope... need to kill it */
 						pdbh->refcount--;
 						zend_list_close(le);

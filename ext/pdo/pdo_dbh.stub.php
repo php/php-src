@@ -121,6 +121,8 @@ class PDO
     public const int ATTR_DEFAULT_FETCH_MODE = UNKNOWN;
     /** @cvalue LONG_CONST(PDO_ATTR_DEFAULT_STR_PARAM) */
     public const int ATTR_DEFAULT_STR_PARAM = UNKNOWN;
+    /** @cvalue LONG_CONST(PDO_ATTR_PERSISTENT_NEW_CONNECTION) */
+    public const int ATTR_PERSISTENT_NEW_CONNECTION = UNKNOWN;
 
     /** @cvalue LONG_CONST(PDO_ERRMODE_SILENT) */
     public const int ERRMODE_SILENT = UNKNOWN;
