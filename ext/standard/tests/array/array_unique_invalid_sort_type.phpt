@@ -17,3 +17,4 @@ try {
 --EXPECT--
 array_unique(): Argument #2 ($flags) must be one of PHP_SORT_REGULAR, PHP_SORT_NUMERIC, PHP_SORT_STRING, or PHP_SORT_LOCALE_STRING
 array_unique(): Argument #2 ($flags) must be one of PHP_SORT_REGULAR, PHP_SORT_NUMERIC, PHP_SORT_STRING, or PHP_SORT_LOCALE_STRING
+
