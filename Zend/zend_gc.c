@@ -1944,7 +1944,7 @@ static void remember_prev_exception(zend_object **prev_exception)
 	}
 }
 
-static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
+static zend_never_inline void gc_call_destructors_in_fiber(void)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
@@ -2093,7 +2093,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
 			} else {
-				gc_call_destructors_in_fiber(end);
+				gc_call_destructors_in_fiber();
 			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 
