@@ -755,7 +755,7 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 			}
 			uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, true);
 			if (type == IS_DOUBLE) {
-				lval = zend_dval_to_lval_cap(dval, str);
+				lval = zend_dval_to_lval_cap(dval);
 				type = IS_LONG;
 			}
 			if (type == IS_LONG) {

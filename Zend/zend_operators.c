@@ -428,10 +428,10 @@ try_again:
 					 * behaviour.
 					 */
 					if (op_str == NULL) {
-						/* zend_dval_to_lval_cap() can emit a warning so always do the copy here */
+						/* zend_incompatible_string_to_long_error() needs op_str, so always do the copy here */
 						op_str = zend_string_copy(Z_STR_P(op));
 					}
-					lval = zend_dval_to_lval_cap(dval, op_str);
+					lval = zend_dval_to_lval_cap(dval);
 					if (!zend_is_long_compatible(dval, lval)) {
 						zend_incompatible_string_to_long_error(op_str);
 						if (UNEXPECTED(EG(exception))) {
@@ -994,7 +994,7 @@ try_again:
 					 * behaviour.
 					 */
 					 /* Most usages are expected to not be (int) casts */
-					lval = zend_dval_to_lval_cap(dval, Z_STR_P(op));
+					lval = zend_dval_to_lval_cap(dval);
 					if (UNEXPECTED(is_strict)) {
 						if (!zend_is_long_compatible(dval, lval)) {
 							zend_incompatible_string_to_long_error(Z_STR_P(op));
