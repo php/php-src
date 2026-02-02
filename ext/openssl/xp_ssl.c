@@ -1816,15 +1816,14 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 
 		if (!has_session_id_context &&
 				(SSL_CTX_get_verify_mode(sslsock->ctx) & SSL_VERIFY_PEER) != 0) {
-			php_error_docref(NULL, E_WARNING,
-				"session_new_cb is ignored as no session_id_context is set and verify_peer is enabled");
+			zend_value_error("session_id_context must be set if session_new_cb is set");
+			return FAILURE;
 		}
 	}
 
 	/* Validate: if session_get_cb is provided, session_new_cb is required */
 	if (has_get_cb && !has_new_cb) {
-		php_error_docref(NULL, E_WARNING,
-			"session_new_cb is required when session_get_cb is provided");
+		zend_value_error("session_new_cb is required when session_get_cb is provided");
 		return FAILURE;
 	}
 
@@ -1856,26 +1855,16 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 		// Disable tickets (they won't work anyway) and warn if explicity enabled
 		SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
 		if (GET_VER_OPT("no_ticket") && !zend_is_true(val)) {
-			php_error_docref(NULL, E_WARNING,
-					"Session tickets cannot be enabled when session_get_cb is set");
+			zend_value_error("Session tickets cannot be enabled when session_get_cb is set");
 		}
 	} else if (php_openssl_is_session_cache_enabled(stream, true)) {
+		if (!has_session_id_context &&
+				(SSL_CTX_get_verify_mode(sslsock->ctx) & SSL_VERIFY_PEER) != 0) {
+			zend_value_error("session_id_context must be set for internal session cache");
+		}
+
 		 /* Internal cache mode */
 		SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_SERVER);
-
-		/* Set ID context */
-		char *session_id_context = NULL;
-		GET_VER_OPT_STRING("session_id_context", session_id_context);
-
-		if (session_id_context == NULL) {
-			/* Default context - could also use script path or similar */
-			static const unsigned char default_ctx[] = "PHP";
-			SSL_CTX_set_session_id_context(sslsock->ctx, default_ctx, sizeof(default_ctx) - 1);
-		} else {
-			SSL_CTX_set_session_id_context(sslsock->ctx,
-				(unsigned char *)session_id_context,
-				strlen(session_id_context));
-		}
 
 		/* Handle session_cache_size */
 		if (GET_VER_OPT("session_cache_size")) {
@@ -1883,7 +1872,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 			if (cache_size > 0) {
 				SSL_CTX_sess_set_cache_size(sslsock->ctx, cache_size);
 			} else {
-				php_error_docref(NULL, E_WARNING, "session_cache_size must be positive");
+				zend_value_error("session_cache_size must be positive");
 			}
 		} else {
 			/* Default cache size from RFC */
@@ -1896,7 +1885,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 			if (timeout > 0) {
 				SSL_CTX_set_timeout(sslsock->ctx, timeout);
 			} else {
-				php_error_docref(NULL, E_WARNING, "session_timeout must be positive");
+				zend_value_error("session_timeout must be positive");
 			}
 		} else {
 			/* Default timeout from RFC */
@@ -2117,8 +2106,6 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 			return SUCCESS;
 		}
 	}
-
-	sslsock->session_callbacks = NULL;
 
 	ERR_clear_error();
 
