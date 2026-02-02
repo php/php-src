@@ -4871,9 +4871,7 @@ PHP_FUNCTION(array_unique)
 	 && base_sort != PHP_SORT_LOCALE_STRING) {
 
 		zend_argument_value_error(
-			2,
-			"must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING"
-		);
+			2, "must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING");
 		RETURN_THROWS();
 	}
 
