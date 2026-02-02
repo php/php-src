@@ -4870,7 +4870,7 @@ PHP_FUNCTION(array_unique)
 
 		zend_argument_value_error(
 			2,
-			"must be one of PHP_SORT_REGULAR, PHP_SORT_NUMERIC, PHP_SORT_STRING, or PHP_SORT_LOCALE_STRING"
+			"must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING"
 		);
 		RETURN_THROWS();
 	}
