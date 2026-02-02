@@ -276,7 +276,7 @@ ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **c
 ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope);
 ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_function *fbc);
-ZEND_API bool zend_is_in_constructor(const zend_object *zobj);
+ZEND_API bool zend_is_in_original_construction(const zend_object *zobj);
 
 /* Check if a readonly property can be modified (has REINITABLE or CPP_REINITABLE flag and is in constructor) */
 static zend_always_inline bool zend_is_readonly_property_modifiable(zval *property_val, const zend_property_info *prop_info, zend_object *zobj)
@@ -285,7 +285,7 @@ static zend_always_inline bool zend_is_readonly_property_modifiable(zval *proper
 		return true;
 	}
 	if ((Z_PROP_FLAG_P(property_val) & IS_PROP_CPP_REINITABLE)
-	    && zend_is_in_constructor(zobj)) {
+	    && zend_is_in_original_construction(zobj)) {
 		return true;
 	}
 	return false;

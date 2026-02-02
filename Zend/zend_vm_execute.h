@@ -1161,7 +1161,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		call_info = EX_CALL_INFO();
 #endif
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -1195,7 +1200,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -53881,7 +53891,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		call_info = EX_CALL_INFO();
 #endif
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -53915,7 +53930,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -110149,7 +110169,12 @@ zend_leave_helper_SPEC_LABEL:
 		call_info = EX_CALL_INFO();
 #endif
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -110183,7 +110208,12 @@ zend_leave_helper_SPEC_LABEL:
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}

@@ -3001,7 +3001,12 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		call_info = EX_CALL_INFO();
 #endif
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -3035,7 +3040,12 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(execute_data->This));
+			zend_object *obj = Z_OBJ(execute_data->This);
+			/* Mark that a constructor has completed on this object */
+			if (EX(func)->common.fn_flags & ZEND_ACC_CTOR) {
+				obj->extra_flags |= IS_OBJ_CTOR_CALLED;
+			}
+			OBJ_RELEASE(obj);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}

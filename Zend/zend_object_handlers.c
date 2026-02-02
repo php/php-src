@@ -49,7 +49,7 @@
 /* Check if we're within a constructor call chain for the given object.
  * Walks up the call stack to find if any frame is a constructor for zobj.
  * This allows reassignment from the constructor or methods/closures called from it. */
-ZEND_API bool zend_is_in_constructor(const zend_object *zobj)
+static bool zend_is_in_constructor(const zend_object *zobj)
 {
 	zend_execute_data *ex = EG(current_execute_data);
 	while (ex) {
@@ -62,6 +62,20 @@ ZEND_API bool zend_is_in_constructor(const zend_object *zobj)
 		ex = ex->prev_execute_data;
 	}
 	return false;
+}
+
+/* Check if we're in the FIRST construction of an object.
+ * Uses the IS_OBJ_CTOR_CALLED flag which is set when a constructor completes.
+ * This allows both 'new' and explicit __construct() calls on reflection-created objects. */
+ZEND_API bool zend_is_in_original_construction(const zend_object *zobj)
+{
+	/* If a constructor has already completed on this object, this is not original construction */
+	if (zobj->extra_flags & IS_OBJ_CTOR_CALLED) {
+		return false;
+	}
+
+	/* Verify we're actually in a constructor for this object */
+	return zend_is_in_constructor(zobj);
 }
 
 static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
