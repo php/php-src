@@ -4866,6 +4866,7 @@ PHP_FUNCTION(array_unique)
 	if (sort_type != PHP_SORT_REGULAR
 	 && sort_type != PHP_SORT_NUMERIC
 	 && sort_type != PHP_SORT_STRING
+	 && sort_type != PHP_SORT_FLAG_CASE
 	 && sort_type != PHP_SORT_LOCALE_STRING) {
 
 		zend_argument_value_error(
