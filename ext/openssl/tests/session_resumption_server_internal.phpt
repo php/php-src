@@ -14,6 +14,7 @@ $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
+        'session_id_context' => 'test-server',
         'session_cache' => true,
         'session_cache_size' => 1024,
         'session_timeout' => 300,

@@ -103,9 +103,10 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_no_tickets_zero.pem.tmp');
 ?>
---EXPECTF--
+--EXPECT--
+Client first connection resumed: no
 Response 1
 Client received tickets on first connection: 0
+Client second connection resumed: no
 Response 2
-Client second connection resumed: yes
 Server: NEW_CB_CALLS:0

@@ -15,6 +15,7 @@ $serverCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
         'session_cache' => true,
+        'session_id_context' => 'test-basic',
     ]]);
 
     $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
