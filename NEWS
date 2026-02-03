@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (alexandre-daubois)
   . Fixed bug GH-20657 (Assertion failure in zend_lazy_object_get_info triggered
     by setRawValueWithoutLazyInitialization() and newLazyGhost()). (Arnaud)
+  . Fixed bug GH-20504 (Assertion failure in zend_get_property_guard when
+    accessing properties on Reflection LazyProxy via isset()). (Arnaud)
 
 - DOM:
   . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
