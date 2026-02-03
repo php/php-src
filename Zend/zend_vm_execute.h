@@ -23590,7 +23590,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -23798,7 +23798,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -23860,7 +23861,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -26591,7 +26593,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -26801,7 +26803,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -26864,7 +26867,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -30951,7 +30955,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -31159,7 +31163,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -31221,7 +31226,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -33621,7 +33627,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -33699,7 +33705,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -33761,7 +33768,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -35807,7 +35815,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -35885,7 +35893,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -35948,7 +35957,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -38457,7 +38467,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -38535,7 +38545,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -38597,7 +38608,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -42612,7 +42624,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -42820,7 +42832,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -42882,7 +42895,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -46566,7 +46580,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -46776,7 +46790,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -46839,7 +46854,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -52071,7 +52087,7 @@ assign_op_object:
 					}
 
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+					if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
@@ -52279,7 +52295,8 @@ pre_incdec_object:
 				}
 			} else {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
-				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
@@ -52341,7 +52358,8 @@ post_incdec_object:
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
 				prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
-				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr,
+					prop_info && ZEND_TYPE_IS_SET(prop_info->type) ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
 			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);

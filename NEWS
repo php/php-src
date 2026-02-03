@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     by setRawValueWithoutLazyInitialization() and newLazyGhost()). (Arnaud)
   . Fixed bug GH-20504 (Assertion failure in zend_get_property_guard when
     accessing properties on Reflection LazyProxy via isset()). (Arnaud)
+  . Fixed OSS-Fuzz #478009707 (Borked assign-op/inc/dec on untyped hooked
+    property backing value). (ilutov)
 
 - Curl:
   . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
