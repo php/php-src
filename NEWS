@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
     (ndossche)
+  . Fixed bug GH-21097 (Accessing Dom\Node properties can can throw TypeError).
+    (ndossche)
 
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)

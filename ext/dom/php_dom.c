@@ -904,7 +904,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "ownerDocument", dom_node_owner_document_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentNode", dom_node_parent_node_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentElement", dom_node_parent_element_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_node_child_nodes_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_modern_node_child_nodes_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "firstChild", dom_node_first_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "lastChild", dom_node_last_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "previousSibling", dom_node_previous_sibling_read, NULL);
@@ -1305,7 +1305,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "firstChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "lastChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "textContent", dom_entity_reference_text_content_read, NULL);
-	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_entity_reference_child_nodes_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_modern_entity_reference_child_nodes_read, NULL);
 	zend_hash_add_new_ptr(&classes, dom_modern_entityreference_class_entry->name, &dom_modern_entity_reference_prop_handlers);
 
 	dom_processinginstruction_class_entry = register_class_DOMProcessingInstruction(dom_node_class_entry);
