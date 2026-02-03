@@ -141,6 +141,7 @@ typedef struct _sapi_globals_struct {
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	zend_long post_max_size;
+	char *multipart_uri_whitelist;
 	int options;
 	bool sapi_started;
 	double global_request_time;

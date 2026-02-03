@@ -670,6 +670,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
 	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 	zend_long upload_max_filesize = REQUEST_PARSE_BODY_OPTION_GET(upload_max_filesize, PG(upload_max_filesize));
+	char *multipart_uri_whitelist = SG(multipart_uri_whitelist);
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding();
 	php_rfc1867_getword_t getword;
 	php_rfc1867_getword_conf_t getword_conf;
@@ -692,6 +693,24 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		getword = php_ap_getword;
 		getword_conf = php_ap_getword_conf;
 		_basename = php_ap_basename;
+	}
+
+	if(multipart_uri_whitelist != NULL) {
+		char *uri = strtok(multipart_uri_whitelist, ":");
+		bool find = 0;
+
+		while (uri)
+		{
+			if(strcasecmp(SG(request_info).request_uri, uri) == 0) {
+				find = 1;
+				break;
+			}
+			uri = strtok(NULL, ":");
+		}
+		if(!find) {
+			EMIT_WARNING_OR_ERROR("request uri %s is not allow POST multipart body", SG(request_info).request_uri);
+			return;
+		}
 	}
 
 	if (post_max_size > 0 && SG(request_info).content_length > post_max_size) {
