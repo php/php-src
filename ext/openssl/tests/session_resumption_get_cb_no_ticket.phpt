@@ -26,15 +26,19 @@ $serverCode = <<<'CODE'
         }
     ]]);
 
-    $server = @stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
-    phpt_notify_server_start($server);
+    try {
+        $server = @stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+        phpt_notify_server_start($server);
 
-    $client = @stream_socket_accept($server, 30);
-    if ($client === false) {
-        phpt_notify(message: "SERVER_FAILED_AS_EXPECTED");
-    } else {
-        phpt_notify(message: "SERVER_CREATED_UNEXPECTEDLY");
-        fclose($server);
+        $client = @stream_socket_accept($server, 30);
+        if ($client === false) {
+            phpt_notify(message: "SERVER_FAILED_UNEXPECTEDLY");
+        } else {
+            phpt_notify(message: "SERVER_CREATED_UNEXPECTEDLY");
+            fclose($server);
+        }
+    } catch (\Throwable $e) {
+        phpt_notify(message: "SERVER_EXCEPTION: " . $e->getMessage());
     }
 CODE;
 $serverCode = sprintf($serverCode, $certFile);
@@ -71,5 +75,5 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_no_ticket.pem.tmp');
 ?>
 --EXPECT--
-Connection failed as expected
-SERVER_FAILED_AS_EXPECTED
+SERVER_EXCEPTION: Session tickets cannot be enabled when session_get_cb is setConnection failed as expected
+

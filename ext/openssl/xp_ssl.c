@@ -184,9 +184,10 @@ typedef struct _php_openssl_alpn_ctx_t {
 
 /* Holds session callback */
 typedef struct _php_openssl_session_callbacks_t {
-    zval new_cb; // Callback for new sessions
-    zval get_cb; // Callback to retrieve sessions (server only)
-    zval remove_cb; // Callback when session removed (server only)
+	int refcount;
+	zval new_cb;
+	zval get_cb;
+	zval remove_cb;
 } php_openssl_session_callbacks_t;
 
 /* This implementation is very closely tied to the that of the native
@@ -1717,6 +1718,7 @@ static zend_result php_openssl_validate_and_allocate_callback(
 		ZVAL_UNDEF(&sslsock->session_callbacks->new_cb);
 		ZVAL_UNDEF(&sslsock->session_callbacks->get_cb);
 		ZVAL_UNDEF(&sslsock->session_callbacks->remove_cb);
+		sslsock->session_callbacks->refcount = 1;
 	}
 
 	return SUCCESS;
@@ -2127,6 +2129,10 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		} else {
 			SSL_CTX_up_ref(parent_sslsock->ctx);
 			sslsock->ctx = parent_sslsock->ctx;
+			if (parent_sslsock->session_callbacks) {
+				parent_sslsock->session_callbacks->refcount++;
+				sslsock->session_callbacks = parent_sslsock->session_callbacks;
+			}
 
 			sslsock->ssl_handle = SSL_new(sslsock->ctx);
 			if (!sslsock->ssl_handle) {
@@ -2664,7 +2670,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 		pefree(sslsock->reneg, php_stream_is_persistent(stream));
 	}
 
-	if (sslsock->session_callbacks) {
+	if (sslsock->session_callbacks && --sslsock->session_callbacks->refcount == 0) {
 		zval_ptr_dtor(&sslsock->session_callbacks->new_cb);
 		zval_ptr_dtor(&sslsock->session_callbacks->get_cb);
 		zval_ptr_dtor(&sslsock->session_callbacks->remove_cb);
