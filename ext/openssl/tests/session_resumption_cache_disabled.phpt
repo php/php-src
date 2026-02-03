@@ -32,14 +32,14 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $sessionData = null;
+    $globalSession = null;
 
     $flags = STREAM_CLIENT_CONNECT;
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $data) use (&$sessionData) {
-            $sessionData = $data;
+        'session_new_cb' => function($stream, $session) use (&$globalSession) {
+            $globalSession = $session;
         }
     ]]);
 
@@ -56,7 +56,7 @@ $clientCode = <<<'CODE'
     $ctx2 = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_data' => $sessionData,
+        'session_data' => $globalSession,
     ]]);
 
     $client2 = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx2);

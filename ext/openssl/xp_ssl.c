@@ -1578,34 +1578,21 @@ static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
 		return 0;
 	}
 
-	/* Serialize session to DER format */
-	int session_len = i2d_SSL_SESSION(session, NULL);
-	if (session_len <= 0) {
-		return 0;
-	}
+	/* Increment reference - we're giving ownership to the PHP object */
+	SSL_SESSION_up_ref(session);
 
-	unsigned char *session_data = emalloc(session_len);
-	unsigned char *p = session_data;
-	i2d_SSL_SESSION(session, &p);
-
-	unsigned int session_id_len = 0;
-	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
-
-	zval args[3];
+	zval args[2];
 	zval retval;
 
 	ZVAL_RES(&args[0], stream->res);
-	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
-	ZVAL_STRINGL(&args[2], (char *)session_data, session_len);
+	php_openssl_session_object_init(&args[1], session);
 
 	if (call_user_function(EG(function_table), NULL, &sslsock->session_callbacks->new_cb,
-			&retval, 3, args) == SUCCESS) {
+			&retval, 2, args) == SUCCESS) {
 		zval_ptr_dtor(&retval);
 	}
 
 	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	efree(session_data);
 
 	return 0;
 }
@@ -1638,7 +1625,15 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 
 	if (call_user_function(EG(function_table), NULL, &sslsock->session_callbacks->get_cb,
 			&retval, 2, args) == SUCCESS) {
-		if (Z_TYPE(retval) == IS_STRING && Z_STRLEN(retval) > 0) {
+		if (php_openssl_is_session_ce(&retval)) {
+			/* Get session from object and increment ref since OpenSSL will own it */
+			php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(&retval);
+			if (obj->session) {
+				SSL_SESSION_up_ref(obj->session);
+				session = obj->session;
+			}
+		} else if (Z_TYPE(retval) == IS_STRING && Z_STRLEN(retval) > 0) {
+			/* Backward compatibility: accept raw DER string */
 			const unsigned char *p = (const unsigned char *)Z_STRVAL(retval);
 			session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN(retval));
 		}
@@ -1647,7 +1642,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 
 	zval_ptr_dtor(&args[1]);
 
-	*copy = 0; /* We return a new reference, OpenSSL will own it */
+	*copy = 0;
 	return session;
 }
 
@@ -1745,10 +1740,11 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 		enable_client_cache = true;
 	}
 
-	/* Handle session_data - must be done after SSL_new() */
-	if (GET_VER_OPT("session_data") && Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0) {
-		/* It just needs to be enabled as it will be applied after SSL handle is created */
-		enable_client_cache = true;
+	if (GET_VER_OPT("session_data")) {
+		if (php_openssl_is_session_ce(val) ||
+				(Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0)) {
+			enable_client_cache = true;
+		}
 	}
 
 	if (enable_client_cache) {
@@ -1912,27 +1908,46 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 	zval *val;
 
 	if (GET_VER_OPT("session_data")) {
-		if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0) {
-			/* Deserialize session from DER format */
-			const unsigned char *p = (const unsigned char *)Z_STRVAL_P(val);
-			SSL_SESSION *session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN_P(val));
+		SSL_SESSION *session = NULL;
+		bool needs_free = false;
 
-			if (session == NULL) {
+		if (php_openssl_is_session_ce(val)) {
+			session = php_openssl_session_from_zval(val);
+			if (!session) {
+				php_error_docref(NULL, E_WARNING,
+						"Invalid OpenSSLSession object, falling back to full handshake");
+				return FAILURE;
+			}
+			/* Object owns the session, we just borrow it */
+			needs_free = false;
+		} else if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0) {
+			/* Legacy: deserialize session from DER format */
+			const unsigned char *p = (const unsigned char *)Z_STRVAL_P(val);
+			session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN_P(val));
+
+			if (!session) {
 				php_error_docref(NULL, E_WARNING,
 						"Invalid or corrupted session_data, falling back to full handshake");
 				ERR_clear_error();
 				return FAILURE;
 			}
+			needs_free = true;
+		}
 
+		if (session) {
 			if (SSL_set_session(sslsock->ssl_handle, session) != 1) {
 				php_error_docref(NULL, E_WARNING,
 						"Failed to set session for resumption, falling back to full handshake");
-				SSL_SESSION_free(session);
+				if (needs_free) {
+					SSL_SESSION_free(session);
+				}
 				ERR_clear_error();
 				return FAILURE;
 			}
 
-			SSL_SESSION_free(session);
+			if (needs_free) {
+				SSL_SESSION_free(session);
+			}
 		}
 	}
 
@@ -2265,20 +2280,17 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		struct timeval start_time, *timeout;
 		bool blocked = sslsock->s.is_blocked, has_timeout = false;
 
-		if (!sslsock->is_client) {
-			php_openssl_init_server_reneg_limit(stream, sslsock);
-		}
-
-#ifdef HAVE_TLS_SNI
 		if (sslsock->is_client) {
-			php_openssl_enable_client_sni(stream, sslsock);
-
 			/* Set session data for client */
 			if ( php_openssl_apply_client_session_data(stream, sslsock)) {
 				return FAILURE;
 			}
-		}
+#ifdef HAVE_TLS_SNI
+			php_openssl_enable_client_sni(stream, sslsock);
 #endif
+		} else {
+			php_openssl_init_server_reneg_limit(stream, sslsock);
+		}
 
 #ifdef PHP_OPENSSL_TLS_DEBUG
 		BIO *b_out = BIO_new_fp(stdout, BIO_NOCLOSE | BIO_FP_TEXT);
