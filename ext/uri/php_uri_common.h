@@ -17,6 +17,8 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
+#include "php_uri_decl.h"
+
 extern zend_class_entry *php_uri_ce_rfc3986_uri;
 extern zend_class_entry *php_uri_ce_whatwg_url;
 extern zend_class_entry *php_uri_ce_comparison_mode;
