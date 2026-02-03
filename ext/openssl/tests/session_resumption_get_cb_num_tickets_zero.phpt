@@ -19,9 +19,9 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
         'session_id_context' => 'test-no-tickets',
         'num_tickets' => 0,  // Disable ticket issuance
-        'session_new_cb' => function($stream, $sessionId, $sessionData) use (&$sessionStore, &$newCbCalled) {
-            $key = bin2hex($sessionId);
-            $sessionStore[$key] = $sessionData;
+        'session_new_cb' => function($stream, $session) use (&$sessionStore, &$newCbCalled) {
+            $key = bin2hex($session->id);
+            $sessionStore[$key] = $session;
             $newCbCalled++;
         },
         'session_get_cb' => function($stream, $sessionId) use (&$sessionStore) {
@@ -55,8 +55,8 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $data) use (&$sessionData, &$clientTickets) {
-            $sessionData = $data;
+        'session_new_cb' => function($stream, $session) use (&$sessionData, &$clientTickets) {
+            $sessionData = $session;
             $clientTickets++;
         }
     ]]);

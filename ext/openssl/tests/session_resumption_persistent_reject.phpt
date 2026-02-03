@@ -33,7 +33,7 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $sessionData) {
+        'session_new_cb' => function($stream, $session) {
             echo "This should never be called\n";
         }
     ]]);

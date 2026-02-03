@@ -19,7 +19,7 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
         'verify_peer' => true,
         'cafile' => '%s',
-        'session_new_cb' => function($stream, $sessionId, $sessionData) {
+        'session_new_cb' => function($stream, $session) {
             echo "Callback might not be called\n";
         }
         /* Missing: 'session_id_context' => 'myapp' */

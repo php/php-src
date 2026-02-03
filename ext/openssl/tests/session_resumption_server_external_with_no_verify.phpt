@@ -22,9 +22,9 @@ $serverCode = <<<'CODE'
         'verify_peer' => false,
         'no_ticket' => true,
         'session_cache' => true,
-        'session_new_cb' => function($stream, $sessionId, $sessionData) use (&$sessionStore, &$newCbCalled) {
-            $key = bin2hex($sessionId);
-            $sessionStore[$key] = $sessionData;
+        'session_new_cb' => function($stream, $session) use (&$sessionStore, &$newCbCalled) {
+            $key = bin2hex($session->id);
+            $sessionStore[$key] = $session;
             $newCbCalled = true;
         },
         'session_get_cb' => function($stream, $sessionId) use (&$sessionStore, &$getCbCalled) {
@@ -68,8 +68,8 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $data) use (&$sessionData) {
-            $sessionData = $data;
+        'session_new_cb' => function($stream, $session) use (&$sessionData) {
+            $sessionData = $session;
         }
     ]]);
 

@@ -39,8 +39,8 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $sessionDataArg) use (&$sessionData) {
-            $sessionData = $sessionDataArg;
+        'session_new_cb' => function($stream, $session) use (&$sessionData) {
+            $sessionData = $session;
         }
     ]]);
 
@@ -50,7 +50,7 @@ $clientCode = <<<'CODE'
         echo trim(fgets($client1)) . "\n";
         $meta1 = stream_get_meta_data($client1);
         echo "First connection resumed: " . ($meta1['crypto']['session_reused'] ? "yes" : "no") . "\n";
-        echo "Session data received: " . (strlen($sessionData) > 0 ? "yes" : "no") . "\n";
+        echo "Session data received: " . (!empty($sessionData) ? "yes" : "no") . "\n";
         fclose($client1);
     }
 

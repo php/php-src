@@ -43,8 +43,8 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_new_cb' => function($stream, $sessionId, $data) use (&$sessionData) {
-            $sessionData = $data;
+        'session_new_cb' => function($stream, $session) use (&$sessionData) {
+            $sessionData = $session;
         }
     ]]);
 
@@ -57,7 +57,7 @@ $clientCode = <<<'CODE'
         fclose($client1);
     }
 
-    echo "Session data received: " . (strlen($sessionData) > 0 ? "YES" : "NO") . "\n";
+    echo "Session data received: " . ($sessionData !== null ? "YES" : "NO") . "\n";
 
     /* Second connection with session resumption */
     $ctx2 = stream_context_create(['ssl' => [

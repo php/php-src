@@ -44,7 +44,7 @@ $clientCode = <<<'CODE'
         'verify_peer' => false,
         'verify_peer_name' => false,
         'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,
-        'session_new_cb' => function($stream, $sessionId, $data) use (&$ticketCount) {
+        'session_new_cb' => function($stream, $session) use (&$ticketCount) {
             $ticketCount++;
         }
     ]]);

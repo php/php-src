@@ -18,7 +18,7 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
         'session_id_context' => 'test-app',
         'no_ticket' => false,  // Explicitly trying to enable tickets
-        'session_new_cb' => function($stream, $sessionId, $sessionData) {
+        'session_new_cb' => function($stream, $sessionData) {
             // Store session
         },
         'session_get_cb' => function($stream, $sessionId) {
