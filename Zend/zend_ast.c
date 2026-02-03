@@ -1153,7 +1153,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
 				/* TODO: PFAs */
 				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-				return FAILURE;
 			}
 
 			switch (ast->kind) {
