@@ -52171,11 +52171,6 @@ assign_dim_error:
 			}
 		}
 	}
-	if (IS_CV != IS_UNUSED) {
-
-
-	}
-
 
 	/* assign_dim has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
