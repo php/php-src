@@ -367,6 +367,7 @@ jobs:
       - name: Update clang
         uses: ./.github/actions/macos-update-clang
       - name: brew
+        timeout-minutes: 10
         uses: ./.github/actions/brew
       - name: ./configure
         uses: ./.github/actions/configure-macos
