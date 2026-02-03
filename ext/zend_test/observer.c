@@ -326,7 +326,7 @@ static void zend_test_execute_internal(zend_execute_data *execute_data, zval *re
 
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 {
-	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
+	zend_array **p = ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
 	if (!ZT_G(observer_enabled)) {

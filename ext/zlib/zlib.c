@@ -1293,7 +1293,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		}
 	}
 
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = int_value;
 
 	ZLIBG(output_compression) = ZLIBG(output_compression_default);

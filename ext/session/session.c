@@ -812,7 +812,7 @@ static PHP_INI_MH(OnUpdateSessionGcProbability)
         return FAILURE;
     }
 
-    zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+    zend_long *p = ZEND_INI_GET_ADDR();
     *p = tmp;
 
     return SUCCESS;
@@ -830,7 +830,7 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
         return FAILURE;
     }
 
-    zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+    zend_long *p = ZEND_INI_GET_ADDR();
     *p = tmp;
 
     return SUCCESS;
@@ -859,7 +859,7 @@ static PHP_INI_MH(OnUpdateUseOnlyCookies)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (!*p) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Disabling session.use_only_cookies INI setting is deprecated");
@@ -871,7 +871,7 @@ static PHP_INI_MH(OnUpdateUseTransSid)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (*p) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Enabling session.use_trans_sid INI setting is deprecated");

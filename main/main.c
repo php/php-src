@@ -670,7 +670,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 
 static PHP_INI_MH(OnUpdateReportMemleaks)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	bool new_bool_value = zend_ini_parse_bool(new_value);
 
 	if (!new_bool_value) {
@@ -707,7 +707,7 @@ static PHP_INI_MH(OnUpdateErrorLog)
 			return FAILURE;
 		}
 	}
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -722,7 +722,7 @@ static PHP_INI_MH(OnUpdateMailLog)
 			return FAILURE;
 		}
 	}
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }

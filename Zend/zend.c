@@ -157,7 +157,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 

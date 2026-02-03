@@ -73,7 +73,7 @@ ZEND_GET_MODULE(bcmath)
 
 ZEND_INI_MH(OnUpdateScale)
 {
-	int *p;
+	int *p = ZEND_INI_GET_ADDR();
 	zend_long tmp;
 
 	tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
@@ -81,7 +81,6 @@ ZEND_INI_MH(OnUpdateScale)
 		return FAILURE;
 	}
 
-	p = (int *) ZEND_INI_GET_ADDR();
 	*p = (int) tmp;
 
 	return SUCCESS;
