@@ -31,6 +31,6 @@ try {
 }
 ?>
 --EXPECTF--
-posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 07777
-posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 07777
-posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 07777
+posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 0o7777
+posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 0o7777
+posix_mkfifo(): Argument #2 ($permissions) must be between 0 and 0o7777
