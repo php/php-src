@@ -2438,11 +2438,8 @@ PHP_FUNCTION(session_regenerate_id)
 	if (PS(use_cookies)) {
 		PS(send_cookie) = true;
 	}
-	if (php_session_reset_id() == FAILURE) {
-		RETURN_FALSE;
-	}
 
-	RETURN_TRUE;
+	RETURN_BOOL(php_session_reset_id() == SUCCESS);
 }
 
 /* Generate new session ID. Intended for user save handlers. */
@@ -2591,10 +2588,7 @@ PHP_FUNCTION(session_decode)
 		RETURN_FALSE;
 	}
 
-	if (php_session_decode(str) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(php_session_decode(str) == SUCCESS);
 }
 
 static zend_result php_session_start_set_ini(zend_string *varname, zend_string *new_value) {
