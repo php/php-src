@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
   . Fix deprecation now showing when accessing null key of an array with JIT.
     (alexandre-daubois)
+  . Fixed bug GH-20174 (Assertion failure in
+    ReflectionProperty::skipLazyInitialization after failed LazyProxy
+    initialization). (Arnaud)
 
 - Date:
   . Update timelib to 2022.16. (Derick)

@@ -7183,6 +7183,10 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 		zval *variable_ptr = EX_VAR(opline->op2.var);
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	} else {
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			value = Z_REFVAL_P(value);
+			value_type = Z_TYPE_INFO_P(value);
+		}
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
 

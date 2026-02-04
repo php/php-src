@@ -995,10 +995,13 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			zend_ast *class_name_ast = ast->child[0];
 			zend_string *class_name = zend_ast_get_str(class_name_ast);
 
-			zend_ast *case_name_ast = ast->child[1];
+			zend_ast *case_id_ast = ast->child[1];
+			int case_id = (int)Z_LVAL_P(zend_ast_get_zval(case_id_ast));
+
+			zend_ast *case_name_ast = ast->child[2];
 			zend_string *case_name = zend_ast_get_str(case_name_ast);
 
-			zend_ast *case_value_ast = ast->child[2];
+			zend_ast *case_value_ast = ast->child[3];
 
 			zval case_value_zv;
 			ZVAL_UNDEF(&case_value_zv);
@@ -1009,7 +1012,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 
 			zend_class_entry *ce = zend_lookup_class(class_name);
-			zend_enum_new(result, ce, case_name, case_value_ast != NULL ? &case_value_zv : NULL);
+			zend_enum_new(result, ce, case_id, case_name, case_value_ast != NULL ? &case_value_zv : NULL);
 			zval_ptr_dtor_nogc(&case_value_zv);
 			break;
 		}
@@ -1150,7 +1153,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
 				/* TODO: PFAs */
 				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-				return FAILURE;
 			}
 
 			switch (ast->kind) {

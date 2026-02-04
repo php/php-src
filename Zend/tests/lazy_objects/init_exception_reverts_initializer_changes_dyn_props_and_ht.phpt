@@ -52,7 +52,6 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     throw new Exception('initializer exception');
 });
 
-// Initializer effects on the proxy are not reverted
 test('Proxy', $obj);
 
 --EXPECTF--
@@ -73,14 +72,10 @@ array(0) {
 }
 string(11) "initializer"
 initializer exception
-lazy proxy object(C)#%d (4) {
-  ["a"]=>
-  int(3)
+lazy proxy object(C)#%d (1) {
   ["b"]=>
-  int(4)
+  uninitialized(int)
   ["c"]=>
-  int(5)
-  ["d"]=>
-  int(6)
+  int(0)
 }
 Is lazy: 1
