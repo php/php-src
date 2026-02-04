@@ -138,9 +138,11 @@ PHP_FUNCTION(finfo_open)
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp!", &options, &file, &file_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+		Z_PARAM_PATH_OR_NULL(file, file_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (object) {
 		zend_replace_error_handling(EH_THROW, NULL, &zeh);
@@ -203,9 +205,9 @@ PHP_FUNCTION(finfo_close)
 {
 	zval *self;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &self, finfo_class_entry) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(self, finfo_class_entry)
+	ZEND_PARSE_PARAMETERS_END();	
 
 	RETURN_TRUE;
 }
@@ -389,9 +391,9 @@ PHP_FUNCTION(mime_content_type)
 	php_stream *stream = NULL;
 	struct magic_set *magic = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &path_or_stream) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(path_or_stream)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (Z_TYPE_P(path_or_stream)) {
 		case IS_STRING:
