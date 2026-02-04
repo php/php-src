@@ -336,9 +336,10 @@ PHP_FUNCTION(bzopen)
 	BZFILE   *bz;     /* The compressed file stream */
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &file, &mode, &mode_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(file)
+		Z_PARAM_STRING(mode, mode_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
 		zend_argument_value_error(2, "must be either \"r\" or \"w\"");
@@ -456,9 +457,12 @@ PHP_FUNCTION(bzcompress)
 	size_t       source_len;       /* Length of the source data */
 	unsigned int dest_len;         /* Length of the destination buffer */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(source, source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(zblock_size)
+		Z_PARAM_LONG(zwork_factor)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (zblock_size < 1 || zblock_size > 9) {
 		zend_argument_value_error(2, "must be between 1 and 9");
@@ -514,9 +518,11 @@ PHP_FUNCTION(bzdecompress)
 	uint64_t size = 0;
 	bz_stream bzs;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &source, &source_len, &small)) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(source, source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(small)
+	ZEND_PARSE_PARAMETERS_END();
 
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
