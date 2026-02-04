@@ -136,25 +136,41 @@ PHP_MINFO_FUNCTION(shmop)
 /* {{{ gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
-	zend_long key, mode, size;
+	zend_long key, permissions, size;
 	php_shmop *shmop;
 	struct shmid_ds shm;
 	char *flags;
 	size_t flags_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsll", &key, &flags, &flags_len, &permissions, &size) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (flags_len != 1) {
-		zend_argument_value_error(2, "must be a valid access mode");
+		zend_argument_value_error(2, "must be a valid access mode, which is one of \"a\", \"c\", \"n\", or \"w\"");
 		RETURN_THROWS();
 	}
+
+	// TODO Check that permissions are valid?
+	if (permissions < 0) {
+		zend_argument_value_error(3, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	if (size < 0) {
+		zend_argument_value_error(4, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	/* There is some implications from the php.net docs that if reopening a segment both permision and size must be 0
+	 * Do something to check this is hold? Or just split the modes into seperate functions
+	 */
+
 
 	object_init_ex(return_value, shmop_ce);
 	shmop = Z_SHMOP_P(return_value);
 	shmop->key = key;
-	shmop->shmflg |= mode;
+	shmop->shmflg |= permissions;
 
 	switch (flags[0])
 	{
@@ -176,7 +192,7 @@ PHP_FUNCTION(shmop_open)
 			*/
 			break;
 		default:
-			zend_argument_value_error(2, "must be a valid access mode");
+			zend_argument_value_error(2, "must be a valid access mode, which is one of \"a\", \"c\", \"n\", or \"w\"");
 			goto err;
 	}
 
@@ -234,11 +250,15 @@ PHP_FUNCTION(shmop_read)
 	shmop = Z_SHMOP_P(shmid);
 
 	if (start < 0 || start > shmop->size) {
-		zend_argument_value_error(2, "must be between 0 and the segment size");
+		zend_argument_value_error(2, "must be between 0 and the segment size of %d", shmop->size);
 		RETURN_THROWS();
 	}
 
-	if (count < 0 || start > (ZEND_LONG_MAX - count) || start + count > shmop->size) {
+	if (count <= 0) {
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+	if (start > (ZEND_LONG_MAX - count) || start + count > shmop->size) {
 		zend_argument_value_error(3, "is out of range");
 		RETURN_THROWS();
 	}
@@ -283,7 +303,6 @@ PHP_FUNCTION(shmop_size)
 PHP_FUNCTION(shmop_write)
 {
 	php_shmop *shmop;
-	zend_long writesize;
 	zend_long offset;
 	zend_string *data;
 	zval *shmid;
@@ -300,14 +319,19 @@ PHP_FUNCTION(shmop_write)
 	}
 
 	if (offset < 0 || offset > shmop->size) {
-		zend_argument_value_error(3, "is out of range");
+		zend_argument_value_error(3, "must be between 0 and the segment size of %d", shmop->size);
 		RETURN_THROWS();
 	}
 
-	writesize = ((zend_long)ZSTR_LEN(data) < shmop->size - offset) ? (zend_long)ZSTR_LEN(data) : shmop->size - offset;
-	memcpy(shmop->addr + offset, ZSTR_VAL(data), writesize);
+	if (ZSTR_LEN(data) > shmop->size - (size_t)offset) {
+		zend_argument_value_error(2, "cannot write data of size %zu from offset " ZEND_LONG_FMT
+			" into a segment of size %d", ZSTR_LEN(data), offset, shmop->size);
+		RETURN_THROWS();
+	}
 
-	RETURN_LONG(writesize);
+	memcpy(shmop->addr + ((size_t)offset), ZSTR_VAL(data), ZSTR_LEN(data));
+
+	RETURN_LONG(ZSTR_LEN(data));
 }
 /* }}} */
 
@@ -324,7 +348,7 @@ PHP_FUNCTION(shmop_delete)
 	shmop = Z_SHMOP_P(shmid);
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
-		php_error_docref(NULL, E_WARNING, "Can't mark segment for deletion (are you the owner?)");
+		php_error_docref(NULL, E_WARNING, "Cannot mark segment for deletion");
 		RETURN_FALSE;
 	}
 
