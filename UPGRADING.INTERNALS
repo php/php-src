@@ -64,6 +64,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_enum_RoundingMode parameter.
   . Added Z_PARAM_ENUM().
   . Added zend_enum_fetch_case_id().
+  . The zend_dval_to_lval_cap() function no longer takes a second
+    zend_string* parameter.
 
 ========================
 2. Build system changes
