@@ -68,6 +68,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     more correctly represents the generic nature of the returned pointer and
     allows to remove explicit casts, but possibly breaks pointer arithmetic
     performed on the result.
+  . The zend_dval_to_lval_cap() function no longer takes a second
+    zend_string* parameter.
 
 ========================
 2. Build system changes
