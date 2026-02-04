@@ -2263,7 +2263,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 		if (UNEXPECTED(!(iface->ce_flags & ZEND_ACC_INTERFACE))) {
 			efree(interfaces);
 			zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
-			return;
 		}
 		for (uint32_t j = 0; j < num_interfaces; j++) {
 			if (interfaces[j] == iface) {

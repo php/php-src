@@ -242,6 +242,7 @@ jobs:
       - name: Update clang
         uses: ./.github/actions/macos-update-clang
       - name: brew
+        timeout-minutes: 10
         uses: ./.github/actions/brew
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2

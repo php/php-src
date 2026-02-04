@@ -2734,16 +2734,21 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 }
 /* }}} */
 
-static bool zend_propagate_list_refs(zend_ast *ast);
-
 static inline bool zend_is_variable(const zend_ast *ast) /* {{{ */
 {
-	if (ast->kind == ZEND_AST_VAR
+	return ast->kind == ZEND_AST_VAR
 		|| ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP
 		|| ast->kind == ZEND_AST_NULLSAFE_PROP
-		|| ast->kind == ZEND_AST_STATIC_PROP
-		|| ast->kind == ZEND_AST_ASSIGN_REF) {
+		|| ast->kind == ZEND_AST_STATIC_PROP;
+}
+/* }}} */
+
+static bool zend_propagate_list_refs(zend_ast *ast);
+
+static inline bool zend_is_passable_by_ref(const zend_ast *ast)
+{
+	if (zend_is_variable(ast) || ast->kind == ZEND_AST_ASSIGN_REF) {
 		return true;
 	}
 	if (ast->kind == ZEND_AST_ASSIGN
@@ -2753,7 +2758,6 @@ static inline bool zend_is_variable(const zend_ast *ast) /* {{{ */
 	}
 	return false;
 }
-/* }}} */
 
 static inline bool zend_is_call(const zend_ast *ast) /* {{{ */
 {
@@ -3875,7 +3879,7 @@ static uint32_t zend_compile_args(
 					opcode = ZEND_SEND_VAR_NO_REF_EX;
 				}
 			}
-		} else if (zend_is_variable(arg) && !zend_ast_is_short_circuited(arg)) {
+		} else if (zend_is_passable_by_ref(arg) && !zend_ast_is_short_circuited(arg)) {
 			if (fbc && arg_num != (uint32_t) -1) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 					zend_compile_var(&arg_node, arg, BP_VAR_W, true);

@@ -1198,6 +1198,11 @@ PHP_FUNCTION(mysqli_options)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
+	if (expected_type == IS_NULL) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants");
+		RETURN_THROWS();
+	}
+	
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
