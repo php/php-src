@@ -54,7 +54,7 @@ PHP_METHOD(SessionHandler, open)
 	} zend_end_try();
 
 	if (SUCCESS == ret) {
-		PS(mod_user_is_open) = 1;
+		PS(mod_user_is_open) = true;
 	}
 
 	RETURN_BOOL(SUCCESS == ret);
@@ -70,7 +70,7 @@ PHP_METHOD(SessionHandler, close)
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	PS(mod_user_is_open) = 0;
+	PS(mod_user_is_open) = false;
 
 	zend_try {
 		ret = PS(default_mod)->s_close(&PS(mod_data));

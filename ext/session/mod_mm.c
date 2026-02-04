@@ -359,7 +359,7 @@ PS_READ_FUNC(mm)
 			return FAILURE;
 		}
 		if (PS(use_cookies)) {
-			PS(send_cookie) = 1;
+			PS(send_cookie) = true;
 		}
 		php_session_reset_id();
 		PS(session_status) = php_session_active;
@@ -367,7 +367,7 @@ PS_READ_FUNC(mm)
 
 	sd = ps_sd_lookup(data, PS(id), false);
 	if (sd) {
-		*val = zend_string_init(sd->data, sd->datalen, 0);
+		*val = zend_string_init(sd->data, sd->datalen, false);
 		ret = SUCCESS;
 	}
 
@@ -476,7 +476,7 @@ PS_CREATE_SID_FUNC(mm)
 		/* Check collision */
 		if (ps_mm_key_exists(data, sid) == SUCCESS) {
 			if (sid) {
-				zend_string_release_ex(sid, 0);
+				zend_string_release_ex(sid, false);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {
