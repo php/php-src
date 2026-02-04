@@ -2785,9 +2785,9 @@ PHP_FUNCTION(exif_tagname)
 	zend_long tag;
 	char *szTemp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &tag) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(tag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	szTemp = exif_get_tagname(tag, tag_table_IFD);
 	if (tag < 0 || !szTemp) {
