@@ -510,7 +510,7 @@ static zend_result php_session_initialize(void)
 	return SUCCESS;
 }
 
-static void php_session_save_current_state(int write)
+static void php_session_save_current_state(bool write)
 {
 	zend_result ret = FAILURE;
 
@@ -1735,7 +1735,7 @@ PHPAPI zend_result php_session_start(void)
 	return SUCCESS;
 }
 
-PHPAPI zend_result php_session_flush(int write)
+PHPAPI zend_result php_session_flush(bool write)
 {
 	if (PS(session_status) == php_session_active) {
 		php_session_save_current_state(write);
