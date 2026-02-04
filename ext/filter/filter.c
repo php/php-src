@@ -470,9 +470,10 @@ PHP_FUNCTION(filter_has_var)
 	zend_string *var;
 	zval        *array_ptr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS", &arg, &var) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(arg)
+		Z_PARAM_STR(var)
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_ptr = php_filter_get_storage(arg);
 	if (EG(exception)) {
@@ -829,9 +830,7 @@ PHP_FUNCTION(filter_list)
 {
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	for (int i = 0; i < size; ++i) {
@@ -847,9 +846,9 @@ PHP_FUNCTION(filter_id)
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 	char *filter;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filter, &filter_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(filter, filter_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	for (int i = 0; i < size; ++i) {
 		if (strcmp(filter_list[i].name, filter) == 0) {
