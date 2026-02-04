@@ -2065,14 +2065,12 @@ static bool can_session_handler_be_changed(void) {
 }
 
 static inline void set_user_save_handler_ini(void) {
-	zend_string *ini_name, *ini_val;
+	/* const */ zend_string *ini_val = ZSTR_KNOWN(ZEND_STR_USER);
+	zend_string *ini_name = ZSTR_INIT_LITERAL("session.save_handler", false);
 
-	ini_name = ZSTR_INIT_LITERAL("session.save_handler", false);
-	ini_val = ZSTR_KNOWN(ZEND_STR_USER);
 	PS(set_handler) = true;
 	zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	PS(set_handler) = false;
-	zend_string_release_ex(ini_val, false);
 	zend_string_release_ex(ini_name, false);
 }
 
