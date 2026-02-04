@@ -2409,7 +2409,7 @@ PHP_FUNCTION(session_regenerate_id)
 		if ((!PS(mod_user_implemented) && PS(mod)->s_validate_sid) || !Z_ISUNDEF(PS(mod_user_names).ps_validate_sid)) {
 			int limit = 3;
 			/* Try to generate non-existing ID */
-			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
+			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
 				zend_string_release_ex(PS(id), 0);
 				PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 				if (!PS(id)) {
@@ -2479,7 +2479,7 @@ PHP_FUNCTION(session_create_id)
 				break;
 			} else {
 				/* Detect collision and retry */
-				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == SUCCESS) {
+				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == FAILURE) {
 					zend_string_release_ex(new_id, 0);
 					new_id = NULL;
 					continue;
