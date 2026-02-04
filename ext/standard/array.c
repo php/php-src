@@ -4916,12 +4916,6 @@ PHP_FUNCTION(array_unique)
 
 	cmp = php_get_data_compare_func_unstable(sort_type, false);
 
-	if(cmp == NULL){
-		zend_argument_value_error(
-			2, "must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING");
-		RETURN_THROWS();
-	}
-
 	bool in_place = zend_may_modify_arg_in_place(array);
 	if (in_place) {
 		RETVAL_ARR(Z_ARRVAL_P(array));
@@ -5996,20 +5990,7 @@ PHP_FUNCTION(array_multisort)
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
-				bucket_compare_func_t cmp =
-					php_get_data_compare_func_unstable(
-						sort_type, sort_order != PHP_SORT_ASC
-					);
-
-				if (cmp == NULL) {
-					zend_argument_value_error(
-						2,
-						"must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING"
-					);
-					RETURN_THROWS();
-				}
-
-				func[num_arrays - 1] = cmp;
+				func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 				sort_order = PHP_SORT_ASC;
 				sort_type = PHP_SORT_REGULAR;
 			}
@@ -6079,20 +6060,7 @@ PHP_FUNCTION(array_multisort)
 	}
 
 	/* Take care of the last array sort flags. */
-	bucket_compare_func_t cmp =
-		php_get_data_compare_func_unstable(
-			sort_type, sort_order != PHP_SORT_ASC
-		);
-
-	if (cmp == NULL) {
-		zend_argument_value_error(
-			2,
-			"must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING"
-		);
-		RETURN_THROWS();
-	}
-
-	func[num_arrays - 1] = cmp;
+	func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 	bucket_compare_func_t *old_multisort_func = ARRAYG(multisort_func);
 	ARRAYG(multisort_func) = func;
 
