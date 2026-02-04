@@ -5747,7 +5747,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
 
-			if (!date_obj->time) {
+			if (!date_obj->time || !period_obj->start_ce) {
 				return false;
 			}
 
@@ -5768,7 +5768,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
 
-			if (!date_obj->time) {
+			if (!date_obj->time || !period_obj->start_ce) {
 				return false;
 			}
 
