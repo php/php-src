@@ -4979,7 +4979,7 @@ PHP_FUNCTION(exif_imagetype)
 	int itype = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(imagefile, imagefile_len)
+		Z_PARAM_PATH(imagefile, imagefile_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	stream = php_stream_open_wrapper(imagefile, "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
