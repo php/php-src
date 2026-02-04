@@ -87,7 +87,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		return FAILURE;
 	}
 
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -104,7 +104,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (size < 0) {
@@ -123,7 +123,7 @@ static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 	if (size < MIN_ACCEL_FILES) {
@@ -140,7 +140,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
-	double *p = (double *) ZEND_INI_GET_ADDR();
+	double *p = ZEND_INI_GET_ADDR();
 	zend_long percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
@@ -159,7 +159,7 @@ static ZEND_INI_MH(OnEnable)
 		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
 		/* It may be only temporarily disabled */
-		bool *p = (bool *) ZEND_INI_GET_ADDR();
+		bool *p = ZEND_INI_GET_ADDR();
 		if (zend_ini_parse_bool(new_value)) {
 			if (*p) {
 				/* Do not warn if OPcache is enabled, as the update would be a noop anyways. */
@@ -206,7 +206,7 @@ static ZEND_INI_MH(OnUpdateJit)
 
 static ZEND_INI_MH(OnUpdateJitDebug)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
@@ -220,7 +220,7 @@ static ZEND_INI_MH(OnUpdateCounter)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < 256) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -232,7 +232,7 @@ static ZEND_INI_MH(OnUpdateUnrollC)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -245,7 +245,7 @@ static ZEND_INI_MH(OnUpdateUnrollR)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -258,7 +258,7 @@ static ZEND_INI_MH(OnUpdateUnrollL)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_LOOPS_UNROLL) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -271,7 +271,7 @@ static ZEND_INI_MH(OnUpdateMaxTraceLength)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 3 && val <= ZEND_JIT_TRACE_MAX_LENGTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}

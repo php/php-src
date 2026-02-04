@@ -963,7 +963,7 @@ ZEND_INI_DISP(display_link_numbers) /* {{{ */
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	return SUCCESS;
 }
@@ -971,7 +971,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
 	return SUCCESS;
 }
@@ -984,7 +984,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 		return FAILURE;
 	}
 
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = tmp;
 
 	return SUCCESS;
@@ -993,7 +993,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateReal) /* {{{ */
 {
-	double *p = (double *) ZEND_INI_GET_ADDR();
+	double *p = ZEND_INI_GET_ADDR();
 	*p = zend_strtod(ZSTR_VAL(new_value), NULL);
 	return SUCCESS;
 }
@@ -1001,7 +1001,7 @@ ZEND_API ZEND_INI_MH(OnUpdateReal) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateString) /* {{{ */
 {
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -1013,7 +1013,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 		return FAILURE;
 	}
 
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -1021,7 +1021,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateStr) /* {{{ */
 {
-	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	zend_string **p = ZEND_INI_GET_ADDR();
 	*p = new_value;
 	return SUCCESS;
 }
@@ -1033,7 +1033,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty) /* {{{ */
 		return FAILURE;
 	}
 
-	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	zend_string **p = ZEND_INI_GET_ADDR();
 	*p = new_value;
 	return SUCCESS;
 }

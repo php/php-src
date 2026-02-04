@@ -64,6 +64,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_enum_RoundingMode parameter.
   . Added Z_PARAM_ENUM().
   . Added zend_enum_fetch_case_id().
+  . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
+    more correctly represents the generic nature of the returned pointer and
+    allows to remove explicit casts, but possibly breaks pointer arithmetic
+    performed on the result.
 
 ========================
 2. Build system changes
