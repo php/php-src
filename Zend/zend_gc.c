@@ -1444,7 +1444,9 @@ static void gc_scan_roots(gc_stack *stack)
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
 	end = GC_G(first_unused);
+
 	while (idx != end) {
+repeat:
 		current = GC_IDX2PTR(idx);
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
@@ -1456,15 +1458,9 @@ static void gc_scan_roots(gc_stack *stack)
 	}
 
 	/* Scan extra roots added during gc_scan */
-	while (idx != GC_G(first_unused)) {
-		current = GC_IDX2PTR(idx);
-		if (GC_IS_ROOT(current->ref)) {
-			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
-				GC_REF_SET_COLOR(current->ref, GC_WHITE);
-				gc_scan(current->ref, stack);
-			}
-		}
-		idx++;
+	if (idx != GC_G(first_unused)) {
+		end = GC_G(first_unused);
+		goto repeat;
 	}
 }
 
@@ -1535,7 +1531,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *entry = (zval*) Z_PTR_P(zv);
-					if (Z_COLLECTABLE_P(entry) && GC_FROM_WEAKMAP_KEY(entry) && GC_COLLECTABLE(Z_COUNTED_P(entry)) && GC_FROM_WEAKMAP_KEY(entry)) {
+					if (Z_COLLECTABLE_P(entry) && GC_FROM_WEAKMAP_KEY(entry) && GC_COLLECTABLE(Z_COUNTED_P(entry))) {
 						GC_UNSET_FROM_WEAKMAP_KEY(entry);
 						GC_UNSET_FROM_WEAKMAP(entry);
 						ref = Z_COUNTED_P(entry);
