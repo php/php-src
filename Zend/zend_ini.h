@@ -58,7 +58,7 @@ struct _zend_ini_entry {
 
 	uint8_t modifiable;
 	uint8_t orig_modifiable;
-	uint8_t modified;
+	bool modified;
 
 	const zend_ini_entry_def *def;
 };
