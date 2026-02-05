@@ -177,11 +177,6 @@ static void php_rshutdown_session_globals(void)
 		PS(session_vars) = NULL;
 	}
 
-	if (PS(mod_user_class_name)) {
-		zend_string_release(PS(mod_user_class_name));
-		PS(mod_user_class_name) = NULL;
-	}
-
 	php_session_cleanup_filename();
 
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
@@ -516,9 +511,7 @@ static void php_session_save_current_state(bool write)
 
 	if (write) {
 		IF_SESSION_VARS() {
-			zend_string *handler_class_name = PS(mod_user_class_name);
-			const char *handler_function_name = "write";
-
+			zval *handler_function = &PS(mod_user_names).ps_write;
 			if (PS(mod_data) || PS(mod_user_implemented)) {
 				zend_string *val;
 
@@ -530,7 +523,7 @@ static void php_session_save_current_state(bool write)
 						&& zend_string_equals(val, PS(session_vars))
 					) {
 						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
-						handler_function_name = handler_class_name != NULL ? "updateTimestamp" : "update_timestamp";
+						handler_function = &PS(mod_user_names).ps_update_timestamp;
 					} else {
 						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
 					}
@@ -547,14 +540,12 @@ static void php_session_save_current_state(bool write)
 									 "is correct (%s)",
 									 PS(mod)->s_name,
 									 ZSTR_VAL(PS(save_path)));
-				} else if (handler_class_name != NULL) {
-					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
-									 "defined save handler. (session.save_path: %s, handler: %s::%s)", ZSTR_VAL(PS(save_path)),
-									 ZSTR_VAL(handler_class_name), handler_function_name);
 				} else {
+					zend_string *callable_name = zend_get_callable_name(handler_function);
 					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
 									 "defined save handler. (session.save_path: %s, handler: %s)", ZSTR_VAL(PS(save_path)),
-									 handler_function_name);
+									 ZSTR_VAL(callable_name));
+					zend_string_release_ex(callable_name, false);
 				}
 			}
 		}
@@ -2115,11 +2106,6 @@ PHP_FUNCTION(session_set_save_handler)
 			RETURN_FALSE;
 		}
 
-		if (PS(mod_user_class_name)) {
-			zend_string_release(PS(mod_user_class_name));
-		}
-		PS(mod_user_class_name) = zend_string_copy(Z_OBJCE_P(obj)->name);
-
 		/* Define mandatory handlers */
 		SESSION_SET_USER_HANDLER_OO_MANDATORY(ps_open, "open");
 		SESSION_SET_USER_HANDLER_OO_MANDATORY(ps_close, "close");
@@ -2154,7 +2140,8 @@ PHP_FUNCTION(session_set_save_handler)
 			/* Validate ID handler */
 			SESSION_SET_USER_HANDLER_OO(ps_validate_sid, zend_string_copy(validate_sid_name));
 			/* Update Timestamp handler */
-			SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, zend_string_copy(update_timestamp_name));
+			/* We need to provide a new string with the correct casing so that error messages work */
+			SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, ZSTR_INIT_LITERAL("updateTimestamp", false));
 		} else {
 			/* For BC reasons we accept methods even if the class does not implement the interface */
 			if (zend_hash_find_ptr(object_methods, validate_sid_name)) {
@@ -2163,7 +2150,8 @@ PHP_FUNCTION(session_set_save_handler)
 			}
 			if (zend_hash_find_ptr(object_methods, update_timestamp_name)) {
 				/* For BC reasons we accept methods even if the class does not implement the interface */
-				SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, zend_string_copy(update_timestamp_name));
+				/* We need to provide a new string with the correct casing so that error messages work */
+				SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, ZSTR_INIT_LITERAL("updateTimestamp", false));
 			}
 		}
 		zend_string_release_ex(validate_sid_name, false);
@@ -2238,12 +2226,6 @@ PHP_FUNCTION(session_set_save_handler)
 	}
 	if (!can_session_handler_be_changed()) {
 		RETURN_FALSE;
-	}
-
-	/* If a custom session handler is already set, release relevant info */
-	if (PS(mod_user_class_name)) {
-		zend_string_release(PS(mod_user_class_name));
-		PS(mod_user_class_name) = NULL;
 	}
 
 	/* remove shutdown function */
@@ -2906,7 +2888,6 @@ static PHP_GINIT_FUNCTION(ps)
 	ps_globals->session_status = php_session_none;
 	ps_globals->default_mod = NULL;
 	ps_globals->mod_user_implemented = false;
-	ps_globals->mod_user_class_name = NULL;
 	ps_globals->mod_user_is_open = false;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = false;
