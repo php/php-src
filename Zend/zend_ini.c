@@ -348,7 +348,7 @@ ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *v
 }
 /* }}} */
 
-ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change) /* {{{ */
+ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, bool force_change) /* {{{ */
 {
 	zend_result ret;
 	zend_string *new_value;
@@ -457,7 +457,7 @@ ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name
  * Data retrieval
  */
 
-ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, bool orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -474,7 +474,7 @@ ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig)
 }
 /* }}} */
 
-ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -491,7 +491,7 @@ ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig) 
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists) /* {{{ */
 {
 	zend_string *str = zend_ini_str_ex(name, name_length, orig, exists);
 
@@ -499,7 +499,7 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API char *zend_ini_string(const char *name, size_t name_length, bool orig) /* {{{ */
 {
 	zend_string *str = zend_ini_str(name, name_length, orig);
 
@@ -886,7 +886,7 @@ ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_strin
 
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
-	int value;
+	bool value;
 	zend_string *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
@@ -900,7 +900,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 	if (tmp_value) {
 		value = zend_ini_parse_bool(tmp_value);
 	} else {
-		value = 0;
+		value = false;
 	}
 
 	if (value) {
