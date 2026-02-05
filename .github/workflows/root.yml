@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
+      comprehensive: ${{ steps.set-matrix.outputs.comprehensive }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -41,23 +42,6 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     with:
-      asan_ubuntu_version: ${{
-        (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '24.04')
-        || '22.04' }}
-      branch: ${{ matrix.branch.ref }}
-      community_verify_type_inference: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      macos_arm64_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '15' || '14' }}
-      run_alpine: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      run_linux_ppc64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      run_macos_arm64: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9 }}
-      run_freebsd_zts: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9 }}
-      ubuntu_version: ${{
-        (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '24.04')
-        || '22.04' }}
-      windows_version: '2022'
-      vs_crt_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) && 'vs17') || 'vs16' }}
-      skip_laravel: false
-      symfony_version: ${{ (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) || matrix.branch.version[0] >= 9) && '8.1') || '7.4' }}
-      skip_wordpress: false
-      variation_enable_zend_max_execution_timers: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9 }}
+      branch: ${{ toJSON(matrix.branch) }}
+      comprehensive: ${{ needs.GENERATE_MATRIX.outputs.comprehensive == 'true' && true || false }}
     secrets: inherit

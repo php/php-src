@@ -2,64 +2,25 @@ name: Test suite
 on:
   workflow_call:
     inputs:
-      asan_ubuntu_version:
-        required: true
-        type: string
       branch:
         required: true
         type: string
-      community_verify_type_inference:
-        required: true
-        type: boolean
-      macos_arm64_version:
-        required: true
-        type: string
-      run_alpine:
-        required: true
-        type: boolean
-      run_linux_ppc64:
-        required: true
-        type: boolean
-      run_macos_arm64:
-        required: true
-        type: boolean
-      run_freebsd_zts:
-        required: true
-        type: boolean
-      ubuntu_version:
-        required: true
-        type: string
-      windows_version:
-        required: true
-        type: string
-      vs_crt_version:
-        required: true
-        type: string
-      skip_laravel:
-        required: true
-        type: boolean
-      symfony_version:
-        required: true
-        type: string
-      skip_wordpress:
-        required: true
-        type: boolean
-      variation_enable_zend_max_execution_timers:
+      comprehensive:
         required: true
         type: boolean
 permissions:
   contents: read
 jobs:
   LINUX_PPC64:
-    if: inputs.run_linux_ppc64
-    name: LINUX_PPC64_ASAN_UBSAN_DEBUG_ZTS
+    if: fromJson(inputs.branch).jobs.LINUX_PPC64
+    name: LINUX_PPC64_ASAN_DEBUG_ZTS
     # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
     runs-on: [self-hosted, gentoo, ppc64]
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -91,8 +52,8 @@ jobs:
       - name: Extra tests
         uses: ./.github/actions/extra-tests
   ALPINE:
-    if: inputs.run_alpine
-    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
+    if: fromJson(inputs.branch).jobs.ALPINE
+    name: ALPINE_X64_ASAN_DEBUG_ZTS
     runs-on: ubuntu-24.04
     container:
       image: 'alpine:3.22'
@@ -100,7 +61,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: apk
         uses: ./.github/actions/apk
       - name: System info
@@ -136,6 +97,7 @@ jobs:
       - name: Extra tests
         uses: ./.github/actions/extra-tests
   LINUX_X64:
+    if: fromJson(inputs.branch).jobs.LINUX_X64
     services:
       mysql:
         image: mysql:8.4
@@ -161,47 +123,14 @@ jobs:
           FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
-      matrix:
-        configuration_parameters: ['']
-        debug: [true, false]
-        name: ['']
-        run_tests_parameters: ['']
-        test_function_jit: [true]
-        zts: [true, false]
-        include:
-          - name: _ASAN_UBSAN
-            debug: true
-            zts: true
-            configuration_parameters: >-
-              CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC"
-              LDFLAGS="-fsanitize=undefined,address"
-            run_tests_parameters: '--asan'
-            test_function_jit: false
-            asan: true
-          - name: _REPEAT
-            debug: true
-            zts: false
-            run_tests_parameters: --repeat 2
-            timeout_minutes: 360
-            test_function_jit: true
-            asan: false
-          - name: _VARIATION
-            debug: true
-            zts: true
-            configuration_parameters: >-
-              CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
-              ${{ inputs.variation_enable_zend_max_execution_timers && '--enable-zend-max-execution-timers' || '' }}
-            run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
-            timeout_minutes: 360
-            test_function_jit: true
-            asan: false
+      matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
     name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ matrix.asan && inputs.asan_ubuntu_version || inputs.ubuntu_version }}
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -220,10 +149,13 @@ jobs:
         uses: ./.github/actions/configure-x64
         with:
           configurationParameters: >-
-            ${{ matrix.configuration_parameters }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
+            ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
+            ${{ (matrix.variation && fromJson(inputs.branch).jobs.LINUX_X64.config.variation_enable_zend_max_execution_timers) && '--enable-zend-max-execution-timers' || '' }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           asan: ${{ matrix.asan && 'true' || 'false' }}
+          skipSlow: ${{ (matrix.asan && !matrix.comprehensive) && 'true' || 'false' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -231,48 +163,56 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-x64
       - name: Test
+        if: ${{ inputs.comprehensive || !matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
+            ${{ matrix.asan && '--asan' || '' }}
+            ${{ matrix.repeat && '--repeat 2' || '' }}
+            ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
           jitType: tracing
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
+            ${{ matrix.asan && '--asan' || '' }}
+            ${{ matrix.repeat && '--repeat 2' || '' }}
+            ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
             -d opcache.enable_cli=1
       - name: Test OpCache
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
+            ${{ matrix.asan && '--asan' || '' }}
+            ${{ matrix.repeat && '--repeat 2' || '' }}
+            ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
             -d opcache.enable_cli=1
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
-        if: matrix.test_function_jit
+        if: ${{ inputs.comprehensive && !matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           jitType: function
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
+            ${{ matrix.repeat && '--repeat 2' || '' }}
+            ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
+    if: fromJson(inputs.branch).jobs.LINUX_X32
     strategy:
       fail-fast: false
-      matrix:
-        debug: [true, false]
-        zts: [true, false]
+      matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:${{ inputs.ubuntu_version }}
+      image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
       PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
@@ -296,7 +236,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: System info
@@ -318,6 +258,7 @@ jobs:
       - name: make install
         uses: ./.github/actions/install-linux-x32
       - name: Test
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
@@ -330,12 +271,14 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d opcache.enable_cli=1
       - name: Test OpCache
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d opcache.enable_cli=1
       - name: Test Function JIT
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
         with:
           jitType: function
@@ -345,21 +288,17 @@ jobs:
       - name: Extra tests
         uses: ./.github/actions/extra-tests
   MACOS:
+    if: fromJson(inputs.branch).jobs.MACOS
     strategy:
       fail-fast: false
-      matrix:
-        debug: [true, false]
-        zts: [true, false]
-        arch: ['X64', 'ARM64']
-        exclude:
-          - arch: ${{ !inputs.run_macos_arm64 && 'ARM64' || '*never*' }}
+      matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || inputs.macos_arm64_version }}
+    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || fromJson(inputs.branch).jobs.MACOS.config.arm64_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: Update clang
         uses: ./.github/actions/macos-update-clang
       - name: brew
@@ -378,6 +317,7 @@ jobs:
       - name: make install
         run: sudo make install
       - name: Test
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
         if: matrix.arch == 'X64' || !matrix.zts
@@ -387,12 +327,13 @@ jobs:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test OpCache
+        if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.arch == 'X64' || !matrix.zts
+        if: inputs.comprehensive && (matrix.arch == 'X64' || !matrix.zts)
         uses: ./.github/actions/test-macos
         with:
           jitType: function
@@ -402,8 +343,8 @@ jobs:
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  COVERAGE_DEBUG_NTS:
-    if: inputs.branch == 'master'
+  COVERAGE:
+    if: fromJson(inputs.branch).jobs.COVERAGE
     services:
       mysql:
         image: mysql:8.4
@@ -432,7 +373,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -463,14 +404,12 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
   COMMUNITY:
+    if: fromJson(inputs.branch).jobs.COMMUNITY
     strategy:
       fail-fast: false
-      matrix:
-        type: ['asan', 'verify_type_inference']
-        exclude:
-          - type: ${{ !inputs.community_verify_type_inference && 'verify_type_inference' || '*never*' }}
+      matrix: ${{ fromJson(inputs.branch).jobs.COMMUNITY.matrix }}
     name: "COMMUNITY_${{ matrix.type }}"
-    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
       ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
@@ -480,7 +419,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -545,7 +484,7 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: ${{ !cancelled() && !inputs.skip_laravel }}
+        if: ${{ !cancelled() }}
         run: |
           git clone https://github.com/laravel/framework.git --depth=1
           cd framework
@@ -590,9 +529,9 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: ${{ !cancelled() && inputs.symfony_version != '' }}
+        if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ inputs.symfony_version }}"
+          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}"
           cd symfony
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -627,7 +566,7 @@ jobs:
           fi
       - name: 'Symfony Preloading'
         # composer create-project will automatically pick the right Symfony version for us.
-        if: ${{ !cancelled() && inputs.symfony_version != '' }}
+        if: ${{ !cancelled() }}
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-req=php+
           cd symfony_demo
@@ -635,7 +574,7 @@ jobs:
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
       - name: Test Wordpress
-        if: ${{ !cancelled() && !inputs.skip_wordpress }}
+        if: ${{ !cancelled() }}
         run: |
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
@@ -650,6 +589,7 @@ jobs:
             exit 1
           fi
   OPCACHE_VARIATION:
+    if: fromJson(inputs.branch).jobs.OPCACHE_VARIATION
     services:
       mysql:
         image: mysql:8.4
@@ -674,12 +614,12 @@ jobs:
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
     name: OPCACHE_VARIATION
-    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -731,13 +671,14 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   MSAN:
+    if: fromJson(inputs.branch).jobs.MSAN
     name: MSAN
-    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -817,13 +758,14 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LIBMYSQLCLIENT:
+    if: fromJson(inputs.branch).jobs.LIBMYSQLCLIENT
     name: LIBMYSQLCLIENT
-    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         run: |
           sudo apt-get update -y | true
@@ -851,7 +793,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   PECL:
-    if: inputs.branch == 'master'
+    if: fromJson(inputs.branch).jobs.PECL
     runs-on: ubuntu-24.04
     env:
       CC: ccache gcc
@@ -861,7 +803,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           path: php
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: git checkout apcu
         uses: actions/checkout@v6
         with:
@@ -960,32 +902,18 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
   WINDOWS:
+    if: fromJson(inputs.branch).jobs.WINDOWS
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - x64: true
-            zts: true
-            opcache: true
-            asan: false
-          - x64: false
-            zts: false
-            opcache: false
-            asan: false
-          - x64: true
-            zts: true
-            opcache: true
-            asan: true
-            branch: 'master'
-            timeout: 120
+      matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
-    runs-on: windows-${{ inputs.windows_version }}
+    runs-on: windows-2022
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
-      PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
+      PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
@@ -998,7 +926,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -1006,12 +934,10 @@ jobs:
       - name: Test
         run: .github/scripts/windows/test.bat
   FREEBSD:
+    if: fromJson(inputs.branch).jobs.FREEBSD
     strategy:
       fail-fast: false
-      matrix:
-        zts: [true, false]
-        exclude:
-          - zts: ${{ !inputs.run_freebsd_zts && true || '*never*' }}
+      matrix: ${{ fromJson(inputs.branch).jobs.FREEBSD.matrix }}
     name: "FREEBSD_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     timeout-minutes: 50
@@ -1019,7 +945,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ fromJson(inputs.branch).ref }}
       - name: FreeBSD
         uses: ./.github/actions/freebsd
         with:
