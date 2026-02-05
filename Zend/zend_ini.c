@@ -41,7 +41,7 @@ static inline bool zend_is_whitespace(char c) {
  */
 static int zend_remove_ini_entries(zval *el, void *arg) /* {{{ */
 {
-	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
+	const zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
 	int module_number = *(int *)arg;
 
 	return ini_entry->module_number == module_number;
@@ -560,7 +560,7 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool zend_ini_parse_bool(zend_string *str)
+ZEND_API bool zend_ini_parse_bool(const zend_string *str)
 {
 	if (zend_string_equals_literal_ci(str, "true")
 			|| zend_string_equals_literal_ci(str, "yes")
@@ -610,12 +610,12 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 	return digits_consumed;
 }
 
-static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
+static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
-	char *str = ZSTR_VAL(value);
-	char *str_end = &str[ZSTR_LEN(value)];
-	char *digits = str;
+	const char *str = ZSTR_VAL(value);
+	const char *str_end = &str[ZSTR_LEN(value)];
+	const char *digits = str;
 	bool overflow = false;
 	zend_ulong factor;
 	smart_str invalid = {0};
@@ -844,19 +844,19 @@ end:
 }
 /* }}} */
 
-ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
+ZEND_API zend_long zend_ini_parse_quantity(const zend_string *value, zend_string **errstr) /* {{{ */
 {
 	return (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr);
 }
 /* }}} */
 
-ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
+ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_string **errstr) /* {{{ */
 {
 	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr);
 }
 /* }}} */
 
-ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting) /* {{{ */
+ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_string *setting) /* {{{ */
 {
 	zend_string *errstr;
 	zend_long retval = zend_ini_parse_quantity(value, &errstr);
@@ -870,7 +870,7 @@ ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string 
 }
 /* }}} */
 
-ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting) /* {{{ */
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend_string *setting) /* {{{ */
 {
 	zend_string *errstr;
 	zend_ulong retval = zend_ini_parse_uquantity(value, &errstr);
@@ -887,7 +887,7 @@ ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_strin
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
 	bool value;
-	zend_string *tmp_value;
+	const zend_string *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
@@ -913,7 +913,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 
 ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 {
-	char *value;
+	const char *value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ZSTR_VAL(ini_entry->orig_value);
@@ -940,7 +940,7 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 
 ZEND_INI_DISP(display_link_numbers) /* {{{ */
 {
-	char *value;
+	const char *value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ZSTR_VAL(ini_entry->orig_value);

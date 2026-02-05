@@ -93,7 +93,7 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool ori
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
 ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
-ZEND_API bool zend_ini_parse_bool(zend_string *str);
+ZEND_API bool zend_ini_parse_bool(const zend_string *str);
 
 /**
  * Parses an ini quantity
@@ -130,16 +130,16 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str);
  * In any of these cases an error string is stored in *errstr (caller must
  * release it), otherwise *errstr is set to NULL.
  */
-ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
+ZEND_API zend_long zend_ini_parse_quantity(const zend_string *value, zend_string **errstr);
 
 /**
  * Unsigned variant of zend_ini_parse_quantity
  */
-ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr);
+ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_string **errstr);
 
-ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting);
+ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_string *setting);
 
-ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting);
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend_string *setting);
 
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
