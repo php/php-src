@@ -735,7 +735,7 @@ default_charset = "UTF-8"
 ; Windows: "\path1;\path2"
 ;include_path = ".;c:\php\includes"
 ;
-; PHP's default setting for include_path is ".;/path/to/php/pear"
+; PHP's default setting for include_path is "."
 ; https://php.net/include-path
 
 ; The root of the PHP pages, used only if nonempty.
@@ -910,7 +910,7 @@ default_socket_timeout = 60
 ; Notes for Windows environments :
 ;
 ; - Many DLL files are located in the ext/
-;   extension folders as well as the separate PECL DLL download.
+;   extension folders as well as the separate DLL download.
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
