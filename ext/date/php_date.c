@@ -795,13 +795,24 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 							  case TIMELIB_ZONETYPE_ABBR:
 								  length = slprintf(buffer, sizeof(buffer), "%s", offset->abbr);
 								  break;
-							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
-												((offset->offset < 0) ? '-' : '+'),
-												abs(offset->offset / 3600),
-												abs((offset->offset % 3600) / 60)
-										   );
+							  case TIMELIB_ZONETYPE_OFFSET: {
+								  int seconds = offset->offset % 60;
+								  if (seconds == 0) {
+								      length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
+								      				((offset->offset < 0) ? '-' : '+'),
+								      				abs(offset->offset / 3600),
+								      				abs((offset->offset % 3600) / 60)
+								      		   );
+								  } else {
+								      length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d:%02d",
+								      				((offset->offset < 0) ? '-' : '+'),
+								      				abs(offset->offset / 3600),
+								      				abs((offset->offset % 3600) / 60),
+													abs(seconds)
+								      		   );
+								  }
 								  break;
+							  }
 						  }
 					  }
 					  break;
@@ -1892,6 +1903,32 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
+static zend_string *date_create_tz_offset_str(timelib_sll offset)
+{
+	int seconds = offset % 60;
+	size_t size;
+	const char *format;
+
+	if (seconds == 0) {
+		size = sizeof("+05:00");
+		format = "%c%02d:%02d";
+	} else {
+		size = sizeof("+05:00:01");
+		format = "%c%02d:%02d:%02d";
+	}
+
+	zend_string *tmpstr = zend_string_alloc(size - 1, 0);
+
+	/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
+	ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
+		offset < 0 ? '-' : '+',
+		abs((int)(offset / 3600)),
+		abs((int)(offset % 3600) / 60),
+		abs(seconds));
+
+	return tmpstr;
+}
+
 static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 {
 	zval zv;
@@ -1909,17 +1946,8 @@ static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 			case TIMELIB_ZONETYPE_ID:
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
-			case TIMELIB_ZONETYPE_OFFSET: {
-				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-				int utc_offset = dateobj->time->z;
-
-				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-					utc_offset < 0 ? '-' : '+',
-					abs(utc_offset / 3600),
-					abs(((utc_offset % 3600) / 60)));
-
-				ZVAL_NEW_STR(&zv, tmpstr);
-				}
+			case TIMELIB_ZONETYPE_OFFSET:
+				ZVAL_NEW_STR(&zv, date_create_tz_offset_str(dateobj->time->z));
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				ZVAL_STRING(&zv, dateobj->time->tz_abbr);
@@ -2031,29 +2059,8 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 		case TIMELIB_ZONETYPE_ID:
 			ZVAL_STRING(zv, tzobj->tzi.tz->name);
 			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			timelib_sll utc_offset = tzobj->tzi.utc_offset;
-			int seconds = utc_offset % 60;
-			size_t size;
-			const char *format;
-			if (seconds == 0) {
-				size = sizeof("+05:00");
-				format = "%c%02d:%02d";
-			} else {
-				size = sizeof("+05:00:01");
-				format = "%c%02d:%02d:%02d";
-			}
-			zend_string *tmpstr = zend_string_alloc(size - 1, 0);
-
-			/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
-				utc_offset < 0 ? '-' : '+',
-				abs((int)(utc_offset / 3600)),
-				abs((int)(utc_offset % 3600) / 60),
-				abs(seconds));
-
-			ZVAL_NEW_STR(zv, tmpstr);
-			}
+		case TIMELIB_ZONETYPE_OFFSET:
+			ZVAL_NEW_STR(zv, date_create_tz_offset_str(tzobj->tzi.utc_offset));
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
 			ZVAL_STRING(zv, tzobj->tzi.z.abbr);
