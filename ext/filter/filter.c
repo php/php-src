@@ -479,11 +479,7 @@ PHP_FUNCTION(filter_has_var)
 		RETURN_THROWS();
 	}
 
-	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var));
 }
 /* }}} */
 
