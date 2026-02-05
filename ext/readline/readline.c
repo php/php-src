@@ -393,13 +393,9 @@ PHP_FUNCTION(readline_read_history)
 		RETURN_FALSE;
 	}
 
-	/* XXX from & to NYI */
-	if (read_history(arg)) {
-		/* If filename is NULL, then read from `~/.history' */
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	/* XXX from & to NYI  
+		If filename is NULL, then read from `~/.history' */
+	RETURN_BOOL(!read_history(arg));
 }
 
 /* }}} */
@@ -417,11 +413,7 @@ PHP_FUNCTION(readline_write_history)
 		RETURN_FALSE;
 	}
 
-	if (write_history(arg)) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(!write_history(arg));
 }
 
 /* }}} */
