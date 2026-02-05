@@ -1027,7 +1027,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print("</p>\n");
 			php_info_print("<p>\n");
 			php_info_print("Copyright &copy; The PHP Group and Contributors.<br>\n");
-			php_info_print("Copyright &copy; Zend by Perforce.\n");
+			php_info_print("Copyright &copy; Zend Technologies Ltd., a subsidiary company of Perforce Software, Inc.\n");
 			php_info_print("</p>\n");
 			php_info_print("<p>\n");
 			php_info_print("Redistribution and use in source and binary forms, with or without ");
@@ -1064,7 +1064,8 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause):\n");
 			php_info_print("\n");
 			php_info_print("Copyright © The PHP Group and Contributors.\n");
-			php_info_print("Copyright © Zend by Perforce.\n");
+			php_info_print("Copyright © Zend Technologies Ltd., a subsidiary company of\n");
+			php_info_print("    Perforce Software, Inc.\n");
 			php_info_print("\n");
 			php_info_print("Redistribution and use in source and binary forms, with or without\n");
 			php_info_print("modification, are permitted provided that the following conditions are met:\n");
