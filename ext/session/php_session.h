@@ -273,18 +273,6 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 PHPAPI zend_result php_session_valid_key(const char *key);
 PHPAPI zend_result php_session_reset_id(void);
 
-#define PS_ADD_VARL(name) do {										\
-	php_add_session_var(name);							\
-} while (0)
-
-#define PS_ADD_VAR(name) PS_ADD_VARL(name)
-
-#define PS_DEL_VARL(name) do {										\
-	if (!Z_ISNULL(PS(http_session_vars))) {							\
-		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), name);		\
-	}																\
-} while (0)
-
 /* Do not use a return statement in `code` because that may leak memory.
  * Break out of the loop instead. */
 #define PS_ENCODE_LOOP(code) do {									\
