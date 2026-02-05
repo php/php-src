@@ -1326,11 +1326,7 @@ PHP_METHOD(DOMElement, hasAttribute)
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
-	if (attr == NULL) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(attr != NULL);
 }
 /* }}} end dom_element_has_attribute */
 
