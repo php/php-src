@@ -887,18 +887,11 @@ ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
 	bool value;
-	const zend_string *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
+		value = zend_ini_parse_bool(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		tmp_value = ini_entry->value;
-	} else {
-		tmp_value = NULL;
-	}
-
-	if (tmp_value) {
-		value = zend_ini_parse_bool(tmp_value);
+		value = zend_ini_parse_bool(ini_entry->value);
 	} else {
 		value = false;
 	}
