@@ -428,7 +428,7 @@ ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage) /* {{{
 	}
 
 	if (EG(modified_ini_directives)) {
-		if (zend_restore_ini_entry_cb(ini_entry, stage) == 0) {
+		if (zend_restore_ini_entry_cb(ini_entry, stage) == SUCCESS) {
 			zend_hash_del(EG(modified_ini_directives), name);
 		} else {
 			return FAILURE;
