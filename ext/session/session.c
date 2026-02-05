@@ -102,7 +102,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 static zend_result php_session_send_cookie(void);
 static zend_result php_session_abort(void);
-static void proposed_session_id_to_session_id(zval *proposed_session_id);
+static void proposed_session_id_to_session_id(const zval *proposed_session_id);
 
 /* Initialized in MINIT, readonly otherwise. */
 static int my_module_number = 0;
@@ -286,7 +286,7 @@ static ZEND_COLD void php_session_cancel_decode(void)
 	php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
 }
 
-static zend_result php_session_decode(zend_string *data)
+static zend_result php_session_decode(const zend_string *data)
 {
     ZEND_ASSERT(PS(serializer));
 	zend_result result = SUCCESS;
@@ -653,17 +653,17 @@ static PHP_INI_MH(OnUpdateSaveDir)
 
 	/* Only do the open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
-		char *p;
-
 		if (memchr(ZSTR_VAL(new_value), '\0', ZSTR_LEN(new_value)) != NULL) {
 			return FAILURE;
 		}
 
 		/* we do not use zend_memrchr() since path can contain ; itself */
-		if ((p = strchr(ZSTR_VAL(new_value), ';'))) {
-			char *p2;
+		const char *p = strchr(ZSTR_VAL(new_value), ';');
+		if (p) {
 			p++;
-			if ((p2 = strchr(p, ';'))) {
+
+			const char *p2 = strchr(p, ';');
+			if (p2) {
 				p = p2 + 1;
 			}
 		} else {
@@ -1193,7 +1193,7 @@ PHPAPI zend_result php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS) {
    ****************** */
 
 typedef struct {
-	char *name;
+	const char *name;
 	void (*func)(void);
 } php_session_cache_limiter_t;
 
@@ -1468,8 +1468,6 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name)
 
 static bool should_invalidate_session_for_external_referer(void)
 {
-	zval *referer_data;
-
 	/* No external referer check configured */
 	if (!PS(id) || PS(extern_referer_chk)[0] == '\0') {
 		return false;
@@ -1481,7 +1479,7 @@ static bool should_invalidate_session_for_external_referer(void)
 	}
 
 	/* Get HTTP_REFERER header */
-	referer_data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZEND_STRL("HTTP_REFERER"));
+	const zval *referer_data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZEND_STRL("HTTP_REFERER"));
 	if (!referer_data || Z_TYPE_P(referer_data) != IS_STRING || Z_STRLEN_P(referer_data) == 0) {
 		return false;
 	}
@@ -1492,7 +1490,7 @@ static bool should_invalidate_session_for_external_referer(void)
 
 static void try_find_session_id_in_global(const char *global_name, size_t global_name_len)
 {
-	zval *global_data, *potential_session_id;
+	zval *global_data;
 
 	if (PS(id)) {
 		return;
@@ -1508,7 +1506,7 @@ static void try_find_session_id_in_global(const char *global_name, size_t global
 		return;
 	}
 
-	potential_session_id = zend_hash_find(Z_ARRVAL_P(global_data), PS(session_name));
+	const zval *potential_session_id = zend_hash_find(Z_ARRVAL_P(global_data), PS(session_name));
 	if (potential_session_id) {
 		proposed_session_id_to_session_id(potential_session_id);
 	}
@@ -1537,7 +1535,7 @@ static bool php_can_change_session_setting(const char *setting_name, bool check_
 
 static void try_find_session_id_in_cookies(void)
 {
-	zval *cookie_data, *potential_session_id;
+	zval *cookie_data;
 
 	if (!PS(use_cookies) || PS(id)) {
 		return;
@@ -1553,7 +1551,7 @@ static void try_find_session_id_in_cookies(void)
 		return;
 	}
 
-	potential_session_id = zend_hash_find(Z_ARRVAL_P(cookie_data), PS(session_name));
+	const zval *potential_session_id = zend_hash_find(Z_ARRVAL_P(cookie_data), PS(session_name));
 	if (potential_session_id) {
 		proposed_session_id_to_session_id(potential_session_id);
 		PS(send_cookie) = false;
@@ -1561,7 +1559,7 @@ static void try_find_session_id_in_cookies(void)
 	}
 }
 
-static void proposed_session_id_to_session_id(zval *proposed_session_id) {
+static void proposed_session_id_to_session_id(const zval *proposed_session_id) {
 	ZVAL_DEREF(proposed_session_id);
 	if (Z_TYPE_P(proposed_session_id) == IS_STRING) {
 		PS(id) = zend_string_copy(Z_STR_P(proposed_session_id));
@@ -1654,7 +1652,7 @@ PHPAPI zend_result php_session_reset_id(void)
 
 PHPAPI zend_result php_session_start(void)
 {
-	char *value;
+	const char *value;
 
 	switch (PS(session_status)) {
 		case php_session_active:
@@ -2831,18 +2829,14 @@ static zend_result php_rinit_session(bool auto_start)
 
 	PS(mod) = NULL;
 	{
-		char *value;
-
-		value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
+		const char *value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
 		if (value) {
 			PS(mod) = _php_find_ps_module(value);
 		}
 	}
 
 	if (PS(serializer) == NULL) {
-		char *value;
-
-		value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
+		const char *value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
 		if (value) {
 			PS(serializer) = _php_find_ps_serializer(value);
 		}
@@ -3082,7 +3076,7 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 	early_find_sid_in(&progress->sid, TRACK_VARS_GET);
 }
 
-static bool php_check_cancel_upload(php_session_rfc1867_progress *progress)
+static bool php_check_cancel_upload(const php_session_rfc1867_progress *progress)
 {
 	zval *progress_ary, *cancel_upload;
 
@@ -3132,7 +3126,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, b
 	php_session_flush(true);
 }
 
-static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress)
+static void php_session_rfc1867_cleanup(const php_session_rfc1867_progress *progress)
 {
 	php_session_initialize();
 	PS(session_status) = php_session_active;
@@ -3160,14 +3154,14 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 	switch(event) {
 		case MULTIPART_EVENT_START: {
-			multipart_event_start *data = (multipart_event_start *) event_data;
+			const multipart_event_start *data = event_data;
 			progress = ecalloc(1, sizeof(php_session_rfc1867_progress));
 			progress->content_length = data->content_length;
 			PS(rfc1867_progress) = progress;
 		}
 		break;
 		case MULTIPART_EVENT_FORMDATA: {
-			multipart_event_formdata *data = (multipart_event_formdata *) event_data;
+			const multipart_event_formdata *data = event_data;
 			size_t value_len;
 
 			if (Z_TYPE(progress->sid) && progress->key.s) {
@@ -3200,7 +3194,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		}
 		break;
 		case MULTIPART_EVENT_FILE_START: {
-			multipart_event_file_start *data = (multipart_event_file_start *) event_data;
+			const multipart_event_file_start *data = event_data;
 
 			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set
 			 * or when we have no session id */
@@ -3261,7 +3255,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		}
 		break;
 		case MULTIPART_EVENT_FILE_DATA: {
-			multipart_event_file_data *data = (multipart_event_file_data *) event_data;
+			const multipart_event_file_data *data = event_data;
 
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
@@ -3274,7 +3268,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		}
 		break;
 		case MULTIPART_EVENT_FILE_END: {
-			multipart_event_file_end *data = (multipart_event_file_end *) event_data;
+			const multipart_event_file_end *data = event_data;
 
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
@@ -3293,7 +3287,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		}
 		break;
 		case MULTIPART_EVENT_END: {
-			multipart_event_end *data = (multipart_event_end *) event_data;
+			const multipart_event_end *data = event_data;
 
 			if (Z_TYPE(progress->sid) && progress->key.s) {
 				if (PS(rfc1867_cleanup)) {
