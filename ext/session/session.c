@@ -567,8 +567,6 @@ static void php_session_save_current_state(bool write)
 
 static void php_session_normalize_vars(void)
 {
-	PS_ENCODE_VARS;
-
 	IF_SESSION_VARS() {
 		PS_ENCODE_LOOP(
 			if (Z_TYPE_P(struc) == IS_PTR) {
@@ -988,7 +986,6 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 {
 	smart_str buf = {0};
 	php_serialize_data_t var_hash;
-	PS_ENCODE_VARS;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
@@ -1052,7 +1049,6 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	smart_str buf = {0};
 	php_serialize_data_t var_hash;
 	bool fail = false;
-	PS_ENCODE_VARS;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
