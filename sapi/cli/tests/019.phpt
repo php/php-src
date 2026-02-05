@@ -23,8 +23,8 @@ PHP Version => %s
 %a
 License
 
-PHP is free software: you can redistribute it and/or modify it under the
-terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause):
+PHP is free software. You may redistribute it and/or modify it under the
+terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).
 
 Copyright © The PHP Group and Contributors.
 Copyright © Zend Technologies Ltd., a subsidiary company of

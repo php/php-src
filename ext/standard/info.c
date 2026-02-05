@@ -1022,8 +1022,8 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			SECTION("License");
 			php_info_print_box_start(0);
 			php_info_print("<p>\n");
-			php_info_print("PHP is free software: you can redistribute it and/or modify it under the ");
-			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause):\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the ");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
 			php_info_print("</p>\n");
 			php_info_print("<p>\n");
 			php_info_print("Copyright &copy; The PHP Group and Contributors.<br>\n");
@@ -1060,8 +1060,8 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print("\n");
 			php_info_print("License\n");
 			php_info_print("\n");
-			php_info_print("PHP is free software: you can redistribute it and/or modify it under the\n");
-			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause):\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the\n");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
 			php_info_print("\n");
 			php_info_print("Copyright © The PHP Group and Contributors.\n");
 			php_info_print("Copyright © Zend Technologies Ltd., a subsidiary company of\n");
