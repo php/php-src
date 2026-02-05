@@ -4,7 +4,8 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright © Zend by Perforce and Contributors.                       |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
    | This source file is subject to the Modified BSD License that is      |
    | bundled with this package in the file LICENSE, and is available      |
@@ -21,7 +22,8 @@ const HEADER_TEXT = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright © Zend by Perforce and Contributors.                       |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
    | This source file is subject to the Modified BSD License that is      |
    | bundled with this package in the file LICENSE, and is available      |
