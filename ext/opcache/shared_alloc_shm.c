@@ -66,7 +66,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 	first_segment_id = shmget(first_segment_key, seg_allocate_size, shmget_flags);
 	if (UNEXPECTED(first_segment_id == -1)) {
 		/* Search for biggest n^2 < requested_size. */
-		seg_allocate_size = 1024 * 1024;
+		seg_allocate_size = SEG_ALLOC_SIZE_MIN;
 		while (seg_allocate_size < requested_size / 2) {
 			seg_allocate_size *= 2;
 		}
