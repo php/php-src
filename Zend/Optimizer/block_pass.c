@@ -178,7 +178,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						if (opline->opcode != ZEND_JMP_NULL
 						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))
 						 /* FETCH_W with ZEND_FETCH_GLOBAL_LOCK does not free op1, which will be used again. */
-						 && (opline->opcode != ZEND_FETCH_W && (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK))) {
+						 && !(opline->opcode == ZEND_FETCH_W && (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK))) {
 							literal_dtor(&ZEND_OP1_LITERAL(src));
 							MAKE_NOP(src);
 						}
