@@ -174,7 +174,6 @@ typedef struct _php_ps_globals {
 		zval ps_validate_sid;
 		zval ps_update_timestamp;
 	} mod_user_names;
-	zend_string *mod_user_class_name;
 	bool mod_user_implemented;
 	bool mod_user_is_open;
 	bool auto_start;
