@@ -285,26 +285,20 @@ PHPAPI zend_result php_session_reset_id(void);
 	}																\
 } while (0)
 
-
-#define PS_ENCODE_VARS 												\
-	zend_string *key;												\
-	zend_ulong num_key;													\
-	zval *struc;
-
 /* Do not use a return statement in `code` because that may leak memory.
  * Break out of the loop instead. */
 #define PS_ENCODE_LOOP(code) do {									\
 	zval _zv;														\
 	/* protect against user interference */							\
 	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars)));				\
-	HashTable *_ht = Z_ARRVAL(_zv);									\
-	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
+	ZEND_HASH_FOREACH_KEY(Z_ARRVAL(_zv), zend_ulong num_key, zend_string * key) { \
 		if (key == NULL) {											\
 			php_error_docref(NULL, E_WARNING,						\
 					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
 			continue;												\
 		}															\
-		if ((struc = php_get_session_var(key))) {					\
+		zval *struc = php_get_session_var(key);						\
+		if (struc) {												\
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\
