@@ -1087,6 +1087,11 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (mode < 0 || (mode & ~07777)) {
+		zend_argument_value_error(2, "must be between 0 and 0o7777");
+		RETURN_THROWS();
+	}
+
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	RETURN_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
