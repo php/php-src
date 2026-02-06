@@ -127,7 +127,6 @@ static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
 	typedef HRESULT (STDAPICALLTYPE *cbtr_t)(LPCWSTR pwszVersion, LPCWSTR pwszBuildFlavor, REFCLSID rclsid, REFIID riid, LPVOID FAR *ppv);
 	cbtr_t CorBindToRuntime;
 	OLECHAR *oleversion;
-	char *version;
 
 	mscoree = LoadLibraryA("mscoree.dll");
 	if (mscoree == NULL) {
@@ -140,11 +139,11 @@ static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
 		return S_FALSE;
 	}
 
-	version = INI_STR("com.dotnet_version");
-	if (version == NULL || *version == '\0') {
+	const zend_string *version = zend_ini_str(ZEND_STRL("com.dotnet_version"), false);
+	if (version == NULL || ZSTR_LEN(version) == 0) {
 		oleversion = NULL;
 	} else {
-		oleversion = php_com_string_to_olestring(version, strlen(version), COMG(code_page));
+		oleversion = php_com_string_to_olestring(ZSTR_VAL(version), ZSTR_LEN(version), COMG(code_page));
 	}
 
 	hr = CorBindToRuntime(oleversion, NULL, &CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, ppv);
