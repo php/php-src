@@ -491,7 +491,7 @@ ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig)
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists) /* {{{ */
+ZEND_API const char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists) /* {{{ */
 {
 	zend_string *str = zend_ini_str_ex(name, name_length, orig, exists);
 
@@ -499,7 +499,7 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool ori
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, bool orig) /* {{{ */
+ZEND_API const char *zend_ini_string(const char *name, size_t name_length, bool orig) /* {{{ */
 {
 	zend_string *str = zend_ini_str(name, name_length, orig);
 
