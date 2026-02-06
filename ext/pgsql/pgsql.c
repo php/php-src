@@ -3023,10 +3023,7 @@ PHP_FUNCTION(pg_lo_export)
 
 	pgsql = link->conn;
 
-	if (lo_export(pgsql, oid, ZSTR_VAL(file_out)) == -1) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(lo_export(pgsql, oid, ZSTR_VAL(file_out)) != -1);
 }
 /* }}} */
 
@@ -3863,10 +3860,8 @@ PHP_FUNCTION(pg_connection_reset)
 	pgsql = link->conn;
 
 	PQreset(pgsql);
-	if (PQstatus(pgsql) == CONNECTION_BAD) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	
+	RETURN_BOOL(PQstatus(pgsql) != CONNECTION_BAD);
 }
 /* }}} */
 
