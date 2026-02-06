@@ -36,11 +36,10 @@
 
 PHP_METHOD(SessionHandler, open)
 {
-	char *save_path = NULL, *session_name = NULL;
-	size_t save_path_len, session_name_len;
+	zend_string *save_path, *session_name;
 	zend_result ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &save_path, &session_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 

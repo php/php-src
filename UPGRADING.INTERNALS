@@ -100,6 +100,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.
   . Removed session_adapt_url().
+  . PS_OPEN_ARGS is now defined as
+    `void **mod_data, zend_string *save_path, zend_string *session_name`
+    rather than
+    `void **mod_data, const char *save_path, const char *session_name`
 
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.
