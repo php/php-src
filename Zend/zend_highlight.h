@@ -30,11 +30,11 @@
 
 
 typedef struct _zend_syntax_highlighter_ini {
-	char *highlight_html;
-	char *highlight_comment;
-	char *highlight_default;
-	char *highlight_string;
-	char *highlight_keyword;
+	const char *highlight_html;
+	const char *highlight_comment;
+	const char *highlight_default;
+	const char *highlight_string;
+	const char *highlight_keyword;
 } zend_syntax_highlighter_ini;
 
 

@@ -79,8 +79,8 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 {
 	zval token;
 	int token_type;
-	char *last_color = syntax_highlighter_ini->highlight_html;
-	char *next_color;
+	const char *last_color = syntax_highlighter_ini->highlight_html;
+	const char *next_color;
 
 	zend_printf("<pre><code style=\"color: %s\">", last_color);
 	/* highlight stuff coming back from zendlex() */
