@@ -101,7 +101,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
 static zend_result php_session_send_cookie(void);
-static zend_result php_session_abort(void);
+static bool php_session_abort(void);
 static void proposed_session_id_to_session_id(const zval *proposed_session_id);
 
 /* Initialized in MINIT, readonly otherwise. */
@@ -1735,16 +1735,16 @@ PHPAPI php_session_status php_get_session_status(void)
 	return PS(session_status);
 }
 
-static zend_result php_session_abort(void)
+static bool php_session_abort(void)
 {
 	if (PS(session_status) == php_session_active) {
 		if (PS(mod_data) || PS(mod_user_implemented)) {
 			PS(mod)->s_close(&PS(mod_data));
 		}
 		PS(session_status) = php_session_none;
-		return SUCCESS;
+		return true;
 	}
-	return FAILURE;
+	return false;
 }
 
 static zend_result php_session_reset(void)
@@ -2738,11 +2738,7 @@ PHP_FUNCTION(session_abort)
 		RETURN_THROWS();
 	}
 
-	if (PS(session_status) != php_session_active) {
-		RETURN_FALSE;
-	}
-	php_session_abort();
-	RETURN_TRUE;
+	RETURN_BOOL(php_session_abort());
 }
 
 /* Reset session data from saved session data */
