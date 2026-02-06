@@ -1410,10 +1410,7 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 		RETURN_THROWS();
 	}
 
-	if (mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len));
 }
 /* }}} */
 
@@ -1552,10 +1549,7 @@ PHP_FUNCTION(mysqli_stmt_reset)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (mysql_stmt_reset(stmt->stmt)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_reset(stmt->stmt));
 }
 /* }}} */
 
