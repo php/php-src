@@ -44,7 +44,7 @@ if (posix_access($testfile, POSIX_F_OK)) {
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/testfile.txt');
+@unlink(__DIR__ . '/testfile.txt');
 ?>
 --EXPECTF--
 posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
