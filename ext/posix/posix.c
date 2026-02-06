@@ -622,10 +622,7 @@ PHP_FUNCTION(posix_mkfifo)
 	}
 
 	if (mode < 0 || (mode & ~07777)) {
-		zend_argument_value_error(
-			2,
-			"must be between 0 and 07777"
-		);
+		zend_argument_value_error(2, "must be between 0 and 0o7777");
 		RETURN_THROWS();
 	}
 
