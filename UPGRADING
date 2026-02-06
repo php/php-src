@@ -81,6 +81,12 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now supports reference values.
 
+- Posix:
+  . posix_access() now throws a ValueError exception if the flags
+    argument is invalid.
+  . posix_mkfifo() now throws a ValueError exception if the permissions
+    argument is invalid.
+
 - Sockets:
   . socket_addrinfo_lookup() now has an additional optional argument $error
     when not null, and on failure, gives the error code (one of the EAI_*
