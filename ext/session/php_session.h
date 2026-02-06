@@ -26,7 +26,7 @@
 #define PHP_SESSION_VERSION PHP_VERSION
 
 /* save handler macros */
-#define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
+#define PS_OPEN_ARGS     void **mod_data, zend_string *save_path, zend_string *session_name
 #define PS_CLOSE_ARGS    void **mod_data
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
 #define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime

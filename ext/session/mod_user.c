@@ -83,12 +83,11 @@ PS_OPEN_FUNC(user)
 {
 	zval args[2];
 	zval retval;
-	zend_result ret = FAILURE;
 
 	ZEND_ASSERT(!Z_ISUNDEF(PSF(open)));
 
-	ZVAL_STRING(&args[0], (char*)save_path);
-	ZVAL_STRING(&args[1], (char*)session_name);
+	ZVAL_STR(&args[0], zend_string_dup(save_path, false));
+	ZVAL_STR(&args[1], zend_string_dup(session_name, false));
 
 	zend_try {
 		ps_call_handler(&PSF(open), 2, args, &retval);
@@ -102,7 +101,7 @@ PS_OPEN_FUNC(user)
 
 	PS(mod_user_implemented) = true;
 
-	ret = verify_bool_return_type_userland_calls(&retval);
+	zend_result ret = verify_bool_return_type_userland_calls(&retval);
 	zval_ptr_dtor(&retval);
 	return ret;
 }
