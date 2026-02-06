@@ -1471,8 +1471,8 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 			if (PG(xmlrpc_errors)) {
 				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "%s%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 			} else {
-				char *prepend_string = INI_STR("error_prepend_string");
-				char *append_string = INI_STR("error_append_string");
+				const char *prepend_string = INI_STR("error_prepend_string");
+				const char *append_string = INI_STR("error_append_string");
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
