@@ -263,7 +263,7 @@ PHPAPI zend_result php_session_register_serializer(const char *name,
 	        zend_result (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
 PHPAPI zend_result php_session_start(void);
-PHPAPI zend_result php_session_flush(bool write);
+PHPAPI bool php_session_flush(bool write);
 PHPAPI php_session_status php_get_session_status(void);
 
 PHPAPI const ps_module *_php_find_ps_module(const char *name);

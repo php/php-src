@@ -1720,14 +1720,14 @@ PHPAPI zend_result php_session_start(void)
 	return SUCCESS;
 }
 
-PHPAPI zend_result php_session_flush(bool write)
+PHPAPI bool php_session_flush(bool write)
 {
 	if (PS(session_status) == php_session_active) {
 		php_session_save_current_state(write);
 		PS(session_status) = php_session_none;
-		return SUCCESS;
+		return true;
 	}
-	return FAILURE;
+	return false;
 }
 
 PHPAPI php_session_status php_get_session_status(void)
@@ -2724,11 +2724,7 @@ PHP_FUNCTION(session_write_close)
 		RETURN_THROWS();
 	}
 
-	if (PS(session_status) != php_session_active) {
-		RETURN_FALSE;
-	}
-	php_session_flush(true);
-	RETURN_TRUE;
+	RETURN_BOOL(php_session_flush(true));
 }
 
 /* Abort session and end session. Session data will not be written */
