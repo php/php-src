@@ -40,7 +40,7 @@ typedef struct _zend_closure {
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
-static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
@@ -56,7 +56,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	zend_fcall_info_cache fcc = {
 		.closure = Z_OBJ_P(ZEND_THIS),
 	};
-	zend_closure_get_closure(Z_OBJ_P(ZEND_THIS), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
+	zend_closure_get_closure(Z_OBJ_P(ZEND_THIS), &fcc.calling_scope, &fcc.function_handler, &fcc.object);
 	fcc.called_scope = fcc.calling_scope;
 	zend_call_known_fcc(&fcc, return_value, num_args, args, named_args);
 
@@ -594,7 +594,7 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 }
 /* }}} */
 
-static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
+static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)obj;
 

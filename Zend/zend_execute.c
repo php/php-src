@@ -5158,7 +5158,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	uint32_t call_info;
 
 	if (EXPECTED(function->handlers->get_closure) &&
-	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object, 0) == SUCCESS)) {
+	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object) == SUCCESS)) {
 
 		object_or_called_scope = called_scope;
 		if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
