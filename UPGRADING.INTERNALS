@@ -97,6 +97,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Dropped session_options parameter from all methods in mysqlnd_auth.
     The same information is present in conn->options and should be used instead.
 
+- ext/session:
+  . php_session_flush() now returns a bool rather than a zend_result.
+
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.
   . _php_error_log() now accepts zend_string* values instead of char*.
