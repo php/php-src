@@ -1896,7 +1896,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 	if (!secure_null) {
 		ini_name = ZSTR_INIT_LITERAL("session.cookie_secure", false);
-		result = zend_alter_ini_entry_chars(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		result = zend_alter_ini_entry(ini_name, secure ? ZSTR_CHAR('1') : ZSTR_CHAR('0'), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, false);
 		if (result == FAILURE) {
 			RETVAL_FALSE;
@@ -1905,7 +1905,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 	if (!partitioned_null) {
 		ini_name = ZSTR_INIT_LITERAL("session.cookie_partitioned", false);
-		result = zend_alter_ini_entry_chars(ini_name, partitioned ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		result = zend_alter_ini_entry(ini_name, partitioned ? ZSTR_CHAR('1') : ZSTR_CHAR('0'), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, false);
 		if (result == FAILURE) {
 			RETVAL_FALSE;
@@ -1914,7 +1914,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 	if (!httponly_null) {
 		ini_name = ZSTR_INIT_LITERAL("session.cookie_httponly", false);
-		result = zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		result = zend_alter_ini_entry(ini_name, httponly ? ZSTR_CHAR('1') : ZSTR_CHAR('0'), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, false);
 		if (result == FAILURE) {
 			RETVAL_FALSE;
