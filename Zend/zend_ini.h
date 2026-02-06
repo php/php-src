@@ -88,8 +88,8 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 
 ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, bool orig);
 ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
+ZEND_API const char *zend_ini_string(const char *name, size_t name_length, bool orig);
+ZEND_API const char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
 ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
