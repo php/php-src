@@ -504,10 +504,10 @@ void php_openssl_set_cert_locations(zval *return_value)
 	add_assoc_string(return_value, "default_cert_dir_env", (char *) X509_get_default_cert_dir_env());
 	add_assoc_string(return_value, "default_private_dir", (char *) X509_get_default_private_dir());
 	add_assoc_string(return_value, "default_default_cert_area", (char *) X509_get_default_cert_area());
-	add_assoc_string(return_value, "ini_cafile",
-		zend_ini_string("openssl.cafile", sizeof("openssl.cafile")-1, 0));
-	add_assoc_string(return_value, "ini_capath",
-		zend_ini_string("openssl.capath", sizeof("openssl.capath")-1, 0));
+	add_assoc_str(return_value, "ini_cafile",
+		zend_string_copy(zend_ini_str(ZEND_STRL("openssl.cafile"), false)));
+	add_assoc_str(return_value, "ini_capath",
+		zend_string_copy(zend_ini_str(ZEND_STRL("openssl.capath"), false)));
 }
 
 X509 *php_openssl_x509_from_str(

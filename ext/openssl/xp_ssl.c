@@ -880,16 +880,16 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
-	char *cafile = NULL;
-	char *capath = NULL;
+	const char *cafile = NULL;
+	const char *capath = NULL;
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	GET_VER_OPT_STRING("cafile", cafile);
 	GET_VER_OPT_STRING("capath", capath);
 
 	if (cafile == NULL) {
-		cafile = zend_ini_string("openssl.cafile", sizeof("openssl.cafile")-1, 0);
-		cafile = strlen(cafile) ? cafile : NULL;
+		const zend_string *cafile_str = zend_ini_str(ZEND_STRL("openssl.cafile"), false);
+		cafile = ZSTR_LEN(cafile_str) ? ZSTR_VAL(cafile_str) : NULL;
 	} else if (!sslsock->is_client) {
 		/* Servers need to load and assign CA names from the cafile */
 		STACK_OF(X509_NAME) *cert_names = SSL_load_client_CA_file(cafile);
@@ -902,8 +902,8 @@ static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream
 	}
 
 	if (capath == NULL) {
-		capath = zend_ini_string("openssl.capath", sizeof("openssl.capath")-1, 0);
-		capath = strlen(capath) ? capath : NULL;
+		const zend_string *capath_str = zend_ini_str(ZEND_STRL("openssl.capath"), false);
+		capath = ZSTR_LEN(capath_str) ? ZSTR_VAL(capath_str) : NULL;
 	}
 
 	if (cafile || capath) {
