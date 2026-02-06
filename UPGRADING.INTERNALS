@@ -99,6 +99,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.
+  . Removed session_adapt_url().
 
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.

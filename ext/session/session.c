@@ -1756,17 +1756,6 @@ static bool php_session_reset(void)
 	return false;
 }
 
-
-/* This API is not used by any PHP modules including session currently.
-   session_adapt_url() may be used to set Session ID to target url without
-   starting "URL-Rewriter" output handler. */
-PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len)
-{
-	if (APPLY_TRANS_SID && (PS(session_status) == php_session_active)) {
-		*new_url = php_url_scanner_adapt_single_url(url, url_len, ZSTR_VAL(PS(session_name)), ZSTR_VAL(PS(id)), new_len, true);
-	}
-}
-
 /* ********************************
    * Userspace exported functions *
    ******************************** */
