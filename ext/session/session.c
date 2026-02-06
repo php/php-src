@@ -1996,9 +1996,8 @@ PHP_FUNCTION(session_name)
 PHP_FUNCTION(session_module_name)
 {
 	zend_string *name = NULL;
-	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2015,7 +2014,7 @@ PHP_FUNCTION(session_module_name)
 
 	if (name) {
 		if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_USER))) {
-			zend_argument_value_error(1, "cannot be \"user\"");
+			zend_argument_value_error(1, "must not be \"user\"");
 			RETURN_THROWS();
 		}
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
@@ -2029,7 +2028,7 @@ PHP_FUNCTION(session_module_name)
 		}
 		PS(mod_data) = NULL;
 
-		ini_name = ZSTR_INIT_LITERAL("session.save_handler", false);
+		zend_string *ini_name = ZSTR_INIT_LITERAL("session.save_handler", false);
 		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, false);
 	}
