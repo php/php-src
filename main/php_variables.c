@@ -854,6 +854,9 @@ static bool php_auto_globals_create_files(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_FILES]);
 
+	/* $_FILES is populated by rfc1867_post_handler() after this point. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_FILES]));
+
 	return false; /* don't rearm */
 }
 
