@@ -234,7 +234,7 @@ static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, 
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
@@ -835,7 +835,7 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
@@ -1048,7 +1048,7 @@ static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, 
 	inst->next_char = 0;
 	inst->lb_ptr = inst->lb_cnt = 0;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
