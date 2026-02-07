@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha1
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)

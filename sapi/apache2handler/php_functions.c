@@ -48,6 +48,7 @@
 
 #include "php_apache.h"
 #include "php_functions_arginfo.h"
+#include "ext/standard/php_standard.h"
 
 #ifdef ZTS
 int php_apache2_info_id;
@@ -208,6 +209,60 @@ PHP_FUNCTION(apache_response_headers)
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
+}
+/* }}} */
+
+/* {{{ The allows for direct select calls on Apache's connection socket */
+PHP_FUNCTION(apache_connection_stream) {
+    php_struct *ctx = SG(server_context);
+    request_rec *r;
+    apr_socket_t *apr_sock;
+    int fd;
+    php_stream *stream;
+
+
+    // Check for proper parsing of parameters (none expected)
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    // Ensure the server context is available
+    if (!ctx) {
+        php_error_docref(NULL, E_WARNING, "Server context is not available");
+        RETURN_FALSE;
+    }
+
+    r = ctx->r;
+
+    // Ensure the request record is available
+    if (!r) {
+        php_error_docref(NULL, E_WARNING, "Request record is not available");
+        RETURN_FALSE;
+    }
+
+    apr_sock = ap_get_conn_socket(r->connection);
+
+    // Ensure the connection socket is available
+    if (!apr_sock) {
+        php_error_docref(NULL, E_WARNING, "Failed to obtain connection socket");
+        RETURN_FALSE;
+    }
+
+    // Get the native descriptor
+    if (apr_os_sock_get(&fd, apr_sock) != APR_SUCCESS) {
+        php_error_docref(NULL, E_WARNING, "Failed to get native socket descriptor");
+        RETURN_FALSE;
+    }
+
+    // Use php_stream_sock_open_from_socket() to create a PHP stream
+    stream = php_stream_sock_open_from_socket(fd, NULL);
+
+    // Check if the stream was successfully created
+    if (!stream) {
+        php_error_docref(NULL, E_WARNING, "Failed to open stream from socket");
+        RETURN_FALSE;
+    }
+
+    // Convert the php_stream to a zval and return it
+    php_stream_to_zval(stream, return_value);
 }
 /* }}} */
 
