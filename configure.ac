@@ -16,7 +16,7 @@ m4_include([Zend/Zend.m4])
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.71])
 AC_INIT([PHP],[8.6.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
@@ -113,11 +113,14 @@ dnl ----------------------------------------------------------------------------
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
+
+dnl Check if C compiler accepts C11.
+AS_CASE([$ac_prog_cc_stdc], [c99|c89|no],
+  [AC_MSG_ERROR([C compiler would not accept C11 code.])])
+
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 
-dnl AC_PROG_CC_C99 is obsolete with autoconf >= 2.70 yet necessary for <= 2.69.
-m4_version_prereq([2.70],,[AC_PROG_CC_C99])
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -127,17 +130,6 @@ AS_VAR_IF([cross_compiling], [yes],
     AC_MSG_CHECKING([for native build C compiler])
     AC_MSG_RESULT([$BUILD_CC])],
   [BUILD_CC=$CC])
-
-dnl The macro AC_PROG_CC_C99 sets the shell variable ac_cv_prog_cc_c99 to 'no'
-dnl if the compiler does not support C99.i.e. does not support any of _Bool,
-dnl flexible arrays, inline, long long int, mixed code and declarations,
-dnl named initialization of structs, restrict, varargs macros, variable
-dnl declarations in for loops and variable length arrays.
-dnl
-dnl https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/C-Compiler.html
-if test "$ac_cv_prog_cc_c99" = no; then
-  AC_MSG_ERROR([C compiler would not accept C99 code])
-fi
 
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
@@ -370,7 +362,7 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
-AC_CHECK_HEADERS(m4_normalize([
+AC_CHECK_HEADERS([
   dirent.h
   sys/param.h
   sys/types.h
@@ -418,7 +410,7 @@ AC_CHECK_HEADERS(m4_normalize([
   nmmintrin.h
   wmmintrin.h
   immintrin.h
-]),,, [dnl
+],,, [dnl
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -441,8 +433,6 @@ PHP_BROKEN_GETCWD
 AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
 dnl Detect the headers required to use makedev, major, and minor.
-dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
-m4_version_prereq([2.70],,[ac_cv_header_sys_types_h_makedev=no])
 AC_HEADER_MAJOR
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -535,7 +525,7 @@ PHP_CHECK_VARIABLE_ATTRIBUTE([aligned])
 dnl Checks for library functions.
 dnl ----------------------------------------------------------------------------
 
-AC_CHECK_FUNCS(m4_normalize([
+AC_CHECK_FUNCS([
   alphasort
   asctime_r
   asprintf
@@ -596,7 +586,7 @@ AC_CHECK_FUNCS(m4_normalize([
   usleep
   utime
   vasprintf
-]))
+])
 
 PHP_ARG_ENABLE([system-glob],
   [whether to use the system glob function],

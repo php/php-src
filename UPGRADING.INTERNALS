@@ -91,6 +91,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - Unix build system changes:
   . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
     HAVE_STRUCT_STAT_ST_BLOCKS).
+  . Autoconf minimum required version upgraded to 2.71.
 
 ========================
 3. Module changes
