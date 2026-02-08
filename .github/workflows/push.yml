@@ -76,7 +76,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:
@@ -182,7 +182,7 @@ jobs:
       PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:

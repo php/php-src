@@ -138,7 +138,7 @@ jobs:
   LINUX_X64:
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:
@@ -277,7 +277,7 @@ jobs:
       PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:
@@ -406,7 +406,7 @@ jobs:
     if: inputs.branch == 'master'
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:
@@ -652,7 +652,7 @@ jobs:
   OPCACHE_VARIATION:
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8.4
         ports:
           - 3306:3306
         env:
