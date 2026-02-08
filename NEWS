@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
 
+- Sockets:
+  . Fixed bug GH-21161 (socket_set_option() crash with array 'addr'
+    entry as null). (David Carlier)
+
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
 
