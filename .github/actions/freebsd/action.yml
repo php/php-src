@@ -25,6 +25,7 @@ runs:
 
           kldload accf_http
           pkg install -y \
+            ccache \
             autoconf \
             bison \
             gmake \
@@ -50,8 +51,13 @@ runs:
             curl \
             $OPCACHE_TLS_TESTS_DEPS
 
+          export CCACHE_DIR=$GITHUB_WORKSPACE/.ccache
+          ccache --set-config=max_size=256M
+          ccache --set-config=compression=true
+          ccache -z
+
           ./buildconf -f
-          CC=clang CXX=clang++ \
+          CC="ccache clang" CXX="ccache clang++" \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
