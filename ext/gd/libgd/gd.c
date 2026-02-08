@@ -2361,7 +2361,6 @@ static int _gdValidateCopyRectBounds(
 	return 1;
 }
 
-
 void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h)
 {
 	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, w, h)) {
@@ -2555,6 +2554,10 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 		return;
 	}
 
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, srcW, srcH)) {
+		return;
+	}
+
 	int c;
 	int x, y;
 	int tox, toy;
@@ -2666,6 +2669,10 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH)
 {
 	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, dstW, dstH)) {
+		return;
+	}
+
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, srcW, srcH)) {
 		return;
 	}
 
