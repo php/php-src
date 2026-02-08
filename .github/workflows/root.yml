@@ -31,7 +31,7 @@ jobs:
             nightly-
       - name: Generate Matrix
         id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}"
   NIGHTLY:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}
