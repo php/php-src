@@ -611,7 +611,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	} else {
 		/* error already emitted, but let's emit another more relevant */
 		do_from_zval_err(ctx, "could not resolve address '%s' to get an AF_INET6 "
-				"address", Z_STRVAL_P(zaddr_str));
+				"address", ZSTR_VAL(addr_str));
 	}
 
 	zend_tmp_string_release(tmp_addr_str);
