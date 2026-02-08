@@ -18,6 +18,10 @@ $c = new C(1);
 $c->prop = 1;
 var_dump($c->prop);
 
+$c->prop = PHP_INT_MAX;
+var_dump($c->prop);
+
 ?>
---EXPECT--
+--EXPECTF--
 int(4)
+float(%s)

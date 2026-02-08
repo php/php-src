@@ -2944,7 +2944,7 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 //???				} else {
 //???					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
 //???				}
-				if (prop_info) {
+				if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 					/* special case for typed properties */
 					zend_jit_assign_op_to_typed_prop(zptr, prop_info, value, binary_op);
 				} else {
@@ -3140,6 +3140,9 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 			}
 		} else {
 			zend_property_info *prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
+			if (prop_info && !ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_increment_function(prop);
@@ -3210,6 +3213,9 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 			}
 		} else {
 			zend_property_info *prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
+			if (prop_info && !ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_decrement_function(prop);
@@ -3278,6 +3284,9 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 			ZVAL_NULL(result);
 		} else {
 			zend_property_info *prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+			if (prop_info && !ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
@@ -3339,6 +3348,9 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 			ZVAL_NULL(result);
 		} else {
 			zend_property_info *prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+			if (prop_info && !ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
