@@ -995,15 +995,12 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 
 PS_SERIALIZER_DECODE_FUNC(php_binary)
 {
-	const char *p;
 	const char *endptr = val + vallen;
-	zend_string *name;
 	php_unserialize_data_t var_hash;
-	zval *current, rv;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	for (p = val; p < endptr; ) {
+	for (const char *p = val; p < endptr; ) {
 		size_t namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
 		if (namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -1011,11 +1008,12 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 			return FAILURE;
 		}
 
-		name = zend_string_init(p + 1, namelen, false);
+		zend_string *name = zend_string_init(p + 1, namelen, false);
 		p += namelen + 1;
-		current = var_tmp_var(&var_hash);
+		zval *current = var_tmp_var(&var_hash);
 
 		if (php_var_unserialize(current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash)) {
+			zval rv;
 			ZVAL_PTR(&rv, current);
 			php_set_session_var(name, &rv, &var_hash);
 		} else {
@@ -1300,8 +1298,6 @@ static const php_session_cache_limiter_t php_session_cache_limiters[] = {
 
 static int php_session_cache_limiter(void)
 {
-	const php_session_cache_limiter_t *lim;
-
 	if (ZSTR_LEN(PS(cache_limiter)) == 0) {
 		return 0;
 	}
@@ -1313,7 +1309,7 @@ static int php_session_cache_limiter(void)
 		return -2;
 	}
 
-	for (lim = php_session_cache_limiters; lim->name; lim++) {
+	for (const php_session_cache_limiter_t *lim = php_session_cache_limiters; lim->name; lim++) {
 		if (!strcasecmp(lim->name, ZSTR_VAL(PS(cache_limiter)))) {
 			lim->func();
 			return 0;
@@ -1446,9 +1442,8 @@ PHPAPI const ps_module *_php_find_ps_module(const char *name)
 PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name)
 {
 	const ps_serializer *found_serializer = NULL;
-	const ps_serializer *current_serializer;
 
-	for (current_serializer = ps_serializers; current_serializer->name; current_serializer++) {
+	for (const ps_serializer *current_serializer = ps_serializers; current_serializer->name; current_serializer++) {
 		if (!strcasecmp(name, current_serializer->name)) {
 			found_serializer = current_serializer;
 			break;
@@ -1643,16 +1638,14 @@ PHPAPI zend_result php_session_reset_id(void)
 
 PHPAPI zend_result php_session_start(void)
 {
-	const char *value;
-
 	switch (PS(session_status)) {
 		case php_session_active:
 			php_session_session_already_started_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			return FAILURE;
 			break;
 
-		case php_session_disabled:
-			value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
+		case php_session_disabled: {
+			const char *value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
 			if (!PS(mod) && value) {
 				PS(mod) = _php_find_ps_module(value);
 				if (!PS(mod)) {
@@ -1670,6 +1663,7 @@ PHPAPI zend_result php_session_start(void)
 			}
 			PS(session_status) = php_session_none;
 			ZEND_FALLTHROUGH;
+		}
 
 		case php_session_none:
 		default:
@@ -1793,9 +1787,6 @@ PHP_FUNCTION(session_set_cookie_params)
 	}
 
 	if (options_ht) {
-		zend_string *key;
-		zval *value;
-
 		if (path) {
 			zend_argument_value_error(2, "must be null when argument #1 ($lifetime_or_options) is an array");
 			RETURN_THROWS();
@@ -1815,7 +1806,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			zend_argument_value_error(5, "must be null when argument #1 ($lifetime_or_options) is an array");
 			RETURN_THROWS();
 		}
-		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, zend_string *key, zval *value) {
 			if (key) {
 				ZVAL_DEREF(value);
 				if (zend_string_equals_literal_ci(key, "lifetime")) {
@@ -2461,7 +2452,6 @@ PHP_FUNCTION(session_create_id)
 PHP_FUNCTION(session_cache_limiter)
 {
 	zend_string *limiter = NULL;
-	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &limiter) == FAILURE) {
 		RETURN_THROWS();
@@ -2480,7 +2470,7 @@ PHP_FUNCTION(session_cache_limiter)
 	RETVAL_STRINGL(ZSTR_VAL(PS(cache_limiter)), ZSTR_LEN(PS(cache_limiter)));
 
 	if (limiter) {
-		ini_name = ZSTR_INIT_LITERAL("session.cache_limiter", false);
+		zend_string *ini_name = ZSTR_INIT_LITERAL("session.cache_limiter", false);
 		zend_alter_ini_entry(ini_name, limiter, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, false);
 	}
@@ -2566,8 +2556,6 @@ static zend_result php_session_start_set_ini(zend_string *varname, zend_string *
 PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
-	zval *value;
-	zend_string *str_idx;
 	bool read_and_close = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
@@ -2591,7 +2579,7 @@ PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), str_idx, value) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), zend_string *str_idx, zval *value) {
 			if (UNEXPECTED(!str_idx)) {
 				zend_argument_value_error(1, "must be of type array with keys as string");
 				RETURN_THROWS();
