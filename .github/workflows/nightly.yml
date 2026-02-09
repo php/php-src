@@ -145,6 +145,17 @@ jobs:
           echo "::group::Show installed package versions"
           dpkg -l
           echo "::endgroup::"
+      - name: Setup Caddy server
+        uses: ./.github/actions/setup-caddy
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          # This duplicates the "job.name" expression above because
+          # GitHub has no way to query the job name (github.job is the
+          # job id, not the job name)
+          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -153,14 +164,16 @@ jobs:
             ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
             ${{ (matrix.variation && fromJson(inputs.branch).jobs.LINUX_X64.config.variation_enable_zend_max_execution_timers) && '--enable-zend-max-execution-timers' || '' }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           asan: ${{ matrix.asan && 'true' || 'false' }}
-          skipSlow: ${{ (matrix.asan && !matrix.comprehensive) && 'true' || 'false' }}
+          skipSlow: ${{ (matrix.asan && !inputs.comprehensive) && 'true' || 'false' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux
       - name: Setup
+        if: ${{ !matrix.asan && !inputs.comprehensive }}
         uses: ./.github/actions/setup-x64
       - name: Test
         if: ${{ inputs.comprehensive || !matrix.asan }}
@@ -177,6 +190,7 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.asan && '--asan' || '' }}
+            ${{ (matrix.asan && !inputs.comprehensive) && '-x' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
             -d opcache.enable_cli=1
@@ -214,6 +228,9 @@ jobs:
     container:
       image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
       PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
     services:
       mysql:
@@ -239,6 +256,12 @@ jobs:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x32
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -260,22 +283,17 @@ jobs:
       - name: Test
         if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
-        with:
-          runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
           jitType: tracing
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
             -d opcache.enable_cli=1
       - name: Test OpCache
         if: ${{ inputs.comprehensive }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
             -d opcache.enable_cli=1
       - name: Test Function JIT
         if: ${{ inputs.comprehensive }}
@@ -283,7 +301,6 @@ jobs:
         with:
           jitType: function
           runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
@@ -304,6 +321,12 @@ jobs:
       - name: brew
         timeout-minutes: 10
         uses: ./.github/actions/brew
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
@@ -327,7 +350,7 @@ jobs:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test OpCache
-        if: ${{ inputs.comprehensive }}
+        if: ${{ inputs.comprehensive || (matrix.arch == 'ARM64' && matrix.zts) }}
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-

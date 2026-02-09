@@ -33,6 +33,7 @@ env:
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
