@@ -84,12 +84,6 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
-- ext/xml:
-  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
-    as it was unused.
-  . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
-    as it was unused and could return the wrong result.
-
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 
@@ -110,6 +104,12 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . _php_error_log() now accepts zend_string* values instead of char*.
   . _php_error_log_ex() has been removed.
   . php_mail()'s extra_cmd parameter is now a zend_string*.
+
+- ext/xml:
+  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
+    as it was unused.
+  . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
+    as it was unused and could return the wrong result.
 
 ========================
 4. OpCode changes
