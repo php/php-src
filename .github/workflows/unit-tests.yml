@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v6
-        
+
       - name: Install dependencies
         run: |
           set -x
@@ -53,23 +53,20 @@ jobs:
             ccache
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "unit-tests-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
-          
+          name: "${{ github.job }}"
+
       - name: ./configure (minimal build)
         uses: ./.github/actions/configure-unit-tests
-        
+
       - name: make libphp.a
         run: |
           set -x
           make -j$(/usr/bin/nproc) >/dev/null
-          
+
       - name: Run unit tests
         run: |
           set -x
           cd tests/unit
           make test
-

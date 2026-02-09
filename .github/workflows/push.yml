@@ -82,11 +82,9 @@ jobs:
             re2c \
             valgrind
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "${{ github.job }}"
       - name: ./configure
         run: |
           set -x

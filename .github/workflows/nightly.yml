@@ -148,14 +148,12 @@ jobs:
       - name: Setup Caddy server
         uses: ./.github/actions/setup-caddy
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
           # This duplicates the "job.name" expression above because
           # GitHub has no way to query the job name (github.job is the
           # job id, not the job name)
-          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -257,11 +255,9 @@ jobs:
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -322,11 +318,9 @@ jobs:
         timeout-minutes: 10
         uses: ./.github/actions/brew
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
@@ -869,11 +863,9 @@ jobs:
             bison \
             re2c
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "${{ github.job }}"
       - name: build PHP
         run: |
           cd php
