@@ -492,6 +492,16 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
+static inline void php_hash_hmac_round_with_copy(unsigned char *final, const php_hash_ops *ops, const void *base_context, void *context, const unsigned char *data, const zend_long data_size) {
+	if (EXPECTED(ops->hash_copy == php_hash_copy)) {
+		memcpy(context, base_context, ops->context_size);
+	} else {
+		ops->hash_copy(ops, base_context, context);
+	}
+	ops->hash_update(context, data, data_size);
+	ops->hash_final(final, context);
+}
+
 static void php_hash_do_hash_hmac(
 	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, bool raw_output, bool isfilename
 ) /* {{{ */ {
@@ -986,12 +996,12 @@ PHP_FUNCTION(hash_pbkdf2)
 {
 	zend_string *returnval, *algo;
 	char *salt, *pass = NULL;
-	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
+	unsigned char *computed_salt, *digest, *result, *K = NULL;
 	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
 	size_t pass_len, salt_len = 0;
 	bool raw_output = false;
 	const php_hash_ops *ops;
-	void *context;
+	void *context, *inner_context, *outer_context;
 	HashTable *args = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lbh", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output, &args) == FAILURE) {
@@ -1019,18 +1029,25 @@ PHP_FUNCTION(hash_pbkdf2)
 		RETURN_THROWS();
 	}
 
+	inner_context = php_hash_alloc_context(ops);
+	outer_context = php_hash_alloc_context(ops);
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context, args);
 
-	K1 = emalloc(ops->block_size);
-	K2 = emalloc(ops->block_size);
+	K = emalloc(ops->block_size);
 	digest = emalloc(ops->digest_size);
-	temp = emalloc(ops->digest_size);
 
 	/* Setup Keys that will be used for all hmac rounds */
-	php_hash_hmac_prep_key(K1, ops, context, (unsigned char *) pass, pass_len);
-	/* Convert K1 to opad -- 0x6A = 0x36 ^ 0x5C */
-	php_hash_string_xor_char(K2, K1, 0x6A, ops->block_size);
+	php_hash_hmac_prep_key(K, ops, context, (unsigned char *) pass, pass_len);
+
+	ops->hash_init(inner_context, NULL);
+	ops->hash_update(inner_context, K, ops->block_size);
+
+	/* Convert K from ipad to opad -- 0x6A = 0x36 ^ 0x5C */
+	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+
+	ops->hash_init(outer_context, NULL);
+	ops->hash_update(outer_context, K, ops->block_size);
 
 	/* Setup Main Loop to build a long enough result */
 	if (length == 0) {
@@ -1052,6 +1069,8 @@ PHP_FUNCTION(hash_pbkdf2)
 	memcpy(computed_salt, (unsigned char *) salt, salt_len);
 
 	for (i = 1; i <= loops; i++) {
+		unsigned char *result_block = result + ((i - 1) * ops->digest_size);
+
 		/* digest = hash_hmac(salt + pack('N', i), password) { */
 
 		/* pack("N", i) */
@@ -1060,12 +1079,11 @@ PHP_FUNCTION(hash_pbkdf2)
 		computed_salt[salt_len + 2] = (unsigned char) ((i & 0xFF00) >> 8);
 		computed_salt[salt_len + 3] = (unsigned char) (i & 0xFF);
 
-		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (zend_long) salt_len + 4);
-		php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+		php_hash_hmac_round_with_copy(digest, ops, inner_context, context, computed_salt, (zend_long) salt_len + 4);
+		php_hash_hmac_round_with_copy(digest, ops, outer_context, context, digest, ops->digest_size);
 		/* } */
 
-		/* temp = digest */
-		memcpy(temp, digest, ops->digest_size);
+		memcpy(result_block, digest, ops->digest_size);
 
 		/*
 		 * Note that the loop starting at 1 is intentional, since we've already done
@@ -1073,25 +1091,25 @@ PHP_FUNCTION(hash_pbkdf2)
 		 */
 		for (j = 1; j < iterations; j++) {
 			/* digest = hash_hmac(digest, password) { */
-			php_hash_hmac_round(digest, ops, context, K1, digest, ops->digest_size);
-			php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+			php_hash_hmac_round_with_copy(digest, ops, inner_context, context, digest, ops->digest_size);
+			php_hash_hmac_round_with_copy(digest, ops, outer_context, context, digest, ops->digest_size);
 			/* } */
-			/* temp ^= digest */
-			php_hash_string_xor(temp, temp, digest, ops->digest_size);
+			/* result block ^= digest */
+			php_hash_string_xor(result_block, result_block, digest, ops->digest_size);
 		}
-		/* result += temp */
-		memcpy(result + ((i - 1) * ops->digest_size), temp, ops->digest_size);
 	}
 	/* Zero potentially sensitive variables */
-	ZEND_SECURE_ZERO(K1, ops->block_size);
-	ZEND_SECURE_ZERO(K2, ops->block_size);
+	ZEND_SECURE_ZERO(K, ops->block_size);
 	ZEND_SECURE_ZERO(computed_salt, salt_len + 4);
-	efree(K1);
-	efree(K2);
+	ZEND_SECURE_ZERO(inner_context, ops->context_size);
+	ZEND_SECURE_ZERO(outer_context, ops->context_size);
+	ZEND_SECURE_ZERO(context, ops->context_size);
+	efree(K);
 	efree(computed_salt);
+	efree(inner_context);
+	efree(outer_context);
 	efree(context);
 	efree(digest);
-	efree(temp);
 
 	returnval = zend_string_alloc(length, 0);
 	if (raw_output) {
