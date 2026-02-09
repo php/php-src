@@ -60,7 +60,7 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 #define ADR_IMM         (1<<20)        // signed imm21
 #define ADRP_IMM        (1LL<<32)      // signed imm21 * 4096
 
-static bool aarch64_may_use_b(ir_code_buffer *code_buffer, const void *addr)
+static bool aarch64_may_use_b(const ir_code_buffer *code_buffer, const void *addr)
 {
 	if (code_buffer) {
 		if (addr >= code_buffer->start && (char*)addr < (char*)code_buffer->end) {
@@ -824,6 +824,34 @@ static void ir_match_fuse_addr(ir_ctx *ctx, ir_ref addr_ref, ir_type type)
 	}
 }
 
+static bool all_usages_are_fusable(ir_ctx *ctx, ir_ref ref)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+	if (insn->op >= IR_EQ && insn->op <= IR_UNORDERED) {
+		ir_use_list *use_list = &ctx->use_lists[ref];
+		ir_ref n = use_list->count;
+
+		if (n > 0) {
+			ir_ref *p = ctx->use_edges + use_list->refs;
+
+			do {
+				insn = &ctx->ir_base[*p];
+				if (insn->op != IR_IF
+				 && insn->op != IR_GUARD
+				 && insn->op != IR_GUARD_NOT) {
+					return 0;
+				}
+				p++;
+				n--;
+			} while (n);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
 static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 {
 	ir_insn *op2_insn;
@@ -1145,7 +1173,7 @@ binop_fp:
 				return IR_RETURN_FP;
 			}
 		case IR_IF:
-			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
+			if (!IR_IS_CONST_REF(insn->op2) && (ctx->use_lists[insn->op2].count == 1 || all_usages_are_fusable(ctx, insn->op2))) {
 				op2_insn = &ctx->ir_base[insn->op2];
 				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED) {
 					if (IR_IS_TYPE_INT(ctx->ir_base[op2_insn->op1].type)) {
@@ -1168,13 +1196,13 @@ binop_fp:
 			}
 		case IR_GUARD:
 		case IR_GUARD_NOT:
-			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
+			if (!IR_IS_CONST_REF(insn->op2) && (ctx->use_lists[insn->op2].count == 1 || all_usages_are_fusable(ctx, insn->op2))) {
 				op2_insn = &ctx->ir_base[insn->op2];
-				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED
+				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED) {
 					// TODO: register allocator may clobber operands of CMP before they are used in the GUARD_CMP
-				 && (insn->op2 == ref - 1 ||
-				     (insn->op2 == ctx->prev_ref[ref] - 1
-				   && ctx->ir_base[ctx->prev_ref[ref]].op == IR_SNAPSHOT))) {
+//???				 && (insn->op2 == ref - 1 ||
+//???				     (insn->op2 == ctx->prev_ref[ref] - 1
+//???				   && ctx->ir_base[ctx->prev_ref[ref]].op == IR_SNAPSHOT))) {
 					if (IR_IS_TYPE_INT(ctx->ir_base[op2_insn->op1].type)) {
 						ctx->rules[insn->op2] = IR_FUSED | IR_CMP_INT;
 						return IR_GUARD_CMP_INT;
@@ -3084,7 +3112,7 @@ static void ir_emit_cmp_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
-static ir_op ir_emit_cmp_fp_common(ir_ctx *ctx, ir_ref cmp_ref, ir_insn *cmp_insn)
+static ir_op ir_emit_cmp_fp_common(ir_ctx *ctx, ir_ref root, ir_ref cmp_ref, ir_insn *cmp_insn)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
@@ -3093,16 +3121,12 @@ static ir_op ir_emit_cmp_fp_common(ir_ctx *ctx, ir_ref cmp_ref, ir_insn *cmp_ins
 	ir_ref op1, op2;
 	ir_reg op1_reg, op2_reg;
 
-	if (op == IR_LT || op == IR_LE) {
-		/* swap operands to avoid P flag check */
-		op ^= 3;
-		op1 = cmp_insn->op2;
-		op2 = cmp_insn->op1;
-		op1_reg = ctx->regs[cmp_ref][2];
-		op2_reg = ctx->regs[cmp_ref][1];
+	op1 = cmp_insn->op1;
+	op2 = cmp_insn->op2;
+	if (UNEXPECTED(ctx->rules[cmp_ref] & IR_FUSED_REG)) {
+		op1_reg = ir_get_fused_reg(ctx, root, cmp_ref * sizeof(ir_ref) + 1);
+		op2_reg = ir_get_fused_reg(ctx, root, cmp_ref * sizeof(ir_ref) + 2);
 	} else {
-		op1 = cmp_insn->op1;
-		op2 = cmp_insn->op2;
 		op1_reg = ctx->regs[cmp_ref][1];
 		op2_reg = ctx->regs[cmp_ref][2];
 	}
@@ -3131,7 +3155,7 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
-	ir_op op = ir_emit_cmp_fp_common(ctx, def, insn);
+	ir_op op = ir_emit_cmp_fp_common(ctx, def, def, insn);
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 //???	ir_reg tmp_reg = ctx->regs[def][3]; // TODO: take into account vs flag
 
@@ -3348,8 +3372,15 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 	ir_type type = ctx->ir_base[cmp_insn->op1].type;
 	ir_ref op1 = cmp_insn->op1;
 	ir_ref op2 = cmp_insn->op2;
-	ir_reg op1_reg = ctx->regs[insn->op2][1];
-	ir_reg op2_reg = ctx->regs[insn->op2][2];
+	ir_reg op1_reg, op2_reg;
+
+	if (UNEXPECTED(ctx->rules[insn->op2] & IR_FUSED_REG)) {
+		op1_reg = ir_get_fused_reg(ctx, def, insn->op2 * sizeof(ir_ref) + 1);
+		op2_reg = ir_get_fused_reg(ctx, def, insn->op2 * sizeof(ir_ref) + 2);
+	} else {
+		op1_reg = ctx->regs[insn->op2][1];
+		op2_reg = ctx->regs[insn->op2][2];
+	}
 
 	if (op1_reg != IR_REG_NONE && IR_REG_SPILLED(op1_reg)) {
 		op1_reg = IR_REG_NUM(op1_reg);
@@ -3390,7 +3421,7 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 
 static void ir_emit_cmp_and_branch_fp(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block)
 {
-	ir_op op = ir_emit_cmp_fp_common(ctx, insn->op2, &ctx->ir_base[insn->op2]);
+	ir_op op = ir_emit_cmp_fp_common(ctx, def, insn->op2, &ctx->ir_base[insn->op2]);
 	ir_emit_jcc(ctx, b, def, insn, next_block, op, 0);
 }
 
@@ -3459,14 +3490,14 @@ static void ir_emit_cond(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			op3_reg = op2_reg;
 		}
 	}
-	if (op3 != op2 && IR_REG_SPILLED(op3_reg)) {
+	if (IR_REG_SPILLED(op3_reg)) {
 		op3_reg = IR_REG_NUM(op3_reg);
 		ir_emit_load(ctx, type, op3_reg, op3);
-		if (op1 == op2) {
+		if (op1 == op3) {
 			op1_reg = op3_reg;
 		}
 	}
-	if (op1 != op2 && op1 != op3 && IR_REG_SPILLED(op1_reg)) {
+	if (IR_REG_SPILLED(op1_reg)) {
 		op1_reg = IR_REG_NUM(op1_reg);
 		ir_emit_load(ctx, op1_type, op1_reg, op1);
 	}
@@ -5682,9 +5713,16 @@ static void ir_emit_guard_cmp_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *
 	ir_type type = ctx->ir_base[cmp_insn->op1].type;
 	ir_ref op1 = cmp_insn->op1;
 	ir_ref op2 = cmp_insn->op2;
-	ir_reg op1_reg = ctx->regs[insn->op2][1];
-	ir_reg op2_reg = ctx->regs[insn->op2][2];
 	void *addr;
+	ir_reg op1_reg, op2_reg;
+
+	if (UNEXPECTED(ctx->rules[insn->op2] & IR_FUSED_REG)) {
+		op1_reg = ir_get_fused_reg(ctx, def, insn->op2 * sizeof(ir_ref) + 1);
+		op2_reg = ir_get_fused_reg(ctx, def, insn->op2 * sizeof(ir_ref) + 2);
+	} else {
+		op1_reg = ctx->regs[insn->op2][1];
+		op2_reg = ctx->regs[insn->op2][2];
+	}
 
 	if (op1_reg != IR_REG_NONE && IR_REG_SPILLED(op1_reg)) {
 		op1_reg = IR_REG_NUM(op1_reg);
@@ -5738,7 +5776,7 @@ static void ir_emit_guard_cmp_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *
 
 static void ir_emit_guard_cmp_fp(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 {
-	ir_op op = ir_emit_cmp_fp_common(ctx, insn->op2, &ctx->ir_base[insn->op2]);
+	ir_op op = ir_emit_cmp_fp_common(ctx, def, insn->op2, &ctx->ir_base[insn->op2]);
 	void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op3]);
 
 	if (insn->op == IR_GUARD) {
@@ -7143,7 +7181,7 @@ static int ir_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, ui
 	return n;
 }
 
-bool ir_needs_thunk(ir_code_buffer *code_buffer, void *addr)
+bool ir_needs_thunk(const ir_code_buffer *code_buffer, void *addr)
 {
 	return !aarch64_may_use_b(code_buffer, addr);
 }

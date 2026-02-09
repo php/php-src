@@ -788,7 +788,7 @@ IR_ALWAYS_INLINE ir_ref ir_count_constant(ir_ref *_xlat, ir_ref ref)
 
 IR_ALWAYS_INLINE bool ir_is_good_bb_order(ir_ctx *ctx, uint32_t b, ir_block *bb, ir_ref start)
 {
-	ir_insn	*insn = &ctx->ir_base[start];
+	ir_insn *insn = &ctx->ir_base[start];
 	uint32_t n = insn->inputs_count;
 	ir_ref *p = insn->ops + 1;
 
@@ -924,25 +924,120 @@ next:
 	ctx->cfg_blocks = new_blocks;
 }
 
+#if IR_DEBUG
+static void ir_schedule_print_list(const ir_ctx *ctx, uint32_t b, const ir_ref *_next,
+                                   ir_ref start, ir_ref end, const char *label)
+{
+	ir_ref ref;
+
+	fprintf(stderr, "  %s [%d", label, start);
+	ref = _next[start];
+	while (ref != end) {
+		fprintf(stderr, ",%d", ref);
+		ref = _next[ref];
+	}
+	fprintf(stderr, ",%d]\n", ref);
+}
+#endif
+
+/* Simple Stable Topological Sort */
+static void ir_schedule_topsort(const ir_ctx *ctx, uint32_t b, const ir_block *bb,
+                                ir_ref *_xlat, ir_ref *_next, ir_ref *_prev,
+                                ir_ref ref, ir_ref end,
+                                ir_ref *insns_count, ir_ref *consts_count)
+{
+	ir_ref i = ref;
+	const ir_insn *insn;
+
+	if (bb->successors_count > 1) {
+		ir_ref input, j = bb->end;
+		ir_insn *end = &ctx->ir_base[j];
+
+		if (end->op == IR_IF) {
+			/* Move condition closer to IF */
+			input = end->op2;
+			if (input > 0
+			 && ctx->cfg_map[input] == b
+			 && !_xlat[input]
+			 && _prev[j] != input
+			 && (!(ir_op_flags[ctx->ir_base[input].op] & IR_OP_FLAG_CONTROL) || end->op1 == input)) {
+				if (input == i) {
+					i = _next[i];
+					insn = &ctx->ir_base[i];
+				}
+				/* remove "input" */
+				_prev[_next[input]] = _prev[input];
+				_next[_prev[input]] = _next[input];
+				/* insert before "j" */
+				_prev[input] = _prev[j];
+				_next[input] = j;
+				_next[_prev[j]] = input;
+				_prev[j] = input;
+			}
+		}
+	}
+
+	while (i != end) {
+		ir_ref n, j, input;
+		const ir_ref *p;
+
+restart:
+		IR_ASSERT(ctx->cfg_map[i] == b);
+		insn = &ctx->ir_base[i];
+		n = insn->inputs_count;
+		for (j = n, p = insn->ops + 1; j > 0; p++, j--) {
+			input = *p;
+			if (!_xlat[input]) {
+				/* input is not scheduled yet */
+				if (input > 0) {
+					if (ctx->cfg_map[input] == b) {
+						/* "input" should be before "i" to satisfy dependency */
+#ifdef IR_DEBUG
+						if (ctx->flags & IR_DEBUG_SCHEDULE) {
+							fprintf(stderr, "Wrong dependency %d:%d -> %d\n", b, input, i);
+						}
+#endif
+						/* remove "input" */
+						_prev[_next[input]] = _prev[input];
+						_next[_prev[input]] = _next[input];
+						/* insert before "i" */
+						_prev[input] = _prev[i];
+						_next[input] = i;
+						_next[_prev[i]] = input;
+						_prev[i] = input;
+						/* restart from "input" */
+						i = input;
+						goto restart;
+					}
+				} else if (input < IR_TRUE) {
+					*consts_count += ir_count_constant(_xlat, input);
+				}
+			}
+		}
+
+		_xlat[i] = *insns_count;
+		*insns_count += ir_insn_inputs_to_len(n);
+		IR_ASSERT(_next[i] != IR_UNUSED);
+		i = _next[i];
+	}
+}
+
 int ir_schedule(ir_ctx *ctx)
 {
-	ir_ctx new_ctx;
 	ir_ref i, j, k, n, *p, *q, ref, new_ref, prev_ref, insns_count, consts_count, use_edges_count;
 	ir_ref *_xlat;
 	ir_ref *edges;
 	ir_ref prev_b_end;
 	uint32_t b;
-	uint32_t *_blocks = ctx->cfg_map;
 	ir_ref *_next = ir_mem_malloc(ctx->insns_count * sizeof(ir_ref));
 	ir_ref *_prev = ir_mem_malloc(ctx->insns_count * sizeof(ir_ref));
 	ir_block *bb;
-	ir_insn *insn, *new_insn;
+	ir_insn *insn, *new_insn, *base;
 	ir_use_list *lists, *use_list, *new_list;
 	bool bad_bb_order = 0;
 
-
 	/* Create a double-linked list of nodes ordered by BB, respecting BB->start and BB->end */
-	IR_ASSERT(_blocks[1] == 1);
+	IR_ASSERT(ctx->cfg_map[1] == 1);
 
 	/* link BB boundaries */
 	_prev[1] = 0;
@@ -950,45 +1045,40 @@ int ir_schedule(ir_ctx *ctx)
 	_next[1] = prev_b_end;
 	_prev[prev_b_end] = 1;
 	for (b = 2, bb = ctx->cfg_blocks + 2; b <= ctx->cfg_blocks_count; b++, bb++) {
-		_next[prev_b_end] = bb->start;
-		_prev[bb->start] = prev_b_end;
-		_next[bb->start] = bb->end;
-		_prev[bb->end] = bb->start;
-		prev_b_end = bb->end;
-		if (!ir_is_good_bb_order(ctx, b, bb, bb->start)) {
+		ir_ref start = bb->start;
+		ir_ref end = bb->end;
+		_next[prev_b_end] = start;
+		_prev[start] = prev_b_end;
+		_next[start] = end;
+		_prev[end] = start;
+		prev_b_end = end;
+		if (!ir_is_good_bb_order(ctx, b, bb, start)) {
 			bad_bb_order = 1;
 		}
 	}
 	_next[prev_b_end] = 0;
 
 	/* insert intermediate BB nodes */
-	for (i = 2, j = 1; i < ctx->insns_count; i++) {
-		b = _blocks[i];
+	use_edges_count = ctx->use_lists[1].count;
+	for (i = 2, use_list = &ctx->use_lists[i]; i < ctx->insns_count; use_list++, i++) {
+		b = ctx->cfg_map[i];
 		if (!b) continue;
+		use_edges_count += use_list->count;
 		bb = &ctx->cfg_blocks[b];
 		if (i != bb->start && i != bb->end) {
 			/* insert before "end" */
-			ir_ref n = bb->end;
-			ir_ref p = _prev[n];
-			_prev[i] = p;
-			_next[i] = n;
-			_next[p] = i;
-			_prev[n] = i;
+			ir_ref next = bb->end;
+			ir_ref prev = _prev[next];
+			_prev[i] = prev;
+			_next[i] = next;
+			_next[prev] = i;
+			_prev[next] = i;
 		}
 	}
 
 	if (bad_bb_order) {
 		ir_fix_bb_order(ctx, _prev, _next);
 	}
-
-#ifdef IR_DEBUG
-	if (ctx->flags & IR_DEBUG_SCHEDULE) {
-		fprintf(stderr, "Before Schedule\n");
-		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d\n", i, _blocks[i]);
-		}
-	}
-#endif
 
 	_xlat = ir_mem_calloc((ctx->consts_count + ctx->insns_count), sizeof(ir_ref));
 	_xlat += ctx->consts_count;
@@ -999,9 +1089,16 @@ int ir_schedule(ir_ctx *ctx)
 	insns_count = 1;
 	consts_count = -(IR_TRUE - 1);
 
-	/* Topological sort according dependencies inside each basic block */
+	/* Schedule instructions inside each BB (now just topological sort according to dependencies) */
 	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
 		ir_ref start;
+
+#ifdef IR_DEBUG
+		if (ctx->flags & IR_DEBUG_SCHEDULE) {
+			fprintf(stderr, "BB%d\n", b);
+			ir_schedule_print_list(ctx, b, _next, bb->start, bb->end, "INITIAL");
+		}
+#endif
 
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		/* Schedule BB start */
@@ -1062,8 +1159,8 @@ int ir_schedule(ir_ctx *ctx)
 				for (p = &ctx->use_edges[use_list->refs]; count > 0; p++, count--) {
 					ir_ref use = *p;
 					ir_insn *use_insn = &ctx->ir_base[use];
-					if (!_xlat[use] && (_blocks[use] || use_insn->op == IR_PARAM)) {
-						IR_ASSERT(_blocks[use] == b || use_insn->op == IR_PARAM);
+					if (!_xlat[use] && ctx->cfg_map[use]) {
+						IR_ASSERT(ctx->cfg_map[use] == b);
 						if (use_insn->op == IR_PARAM
 						 || use_insn->op == IR_VAR
 						 || use_insn->op == IR_PI
@@ -1100,76 +1197,20 @@ int ir_schedule(ir_ctx *ctx)
 				insn = &ctx->ir_base[i];
 			}
 		}
-		if (bb->successors_count > 1) {
-			ir_ref input, j = bb->end;
-			ir_insn *end = &ctx->ir_base[j];
 
-			if (end->op == IR_IF) {
-				/* Move condition closer to IF */
-				input = end->op2;
-				if (input > 0
-				 && _blocks[input] == b
-				 && !_xlat[input]
-				 && _prev[j] != input
-				 && (!(ir_op_flags[ctx->ir_base[input].op] & IR_OP_FLAG_CONTROL) || end->op1 == input)) {
-					if (input == i) {
-						i = _next[i];
-						insn = &ctx->ir_base[i];
-					}
-					/* remove "input" */
-					_prev[_next[input]] = _prev[input];
-					_next[_prev[input]] = _next[input];
-					/* insert before "j" */
-					_prev[input] = _prev[j];
-					_next[input] = j;
-					_next[_prev[j]] = input;
-					_prev[j] = input;
-				}
-			}
+		if (i != bb->end) {
+			ir_schedule_topsort(ctx, b, bb, _xlat, _next, _prev, i, bb->end, &insns_count, &consts_count);
 		}
-		while (i != bb->end) {
-			ir_ref n, j, *p, input;
 
-restart:
-			IR_ASSERT(_blocks[i] == b);
-			n = insn->inputs_count;
-			for (j = n, p = insn->ops + 1; j > 0; p++, j--) {
-				input = *p;
-				if (!_xlat[input]) {
-					/* input is not scheduled yet */
-					if (input > 0) {
-						if (_blocks[input] == b) {
-							/* "input" should be before "i" to satisfy dependency */
 #ifdef IR_DEBUG
-							if (ctx->flags & IR_DEBUG_SCHEDULE) {
-								fprintf(stderr, "Wrong dependency %d:%d -> %d\n", b, input, i);
-							}
-#endif
-							/* remove "input" */
-							_prev[_next[input]] = _prev[input];
-							_next[_prev[input]] = _next[input];
-							/* insert before "i" */
-							_prev[input] = _prev[i];
-							_next[input] = i;
-							_next[_prev[i]] = input;
-							_prev[i] = input;
-							/* restart from "input" */
-							i = input;
-							insn = &ctx->ir_base[i];
-							goto restart;
-						}
-					} else if (input < IR_TRUE) {
-						consts_count += ir_count_constant(_xlat, input);
-					}
-				}
-			}
-			_xlat[i] = insns_count;
-			insns_count += ir_insn_inputs_to_len(n);
-			IR_ASSERT(_next[i] != IR_UNUSED);
-			i = _next[i];
-			insn = &ctx->ir_base[i];
+		if (ctx->flags & IR_DEBUG_SCHEDULE) {
+			ir_schedule_print_list(ctx, b, _next, start, bb->end, "  FINAL");
 		}
+#endif
+
 		/* Schedule BB end */
+		i = bb->end;
+		insn = &ctx->ir_base[i];
 		_xlat[i] = bb->end = insns_count;
 		insns_count++;
 		if (IR_INPUT_EDGES_COUNT(ir_op_flags[insn->op]) == 2) {
@@ -1178,15 +1219,6 @@ restart:
 			}
 		}
 	}
-
-#ifdef IR_DEBUG
-	if (ctx->flags & IR_DEBUG_SCHEDULE) {
-		fprintf(stderr, "After Schedule\n");
-		for (i = 1; i != 0; i = _next[i]) {
-			fprintf(stderr, "%d -> %d (%d)\n", i, _blocks[i], _xlat[i]);
-		}
-	}
-#endif
 
 #if 1
 	/* Check if scheduling didn't make any modifications */
@@ -1215,113 +1247,55 @@ restart:
 
 	ir_mem_free(_prev);
 
-	ir_init(&new_ctx, ctx->flags, consts_count, insns_count);
-	new_ctx.insns_count = insns_count;
-	new_ctx.flags2 = ctx->flags2;
-	new_ctx.ret_type = ctx->ret_type;
-	new_ctx.value_params = ctx->value_params;
-	new_ctx.mflags = ctx->mflags;
-	new_ctx.spill_base = ctx->spill_base;
-	new_ctx.fixed_stack_red_zone = ctx->fixed_stack_red_zone;
-	new_ctx.fixed_stack_frame_size = ctx->fixed_stack_frame_size;
-	new_ctx.fixed_call_stack_size = ctx->fixed_call_stack_size;
-	new_ctx.fixed_regset = ctx->fixed_regset;
-	new_ctx.fixed_save_regset = ctx->fixed_save_regset;
-	new_ctx.entries_count = ctx->entries_count;
-#if defined(IR_TARGET_AARCH64)
-	new_ctx.deoptimization_exits = ctx->deoptimization_exits;
-	new_ctx.get_exit_addr = ctx->get_exit_addr;
-	new_ctx.get_veneer = ctx->get_veneer;
-	new_ctx.set_veneer = ctx->set_veneer;
-#endif
-	new_ctx.loader = ctx->loader;
+	uint32_t *map = ir_mem_calloc(insns_count, sizeof(uint32_t));
+	_prev = ir_mem_malloc(insns_count * sizeof(ir_ref));
+	lists = ir_mem_malloc(insns_count * sizeof(ir_use_list));
+	ir_ref *use_edges = edges = ir_mem_malloc(use_edges_count * sizeof(ir_ref));
+	base = ir_mem_malloc((consts_count + insns_count) * sizeof(ir_insn));
+	base += consts_count;
 
 	/* Copy constants */
-	if (consts_count == ctx->consts_count) {
-		new_ctx.consts_count = consts_count;
-		ref = 1 - consts_count;
-		insn = &ctx->ir_base[ref];
-		new_insn = &new_ctx.ir_base[ref];
-
-		memcpy(new_insn, insn, sizeof(ir_insn) * (IR_TRUE - ref));
-		if (ctx->strtab.data) {
-			while (ref != IR_TRUE) {
-				if (new_insn->op == IR_FUNC_ADDR) {
-					if (new_insn->proto) {
-						size_t len;
-						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
-						new_insn->proto = ir_strl(&new_ctx, proto, len);
-					}
-				} else if (new_insn->op == IR_FUNC) {
-					size_t len;
-					const char *name = ir_get_strl(ctx, new_insn->val.name, &len);
-					new_insn->val.u64 = ir_strl(&new_ctx, name, len);
-					if (new_insn->proto) {
-						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
-						new_insn->proto = ir_strl(&new_ctx, proto, len);
-					}
-				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR || new_insn->op == IR_LABEL) {
-					size_t len;
-					const char *str = ir_get_strl(ctx, new_insn->val.name, &len);
-					new_insn->val.u64 = ir_strl(&new_ctx, str, len);
-				}
-				new_insn++;
-				ref++;
-			}
+	if (ctx->consts_count == consts_count) {
+		memcpy(base - consts_count + 1, ctx->ir_base - consts_count + 1, sizeof(ir_insn) * consts_count);
+		for (j = -consts_count + 1; j < IR_TRUE; j++) {
+			_xlat[j] = j;
 		}
 	} else {
-		new_ref = -new_ctx.consts_count;
-		new_insn = &new_ctx.ir_base[new_ref];
-		for (ref = IR_TRUE - 1, insn = &ctx->ir_base[ref]; ref > -ctx->consts_count; insn--, ref--) {
-			if (!_xlat[ref]) {
-				continue;
+		ir_insn *src = ctx->ir_base - ctx->consts_count + 1;
+		ir_insn *dst = base - consts_count + 1;
+
+		i = -ctx->consts_count + 1;
+		j = -consts_count + 1;
+		while (i < IR_TRUE) {
+			if (_xlat[i]) {
+				*dst = *src;
+				dst->prev_const = 0;
+				_xlat[i] = j;
+				dst++;
+				j++;
 			}
-			new_insn->optx = insn->optx;
-			new_insn->prev_const = 0;
-			if (insn->op == IR_FUNC_ADDR) {
-				new_insn->val.u64 = insn->val.u64;
-				if (insn->proto) {
-					size_t len;
-					const char *proto = ir_get_strl(ctx, insn->proto, &len);
-					new_insn->proto = ir_strl(&new_ctx, proto, len);
-				} else {
-					new_insn->proto = 0;
-				}
-			} else if (insn->op == IR_FUNC) {
-				size_t len;
-				const char *name = ir_get_strl(ctx, insn->val.name, &len);
-				new_insn->val.u64 = ir_strl(&new_ctx, name, len);
-				if (insn->proto) {
-					const char *proto = ir_get_strl(ctx, insn->proto, &len);
-					new_insn->proto = ir_strl(&new_ctx, proto, len);
-				} else {
-					new_insn->proto = 0;
-				}
-			} else if (insn->op == IR_SYM || insn->op == IR_STR || insn->op == IR_LABEL) {
-				size_t len;
-				const char *str = ir_get_strl(ctx, insn->val.name, &len);
-				new_insn->val.u64 = ir_strl(&new_ctx, str, len);
-			} else {
-				new_insn->val.u64 = insn->val.u64;
-			}
-			_xlat[ref] = new_ref;
-			new_ref--;
-			new_insn--;
+			src++;
+			i++;
 		}
-		new_ctx.consts_count = -new_ref;
+		IR_ASSERT(j == IR_TRUE);
+		base[IR_TRUE].optx = IR_OPT(IR_C_BOOL, IR_BOOL);
+		base[IR_TRUE].val.u64 = 1;
+		base[IR_FALSE].optx = IR_OPT(IR_C_BOOL, IR_BOOL);
+		base[IR_FALSE].val.u64 = 0;
+		base[IR_NULL].optx = IR_OPT(IR_C_ADDR, IR_ADDR);
+		base[IR_NULL].val.u64 = 0;
+		MAKE_NOP(&base[IR_UNUSED]);
 	}
 
-	new_ctx.cfg_map = ir_mem_calloc(ctx->insns_count, sizeof(uint32_t));
-	new_ctx.prev_ref = _prev = ir_mem_malloc(insns_count * sizeof(ir_ref));
-	new_ctx.use_lists = lists = ir_mem_malloc(insns_count * sizeof(ir_use_list));
-	new_ctx.use_edges = edges = ir_mem_malloc(ctx->use_edges_count * sizeof(ir_ref));
-
 	/* Copy instructions, use lists and use edges */
+#ifdef IR_DEBUG
+	ir_ref orig_use_edges_count = use_edges_count;
+#endif
 	prev_ref = 0;
 	use_edges_count = 0;
 	for (i = 1; i != 0; i = _next[i]) {
 		new_ref = _xlat[i];
-		new_ctx.cfg_map[new_ref] = _blocks[i];
+		map[new_ref] = ctx->cfg_map[i];
 		_prev[new_ref] = prev_ref;
 		prev_ref = new_ref;
 
@@ -1330,7 +1304,7 @@ restart:
 		k = 0;
 		if (n == 1) {
 			ref = ctx->use_edges[use_list->refs];
-			if (_xlat[ref]) {
+			if (EXPECTED(_xlat[ref])) {
 				*edges = _xlat[ref];
 				edges++;
 				k = 1;
@@ -1339,7 +1313,7 @@ restart:
 			p = &ctx->use_edges[use_list->refs];
 			while (n--) {
 				ref = *p;
-				if (_xlat[ref]) {
+				if (EXPECTED(_xlat[ref])) {
 					*edges = _xlat[ref];
 					edges++;
 					k++;
@@ -1353,7 +1327,7 @@ restart:
 		new_list->count = k;
 
 		insn = &ctx->ir_base[i];
-		new_insn = &new_ctx.ir_base[new_ref];
+		new_insn = &base[new_ref];
 
 		new_insn->optx = insn->optx;
 		n = new_insn->inputs_count;
@@ -1365,11 +1339,7 @@ restart:
 				break;
 			case 1:
 				new_insn->op1 = _xlat[insn->op1];
-				if (new_insn->op == IR_PARAM || new_insn->op == IR_VAR || new_insn->op == IR_PROTO) {
-					size_t len;
-					const char *str = ir_get_strl(ctx, insn->op2, &len);
-					new_insn->op2 = ir_strl(&new_ctx, str, len);
-				} else if (new_insn->op == IR_BEGIN && insn->op2) {
+				if (new_insn->op == IR_BEGIN && insn->op2) {
 					new_insn->op2 = _xlat[insn->op2];
 				} else {
 					new_insn->op2 = insn->op2;
@@ -1428,12 +1398,12 @@ restart:
 	}
 
 	/* Update list of terminators (IR_OPND_CONTROL_REF) */
-	insn = &new_ctx.ir_base[1];
+	insn = &base[1];
 	ref = insn->op1;
 	if (ref) {
 		insn->op1 = ref = _xlat[ref];
 		while (1) {
-			insn = &new_ctx.ir_base[ref];
+			insn = &base[ref];
 			ref = insn->op3;
 			if (!ref) {
 				break;
@@ -1442,36 +1412,33 @@ restart:
 		}
 	}
 
-	IR_ASSERT(ctx->use_edges_count >= use_edges_count);
-	new_ctx.use_edges_count = use_edges_count;
-	new_ctx.use_edges = ir_mem_realloc(new_ctx.use_edges, use_edges_count * sizeof(ir_ref));
-
 	if (ctx->binding) {
 		ir_xlat_binding(ctx, _xlat);
-		new_ctx.binding = ctx->binding;
-		ctx->binding = NULL;
 	}
 
 	_xlat -= ctx->consts_count;
 	ir_mem_free(_xlat);
-
-	new_ctx.cfg_blocks_count = ctx->cfg_blocks_count;
-	new_ctx.cfg_edges_count = ctx->cfg_edges_count;
-	new_ctx.cfg_blocks = ctx->cfg_blocks;
-	new_ctx.cfg_edges = ctx->cfg_edges;
-	ctx->cfg_blocks = NULL;
-	ctx->cfg_edges = NULL;
-	ctx->value_params = NULL;
-	ir_code_buffer *saved_code_buffer = ctx->code_buffer;
-
-	ir_free(ctx);
-	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
-	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
-	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
-	ctx->code_buffer = saved_code_buffer;
-	ctx->flags2 |= IR_LINEAR;
-
 	ir_mem_free(_next);
+
+	/* Switch to new IR buffer */
+	ir_mem_free(ctx->ir_base - ctx->consts_limit);
+	ctx->ir_base = base;
+	ctx->insns_count = ctx->insns_limit = insns_count;
+	ctx->consts_count = ctx->consts_limit = consts_count;
+
+	ir_mem_free(ctx->use_lists);
+	ir_mem_free(ctx->use_edges);
+	IR_ASSERT(orig_use_edges_count >= use_edges_count);
+	ctx->use_lists = lists;
+	ctx->use_edges = use_edges;
+	ctx->use_edges_count = use_edges_count;
+
+	ir_mem_free(ctx->cfg_map);
+	ctx->cfg_map = map;
+
+	ctx->prev_ref = _prev;
+
+	ctx->flags2 |= IR_LINEAR;
 
 	return 1;
 }
