@@ -2978,14 +2978,12 @@ static PHP_MINFO_FUNCTION(session)
 
 static bool early_find_sid_in(zval *dest, int where)
 {
-	zval *potential_session_id;
-
 	if (Z_ISUNDEF(PG(http_globals)[where])) {
 		return false;
 	}
 
-	if ((potential_session_id = zend_hash_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name)))
-			&& Z_TYPE_P(potential_session_id) == IS_STRING) {
+	zval *potential_session_id = zend_hash_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name));
+	if (potential_session_id && Z_TYPE_P(potential_session_id) == IS_STRING) {
 		zval_ptr_dtor(dest);
 		ZVAL_COPY_DEREF(dest, potential_session_id);
 		return true;
@@ -3013,15 +3011,15 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 
 static bool php_check_cancel_upload(const php_session_rfc1867_progress *progress)
 {
-	zval *progress_ary, *cancel_upload;
-
-	if ((progress_ary = zend_symtable_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s)) == NULL) {
+	const zval *progress_ary = zend_symtable_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
+	if (progress_ary == NULL) {
 		return false;
 	}
 	if (Z_TYPE_P(progress_ary) != IS_ARRAY) {
 		return false;
 	}
-	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), ZEND_STRL("cancel_upload"))) == NULL) {
+	const zval *cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), ZEND_STRL("cancel_upload"));
+	if (cancel_upload == NULL) {
 		return false;
 	}
 	return Z_TYPE_P(cancel_upload) == IS_TRUE;
