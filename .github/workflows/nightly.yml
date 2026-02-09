@@ -171,7 +171,7 @@ jobs:
       - name: make install
         uses: ./.github/actions/install-linux
       - name: Setup
-        if: ${{ !matrix.asan && !inputs.comprehensive }}
+        if: ${{ !matrix.asan || inputs.comprehensive }}
         uses: ./.github/actions/setup-x64
       - name: Test
         if: ${{ inputs.comprehensive || !matrix.asan }}
