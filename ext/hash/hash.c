@@ -19,7 +19,6 @@
 #include <config.h>
 #endif
 
-#include <math.h>
 #include "php_hash.h"
 #include "php_hash_sha.h"
 #include "ext/standard/info.h"
@@ -582,10 +581,10 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (zend_long) ceil((float) length / 2.0);
+		digest_length = (length / 2) + (length % 2);
 	}
 
-	loops = (zend_long) ceil((float) digest_length / (float) digest_size);
+	loops = (digest_length / digest_size) + ((digest_length % digest_size) ? 1 : 0);
 
 	result = safe_emalloc(loops, digest_size, 0);
 
@@ -647,7 +646,7 @@ static zend_string *php_hash_pbkdf2_sha256_commoncrypto(const char *pass, size_t
 		length = raw_output ? 32 : 64;
 	}
 
-	derived_len = raw_output ? length : (zend_long) ceil((float) length / 2.0);
+	derived_len = raw_output ? length : (length / 2) + (length % 2);
 	if (derived_len <= 0) {
 		return NULL;
 	}
@@ -1244,10 +1243,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (zend_long) ceil((float) length / 2.0);
+		digest_length = (length / 2) + (length % 2);
 	}
 
-	loops = (zend_long) ceil((float) digest_length / (float) ops->digest_size);
+	loops = (digest_length / ops->digest_size) + ((digest_length % ops->digest_size) ? 1 : 0);
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
