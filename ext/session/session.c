@@ -305,23 +305,17 @@ static zend_result php_session_decode(const zend_string *data)
 
 static const char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
-static void bin_to_readable(unsigned char *in, size_t inlen, char *out, size_t outlen, char nbits)
+static void bin_to_readable(const unsigned char *in, size_t inlen, char *out, size_t outlen, char nbits)
 {
-	unsigned char *p, *q;
-	unsigned short w;
-	int mask;
-	int have;
-
-	p = (unsigned char *)in;
-	q = (unsigned char *)in + inlen;
-
-	w = 0;
-	have = 0;
-	mask = (1 << nbits) - 1;
+	const unsigned char *p = in;
+	const unsigned char *end_p = in + inlen;
+	unsigned short w = 0;
+	int have = 0;
+	const int mask = (1 << nbits) - 1;
 
 	while (outlen--) {
 		if (have < nbits) {
-			if (p < q) {
+			if (p < end_p) {
 				w |= *p++ << have;
 				have += 8;
 			} else {
