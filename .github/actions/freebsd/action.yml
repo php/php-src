@@ -14,7 +14,7 @@ runs:
       with:
         release: '13.5'
         usesh: true
-        copyback: false
+        copyback: true
         # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
         # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
@@ -24,6 +24,7 @@ runs:
 
           kldload accf_http
           pkg install -y \
+            ccache \
             autoconf \
             bison \
             gmake \
@@ -49,8 +50,13 @@ runs:
             curl \
             $OPCACHE_TLS_TESTS_DEPS
 
+          export CCACHE_DIR=$GITHUB_WORKSPACE/.ccache
+          ccache --set-config=max_size=256M
+          ccache --set-config=compression=true
+          ccache -z
+
           ./buildconf -f
-          CC=clang CXX=clang++ \
+          CC="ccache clang" CXX="ccache clang++" \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \

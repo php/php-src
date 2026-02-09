@@ -407,5 +407,13 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v6
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}-${{github.sha}}"
+          restore-keys: |
+            ${{github.job}}-${{hashFiles('main/php_version.h')}}-
+            ${{github.job}}-
       - name: FreeBSD
         uses: ./.github/actions/freebsd
