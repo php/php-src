@@ -77,8 +77,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
   . build/gen_stub.php may now generate a _decl.h file in addition to
     the _arginfo.h file, if the stub declares enums and is annotated with
-    @generate-c-enums. For each enum the file will contain a C enum. Enum values
-    can be compared to the result of zend_enum_fetch_case_id(zend_object*).
+    @generate-c-enums. For each enum the file will contain a C enum. Enum
+    values can be compared to the result of
+    zend_enum_fetch_case_id(zend_object*).
 
 ========================
 3. Module changes
@@ -89,7 +90,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
 - ext/mysqlnd:
   . Dropped session_options parameter from all methods in mysqlnd_auth.
-    The same information is present in conn->options and should be used instead.
+    The same information is present in conn->options and should be used
+    instead.
 
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.

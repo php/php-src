@@ -43,8 +43,14 @@ PHP 8.6 UPGRADE NOTES
   . finfo_file() now works with remote streams.
 
 - Intl:
-  . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
-    IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
+    IntlNumberRangeFormatter::COLLAPSE_NONE,
+    IntlNumberRangeFormatter::COLLAPSE_UNIT,
+    IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
 
@@ -106,7 +112,8 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Standard:
-  . `clamp()` returns the given value if in range, else return the nearest bound.
+  . `clamp()` returns the given value if in range, else return the nearest
+    bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
 
 ========================================
@@ -189,8 +196,8 @@ PHP 8.6 UPGRADE NOTES
 
 - Core:
   . `printf()` using only `%s` and `%d` will be compiled into the equivalent
-    string interpolation, avoiding the overhead of a function call and repeatedly
-    parsing the format string.
+    string interpolation, avoiding the overhead of a function call and
+    repeatedly parsing the format string.
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
   . array_map() using a first-class callable or partial function application
