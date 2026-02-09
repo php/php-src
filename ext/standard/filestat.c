@@ -571,10 +571,6 @@ PHP_FUNCTION(chmod)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_validate_file_permissions(mode, 2)) {
-		RETURN_THROWS();
-	}
-
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
 		if(wrapper && wrapper->wops->stream_metadata) {
