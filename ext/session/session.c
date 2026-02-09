@@ -1682,7 +1682,7 @@ PHPAPI zend_result php_session_start(void)
 	 * Cookies are preferred, because initially cookie and get
 	 * variables will be available.
 	 * URL/POST session ID may be used when use_only_cookies=Off.
-	 * session.use_strice_mode=On prevents session adoption.
+	 * session.use_strict_mode=On prevents session adoption.
 	 * Session based file upload progress uses non-cookie ID.
 	 */
 
