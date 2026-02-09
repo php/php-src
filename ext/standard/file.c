@@ -1087,8 +1087,7 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode < 0 || (mode & ~07777)) {
-		zend_argument_value_error(2, "must be between 0 and 0o7777");
+	if (!zend_validate_file_permissions(mode, 2)) {
 		RETURN_THROWS();
 	}
 

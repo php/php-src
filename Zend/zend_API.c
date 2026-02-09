@@ -5301,3 +5301,15 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 #endif
 	return get_default_via_ast(default_value_zval, ZSTR_VAL(default_value));
 }
+
+ZEND_API bool zend_validate_file_permissions(zend_long mode, uint32_t arg_num
+) {
+    if (mode < 0 || (mode & ~07777)) {
+        zend_argument_value_error(
+            arg_num,
+            "must be between 0 and 0o7777"
+        );
+        return false;
+    }
+    return true;
+}
