@@ -15,8 +15,6 @@ runs:
         release: '13.5'
         usesh: true
         copyback: false
-        # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
-        # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
           cd $GITHUB_WORKSPACE
 
@@ -45,7 +43,7 @@ runs:
             pkgconf \
             webp \
             libavif \
-            `#sqlite3` \
+            sqlite3 \
             curl \
             $OPCACHE_TLS_TESTS_DEPS
 
@@ -56,9 +54,7 @@ runs:
             --enable-debug \
             --enable-option-checking=fatal \
             --enable-fpm \
-            `#--with-pdo-sqlite` \
-            --without-sqlite3 \
-            --without-pdo-sqlite \
+            --with-pdo-sqlite \
             --without-pear \
             --with-bz2 \
             --with-avif \
