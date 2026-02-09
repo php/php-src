@@ -1186,12 +1186,12 @@ typedef struct {
 #define ADD_HEADER(a) sapi_add_header(a, strlen(a), 1);
 #define MAX_STR 512
 
-static const char *month_names[] = {
+static const char *const month_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static const char *week_days[] = {
+static const char *const week_days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 };
 
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(session_decode)
 	RETURN_BOOL(php_session_decode(str) == SUCCESS);
 }
 
-static zend_result php_session_start_set_ini(zend_string *varname, zend_string *new_value) {
+static zend_result php_session_start_set_ini(const zend_string *varname, zend_string *new_value) {
 	zend_result ret;
 	smart_str buf ={0};
 	smart_str_appends(&buf, "session");
