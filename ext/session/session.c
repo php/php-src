@@ -507,24 +507,24 @@ static void php_session_save_current_state(bool write)
 		IF_SESSION_VARS() {
 			zval *handler_function = &PS(mod_user_names).ps_write;
 			if (PS(mod_data) || PS(mod_user_implemented)) {
-				zend_string *val;
-
-				val = php_session_encode();
-				if (val) {
-					if (PS(lazy_write) && PS(session_vars)
-						&& PS(mod)->s_update_timestamp
-						&& PS(mod)->s_update_timestamp != php_session_update_timestamp
-						&& zend_string_equals(val, PS(session_vars))
-					) {
-						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
-						handler_function = &PS(mod_user_names).ps_update_timestamp;
-					} else {
-						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
-					}
-					zend_string_release_ex(val, false);
-				} else {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
+				zend_string *val = php_session_encode();
+				/* Not being able to encode the session data means there is some kind of issue that prevents a write
+				 * (e.g. a key containing the '|' character with the default serialization) */
+				if (UNEXPECTED(val == NULL)) {
+					return;
 				}
+
+				if (PS(lazy_write) && PS(session_vars)
+					&& PS(mod)->s_update_timestamp
+					&& PS(mod)->s_update_timestamp != php_session_update_timestamp
+					&& zend_string_equals(val, PS(session_vars))
+				) {
+					ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
+					handler_function = &PS(mod_user_names).ps_update_timestamp;
+				} else {
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
+				}
+				zend_string_release_ex(val, false);
 			}
 
 			if ((ret == FAILURE) && !EG(exception)) {
@@ -929,7 +929,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize)
 		php_var_serialize(&buf, Z_REFVAL(PS(http_session_vars)), &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	}
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 
 PS_SERIALIZER_DECODE_FUNC(php_serialize)
@@ -980,11 +980,9 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			smart_str_append(&buf, key);
 			php_var_serialize(&buf, struc, &var_hash);
 	);
-
-	smart_str_0(&buf);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 
 PS_SERIALIZER_DECODE_FUNC(php_binary)
@@ -1047,15 +1045,15 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 		smart_str_appendc(&buf, PS_DELIMITER);
 		php_var_serialize(&buf, struc, &var_hash);
 	);
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (fail) {
 		return NULL;
 	}
 
-	smart_str_0(&buf);
+	zend_string *encoded = smart_str_extract(&buf);
 
-	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-	return buf.s;
+	return encoded;
 }
 
 PS_SERIALIZER_DECODE_FUNC(php)
@@ -2280,7 +2278,6 @@ PHP_FUNCTION(session_id)
 PHP_FUNCTION(session_regenerate_id)
 {
 	bool del_ses = false;
-	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
 		RETURN_THROWS();
@@ -2307,14 +2304,17 @@ PHP_FUNCTION(session_regenerate_id)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_result ret;
-		data = php_session_encode();
-		if (data) {
-			ret = PS(mod)->s_write(&PS(mod_data), PS(id), data, PS(gc_maxlifetime));
-			zend_string_release_ex(data, false);
-		} else {
-			ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
+		zend_string *old_session_data = php_session_encode();
+		/* If we have no data we must destroy the related session ID */
+		if (UNEXPECTED(old_session_data == NULL)) {
+			PS(mod)->s_close(&PS(mod_data));
+			PS(session_status) = php_session_none;
+			RETURN_FALSE;
 		}
+
+		zend_result ret = PS(mod)->s_write(&PS(mod_data), PS(id), old_session_data, PS(gc_maxlifetime));
+		zend_string_release_ex(old_session_data, false);
+
 		if (ret == FAILURE) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
@@ -2368,6 +2368,7 @@ PHP_FUNCTION(session_regenerate_id)
 		// TODO warn that ID cannot be verified? else { }
 	}
 	/* Read is required to make new session data at this point. */
+	zend_string *data;
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;

@@ -83,7 +83,7 @@ Read [%s,PHPT-%d]
 GC [0]
 1 deleted
 bool(true)
-Write [%s,PHPT-%d,]
+Update [%s,PHPT-%d]
 Close [%s,PHPSESSID]
 bool(true)
 string(%d) "PHPT-%d"
