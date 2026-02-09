@@ -26,6 +26,12 @@
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
 
+#if defined(__APPLE__) && __has_include(<CommonCrypto/CommonKeyDerivation.h>)
+# include <CommonCrypto/CommonCryptoError.h>
+# include <CommonCrypto/CommonKeyDerivation.h>
+# define PHP_HASH_HAVE_COMMONCRYPTO_PBKDF2 1
+#endif
+
 /* Internal helper from hash_sha.c, not part of the public hash API. */
 void php_hash_sha256_final32_from_context(unsigned char digest[32], const PHP_SHA256_CTX *context, const unsigned char data[32]);
 
@@ -627,6 +633,51 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 	return returnval;
 }
 
+#ifdef PHP_HASH_HAVE_COMMONCRYPTO_PBKDF2
+static zend_string *php_hash_pbkdf2_sha256_commoncrypto(const char *pass, size_t pass_len, const char *salt, size_t salt_len, zend_long iterations, zend_long length, bool raw_output) {
+	zend_string *returnval;
+	unsigned char *derived = NULL;
+	zend_long derived_len = 0;
+
+	if (iterations > UINT32_MAX) {
+		return NULL;
+	}
+
+	if (length == 0) {
+		length = raw_output ? 32 : 64;
+	}
+
+	derived_len = raw_output ? length : (zend_long) ceil((float) length / 2.0);
+	if (derived_len <= 0) {
+		return NULL;
+	}
+
+	derived = safe_emalloc(derived_len, 1, 0);
+	if (CCKeyDerivationPBKDF(
+			kCCPBKDF2,
+			pass, pass_len,
+			(const uint8_t *) salt, salt_len,
+			kCCPRFHmacAlgSHA256,
+			(uint32_t) iterations,
+			derived, (size_t) derived_len) != kCCSuccess) {
+		efree(derived);
+		return NULL;
+	}
+
+	returnval = zend_string_alloc(length, 0);
+	if (raw_output) {
+		memcpy(ZSTR_VAL(returnval), derived, length);
+	} else {
+		php_hash_bin2hex(ZSTR_VAL(returnval), derived, derived_len);
+	}
+	ZSTR_VAL(returnval)[length] = 0;
+	ZEND_SECURE_ZERO(derived, derived_len);
+	efree(derived);
+
+	return returnval;
+}
+#endif
+
 static void php_hash_do_hash_hmac(
 	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, bool raw_output, bool isfilename
 ) /* {{{ */ {
@@ -1155,6 +1206,12 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	if (ops == &php_hash_sha256_ops) {
+#ifdef PHP_HASH_HAVE_COMMONCRYPTO_PBKDF2
+		zend_string *returnval_cc = php_hash_pbkdf2_sha256_commoncrypto(pass, pass_len, salt, salt_len, iterations, length, raw_output);
+		if (returnval_cc != NULL) {
+			RETURN_NEW_STR(returnval_cc);
+		}
+#endif
 		RETURN_NEW_STR(php_hash_pbkdf2_sha256(pass, pass_len, salt, salt_len, iterations, length, raw_output));
 	}
 
