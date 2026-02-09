@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21097 (Accessing Dom\Node properties can can throw TypeError).
     (ndossche)
 
+- Opcache:
+  . Fixed bug GH-20718 ("Insufficient shared memory" when using JIT on Solaris).
+    (Petr Sumbera)
+
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
 
