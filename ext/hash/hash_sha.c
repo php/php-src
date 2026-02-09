@@ -390,6 +390,29 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 }
 /* }}} */
 
+/* {{{ php_hash_sha256_final32_from_context
+   Compute SHA256(base_ctx || data[32]) where base_ctx already hashed one full 64-byte block.
+ */
+void php_hash_sha256_final32_from_context(unsigned char digest[32], const PHP_SHA256_CTX *context, const unsigned char data[32])
+{
+	uint32_t state[8];
+	unsigned char block[64];
+
+	ZEND_ASSERT(context->count[1] == 0);
+	ZEND_ASSERT(context->count[0] == 512);
+
+	memcpy(state, context->state, sizeof(state));
+	memcpy(block, data, 32);
+	block[32] = 0x80;
+	memset(block + 33, 0, 23);
+	memset(block + 56, 0, 8);
+	block[62] = 0x03;
+
+	SHA256Transform(state, block);
+	SHAEncode32(digest, state, 32);
+}
+/* }}} */
+
 /* sha384/sha512 */
 
 /* Ch */

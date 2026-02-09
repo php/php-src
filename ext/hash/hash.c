@@ -21,9 +21,13 @@
 
 #include <math.h>
 #include "php_hash.h"
+#include "php_hash_sha.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
+
+/* Internal helper from hash_sha.c, not part of the public hash API. */
+void php_hash_sha256_final32_from_context(unsigned char digest[32], const PHP_SHA256_CTX *context, const unsigned char data[32]);
 
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
@@ -500,6 +504,127 @@ static inline void php_hash_hmac_round_with_copy(unsigned char *final, const php
 	}
 	ops->hash_update(context, data, data_size);
 	ops->hash_final(final, context);
+}
+
+static const unsigned char php_hash_sha_padding[128] = {
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static inline void php_hash_sha256_encode(unsigned char digest[32], const uint32_t state[8]) {
+	for (size_t i = 0; i < 8; i++) {
+		digest[i * 4] = (unsigned char) ((state[i] >> 24) & 0xff);
+		digest[(i * 4) + 1] = (unsigned char) ((state[i] >> 16) & 0xff);
+		digest[(i * 4) + 2] = (unsigned char) ((state[i] >> 8) & 0xff);
+		digest[(i * 4) + 3] = (unsigned char) (state[i] & 0xff);
+	}
+}
+
+static inline void php_hash_sha256_final_no_zero(unsigned char digest[32], PHP_SHA256_CTX *context) {
+	unsigned char bits[8];
+	unsigned int index, pad_len;
+
+	bits[7] = (unsigned char) (context->count[0] & 0xFF);
+	bits[6] = (unsigned char) ((context->count[0] >> 8) & 0xFF);
+	bits[5] = (unsigned char) ((context->count[0] >> 16) & 0xFF);
+	bits[4] = (unsigned char) ((context->count[0] >> 24) & 0xFF);
+	bits[3] = (unsigned char) (context->count[1] & 0xFF);
+	bits[2] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
+	bits[1] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
+	bits[0] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
+
+	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	pad_len = (index < 56) ? (56 - index) : (120 - index);
+	PHP_SHA256Update(context, php_hash_sha_padding, pad_len);
+	PHP_SHA256Update(context, bits, 8);
+
+	php_hash_sha256_encode(digest, context->state);
+}
+
+static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, const char *salt, size_t salt_len, zend_long iterations, zend_long length, bool raw_output) {
+	zend_string *returnval;
+	unsigned char *digest, *result, *K = NULL, counter[4];
+	zend_long loops, i, j, digest_length = 0;
+	const size_t digest_size = 32;
+	const size_t block_size = 64;
+	PHP_SHA256_CTX inner_context, outer_context, context;
+
+	memset(&context, 0, sizeof(PHP_SHA256_CTX));
+	K = emalloc(block_size);
+	digest = emalloc(digest_size);
+
+	php_hash_hmac_prep_key(K, &php_hash_sha256_ops, &context, (const unsigned char *) pass, pass_len);
+
+	PHP_SHA256Init(&inner_context);
+	PHP_SHA256Update(&inner_context, K, block_size);
+
+	php_hash_string_xor_char(K, K, 0x6A, block_size);
+	PHP_SHA256Init(&outer_context);
+	PHP_SHA256Update(&outer_context, K, block_size);
+
+	if (length == 0) {
+		length = digest_size;
+		if (!raw_output) {
+			length = length * 2;
+		}
+	}
+	digest_length = length;
+	if (!raw_output) {
+		digest_length = (zend_long) ceil((float) length / 2.0);
+	}
+
+	loops = (zend_long) ceil((float) digest_length / (float) digest_size);
+
+	result = safe_emalloc(loops, digest_size, 0);
+
+	for (i = 1; i <= loops; i++) {
+		unsigned char *result_block = result + ((i - 1) * digest_size);
+
+		counter[0] = (unsigned char) (i >> 24);
+		counter[1] = (unsigned char) ((i & 0xFF0000) >> 16);
+		counter[2] = (unsigned char) ((i & 0xFF00) >> 8);
+		counter[3] = (unsigned char) (i & 0xFF);
+
+		context = inner_context;
+		PHP_SHA256Update(&context, (const unsigned char *) salt, salt_len);
+		PHP_SHA256Update(&context, counter, sizeof(counter));
+		php_hash_sha256_final_no_zero(digest, &context);
+
+		php_hash_sha256_final32_from_context(digest, &outer_context, digest);
+		memcpy(result_block, digest, digest_size);
+
+		for (j = 1; j < iterations; j++) {
+			php_hash_sha256_final32_from_context(digest, &inner_context, digest);
+			php_hash_sha256_final32_from_context(digest, &outer_context, digest);
+
+			php_hash_string_xor(result_block, result_block, digest, digest_size);
+		}
+	}
+
+	ZEND_SECURE_ZERO(K, block_size);
+	ZEND_SECURE_ZERO(digest, digest_size);
+	ZEND_SECURE_ZERO(&inner_context, sizeof(PHP_SHA256_CTX));
+	ZEND_SECURE_ZERO(&outer_context, sizeof(PHP_SHA256_CTX));
+	ZEND_SECURE_ZERO(&context, sizeof(PHP_SHA256_CTX));
+	efree(K);
+	efree(digest);
+
+	returnval = zend_string_alloc(length, 0);
+	if (raw_output) {
+		memcpy(ZSTR_VAL(returnval), result, length);
+	} else {
+		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
+	}
+	ZSTR_VAL(returnval)[length] = 0;
+	efree(result);
+
+	return returnval;
 }
 
 static void php_hash_do_hash_hmac(
@@ -1027,6 +1152,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (length < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	}
+
+	if (ops == &php_hash_sha256_ops) {
+		RETURN_NEW_STR(php_hash_pbkdf2_sha256(pass, pass_len, salt, salt_len, iterations, length, raw_output));
 	}
 
 	inner_context = php_hash_alloc_context(ops);
