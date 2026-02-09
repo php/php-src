@@ -971,7 +971,7 @@ int ir_match(ir_ctx *ctx)
 	return 1;
 }
 
-int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref)
+int32_t ir_get_spill_slot_offset(const ir_ctx *ctx, ir_ref ref)
 {
 	int32_t offset;
 
