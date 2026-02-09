@@ -60,7 +60,7 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 #define ADR_IMM         (1<<20)        // signed imm21
 #define ADRP_IMM        (1LL<<32)      // signed imm21 * 4096
 
-static bool aarch64_may_use_b(ir_code_buffer *code_buffer, const void *addr)
+static bool aarch64_may_use_b(const ir_code_buffer *code_buffer, const void *addr)
 {
 	if (code_buffer) {
 		if (addr >= code_buffer->start && (char*)addr < (char*)code_buffer->end) {
