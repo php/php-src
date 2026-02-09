@@ -68,6 +68,7 @@ void SHA256_Transform_shani(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t
 #endif
 
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
+PHP_HASH_API void PHP_SHA256Final32FromContext(unsigned char digest[32], const PHP_SHA256_CTX *context, const unsigned char data[32]);
 
 /* SHA384 context */
 typedef struct {
