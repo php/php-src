@@ -62,7 +62,7 @@ typedef struct ps_module_struct {
 #define PS_VALIDATE_SID_FUNC(x)	zend_result ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
 #define PS_UPDATE_TIMESTAMP_FUNC(x) 	zend_result ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
-/* Legacy save handler module definitions */
+/* Save handler module definitions without timestamp enabled */
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -70,32 +70,15 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x);	\
-	PS_CREATE_SID_FUNC(x)
+	PS_CREATE_SID_FUNC(x) \
+	PS_VALIDATE_SID_FUNC(x);
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, php_session_create_id, \
-	 php_session_validate_sid, php_session_update_timestamp
-
-/* Legacy SID creation enabled save handler module definitions */
-#define PS_FUNCS_SID(x) \
-	PS_OPEN_FUNC(x); \
-	PS_CLOSE_FUNC(x); \
-	PS_READ_FUNC(x); \
-	PS_WRITE_FUNC(x); \
-	PS_DESTROY_FUNC(x); \
-	PS_GC_FUNC(x); \
-	PS_CREATE_SID_FUNC(x); \
-	PS_VALIDATE_SID_FUNC(x); \
-	PS_UPDATE_TIMESTAMP_FUNC(x);
-
-#define PS_MOD_SID(x) \
-	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
-	 php_session_validate_sid, php_session_update_timestamp
+	 ps_validate_sid_##x, NULL
 
-/* Update timestamp enabled save handler module definitions
-   New save handlers should use this API */
+/* Save handlers with timestamp enabled, it is recommended to use this API */
 #define PS_FUNCS_UPDATE_TIMESTAMP(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
