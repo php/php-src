@@ -18,7 +18,7 @@ void ir_print_proto(const ir_ctx *ctx, ir_ref func_proto, FILE *f)
 	}
 }
 
-void ir_print_call_conv(uint32_t flags, FILE *f)
+static void ir_print_call_conv(uint32_t flags, FILE *f)
 {
 	switch (flags & IR_CALL_CONV_MASK) {
 		case IR_CC_BUILTIN:
@@ -71,6 +71,38 @@ void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, c
 	if (flags & IR_CONST_FUNC) {
 		fprintf(f, " __const");
 	} else if (flags & IR_PURE_FUNC) {
+		fprintf(f, " __pure");
+	}
+}
+
+void ir_print_func_proto(const ir_ctx *ctx, const char *name, bool prefix, FILE *f)
+{
+	if (ctx->flags & IR_STATIC) {
+		fprintf(f, "static ");
+	}
+	fprintf(f, "func %s%s(",
+		prefix ? "@" : "",
+		name);
+	if (ctx->ir_base[2].op == IR_PARAM) {
+		ir_insn *insn = &ctx->ir_base[2];
+
+		fprintf(f, "%s", ir_type_cname[insn->type]);
+		insn++;
+		while (insn->op == IR_PARAM) {
+			fprintf(f, ", %s", ir_type_cname[insn->type]);
+			insn++;;
+		}
+		if (ctx->flags & IR_VARARG_FUNC) {
+			fprintf(f, ", ...");
+		}
+	} else if (ctx->flags & IR_VARARG_FUNC) {
+		fprintf(f, "...");
+	}
+	fprintf(f, "): %s", ir_type_cname[ctx->ret_type != (ir_type)-1 ? ctx->ret_type : IR_VOID]);
+	ir_print_call_conv(ctx->flags, f);
+	if (ctx->flags & IR_CONST_FUNC) {
+		fprintf(f, " __const");
+	} else if (ctx->flags & IR_PURE_FUNC) {
 		fprintf(f, " __pure");
 	}
 }
