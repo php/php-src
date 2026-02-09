@@ -1749,11 +1749,7 @@ static bool php_session_abort(void)
 
 static bool php_session_reset(void)
 {
-	if (PS(session_status) == php_session_active
-		&& php_session_initialize() == SUCCESS) {
-		return true;
-	}
-	return false;
+	return PS(session_status) == php_session_active && php_session_initialize() == SUCCESS;
 }
 
 /* ********************************
