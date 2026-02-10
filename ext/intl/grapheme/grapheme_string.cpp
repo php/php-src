@@ -180,13 +180,15 @@ U_CFUNC PHP_FUNCTION(grapheme_stripos)
 
 		found = php_memnstr(haystack_dup + noffset, needle_dup, needle_len, haystack_dup + haystack_len);
 
-		efree(haystack_dup);
 		efree(needle_dup);
 
 		if (found) {
-			RETURN_LONG(found - haystack_dup);
+			ret_pos = found - haystack_dup;
+			efree(haystack_dup);
+			RETURN_LONG(ret_pos);
 		}
-
+		
+		efree(haystack_dup);
 		/* if needle was ascii too, we are all done, otherwise we need to try using Unicode to see what we get */
 		if ( grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
 			RETURN_FALSE;
