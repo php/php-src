@@ -11,8 +11,8 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
+      all_variations: ${{ steps.set-matrix.outputs.all_variations }}
       branches: ${{ steps.set-matrix.outputs.branches }}
-      comprehensive: ${{ steps.set-matrix.outputs.comprehensive }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -42,6 +42,6 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     with:
+      all_variations: ${{ needs.GENERATE_MATRIX.outputs.all_variations == 'true' && true || false }}
       branch: ${{ toJSON(matrix.branch) }}
-      comprehensive: ${{ needs.GENERATE_MATRIX.outputs.comprehensive == 'true' && true || false }}
     secrets: inherit

@@ -46,9 +46,9 @@ function get_current_version(): array {
     return [$major, $minor];
 }
 
-function select_jobs($trigger, $labels, $php_version, $ref, $comprehensive) {
-    $disable_all = in_array('CI: Disable all', $labels, true);
-    $enable_all = in_array('CI: Enable all', $labels, true);
+function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
+    $no_jobs = in_array('CI: No jobs', $labels, true);
+    $all_jobs = in_array('CI: All jobs', $labels, true);
     $test_alpine = in_array('CI: Alpine', $labels, true);
     $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
@@ -63,10 +63,10 @@ function select_jobs($trigger, $labels, $php_version, $ref, $comprehensive) {
     $test_windows = in_array('CI: Windows', $labels, true);
 
     $jobs = [];
-    if (version_compare($php_version, '8.4', '>=') && ($enable_all || !$disable_all || $test_alpine)) {
+    if (version_compare($php_version, '8.4', '>=') && ($all_jobs || !$no_jobs || $test_alpine)) {
         $jobs['ALPINE'] = true;
     }
-    if ($enable_all || $test_community) {
+    if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
             ? ['type' => ['asan', 'verify_type_inference']]
             : ['type' => ['asan']];
@@ -75,14 +75,14 @@ function select_jobs($trigger, $labels, $php_version, $ref, $comprehensive) {
     if ($trigger === 'schedule' && $ref === 'master') {
         $jobs['COVERAGE'] = true;
     }
-    if ($enable_all || $test_libmysqlclient) {
+    if ($all_jobs || $test_libmysqlclient) {
         $jobs['LIBMYSQLCLIENT'] = true;
     }
-    if (version_compare($php_version, '8.4', '>=') && ($enable_all || $test_linux_ppc64)) {
+    if (version_compare($php_version, '8.4', '>=') && ($all_jobs || $test_linux_ppc64)) {
         $jobs['LINUX_PPC64'] = true;
     }
-    if ($enable_all || !$disable_all || $test_linux_x64) {
-        $jobs['LINUX_X64']['matrix'] = $comprehensive
+    if ($all_jobs || !$no_jobs || $test_linux_x64) {
+        $jobs['LINUX_X64']['matrix'] = $all_variations
             ? [
                 'name' => [''],
                 'asan' => [false],
@@ -102,30 +102,30 @@ function select_jobs($trigger, $labels, $php_version, $ref, $comprehensive) {
             ]];
         $jobs['LINUX_X64']['config']['variation_enable_zend_max_execution_timers'] = version_compare($php_version, '8.3', '>=');
     }
-    if ($enable_all || !$disable_all || $test_linux_x32) {
-        $jobs['LINUX_X32']['matrix'] = $comprehensive
+    if ($all_jobs || !$no_jobs || $test_linux_x32) {
+        $jobs['LINUX_X32']['matrix'] = $all_variations
             ? ['debug' => [true, false], 'zts' => [true, false]]
             : ['debug' => [true], 'zts' => [true]];
     }
-    if ($enable_all || !$disable_all || $test_macos) {
+    if ($all_jobs || !$no_jobs || $test_macos) {
         $test_arm = version_compare($php_version, '8.4', '>=');
-        $jobs['MACOS']['matrix'] = $comprehensive
+        $jobs['MACOS']['matrix'] = $all_variations
             ? ['arch' => $test_arm ? ['X64', 'ARM64'] : ['X64'], 'debug' => [true, false], 'zts' => [true, false]]
             : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false]]];
         $jobs['MACOS']['config']['arm64_version'] = version_compare($php_version, '8.4', '>=') ? '15' : '14';
     }
-    if ($enable_all || $test_msan) {
+    if ($all_jobs || $test_msan) {
         $jobs['MSAN'] = true;
     }
-    if ($enable_all || $test_opcache_variation) {
+    if ($all_jobs || $test_opcache_variation) {
         $jobs['OPCACHE_VARIATION'] = true;
     }
     if ($trigger === 'schedule' && $ref === 'master') {
         $jobs['PECL'] = true;
     }
-    if ($enable_all || !$disable_all || $test_windows) {
+    if ($all_jobs || !$no_jobs || $test_windows) {
         $windows_jobs = ['include' => [['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true]]];
-        if ($comprehensive) {
+        if ($all_variations) {
             $windows_jobs['include'][] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];
         }
         $jobs['WINDOWS']['matrix'] = $windows_jobs;
@@ -133,11 +133,11 @@ function select_jobs($trigger, $labels, $php_version, $ref, $comprehensive) {
             ? ['vs_crt_version' => 'vs17']
             : ['vs_crt_version' => 'vs16'];
     }
-    if ($enable_all || !$disable_all || $test_benchmarking) {
+    if ($all_jobs || !$no_jobs || $test_benchmarking) {
         $jobs['BENCHMARKING'] = true;
     }
-    if ($enable_all || !$disable_all || $test_freebsd) {
-        $jobs['FREEBSD']['matrix'] = $comprehensive && version_compare($php_version, '8.3', '>=')
+    if ($all_jobs || !$no_jobs || $test_freebsd) {
+        $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')
             ? ['zts' => [true, false]]
             : ['zts' => [false]];
     }
@@ -160,15 +160,15 @@ $branches = $branch === 'master'
 
 $labels = json_decode($argv[4] ?? '[]', true);
 $labels = array_column($labels, 'name');
-$comprehensive = $trigger === 'schedule' || $trigger === 'workflow_dispatch' || in_array('CI: Comprehensive', $labels, true);
+$all_variations = $trigger === 'schedule' || $trigger === 'workflow_dispatch' || in_array('CI: All variations', $labels, true);
 
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
-    $branch['jobs'] = select_jobs($trigger, $labels, $php_version, $branch['ref'], $comprehensive);
+    $branch['jobs'] = select_jobs($trigger, $labels, $php_version, $branch['ref'], $all_variations);
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
 }
 
 $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'comprehensive=' . json_encode($comprehensive, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'all_variations=' . json_encode($all_variations, JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);
