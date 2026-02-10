@@ -75,6 +75,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+- Abstract:
+  . Minimum required PHP version found on the host system for running scripts
+    like build/gen_stub.php during development has been updated from 7.4 to 8.1.
   . build/gen_stub.php may now generate a _decl.h file in addition to
     the _arginfo.h file, if the stub declares enums and is annotated with
     @generate-c-enums. For each enum the file will contain a C enum. Enum
