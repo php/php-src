@@ -495,10 +495,8 @@ PHP_FUNCTION(readline_completion_function)
 
 	/* NOTE: The rl_attempted_completion_function variable (and others) are part of the readline library, not php */
 	rl_attempted_completion_function = php_readline_completion_cb;
-	if (rl_attempted_completion_function == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	
+	RETURN_BOOL(rl_attempted_completion_function != NULL);
 }
 
 /* }}} */
