@@ -654,6 +654,7 @@ declared_property:
 						}
 					}
 
+					GC_DEL_FLAGS(Z_OBJ_P(rval), GC_NOT_COLLECTABLE);
 					data = zend_hash_add_new(ht, Z_STR(key), &EG(uninitialized_zval));
 				} else if (ret < 0) {
 					goto failure;
