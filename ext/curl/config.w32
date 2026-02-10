@@ -5,7 +5,7 @@ ARG_WITH("curl", "cURL support", "no");
 if (PHP_CURL != "no") {
 	var curl_location;
 	if ((curl_location = CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL)) &&
-		CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
+		CHECK_HEADER("curl/easy.h", "CFLAGS_CURL") &&
 		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
 		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&

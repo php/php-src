@@ -92,6 +92,14 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
     HAVE_STRUCT_STAT_ST_BLOCKS).
 
+- Windows build system changes:
+  . Function SETUP_OPENSSL() doesn't accept 6th argument anymore and doesn't
+    define the HAVE_OPENSSL_SSL_H preprocessor macro anymore.
+  . Function SETUP_SQLITE3() doesn't define HAVE_SQLITE3_H and HAVE_SQLITE3EXT_H
+    preprocessor macros anymore.
+  . Added a new function CHECK_HEADER() which is intended to be used instead of
+    the CHECK_HEADER_ADD_INCLUDE().
+
 ========================
 3. Module changes
 ========================
