@@ -177,8 +177,10 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		ssb->sb.st_ctime = sb.mtime;
 		ssb->sb.st_nlink = 1;
 		ssb->sb.st_rdev = -1;
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ssb->sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ssb->sb.st_blocks = -1;
 #endif
 		ssb->sb.st_ino = -1;

@@ -526,8 +526,10 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
 	if (!is_temp_dir) {
 		ssb->sb.st_ino = data->inode;
 	}
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ssb->sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	ssb->sb.st_blocks = -1;
 #endif
 }
