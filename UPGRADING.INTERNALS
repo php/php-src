@@ -100,6 +100,12 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     `void **mod_data, zend_string *save_path, zend_string *session_name`
     rather than
     `void **mod_data, const char *save_path, const char *session_name`
+  . PS_FUNCS() now includes the PS_VALIDATE_SID_FUNC()
+  . PS_MOD() now requires that the PS_CREATE_SID_FUNC() and
+    PS_VALIDATE_SID_FUNC() functions are defined.
+  . PS_FUNCS_SID() and PS_MOD_SID() have been removed.
+    Either use PS_FUNCS()/PS_MOD() or PS_FUNCS_UPDATE_TIMESTAMP()/
+    PS_MOD_UPDATE_TIMESTAMP() if timestamp support exists.
 
 - ext/standard:
   . _php_error_log() now has a formal return type of zend_result.
