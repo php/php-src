@@ -421,6 +421,11 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 		return;
 	}
 
+	if (GC_TYPE_INFO(obj_addr) & (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT)) {
+		GC_DEL_FLAGS(obj_addr, GC_NOT_COLLECTABLE);
+		gc_check_possible_root((zend_refcounted *)obj_addr);
+	}
+
 	zend_weakref_register(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
 	zend_hash_index_add_new(&wm->ht, obj_key, value);
 }

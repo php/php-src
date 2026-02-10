@@ -1444,7 +1444,6 @@ static void gc_scan_roots(gc_stack *stack)
 	 * make sure to reload pointers. */
 	idx = GC_FIRST_ROOT;
 	end = GC_G(first_unused);
-
 	while (idx != end) {
 repeat:
 		current = GC_IDX2PTR(idx);
