@@ -1036,7 +1036,6 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	PS_ENCODE_LOOP(
 		smart_str_append(&buf, key);
 		if (memchr(ZSTR_VAL(key), PS_DELIMITER, ZSTR_LEN(key))) {
-			PHP_VAR_SERIALIZE_DESTROY(var_hash);
 			smart_str_free(&buf);
 			fail = true;
 			php_error_docref(NULL, E_WARNING, "Failed to write session data. Data contains invalid key \"%s\"", ZSTR_VAL(key));
@@ -2368,7 +2367,7 @@ PHP_FUNCTION(session_regenerate_id)
 		// TODO warn that ID cannot be verified? else { }
 	}
 	/* Read is required to make new session data at this point. */
-	zend_string *data;
+	zend_string *data = NULL;
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
