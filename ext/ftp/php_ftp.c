@@ -678,11 +678,8 @@ PHP_FUNCTION(ftp_pasv)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(ftp_pasv(ftp, pasv ? 1 : 0));
 
-	RETURN_TRUE;
 }
 /* }}} */
 
