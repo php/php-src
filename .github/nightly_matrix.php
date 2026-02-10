@@ -50,7 +50,6 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
     $no_jobs = in_array('CI: No jobs', $labels, true);
     $all_jobs = in_array('CI: All jobs', $labels, true);
     $test_alpine = in_array('CI: Alpine', $labels, true);
-    $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
     $test_freebsd = in_array('CI: FreeBSD', $labels, true);
     $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
@@ -133,9 +132,6 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
         $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
             ? ['vs_crt_version' => 'vs17']
             : ['vs_crt_version' => 'vs16'];
-    }
-    if ($all_jobs || !$no_jobs || $test_benchmarking) {
-        $jobs['BENCHMARKING'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_freebsd) {
         $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')
