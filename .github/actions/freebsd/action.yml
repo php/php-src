@@ -15,6 +15,7 @@ runs:
         release: '13.5'
         usesh: true
         copyback: false
+        disable-cache: true
         # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
         # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
