@@ -227,10 +227,7 @@ PHP_METHOD(DOMXPath, registerNamespace)
 		RETURN_THROWS();
 	}
 
-	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(xmlXPathRegisterNs(ctxp, prefix, ns_uri) == 0);
 }
 /* }}} */
 
