@@ -1767,7 +1767,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
-				GC_TYPE_INFO(object) &= ~(GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT);
+				GC_DEL_FLAGS(object, GC_NOT_COLLECTABLE);
 				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
 				zval_add_ref(prop);
 			}
@@ -1780,7 +1780,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 					ZSTR_VAL(object->ce->name), h);
 			}
 
-			GC_TYPE_INFO(object) &= ~(GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT);
+			GC_DEL_FLAGS(object, GC_NOT_COLLECTABLE);
 			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
