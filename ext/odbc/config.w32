@@ -4,8 +4,8 @@ ARG_ENABLE("odbc", "ODBC support", "no");
 
 if (PHP_ODBC == "yes") {
 	if (CHECK_LIB("odbc32.lib", "odbc") && CHECK_LIB("odbccp32.lib", "odbc")
-	&& CHECK_HEADER_ADD_INCLUDE("sql.h", "CFLAGS_ODBC")
-	&& CHECK_HEADER_ADD_INCLUDE("sqlext.h", "CFLAGS_ODBC")) {
+	&& CHECK_HEADER("sql.h", "CFLAGS_ODBC")
+	&& CHECK_HEADER("sqlext.h", "CFLAGS_ODBC")) {
 		EXTENSION("odbc", "php_odbc.c odbc_utils.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_UODBC", 1, "Define to 1 if the PHP extension 'odbc' is available.");
 	} else {
