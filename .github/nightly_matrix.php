@@ -124,11 +124,12 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
         $jobs['PECL'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
-        $windows_jobs = ['include' => [['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true]]];
-        if ($all_variations) {
-            $windows_jobs['include'][] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];
-        }
-        $jobs['WINDOWS']['matrix'] = $windows_jobs;
+        $jobs['WINDOWS']['matrix'] = $all_variations
+            ? ['include' => [
+                ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
+                ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
+            ]]
+            : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
         $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
             ? ['vs_crt_version' => 'vs17']
             : ['vs_crt_version' => 'vs16'];
