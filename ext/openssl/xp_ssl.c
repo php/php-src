@@ -1416,6 +1416,10 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 	/* The hello method is not inherited by SSL structs when assigning a new context
 	 * inside the SNI callback, so the just use SSLv23 */
 	SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create the SSL context");
+		return NULL;
+	}
 
 	if (SSL_CTX_use_certificate_chain_file(ctx, cert_path) != 1) {
 		php_error_docref(NULL, E_WARNING,
