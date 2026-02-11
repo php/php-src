@@ -70,7 +70,7 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x);	\
-	PS_CREATE_SID_FUNC(x) \
+	PS_CREATE_SID_FUNC(x); \
 	PS_VALIDATE_SID_FUNC(x);
 
 #define PS_MOD(x) \
