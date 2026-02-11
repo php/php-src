@@ -221,19 +221,11 @@ int(-2147483648)
 int(2147483647)
 
 *** Testing intval() on non integer types ***
-
-Warning: The float-string "-2147483649" is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
-
-Warning: The float-string "2147483648" is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 int(0)
 int(0)
-
-Warning: The float-string "020000000001" is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
-
-Warning: The float-string "-020000000001" is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
 int(0)
 int(0)

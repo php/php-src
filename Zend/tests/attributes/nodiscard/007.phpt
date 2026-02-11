@@ -12,6 +12,8 @@ zend_test_nodiscard();
 ?>
 --EXPECTF--
 <!-- internal enter NoDiscard::__construct() -->
+<!-- internal leave NoDiscard::__construct() -->
 
 Warning: The return value of function zend_test_nodiscard() should either be used or intentionally ignored by casting it as (void), custom message in %s on line %d
 <!-- internal enter zend_test_nodiscard() -->
+<!-- internal leave zend_test_nodiscard() -->

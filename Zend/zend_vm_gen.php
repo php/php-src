@@ -64,7 +64,7 @@ $vm_op_flags = array(
     "ZEND_VM_OP_NUM"          => 0x10,
     "ZEND_VM_OP_JMP_ADDR"     => 0x20,
     "ZEND_VM_OP_TRY_CATCH"    => 0x30,
-    // unused 0x40
+    "ZEND_VM_OP_LOOP_END"     => 0x40,
     "ZEND_VM_OP_THIS"         => 0x50,
     "ZEND_VM_OP_NEXT"         => 0x60,
     "ZEND_VM_OP_CLASS_FETCH"  => 0x70,
@@ -112,6 +112,7 @@ $vm_op_decode = array(
     "NUM"                  => ZEND_VM_OP_NUM,
     "JMP_ADDR"             => ZEND_VM_OP_JMP_ADDR,
     "TRY_CATCH"            => ZEND_VM_OP_TRY_CATCH,
+    "LOOP_END"             => ZEND_VM_OP_LOOP_END,
     "THIS"                 => ZEND_VM_OP_THIS,
     "NEXT"                 => ZEND_VM_OP_NEXT,
     "CLASS_FETCH"          => ZEND_VM_OP_CLASS_FETCH,
@@ -1582,7 +1583,6 @@ function gen_null_handler($f, $kind) {
     out($f,"\n");
     out($f,"\tSAVE_OPLINE();\n");
     out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-    out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
     out($f,"}\n\n");
 }
 
@@ -1811,12 +1811,10 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         case ZEND_VM_KIND_SWITCH:
             out($f,"default: ZEND_NULL_LABEL:\n");
             out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-            out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
             break;
         case ZEND_VM_KIND_GOTO:
             out($f,"ZEND_NULL_LABEL:\n");
             out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-            out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
             break;
         case ZEND_VM_KIND_HYBRID:
             out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");

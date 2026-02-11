@@ -59,6 +59,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 #define PHP_COUNT_NORMAL      0
 #define PHP_COUNT_RECURSIVE   1
 
+#define ARRAY_FILTER_USE_VALUE	0
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
 

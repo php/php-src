@@ -82,11 +82,22 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
             $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
+            $declFile = "{$stubFilenameWithoutExtension}_decl.h";
 
+            /* Check if the stub file changed, by checking that the hash stored
+             * in the generated arginfo.h matches.
+             * Also check that the decl.h file has the same hash. At this point
+             * we don't know if a decl.h file is supposed to exist, so extract
+             * this information (whether a decl file should exist) from the
+             * arginfo.h file. */
             $stubCode = file_get_contents($stubFile);
             $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
-            if ($stubHash === $oldStubHash && !$context->forceParse) {
+            $hasDeclHeader = extractHasDeclHeader($arginfoFile);
+            $oldStubHashDecl = extractStubHash($declFile);
+            $generatedFilesUpToDate = $stubHash === $oldStubHash
+                    && ($hasDeclHeader ? $stubHash === $oldStubHashDecl : $oldStubHashDecl === null);
+            if ($generatedFilesUpToDate && !$context->forceParse) {
                 /* Stub file did not change, do not regenerate. */
                 return null;
             }
@@ -122,26 +133,31 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             return $fileInfo;
         }
 
-        $arginfoCode = generateArgInfoCode(
+        [$arginfoCode, $declCode] = generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
             $fileInfo,
             $context->allConstInfos,
             $stubHash
         );
-        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+        if ($context->forceRegeneration || !$generatedFilesUpToDate) {
             reportFilePutContents($arginfoFile, $arginfoCode);
+            if ($declCode !== '') {
+                reportFilePutContents($declFile, $declCode);
+            } else if (file_exists($declFile)) {
+                unlink($declFile);
+            }
         }
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
             $legacyFileInfo = $fileInfo->getLegacyVersion();
 
-            $arginfoCode = generateArgInfoCode(
+            [$arginfoCode] = generateArgInfoCode(
                 basename($stubFilenameWithoutExtension),
                 $legacyFileInfo,
                 $context->allConstInfos,
                 $stubHash
             );
-            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+            if ($context->forceRegeneration || !$generatedFilesUpToDate) {
                 reportFilePutContents($legacyFile, $arginfoCode);
             }
         }
@@ -159,11 +175,20 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: ([0-9a-f]+) \*/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: ([0-9a-f]+)/', $arginfoCode, $matches)) {
         return null;
     }
 
     return $matches[1];
+}
+
+function extractHasDeclHeader(string $arginfoFile): bool {
+    if (!file_exists($arginfoFile)) {
+        return false;
+    }
+
+    $arginfoCode = file_get_contents($arginfoFile);
+    return str_contains($arginfoCode, '* Has decl header: yes *');
 }
 
 class Context {
@@ -2184,7 +2209,7 @@ OUPUT_EXAMPLE
                 $defaultValue = $arg->getDefaultValueAsMethodSynopsisString();
                 if ($defaultValue !== null) {
                     $initializer = $doc->createElement('initializer');
-                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9]*$/', $defaultValue)) {
+                    if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9\:\\\\]*$/', $defaultValue)) {
                         $constant = $doc->createElement('constant', $defaultValue);
                         $initializer->appendChild($constant);
                     } else {
@@ -2215,11 +2240,11 @@ OUPUT_EXAMPLE
             $this->numRequiredArgs,
             $minPHPCompatability === null || $minPHPCompatability >= PHP_81_VERSION_ID
         );
-    
+
         foreach ($this->args as $argInfo) {
             $code .= $argInfo->toZendInfo();
         }
-    
+
         $code .= "ZEND_END_ARG_INFO()";
         return $code . "\n";
     }
@@ -2235,7 +2260,7 @@ OUPUT_EXAMPLE
 
 class EvaluatedValue
 {
-    public /* readonly */ mixed $value;
+    public /* readonly */ /* mixed */ $value;
     public SimpleType $type;
     public Expr $expr;
     public bool $isUnknownConstValue;
@@ -3278,7 +3303,7 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    private /* readonly */ string $name;
+    public /* readonly */ string $name;
     private /* readonly */ ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
@@ -3655,6 +3680,38 @@ class ClassInfo {
         }
 
         if ($this->type === "enum" && !$php81MinimumCompatibility) {
+            $code .= "#endif\n";
+        }
+
+        return $code;
+    }
+
+    public function getCDeclarations(): string
+    {
+        if ($this->type !== "enum") {
+            return '';
+        }
+
+        $code = '';
+
+        if ($this->cond) {
+            $code .= "#if {$this->cond}\n";
+        }
+
+        $cEnumName = 'zend_enum_' . str_replace('\\', '_', $this->name->toString());
+
+        $code .= "typedef enum {$cEnumName} {\n";
+
+        $i = 1;
+        foreach ($this->enumCaseInfos as $case) {
+            $cName = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString()) . '_' . $case->name;
+            $code .= "\t{$cName} = {$i},\n";
+            $i++;
+        }
+
+        $code .= "} {$cEnumName};\n";
+
+        if ($this->cond) {
             $code .= "#endif\n";
         }
 
@@ -4192,6 +4249,7 @@ class FileInfo {
     public bool $generateFunctionEntries = false;
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
+    public bool $generateCEnums = false;
     private bool $isUndocumentable = false;
     private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
@@ -4217,6 +4275,8 @@ class FileInfo {
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
             } else if ($tag->name === 'undocumentable') {
                 $this->isUndocumentable = true;
+            } else if ($tag->name === 'generate-c-enums') {
+                $this->generateCEnums = true;
             }
         }
 
@@ -4310,13 +4370,13 @@ class FileInfo {
                 return implode('\\', $node->getParts());
             }
         };
-    
+
         $stmts = $parser->parse($code);
         $nodeTraverser->traverse($stmts);
-    
+
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
-    
+
         $fileInfo->handleStatements($stmts, $prettyPrinter);
         return $fileInfo;
     }
@@ -4337,16 +4397,16 @@ class FileInfo {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
-    
+
             if ($stmt instanceof Stmt\Nop) {
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Const_) {
                 foreach ($stmt->consts as $const) {
                     $this->constInfos[] = parseConstLike(
@@ -4364,7 +4424,7 @@ class FileInfo {
                 }
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Function_) {
                 $this->funcInfos[] = parseFunctionLike(
                     $prettyPrinter,
@@ -4378,7 +4438,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\ClassLike) {
                 $className = $stmt->namespacedName;
                 $constInfos = [];
@@ -4390,10 +4450,10 @@ class FileInfo {
                     if ($classStmt instanceof Stmt\Nop) {
                         continue;
                     }
-    
+
                     $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
                     $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
-    
+
                     if ($classStmt instanceof Stmt\ClassConst) {
                         foreach ($classStmt->consts as $const) {
                             $constInfos[] = parseConstLike(
@@ -4447,7 +4507,7 @@ class FileInfo {
                         throw new Exception("Not implemented {$classStmt->getType()}");
                     }
                 }
-    
+
                 $this->classInfos[] = parseClass(
                     $className,
                     $stmt,
@@ -4461,7 +4521,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Expression) {
                 $expr = $stmt->expr;
                 if ($expr instanceof Expr\Include_) {
@@ -4469,7 +4529,7 @@ class FileInfo {
                     continue;
                 }
             }
-    
+
             throw new Exception("Unexpected node {$stmt->getType()}");
         }
         if (!empty($conds)) {
@@ -4501,7 +4561,7 @@ class FileInfo {
                 throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
-    
+
         return empty($conds) ? null : implode(' && ', $conds);
     }
 
@@ -4511,6 +4571,23 @@ class FileInfo {
 
         foreach ($this->classInfos as $class) {
             $code .= "\n" . $class->getRegistration($allConstInfos);
+        }
+
+        return $code;
+    }
+
+    public function generateCDeclarations(): string {
+        $code = "";
+
+        if (!$this->generateCEnums) {
+            return $code;
+        }
+
+        foreach ($this->classInfos as $class) {
+            $cdecl = $class->getCDeclarations();
+            if ($cdecl !== '') {
+                $code .= "\n" . $cdecl;
+            }
         }
 
         return $code;
@@ -4540,7 +4617,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|(\.\.\.)?\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -4562,7 +4639,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*(\.\.\.)?\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
@@ -5150,15 +5227,15 @@ function generateCodeWithConditions(
 
 /**
  * @param array<string, ConstInfo> $allConstInfos
+ * @return array{string, string}
  */
 function generateArgInfoCode(
     string $stubFilenameWithoutExtension,
     FileInfo $fileInfo,
     array $allConstInfos,
     string $stubHash
-): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead.\n"
-          . " * Stub hash: $stubHash */\n";
+): array {
+    $code = "";
 
     $generatedFuncInfos = [];
 
@@ -5250,7 +5327,26 @@ function generateArgInfoCode(
         $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
-    return $code;
+    $hasDeclFile = false;
+    $declCode = $fileInfo->generateCDeclarations();
+    if ($declCode !== '') {
+        $hasDeclFile = true;
+        $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
+        $declCode = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+            . " * Stub hash: $stubHash */\n"
+            . "\n"
+            . "#ifndef {$headerName}\n"
+            . "#define {$headerName}\n"
+            . $declCode . "\n"
+            . "#endif /* {$headerName} */\n";
+    }
+
+    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+          . " * Stub hash: $stubHash"
+          . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+          . $code;
+
+    return [$code, $declCode];
 }
 
 /** @param FuncInfo[] $funcInfos */
@@ -6048,9 +6144,10 @@ function installPhpParser(string $version, string $phpParserDir) {
         chdir(__DIR__);
 
         $tarName = "v$version.tar.gz";
-        passthru("wget https://github.com/nikic/PHP-Parser/archive/$tarName", $exit);
+        $downloadUrl = "https://github.com/nikic/PHP-Parser/archive/$tarName";
+        passthru("wget -O $tarName $downloadUrl", $exit);
         if ($exit !== 0) {
-            passthru("curl -LO https://github.com/nikic/PHP-Parser/archive/$tarName", $exit);
+            passthru("curl -LO $downloadUrl", $exit);
         }
         if ($exit !== 0) {
             throw new Exception("Failed to download PHP-Parser tarball");
@@ -6060,6 +6157,7 @@ function installPhpParser(string $version, string $phpParserDir) {
         }
         passthru("tar xvzf $tarName -C PHP-Parser-$version --strip-components 1", $exit);
         if ($exit !== 0) {
+            rmdir($phpParserDir);
             throw new Exception("Failed to extract PHP-Parser tarball");
         }
         unlink(__DIR__ . "/$tarName");

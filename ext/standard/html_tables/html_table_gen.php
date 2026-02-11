@@ -180,7 +180,7 @@ foreach ($encodings as $e) {
 
     /* process file */
     $map = array();
-    $lines = explode("\n", file_get_contents($e{'file'}));
+    $lines = explode("\n", file_get_contents($e['file']));
     foreach ($lines as $l) {
         if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})/i", $l, $matches))
             $map[] = array($matches[1], $matches[2]);
@@ -323,7 +323,7 @@ foreach ($encodings as $e) {
 
     /* process file */
     $map = array();
-    $lines = explode("\n", file_get_contents($e{'file'}));
+    $lines = explode("\n", file_get_contents($e['file']));
     foreach ($lines as $l) {
         if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})\s+#\s*(.*)$/i", $l, $matches))
             $map[] = array($matches[1], $matches[2], rtrim($matches[3]));

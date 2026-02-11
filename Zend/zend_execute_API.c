@@ -176,7 +176,6 @@ void init_executor(void) /* {{{ */
 	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
 
 	EG(exception) = NULL;
-	EG(prev_exception) = NULL;
 
 	EG(fake_scope) = NULL;
 	EG(trampoline).common.function_name = NULL;
@@ -652,11 +651,7 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 		return NULL;
 	}
 
-	if (func->type == ZEND_USER_FUNCTION || (func->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-		return ZSTR_VAL(func->common.arg_info[arg_num - 1].name);
-	} else {
-		return ((zend_internal_arg_info*) func->common.arg_info)[arg_num - 1].name;
-	}
+	return ZSTR_VAL(func->common.arg_info[arg_num - 1].name);
 }
 /* }}} */
 
@@ -1272,9 +1267,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_long previous_lineno = EG(lineno_override);
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
-	zend_exception_save();
 	ce = zend_autoload(autoload_name, lc_name);
-	zend_exception_restore();
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;
 
@@ -1569,7 +1562,6 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
-			return;
 		}
 		tq_timer = NULL;
 	}
@@ -1579,7 +1571,6 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		tq_timer = NULL;
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
-		return;
 	}
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
 	if (seconds > 0) {
@@ -1666,7 +1657,6 @@ void zend_unset_timeout(void) /* {{{ */
 			zend_atomic_bool_store_ex(&EG(timed_out), false);
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
-			return;
 		}
 		tq_timer = NULL;
 	}

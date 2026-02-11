@@ -339,7 +339,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fcc.called_scope = zend_get_called_scope(EG(current_execute_data));
 
 	zend_call_function(&fci, &fcc);
-
+	zend_return_unwrap_ref(EG(current_execute_data), return_value);
 	zval_ptr_dtor(&fci.params[1]);
 }
 /* }}} */
@@ -510,7 +510,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	 * ZEND_ACC_USER_ARG_INFO flag to prevent invalid usage by Reflection */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
 	invoke->internal_function.fn_flags =
-		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_NEVER_CACHE | (closure->func.common.fn_flags & keep_flags);
 	if (closure->func.type != ZEND_INTERNAL_FUNCTION || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		invoke->internal_function.fn_flags |=
 			ZEND_ACC_USER_ARG_INFO;
@@ -618,7 +618,6 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
 	HashTable *debug_info;
-	bool zstr_args = (closure->func.type == ZEND_USER_FUNCTION) || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 
 	*is_temp = 1;
 
@@ -694,15 +693,9 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			zend_string *name;
 			zval info;
 			ZEND_ASSERT(arg_info->name && "Argument should have name");
-			if (zstr_args) {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						ZSTR_VAL(arg_info->name));
-			} else {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						((zend_internal_arg_info*)arg_info)->name);
-			}
+			name = zend_strpprintf(0, "%s$%s",
+					ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
+					ZSTR_VAL(arg_info->name));
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
 			zend_string_release_ex(name, 0);
@@ -885,9 +878,6 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 }
 /* }}} */
 
-/* __call and __callStatic name the arguments "$arguments" in the docs. */
-static zend_internal_arg_info trampoline_arg_info[] = {ZEND_ARG_VARIADIC_TYPE_INFO(false, arguments, IS_MIXED, false)};
-
 void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
 	zend_internal_function trampoline;
@@ -912,9 +902,7 @@ void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) 
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
 		trampoline.doc_comment = NULL;
-		if (trampoline.fn_flags & ZEND_ACC_VARIADIC) {
-			trampoline.arg_info = trampoline_arg_info;
-		}
+		trampoline.arg_info = mptr->common.arg_info;
 		trampoline.attributes = mptr->common.attributes;
 
 		zend_free_trampoline(mptr);

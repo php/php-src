@@ -1817,7 +1817,6 @@ again:
         if (override_state != LXB_URL_STATE__UNDEF
             && url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE)
         {
-            p -= 1;
             state = LXB_URL_STATE_FILE_HOST_STATE;
             goto again;
         }

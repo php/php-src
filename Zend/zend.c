@@ -38,6 +38,8 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_hrtime.h"
+#include "zend_enum.h"
+#include "zend_closures.h"
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
@@ -155,7 +157,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
@@ -1054,6 +1056,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
+	zend_object_handlers_startup();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
@@ -1077,6 +1080,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
+
+    zend_enum_startup();
 }
 /* }}} */
 
@@ -1973,7 +1978,6 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 	zend_result ret = SUCCESS;
 	if (op_array) {
 		zend_execute(op_array, retval);
-		zend_exception_restore();
 		if (UNEXPECTED(EG(exception))) {
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();

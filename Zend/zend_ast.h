@@ -76,6 +76,7 @@ enum _zend_ast_kind {
 	ZEND_AST_TYPE,
 	ZEND_AST_CONSTANT_CLASS,
 	ZEND_AST_CALLABLE_CONVERT,
+	ZEND_AST_PLACEHOLDER_ARG,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -167,14 +168,14 @@ enum _zend_ast_kind {
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_CLASS_CONST_GROUP,
 
-	// Pseudo node for initializing enums
-	ZEND_AST_CONST_ENUM_INIT,
-
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
 	ZEND_AST_ENUM_CASE,
 	ZEND_AST_PROP_ELEM,
+
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
 
 	/* 5 child nodes */
 
@@ -229,10 +230,12 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[5];
 } zend_ast_decl;
 
+// TODO: rename
 typedef struct _zend_ast_fcc {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	uint32_t lineno;    /* Line number */
+	zend_ast *args;
 	ZEND_MAP_PTR_DEF(zend_function *, fptr);
 } zend_ast_fcc;
 
@@ -307,27 +310,39 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_0(zend_ast_kind kind);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zend_ast *child);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_0(zend_ast_kind kind);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_1(zend_ast_kind kind, zend_ast *child);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
+
 # define zend_ast_create(...) \
 	ZEND_AST_SPEC_CALL(zend_ast_create, __VA_ARGS__)
 # define zend_ast_create_ex(...) \
 	ZEND_AST_SPEC_CALL_EX(zend_ast_create_ex, __VA_ARGS__)
 # define zend_ast_create_list(init_children, ...) \
 	ZEND_AST_SPEC_CALL(zend_ast_create_list, __VA_ARGS__)
+# define zend_ast_create_arg_list(init_children, ...) \
+	ZEND_AST_SPEC_CALL(zend_ast_create_arg_list, __VA_ARGS__)
 
 #else
 ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
+ZEND_API zend_ast *zend_ast_create_arg_list(uint32_t init_children, zend_ast_kind kind, ...);
 #endif
 
 ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op);
+
+/* Like zend_ast_list_add(), but wraps the list into a ZEND_AST_CALLABLE_CONVERT
+ * if any arg is a ZEND_AST_PLACEHOLDER_ARG. list can be a zend_ast_list, or a
+ * zend_ast_fcc. */
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_arg_list_add(zend_ast *list, zend_ast *arg);
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(void);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args);
 
 typedef struct {
 	bool had_side_effects;
@@ -424,5 +439,7 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 }
 
 zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
+
+zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
 
 #endif

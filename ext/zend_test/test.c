@@ -37,10 +37,12 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "test_arginfo.h"
+#include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
+#include "zend_observer.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -72,6 +74,7 @@ static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
+static zend_class_entry *zend_test_enum_with_interface;
 static zend_class_entry *zend_test_magic_call;
 static zend_object_handlers zend_test_class_handlers;
 
@@ -490,7 +493,6 @@ static ZEND_FUNCTION(zend_call_method)
 		ce = zend_lookup_class(Z_STR_P(class_or_object));
 		if (!ce) {
 			zend_error_noreturn(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
-			return;
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
@@ -1030,16 +1032,38 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
+typedef struct _zend_test_object {
+	zend_internal_function *tmp_method;
+	zend_object std;
+} zend_test_object;
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
-	zend_object *obj = zend_objects_new(class_type);
-	object_properties_init(obj, class_type);
-	obj->handlers = &zend_test_class_handlers;
-	return obj;
+	zend_test_object *intern = zend_object_alloc(sizeof(zend_test_object), class_type);
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	return &intern->std;
+}
+
+static void zend_test_class_free_obj(zend_object *object)
+{
+	zend_test_object *intern = (zend_test_object*)((char*)object - XtOffsetOf(zend_test_object, std));
+
+	if (intern->tmp_method) {
+		zend_internal_function *func = intern->tmp_method;
+		intern->tmp_method = NULL;
+		zend_string_release_ex(func->function_name, 0);
+		zend_free_internal_arg_info(func, false);
+		efree(func);
+	}
+
+	zend_object_std_dtor(object);
 }
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
+	zend_test_object *intern = (zend_test_object*)((char*)(*object) - XtOffsetOf(zend_test_object, std));
+
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
 
@@ -1057,6 +1081,41 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
 		fptr->doc_comment = NULL;
+
+		return (zend_function*)fptr;
+	} else if (zend_string_equals_literal_ci(name, "testTmpMethodWithArgInfo")) {
+		if (intern->tmp_method) {
+			return (zend_function*)intern->tmp_method;
+		}
+
+		const zend_function_entry *entry = &class_ZendTestTmpMethods_methods[0];
+		zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
+		memset(fptr, 0, sizeof(zend_internal_function));
+		fptr->type = ZEND_INTERNAL_FUNCTION;
+		fptr->handler = entry->handler;
+		fptr->function_name = zend_string_init(entry->fname, strlen(entry->fname), false);
+		fptr->scope = intern->std.ce;
+		fptr->prototype = NULL;
+		fptr->T = ZEND_OBSERVER_ENABLED;
+		fptr->fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
+
+		zend_internal_function_info *info = (zend_internal_function_info*)entry->arg_info;
+
+		uint32_t num_arg_info = 1 + entry->num_args;
+		zend_arg_info *arg_info = safe_emalloc(num_arg_info, sizeof(zend_arg_info), 0);
+		for (uint32_t i = 0; i < num_arg_info; i++) {
+			zend_convert_internal_arg_info(&arg_info[i], &entry->arg_info[i], i == 0, false);
+		}
+
+		fptr->arg_info = arg_info + 1;
+		fptr->num_args = entry->num_args;
+		if (info->required_num_args == (uint32_t)-1) {
+			fptr->required_num_args = entry->num_args;
+		} else {
+			fptr->required_num_args = info->required_num_args;
+		}
+
+		intern->tmp_method = fptr;
 
 		return (zend_function*)fptr;
 	}
@@ -1143,6 +1202,18 @@ static ZEND_METHOD(_ZendTestClass, variadicTest) {
 	}
 
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
+ZEND_METHOD(ZendTestTmpMethods, testTmpMethodWithArgInfo)
+{
+	zend_object *obj;
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2);
+		Z_PARAM_OPTIONAL;
+		Z_PARAM_OBJ_OR_NULL(obj);
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
 }
 
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
@@ -1450,11 +1521,14 @@ PHP_MINIT_FUNCTION(zend_test)
 	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
+	zend_test_class->default_object_handlers = &zend_test_class_handlers;
 
 	zend_test_child_class = register_class__ZendTestChildClass(zend_test_class);
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
+	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
 
 	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
 
@@ -1502,6 +1576,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+	zend_test_enum_with_interface = register_class_ZendTestEnumWithInterface(zend_test_interface);
 
 	zend_test_magic_call = register_class__ZendTestMagicCall();
 

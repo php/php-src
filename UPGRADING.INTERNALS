@@ -49,14 +49,76 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
     instead.
   . PHP_HAVE_STREAMS macro removed from <php.h>.
+  . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
+    zend_internal_arg_info on internal functions, unless the
+    ZEND_ACC_USER_ARG_INFO flag was set.
+  . Added zend_ast_call_get_args() to fetch the argument node from any call
+    node.
+  . The zend_exception_save() and zend_exception_restore() functions were
+    removed.
+  . Internal functions that return by reference are now expected to
+    automatically unwrap references when the result of the call is stored in an
+    IS_TMP_VAR variable. This may be achieved by calling the
+    zend_return_unwrap_ref() function.
+  . The php_math_round_mode_from_enum() function now takes a
+    zend_enum_RoundingMode parameter.
+  . Added Z_PARAM_ENUM().
+  . Added zend_enum_fetch_case_id().
+  . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
+    more correctly represents the generic nature of the returned pointer and
+    allows to remove explicit casts, but possibly breaks pointer arithmetic
+    performed on the result.
+  . The zend_dval_to_lval_cap() function no longer takes a second
+    zend_string* parameter.
 
 ========================
 2. Build system changes
 ========================
 
+- Abstract:
+  . Minimum required PHP version found on the host system for running scripts
+    like build/gen_stub.php during development has been updated from 7.4 to 8.1.
+  . build/gen_stub.php may now generate a _decl.h file in addition to
+    the _arginfo.h file, if the stub declares enums and is annotated with
+    @generate-c-enums. For each enum the file will contain a C enum. Enum
+    values can be compared to the result of
+    zend_enum_fetch_case_id(zend_object*).
+
+- Unix build system changes:
+  . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
+    HAVE_STRUCT_STAT_ST_BLOCKS).
+
 ========================
 3. Module changes
 ========================
+
+- ext/mbstring:
+  . Added GB18030-2022 to default encoding list for zh-CN.
+
+- ext/mysqlnd:
+  . Dropped session_options parameter from all methods in mysqlnd_auth.
+    The same information is present in conn->options and should be used
+    instead.
+
+- ext/session:
+  . php_session_flush() now returns a bool rather than a zend_result.
+  . Removed session_adapt_url().
+  . PS_OPEN_ARGS is now defined as
+    `void **mod_data, zend_string *save_path, zend_string *session_name`
+    rather than
+    `void **mod_data, const char *save_path, const char *session_name`
+  . PS_FUNCS() now includes the PS_VALIDATE_SID_FUNC()
+  . PS_MOD() now requires that the PS_CREATE_SID_FUNC() and
+    PS_VALIDATE_SID_FUNC() functions are defined.
+  . PS_FUNCS_SID() and PS_MOD_SID() have been removed.
+    Either use PS_FUNCS()/PS_MOD() or PS_FUNCS_UPDATE_TIMESTAMP()/
+    PS_MOD_UPDATE_TIMESTAMP() if timestamp support exists.
+
+- ext/standard:
+  . _php_error_log() now has a formal return type of zend_result.
+  . _php_error_log() now accepts zend_string* values instead of char*.
+  . _php_error_log_ex() has been removed.
+  . php_mail()'s extra_cmd parameter is now a zend_string*.
 
 - ext/xml:
   . Removed the XML_ExpatVersion() libxml compatibility wrapper,
@@ -67,6 +129,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 4. OpCode changes
 ========================
+
+- Added ZEND_TYPE_ASSERT to check a value's type against the parameter
+  type of a function, throwing a TypeError on failure as if the function
+  was called. Used in optimizations that elide function calls.
 
 ========================
 5. SAPI changes

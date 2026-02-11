@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit sqlite_driver.stub.php instead.
  * Stub hash: dc901bd60d17c1a2cdb40a118e2c6cd6eb0396e3 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_SQLite_Ext_sqliteCreateFunction, 0, 2, _IS_BOOL, 0)

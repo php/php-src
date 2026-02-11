@@ -27,7 +27,6 @@
 #include "main/SAPI.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "zend_exceptions.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;
@@ -1341,17 +1340,55 @@ struct _phar_t {
 	int count;
 };
 
+static zend_always_inline void phar_call_method_with_unwrap(zend_object *obj, const char *name, zval *rv)
+{
+	zend_call_method_with_0_params(obj, obj->ce, NULL, name, rv);
+	if (Z_ISREF_P(rv)) {
+		zend_unwrap_reference(rv);
+	}
+}
+
+/* This is the same as phar_get_or_create_entry_data(), but allows overriding metadata via SplFileInfo. */
+static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, char **error, zval *file_info)
+{
+	uint32_t timestamp;
+
+	/* Expects an instance of SplFileInfo if it is an object, which is verified in phar_build(). */
+	if (Z_TYPE_P(file_info) == IS_OBJECT && Z_OBJCE_P(file_info)->type == ZEND_USER_CLASS) {
+		zval rv;
+		phar_call_method_with_unwrap(Z_OBJ_P(file_info), "getMTime", &rv);
+
+		if (UNEXPECTED(Z_TYPE(rv) != IS_LONG)) {
+			/* Either it's a tentative type failure, an exception happened, or the function returned false to indicate failure. */
+			*error = estrdup("getMTime() must return an int");
+			return NULL;
+		}
+
+		/* Sanity check bounds. See GH-14141. */
+		if (ZEND_LONG_UINT_OVFL(Z_LVAL(rv))) {
+			*error = estrdup("timestamp is limited to 32-bit");
+			return NULL;
+		}
+
+		timestamp = Z_LVAL(rv);
+	} else {
+		timestamp = time(NULL);
+	}
+
+	return phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, true, timestamp);
+}
+
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 {
 	zval *value;
 	bool close_fp = true;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
+	size_t str_key_len, base_len = p_obj->base ? ZSTR_LEN(p_obj->base) : 0;
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t fname_len;
 	size_t contents_len;
-	char *fname, *error = NULL, *base = ZSTR_VAL(p_obj->base), *save = NULL, *temp = NULL;
+	char *fname = NULL, *error = NULL, *base = p_obj->base ? ZSTR_VAL(p_obj->base) : NULL, *save = NULL, *temp = NULL;
 	zend_string *opened;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
@@ -1411,7 +1448,6 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
-				char *test = NULL;
 				spl_filesystem_object *intern = PHAR_FETCH_INTERNAL_EX(value);
 
 				if (!base_len) {
@@ -1419,43 +1455,59 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 					return ZEND_HASH_APPLY_STOP;
 				}
 
-				switch (intern->type) {
-					case SPL_FS_DIR: {
-						zend_string *test_str = spl_filesystem_object_get_path(intern);
-						fname_len = spprintf(&fname, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
-						zend_string_release_ex(test_str, /* persistent */ false);
-						if (php_stream_stat_path(fname, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
-							/* ignore directories */
-							efree(fname);
-							return ZEND_HASH_APPLY_KEEP;
-						}
+				zend_string *tmp_dir_str = NULL;
 
-						test = expand_filepath(fname, NULL);
-						efree(fname);
+				/* Take into account that SplFileObject may be overridden.
+				 * The purpose here is to grab the path name of the file to add. */
+				if (Z_OBJCE_P(value)->type == ZEND_USER_CLASS) {
+					zval rv;
+					phar_call_method_with_unwrap(Z_OBJ_P(value), "getPathname", &rv);
 
-						if (test) {
-							fname = test;
-							fname_len = strlen(fname);
-						} else {
-							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
-							return ZEND_HASH_APPLY_STOP;
-						}
-
-						save = fname;
-						goto phar_spl_fileinfo;
+					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "getPathname() must return a string");
+						return ZEND_HASH_APPLY_STOP;
 					}
-					case SPL_FS_INFO:
-					case SPL_FS_FILE:
-						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
-						if (!fname) {
-							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
-							return ZEND_HASH_APPLY_STOP;
+					tmp_dir_str = Z_STR(rv);
+				} else {
+					/* Not a user class, so we can grab the data internally quickly. */
+					switch (intern->type) {
+						case SPL_FS_DIR: {
+							zend_string *test_str = spl_filesystem_object_get_path(intern);
+							const char slash = DEFAULT_SLASH;
+							tmp_dir_str = zend_string_concat3(
+								ZSTR_VAL(test_str), ZSTR_LEN(test_str),
+								&slash, 1,
+								intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name)
+							);
+							zend_string_release_ex(test_str, /* persistent */ false);
+							break;
 						}
-
-						fname_len = strlen(fname);
-						save = fname;
-						goto phar_spl_fileinfo;
+						case SPL_FS_INFO:
+						case SPL_FS_FILE:
+							fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
+							break;
+					}
 				}
+
+				if (tmp_dir_str) {
+					if (php_stream_stat_path(ZSTR_VAL(tmp_dir_str), &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
+						/* ignore directories */
+						zend_string_release_ex(tmp_dir_str, /* persistent */ false);
+						return ZEND_HASH_APPLY_KEEP;
+					}
+
+					fname = expand_filepath(ZSTR_VAL(tmp_dir_str), NULL);
+					zend_string_release_ex(tmp_dir_str, /* persistent */ false);
+				}
+
+				if (!fname) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
+					return ZEND_HASH_APPLY_STOP;
+				}
+
+				fname_len = strlen(fname);
+				save = fname;
+				goto phar_spl_fileinfo;
 			}
 			ZEND_FALLTHROUGH;
 		default:
@@ -1586,7 +1638,7 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, true))) {
+	if (!(data = phar_build_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, &error, value))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 
@@ -1775,7 +1827,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	zend_string *base = ZSTR_EMPTY_ALLOC();
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &obj, zend_ce_traversable, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|P!", &obj, zend_ce_traversable, &base) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3544,7 +3596,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, true, time(NULL)))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
 			efree(error);
@@ -3616,7 +3668,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true))) {
+	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, ZSTR_VAL(dir_name), ZSTR_LEN(dir_name), "w+b", 2, &error, true, time(NULL)))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Directory %s does not exist and cannot be created: %s", ZSTR_VAL(dir_name), error);
 			efree(error);
@@ -4388,7 +4440,7 @@ PHP_METHOD(PharFileInfo, __construct)
 
 	entry_obj->entry = entry_info;
 	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {
-		++entry_info->fp_refcount;
+		++entry_info->fileinfo_lock_count;
 		/* The phar data must exist to keep the alias locked. */
 		ZEND_ASSERT(!phar_data->is_persistent);
 		++phar_data->refcount;
@@ -4433,7 +4485,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 		efree(entry);
 		entry_obj->entry = NULL;
 	} else if (!entry->is_persistent) {
-		--entry->fp_refcount;
+		--entry->fileinfo_lock_count;
 		/* The entry itself still lives in the manifest,
 		 * which will either be freed here if the file info was the last reference; or freed later. */
 		entry_obj->entry = NULL;

@@ -452,9 +452,9 @@ ok:
 /* Bind to a local IP address.
  * Returns the bound socket, or -1 on failure.
  * */
-/* {{{ php_network_bind_socket_to_local_addr */
-php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, long sockopts, zend_string **error_string, int *error_code
+php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned port,
+		int socktype, long sockopts, php_sockvals *sockvals, zend_string **error_string,
+		int *error_code
 		)
 {
 	int num_addrs, n, err = 0;
@@ -533,6 +533,35 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 			setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
 		}
 #endif
+#ifdef SO_KEEPALIVE
+		if (sockopts & STREAM_SOCKOP_SO_KEEPALIVE) {
+			setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&sockoptval, sizeof(sockoptval));
+		}
+#endif
+
+		/* Set socket values if provided */
+		if (sockvals != NULL) {
+#if defined(TCP_KEEPIDLE)
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#elif defined(TCP_KEEPALIVE)
+			/* macOS uses TCP_KEEPALIVE instead of TCP_KEEPIDLE */
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#endif
+#ifdef TCP_KEEPINTVL
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPINTVL) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (char*)&sockvals->keepalive.keepintvl, sizeof(sockvals->keepalive.keepintvl));
+			}
+#endif
+#ifdef TCP_KEEPCNT
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPCNT) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
+			}
+#endif
+		}
 
 		n = bind(sock, sa, socklen);
 
@@ -560,7 +589,13 @@ bound:
 	return sock;
 
 }
-/* }}} */
+
+php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
+		int socktype, long sockopts, zend_string **error_string, int *error_code
+		)
+{
+	return php_network_bind_socket_to_local_addr_ex(host, port, socktype, sockopts, NULL, error_string, error_code);
+}
 
 PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr, size_t addrlen, struct sockaddr *sa, socklen_t *sl)
 {
@@ -766,15 +801,22 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
  * version of the address will be emalloc'd and returned.
  * */
 
-/* {{{ php_network_accept_incoming */
-PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+ /* Accept a client connection from a server socket,
+ * using an optional timeout.
+ * Returns the peer address in addr/addrlen (it will emalloc
+ * these, so be sure to efree the result).
+ * If you specify textaddr, a text-printable
+ * version of the address will be emalloc'd and returned.
+ * */
+
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
 		int *error_code,
-		int tcp_nodelay
+		php_sockvals *sockvals
 		)
 {
 	php_socket_t clisock = -1;
@@ -798,11 +840,19 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 					textaddr,
 					addr, addrlen
 					);
-			if (tcp_nodelay) {
 #ifdef TCP_NODELAY
+			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_NODELAY)) {
+				int tcp_nodelay = 1;
 				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
-#endif
 			}
+#endif
+#ifdef TCP_KEEPALIVE
+			/* MacOS does not inherit TCP_KEEPALIVE so it needs to be set */
+			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_KEEPIDLE)) {
+				setsockopt(clisock, IPPROTO_TCP, TCP_KEEPALIVE,
+						(char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#endif
 		} else {
 			error = php_socket_errno();
 		}
@@ -817,18 +867,31 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 
 	return clisock;
 }
-/* }}} */
+
+PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		int tcp_nodelay
+		)
+{
+	php_sockvals sockvals = { .mask = tcp_nodelay ? PHP_SOCKVAL_TCP_NODELAY : 0 };
+
+	return php_network_accept_incoming_ex(srvsock, textaddr, addr, addrlen, timeout, error_string,
+			error_code, &sockvals);
+}
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
  * Returns the connected (or connecting) socket, or -1 on failure.
  * */
-
-/* {{{ php_network_connect_socket_to_host */
-php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
+php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, const char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
 		)
 {
 	int num_addrs, n, fatal = 0;
@@ -952,6 +1015,40 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			}
 		}
 #endif
+
+#ifdef SO_KEEPALIVE
+		{
+			int val = 1;
+			if (sockopts & STREAM_SOCKOP_SO_KEEPALIVE) {
+				setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&val, sizeof(val));
+			}
+		}
+#endif
+
+		/* Set socket values if provided */
+		if (sockvals != NULL) {
+#if defined(TCP_KEEPIDLE)
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#elif defined(TCP_KEEPALIVE)
+			/* macOS uses TCP_KEEPALIVE instead of TCP_KEEPIDLE */
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+			}
+#endif
+#ifdef TCP_KEEPINTVL
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPINTVL) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (char*)&sockvals->keepalive.keepintvl, sizeof(sockvals->keepalive.keepintvl));
+			}
+#endif
+#ifdef TCP_KEEPCNT
+			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPCNT) {
+				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
+			}
+#endif
+		}
+
 		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 				timeout ? &working_timeout : NULL,
 				error_string, error_code);
@@ -998,7 +1095,15 @@ connected:
 
 	return sock;
 }
-/* }}} */
+
+php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts
+		)
+{
+	return php_network_connect_socket_to_host_ex(host, port, socktype, asynchronous, timeout,
+			error_string, error_code, bindto, bindport, sockopts, NULL);
+}
 
 /* {{{ php_any_addr
  * Fills any (wildcard) address into php_sockaddr_storage

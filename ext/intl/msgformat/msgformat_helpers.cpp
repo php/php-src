@@ -455,6 +455,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 						char *message;
 						spprintf(&message, 0, "Invalid UTF-8 data in string argument: "
 							"'%s'", ZSTR_VAL(str));
+						zend_tmp_string_release(tmp_str);
 						intl_errors_set(&err, err.code, message);
 						efree(message);
 						delete text;

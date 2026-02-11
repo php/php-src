@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Install dependencies
         run: |

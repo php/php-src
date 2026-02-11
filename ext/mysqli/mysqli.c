@@ -32,7 +32,6 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
-#include "zend_attributes.h"
 #include "mysqli_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)

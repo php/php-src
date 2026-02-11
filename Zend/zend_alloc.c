@@ -1480,7 +1480,6 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
 	if (UNEXPECTED(size < real_size)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
-		return NULL;
 	}
 #endif
 	if (EXPECTED(size <= ZEND_MM_MAX_SMALL_SIZE)) {
@@ -3466,12 +3465,14 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size)
 {
 #if ZEND_MM_STORAGE
-	zend_mm_storage tmp_storage, *storage;
+	zend_mm_storage *storage;
+	zend_mm_storage tmp_storage = {
+		.handlers = *handlers,
+		.data = data,
+	};
 	zend_mm_chunk *chunk;
 	zend_mm_heap *heap;
 
-	memcpy((zend_mm_handlers*)&tmp_storage.handlers, handlers, sizeof(zend_mm_handlers));
-	tmp_storage.data = data;
 	chunk = (zend_mm_chunk*)handlers->chunk_alloc(&tmp_storage, ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(chunk == NULL)) {
 #if ZEND_MM_ERROR

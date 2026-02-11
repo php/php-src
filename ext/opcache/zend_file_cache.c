@@ -384,6 +384,12 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
+		if (!IS_SERIALIZED(fcc->args)) {
+			SERIALIZE_PTR(fcc->args);
+			tmp = fcc->args;
+			UNSERIALIZE_PTR(tmp);
+			zend_file_cache_serialize_ast(tmp, script, info, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1304,6 +1310,10 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_NEW(fcc->fptr);
+		if (!IS_UNSERIALIZED(fcc->args)) {
+			UNSERIALIZE_PTR(fcc->args);
+			zend_file_cache_unserialize_ast(fcc->args, script, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -2109,7 +2119,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return;
 	}
-	
+
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);

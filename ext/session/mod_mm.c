@@ -215,7 +215,7 @@ static zend_result ps_mm_key_exists(ps_mm *data, const zend_string *key)
 }
 
 const ps_module ps_mod_mm = {
-	PS_MOD_SID(mm)
+	PS_MOD(mm)
 };
 
 #define PS_MM_DATA ps_mm *data = PS_GET_MOD_DATA()
@@ -264,7 +264,7 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	size_t save_path_len = strlen(PS(save_path));
+	size_t save_path_len = ZSTR_LEN(PS(save_path));
 	size_t mod_name_len = strlen(sapi_module.name);
 	size_t euid_len;
 	char *ps_mm_path, euid[30];
@@ -284,8 +284,8 @@ PHP_MINIT_FUNCTION(ps_mm)
 	/* Directory + '/' + File + Module Name + Effective UID + \0 */
 	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
 
-	memcpy(ps_mm_path, PS(save_path), save_path_len);
-	if (save_path_len && PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
+	memcpy(ps_mm_path, ZSTR_VAL(PS(save_path)), save_path_len);
+	if (save_path_len && ZSTR_VAL(PS(save_path))[save_path_len - 1] != DEFAULT_SLASH) {
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		save_path_len++;
 	}
@@ -346,28 +346,9 @@ PS_READ_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RD);
 
-	/* If there is an ID and strict mode, verify existence */
-	if (PS(use_strict_mode)
-		&& ps_mm_key_exists(data, key) == FAILURE) {
-		/* key points to PS(id), but cannot change here. */
-		if (key) {
-			efree(PS(id));
-			PS(id) = NULL;
-		}
-		PS(id) = PS(mod)->s_create_sid((void **)&data);
-		if (!PS(id)) {
-			return FAILURE;
-		}
-		if (PS(use_cookies)) {
-			PS(send_cookie) = 1;
-		}
-		php_session_reset_id();
-		PS(session_status) = php_session_active;
-	}
-
-	sd = ps_sd_lookup(data, PS(id), false);
+	sd = ps_sd_lookup(data, key, false);
 	if (sd) {
-		*val = zend_string_init(sd->data, sd->datalen, 0);
+		*val = zend_string_init(sd->data, sd->datalen, false);
 		ret = SUCCESS;
 	}
 
@@ -476,7 +457,7 @@ PS_CREATE_SID_FUNC(mm)
 		/* Check collision */
 		if (ps_mm_key_exists(data, sid) == SUCCESS) {
 			if (sid) {
-				zend_string_release_ex(sid, 0);
+				zend_string_release_ex(sid, false);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {
@@ -486,6 +467,25 @@ PS_CREATE_SID_FUNC(mm)
 	} while(!sid);
 
 	return sid;
+}
+
+/*
+ * Check session ID existence for use_strict_mode support.
+ * PARAMETERS: PS_VALIDATE_SID_ARGS in php_session.h
+ * RETURN VALUE: SUCCESS or FAILURE.
+ *
+ * Return SUCCESS for valid key(already existing session).
+ * Return FAILURE for invalid key(non-existing session).
+ * *mod_data, *key are guaranteed to have non-NULL values.
+ */
+PS_VALIDATE_SID_FUNC(mm)
+{
+	PS_MM_DATA;
+
+	mm_lock(data->mm, MM_LOCK_RD);
+	zend_result ret = ps_mm_key_exists(data, key)
+	mm_unlock(data->mm);
+	return ret;
 }
 
 #endif

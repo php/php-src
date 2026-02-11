@@ -213,8 +213,10 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 	/* generate unique inode number for alias/filename, so no phars will conflict */
 	ssb->sb.st_ino = 0;
 
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ssb->sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	ssb->sb.st_blocks = -1;
 #endif
 
@@ -247,8 +249,8 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						size_t old_size = ZSTR_LEN(ms->data);
 						ms->data = zend_string_realloc(ms->data, newsize, 0);
 						memset(ZSTR_VAL(ms->data) + old_size, 0, newsize - old_size);
-						ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 					}
+					ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}
 	}

@@ -120,7 +120,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string(zend_string *Data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn);
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num);
 static int _php_image_type(zend_string *data);
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(imagecreatefromtga)
 /* }}} */
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -2102,14 +2102,14 @@ PHP_FUNCTION(imagewbmp)
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD);
 }
 /* }}} */
 
 /* {{{ Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2);
 }
 /* }}} */
 
@@ -4309,7 +4309,7 @@ PHP_FUNCTION(imageresolution)
  *
  * Stream Handling
  * Formerly contained within ext/gd/gd_ctx.c and included
- * at the the top of this file
+ * at the top of this file
  *
  ********************************************************/
 

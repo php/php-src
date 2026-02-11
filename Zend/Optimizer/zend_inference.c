@@ -3840,7 +3840,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 					tmp &= ~MAY_BE_RC1;
 				}
 				if (opline->opcode == ZEND_FETCH_STATIC_PROP_IS) {
-					tmp |= MAY_BE_UNDEF;
+					tmp |= MAY_BE_NULL;
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -5336,6 +5336,13 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				return 1;
 			}
 			return 0;
+		case ZEND_YIELD_FROM: {
+			uint32_t t1 = OP1_INFO();
+			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY && MAY_BE_EMPTY_ONLY(t1)) {
+				return false;
+			}
+			return true;
+		}
 		default:
 			return 1;
 	}

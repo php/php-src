@@ -922,8 +922,12 @@ ZEND_API bool zend_is_iterable(const zval *iterable);
 
 ZEND_API bool zend_is_countable(const zval *countable);
 
+ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info,
+		const zend_internal_arg_info *arg_info, bool is_return_info,
+		bool permanent);
+
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
-		zval *default_value_zval, const zend_internal_arg_info *arg_info);
+		zval *default_value_zval, const zend_arg_info *arg_info);
 
 END_EXTERN_C()
 
@@ -2004,6 +2008,13 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 
 #define Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(dest_obj, _ce, dest_long, is_null) \
 	Z_PARAM_OBJ_OF_CLASS_OR_LONG_EX(dest_obj, _ce, dest_long, is_null, 1)
+
+#define Z_PARAM_ENUM(dest, _ce) \
+	{ \
+		zend_object *_tmp = NULL; \
+		Z_PARAM_OBJ_OF_CLASS(_tmp, _ce); \
+		dest = zend_enum_fetch_case_id(_tmp); \
+	}
 
 /* old "p" */
 #define Z_PARAM_PATH_EX(dest, dest_len, check_null, deref) \

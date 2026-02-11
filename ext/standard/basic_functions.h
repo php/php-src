@@ -27,6 +27,8 @@
 
 #include "url_scanner_ex.h"
 
+#include "basic_functions_decl.h"
+
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
@@ -46,9 +48,7 @@ PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(browscap);
 
-/* Left for BC (not binary safe!) */
-PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers);
-PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
+PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const zend_string *opt, const zend_string *headers);
 
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;

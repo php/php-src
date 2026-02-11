@@ -196,6 +196,7 @@ typedef struct _phar_metadata_tracker {
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
 	uint32_t                 uncompressed_filesize;
+	/* modification time */
 	uint32_t                 timestamp;
 	uint32_t                 compressed_filesize;
 	uint32_t                 crc32;
@@ -215,6 +216,7 @@ typedef struct _phar_entry_info {
 	php_stream               *cfp;
 	enum phar_fp_type        fp_type;
 	int                      fp_refcount;
+	unsigned int             fileinfo_lock_count;
 	char                     *tmp;
 	phar_archive_data        *phar;
 	char                     *link; /* symbolic link to another file */
@@ -438,7 +440,7 @@ php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links);
 phar_entry_info *phar_get_link_source(phar_entry_info *entry);
-zend_result phar_open_archive_fp(phar_archive_data *phar);
+php_stream *phar_open_archive_fp(phar_archive_data *phar);
 zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
@@ -464,7 +466,7 @@ void phar_entry_delref(phar_entry_data *idata);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, bool security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security);
-ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
+ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *archive, char **error);

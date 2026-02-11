@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit converter.stub.php instead.
  * Stub hash: f351fbf3afd9753fb16c87903c3dbd5e4621c024 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UConverter___construct, 0, 0, 0)

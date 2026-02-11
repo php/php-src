@@ -41,7 +41,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 #ifndef PHP_WIN32
 #include "unixd.h"

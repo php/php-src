@@ -23,6 +23,14 @@ PHP 8.6 UPGRADE NOTES
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
 
+- Session:
+  . A ValueError is not thrown if $name is a string containing null bytes in
+    session_module_name().
+
+- Standard:
+  . Invalid mode values now throw in array_filter() instead of being silently
+    defaulted to 0.
+
 ========================================
 2. New Features
 ========================================
@@ -31,16 +39,38 @@ PHP 8.6 UPGRADE NOTES
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
 
+- Fileinfo:
+  . finfo_file() now works with remote streams.
+
 - Intl:
-  . Added IntlNumberRangeFormatter class to format an interval of two numbers with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
-    IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
+    IntlNumberRangeFormatter::COLLAPSE_NONE,
+    IntlNumberRangeFormatter::COLLAPSE_UNIT,
+    IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
+
+- JSON:
+  . Added extra info about error location to the JSON error messages returned
+    from json_last_error_msg() and JsonException message.
+
+- Phar:
+  . Overriding the getMTime() and getPathname() methods of SplFileInfo now
+    influences the result of the phar buildFrom family of functions.
+    This makes it possible to override the timestamp and names of files.
 
 - Streams:
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
+  . Added stream socket context options so_keepalive, tcp_keepidle,
+    tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
+    options.
+  . Allowed casting casting filtered streams as file descriptor for select.
 
 ========================================
 3. Changes in SAPI modules
@@ -54,8 +84,23 @@ PHP 8.6 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- OpenSSL:
+  . Output of openssl_x509_parse() contains criticalExtensions listing all
+    critical certificate extensions.
+
 - Phar:
   . Phar::mungServer() now supports reference values.
+
+- Posix:
+  . posix_access() now throws a ValueError exception if the flags
+    argument is invalid.
+  . posix_mkfifo() now throws a ValueError exception if the permissions
+    argument is invalid.
+
+- Sockets:
+  . socket_addrinfo_lookup() now has an additional optional argument $error
+    when not null, and on failure, gives the error code (one of the EAI_*
+    constants).
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
@@ -65,6 +110,11 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- Standard:
+  . `clamp()` returns the given value if in range, else return the nearest
+    bound.
+    RFC: https://wiki.php.net/rfc/clamp_v2
 
 ========================================
 7. New Classes and Interfaces
@@ -81,9 +131,36 @@ PHP 8.6 UPGRADE NOTES
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
 
+- mysqli
+  . Added new constant MYSQLI_OPT_COMPRESS.
+
 ========================================
 10. New Global Constants
 ========================================
+
+- Sockets:
+  . TCP_USER_TIMEOUT (Linux only).
+  . AF_UNSPEC.
+  . EAI_BADFLAGS.
+  . EAI_NONAME.
+  . EAI_AGAIN.
+  . EAI_FAIL.
+  . EAI_NODATA.
+  . EAI_FAMILY.
+  . EAI_SOCKTYPE.
+  . EAI_SERVICE.
+  . EAI_ADDRFAMILY.
+  . EAI_SYSTEM.
+  . EAI_OVERFLOW
+  . EAI_INPROGRESS.
+  . EAI_CANCELED.
+  . EAI_NOTCANCELED.
+  . EAI_ALLDONE.
+  . EAI_INTR.
+  . EAI_IDN_ENCODE.
+
+- Standard
+  . ARRAY_FILTER_USE_KEY.
 
 ========================================
 11. Changes to INI File Handling
@@ -119,10 +196,15 @@ PHP 8.6 UPGRADE NOTES
 
 - Core:
   . `printf()` using only `%s` and `%d` will be compiled into the equivalent
-    string interpolation, avoiding the overhead of a function call and repeatedly
-    parsing the format string.
+    string interpolation, avoiding the overhead of a function call and
+    repeatedly parsing the format string.
   . Arguments are now passed more efficiently to known constructors (e.g. when
     using new self()).
+  . array_map() using a first-class callable or partial function application
+    callback will be compiled into the equivalent foreach-loop, avoiding the
+    creation of intermediate Closures, the overhead of calling userland
+    callbacks from internal functions and providing for better insight for the
+    JIT.
 
 - DOM:
   . Made splitText() faster and consume less memory.

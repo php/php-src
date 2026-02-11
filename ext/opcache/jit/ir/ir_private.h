@@ -887,7 +887,7 @@ void ir_print_escaped_str(const char *s, size_t len, FILE *f);
 
 #define IR_IS_CONST_OP(op)       ((op) > IR_NOP && (op) <= IR_C_FLOAT)
 #define IR_IS_FOLDABLE_OP(op)    ((op) <= IR_LAST_FOLDABLE_OP)
-#define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC)
+#define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC || (op) == IR_LABEL)
 
 ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx);
 
@@ -908,7 +908,7 @@ IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 	return 0;
 }
 
-IR_ALWAYS_INLINE bool ir_ref_is_true(ir_ctx *ctx, ir_ref ref)
+IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 {
 	if (ref == IR_TRUE) {
 		return 1;
@@ -946,12 +946,13 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_UNUSED            0x0
 #define IR_OPND_DATA              0x1
 #define IR_OPND_CONTROL           0x2
-#define IR_OPND_CONTROL_DEP       0x3
-#define IR_OPND_CONTROL_REF       0x4
-#define IR_OPND_STR               0x5
-#define IR_OPND_NUM               0x6
-#define IR_OPND_PROB              0x7
-#define IR_OPND_PROTO             0x8
+#define IR_OPND_LABEL_REF         0x3
+#define IR_OPND_CONTROL_DEP       0x4
+#define IR_OPND_CONTROL_REF       0x5
+#define IR_OPND_STR               0x6
+#define IR_OPND_NUM               0x7
+#define IR_OPND_PROB              0x8
+#define IR_OPND_PROTO             0x9
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -1013,6 +1014,9 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_HAS_VA_ARG_FP       (1<<9)
 #define IR_HAS_FP_RET_SLOT     (1<<10)
 #define IR_16B_FRAME_ALIGNMENT (1<<11)
+#define IR_HAS_BLOCK_ADDR      (1<<12)
+#define IR_PREALLOCATED_STACK  (1<<13)
+
 
 /* Temporary: MEM2SSA -> SCCP */
 #define IR_MEM2SSA_VARS        (1<<25)
@@ -1092,6 +1096,7 @@ void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref);
 void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
 
 /*** Iterative Optimization ***/
+void ir_iter_add_uses(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist);
 void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
 void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
 void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
@@ -1175,16 +1180,17 @@ typedef enum _ir_fold_action {
 	IR_FOLD_DO_CONST
 } ir_fold_action;
 
-ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3, ir_insn *op1_insn, ir_insn *op2_insn, ir_insn *op3_insn);
+ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3,
+                  const ir_insn *op1_insn, const ir_insn *op2_insn, const ir_insn *op3_insn);
 
 /*** Alias Analyzes (see ir.c) ***/
-ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr);
-ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var);
+ir_ref ir_find_aliasing_load(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr);
+ir_ref ir_find_aliasing_vload(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var);
 ir_ref ir_find_aliasing_store(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
 ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val);
 
 /*** Predicates (see ir.c) ***/
-ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition);
+ir_ref ir_check_dominating_predicates(const ir_ctx *ctx, ir_ref ref, ir_ref condition);
 
 /*** IR Live Info ***/
 typedef ir_ref                   ir_live_pos;
@@ -1248,11 +1254,10 @@ struct _ir_live_range {
 #define IR_LIVE_INTERVAL_HAS_HINT_REGS   (1<<2)
 #define IR_LIVE_INTERVAL_HAS_HINT_REFS   (1<<3)
 #define IR_LIVE_INTERVAL_MEM_PARAM       (1<<4)
-#define IR_LIVE_INTERVAL_MEM_LOAD        (1<<5)
-#define IR_LIVE_INTERVAL_COALESCED       (1<<6)
-#define IR_LIVE_INTERVAL_SPILL_SPECIAL   (1<<7) /* spill slot is pre-allocated in a special area (see ir_ctx.spill_reserved_base) */
-#define IR_LIVE_INTERVAL_SPILLED         (1<<8)
-#define IR_LIVE_INTERVAL_SPLIT_CHILD     (1<<9)
+#define IR_LIVE_INTERVAL_COALESCED       (1<<5)
+#define IR_LIVE_INTERVAL_SPILL_SPECIAL   (1<<6) /* spill slot is pre-allocated in a special area (see ir_ctx.spill_reserved_base) */
+#define IR_LIVE_INTERVAL_SPILLED         (1<<7)
+#define IR_LIVE_INTERVAL_SPLIT_CHILD     (1<<8)
 
 struct _ir_live_interval {
 	uint8_t           type;
@@ -1274,9 +1279,9 @@ struct _ir_live_interval {
 	ir_live_interval *list_next; /* linked list of active, inactive or unhandled intervals */
 };
 
-typedef int (*emit_copy_t)(ir_ctx *ctx, uint8_t type, ir_ref from, ir_ref to);
+typedef int (*emit_copy_t)(ir_ctx *ctx, uint8_t type, ir_ref from, ir_ref to, void *data);
 
-int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy);
+int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy, void *data);
 
 #if defined(IR_REGSET_64BIT)
 
@@ -1362,16 +1367,44 @@ IR_ALWAYS_INLINE ir_reg ir_regset_pop_first(ir_regset *set)
 
 #endif /* defined(IR_REGSET_64BIT) */
 
+/*** Calling Conventions ***/
+#if defined(IR_REGSET_64BIT)
+struct _ir_call_conv_dsc {
+	bool          cleanup_stack_by_callee: 1; /* use "retn $size" to return */
+	bool          pass_struct_by_val: 1;      /* pass aggreagate by value, otherwise their copies are passed by ref */
+	bool          sysv_varargs: 1;            /* Use SysV varargs ABI */
+	bool          shadow_param_regs: 1;       /* registers for INT and FP parametrs shadow each other */
+	                                          /* (WIN64: 1-st arg is passed in %rcx/%xmm0, 2-nd in %rdx/%xmm1) */
+	uint8_t       shadow_store_size;          /* reserved stack space to keep arguemnts passed in registers (WIN64) */
+	uint8_t       int_param_regs_count;       /* number of registers for INT parameters */
+	uint8_t       fp_param_regs_count;        /* number of registers for FP parameters */
+	int8_t        int_ret_reg;                /* register to return INT value */
+	int8_t        fp_ret_reg;                 /* register to return FP value */
+	int8_t        fp_varargs_reg;             /* register to pass number of fp register arguments into vararg func */
+	int8_t        scratch_reg;                /* pseudo register to reffer srcatch regset (clobbered by call) */
+	const int8_t *int_param_regs;             /* registers for INT parameters */
+	const int8_t *fp_param_regs;              /* registers for FP parameters */
+	ir_regset     preserved_regs;             /* preserved or callee-saved registers */
+};
+
+extern const ir_regset ir_scratch_regset[];
+#endif
+
+typedef struct _ir_call_conv_dsc ir_call_conv_dsc;
+
+const ir_call_conv_dsc *ir_get_call_conv_dsc(uint32_t flags);
+
 /*** IR Register Allocation ***/
 /* Flags for ctx->regs[][] (low bits are used for register number itself) */
 typedef struct _ir_reg_alloc_data {
+	const ir_call_conv_dsc *cc;
 	int32_t unused_slot_4;
 	int32_t unused_slot_2;
 	int32_t unused_slot_1;
 	ir_live_interval **handled;
 } ir_reg_alloc_data;
 
-int32_t ir_allocate_spill_slot(ir_ctx *ctx, ir_type type, ir_reg_alloc_data *data);
+int32_t ir_allocate_spill_slot(ir_ctx *ctx, ir_type type);
 
 IR_ALWAYS_INLINE void ir_set_alocated_reg(ir_ctx *ctx, ir_ref ref, int op_num, int8_t reg)
 {
@@ -1405,9 +1438,27 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 
 #define IR_RULE_MASK 0xff
 
+#define IR_MAX_REG_ARGS 64
+
 extern const char *ir_rule_name[];
 
-typedef struct _ir_target_constraints ir_target_constraints;
+typedef struct _ir_tmp_reg {
+	union {
+		uint8_t num;
+		int8_t  reg;
+	};
+	uint8_t     type;
+	int8_t      start;
+	int8_t      end;
+} ir_tmp_reg;
+
+typedef struct {
+	int8_t      def_reg;
+	uint8_t     tmps_count;
+	uint8_t     hints_count;
+	ir_tmp_reg  tmp_regs[3];
+	int8_t      hints[IR_MAX_REG_ARGS + 3];
+} ir_target_constraints;
 
 #define IR_TMP_REG(_num, _type, _start, _end) \
 	(ir_tmp_reg){.num=(_num), .type=(_type), .start=(_start), .end=(_end)}
@@ -1419,9 +1470,7 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 void ir_fix_stack_frame(ir_ctx *ctx);
 
 /* Utility */
-ir_type ir_get_return_type(ir_ctx *ctx);
-bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn);
-bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn);
+const ir_proto_t *ir_call_proto(const ir_ctx *ctx, const ir_insn *insn);
 
 //#define IR_BITSET_LIVENESS
 

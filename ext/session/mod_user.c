@@ -27,19 +27,19 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
 	if (PS(in_save_handler)) {
-		PS(in_save_handler) = 0;
+		PS(in_save_handler) = false;
 		ZVAL_UNDEF(retval);
 		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
 		return;
 	}
-	PS(in_save_handler) = 1;
+	PS(in_save_handler) = true;
 	if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {
 		ZVAL_NULL(retval);
 	}
-	PS(in_save_handler) = 0;
+	PS(in_save_handler) = false;
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
@@ -83,12 +83,11 @@ PS_OPEN_FUNC(user)
 {
 	zval args[2];
 	zval retval;
-	zend_result ret = FAILURE;
 
 	ZEND_ASSERT(!Z_ISUNDEF(PSF(open)));
 
-	ZVAL_STRING(&args[0], (char*)save_path);
-	ZVAL_STRING(&args[1], (char*)session_name);
+	ZVAL_STR(&args[0], zend_string_dup(save_path, false));
+	ZVAL_STR(&args[1], zend_string_dup(session_name, false));
 
 	zend_try {
 		ps_call_handler(&PSF(open), 2, args, &retval);
@@ -100,16 +99,16 @@ PS_OPEN_FUNC(user)
 		zend_bailout();
 	} zend_end_try();
 
-	PS(mod_user_implemented) = 1;
+	PS(mod_user_implemented) = true;
 
-	ret = verify_bool_return_type_userland_calls(&retval);
+	zend_result ret = verify_bool_return_type_userland_calls(&retval);
 	zval_ptr_dtor(&retval);
 	return ret;
 }
 
 PS_CLOSE_FUNC(user)
 {
-	bool bailout = 0;
+	bool bailout = false;
 	zval retval;
 	zend_result ret = FAILURE;
 
@@ -123,10 +122,10 @@ PS_CLOSE_FUNC(user)
 	zend_try {
 		ps_call_handler(&PSF(close), 0, NULL, &retval);
 	} zend_catch {
-		bailout = 1;
+		bailout = true;
 	} zend_end_try();
 
-	PS(mod_user_implemented) = 0;
+	PS(mod_user_implemented) = false;
 
 	if (bailout) {
 		if (!Z_ISUNDEF(retval)) {

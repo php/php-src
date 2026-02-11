@@ -124,21 +124,32 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	}
 }
 
-void zend_free_internal_arg_info(zend_internal_function *function) {
-	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		function->arg_info) {
+ZEND_API void zend_free_internal_arg_info(zend_internal_function *function,
+		bool persistent) {
+	if (function->arg_info) {
+		ZEND_ASSERT((persistent || (function->fn_flags & ZEND_ACC_NEVER_CACHE))
+				&& "Functions with non-persistent arg_info must be flagged ZEND_ACC_NEVER_CACHE");
 
 		uint32_t i;
 		uint32_t num_args = function->num_args + 1;
-		zend_internal_arg_info *arg_info = function->arg_info - 1;
+		zend_arg_info *arg_info = function->arg_info - 1;
 
 		if (function->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ true);
+			bool is_return_info = i == 0;
+			if (!is_return_info) {
+				zend_string_release_ex(arg_info[i].name, persistent);
+				if (arg_info[i].default_value) {
+					zend_string_release_ex(arg_info[i].default_value,
+							persistent);
+				}
+			}
+			zend_type_release(arg_info[i].type, persistent);
 		}
-		free(arg_info);
+
+		pefree(arg_info, persistent);
 	}
 }
 
@@ -157,7 +168,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 		/* For methods this will be called explicitly. */
 		if (!function->common.scope) {
-			zend_free_internal_arg_info(&function->internal_function);
+			zend_free_internal_arg_info(&function->internal_function, true);
 
 			if (function->common.attributes) {
 				zend_hash_release(function->common.attributes);
@@ -474,12 +485,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 				if (fn->common.scope == ce) {
-					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
-						zend_free_internal_arg_info(&fn->internal_function);
-					}
+					zend_free_internal_arg_info(&fn->internal_function, true);
 
 					if (fn->common.attributes) {
 						zend_hash_release(fn->common.attributes);
@@ -985,6 +993,35 @@ static void zend_calc_live_ranges(
 				if (EXPECTED(!keeps_op1_alive(opline))) {
 					/* OP_DATA is really part of the previous opcode. */
 					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+				}
+			} else if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) && opline->extended_value & ZEND_FREE_ON_RETURN) {
+				int jump_offset = 1;
+				while (((opline + jump_offset)->opcode == ZEND_FREE || (opline + jump_offset)->opcode == ZEND_FE_FREE)
+					&& (opline + jump_offset)->extended_value & ZEND_FREE_ON_RETURN) {
+					++jump_offset;
+				}
+				// loop var frees directly precede the jump (or return) operand, except that ZEND_VERIFY_RETURN_TYPE may happen first.
+				if ((opline + jump_offset)->opcode == ZEND_VERIFY_RETURN_TYPE) {
+					++jump_offset;
+				}
+				/* FREE with ZEND_FREE_ON_RETURN immediately followed by RETURN frees
+				 * the loop variable on early return. We need to split the live range
+				 * so GC doesn't access the freed variable after this FREE. */
+				uint32_t opnum_last_use = last_use[var_num];
+				zend_op *opline_last_use = op_array->opcodes + opnum_last_use;
+				ZEND_ASSERT(opline_last_use->opcode == opline->opcode); // any ZEND_FREE_ON_RETURN must be followed by a FREE without
+				if (opnum + jump_offset + 1 != opnum_last_use) {
+					emit_live_range_raw(op_array, var_num, opline->opcode == ZEND_FE_FREE ? ZEND_LIVE_LOOP : ZEND_LIVE_TMPVAR,
+							opnum + jump_offset + 1, opnum_last_use);
+				}
+
+				/* Update last_use so next range includes this FREE */
+				last_use[var_num] = opnum;
+
+				/* Store opline offset to loop end */
+				opline->op2.opline_num = opnum_last_use - opnum;
+				if (opline_last_use->extended_value & ZEND_FREE_ON_RETURN) {
+					opline->op2.opline_num += opline_last_use->op2.opline_num;
 				}
 			}
 		}

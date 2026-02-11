@@ -701,7 +701,8 @@ function main(): void
     write_information($user_tests, $phpdbg);
 
     if ($test_cnt) {
-        putenv('NO_INTERACTION=1');
+        $exts_tested = [];
+        $exts_skipped = [];
         usort($test_files, "test_sort");
         $start_time = hrtime(true);
 
@@ -780,7 +781,7 @@ function main(): void
         show_end($start_timestamp, $start_time, $end_time);
         show_summary();
 
-        save_results($output_file, /* prompt_to_save_results: */ true);
+        save_results($output_file, /* prompt_to_save_results: */ !$just_save_results);
     }
 
     $junit->saveXML();
@@ -906,7 +907,7 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
 {
     global $sum_results, $failed_test_summary, $PHP_FAILED_TESTS, $php;
 
-    if (getenv('NO_INTERACTION')) {
+    if (getenv('NO_INTERACTION') && $prompt_to_save_results) {
         return;
     }
 
@@ -1821,8 +1822,8 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
-    $orig_php = $php;
     $php = escapeshellarg($php);
+    $orig_php = $php;
 
     $retried = false;
 retry:

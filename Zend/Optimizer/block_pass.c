@@ -176,7 +176,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					 && zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						VAR_SOURCE(op1) = NULL;
 						if (opline->opcode != ZEND_JMP_NULL
-						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))
+						 /* FETCH_W with ZEND_FETCH_GLOBAL_LOCK does not free op1, which will be used again. */
+						 && !(opline->opcode == ZEND_FETCH_W && (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK))) {
 							literal_dtor(&ZEND_OP1_LITERAL(src));
 							MAKE_NOP(src);
 						}
@@ -289,20 +291,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								MAKE_NOP(opline);
 								++(*opt_count);
 								break;
-							case ZEND_ASSIGN:
-							case ZEND_ASSIGN_DIM:
-							case ZEND_ASSIGN_OBJ:
-							case ZEND_ASSIGN_STATIC_PROP:
-							case ZEND_ASSIGN_OP:
-							case ZEND_ASSIGN_DIM_OP:
-							case ZEND_ASSIGN_OBJ_OP:
-							case ZEND_ASSIGN_STATIC_PROP_OP:
-							case ZEND_PRE_INC:
-							case ZEND_PRE_DEC:
-							case ZEND_PRE_INC_OBJ:
-							case ZEND_PRE_DEC_OBJ:
-							case ZEND_PRE_INC_STATIC_PROP:
-							case ZEND_PRE_DEC_STATIC_PROP:
+							case ZEND_QM_ASSIGN:
 								if (src < op_array->opcodes + block->start) {
 									break;
 								}
@@ -310,8 +299,26 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
 								++(*opt_count);
+								if (src->op1_type & (IS_VAR|IS_TMP_VAR)) {
+									src->opcode = ZEND_FREE;
+								} else if (src->op1_type == IS_CONST) {
+									MAKE_NOP(src);
+								} else if (src->op1_type == IS_CV) {
+									src->opcode = ZEND_CHECK_VAR;
+									SET_UNUSED(src->result);
+								}
 								break;
 							default:
+								if (!zend_op_may_elide_result(src->opcode)) {
+									break;
+								}
+								if (src < op_array->opcodes + block->start) {
+									break;
+								}
+								src->result_type = IS_UNUSED;
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 						}
 					}
@@ -985,6 +992,8 @@ optimize_const_unary_op:
 					src = VAR_SOURCE(opline->op1);
 					if (src &&
 						src->opcode != ZEND_COPY_TMP &&
+						/* See gh20628_borked_live_range_calc.phpt. */
+						src->opcode != ZEND_NEW &&
 						src->opcode != ZEND_ADD_ARRAY_ELEMENT &&
 						src->opcode != ZEND_ADD_ARRAY_UNPACK &&
 						(src->opcode != ZEND_DECLARE_LAMBDA_FUNCTION ||
@@ -1228,7 +1237,7 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 		}
 		next_block++;
 	}
-	while (next_block->len == 0 && !(next_block->flags & ZEND_BB_PROTECTED)) {
+	while (next_block->len == 0 && !(next_block->flags & (ZEND_BB_TARGET|ZEND_BB_PROTECTED))) {
 		next_block = cfg->blocks + next_block->successors[0];
 	}
 	return next_block;

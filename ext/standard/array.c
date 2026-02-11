@@ -4156,7 +4156,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 	uint32_t argc, i;
 	zval *src_entry;
 	HashTable *src, *dest;
-	uint32_t count = 0;
+	uint64_t count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
@@ -4174,6 +4174,11 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 			RETURN_THROWS();
 		}
 		count += zend_hash_num_elements(Z_ARRVAL_P(arg));
+	}
+
+	if (UNEXPECTED(count >= HT_MAX_SIZE)) {
+		zend_throw_error(NULL, "The total number of elements must be lower than %u", HT_MAX_SIZE);
+		RETURN_THROWS();
 	}
 
 	if (argc == 2) {
@@ -6448,7 +6453,7 @@ PHP_FUNCTION(array_filter)
 	zval args[2];
 	zval retval;
 	bool have_callback = 0;
-	zend_long use_type = 0;
+	zend_long use_type = ARRAY_FILTER_USE_VALUE;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache;
@@ -6460,6 +6465,16 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
+
+	switch (use_type) {
+		case ARRAY_FILTER_USE_VALUE:
+		case ARRAY_FILTER_USE_BOTH:
+		case ARRAY_FILTER_USE_KEY:
+			break;
+		default:
+			zend_argument_value_error(3, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
+		RETURN_THROWS();
+	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
 		RETVAL_EMPTY_ARRAY();
@@ -6481,7 +6496,7 @@ PHP_FUNCTION(array_filter)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
-			if (use_type) {
+			if (use_type != ARRAY_FILTER_USE_VALUE) {
 				/* Set up the key */
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);

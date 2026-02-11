@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit ldap.stub.php instead.
  * Stub hash: 9e47a0d85336f0e149abbdf56468513c5d31780f */
 
 #if defined(HAVE_ORALDAP)

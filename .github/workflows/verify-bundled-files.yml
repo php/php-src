@@ -18,11 +18,12 @@ permissions:
 
 jobs:
   VERIFY_BUNDLED_FILES:
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     name: Verify Bundled Files
     runs-on: ubuntu-24.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Detect changed files
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}

@@ -36,11 +36,10 @@
 
 PHP_METHOD(SessionHandler, open)
 {
-	char *save_path = NULL, *session_name = NULL;
-	size_t save_path_len, session_name_len;
+	zend_string *save_path, *session_name;
 	zend_result ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &save_path, &session_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -54,7 +53,7 @@ PHP_METHOD(SessionHandler, open)
 	} zend_end_try();
 
 	if (SUCCESS == ret) {
-		PS(mod_user_is_open) = 1;
+		PS(mod_user_is_open) = true;
 	}
 
 	RETURN_BOOL(SUCCESS == ret);
@@ -70,7 +69,7 @@ PHP_METHOD(SessionHandler, close)
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	PS(mod_user_is_open) = 0;
+	PS(mod_user_is_open) = false;
 
 	zend_try {
 		ret = PS(default_mod)->s_close(&PS(mod_data));

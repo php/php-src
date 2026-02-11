@@ -1,0 +1,44 @@
+/* This is a generated file, edit php_uri.stub.php instead.
+ * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99 */
+
+#ifndef ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
+#define ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
+
+typedef enum zend_enum_Uri_UriComparisonMode {
+	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
+	ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment = 2,
+} zend_enum_Uri_UriComparisonMode;
+
+typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToAscii = 1,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToUnicode = 2,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainInvalidCodePoint = 3,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_HostInvalidCodePoint = 4,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4EmptyPart = 5,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4TooManyParts = 6,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4NonNumericPart = 7,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4NonDecimalPart = 8,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4OutOfRangePart = 9,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6Unclosed = 10,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6InvalidCompression = 11,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6TooManyPieces = 12,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6MultipleCompression = 13,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6InvalidCodePoint = 14,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv6TooFewPieces = 15,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4InIpv6TooManyPieces = 16,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4InIpv6InvalidCodePoint = 17,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4InIpv6OutOfRangePart = 18,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_Ipv4InIpv6TooFewParts = 19,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidUrlUnit = 20,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_SpecialSchemeMissingFollowingSolidus = 21,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_MissingSchemeNonRelativeUrl = 22,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidReverseSoldius = 23,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidCredentials = 24,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_HostMissing = 25,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_PortOutOfRange = 26,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_PortInvalid = 27,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetter = 28,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetterHost = 29,
+} zend_enum_Uri_WhatWg_UrlValidationErrorType;
+
+#endif /* ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H */

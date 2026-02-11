@@ -65,8 +65,8 @@ BB0:
      ; level=0
      ; children=(BB1, BB2, BB3)
 0000 INIT_FCALL 0 %d string("rand")
-0001 #2.V2 [long] = DO_ICALL
-0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.V2 [long] int(10)
+0001 #2.T2 [long] = DO_ICALL
+0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.T2 [long] int(10)
 0003 JMPZ #3.T3 [long] RANGE[MIN..MAX] BB2
 
 BB1:
@@ -111,8 +111,8 @@ BB0:
      ; level=0
      ; children=(BB1, BB2, BB3)
 0000 INIT_FCALL 0 %d string("rand")
-0001 #2.V2 [long] = DO_ICALL
-0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.V2 [long] int(10)
+0001 #2.T2 [long] = DO_ICALL
+0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.T2 [long] int(10)
 0003 JMPZ #3.T3 [long] RANGE[MIN..MAX] BB2
 
 BB1:

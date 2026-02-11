@@ -160,8 +160,8 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([1.0.3], [--no-generation-date])
-dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 7.4.
-PHP_PROG_PHP([7.4])
+dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 8.1.
+PHP_PROG_PHP([8.1])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto extension with re2c],
@@ -504,11 +504,11 @@ AS_VAR_IF([php_cv_have_alignof], [yes],
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
-if test "$(uname -s 2>/dev/null)" != "QNX"; then
-  AC_STRUCT_ST_BLOCKS
-fi
+AC_CHECK_MEMBERS(m4_normalize([
+  struct stat.st_blksize,
+  struct stat.st_blocks,
+  struct stat.st_rdev
+]))
 
 dnl Checks for types.
 AC_TYPE_UID_T
@@ -1738,6 +1738,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_ast.c
     zend_atomic.c
     zend_attributes.c
+    zend_autoload.c
     zend_builtin_functions.c
     zend_call_stack.c
     zend_closures.c

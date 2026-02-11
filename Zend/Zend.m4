@@ -487,7 +487,7 @@ uint64_t key = UINT64_C(0x9d7f71d2bd296364);
 uintptr_t _a = 0;
 uintptr_t _b = 0;
 
-uintptr_t __attribute__((preserve_none)) fun(uintptr_t a, uintptr_t b) {
+uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_t b) {
 	_a = a;
 	_b = b;
 	return (uintptr_t)const3;

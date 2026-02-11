@@ -191,7 +191,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	/* strip leading "/" */
 	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true, time(NULL)))) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options, "%s", error);
 				efree(error);
@@ -254,13 +254,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			} else {
 				php_stream *stream = phar_get_pharfp(phar);
 				if (stream == NULL) {
-					if (UNEXPECTED(FAILURE == phar_open_archive_fp(phar))) {
+					stream = phar_open_archive_fp(phar);
+					if (UNEXPECTED(!stream)) {
 						php_stream_wrapper_log_error(wrapper, options, "phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
 						efree(internal_file);
 						php_url_free(resource);
 						return NULL;
 					}
-					stream = phar_get_pharfp(phar);
 				}
 
 				phar_entry_info *entry;
@@ -526,8 +526,10 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
 	if (!is_temp_dir) {
 		ssb->sb.st_ino = data->inode;
 	}
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ssb->sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	ssb->sb.st_blocks = -1;
 #endif
 }

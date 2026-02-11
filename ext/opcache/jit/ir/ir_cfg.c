@@ -77,12 +77,86 @@ void ir_reset_cfg(ir_ctx *ctx)
 	}
 }
 
+static void ir_remove_phis_inputs(ir_ctx *ctx, ir_use_list *use_list, int new_inputs_count, ir_bitset life_inputs)
+{
+	ir_ref i, j, n, k, *p, *q, use;
+	ir_insn *use_insn;
+
+	if (new_inputs_count == 1) {
+		for (k = use_list->count, p = q = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
+			use = *p;
+			use_insn = &ctx->ir_base[use];
+			if (use_insn->op == IR_PHI) {
+				/* Convert PHI to COPY */
+				n = use_insn->inputs_count;
+				i = 2;
+				for (j = 2; j <= n; j++) {
+					ir_ref input = ir_insn_op(use_insn, j);
+
+					if (ir_bitset_in(life_inputs, j - 1)) {
+						use_insn->op1 = ir_insn_op(use_insn, j);
+					} else if (input > 0) {
+						ir_use_list_remove_one(ctx, input, use);
+					}
+				}
+				use_insn->op = IR_COPY;
+				use_insn->inputs_count = 1;
+				for (j = 2; j <= n; j++) {
+					ir_insn_set_op(use_insn, j, IR_UNUSED);
+				}
+				continue;
+			}
+
+			/*compact use list */
+			if (p != q){
+				*q = use;
+			}
+			q++;
+		}
+
+		if (p != q) {
+			use_list->count -= (p - q);
+			do {
+				*q = IR_UNUSED; /* clenu-op the removed tail */
+				q++;
+			} while (p != q);
+		}
+	} else {
+		for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
+			use = *p;
+			use_insn = &ctx->ir_base[use];
+			if (use_insn->op == IR_PHI) {
+				n = use_insn->inputs_count;
+				i = 2;
+				for (j = 2; j <= n; j++) {
+					ir_ref input = ir_insn_op(use_insn, j);
+
+					if (ir_bitset_in(life_inputs, j - 1)) {
+						IR_ASSERT(input);
+						if (i != j) {
+							ir_insn_set_op(use_insn, i, input);
+						}
+						i++;
+					} else if (input > 0) {
+						ir_use_list_remove_one(ctx, input, use);
+					}
+				}
+				use_insn->inputs_count = i - 1;
+				for (j = i; j <= n; j++) {
+					ir_insn_set_op(use_insn, j, IR_UNUSED);
+				}
+			}
+		}
+	}
+}
+
 static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t *_blocks, ir_block *blocks, uint32_t bb_count)
 {
 	uint32_t b, count = 0;
 	ir_block *bb = blocks + 1;
 	ir_insn *insn;
 	ir_ref i, j, n, *ops, input;
+	ir_bitset life_inputs = NULL;
 
 	for (b = 1; b <= bb_count; b++, bb++) {
 		bb->successors = count;
@@ -96,12 +170,27 @@ static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t 
 			for (i = 1, j = 1; i <= n; i++) {
 				input = ops[i];
 				if (_blocks[input]) {
+					if (life_inputs) {
+						ir_bitset_incl(life_inputs, i);
+					}
 					if (i != j) {
 						ops[j] = ops[i];
 					}
 					j++;
-				} else if (input > 0) {
-					ir_use_list_remove_one(ctx, input, bb->start);
+				} else {
+					if (ctx->use_lists[bb->start].count > 1) {
+						/* Some inputs of this MERGE are deleted and we have to update the depended PHIs */
+						if (!life_inputs) {
+							int k;
+							life_inputs = ir_bitset_malloc(n + 1);
+							for (k = 1; k < i; k++) {
+								ir_bitset_incl(life_inputs, k);
+							}
+						}
+					}
+					if (input > 0) {
+						ir_use_list_remove_one(ctx, input, bb->start);
+					}
 				}
 			}
 			j--;
@@ -114,6 +203,10 @@ static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t 
 				j++;
 				for (;j <= n; j++) {
 					ops[j] = IR_UNUSED;
+				}
+				if (life_inputs) {
+					ir_remove_phis_inputs(ctx, &ctx->use_lists[bb->start], insn->inputs_count, life_inputs);
+					ir_mem_free(life_inputs);
 				}
 			}
 		}
@@ -375,8 +468,7 @@ static void ir_remove_predecessor(ir_ctx *ctx, ir_block *bb, uint32_t from)
 
 static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 {
-	ir_ref i, j, n, k, *p, *q, use;
-	ir_insn *use_insn;
+	ir_ref i, j, n;
 	ir_use_list *use_list;
 	ir_bitset life_inputs;
 	ir_insn *insn = &ctx->ir_base[merge];
@@ -402,80 +494,14 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 	}
 	if (i == 1) {
 		insn->op = IR_BEGIN;
-		insn->inputs_count = 1;
-		use_list = &ctx->use_lists[merge];
-		if (use_list->count > 1) {
-			n++;
-			for (k = use_list->count, p = q = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
-				use = *p;
-				use_insn = &ctx->ir_base[use];
-				if (use_insn->op == IR_PHI) {
-					/* Convert PHI to COPY */
-					i = 2;
-					for (j = 2; j <= n; j++) {
-						ir_ref input = ir_insn_op(use_insn, j);
-
-						if (ir_bitset_in(life_inputs, j - 1)) {
-							use_insn->op1 = ir_insn_op(use_insn, j);
-						} else if (input > 0) {
-							ir_use_list_remove_one(ctx, input, use);
-						}
-					}
-					use_insn->op = IR_COPY;
-					use_insn->inputs_count = 1;
-					for (j = 2; j <= n; j++) {
-						ir_insn_set_op(use_insn, j, IR_UNUSED);
-					}
-					continue;
-				}
-
-				/*compact use list */
-				if (p != q){
-					*q = use;
-				}
-				q++;
-			}
-
-			if (p != q) {
-				use_list->count -= (p - q);
-				do {
-					*q = IR_UNUSED; /* clenu-op the removed tail */
-					q++;
-				} while (p != q);
-			}
-		}
-	} else {
-		insn->inputs_count = i;
-
-		use_list = &ctx->use_lists[merge];
-		if (use_list->count > 1) {
-			n++;
-			for (k = use_list->count, p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
-				use = *p;
-				use_insn = &ctx->ir_base[use];
-				if (use_insn->op == IR_PHI) {
-					i = 2;
-					for (j = 2; j <= n; j++) {
-						ir_ref input = ir_insn_op(use_insn, j);
-
-						if (ir_bitset_in(life_inputs, j - 1)) {
-							IR_ASSERT(input);
-							if (i != j) {
-								ir_insn_set_op(use_insn, i, input);
-							}
-							i++;
-						} else if (input > 0) {
-							ir_use_list_remove_one(ctx, input, use);
-						}
-					}
-					use_insn->inputs_count = i - 1;
-					for (j = i; j <= n; j++) {
-						ir_insn_set_op(use_insn, j, IR_UNUSED);
-					}
-				}
-			}
-		}
 	}
+	insn->inputs_count = i;
+
+	use_list = &ctx->use_lists[merge];
+	if (use_list->count > 1) {
+		ir_remove_phis_inputs(ctx, use_list, i, life_inputs);
+	}
+
 	ir_mem_free(life_inputs);
 	ir_use_list_remove_all(ctx, from, merge);
 }
@@ -820,11 +846,14 @@ slow_case:
 			succ_b = ctx->cfg_edges[bb->successors];
 			if (bb->successors_count != 1) {
 				/* LOOP_END/END may be linked with the following ENTRY by a fake edge */
-				IR_ASSERT(bb->successors_count == 2);
-				if (blocks[succ_b].flags & IR_BB_ENTRY) {
+				if (bb->successors_count != 2) {
+					complete = 0;
+					break;
+				} else if (blocks[succ_b].flags & IR_BB_ENTRY) {
 					succ_b = ctx->cfg_edges[bb->successors + 1];
-				} else {
-					IR_ASSERT(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY);
+				} else if (!(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY)) {
+					complete = 0;
+					break;
 				}
 			}
 			dom_depth = blocks[succ_b].dom_depth;;

@@ -1,5 +1,6 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f6bf6cdd07080c01d3a0cb08d71409d05b1084f9 */
+/* This is a generated file, edit basic_functions.stub.php instead.
+ * Stub hash: 8d1c2a735f412f8571675c6b025c3a418b68fb65
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -137,6 +138,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_min, 0, 1, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_max arginfo_min
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clamp, 0, 3, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, min, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, max, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_MASK(1, array, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
@@ -339,7 +346,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_KEY")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
@@ -2197,6 +2204,12 @@ static const zend_frameless_function_info frameless_function_infos_max[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(clamp, 3);
+static const zend_frameless_function_info frameless_function_infos_clamp[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(clamp, 3), 3 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(in_array, 2);
 ZEND_FRAMELESS_FUNCTION(in_array, 3);
 static const zend_frameless_function_info frameless_function_infos_in_array[] = {
@@ -2332,6 +2345,7 @@ ZEND_FUNCTION(current);
 ZEND_FUNCTION(key);
 ZEND_FUNCTION(min);
 ZEND_FUNCTION(max);
+ZEND_FUNCTION(clamp);
 ZEND_FUNCTION(array_walk);
 ZEND_FUNCTION(array_walk_recursive);
 ZEND_FUNCTION(in_array);
@@ -2925,6 +2939,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(key, arginfo_key)
 	ZEND_RAW_FENTRY("min", zif_min, arginfo_min, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_min, NULL)
 	ZEND_RAW_FENTRY("max", zif_max, arginfo_max, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_max, NULL)
+	ZEND_RAW_FENTRY("clamp", zif_clamp, arginfo_clamp, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_clamp, NULL)
 	ZEND_FE(array_walk, arginfo_array_walk)
 	ZEND_FE(array_walk_recursive, arginfo_array_walk_recursive)
 	ZEND_RAW_FENTRY("in_array", zif_in_array, arginfo_in_array, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_in_array, NULL)
@@ -3516,6 +3531,7 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CASE_UPPER", PHP_CASE_UPPER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", PHP_COUNT_NORMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", PHP_COUNT_RECURSIVE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_VALUE", ARRAY_FILTER_USE_VALUE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_PERSISTENT);
 	zend_constant *const_ASSERT_ACTIVE = REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);

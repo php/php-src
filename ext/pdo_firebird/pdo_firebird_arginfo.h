@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo_firebird.stub.php instead.
  * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)

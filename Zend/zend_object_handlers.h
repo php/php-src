@@ -334,6 +334,8 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
 
+void zend_object_handlers_startup(void);
+
 #define zend_release_properties(ht) do { \
 	if (ht) { \
 		zend_array_release(ht); \

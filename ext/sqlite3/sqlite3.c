@@ -143,11 +143,7 @@ PHP_METHOD(SQLite3, open)
 	rc = sqlite3_open_v2(fullpath, &(db_obj->db), flags, NULL);
 	if (rc != SQLITE_OK) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s",
-#ifdef HAVE_SQLITE3_ERRSTR
-				db_obj->db ? sqlite3_errmsg(db_obj->db) : sqlite3_errstr(rc));
-#else
-				db_obj->db ? sqlite3_errmsg(db_obj->db) : "");
-#endif
+			db_obj->db ? sqlite3_errmsg(db_obj->db) : sqlite3_errstr(rc));
 		sqlite3_close(db_obj->db);
 		if (fullpath != filename) {
 			efree(fullpath);
@@ -648,7 +644,7 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 			break;
 
 		case SQLITE3_TEXT:
-			ZVAL_STRING(data, (char*)sqlite3_column_text(stmt, column));
+			ZVAL_STRINGL(data, (const char *) sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
 			break;
 
 		case SQLITE_BLOB:
@@ -1270,13 +1266,10 @@ PHP_METHOD(SQLite3, openBlob)
 		mode = "r+b";
 	}
 
+	// since it is not persistent, php_stream_alloc can't fail
 	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, mode);
-
-	if (stream) {
-		php_stream_to_zval(stream, return_value);
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_ASSERT(stream != NULL);
+	php_stream_to_zval(stream, return_value);
 }
 /* }}} */
 
@@ -1332,7 +1325,6 @@ PHP_METHOD(SQLite3, setAuthorizer)
 /* }}} */
 
 
-#if SQLITE_VERSION_NUMBER >= 3006011
 /* {{{ Backups the current database to another one. */
 PHP_METHOD(SQLite3, backup)
 {
@@ -1386,7 +1378,6 @@ PHP_METHOD(SQLite3, backup)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ Returns the number of parameters within the prepared statement. */
 PHP_METHOD(SQLite3Stmt, paramCount)
@@ -2043,6 +2034,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 		default:
 			php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+			RETURN_FALSE;
 	}
 }
 /* }}} */

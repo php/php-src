@@ -21,61 +21,10 @@ static inline uint32_t coalesce(uint32_t a, uint32_t b)
 	return a ? a : b;
 }
 
-/* Helper for single-byte encodings which use a conversion table */
-static int mbfl_conv_singlebyte_table(int c, mbfl_convert_filter *filter, int tbl_min, const unsigned short tbl[])
-{
-	if (c >= 0 && c < tbl_min) {
-		CK((*filter->output_function)(c, filter->data));
-	} else if (c < 0) {
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	} else {
-		CK((*filter->output_function)(coalesce(tbl[c - tbl_min], MBFL_BAD_INPUT), filter->data));
-	}
-	return 0;
-}
-
-static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int tbl_min, const unsigned short tbl[])
-{
-	if (c >= 0 && c < tbl_min) {
-		CK((*filter->output_function)(c, filter->data));
-	} else if (c < 0 || c == MBFL_BAD_INPUT) {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else {
-		for (int i = 0; i < 256 - tbl_min; i++) {
-			if (c == tbl[i]) {
-				CK((*filter->output_function)(i + tbl_min, filter->data));
-				return 0;
-			}
-		}
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
 /* Initialize data structures for a single-byte encoding */
 #define DEF_SB(id, name, mime_name, aliases) \
-	static int mbfl_filt_conv_##id##_wchar(int c, mbfl_convert_filter *filter); \
-	static int mbfl_filt_conv_wchar_##id(int c, mbfl_convert_filter *filter); \
 	static size_t mb_##id##_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state); \
 	static void mb_wchar_to_##id(uint32_t *in, size_t len, mb_convert_buf *buf, bool end); \
-	static const struct mbfl_convert_vtbl vtbl_##id##_wchar = { \
-		mbfl_no_encoding_##id, \
-		mbfl_no_encoding_wchar, \
-		mbfl_filt_conv_common_ctor, \
-		NULL, \
-		mbfl_filt_conv_##id##_wchar, \
-		mbfl_filt_conv_common_flush, \
-		NULL \
-	}; \
-	static const struct mbfl_convert_vtbl vtbl_wchar_##id = { \
-		mbfl_no_encoding_wchar, \
-		mbfl_no_encoding_##id, \
-		mbfl_filt_conv_common_ctor, \
-		NULL, \
-		mbfl_filt_conv_wchar_##id, \
-		mbfl_filt_conv_common_flush, \
-		NULL \
-	}; \
 	const mbfl_encoding mbfl_encoding_##id = { \
 		mbfl_no_encoding_##id, \
 		name, \
@@ -83,8 +32,8 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 		aliases, \
 		NULL, \
 		MBFL_ENCTYPE_SBCS, \
-		&vtbl_##id##_wchar, \
-		&vtbl_wchar_##id, \
+		NULL, \
+		NULL, \
 		mb_##id##_to_wchar, \
 		mb_wchar_to_##id, \
 		NULL, \
@@ -93,12 +42,6 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 
 /* For single-byte encodings which use a conversion table */
 #define DEF_SB_TBL(id, name, mime_name, aliases, tbl_min, tbl) \
-	static int mbfl_filt_conv_##id##_wchar(int c, mbfl_convert_filter *filter) { \
-		return mbfl_conv_singlebyte_table(c, filter, tbl_min, tbl); \
-	} \
-	static int mbfl_filt_conv_wchar_##id(int c, mbfl_convert_filter *filter) { \
-		return mbfl_conv_reverselookup_table(c, filter, tbl_min, tbl); \
-	} \
 	static size_t mb_##id##_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state) \
 	{ \
 		unsigned char *p = *in, *e = p + *in_len; \
@@ -140,22 +83,6 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 static const char *ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "IBM-367", "cp367", "csASCII", NULL};
 DEF_SB(ascii, "ASCII", "US-ASCII", ascii_aliases);
 
-static int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
-{
-	CK((*filter->output_function)((c < 0x80) ? c : MBFL_BAD_INPUT, filter->data));
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
-{
-	if (c >= 0 && c < 0x80 && c != MBFL_BAD_INPUT) {
-		CK((*filter->output_function)(c, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
 static size_t mb_ascii_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -194,21 +121,6 @@ static void mb_wchar_to_ascii(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 
 static const char *iso8859_1_aliases[] = {"ISO8859-1", "latin1", NULL};
 DEF_SB(8859_1, "ISO-8859-1", "ISO-8859-1", iso8859_1_aliases);
-
-static int mbfl_filt_conv_8859_1_wchar(int c, mbfl_convert_filter *filter)
-{
-	return (*filter->output_function)(c, filter->data);
-}
-
-static int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter)
-{
-	if (c >= 0 && c < 0x100 && c != MBFL_BAD_INPUT) {
-		CK((*filter->output_function)(c, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
 
 static size_t mb_8859_1_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
@@ -494,38 +406,6 @@ static const unsigned short cp1252_ucs_table[] = {
 };
 DEF_SB(cp1252, "Windows-1252", "Windows-1252", cp1252_aliases);
 
-static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
-{
-	if (c < 0 || c == MBFL_BAD_INPUT) {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c >= 0x100) {
-		for (int n = 0; n < 32; n++) {
-			if (c == cp1252_ucs_table[n]) {
-				CK((*filter->output_function)(0x80 + n, filter->data));
-				return 0;
-			}
-		}
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c <= 0x7F || c >= 0xA0 || c == 0x81 || c == 0x8D || c == 0x8F || c == 0x90 || c == 0x9D) {
-		CK((*filter->output_function)(c, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
-static int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
-{
-	int s;
-	if (c >= 0x80 && c < 0xA0) {
-		s = coalesce(cp1252_ucs_table[c - 0x80], MBFL_BAD_INPUT);
-	} else {
-		s = c;
-	}
-	CK((*filter->output_function)(s, filter->data));
-	return 0;
-}
-
 static size_t mb_cp1252_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -700,32 +580,6 @@ static const unsigned char ucs_armscii8_table[] = {
 	0xA5, 0xA4, 0x2A, 0x2B, 0xAB, 0xAC, 0xA9, 0x2F
 };
 DEF_SB(armscii8, "ArmSCII-8", "ArmSCII-8", armscii8_aliases);
-
-static int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
-{
-	CK((*filter->output_function)((c < 0xA0) ? c : coalesce(armscii8_ucs_table[c - 0xA0], MBFL_BAD_INPUT), filter->data));
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
-{
-	if (c >= 0x28 && c <= 0x2F) {
-		CK((*filter->output_function)(ucs_armscii8_table[c - 0x28], filter->data));
-	} else if (c < 0 || c == MBFL_BAD_INPUT) {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c < 0xA0) {
-		CK((*filter->output_function)(c, filter->data));
-	} else {
-		for (int n = 0; n < 0x60; n++) {
-			if (c == armscii8_ucs_table[n]) {
-				CK((*filter->output_function)(0xA0 + n, filter->data));
-				return 0;
-			}
-		}
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
 
 static size_t mb_armscii8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {

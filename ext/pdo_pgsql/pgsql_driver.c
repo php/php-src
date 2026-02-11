@@ -520,7 +520,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 					break;
 #endif
 #ifdef CONNECTION_GSS_STARTUP
-				case CONNECTION_SSL_STARTUP:
+				case CONNECTION_GSS_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));
 					break;
 #endif
@@ -1340,6 +1340,20 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
+static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
+{
+	PGresult *res;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	if(H->server) {
+		res = PQexec(H->server, "DISCARD ALL");
+
+		if(res) {
+			PQclear(res);
+		}
+	}
+}
+
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	bool bval;
@@ -1383,7 +1397,7 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
-	NULL,
+	pdo_pgsql_request_shutdown,
 	pgsql_handle_in_transaction,
 	NULL, /* get_gc */
 	pdo_pgsql_scanner

@@ -4,8 +4,8 @@ jobs:
   arm:
     resource_class: arm.medium
     docker:
-      - image: cimg/base:current-22.04
-      - image: mysql:8.3
+      - image: cimg/base:current-24.04
+      - image: mysql:8.4
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
@@ -60,7 +60,7 @@ jobs:
               libreadline-dev \
               libldap2-dev \
               libsodium-dev \
-              libargon2-0-dev \
+              libargon2-dev \
               libmm-dev \
               libsnmp-dev \
               snmpd \
@@ -78,7 +78,7 @@ jobs:
               libqdbm-dev \
               libjpeg-dev \
               libpng-dev \
-              libfreetype6-dev
+              libfreetype-dev
       - run:
           name: ./configure
           command: |

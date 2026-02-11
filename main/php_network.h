@@ -124,6 +124,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 #define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
 #define STREAM_SOCKOP_SO_REUSEADDR        (1 << 6)
+#define STREAM_SOCKOP_SO_KEEPALIVE        (1 << 7)
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
@@ -266,9 +267,31 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
+#define PHP_SOCKVAL_TCP_NODELAY   (1 << 0)
+#define PHP_SOCKVAL_TCP_KEEPIDLE  (1 << 1)
+#define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 2)
+#define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 3)
+
+#define PHP_SOCKVAL_IS_SET(sockvals, opt) ((sockvals)->mask & (opt))
+
+typedef struct {
+	unsigned int mask;
+	int tcp_nodelay;
+	struct {
+		int keepidle;
+		int keepcnt;
+		int keepintvl;
+	} keepalive;
+} php_sockvals;
+
 BEGIN_EXTERN_C()
 PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string);
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
+
+PHPAPI php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
+		);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
@@ -286,8 +309,22 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 #define php_connect_nonb(sock, addr, addrlen, timeout) \
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
+PHPAPI php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned port,
+		int socktype, long sockopts, php_sockvals *sockvals, zend_string **error_string, int *error_code
+		);
+
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
+		);
+
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		php_sockvals *sockvals
 		);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
