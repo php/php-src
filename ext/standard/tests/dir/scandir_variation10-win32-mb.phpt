@@ -3,7 +3,7 @@ Test scandir() function : usage variations - different sorting constants
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
- // die("skip Valid only on Windows");
+  die("skip Valid only on Windows");
 }
 ?>
 --FILE--
