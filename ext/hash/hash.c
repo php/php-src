@@ -31,9 +31,6 @@
 # define PHP_HASH_HAVE_COMMONCRYPTO_PBKDF2 1
 #endif
 
-/* Internal helper from hash_sha.c, not part of the public hash API. */
-void php_hash_sha256_final32_from_context(unsigned char digest[32], const PHP_SHA256_CTX *context, const unsigned char data[32]);
-
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -524,10 +521,10 @@ static const unsigned char php_hash_sha_padding[128] = {
 
 static inline void php_hash_sha256_encode(unsigned char digest[32], const uint32_t state[8]) {
 	for (size_t i = 0; i < 8; i++) {
-		digest[i * 4] = (unsigned char) ((state[i] >> 24) & 0xff);
+		digest[(i * 4) + 0] = (unsigned char) ((state[i] >> 24) & 0xff);
 		digest[(i * 4) + 1] = (unsigned char) ((state[i] >> 16) & 0xff);
 		digest[(i * 4) + 2] = (unsigned char) ((state[i] >> 8) & 0xff);
-		digest[(i * 4) + 3] = (unsigned char) (state[i] & 0xff);
+		digest[(i * 4) + 3] = (unsigned char) ((state[i] >> 0) & 0xff);
 	}
 }
 
@@ -552,10 +549,17 @@ static inline void php_hash_sha256_final_no_zero(unsigned char digest[32], PHP_S
 	php_hash_sha256_encode(digest, context->state);
 }
 
+static inline void php_hash_sha256_final32_from_context(unsigned char digest[32], const PHP_SHA256_CTX *base_context, const unsigned char data[32]) {
+	PHP_SHA256_CTX context = *base_context;
+
+	PHP_SHA256Update(&context, data, 32);
+	php_hash_sha256_final_no_zero(digest, &context);
+	ZEND_SECURE_ZERO(&context, sizeof(context));
+}
+
 static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, const char *salt, size_t salt_len, zend_long iterations, zend_long length, bool raw_output) {
-	zend_string *returnval;
 	unsigned char *digest, *result, *K = NULL, counter[4];
-	zend_long loops, i, j, digest_length = 0;
+	zend_long digest_length;
 	const size_t digest_size = 32;
 	const size_t block_size = 64;
 	PHP_SHA256_CTX inner_context, outer_context, context;
@@ -584,11 +588,10 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 		digest_length = (length / 2) + (length % 2);
 	}
 
-	loops = (digest_length / digest_size) + ((digest_length % digest_size) ? 1 : 0);
-
+	const zend_long loops = (digest_length / digest_size) + ((digest_length % digest_size) ? 1 : 0);
 	result = safe_emalloc(loops, digest_size, 0);
 
-	for (i = 1; i <= loops; i++) {
+	for (zend_long i = 1; i <= loops; i++) {
 		unsigned char *result_block = result + ((i - 1) * digest_size);
 
 		counter[0] = (unsigned char) (i >> 24);
@@ -604,7 +607,7 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 		php_hash_sha256_final32_from_context(digest, &outer_context, digest);
 		memcpy(result_block, digest, digest_size);
 
-		for (j = 1; j < iterations; j++) {
+		for (zend_long j = 1; j < iterations; j++) {
 			php_hash_sha256_final32_from_context(digest, &inner_context, digest);
 			php_hash_sha256_final32_from_context(digest, &outer_context, digest);
 
@@ -620,7 +623,7 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 	efree(K);
 	efree(digest);
 
-	returnval = zend_string_alloc(length, 0);
+	zend_string *returnval = zend_string_alloc(length, 0);
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
@@ -634,9 +637,8 @@ static zend_string *php_hash_pbkdf2_sha256(const char *pass, size_t pass_len, co
 
 #ifdef PHP_HASH_HAVE_COMMONCRYPTO_PBKDF2
 static zend_string *php_hash_pbkdf2_sha256_commoncrypto(const char *pass, size_t pass_len, const char *salt, size_t salt_len, zend_long iterations, zend_long length, bool raw_output) {
-	zend_string *returnval;
 	unsigned char *derived = NULL;
-	zend_long derived_len = 0;
+	zend_long derived_len;
 
 	if (iterations > UINT32_MAX) {
 		return NULL;
@@ -663,7 +665,7 @@ static zend_string *php_hash_pbkdf2_sha256_commoncrypto(const char *pass, size_t
 		return NULL;
 	}
 
-	returnval = zend_string_alloc(length, 0);
+	zend_string *returnval = zend_string_alloc(length, 0);
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), derived, length);
 	} else {
