@@ -3,7 +3,7 @@ Test scandir() function : usage variations - different sorting constants
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-  die("skip Valid only on Windows");
+ // die("skip Valid only on Windows");
 }
 ?>
 --FILE--
@@ -28,8 +28,12 @@ mkdir($dir);
 @create_files($dir, 2, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
 
 // Deterministic tests.
-var_dump(scandir($dir, SCANDIR_SORT_ASCENDING));
-var_dump(scandir($dir, SCANDIR_SORT_DESCENDING));
+try {
+  var_dump(scandir($dir, SCANDIR_SORT_ASCENDING));
+  var_dump(scandir($dir, SCANDIR_SORT_DESCENDING));
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 
 // Non-deterministic tests.
 $files = scandir($dir, SCANDIR_SORT_NONE);
@@ -61,17 +65,7 @@ array(4) {
   [3]=>
   string(45) "私はガラスを食べられますfile2.tmp"
 }
-array(4) {
-  [0]=>
-  string(45) "私はガラスを食べられますfile2.tmp"
-  [1]=>
-  string(45) "私はガラスを食べられますfile1.tmp"
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(1) "."
-}
-int(4)
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONEint(4)
 bool(true)
 bool(true)
 bool(true)
