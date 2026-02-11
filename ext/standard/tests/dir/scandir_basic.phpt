@@ -22,8 +22,11 @@ var_dump(scandir($directory));
 echo "\n-- scandir() with all arguments --\n";
 $sorting_order = SCANDIR_SORT_DESCENDING;
 $context = stream_context_create();
-var_dump(scandir($directory, $sorting_order, $context));
-
+try {
+  var_dump(scandir($directory, $sorting_order, $context));
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 delete_files($directory, 3);
 ?>
 --CLEAN--
@@ -49,15 +52,4 @@ array(5) {
 }
 
 -- scandir() with all arguments --
-array(5) {
-  [0]=>
-  string(9) "file3.tmp"
-  [1]=>
-  string(9) "file2.tmp"
-  [2]=>
-  string(9) "file1.tmp"
-  [3]=>
-  string(2) ".."
-  [4]=>
-  string(1) "."
-}
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE

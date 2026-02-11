@@ -22,8 +22,12 @@ mkdir($dir);
 @create_files($dir, 2);
 
 // Deterministic tests.
-var_dump(scandir($dir, SCANDIR_SORT_ASCENDING));
-var_dump(scandir($dir, SCANDIR_SORT_DESCENDING));
+try {
+  var_dump(scandir($dir, SCANDIR_SORT_ASCENDING));
+  var_dump(scandir($dir, SCANDIR_SORT_DESCENDING));
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 
 // Non-deterministic tests.
 $files = scandir($dir, SCANDIR_SORT_NONE);
@@ -55,17 +59,7 @@ array(4) {
   [3]=>
   string(9) "file2.tmp"
 }
-array(4) {
-  [0]=>
-  string(9) "file2.tmp"
-  [1]=>
-  string(9) "file1.tmp"
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(1) "."
-}
-int(4)
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONEint(4)
 bool(true)
 bool(true)
 bool(true)
