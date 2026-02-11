@@ -7,6 +7,7 @@ on:
       - 'Zend/asm/**'
       - 'Zend/zend_simd.h'
       - 'ext/date/lib/**'
+      - 'ext/hash/xxhash/**'
       - 'ext/mbstring/**'
       - 'ext/pcre/pcre2lib/**'
       - 'ext/uri/uriparser/**'
@@ -43,6 +44,9 @@ jobs:
             timelib:
               - '.github/scripts/download-bundled/timelib.*'
               - 'ext/date/lib/**'
+            xxhash:
+              - '.github/scripts/download-bundled/xxhash.*'
+              - 'ext/hash/xxhash/**'
             'unicode-character-database':
               - '.github/scripts/download-bundled/unicode-character-database.*'
               - 'ext/mbstring/**'
@@ -79,6 +83,15 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify files"
           .github/scripts/test-directory-unchanged.sh 'ext/date/lib'
+          echo "::endgroup::"
+      - name: xxHash
+        if: ${{ !cancelled() && (steps.changes.outputs.xxhash == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/xxhash.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/hash/xxhash'
           echo "::endgroup::"
       - name: 'Unicode Character Database'
         if: ${{ !cancelled() && (steps.changes.outputs.unicode-character-database == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
