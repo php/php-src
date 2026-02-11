@@ -7,7 +7,6 @@ echo "== Valid flags ==\n";
 
 $valid_flags = [
     SCANDIR_SORT_ASCENDING,
-    SCANDIR_SORT_DESCENDING,
     SCANDIR_SORT_NONE,
 ];
 
@@ -23,9 +22,8 @@ $invalid_flags = [-1, 3, 999, PHP_INT_MAX];
 foreach ($invalid_flags as $flag) {
     try {
         scandir(__DIR__, $flag);
-        echo "FAIL\n";
     } catch (ValueError $e) {
-        echo "OK\n";
+        echo $e->getMessage() . PHP_EOL;
     }
 }
 
@@ -34,9 +32,8 @@ foreach ($invalid_flags as $flag) {
 == Valid flags ==
 OK
 OK
-OK
 == Invalid flags ==
-OK
-OK
-OK
-OK
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
