@@ -537,6 +537,13 @@ PHP_FUNCTION(scandir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (flags != PHP_SCANDIR_SORT_ASCENDING &&
+			flags != PHP_SCANDIR_SORT_DESCENDING &&
+			flags != PHP_SCANDIR_SORT_NONE) {
+		zend_argument_value_error(2, "must be one of SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING, or SCANDIR_SORT_NONE");
+		RETURN_THROWS();
+	}
+
 	if (dirn_len < 1) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
