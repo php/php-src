@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_zip.stub.php instead.
- * Stub hash: 1f77735273373672b9c8c5b92c46e23ea99faeaf */
+ * Stub hash: 030038017c7c76195c0b0dc2392696f458c2471f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
