@@ -1094,8 +1094,11 @@ ZEND_FUNCTION(gmp_fact)
 		RETURN_THROWS();
 	}
 
-	// TODO: Check that we don't an int that is larger than an unsigned long?
-	// Could use mpz_fits_slong_p() if we revert to using mpz_get_si()
+	/* mpz_fac_ui() takes an unsigned long; avoid truncation/overflow + huge work */
+	if (!mpz_fits_ulong_p(gmpnum) || mpz_cmp_ui(gmpnum, 100000) > 0) {
+		zend_argument_value_error(1, "is too large");
+		RETURN_THROWS();
+	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	mpz_fac_ui(gmpnum_result, mpz_get_ui(gmpnum));
