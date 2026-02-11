@@ -48,7 +48,7 @@ jobs:
           .github/scripts/download-bundled/boost-context.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh Zend/asm
+          .github/scripts/test-directory-unchanged.sh 'Zend/asm'
           echo "::endgroup::"
       - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
@@ -57,7 +57,7 @@ jobs:
           .github/scripts/download-bundled/pcre2.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
+          .github/scripts/test-directory-unchanged.sh 'ext/pcre/pcre2lib'
           echo "::endgroup::"
       - name: uriparser
         if: ${{ !cancelled() && (steps.changes.outputs.uriparser == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
@@ -66,5 +66,5 @@ jobs:
           .github/scripts/download-bundled/uriparser.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh ext/uri/uriparser
+          .github/scripts/test-directory-unchanged.sh 'ext/uri/uriparser'
           echo "::endgroup::"
