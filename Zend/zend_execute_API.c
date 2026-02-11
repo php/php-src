@@ -155,7 +155,7 @@ void init_executor(void) /* {{{ */
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator);
 
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
-	zend_hash_init(&EG(in_autoload), 8, NULL, NULL, 0);
+	zend_hash_init(&EG(autoload_current_classnames), 8, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
 
@@ -503,7 +503,7 @@ void shutdown_executor(void) /* {{{ */
 		}
 
 		zend_hash_destroy(&EG(included_files));
-		zend_hash_destroy(&EG(in_autoload));
+		zend_hash_destroy(&EG(autoload_current_classnames));
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_destroy(&EG(user_error_handlers));
@@ -1242,7 +1242,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return NULL;
 	}
 
-	if (zend_hash_add_empty_element(&EG(in_autoload), lc_name) == NULL) {
+	if (zend_hash_add_empty_element(&EG(autoload_current_classnames), lc_name) == NULL) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
@@ -1264,7 +1264,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	EG(lineno_override) = previous_lineno;
 
 	zend_string_release_ex(autoload_name, 0);
-	zend_hash_del(&EG(in_autoload), lc_name);
+	zend_hash_del(&EG(autoload_current_classnames), lc_name);
 
 	if (!key) {
 		zend_string_release_ex(lc_name, 0);

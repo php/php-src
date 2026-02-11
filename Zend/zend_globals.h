@@ -220,7 +220,7 @@ struct _zend_executor_globals {
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
 
-	HashTable in_autoload;
+	HashTable autoload_current_classnames;
 
 	zend_long hard_timeout;
 	void *stack_base;
