@@ -70,6 +70,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     performed on the result.
   . The zend_dval_to_lval_cap() function no longer takes a second
     zend_string* parameter.
+  . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
+    longer is a pointer, but a directly embedded HashTable struct.
 
 ========================
 2. Build system changes
