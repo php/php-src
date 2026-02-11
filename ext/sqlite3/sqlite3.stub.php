@@ -199,10 +199,8 @@ class SQLite3
     public function loadExtension(string $name): bool {}
 #endif
 
-#if SQLITE_VERSION_NUMBER >= 3006011
     /** @tentative-return-type */
     public function backup(SQLite3 $destination, string $sourceDatabase = "main", string $destinationDatabase = "main"): bool {}
-#endif
 
     /** @tentative-return-type */
     public static function escapeString(string $string): string {}

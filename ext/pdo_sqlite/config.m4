@@ -9,12 +9,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   PHP_SETUP_SQLITE([PDO_SQLITE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY([sqlite3], [sqlite3_close_v2],
-    [AC_DEFINE([HAVE_SQLITE3_CLOSE_V2], [1],
-      [Define to 1 if SQLite library has the 'sqlite3_close_v2' function.])],
-    [],
-    [$PDO_SQLITE_SHARED_LIBADD])
-
   PHP_CHECK_LIBRARY([sqlite3], [sqlite3_column_table_name],
     [AC_DEFINE([HAVE_SQLITE3_COLUMN_TABLE_NAME], [1],
       [Define to 1 if SQLite library was compiled with the
