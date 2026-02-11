@@ -2688,10 +2688,6 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 		return;
 	}
 
-	if (overflow2(sizeof(int), n)) {
-		return;
-	}
-
 	if (c == gdAntiAliased) {
 		fill_color = im->AA_color;
 	} else {
@@ -2699,7 +2695,13 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 
 	if (!im->polyAllocated) {
+		if (overflow2(sizeof(int), n)) {
+			return;
+		}
 		im->polyInts = (int *) gdMalloc(sizeof(int) * n);
+		if (!im->polyInts) {
+			return;
+		}
 		im->polyAllocated = n;
 	}
 	if (im->polyAllocated < n) {
@@ -2710,6 +2712,9 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 			return;
 		}
 		im->polyInts = (int *) gdRealloc(im->polyInts, sizeof(int) * im->polyAllocated);
+		if (!im->polyInts) {
+			return;
+		}
 	}
 	miny = p[0].y;
 	maxy = p[0].y;
@@ -2736,11 +2741,12 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 	pmaxy = maxy;
 	/* 2.0.16: Optimization by Ilia Chipitsine -- don't waste time offscreen */
-	if (miny < 0) {
-		miny = 0;
+	/* 2.0.26: clipping rectangle is even better */
+	if (miny < im->cy1) {
+		miny = im->cy1;
 	}
-	if (maxy >= gdImageSY(im)) {
-		maxy = gdImageSY(im) - 1;
+	if (maxy > im->cy2) {
+		maxy = im->cy2;
 	}
 
 	/* Fix in 1.3: count a vertex only once */
@@ -2774,9 +2780,18 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 			 * that Polygon and FilledPolygon for the same set of points have the
 			 * same footprint.
 			 */
-			if (y >= y1 && y < y2) {
-				im->polyInts[ints++] = (float) ((y - y1) * (x2 - x1)) / (float) (y2 - y1) + 0.5 + x1;
-			} else if (y == pmaxy && y == y2) {
+			if ((y >= y1) && (y < y2)) {
+				if ((y1 > 0 && y < INT_MIN + y1) ||
+				    (y1 < 0 && y > INT_MAX + y1) ||
+				    (x1 > 0 && x2 < INT_MIN + x1) ||
+				    (x1 < 0 && x2 > INT_MAX + x1) ||
+				    (((y - y1) <= 0 || (x2 - x1) <= 0)) ||
+				    ((y - y1) > INT_MAX / (x2 - x1))) {
+					return;
+				}
+				im->polyInts[ints++] = (int) ((float) ((y - y1) * (x2 - x1)) /
+				                              (float) (y2 - y1) + 0.5 + x1);
+			} else if ((y == pmaxy) && (y == y2)) {
 				im->polyInts[ints++] = x2;
 			}
 		}
