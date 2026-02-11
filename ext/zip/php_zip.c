@@ -1463,11 +1463,7 @@ PHP_METHOD(ZipArchive, open)
 	}
 
 	/* open for write without option to empty the archive */
-#ifdef ZIP_RDONLY
 	if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
-#else
-	if ((flags & ZIP_TRUNCATE) == 0) {
-#endif
 		zend_stat_t st = {0};
 
 		/* exists and is empty */

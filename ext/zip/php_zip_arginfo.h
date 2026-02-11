@@ -550,14 +550,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_OVERWRITE_name = zend_string_init_interned("OVERWRITE", sizeof("OVERWRITE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OVERWRITE_name, &const_OVERWRITE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_OVERWRITE_name, true);
-#if defined(ZIP_RDONLY)
 
 	zval const_RDONLY_value;
 	ZVAL_LONG(&const_RDONLY_value, ZIP_RDONLY);
 	zend_string *const_RDONLY_name = zend_string_init_interned("RDONLY", sizeof("RDONLY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RDONLY_name, &const_RDONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_RDONLY_name, true);
-#endif
 
 	zval const_FL_NOCASE_value;
 	ZVAL_LONG(&const_FL_NOCASE_value, ZIP_FL_NOCASE);
