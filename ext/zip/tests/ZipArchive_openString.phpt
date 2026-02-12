@@ -1,11 +1,11 @@
 --TEST--
-ZipArchive::openBuffer() method
+ZipArchive::openString() method
 --EXTENSIONS--
 zip
 --FILE--
 <?php
 $zip = new ZipArchive();
-$zip->openBuffer(file_get_contents(__DIR__."/test_procedural.zip"));
+$zip->openString(file_get_contents(__DIR__."/test_procedural.zip"));
 
 for ($i = 0; $i < $zip->numFiles; $i++) {
     $stat = $zip->statIndex($i);

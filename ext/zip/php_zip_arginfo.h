@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_zip.stub.php instead.
- * Stub hash: 3455b2ead689077d995baf30e3143e99e02d4c4e */
+ * Stub hash: e04b3e90c42074ac364ea25a0e794815bd4271e5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -45,7 +45,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_open,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_openBuffer, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_openString, 0, 1, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -317,7 +317,7 @@ ZEND_FUNCTION(zip_entry_compressedsize);
 ZEND_FUNCTION(zip_entry_filesize);
 ZEND_FUNCTION(zip_entry_compressionmethod);
 ZEND_METHOD(ZipArchive, open);
-ZEND_METHOD(ZipArchive, openBuffer);
+ZEND_METHOD(ZipArchive, openString);
 ZEND_METHOD(ZipArchive, setPassword);
 ZEND_METHOD(ZipArchive, close);
 ZEND_METHOD(ZipArchive, count);
@@ -396,7 +396,7 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, open, arginfo_class_ZipArchive_open, ZEND_ACC_PUBLIC)
-	ZEND_ME(ZipArchive, openBuffer, arginfo_class_ZipArchive_openBuffer, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, openString, arginfo_class_ZipArchive_openString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setPassword, arginfo_class_ZipArchive_setPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, close, arginfo_class_ZipArchive_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, count, arginfo_class_ZipArchive_count, ZEND_ACC_PUBLIC)
