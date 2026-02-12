@@ -165,7 +165,15 @@ foreach ($branches as &$branch) {
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
 }
 
-$f = fopen(getenv('GITHUB_OUTPUT'), 'a');
-fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
-fwrite($f, 'all_variations=' . json_encode($all_variations, JSON_UNESCAPED_SLASHES) . "\n");
-fclose($f);
+echo "All variations:";
+echo json_encode($all_variations, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+echo "\n\nBranches:\n";
+echo json_encode($branches, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+echo "\n";
+
+if (false !== ($github_output = getenv('GITHUB_OUTPUT'))) {
+    $f = fopen($github_output, 'a');
+    fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
+    fwrite($f, 'all_variations=' . json_encode($all_variations, JSON_UNESCAPED_SLASHES) . "\n");
+    fclose($f);
+}

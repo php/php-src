@@ -45,14 +45,14 @@ jobs:
         run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}" '${{ toJSON(github.event.pull_request.labels) }}'
   PUSH:
     needs: GENERATE_MATRIX
-    name: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches)[0].ref }}
+    name: ${{ matrix.branch.ref }}
     uses: ./.github/workflows/nightly.yml
     strategy:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     with:
-      all_variations: ${{ needs.GENERATE_MATRIX.outputs.all_variations == 'true' && true || false }}
+      all_variations: ${{ needs.GENERATE_MATRIX.outputs.all_variations == 'true' }}
       branch: ${{ toJSON(matrix.branch) }}
     secrets: inherit
   BENCHMARKING:
