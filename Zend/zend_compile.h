@@ -497,6 +497,23 @@ typedef struct _zend_class_constant {
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+enum zend_function_type: uint8_t
+#else
+enum zend_function_type
+#endif
+{
+	ZEND_INTERNAL_FUNCTION = 1,
+	ZEND_USER_FUNCTION = 2,
+	ZEND_EVAL_CODE = 4,
+};
+
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+typedef enum zend_function_type zend_function_type;
+#else
+typedef uint8_t zend_function_type;
+#endif
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
@@ -524,7 +541,7 @@ typedef struct _zend_internal_function_info {
 
 struct _zend_op_array {
 	/* Common elements */
-	uint8_t type;
+	zend_function_type type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
@@ -584,7 +601,7 @@ typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef struct _zend_internal_function {
 	/* Common elements */
-	uint8_t type;
+	zend_function_type type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
@@ -610,11 +627,11 @@ typedef struct _zend_internal_function {
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
-	uint8_t type;	/* MUST be the first element of this struct! */
+	zend_function_type type;	/* MUST be the first element of this struct! */
 	uint32_t   quick_arg_flags;
 
 	struct {
-		uint8_t type;  /* never used */
+		zend_function_type type;  /* never used */
 		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
@@ -956,7 +973,7 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle);
 ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
-ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
+ZEND_API void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
@@ -1070,10 +1087,6 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define BP_VAR_IS			3
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
-
-#define ZEND_INTERNAL_FUNCTION		1
-#define ZEND_USER_FUNCTION			2
-#define ZEND_EVAL_CODE				4
 
 #define ZEND_USER_CODE(type)		((type) != ZEND_INTERNAL_FUNCTION)
 
