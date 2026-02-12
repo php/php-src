@@ -27,7 +27,11 @@ mkdir($dir);
 $ints = array (PHP_INT_MAX, -PHP_INT_MAX, 0);
 
 foreach($ints as $sorting_order) {
+  try {
     var_dump( scandir($dir, $sorting_order) );
+  } catch (ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+  }
 }
 
 delete_files($dir, 2, "私はガラスを食べられますfile");
@@ -39,26 +43,8 @@ rmdir($dir);
 ?>
 --EXPECT--
 *** Testing scandir() : usage variations ***
-array(4) {
-  [0]=>
-  string(45) "私はガラスを食べられますfile2.tmp"
-  [1]=>
-  string(45) "私はガラスを食べられますfile1.tmp"
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(1) "."
-}
-array(4) {
-  [0]=>
-  string(45) "私はガラスを食べられますfile2.tmp"
-  [1]=>
-  string(45) "私はガラスを食べられますfile1.tmp"
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(1) "."
-}
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
+scandir(): Argument #2 ($sorting_order) must be one of PHP_SCANDIR_SORT_ASCENDING, or SCANDIR_SORT_NONE
 array(4) {
   [0]=>
   string(1) "."
