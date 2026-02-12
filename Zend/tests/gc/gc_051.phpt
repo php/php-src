@@ -3,7 +3,9 @@ GC 051: Acyclic objects are not added to GC buffer
 --FILE--
 <?php
 
-function test($x) {}
+function test($x) {
+    assert($x); // Prevent inlining
+}
 
 enum E {
     case A;
