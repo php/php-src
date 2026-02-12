@@ -721,8 +721,10 @@ PHP_FUNCTION(log)
 		RETURN_DOUBLE(log10(num));
 	}
 
+	
 	if (base == 1.0) {
-		RETURN_DOUBLE(ZEND_NAN);
+		zend_argument_value_error(2, "must not be equal to 1");
+		RETURN_THROWS();
 	}
 
 	if (base <= 0.0) {
