@@ -345,7 +345,7 @@ typedef struct _zend_oparray_context {
 /* =========================                              |     |     |     */
 /*                                                        |     |     |     */
 /* Object may be the root of a cycle                      |     |     |     */
-#define ZEND_ACC2_MAY_BE_CYCLIC          (1 << 0)  /*  X  |     |     |     */
+#define ZEND_ACC2_MAY_BE_CYCLIC          (1 << 0)  /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
