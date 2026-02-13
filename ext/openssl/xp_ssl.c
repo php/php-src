@@ -1632,12 +1632,11 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 				SSL_SESSION_up_ref(obj->session);
 				session = obj->session;
 			}
-		} else if (Z_TYPE(retval) == IS_STRING && Z_STRLEN(retval) > 0) {
-			/* Backward compatibility: accept raw DER string */
-			const unsigned char *p = (const unsigned char *)Z_STRVAL(retval);
-			session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN(retval));
+			zval_ptr_dtor(&retval);
+		} else if (Z_TYPE(retval) != IS_NULL) {
+			zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+			return NULL;
 		}
-		zval_ptr_dtor(&retval);
 	}
 
 	zval_ptr_dtor(&args[1]);
@@ -1729,6 +1728,15 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 	bool enable_client_cache = false;
 	bool is_persistent = php_stream_is_persistent(stream);
 
+	if (GET_VER_OPT("session_data")) {
+		if (php_openssl_is_session_ce(val)) {
+			enable_client_cache = true;
+		} else if (Z_TYPE_P(val) != IS_NULL) {
+			zend_type_error("session_data must be an OpenSSLSession instance");
+			return FAILURE;
+		}
+	}
+
 	if (GET_VER_OPT("session_new_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_callback(
 				sslsock, val, "session_new_cb", is_persistent)) {
@@ -1738,13 +1746,6 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 		ZVAL_COPY(&sslsock->session_callbacks->new_cb, val);
 		SSL_CTX_sess_set_new_cb(sslsock->ctx, php_openssl_session_new_cb);
 		enable_client_cache = true;
-	}
-
-	if (GET_VER_OPT("session_data")) {
-		if (php_openssl_is_session_ce(val) ||
-				(Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0)) {
-			enable_client_cache = true;
-		}
 	}
 
 	if (enable_client_cache) {
@@ -1920,18 +1921,9 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 			}
 			/* Object owns the session, we just borrow it */
 			needs_free = false;
-		} else if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0) {
-			/* Legacy: deserialize session from DER format */
-			const unsigned char *p = (const unsigned char *)Z_STRVAL_P(val);
-			session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN_P(val));
-
-			if (!session) {
-				php_error_docref(NULL, E_WARNING,
-						"Invalid or corrupted session_data, falling back to full handshake");
-				ERR_clear_error();
-				return FAILURE;
-			}
-			needs_free = true;
+		} else if (Z_TYPE_P(val) != IS_NULL) {
+			zend_type_error("session_data must be an OpenSSLSession instance");
+			return FAILURE;
 		}
 
 		if (session) {
@@ -2076,24 +2068,14 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 	SSL_CTX_set_min_proto_version(sslsock->ctx, php_openssl_get_min_proto_version(method_flags));
 	SSL_CTX_set_max_proto_version(sslsock->ctx, php_openssl_get_max_proto_version(method_flags));
 
-	if (sslsock->is_client == 0 &&
-		PHP_STREAM_CONTEXT(stream) &&
-		FAILURE == php_openssl_set_server_specific_opts(stream, sslsock->ctx)
-	) {
-		return FAILURE;
-	}
-
 	if (sslsock->is_client) {
 		/* Setup client session resumption */
 		if (FAILURE == php_openssl_setup_client_session(stream, sslsock)) {
 			return FAILURE;
 		}
-	} else {
-		/* Setup server session resumption */
-		if (PHP_STREAM_CONTEXT(stream)) {
-			if (FAILURE == php_openssl_setup_server_session(stream, sslsock)) {
-				return FAILURE;
-			}
+	} else if (PHP_STREAM_CONTEXT(stream)) {
+		if (FAILURE == php_openssl_setup_server_session(stream, sslsock)) {
+			return FAILURE;
 		}
 		/* Original server-specific setup */
 		if (FAILURE == php_openssl_set_server_specific_opts(stream, sslsock->ctx)) {

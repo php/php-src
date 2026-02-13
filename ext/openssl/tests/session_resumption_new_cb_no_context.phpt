@@ -49,7 +49,6 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'session_data' => 'this_is_invalid_session_data',
     ]]);
 
     $client = @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
