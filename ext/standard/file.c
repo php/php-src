@@ -1446,6 +1446,11 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 	php_stream_statbuf src_s, dest_s;
 	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
+	if (!dest||!*dest) {
+		zend_argument_value_error(2, "cannot be empty");
+		return FAILURE;
+	}
+
 	switch (php_stream_stat_path_ex(src, src_stat_flags, &src_s, ctx)) {
 		case -1:
 			/* non-statable stream */
