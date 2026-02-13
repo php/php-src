@@ -159,7 +159,7 @@ PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs.
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3], [--no-generation-date])
+PHP_PROG_RE2C([1.0.3], [--no-generation-date -W])
 dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 8.1.
 PHP_PROG_PHP([8.1])
 
