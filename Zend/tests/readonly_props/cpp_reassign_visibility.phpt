@@ -27,7 +27,7 @@ class Child1 extends Parent1 {
 $child1 = new Child1();
 var_dump($child1->prop);
 
-// Case 2: protected(set) - child CAN reassign
+// Case 2: protected(set) - child still cannot reassign parent-owned promoted property
 class Parent2 {
     public function __construct(
         protected(set) public readonly string $prop = 'parent default',
@@ -39,15 +39,18 @@ class Parent2 {
 class Child2 extends Parent2 {
     public function __construct() {
         parent::__construct();
-        // Child CAN reassign - protected(set) allows child classes
-        $this->prop = 'child override';
+        try {
+            $this->prop = 'child override';
+        } catch (Error $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
 $child2 = new Child2();
 var_dump($child2->prop);
 
-// Case 3: public (default) - child CAN reassign
+// Case 3: public (default) - child still cannot reassign parent-owned promoted property
 class Parent3 {
     public function __construct(
         public readonly string $prop = 'parent default',
@@ -59,8 +62,11 @@ class Parent3 {
 class Child3 extends Parent3 {
     public function __construct() {
         parent::__construct();
-        // Child CAN reassign - public allows anyone
-        $this->prop = 'child override';
+        try {
+            $this->prop = 'child override';
+        } catch (Error $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
@@ -93,9 +99,11 @@ var_dump($child4->prop);
 
 ?>
 --EXPECT--
-Cannot modify private(set) property Parent1::$prop from scope Child1
+Cannot modify readonly property Parent1::$prop
 string(14) "parent default"
-string(14) "child override"
-string(14) "child override"
+Cannot modify readonly property Parent2::$prop
+string(14) "parent default"
+Cannot modify readonly property Parent3::$prop
+string(14) "parent default"
 Cannot modify readonly property Parent4::$prop
 string(10) "parent set"

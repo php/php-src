@@ -2808,7 +2808,7 @@ static zend_always_inline bool verify_readonly_and_avis(zval *property_val, zend
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
 		if (info->flags & ZEND_ACC_READONLY) {
 			ZEND_ASSERT(zobj != NULL); /* CPP_REINITABLE only applies to instance properties */
-			if (!zend_is_readonly_property_modifiable(property_val, info, zobj)) {
+			if (!zend_is_readonly_property_modifiable(property_val, info->ce, zobj)) {
 				zend_readonly_property_modification_error(info);
 				return false;
 			}

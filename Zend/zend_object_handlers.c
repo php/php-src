@@ -47,16 +47,17 @@
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
 /* Check if we're within a constructor call chain for the given object.
- * Walks up the call stack to find if any frame is a constructor for zobj.
- * This allows reassignment from the constructor or methods/closures called from it. */
-static bool zend_is_in_constructor(const zend_object *zobj)
+ * If ctor_scope is non-NULL, restrict to constructor frames declared by ctor_scope.
+ * Methods/closures called from that constructor are allowed through the stack walk. */
+static bool zend_is_in_constructor(const zend_object *zobj, const zend_class_entry *ctor_scope)
 {
 	zend_execute_data *ex = EG(current_execute_data);
 	while (ex) {
 		if (ex->func
 		    && (ex->func->common.fn_flags & ZEND_ACC_CTOR)
 		    && (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
-		    && Z_OBJ(ex->This) == zobj) {
+		    && Z_OBJ(ex->This) == zobj
+		    && (!ctor_scope || ex->func->common.scope == ctor_scope)) {
 			return true;
 		}
 		ex = ex->prev_execute_data;
@@ -64,18 +65,14 @@ static bool zend_is_in_constructor(const zend_object *zobj)
 	return false;
 }
 
-/* Check if we're in the FIRST construction of an object.
- * Uses the IS_OBJ_CTOR_CALLED flag which is set when a constructor completes.
- * This allows both 'new' and explicit __construct() calls on reflection-created objects. */
-ZEND_API bool zend_is_in_original_construction(const zend_object *zobj)
+/* Check if we're in the first construction of an object and executing the
+ * constructor chain declared by ctor_scope. */
+ZEND_API bool zend_is_in_declaring_constructor(const zend_object *zobj, const zend_class_entry *ctor_scope)
 {
-	/* If a constructor has already completed on this object, this is not original construction */
 	if (zobj->extra_flags & IS_OBJ_CTOR_CALLED) {
 		return false;
 	}
-
-	/* Verify we're actually in a constructor for this object */
-	return zend_is_in_constructor(zobj);
+	return zend_is_in_constructor(zobj, ctor_scope);
 }
 
 static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
@@ -1100,7 +1097,7 @@ try_again:
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
-				 && !zend_is_readonly_property_modifiable(variable_ptr, prop_info, zobj)) {
+				 && !zend_is_readonly_property_modifiable(variable_ptr, prop_info->ce, zobj)) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
 					goto exit;
@@ -1138,7 +1135,7 @@ typed_property:
 				 * set IS_PROP_CPP_REINITABLE to allow one reassignment in the constructor. */
 				if ((prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
 				 && (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT)
-				 && zend_is_in_constructor(zobj)) {
+				 && zend_is_in_declaring_constructor(zobj, prop_info->ce)) {
 					Z_PROP_FLAG_P(variable_ptr) = IS_PROP_CPP_REINITABLE;
 				} else {
 					Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE|IS_PROP_CPP_REINITABLE);

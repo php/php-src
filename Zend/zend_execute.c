@@ -1074,7 +1074,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
 		if (info->flags & ZEND_ACC_READONLY) {
-			if (!zend_is_readonly_property_modifiable(property_val, info, zobj)) {
+			if (!zend_is_readonly_property_modifiable(property_val, info->ce, zobj)) {
 				zend_readonly_property_modification_error(info);
 				return &EG(uninitialized_zval);
 			}

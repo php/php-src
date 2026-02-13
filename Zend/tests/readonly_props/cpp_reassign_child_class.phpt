@@ -1,9 +1,9 @@
 --TEST--
-Promoted readonly property reassignment in constructor - child class can reassign parent's property
+Promoted readonly property reassignment in constructor - child cannot reassign parent's property
 --FILE--
 <?php
 
-// Case 1: Parent does NOT use reassignment, child CAN reassign
+// Case 1: Parent does NOT use reassignment, child still cannot reassign
 class Parent1 {
     public function __construct(
         public readonly string $prop = 'parent default',
@@ -15,8 +15,12 @@ class Parent1 {
 class Child1 extends Parent1 {
     public function __construct() {
         parent::__construct();
-        // Child CAN reassign since parent didn't use the one reassignment
-        $this->prop = 'child override';
+        // Child cannot reassign parent-owned promoted property
+        try {
+            $this->prop = 'child override';
+        } catch (Error $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
@@ -64,8 +68,12 @@ class Child3 extends Parent3 {
         public readonly string $childProp = 'child default',
     ) {
         parent::__construct();
-        // Child can reassign both: parent's (not yet used) and its own
-        $this->parentProp = 'child set parent';
+        // Child cannot reassign parent's property, but can reassign its own
+        try {
+            $this->parentProp = 'child set parent';
+        } catch (Error $e) {
+            echo $e->getMessage(), "\n";
+        }
         $this->childProp = 'child set own';
     }
 }
@@ -76,8 +84,10 @@ var_dump($child3->parentProp, $child3->childProp);
 ?>
 --EXPECT--
 string(14) "parent default"
-string(14) "child override"
+Cannot modify readonly property Parent1::$prop
+string(14) "parent default"
 Cannot modify readonly property Parent2::$prop
 string(10) "parent set"
-string(16) "child set parent"
+Cannot modify readonly property Parent3::$parentProp
+string(14) "parent default"
 string(13) "child set own"
