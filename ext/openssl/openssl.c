@@ -3732,15 +3732,22 @@ static int php_openssl_get_evp_pkey_type(int key_type) {
 /* {{{ php_openssl_generate_private_key */
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 {
-	if (req->priv_key_bits < MIN_KEY_LENGTH) {
-		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
-			MIN_KEY_LENGTH, req->priv_key_bits);
-		return NULL;
-	}
-
 	int type = php_openssl_get_evp_pkey_type(req->priv_key_type);
 	if (type < 0) {
 		php_error_docref(NULL, E_WARNING, "Unsupported private key type");
+		return NULL;
+	}
+
+	/* EC key sizes are determined by the curve, not by private_key_bits,
+	 * so the minimum key length check does not apply to them. */
+	if (
+#ifdef HAVE_EVP_PKEY_EC
+		type != EVP_PKEY_EC &&
+#endif
+		req->priv_key_bits < MIN_KEY_LENGTH
+	) {
+		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
+			MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
 	}
 
