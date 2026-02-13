@@ -36,10 +36,14 @@ $clientCode = <<<'CODE'
         'session_data' => 'this_is_invalid_session_data',
     ]]);
 
-    $client = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
-
-    if ($client === false) {
-        echo "Connection failed as expected\n";
+    try {
+        $client = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
+    
+        if ($client === false) {
+            echo "Connection failed unexpectedlyd\n";
+        }
+    } catch (\Throwable $e) {
+        echo "Type error thrown: " . $e->getMessage() . "\n";
     }
 CODE;
 
@@ -56,9 +60,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 
-Warning: stream_socket_client(): Invalid or corrupted session_data, falling back to full handshake in %s on line %d
-
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
 Warning: stream_socket_client(): Unable to connect to %s in %s on line %d
-Connection failed as expected
+Type error thrown: session_data must be an OpenSSLSession instance
