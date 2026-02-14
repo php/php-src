@@ -43,8 +43,8 @@ $_main:
      ; (after optimizer)
      ; %spipe_optimization_011.php:1-29
 0000 INIT_FCALL 0 %d string("time")
-0001 V2 = DO_ICALL
-0002 T1 = IS_SMALLER int(0) V2
+0001 T2 = DO_ICALL
+0002 T1 = IS_SMALLER int(0) T2
 0003 JMPZ T1 0008
 0004 DECLARE_FUNCTION string("foo") 0
 0005 DECLARE_FUNCTION string("lhs") 1
