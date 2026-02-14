@@ -1946,7 +1946,6 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 	return SUCCESS;
 }
 
-
 static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock, int method_flags)
 {
