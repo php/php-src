@@ -23,7 +23,7 @@ const ps_module ps_mod_user = {
 };
 
 
-static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
+static void ps_call_handler(zval *func, uint32_t argc, zval *argv, zval *retval)
 {
 	int i;
 	if (PS(in_save_handler)) {
