@@ -1584,6 +1584,12 @@ PHP_FUNCTION(socket_sendto)
 	switch (php_sock->type) {
 		case AF_UNIX:
 			memset(&s_un, 0, sizeof(s_un));
+
+			if (addr_len >= sizeof(s_un.sun_path)) {
+				zend_argument_value_error(5, "must be less than %d", sizeof(s_un.sun_path));
+				RETURN_THROWS();
+			}
+
 			s_un.sun_family = AF_UNIX;
 			snprintf(s_un.sun_path, sizeof(s_un.sun_path), "%s", addr);
 
