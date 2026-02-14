@@ -451,7 +451,7 @@ PS_CLOSE_FUNC(files)
 
 	zend_string_release_ex(data->basedir, /* persistent */ false);
 	efree(data);
-	PS_SET_MOD_DATA(NULL);
+	PS_SET_MOD_DATA(data);
 
 	return SUCCESS;
 }
