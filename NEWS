@@ -41,6 +41,8 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug GH-21161 (socket_set_option() crash with array 'addr'
     entry as null). (David Carlier)
+  . Fixed possible addr length overflow with socket_connect() and AF_UNIX
+    family sockets. (David Carlier)
 
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
