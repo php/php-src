@@ -30,8 +30,8 @@ $_main:
      ; (after optimizer)
      ; %spipe_optimization_007.php:1-16
 0000 INIT_FCALL 0 %d string("time")
-0001 V2 = DO_ICALL
-0002 T1 = IS_SMALLER int(0) V2
+0001 T2 = DO_ICALL
+0002 T1 = IS_SMALLER int(0) T2
 0003 JMPZ T1 0005
 0004 DECLARE_FUNCTION string("foo") 0
 0005 INIT_FCALL_BY_NAME 0 string("foo")
@@ -47,8 +47,8 @@ $_main:
 0015 ECHO T1
 0016 ECHO string(": ")
 0017 INIT_METHOD_CALL 0 CV0($e) string("getMessage")
-0018 V1 = DO_FCALL
-0019 ECHO V1
+0018 T1 = DO_FCALL
+0019 ECHO T1
 0020 ECHO string("\n")
 0021 RETURN int(1)
 EXCEPTION TABLE:
@@ -83,6 +83,6 @@ $_main:
 0002 INIT_FCALL 2 %d string("foo")
 0003 SEND_VAR CV0($a) 1
 0004 SEND_VAR CV1($b) 2
-0005 V2 = DO_UCALL
-0006 RETURN V2
+0005 T2 = DO_UCALL
+0006 RETURN T2
 ArgumentCountError: Too few arguments to function {closure:pfa:%s:%d}(), 1 passed in %s on line %d and exactly 2 expected

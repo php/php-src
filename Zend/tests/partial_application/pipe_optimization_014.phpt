@@ -30,8 +30,8 @@ $_main:
      ; (after optimizer)
      ; %s:1-16
 0000 INIT_FCALL 0 %d string("time")
-0001 V2 = DO_ICALL
-0002 T1 = IS_SMALLER int(0) V2
+0001 T2 = DO_ICALL
+0002 T1 = IS_SMALLER int(0) T2
 0003 JMPZ T1 0005
 0004 DECLARE_FUNCTION string("foo") 0
 0005 INIT_FCALL_BY_NAME 1 string("foo")
@@ -45,8 +45,8 @@ $_main:
 0013 ECHO T1
 0014 ECHO string(": ")
 0015 INIT_METHOD_CALL 0 CV0($e) string("getMessage")
-0016 V1 = DO_FCALL
-0017 ECHO V1
+0016 T1 = DO_FCALL
+0017 ECHO T1
 0018 ECHO string("\n")
 0019 RETURN int(1)
 EXCEPTION TABLE:
