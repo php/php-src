@@ -638,6 +638,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					break;
 			}
 #endif
+#ifdef HAVE_JIT
+			/* Re-normalize handlers before serializing to avoid storing JIT runtime handlers. */
+			ZEND_VM_SET_OPCODE_HANDLER(opline);
+#endif
 			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
@@ -1152,15 +1156,19 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	char *filename;
 	zend_file_cache_metainfo info;
 	void *mem, *buf;
-
 #ifdef HAVE_JIT
-	/* FIXME: dump jited codes out to file cache? */
-	if (JIT_G(on)) {
-		return FAILURE;
+	bool orig_jit_on = JIT_G(on);
+
+	/* File cache stores bytecode/metadata only; JIT code is rebuilt at runtime. */
+	if (orig_jit_on) {
+		JIT_G(on) = 0;
 	}
 #endif
 
 	if (ZCG(accel_directives).file_cache_read_only) {
+#ifdef HAVE_JIT
+		JIT_G(on) = orig_jit_on;
+#endif
 		return FAILURE;
 	}
 
@@ -1169,6 +1177,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s', %s\n", filename, strerror(errno));
 		efree(filename);
+#ifdef HAVE_JIT
+		JIT_G(on) = orig_jit_on;
+#endif
 		return FAILURE;
 	}
 
@@ -1178,12 +1189,18 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create file '%s', %s\n", filename, strerror(errno));
 		}
 		efree(filename);
+#ifdef HAVE_JIT
+		JIT_G(on) = orig_jit_on;
+#endif
 		return FAILURE;
 	}
 
 	if (zend_file_cache_flock(fd, LOCK_EX) != 0) {
 		close(fd);
 		efree(filename);
+#ifdef HAVE_JIT
+		JIT_G(on) = orig_jit_on;
+#endif
 		return FAILURE;
 	}
 
@@ -1227,6 +1244,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 		efree(mem);
 		zend_file_cache_unlink(filename);
 		efree(filename);
+#ifdef HAVE_JIT
+		JIT_G(on) = orig_jit_on;
+#endif
 		return FAILURE;
 	}
 
@@ -1237,6 +1257,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	}
 	close(fd);
 	efree(filename);
+#ifdef HAVE_JIT
+	JIT_G(on) = orig_jit_on;
+#endif
 
 	return SUCCESS;
 }
