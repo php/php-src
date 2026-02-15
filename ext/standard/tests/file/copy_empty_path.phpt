@@ -28,4 +28,4 @@ $dir = __DIR__;
 ?>
 --EXPECT--
 Path must not be empty
-copy(): Argument #2 ($to) cannot be empty
+copy(): Argument #2 ($to) must not be empty

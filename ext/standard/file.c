@@ -1439,7 +1439,7 @@ PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_f
 /* }}} */
 
 /* {{{ php_copy_file_ctx */
-PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx)
+ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	zend_result ret = FAILURE;
@@ -1447,7 +1447,7 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
 	if (!dest||!*dest) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		return FAILURE;
 	}
 
