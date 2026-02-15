@@ -266,7 +266,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 #endif
 
 	if (n != ZSTR_LEN(val)) {
-		if (n == (size_t)-1) {
+		if (n == (ssize_t)-1) {
 			php_error_docref(NULL, E_WARNING, "Write failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Write wrote less bytes than requested");
