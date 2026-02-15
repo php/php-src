@@ -82,12 +82,10 @@ class ZipArchive implements Countable
      * @cvalue ZIP_OVERWRITE
      */
     public const int OVERWRITE = UNKNOWN;
-#ifdef ZIP_RDONLY
     /**
      * @cvalue ZIP_RDONLY
      */
     public const int RDONLY = UNKNOWN;
-#endif
 
     /**
      * @cvalue ZIP_FL_NOCASE

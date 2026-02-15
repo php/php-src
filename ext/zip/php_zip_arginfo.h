@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_zip.stub.php instead.
- * Stub hash: 1f77735273373672b9c8c5b92c46e23ea99faeaf */
+ * Stub hash: 030038017c7c76195c0b0dc2392696f458c2471f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -550,14 +550,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_OVERWRITE_name = zend_string_init_interned("OVERWRITE", sizeof("OVERWRITE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OVERWRITE_name, &const_OVERWRITE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_OVERWRITE_name, true);
-#if defined(ZIP_RDONLY)
 
 	zval const_RDONLY_value;
 	ZVAL_LONG(&const_RDONLY_value, ZIP_RDONLY);
 	zend_string *const_RDONLY_name = zend_string_init_interned("RDONLY", sizeof("RDONLY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RDONLY_name, &const_RDONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_RDONLY_name, true);
-#endif
 
 	zval const_FL_NOCASE_value;
 	ZVAL_LONG(&const_FL_NOCASE_value, ZIP_FL_NOCASE);
