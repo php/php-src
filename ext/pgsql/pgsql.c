@@ -706,10 +706,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* create the link */
 			pgsql = PQconnectdb(connstring);
 			if (pgsql == NULL || PQstatus(pgsql) == CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql)
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 
@@ -790,19 +792,23 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (connect_type & PGSQL_CONNECT_ASYNC) {
 			pgsql = PQconnectStart(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		} else {
 			pgsql = PQconnectdb(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		}
