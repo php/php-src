@@ -1446,7 +1446,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file_ctx(const char
 	php_stream_statbuf src_s, dest_s;
 	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
-	if (!dest||!*dest) {
+	if (!*dest) {
 		zend_argument_must_not_be_empty_error(2);
 		return FAILURE;
 	}
