@@ -105,6 +105,7 @@ PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclos
 	php_stream *orig = enclosed->enclosing_stream;
 
 	php_stream_auto_cleanup(enclosed);
+	enclosed->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	enclosed->enclosing_stream = enclosing;
 	return orig;
 }
