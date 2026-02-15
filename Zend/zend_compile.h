@@ -497,22 +497,11 @@ typedef struct _zend_class_constant {
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
-#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
-enum zend_function_type: uint8_t
-#else
-enum zend_function_type
-#endif
-{
+enum C23_ENUM(zend_function_type, uint8_t) {
 	ZEND_INTERNAL_FUNCTION = 1,
 	ZEND_USER_FUNCTION = 2,
 	ZEND_EVAL_CODE = 4,
 };
-
-#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
-typedef enum zend_function_type zend_function_type;
-#else
-typedef uint8_t zend_function_type;
-#endif
 
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
