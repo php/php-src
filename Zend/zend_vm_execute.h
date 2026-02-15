@@ -3987,25 +3987,29 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 	SAVE_OPLINE();
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
+		ZEND_VM_CONTINUE();
+	} else if (zend_atomic_bool_load_ex(&EG(gc_requested))) {
+		gc_run_from_interrupt();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
-		if (EG(exception)) {
-			/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
-			const zend_op *throw_op = EG(opline_before_exception);
-
-			if (throw_op
-			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
-			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
-			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
-			 && throw_op->opcode != ZEND_ROPE_INIT
-			 && throw_op->opcode != ZEND_ROPE_ADD) {
-				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
-
-			}
-		}
-		ZEND_VM_ENTER();
+	} else {
+		ZEND_VM_CONTINUE();
 	}
-	ZEND_VM_CONTINUE();
+	if (EG(exception)) {
+		/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
+		const zend_op *throw_op = EG(opline_before_exception);
+
+		if (throw_op
+		 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
+		 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+		 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+		 && throw_op->opcode != ZEND_ROPE_INIT
+		 && throw_op->opcode != ZEND_ROPE_ADD) {
+			ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
+
+		}
+	}
+	ZEND_VM_ENTER();
 }
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -56591,25 +56595,29 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 	SAVE_OPLINE();
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
+		ZEND_VM_CONTINUE();
+	} else if (zend_atomic_bool_load_ex(&EG(gc_requested))) {
+		gc_run_from_interrupt();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
-		if (EG(exception)) {
-			/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
-			const zend_op *throw_op = EG(opline_before_exception);
-
-			if (throw_op
-			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
-			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
-			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
-			 && throw_op->opcode != ZEND_ROPE_INIT
-			 && throw_op->opcode != ZEND_ROPE_ADD) {
-				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
-
-			}
-		}
-		ZEND_VM_ENTER();
+	} else {
+		ZEND_VM_CONTINUE();
 	}
-	ZEND_VM_CONTINUE();
+	if (EG(exception)) {
+		/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
+		const zend_op *throw_op = EG(opline_before_exception);
+
+		if (throw_op
+		 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
+		 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+		 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+		 && throw_op->opcode != ZEND_ROPE_INIT
+		 && throw_op->opcode != ZEND_ROPE_ADD) {
+			ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
+
+		}
+	}
+	ZEND_VM_ENTER();
 }
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
