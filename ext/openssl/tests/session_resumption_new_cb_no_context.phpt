@@ -20,15 +20,19 @@ $serverCode = <<<'CODE'
         'verify_peer' => true,
         'cafile' => '%s',
         'session_new_cb' => function($stream, $session) {
-            echo "Callback might not be called\n";
+            echo "not called new_cb\n";
+        },
+        'session_get_cb' => function($stream, $sessionId) {
+            echo "not called new_cb\n";
+            return null;
         }
         /* Missing: 'session_id_context' => 'myapp' */
     ]]);
 
-    $server = @stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
-    phpt_notify_server_start($server);
-
     try {
+        $server = @stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+        phpt_notify_server_start($server);
+
         $client = @stream_socket_accept($server, 30);
         if ($client === false) {
             phpt_notify(message: "SERVER_FAILED_UNEXPECTEDLY");
@@ -48,14 +52,10 @@ $clientCode = <<<'CODE'
     /* Try to use corrupted session data */
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
-        'verify_peer_name' => false,
+        'verify_peer_name' => false
     ]]);
 
     $client = @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 30, $flags, $ctx);
-
-    if ($client === false) {
-        echo "Connection failed as expected\n";
-    }
 
     $result = phpt_wait();
     echo trim($result) . "\n";
@@ -75,5 +75,4 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_no_context_ca.pem.tmp');
 ?>
 --EXPECT--
-Connection failed as expected
 SERVER_EXCEPTION: session_id_context must be set if session_new_cb is set
