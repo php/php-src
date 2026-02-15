@@ -3415,7 +3415,7 @@ MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned c
 	}
 
 	/* Allocate on stack; when we return, this array is automatically freed */
-	struct candidate *array = alloca(elist_size * sizeof(struct candidate));
+	struct candidate *array = (struct candidate *) safe_emalloc(elist_size, sizeof(struct candidate), 0);
 	elist_size = init_candidate_array(array, elist_size, elist, strings, str_lengths, n, strict, order_significant);
 
 	while (n--) {
@@ -3423,6 +3423,7 @@ MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned c
 		elist_size = count_demerits(array, elist_size, strict);
 		if (elist_size == 0) {
 			/* All candidates were eliminated */
+			efree(array);
 			return NULL;
 		}
 	}
@@ -3434,7 +3435,10 @@ MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned c
 			best = i;
 		}
 	}
-	return array[best].enc;
+
+	const mbfl_encoding *result = array[best].enc;
+	efree(array);
+	return result;
 }
 
 /* When doing 'strict' detection, any string which is invalid in the candidate encoding
