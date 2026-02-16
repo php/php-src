@@ -127,6 +127,9 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
 dnl Always shared.
 PHP_BUILD_SHARED
 
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+  [CFLAGS="$CFLAGS -fvisibility=hidden"])
+
 PHP_HELP_SEPARATOR([Extension:])
 PHP_CONFIGURE_PART([Configuring extension])
 

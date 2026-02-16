@@ -91,6 +91,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - Unix build system changes:
   . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
     HAVE_STRUCT_STAT_ST_BLOCKS).
+  . When using phpize, extensions are now built with -fvisibility=hidden compile
+    option (when building inside php-src this was already enabled previously).
 
 ========================
 3. Module changes
