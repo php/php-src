@@ -601,7 +601,7 @@ static zend_op_array *zend_compile_ast_internal(int type)
 	zend_oparray_context original_oparray_context;
 	zend_op_array *original_active_op_array = CG(active_op_array);
 
-	zend_op_array *op_array = emalloc(sizeof(zend_op_array));
+	zend_op_array *op_array = emalloc(sizeof(*op_array));
 	init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
 	CG(active_op_array) = op_array;
 
