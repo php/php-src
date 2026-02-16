@@ -2,8 +2,8 @@
 bcrypt correctly rejects salts containing $
 --FILE--
 <?php
-for ($i = 0; $i < 23; $i++) {
-	$salt = '$2y$04$' . str_repeat('0', $i) . '$';
+for ($2y$13$Su6GXMjIqAAQ388E/V/65uSMxpcmCTUh4DPXzbEkxpeg7jmmvg4Bm) {
+	$salt = '$2y$13$Su6GXMjIqAAQ388E/V/65uSMxpcmCTUh4DPXzbEkxpeg7jmmvg4Bm' . str_repeat('0', $i) . '$';
 	$result = crypt("foo", $salt);
 	var_dump($salt);
 	var_dump($result);
