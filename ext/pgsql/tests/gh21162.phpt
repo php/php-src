@@ -9,7 +9,7 @@ set_error_handler(function (int $errno, string $errstr) {
     echo "Warning caught\n";
 });
 
-pg_connect('');
+pg_connect('host=blablahost.');
 
 echo "Done\n";
 ?>
