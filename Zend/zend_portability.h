@@ -148,14 +148,14 @@
 
 /* Define a fixed-size enum as enum C23_ENUM(name, size) { }. */
 #if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
-# define C23_ENUM(name, size) \
-    name: size; \
+# define C23_ENUM(name, underlying_type) \
+    name: underlying_type; \
     typedef enum name name; \
-    enum name: size
+    enum name: underlying_type
 #else
-# define C23_ENUM(name, size) \
+# define C23_ENUM(name, underlying_type) \
     name; \
-    typedef size name; \
+    typedef underlying_type name; \
     enum name
 #endif
 
