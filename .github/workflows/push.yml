@@ -50,14 +50,20 @@ jobs:
           echo "::group::Show installed package versions"
           apk list
           echo "::endgroup::"
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-20
-            CXX=clang++-20
+            CC="ccache clang-20"
+            CXX="ccache clang++-20"
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
