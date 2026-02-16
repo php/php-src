@@ -1420,19 +1420,24 @@ PHP_FUNCTION(copy)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
+	if (!target || !*target) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_FALSE;
+	}
+
 	RETURN_BOOL(php_copy_file_ctx(source, target, 0, context) == SUCCESS);
 }
 /* }}} */
 
 /* {{{ php_copy_file */
-PHPAPI zend_result php_copy_file(const char *src, const char *dest)
+ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file(const char *src, const char *dest)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL);
 }
 /* }}} */
 
 /* {{{ php_copy_file_ex */
-PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags)
+ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags)
 {
 	return php_copy_file_ctx(src, dest, src_flags, NULL);
 }
@@ -1445,11 +1450,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file_ctx(const char
 	zend_result ret = FAILURE;
 	php_stream_statbuf src_s, dest_s;
 	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
-
-	if (!*dest) {
-		zend_argument_must_not_be_empty_error(2);
-		return FAILURE;
-	}
 
 	switch (php_stream_stat_path_ex(src, src_stat_flags, &src_s, ctx)) {
 		case -1:
