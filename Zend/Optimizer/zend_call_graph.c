@@ -126,6 +126,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 			case ZEND_CALLABLE_CONVERT:
+			case ZEND_CALLABLE_CONVERT_PARTIAL:
 				func_info->flags |= ZEND_FUNC_HAS_CALLS;
 				if (call_info) {
 					call_info->caller_call_opline = opline;
@@ -142,6 +143,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_VAR_NO_REF:
 			case ZEND_SEND_VAR_NO_REF_EX:
 			case ZEND_SEND_USER:
+			case ZEND_SEND_PLACEHOLDER:
 				if (call_info) {
 					if (opline->op2_type == IS_CONST) {
 						call_info->named_args = true;

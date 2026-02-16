@@ -951,6 +951,7 @@ struct _zend_arena;
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *filename, zend_compile_position position);
 ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
+ZEND_API zend_op_array *zend_compile_ast(zend_ast *ast, int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
@@ -1119,7 +1120,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_THROW_IS_EXPR 1u
 
-#define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
+#define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS (1<<0)
+#define ZEND_FCALL_USES_VARIADIC_PLACEHOLDER   (1<<1)
 
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

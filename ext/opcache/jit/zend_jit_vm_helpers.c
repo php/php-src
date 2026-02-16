@@ -1059,7 +1059,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, func);
 			}
 		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL
-				|| opline->opcode == ZEND_CALLABLE_CONVERT) {
+				|| opline->opcode == ZEND_CALLABLE_CONVERT
+				|| opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
 			/* TODO: Support tracing JIT for ZEND_CALLABLE_CONVERT. */
 			stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 			break;

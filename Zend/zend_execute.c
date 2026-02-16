@@ -1230,6 +1230,12 @@ static zend_always_inline bool zend_check_type(
 	return zend_check_type_slow(type, arg, ref, is_return_type, is_internal);
 }
 
+ZEND_API bool zend_check_type_ex(
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
+{
+	return zend_check_type(type, arg, is_return_type, is_internal);
+}
+
 ZEND_API bool zend_check_user_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref, bool is_return_type)
 {
@@ -4651,6 +4657,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 				case ZEND_DO_UCALL:
 				case ZEND_DO_FCALL_BY_NAME:
 				case ZEND_CALLABLE_CONVERT:
+				case ZEND_CALLABLE_CONVERT_PARTIAL:
 					level++;
 					break;
 				case ZEND_INIT_FCALL:
@@ -4707,6 +4714,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 					case ZEND_DO_UCALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_CALLABLE_CONVERT:
+					case ZEND_CALLABLE_CONVERT_PARTIAL:
 						level++;
 						break;
 					case ZEND_INIT_FCALL:
@@ -4787,6 +4795,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_DO_UCALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_CALLABLE_CONVERT:
+					case ZEND_CALLABLE_CONVERT_PARTIAL:
 						level++;
 						break;
 					case ZEND_INIT_FCALL:
@@ -4844,6 +4853,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 						case ZEND_DO_UCALL:
 						case ZEND_DO_FCALL_BY_NAME:
 						case ZEND_CALLABLE_CONVERT:
+						case ZEND_CALLABLE_CONVERT_PARTIAL:
 							level++;
 							break;
 						case ZEND_INIT_FCALL:
@@ -5555,9 +5565,10 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 		}
 	} else {
 		arg = ZEND_CALL_VAR_NUM(call, arg_offset);
+
 		if (UNEXPECTED(!Z_ISUNDEF_P(arg))) {
-			zend_throw_error(NULL, "Named parameter $%s overwrites previous argument",
-				ZSTR_VAL(arg_name));
+			zend_throw_error(NULL, "Named parameter $%s overwrites previous %s",
+				ZSTR_VAL(arg_name), Z_TYPE_P(arg) == _IS_PLACEHOLDER ? "placeholder" : "argument");
 			return NULL;
 		}
 	}
