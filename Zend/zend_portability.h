@@ -146,7 +146,7 @@
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
-/* Define a fixed-size enum as C23_ENUM(name, size) { }. */
+/* Define an enum with a fixed underlying type as C23_ENUM(name, underlying_type) { }. */
 #if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
 # define C23_ENUM(name, underlying_type) \
     enum name: underlying_type; \
