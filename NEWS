@@ -87,6 +87,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
 
+- Session:
+  . Fixed bug 71162 (updateTimestamp never called when session data is empty).
+    (Girgias)
+
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
     represented as a string anymore but a int. (David Carlier)

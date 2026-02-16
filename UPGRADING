@@ -26,6 +26,10 @@ PHP 8.6 UPGRADE NOTES
 - Session:
   . A ValueError is not thrown if $name is a string containing null bytes in
     session_module_name().
+  . session_encode() now returns an empty string instead of false for empty
+    sessions. It only returns false now when the session data could not be
+    encoded. This mainly happens with the default serialization handler
+    if a key contains the pipe | character.
 
 - Standard:
   . Invalid mode values now throw in array_filter() instead of being silently
