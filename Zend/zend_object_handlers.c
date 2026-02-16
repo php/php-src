@@ -1257,6 +1257,7 @@ write_std_property:
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
+			GC_DEL_FLAGS(zobj, GC_NOT_COLLECTABLE);
 			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
 				if (UNEXPECTED(!zend_deprecated_dynamic_property(zobj, name))) {
 					variable_ptr = &EG(error_zval);
@@ -1466,6 +1467,7 @@ try_again:
 					return &EG(error_zval);
 				}
 			}
+			GC_DEL_FLAGS(zobj, GC_NOT_COLLECTABLE);
 			if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
 				zobj = zend_lazy_object_init(zobj);
 				if (!zobj) {

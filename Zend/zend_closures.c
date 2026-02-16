@@ -862,6 +862,10 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 {
 	zend_create_closure_ex(res, func, scope, called_scope, this_ptr,
 		/* is_fake */ (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0);
+
+	if (!(func->common.fn_flags2 & ZEND_ACC2_MAY_BE_CYCLIC)) {
+		GC_ADD_FLAGS(Z_OBJ_P(res), GC_NOT_COLLECTABLE);
+	}
 }
 
 ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */

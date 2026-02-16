@@ -1767,6 +1767,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
+				GC_DEL_FLAGS(object, GC_NOT_COLLECTABLE);
 				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
 				zval_add_ref(prop);
 			}
@@ -1779,6 +1780,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 					ZSTR_VAL(object->ce->name), h);
 			}
 
+			GC_DEL_FLAGS(object, GC_NOT_COLLECTABLE);
 			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
@@ -2391,6 +2393,8 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 	}
 	module->module_started = 1;
 
+	uint32_t prev_class_count = zend_hash_num_elements(CG(class_table));
+
 	/* Check module dependencies */
 	if (module->deps) {
 		const zend_module_dep *dep = module->deps;
@@ -2433,6 +2437,22 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 		}
 		EG(current_module) = NULL;
 	}
+
+	/* Mark classes with custom get_gc handler as potentially cyclic, even if
+	 * their properties don't indicate so. */
+	if (prev_class_count != zend_hash_num_elements(CG(class_table))) {
+		Bucket *p;
+		ZEND_HASH_MAP_FOREACH_BUCKET_FROM(CG(class_table), p, prev_class_count) {
+			zend_class_entry *ce = Z_PTR(p->val);
+			if ((ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)
+			 || ce->create_object
+			 || ce->default_object_handlers->get_gc != zend_std_get_gc
+			 || ce->default_object_handlers->get_properties != zend_std_get_properties) {
+				ce->ce_flags2 |= ZEND_ACC2_MAY_BE_CYCLIC;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4414,6 +4434,27 @@ static zend_always_inline bool is_persistent_class(const zend_class_entry *ce) {
 		&& ce->info.internal.module->type == MODULE_PERSISTENT;
 }
 
+static bool zend_type_may_be_cyclic(zend_type type)
+{
+	if (!ZEND_TYPE_IS_SET(type)) {
+		return true;
+	}
+
+	if (!ZEND_TYPE_IS_COMPLEX(type)) {
+		return ZEND_TYPE_PURE_MASK(type) & (MAY_BE_OBJECT|MAY_BE_ARRAY);
+	} else if (ZEND_TYPE_IS_UNION(type)) {
+		const zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (zend_type_may_be_cyclic(*list_type)) {
+				return true;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		return false;
+	}
+
+	return true;
+}
+
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
@@ -4424,6 +4465,12 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		if (access_type & ZEND_ACC_READONLY) {
 			ce->ce_flags |= ZEND_ACC_HAS_READONLY_PROPS;
 		}
+	}
+
+	if (!(access_type & ZEND_ACC_STATIC)
+	 && !(ce->ce_flags2 & ZEND_ACC2_MAY_BE_CYCLIC)
+	 && zend_type_may_be_cyclic(type)) {
+		ce->ce_flags2 |= ZEND_ACC2_MAY_BE_CYCLIC;
 	}
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {

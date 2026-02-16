@@ -11510,6 +11510,25 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 			ir_END_list(end_inputs);
 			ir_IF_TRUE(if_non_zero);
 
+			if (op1_info & (MAY_BE_REF|MAY_BE_GUARD)) {
+				ir_ref if_ref, ref_ref, if_collectable;
+
+				if_ref = jit_if_Z_TYPE(jit, op1_addr, IS_REFERENCE);
+				ir_IF_TRUE(if_ref);
+
+				ref_ref = ir_ADD_OFFSET(ref2, offsetof(zend_reference, val));
+
+				if_collectable = jit_if_COLLECTABLE_ref(jit, ref_ref);
+				ir_IF_FALSE(if_collectable);
+				ir_END_list(end_inputs);
+				ir_IF_TRUE(if_collectable);
+
+				ref_ref = jit_Z_PTR_ref(jit, ref_ref);
+
+				ir_MERGE_WITH_EMPTY_FALSE(if_ref);
+				ref2 = ir_PHI_2(IR_ADDR, ref_ref, ref2);
+			}
+
 			// JIT: GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
 			if_may_not_leak = jit_if_GC_MAY_NOT_LEAK(jit, ref2);
 			ir_IF_TRUE(if_may_not_leak);
