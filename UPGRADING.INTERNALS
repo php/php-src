@@ -104,6 +104,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.
+  . The mod_user_names global has been removed.
+  . The mod_user_uses_object_methods_as_handlers global has been added,
+    it indicates whether the session handlers are methods of an object or not.
   . Removed session_adapt_url().
   . PS_OPEN_ARGS is now defined as
     `void **mod_data, zend_string *save_path, zend_string *session_name`
