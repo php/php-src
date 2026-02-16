@@ -118,6 +118,7 @@ static inline void php_rinit_session_globals(void)
 	PS(set_handler) = false;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = false;
+	PS(mod_user_uses_object_methods_as_handlers) = false;
 	PS(define_sid) = true;
 	PS(session_vars) = NULL;
 	PS(module_number) = my_module_number;
@@ -2123,6 +2124,7 @@ PHP_FUNCTION(session_set_save_handler)
 		zend_string_release_ex(validate_sid_name, false);
 		zend_string_release_ex(update_timestamp_name, false);
 
+		PS(mod_user_uses_object_methods_as_handlers) = true;
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry = {
@@ -2214,6 +2216,7 @@ PHP_FUNCTION(session_set_save_handler)
 	SESSION_SET_USER_HANDLER_PROCEDURAL_OPTIONAL(ps_validate_sid, validate_id_fci);
 	SESSION_SET_USER_HANDLER_PROCEDURAL_OPTIONAL(ps_update_timestamp, update_timestamp_fci);
 
+	PS(mod_user_uses_object_methods_as_handlers) = false;
 	RETURN_TRUE;
 }
 
@@ -2843,6 +2846,7 @@ static PHP_GINIT_FUNCTION(ps)
 	ps_globals->default_mod = NULL;
 	ps_globals->mod_user_implemented = false;
 	ps_globals->mod_user_is_open = false;
+	ps_globals->mod_user_uses_object_methods_as_handlers = false;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = false;
 	ps_globals->session_started_filename = NULL;
