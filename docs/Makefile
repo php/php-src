@@ -1,5 +1,5 @@
 # Makefile for php-src/docs
-# Copyright (c) The PHP Group
+# Copyright © The PHP Group and Contributors.
 
 # If people set these on the make command line, use 'em
 

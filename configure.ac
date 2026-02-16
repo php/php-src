@@ -1852,11 +1852,11 @@ cat <<X
 
 +--------------------------------------------------------------------+
 | License:                                                           |
-| This software is subject to the PHP License, available in this     |
-| distribution in the file LICENSE. By continuing this installation  |
-| process, you are bound by the terms of this license agreement.     |
-| If you do not agree with the terms of this license, you must abort |
-| the installation process at this point.                            |
+| This software is subject to the Modified BSD License, available in |
+| this distribution in the file LICENSE. By continuing this          |
+| installation process, you are bound by the terms of this license   |
+| agreement. If you do not agree with the terms of this license, you |
+| must abort the installation process at this point.                 |
 +--------------------------------------------------------------------+
 
 Thank you for using PHP.
