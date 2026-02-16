@@ -133,10 +133,19 @@ typedef struct _php_ps_globals {
 	bool  cookie_secure;
 	bool  cookie_httponly;
 	bool  cookie_partitioned;
+	bool  use_cookies;
+	bool  use_only_cookies;
+	bool  send_cookie;
+	bool  auto_start;
+	bool  define_sid;
 	const ps_module *mod;
 	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
+	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	bool lazy_write; /* omit session write when it is possible */
+	bool in_save_handler; /* state if session is in save handler or not */
+	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_started_filename;
 	uint32_t session_started_lineno;
 	int module_number;
@@ -157,15 +166,8 @@ typedef struct _php_ps_globals {
 		zval ps_validate_sid;
 		zval ps_update_timestamp;
 	} mod_user_names;
-	bool mod_user_implemented;
-	bool mod_user_is_open;
-	bool auto_start;
-	bool use_cookies;
-	bool use_only_cookies;
-	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
-	bool send_cookie;
-	bool define_sid;
 
+	zend_string *session_vars; /* serialized original session data */
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
 
@@ -180,11 +182,9 @@ typedef struct _php_ps_globals {
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
 	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
-	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	bool lazy_write; /* omit session write when it is possible */
-	bool in_save_handler; /* state if session is in save handler or not */
-	bool set_handler;     /* state if session module i setting handler or not */
-	zend_string *session_vars; /* serialized original session data */
+	bool mod_user_implemented;
+	bool mod_user_is_open;
+	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
