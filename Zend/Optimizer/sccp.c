@@ -965,7 +965,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					SET_RESULT(op1, &zv);
 				} else if (ct_eval_assign_dim(&zv, data, op2) == SUCCESS) {
 					/* Mark array containing partial array as partial */
-					if (IS_PARTIAL_ARRAY(data)) {
+					if (IS_PARTIAL_ARRAY(data) || IS_PARTIAL_OBJECT(data)) {
 						MAKE_PARTIAL_ARRAY(&zv);
 					}
 					SET_RESULT(result, data);
@@ -1165,7 +1165,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						/* We can't add NEXT element into partial array (skip it) */
 						SET_RESULT(result, &zv);
 					} else if (ct_eval_add_array_elem(&zv, op1, op2) == SUCCESS) {
-						if (IS_PARTIAL_ARRAY(op1)) {
+						if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_OBJECT(op1)) {
 							MAKE_PARTIAL_ARRAY(&zv);
 						}
 						SET_RESULT(result, &zv);
