@@ -56,6 +56,8 @@ PHP                                                                        NEWS
   . Added GB18030-2022 to default encoding list for zh-CN. (HeRaNO)
   . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
     recursive array references). (alexandre-daubois)
+  . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
+    list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
