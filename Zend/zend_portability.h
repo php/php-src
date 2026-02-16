@@ -146,6 +146,19 @@
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
+/* Define an enum with a fixed underlying type as C23_ENUM(name, underlying_type) { }. */
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define C23_ENUM(name, underlying_type) \
+    enum name: underlying_type; \
+    typedef enum name name; \
+    enum name: underlying_type
+#else
+# define C23_ENUM(name, underlying_type) \
+    enum name; \
+    typedef underlying_type name; \
+    enum name
+#endif
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)

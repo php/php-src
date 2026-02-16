@@ -72,6 +72,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_string* parameter.
   . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
     longer is a pointer, but a directly embedded HashTable struct.
+  . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
+    enums.
 
 ========================
 2. Build system changes
