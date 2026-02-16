@@ -22,12 +22,7 @@ try {
     printf("%s: %s\n", $ex::class, $ex->getMessage());
 }
 
-try {
-    $bar(1, 2);
-} catch (Error $ex) {
-    printf("%s: %s\n", $ex::class, $ex->getMessage());
-}
-
+$bar(1, 2);
 $bar(1);
 
 $bar = $foo->method(?, ...);
@@ -35,6 +30,7 @@ $bar = $foo->method(?, ...);
 echo (string) new ReflectionFunction($bar);
 
 $bar(10);
+$bar(10, 20);
 
 $bar = $foo->method(new Foo, ...);
 
@@ -56,7 +52,7 @@ int(1)
 Foo::method
 int(1)
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s 30 - 30
+  @@ %s 25 - 25
 
   - Parameters [2] {
     Parameter #0 [ <required> mixed $arguments0 ]
@@ -65,8 +61,11 @@ Closure [ <user> public method {closure:%s:%d} ] {
 }
 Foo::method
 int(10)
+Foo::method
+int(10)
+int(20)
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s 36 - 36
+  @@ %s 32 - 32
 
   - Bound Variables [1] {
       Variable #0 [ $arguments0 ]
