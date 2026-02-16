@@ -4,8 +4,6 @@ updateTimestamp never called when session data is empty
 session
 --INI--
 session.use_strict_mode=0
---XFAIL--
-Current session module is designed to write empty session always.
 --FILE--
 <?php
 class MySessionHandler extends SessionHandler implements SessionUpdateTimestampHandlerInterface
@@ -71,7 +69,7 @@ session_commit();
 --EXPECT--
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
-write
+updateTimestamp
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
 updateTimestamp
