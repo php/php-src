@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     accessing properties on Reflection LazyProxy via isset()). (Arnaud)
   . Fixed OSS-Fuzz #478009707 (Borked assign-op/inc/dec on untyped hooked
     property backing value). (ilutov)
+  . Fixed bug GH-21215 (Build fails with -std=). (Arnaud)
 
 - Curl:
   . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
