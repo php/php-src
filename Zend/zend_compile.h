@@ -497,7 +497,7 @@ typedef struct _zend_class_constant {
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
-enum C23_ENUM(zend_function_type, uint8_t) {
+C23_ENUM(zend_function_type, uint8_t) {
 	ZEND_INTERNAL_FUNCTION = 1,
 	ZEND_USER_FUNCTION = 2,
 	ZEND_EVAL_CODE = 4,

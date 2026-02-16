@@ -146,15 +146,15 @@
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
-/* Define a fixed-size enum as enum C23_ENUM(name, size) { }. */
+/* Define a fixed-size enum as C23_ENUM(name, size) { }. */
 #if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
 # define C23_ENUM(name, underlying_type) \
-    name: underlying_type; \
+    enum name: underlying_type; \
     typedef enum name name; \
     enum name: underlying_type
 #else
 # define C23_ENUM(name, underlying_type) \
-    name; \
+    enum name; \
     typedef underlying_type name; \
     enum name
 #endif
