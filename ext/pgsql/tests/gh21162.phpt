@@ -2,6 +2,12 @@
 GH-21162 (pg_connect() on error memory leak)
 --EXTENSIONS--
 pgsql
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for windows');
+}
+?>
 --FILE--
 <?php
 
