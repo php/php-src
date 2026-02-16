@@ -15,12 +15,14 @@ $bar = Foo::method(?);
 echo (string) new ReflectionFunction($bar);
 
 $bar(1);
+$bar(1, 2);
 
 $bar = Foo::method(?, ...);
 
 echo (string) new ReflectionFunction($bar);
 
 $bar(10);
+$bar(10, 20);
 
 $bar = Foo::method(new Foo,...);
 
@@ -38,8 +40,10 @@ Closure [ <user> static public method {closure:%s:%d} ] {
 }
 Foo::method
 int(1)
+Foo::method
+int(1)
 Closure [ <user> static public method {closure:%s:%d} ] {
-  @@ %s 16 - 16
+  @@ %s 17 - 17
 
   - Parameters [2] {
     Parameter #0 [ <required> mixed $arguments0 ]
@@ -48,8 +52,11 @@ Closure [ <user> static public method {closure:%s:%d} ] {
 }
 Foo::method
 int(10)
+Foo::method
+int(10)
+int(20)
 Closure [ <user> static public method {closure:%s:%d} ] {
-  @@ %s 22 - 22
+  @@ %s 24 - 24
 
   - Bound Variables [1] {
       Variable #0 [ $arguments0 ]

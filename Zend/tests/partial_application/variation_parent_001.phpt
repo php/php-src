@@ -14,7 +14,7 @@ $foo = new Foo();
 $bar = $foo->method(10, ...);
 $baz = $bar(20, ...);
 
-var_dump($baz, $baz());
+var_dump($baz, $c = $baz(), $c() === $foo);
 ?>
 --EXPECTF--
 object(Closure)#%d (6) {
@@ -73,3 +73,4 @@ object(Closure)#%d (4) {
   object(Foo)#%d (0) {
   }
 }
+bool(true)
