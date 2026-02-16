@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20718 ("Insufficient shared memory" when using JIT on Solaris).
     (Petr Sumbera)
+  . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
+    (ilutov)
 
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
