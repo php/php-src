@@ -11,6 +11,9 @@ on:
       community_verify_type_inference:
         required: true
         type: boolean
+      macos_arm64_version:
+        required: true
+        type: string
       run_alpine:
         required: true
         type: boolean
@@ -347,11 +350,11 @@ jobs:
       matrix:
         debug: [true, false]
         zts: [true, false]
-        os: ['13', '14']
+        arch: ['X64', 'ARM64']
         exclude:
-          - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
-    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.os }}
+          - arch: ${{ !inputs.run_macos_arm64 && 'ARM64' || '*never*' }}
+    name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || inputs.macos_arm64_version }}
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -377,7 +380,7 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: tracing
@@ -389,7 +392,7 @@ jobs:
           runTestsParameters: >-
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: matrix.arch == 'X64' || !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: function
@@ -981,7 +984,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
       PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
