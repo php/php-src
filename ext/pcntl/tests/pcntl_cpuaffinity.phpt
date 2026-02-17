@@ -4,6 +4,9 @@ pcntl_getcpuaffinity() and pcntl_setcpuaffinity()
 pcntl
 --SKIPIF--
 <?php
+if (getenv("SKIP_BROKEN_PSET_CREATE")) {
+    die("skip broken pset_create()");
+}
 if (!function_exists("pcntl_setcpuaffinity")) die("skip pcntl_setcpuaffinity is not available");
 ?>
 --FILE--

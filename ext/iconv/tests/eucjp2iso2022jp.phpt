@@ -2,6 +2,12 @@
 EUC-JP to ISO-2022-JP
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
+?>
 --INI--
 error_reporting=2039
 --FILE--

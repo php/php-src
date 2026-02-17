@@ -75,7 +75,13 @@ $all_system_locales = list_system_locales();
 // checking the currency setting of the system(use localconv())
 $list_of_locales = array();
 foreach($common_locales as $value) {
-  if( in_array($value, $all_system_locales) ) {
+  
+  // Solaris uses canonical .UTF-8 form, so normalize the name
+  $normalized = preg_replace('/\.utf8$/i', '.UTF-8', $value);
+
+  if (in_array($value, $all_system_locales) ||
+      in_array($normalized, $all_system_locales)) {
+
     $list_of_locales[] = $value;
   }
 }

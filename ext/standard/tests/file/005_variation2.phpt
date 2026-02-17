@@ -52,6 +52,7 @@ stat_fn('|');
 
 var_dump(unlink(' '));
 var_dump(unlink('|'));
+chdir(__DIR__); // Solaris cannot remove CWD
 rmdir($dir);
 
 echo "Done";

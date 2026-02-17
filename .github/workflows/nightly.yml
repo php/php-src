@@ -26,6 +26,9 @@ on:
       run_freebsd_zts:
         required: true
         type: boolean
+      run_solaris:
+        required: true
+        type: boolean
       ubuntu_version:
         required: true
         type: string
@@ -1025,4 +1028,19 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          runExtraTests: true
+  SOLARIS:
+    if: inputs.run_solaris
+    name: "SOLARIS"
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Solaris
+        uses: ./.github/actions/solaris
+        with:
+          configurationParameters: --disable-zts
           runExtraTests: true

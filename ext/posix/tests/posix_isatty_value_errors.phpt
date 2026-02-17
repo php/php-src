@@ -24,10 +24,10 @@ foreach ($values as $value) {
 
 Warning: posix_isatty(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"
 bool(false)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"
 
 Warning: posix_isatty(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"

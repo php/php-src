@@ -2,6 +2,12 @@
 Bug #69840 (iconv_substr() doesn't work with UTF-16BE)
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
+?>
 --FILE--
 <?php
 $str = iconv_substr("a\x00b\x00", 0, 1, 'UTF-16LE');

@@ -9,6 +9,9 @@ posix
 if (!defined("AF_PACKET")) {
     die('SKIP AF_PACKET not supported on this platform.');
 }
+if (!defined("ETH_P_IP")) {
+    die('SKIP ETH_P_IP not available on this platform.');
+}
 if (!function_exists("posix_getuid") || posix_getuid() != 0) {
     die('SKIP AF_PACKET requires root permissions.');
 }

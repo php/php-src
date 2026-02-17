@@ -27,7 +27,7 @@ try {
 
 ?>
 --EXPECTF--
-Warning: socket_create_pair(): Unable to create socket pair [%d]: %s not supported in %s on line %d
+Warning: socket_create_pair(): Unable to create socket pair [%d]: %s %r(not supported|wrong type for socket)%r in %s on line %d
 bool(false)
 socket_create_pair(): Argument #1 ($domain) must be one of AF_UNIX, AF_INET6, or AF_INET
 socket_create_pair(): Argument #2 ($type) must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW, or SOCK_RDM%A

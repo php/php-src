@@ -17,6 +17,7 @@ on:
       - PHP-8.4
       - PHP-8.5
       - master
+      - github-solaris-ci
   pull_request:
     paths-ignore: *ignore_paths
     branches:
@@ -409,3 +410,13 @@ jobs:
         uses: actions/checkout@v6
       - name: FreeBSD
         uses: ./.github/actions/freebsd
+  SOLARIS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: SOLARIS
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+      - name: Solaris
+        uses: ./.github/actions/solaris
