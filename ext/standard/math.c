@@ -51,9 +51,21 @@ static inline double php_intpow10(int power) {
 
 static zend_always_inline double php_round_get_basic_edge_case(double integral, double exponent, int places)
 {
-	return (places > 0)
-		? fabs((integral + copysign(0.5, integral)) / exponent)
-		: fabs((integral + copysign(0.5, integral)) * exponent);
+	/* Integer + `0.5` can be represented exactly in a double, so in most cases, there is no rounding error at this point. */
+	double edge_case = integral + copysign(0.5, integral);
+
+	/* When the calculation precision is as high as `1e16`, adding `0.5` may be lost due to rounding.
+	 * In such cases, the exponent is applied individually before performing the addition.
+	 * This approach is not used all the time in order to avoid introducing rounding errors when adding `0.5`.
+	 * It is only used when the precision is so fine that adding `0.5` would have no meaningful effect. */
+	if (UNEXPECTED(integral == edge_case)) {
+		return (places > 0)
+			? fabs((integral / exponent) + (copysign(0.5, integral) / exponent))
+			: fabs((integral * exponent) + (copysign(0.5, integral) * exponent));
+	}
+
+	/* Returns a value adjusted with the exponent so that it can be compared with the input. */
+	return (places > 0) ? fabs(edge_case / exponent) : fabs(edge_case * exponent);
 }
 
 static zend_always_inline double php_round_get_zero_edge_case(double integral, double exponent, int places)
