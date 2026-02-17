@@ -155,7 +155,7 @@ $branches = $branch === 'master'
     ? get_branches()
     : [['ref' => $branch, 'version' => get_current_version()]];
 
-$labels = json_decode($argv[4] ?? '[]', true);
+$labels = json_decode($argv[4] ?? '[]', true) ?? [];
 $labels = array_column($labels, 'name');
 $all_variations = $trigger === 'schedule' || $trigger === 'workflow_dispatch' || in_array('CI: All variations', $labels, true);
 
