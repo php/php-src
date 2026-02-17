@@ -1527,6 +1527,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.clone_obj = NULL;
 	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
 	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
 
