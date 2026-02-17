@@ -41,6 +41,7 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
@@ -1725,14 +1726,27 @@ PHPAPI php_session_status php_get_session_status(void)
 
 static bool php_session_abort(void)
 {
-	if (PS(session_status) == php_session_active) {
-		if (PS(mod_data) || PS(mod_user_implemented)) {
-			PS(mod)->s_close(&PS(mod_data));
-		}
-		PS(session_status) = php_session_none;
-		return true;
-	}
-	return false;
+    if (PS(session_status) == php_session_active) {
+
+        if ((PS(mod_data) || PS(mod_user_implemented)) && PS(mod)->s_close) {
+
+            zend_object *old_exception = EG(exception);
+            EG(exception) = NULL;
+
+            PS(mod)->s_close(&PS(mod_data));
+
+            if (!EG(exception)) {
+                EG(exception) = old_exception;
+            } else if (old_exception) {
+                zend_exception_set_previous(EG(exception), old_exception);
+            }
+        }
+
+        PS(session_status) = php_session_none;
+        return true;
+    }
+
+    return false;
 }
 
 static bool php_session_reset(void)
