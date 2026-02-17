@@ -9,12 +9,13 @@ set_error_handler(function ($type, $msg) {
     throw new \Exception($msg);
 });
 
-call_user_func(function (array &$ref) {var_dump("xxx");}, 'not_an_array_variable');
+$fn = 'call_user_func';
+$fn(function (array &$ref) {var_dump("xxx");}, 'not_an_array_variable');
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: {closure:%s:%d}(): Argument #1 ($ref) must be passed by reference, value given in %s:%d
 Stack trace:
-#0 [internal function]: {closure:%s:%d}(2, '%s', '%s', 9)
+#0 [internal function]: {closure:%s:%d}(2, '%s', '%s', 10)
 #1 %sbug74164.php(%d): call_user_func(%s)
 #2 {main}
   thrown in %sbug74164.php on line %d
