@@ -46,6 +46,101 @@ function get_current_version(): array {
     return [$major, $minor];
 }
 
+function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
+    $no_jobs = in_array('CI: No jobs', $labels, true);
+    $all_jobs = in_array('CI: All jobs', $labels, true);
+    $test_alpine = in_array('CI: Alpine', $labels, true);
+    $test_community = in_array('CI: Community', $labels, true);
+    $test_freebsd = in_array('CI: FreeBSD', $labels, true);
+    $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
+    $test_linux_ppc64 = in_array('CI: Linux PPC64', $labels, true);
+    $test_linux_x32 = in_array('CI: Linux X32', $labels, true);
+    $test_linux_x64 = in_array('CI: Linux X64', $labels, true);
+    $test_macos = in_array('CI: macOS', $labels, true);
+    $test_msan = in_array('CI: MSAN', $labels, true);
+    $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
+    $test_windows = in_array('CI: Windows', $labels, true);
+
+    $jobs = [];
+    if (version_compare($php_version, '8.4', '>=') && ($all_jobs || !$no_jobs || $test_alpine)) {
+        $jobs['ALPINE'] = true;
+    }
+    if ($all_jobs || $test_community) {
+        $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
+            ? ['type' => ['asan', 'verify_type_inference']]
+            : ['type' => ['asan']];
+        $jobs['COMMUNITY']['config']['symfony_version'] = version_compare($php_version, '8.4', '>=') ? '8.1' : '7.4';
+    }
+    if ($trigger === 'schedule' && $ref === 'master') {
+        $jobs['COVERAGE'] = true;
+    }
+    if ($all_jobs || $test_libmysqlclient) {
+        $jobs['LIBMYSQLCLIENT'] = true;
+    }
+    if (version_compare($php_version, '8.4', '>=') && ($all_jobs || $test_linux_ppc64)) {
+        $jobs['LINUX_PPC64'] = true;
+    }
+    if ($all_jobs || !$no_jobs || $test_linux_x64) {
+        $jobs['LINUX_X64']['matrix'] = $all_variations
+            ? [
+                'name' => [''],
+                'asan' => [false],
+                'debug' => [true, false],
+                'repeat' => [false],
+                'variation' => [false],
+                'zts' => [true, false],
+                'include' => [
+                    ['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'variation' => false, 'zts' => true],
+                    ['name' => '_REPEAT', 'asan' => false, 'debug' => true, 'repeat' => true, 'variation' => false, 'zts' => false],
+                    ['name' => '_VARIATION', 'asan' => false, 'debug' => true, 'repeat' => false, 'variation' => true, 'zts' => true],
+                ],
+            ]
+            : ['include' => [
+                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'variation' => false, 'zts' => false],
+                ['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'variation' => false, 'zts' => true],
+            ]];
+        $jobs['LINUX_X64']['config']['variation_enable_zend_max_execution_timers'] = version_compare($php_version, '8.3', '>=');
+    }
+    if ($all_jobs || !$no_jobs || $test_linux_x32) {
+        $jobs['LINUX_X32']['matrix'] = $all_variations
+            ? ['debug' => [true, false], 'zts' => [true, false]]
+            : ['debug' => [true], 'zts' => [true]];
+    }
+    if ($all_jobs || !$no_jobs || $test_macos) {
+        $test_arm = version_compare($php_version, '8.4', '>=');
+        $jobs['MACOS']['matrix'] = $all_variations
+            ? ['arch' => $test_arm ? ['X64', 'ARM64'] : ['X64'], 'debug' => [true, false], 'zts' => [true, false]]
+            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false]]];
+        $jobs['MACOS']['config']['arm64_version'] = version_compare($php_version, '8.4', '>=') ? '15' : '14';
+    }
+    if ($all_jobs || $test_msan) {
+        $jobs['MSAN'] = true;
+    }
+    if ($all_jobs || $test_opcache_variation) {
+        $jobs['OPCACHE_VARIATION'] = true;
+    }
+    if ($trigger === 'schedule' && $ref === 'master') {
+        $jobs['PECL'] = true;
+    }
+    if ($all_jobs || !$no_jobs || $test_windows) {
+        $jobs['WINDOWS']['matrix'] = $all_variations
+            ? ['include' => [
+                ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
+                ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
+            ]]
+            : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
+        $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
+            ? ['vs_crt_version' => 'vs17']
+            : ['vs_crt_version' => 'vs16'];
+    }
+    if ($all_jobs || !$no_jobs || $test_freebsd) {
+        $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')
+            ? ['zts' => [true, false]]
+            : ['zts' => [false]];
+    }
+    return $jobs;
+}
+
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
 $sunday = date('w', time()) === '0';
@@ -60,6 +155,25 @@ $branches = $branch === 'master'
     ? get_branches()
     : [['ref' => $branch, 'version' => get_current_version()]];
 
-$f = fopen(getenv('GITHUB_OUTPUT'), 'a');
-fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
-fclose($f);
+$labels = json_decode($argv[4] ?? '[]', true);
+$labels = array_column($labels, 'name');
+$all_variations = $trigger === 'schedule' || $trigger === 'workflow_dispatch' || in_array('CI: All variations', $labels, true);
+
+foreach ($branches as &$branch) {
+    $php_version = $branch['version'][0] . '.' . $branch['version'][1];
+    $branch['jobs'] = select_jobs($trigger, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
+}
+
+echo "All variations:";
+echo json_encode($all_variations, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+echo "\n\nBranches:\n";
+echo json_encode($branches, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+echo "\n";
+
+if (false !== ($github_output = getenv('GITHUB_OUTPUT'))) {
+    $f = fopen($github_output, 'a');
+    fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
+    fwrite($f, 'all_variations=' . json_encode($all_variations, JSON_UNESCAPED_SLASHES) . "\n");
+    fclose($f);
+}
