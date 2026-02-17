@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     property backing value). (ilutov)
   . Fixed bug GH-21215 (Build fails with -std=). (Arnaud)
 
+- Curl:
+  . Don't truncate length. (ndossche)
+
 - Date:
   . Fixed bug GH-20936 (DatePeriod::__set_state() cannot handle null start).
     (ndossche)
