@@ -100,7 +100,7 @@ static zend_function *zend_duplicate_internal_function(const zend_function *func
 {
 	zend_function *new_function;
 
-	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)) {
 		new_function = (zend_function *)pemalloc(sizeof(zend_internal_function), 1);
 		memcpy(new_function, func, sizeof(zend_internal_function));
 	} else {
@@ -1669,7 +1669,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
 			c = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(c, parent_const, sizeof(zend_class_constant));
 			parent_const = c;
@@ -2151,7 +2151,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ct = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(ct, c, sizeof(zend_class_constant));
 			c = ct;
