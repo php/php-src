@@ -4410,8 +4410,7 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 /* }}} */
 
 static zend_always_inline bool is_persistent_class(const zend_class_entry *ce) {
-	return (ce->type & ZEND_INTERNAL_CLASS)
-		&& ce->info.internal.module->type == MODULE_PERSISTENT;
+	return ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->type == MODULE_PERSISTENT;
 }
 
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
@@ -4534,7 +4533,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
 skip_property_storage:
-	if (ce->type & ZEND_INTERNAL_CLASS) {
+	if (ce->type == ZEND_INTERNAL_CLASS) {
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
 			name = zend_new_interned_string(zend_string_copy(name));
@@ -4753,7 +4752,7 @@ ZEND_API void zend_declare_property_string(zend_class_entry *ce, const char *nam
 {
 	zval property;
 
-	ZVAL_NEW_STR(&property, zend_string_init(value, strlen(value), ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, zend_string_init(value, strlen(value), ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
@@ -4762,7 +4761,7 @@ ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *na
 {
 	zval property;
 
-	ZVAL_NEW_STR(&property, zend_string_init(value, value_len, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, zend_string_init(value, value_len, ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
@@ -4876,7 +4875,7 @@ ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const ch
 {
 	zval constant;
 
-	ZVAL_NEW_STR(&constant, zend_string_init(value, value_length, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&constant, zend_string_init(value, value_length, ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_class_constant(ce, name, name_length, &constant);
 }
 /* }}} */
