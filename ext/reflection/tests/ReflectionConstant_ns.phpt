@@ -14,6 +14,10 @@ namespace {
     var_dump(new \ReflectionConstant('\\C'));
     var_dump(new \ReflectionConstant('Foo\\C'));
     var_dump(new \ReflectionConstant('\\Foo\\C'));
+    var_dump((new \ReflectionConstant('C'))->inNamespace());
+    var_dump((new \ReflectionConstant('\\C'))->inNamespace());
+    var_dump((new \ReflectionConstant('Foo\\C'))->inNamespace());
+    var_dump((new \ReflectionConstant('\\Foo\\C'))->inNamespace());
     var_dump((new \ReflectionConstant('C'))->getNamespaceName());
     var_dump((new \ReflectionConstant('\\C'))->getNamespaceName());
     var_dump((new \ReflectionConstant('Foo\\C'))->getNamespaceName());
@@ -42,6 +46,10 @@ object(ReflectionConstant)#1 (1) {
   ["name"]=>
   string(6) "\Foo\C"
 }
+bool(false)
+bool(false)
+bool(true)
+bool(true)
 string(0) ""
 string(0) ""
 string(3) "Foo"

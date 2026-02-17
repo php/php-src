@@ -115,6 +115,9 @@ PHP 8.6 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Reflection:
+  . ReflectionConstant::inNamespace()
+
 - Standard:
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
