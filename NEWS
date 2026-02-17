@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
     (ilutov)
 
+- OpenSSL:
+  . Fix a bunch of leaks and error propagation. (ndossche)
+
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
