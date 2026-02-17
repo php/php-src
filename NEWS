@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20718 ("Insufficient shared memory" when using JIT on Solaris).
     (Petr Sumbera)
+  . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
+    (ilutov)
 
 - Windows:
   . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
