@@ -692,21 +692,13 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	X509_INFO *xi;
 	char cert_path[MAXPATHLEN];
 
-	if(!(stack = sk_X509_new_null())) {
-		php_openssl_store_errors();
-		php_error_docref(NULL, E_ERROR, "Memory allocation failure");
-		goto end;
-	}
-
 	if (!php_openssl_check_path(cert_file, cert_file_len, cert_path, arg_num)) {
-		sk_X509_free(stack);
 		goto end;
 	}
 
 	if (!(in = BIO_new_file(cert_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY)))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening the file, %s", cert_path);
-		sk_X509_free(stack);
 		goto end;
 	}
 
@@ -714,7 +706,11 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	if (!(sk = php_openssl_pem_read_bio_x509_info(in))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error reading the file, %s", cert_path);
-		sk_X509_free(stack);
+		goto end;
+	}
+
+	if(!(stack = sk_X509_new_reserve(NULL, sk_X509_INFO_num(sk)))) {
+		php_openssl_store_errors();
 		goto end;
 	}
 
@@ -886,7 +882,10 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 				}
 
 			}
-			sk_X509_push(sk, cert);
+			if (sk_X509_push(sk, cert) <= 0) {
+				X509_free(cert);
+				goto push_fail_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -904,11 +903,20 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(sk, cert);
+		if (sk_X509_push(sk, cert) <= 0) {
+			X509_free(cert);
+			goto push_fail_exit;
+		}
 	}
 
 clean_exit:
 	return sk;
+
+push_fail_exit:
+	php_openssl_store_errors();
+	php_openssl_sk_X509_free(sk);
+	sk = NULL;
+	goto clean_exit;
 }
 
 zend_result php_openssl_csr_add_subj_entry(zval *item, X509_NAME *subj, int nid)

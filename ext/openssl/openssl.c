@@ -1272,8 +1272,6 @@ PHP_FUNCTION(openssl_x509_free)
 }
 /* }}} */
 
-/* }}} */
-
 /* {{{ Creates and exports a PKCS to file */
 PHP_FUNCTION(openssl_pkcs12_export_to_file)
 {
@@ -1339,6 +1337,9 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 
 	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
 		ca = php_openssl_array_to_X509_sk(item, 5, "extracerts");
+		if (!ca) {
+			goto cleanup;
+		}
 	}
 	/* end parse extra config */
 
@@ -1432,6 +1433,9 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
 		ca = php_openssl_array_to_X509_sk(item, 5, "extracerts");
+		if (!ca) {
+			goto cleanup;
+		}
 	}
 	/* end parse extra config */
 
@@ -2651,7 +2655,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 					goto clean_exit;
 				}
 			}
-			sk_X509_push(recipcerts, cert);
+			if (sk_X509_push(recipcerts, cert) <= 0) {
+				X509_free(cert);
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -2672,7 +2679,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(recipcerts, cert);
+		if (sk_X509_push(recipcerts, cert) <= 0) {
+			X509_free(cert);
+			goto clean_exit;
+		}
 	}
 
 	/* sanity check the cipher */
@@ -3267,7 +3277,10 @@ PHP_FUNCTION(openssl_cms_encrypt)
 					goto clean_exit;
 				}
 			}
-			sk_X509_push(recipcerts, cert);
+			if (sk_X509_push(recipcerts, cert) <= 0) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -3287,7 +3300,10 @@ PHP_FUNCTION(openssl_cms_encrypt)
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(recipcerts, cert);
+		if (sk_X509_push(recipcerts, cert) <= 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 	}
 
 	/* sanity check the cipher */
