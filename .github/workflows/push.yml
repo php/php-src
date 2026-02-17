@@ -31,269 +31,30 @@ env:
   CC: ccache gcc
   CXX: ccache g++
 jobs:
-  ALPINE:
+  GENERATE_MATRIX:
+    name: Generate Matrix
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
-    runs-on: ubuntu-24.04
-    container:
-      image: 'alpine:3.22'
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: apk
-        uses: ./.github/actions/apk
-      - name: System info
-        run: |
-          echo "::group::Show host CPU info"
-          lscpu
-          echo "::endgroup::"
-          echo "::group::Show installed package versions"
-          apk list
-          echo "::endgroup::"
-      - name: ./configure
-        uses: ./.github/actions/configure-alpine
-        with:
-          configurationParameters: >-
-            CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
-            LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-20
-            CXX=clang++-20
-            --enable-debug
-            --enable-zts
-          skipSlow: true # FIXME: This should likely include slow extensions
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        uses: ./.github/actions/install-alpine
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-alpine
-        with:
-          jitType: tracing
-          runTestsParameters: >-
-            --asan -x
-            -d opcache.enable_cli=1
-  LINUX_X64:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    services:
-      mysql:
-        image: mysql:8.4
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: root
-      postgres:
-        image: postgres
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
-      firebird:
-        image: jacobalberty/firebird
-        ports:
-          - 3050:3050
-        env:
-          ISC_PASSWORD: test
-          FIREBIRD_DATABASE: test.fdb
-          FIREBIRD_USER: test
-          FIREBIRD_PASSWORD: test
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - debug: false
-            zts: false
-            asan: false
-          - debug: true
-            zts: true
-            asan: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-24.04
-    timeout-minutes: 50
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: apt
-        uses: ./.github/actions/apt-x64
-      - name: System info
-        run: |
-          echo "::group::Show host CPU info"
-          lscpu
-          echo "::endgroup::"
-          echo "::group::Show installed package versions"
-          dpkg -l
-          echo "::endgroup::"
-      - name: Create MSSQL container
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-mssql
-      - name: Setup Caddy server
-        uses: ./.github/actions/setup-caddy
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          # This duplicates the "job.name" expression above because
-          # GitHub has no way to query the job name (github.job is the
-          # job id, not the job name)
-          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
-      - name: ./configure
-        uses: ./.github/actions/configure-x64
-        with:
-          configurationParameters: >-
-            --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
-            --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
-          skipSlow: ${{ matrix.asan }}
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        uses: ./.github/actions/install-linux
-      - name: Setup
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-x64
-      - name: Test
-        if: matrix.asan == false
-        uses: ./.github/actions/test-linux
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-linux
-        with:
-          jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
-            ${{ matrix.asan && '--asan -x' || '' }}
-      - name: Verify generated files are up to date
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/verify-generated-files
-  LINUX_X32:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
-    timeout-minutes: 50
-    container:
-      image: ubuntu:24.04
-    env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
-      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
-    services:
-      mysql:
-        image: mysql:8.4
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: root
-      firebird:
-        image: jacobalberty/firebird
-        ports:
-          - 3050:3050
-        env:
-          ISC_PASSWORD: test
-          FIREBIRD_DATABASE: test.fdb
-          FIREBIRD_USER: test
-          FIREBIRD_PASSWORD: test
+    outputs:
+      all_variations: ${{ steps.set-matrix.outputs.all_variations }}
+      branches: ${{ steps.set-matrix.outputs.branches }}
     steps:
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: apt
-        uses: ./.github/actions/apt-x32
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
-      - name: ./configure
-        uses: ./.github/actions/configure-x32
-        with:
-          configurationParameters: >-
-            --enable-debug
-            --enable-zts
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        uses: ./.github/actions/install-linux-x32
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-linux
-        with:
-          jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
-  MACOS_DEBUG_NTS:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+      - uses: actions/checkout@v6
+      - name: Generate Matrix
+        id: set-matrix
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}" '${{ toJSON(github.event.pull_request.labels) }}'
+  PUSH:
+    needs: GENERATE_MATRIX
+    name: ${{ matrix.branch.ref }}
+    uses: ./.github/workflows/nightly.yml
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: 15
-            arch: ARM64
-    name: MACOS_${{ matrix.arch }}_DEBUG_NTS
-    runs-on: macos-${{ matrix.os }}
-    timeout-minutes: 50
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: Update clang
-        uses: ./.github/actions/macos-update-clang
-      - name: brew
-        timeout-minutes: 10
-        uses: ./.github/actions/brew
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
-      - name: ./configure
-        uses: ./.github/actions/configure-macos
-        with:
-          configurationParameters: --enable-debug --disable-zts
-      - name: make
-        run: |-
-          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
-          make -j$(sysctl -n hw.logicalcpu) >/dev/null
-      - name: make install
-        run: sudo make install
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-macos
-        with:
-          jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
-      - name: Verify generated files are up to date
-        uses: ./.github/actions/verify-generated-files
-  WINDOWS:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: WINDOWS_X64_ZTS
-    runs-on: windows-2022
-    timeout-minutes: 50
-    env:
-      PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
-      PHP_BUILD_OBJ_DIR: C:\obj
-      PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
-      PHP_BUILD_CRT: vs17
-      PLATFORM: x64
-      THREAD_SAFE: "1"
-      INTRINSICS: AVX2
-      PARALLEL: -j2
-      OPCACHE: "1"
-    steps:
-      - name: git config
-        run: git config --global core.autocrlf false && git config --global core.eol lf
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: Setup
-        uses: ./.github/actions/setup-windows
-      - name: Build
-        run: .github/scripts/windows/build.bat
-      - name: Test
-        run: .github/scripts/windows/test.bat
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+    with:
+      all_variations: ${{ needs.GENERATE_MATRIX.outputs.all_variations == 'true' }}
+      branch: ${{ toJSON(matrix.branch) }}
+    secrets: inherit
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
@@ -321,11 +82,9 @@ jobs:
             re2c \
             valgrind
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: "${{ github.job }}"
       - name: ./configure
         run: |
           set -x
@@ -399,13 +158,3 @@ jobs:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
-  FREEBSD:
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: FREEBSD
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v6
-      - name: FreeBSD
-        uses: ./.github/actions/freebsd
