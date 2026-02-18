@@ -834,12 +834,12 @@ jobs:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
+        if: ${{ false }}
         uses: actions/checkout@v6
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        if: false
         uses: actions/checkout@v6
         with:
           repository: xdebug/xdebug
@@ -895,13 +895,13 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build redis
+        if: ${{ false }}
         run: |
           cd redis
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build xdebug
-        if: false
         run: |
           cd xdebug
           /opt/php/bin/phpize
