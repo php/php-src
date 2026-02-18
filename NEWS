@@ -134,4 +134,8 @@ PHP                                                                        NEWS
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
 
+- Standard:
+  . Passing 1 or negative base to log() now throws a ValueError.
+    (alexandre-daubois)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
