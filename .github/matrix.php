@@ -1,11 +1,11 @@
 <?php
 
 const BRANCHES = [
-    ['ref' => 'refs/heads/master', 'version' => [8, 6]],
-    ['ref' => 'refs/heads/PHP-8.5', 'version' => [8, 5]],
-    ['ref' => 'refs/heads/PHP-8.4', 'version' => [8, 4]],
-    ['ref' => 'refs/heads/PHP-8.3', 'version' => [8, 3]],
-    ['ref' => 'refs/heads/PHP-8.2', 'version' => [8, 2]],
+    ['name' => 'master', 'ref' => 'refs/heads/master', 'version' => [8, 6]],
+    ['name' => 'PHP-8.5', 'ref' => 'refs/heads/PHP-8.5', 'version' => [8, 5]],
+    ['name' => 'PHP-8.4', 'ref' => 'refs/heads/PHP-8.4', 'version' => [8, 4]],
+    ['name' => 'PHP-8.3', 'ref' => 'refs/heads/PHP-8.3', 'version' => [8, 3]],
+    ['name' => 'PHP-8.2', 'ref' => 'refs/heads/PHP-8.2', 'version' => [8, 2]],
 ];
 
 function get_branch_commit_cache_file_path(): string {
@@ -164,7 +164,7 @@ $branch = $argv[3] ?? 'refs/heads/master';
 $nightly = $trigger === 'schedule' || $trigger === 'workflow_dispatch';
 $branches = $nightly && $branch === 'refs/heads/master'
     ? get_branches()
-    : [['ref' => $branch, 'version' => get_current_version()]];
+    : [['name' => 'Suite', 'ref' => $branch, 'version' => get_current_version()]];
 
 $labels = json_decode($argv[4] ?? '[]', true) ?? [];
 $labels = array_column($labels, 'name');
