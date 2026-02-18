@@ -144,11 +144,6 @@
 ;   Development Value: Off
 ;   Production Value: Off
 
-; variables_order
-;   Default Value: "EGPCS"
-;   Development Value: "GPCS"
-;   Production Value: "GPCS"
-
 ; zend.assertions
 ;   Default Value: 1
 ;   Development Value: 1
@@ -630,16 +625,14 @@ ignore_repeated_source = Off
 
 ; This directive determines which super global arrays are registered when PHP
 ; starts up. G,P,C,E & S are abbreviations for the following respective super
-; globals: GET, POST, COOKIE, ENV and SERVER. There is a performance penalty
-; paid for the registration of these arrays and because ENV is not as commonly
-; used as the others, ENV is not recommended on productions servers. You
-; can still get access to the environment variables through getenv() should you
-; need to.
+; globals: GET, POST, COOKIE, ENV and SERVER.
+; In environments where _ENV is not registered, it is still possible to get
+; access to the environment via getenv()
 ; Default Value: "EGPCS"
-; Development Value: "GPCS"
-; Production Value: "GPCS";
+; Development Value: "EGPCS"
+; Production Value: "EGPCS";
 ; https://php.net/variables-order
-variables_order = "GPCS"
+;variables_order = "EGPCS"
 
 ; This directive determines which super global data (G,P & C) should be
 ; registered into the super global array REQUEST. If so, it also determines
