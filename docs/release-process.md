@@ -983,7 +983,7 @@ feature development that cannot go into the new version.
    applicable files there to reflect the branch cut, and then upmerge that commit
    5 times to get it to `master`. The following files need to be updated:
 
-   * `.github/nightly_matrix.php` (add new branch, update version for `master`)
+   * `.github/matrix.php` (add new branch, update version for `master`)
    [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
 
    * `.github/scripts/windows/find-target-branch.bat` (update version for `master`)
