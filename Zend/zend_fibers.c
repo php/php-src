@@ -30,6 +30,7 @@
 #include "zend_compile.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_sanitizers.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -588,6 +589,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
 
 		fiber->execute_data = (zend_execute_data *) stack->top;
+		ZEND_UNPOISON_MEMORY_REGION(stack->top, sizeof(zend_execute_data));
 		fiber->stack_bottom = fiber->execute_data;
 
 		memset(fiber->execute_data, 0, sizeof(zend_execute_data));

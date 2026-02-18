@@ -4581,6 +4581,7 @@ zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32
 
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
+	ZEND_UNPOISON_MEMORY_REGION(new_call, used_stack * sizeof(zval));
 	*new_call = *call;
 	ZEND_ADD_CALL_FLAG(new_call, ZEND_CALL_ALLOCATED);
 
@@ -5705,11 +5706,13 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame_ex(u
 	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 		EX(opline) = opline; /* this is the only difference */
 		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
+		ZEND_UNPOISON_MEMORY_REGION(call, used_stack);
 		ZEND_ASSERT_VM_STACK_GLOBAL;
 		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, object_or_called_scope);
 		return call;
 	} else {
 		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+		ZEND_UNPOISON_MEMORY_REGION(call, used_stack);
 		zend_vm_init_call_frame(call, call_info, func, num_args, object_or_called_scope);
 		return call;
 	}
