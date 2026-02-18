@@ -208,7 +208,8 @@ typedef struct _zend_oparray_context {
 	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
-	bool has_assigned_to_http_response_header;
+	bool       has_assigned_to_http_response_header;
+	bool       closure_may_use_this;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -413,10 +414,10 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 /*                                                        |     |     |     */
-/* Function Flags 2 (fn_flags2) (unused: 0-31)            |     |     |     */
+/* Function Flags 2 (fn_flags2) (unused: 1-31)            |     |     |     */
 /* ============================                           |     |     |     */
 /*                                                        |     |     |     */
-/* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
+#define ZEND_ACC2_INFERRED_STATIC        (1 << 0) /*      |  X  |     |     */
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)

@@ -75,14 +75,19 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 /* }}} */
 
 static bool zend_valid_closure_binding(
-		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
+		zend_closure *closure, zval **newthis_ptr, zend_class_entry *scope) /* {{{ */
 {
+	zval *newthis = *newthis_ptr;
 	zend_function *func = &closure->func;
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_WARNING, "Cannot bind an instance to a static closure, this will be an error in PHP 9");
-			return false;
+			if (!(func->common.fn_flags2 & ZEND_ACC2_INFERRED_STATIC)) {
+				zend_error(E_WARNING, "Cannot bind an instance to a static closure, this will be an error in PHP 9");
+				return false;
+			} else {
+				*newthis_ptr = NULL;
+			}
 		}
 
 		if (is_fake_closure && func->common.scope &&
@@ -144,12 +149,13 @@ ZEND_METHOD(Closure, call)
 
 	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
 
-	newobj = Z_OBJ_P(newthis);
-	newclass = newobj->ce;
+	newclass = Z_OBJ_P(newthis)->ce;
 
-	if (!zend_valid_closure_binding(closure, newthis, newclass)) {
+	if (!zend_valid_closure_binding(closure, &newthis, newclass)) {
 		return;
 	}
+
+	newobj = newthis ? Z_OBJ_P(newthis) : NULL;
 
 	fci_cache.called_scope = newclass;
 	fci_cache.object = fci.object = newobj;
@@ -241,14 +247,14 @@ static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, z
 		ce = NULL;
 	}
 
-	if (!zend_valid_closure_binding(closure, newthis, ce)) {
-		return;
-	}
-
 	if (newthis) {
 		called_scope = Z_OBJCE_P(newthis);
 	} else {
 		called_scope = ce;
+	}
+
+	if (!zend_valid_closure_binding(closure, &newthis, ce)) {
+		return;
 	}
 
 	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);

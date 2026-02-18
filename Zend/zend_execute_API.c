@@ -203,6 +203,7 @@ void init_executor(void) /* {{{ */
 	zend_weakrefs_init();
 
 	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
+	zend_stack_init(&EG(lambda_cache), sizeof(zend_object *));
 
 	EG(active) = 1;
 }
@@ -267,6 +268,14 @@ void shutdown_destructors(void) /* {{{ */
 	} zend_end_try();
 }
 /* }}} */
+
+static void lambda_dtor(zend_object **closure_ptr)
+{
+	zend_object *closure = *closure_ptr;
+	if (GC_DELREF(closure) == 0) {
+		zend_objects_store_del(closure);
+	}
+}
 
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
@@ -420,6 +429,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_hash_clean(&EG(callable_convert_cache));
+		zend_stack_clean(&EG(lambda_cache), (void (*)(void *)) lambda_dtor, 1);
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
