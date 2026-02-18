@@ -25,8 +25,10 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_interfaces.h"
+#include "zend_smart_str.h"
 
 #include "ext/reflection/php_reflection.h"
+#include "ext/json/php_json.h"
 
 #include "SAPI.h"
 
@@ -823,6 +825,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				if (php_optarg) {
 					if (strcmp(php_optarg, "diff") == 0) {
 						context.mode = PHP_CLI_MODE_SHOW_INI_DIFF;
+					} else if(strcmp(php_optarg, "json") == 0) {
+						context.mode = PHP_CLI_MODE_SHOW_INI_JSON;
 					} else {
 						param_error = "Unknown argument for --ini\n";
 					}
@@ -1143,6 +1147,57 @@ do_repeat:
 					);
 				} ZEND_HASH_FOREACH_END();
 				zend_array_destroy(sorted);
+				break;
+			}
+		case PHP_CLI_MODE_SHOW_INI_JSON:
+			{
+				zval out;
+				array_init_size(&out, 4);
+
+				add_assoc_string(&out, "path", PHP_CONFIG_FILE_PATH);
+				if (php_ini_opened_path) {
+					add_assoc_string(&out, "file", php_ini_opened_path);
+				}
+				if (php_ini_scanned_path) {
+					add_assoc_string(&out, "scan", php_ini_scanned_path);
+				}
+				if (php_ini_scanned_files) {
+					char* scanning = estrdup(php_ini_scanned_files);
+					char* token;
+					char* next = php_strtok_r(scanning, ",\n", &token);
+					zval scanned;
+					array_init(&scanned);
+
+					while (next) {
+						while (*next == ' ' || *next == '\t') {
+							next++;
+						}
+						if (*next != '\0') {
+							char *end = next + strlen(next) - 1;
+							while (end > next && (*end == ' ' || *end == '\t')) {
+								*end = '\0';
+								end--;
+							}
+							add_next_index_string(&scanned, next);
+						}
+						next = php_strtok_r(NULL, ",\n", &token);
+					}
+					add_assoc_zval(&out, "scanned", &scanned);
+					efree(scanning);
+				}
+				smart_str buf = {0};
+				if (php_json_encode(&buf, &out,
+						PHP_JSON_PRETTY_PRINT |
+						PHP_JSON_UNESCAPED_SLASHES) == SUCCESS) {
+					fwrite(ZSTR_VAL(buf.s), 1, ZSTR_LEN(buf.s), stdout);
+					fwrite("\n", 1, sizeof("\n")-1, stdout);
+				} else {
+					fprintf(stderr,
+						"An error occured while trying to encode configuration\n");
+					EG(exit_status) = 1;
+				}
+				smart_str_free(&buf);
+				zval_dtor(&out);
 				break;
 			}
 		}
