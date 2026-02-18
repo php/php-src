@@ -411,7 +411,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
-		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
+		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, num_index);
 		} else { //string; assumed to be in UTF-8
 			intl_stringFromChar(key, ZSTR_VAL(str_index), ZSTR_LEN(str_index), &err.code);
 
