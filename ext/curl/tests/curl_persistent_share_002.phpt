@@ -4,6 +4,7 @@ Curl persistent share handle test with different options
 curl
 --SKIPIF--
 <?php
+if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
 include 'skipif-nocaddy.inc';
 ?>
 --FILE--
