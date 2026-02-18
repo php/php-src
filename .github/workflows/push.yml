@@ -46,7 +46,7 @@ jobs:
   PUSH:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}
-    uses: ./.github/workflows/nightly.yml
+    uses: ./.github/workflows/test-suite.yml
     strategy:
       fail-fast: false
       matrix:
