@@ -60,7 +60,7 @@ jobs:
       - name: Generate Matrix
         id: set-matrix
         run: php .github/matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}" '${{ toJSON(github.event.pull_request.labels) }}' "${{ github.repository }}"
-  PUSH:
+  TEST:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.name }}
     uses: ./.github/workflows/test-suite.yml
