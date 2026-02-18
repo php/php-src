@@ -46,10 +46,11 @@ function get_current_version(): array {
     return [$major, $minor];
 }
 
-function select_jobs($nightly, $labels, $php_version, $ref, $all_variations) {
+function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $ref, $all_variations) {
     $no_jobs = in_array('CI: No jobs', $labels, true);
     $all_jobs = in_array('CI: All jobs', $labels, true) || $nightly;
     $test_alpine = in_array('CI: Alpine', $labels, true);
+    $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
     $test_coverage = in_array('CI: COVERAGE', $labels, true);
     $test_freebsd = in_array('CI: FreeBSD', $labels, true);
@@ -66,6 +67,13 @@ function select_jobs($nightly, $labels, $php_version, $ref, $all_variations) {
     $jobs = [];
     if (version_compare($php_version, '8.4', '>=') && ($all_jobs || !$no_jobs || $test_alpine)) {
         $jobs['ALPINE'] = true;
+    }
+    if (version_compare($php_version, '8.4', '>=')
+        && !$nightly
+        && ($all_jobs || !$no_jobs || $test_benchmarking)
+        // push trigger is restricted to official repository.
+        && ($repository === 'php/php-src' || $trigger === 'pull_request')) {
+        $jobs['BENCHMARKING'] = true;
     }
     if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
@@ -162,9 +170,11 @@ $labels = array_column($labels, 'name');
 $nightly = $trigger === 'schedule' || $trigger === 'workflow_dispatch';
 $all_variations = $nightly || in_array('CI: All variations', $labels, true);
 
+$repository = $argv[5] ?? null;
+
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
-    $branch['jobs'] = select_jobs($nightly, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['jobs'] = select_jobs($repository, $trigger, $nightly, $labels, $php_version, $branch['ref'], $all_variations);
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
 }
 
