@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-20906 (Assertion failure when messing up output buffers).
     (ndossche)
+  . Fixed bug GH-20627 (Cannot identify some avif images with getimagesize).
+    (y-guyon)
 
 12 Mar 2026, PHP 8.4.19
 
