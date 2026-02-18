@@ -973,6 +973,7 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ fromJson(inputs.branch).ref }}
           fetch-depth: 0
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
       # and other operations, so we disable it during benchmarking.
