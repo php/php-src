@@ -46,11 +46,12 @@ function get_current_version(): array {
     return [$major, $minor];
 }
 
-function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
+function select_jobs($nightly, $labels, $php_version, $ref, $all_variations) {
     $no_jobs = in_array('CI: No jobs', $labels, true);
-    $all_jobs = in_array('CI: All jobs', $labels, true);
+    $all_jobs = in_array('CI: All jobs', $labels, true) || $nightly;
     $test_alpine = in_array('CI: Alpine', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
+    $test_coverage = in_array('CI: COVERAGE', $labels, true);
     $test_freebsd = in_array('CI: FreeBSD', $labels, true);
     $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
     $test_linux_ppc64 = in_array('CI: Linux PPC64', $labels, true);
@@ -59,6 +60,7 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
     $test_macos = in_array('CI: macOS', $labels, true);
     $test_msan = in_array('CI: MSAN', $labels, true);
     $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
+    $test_pecl = in_array('CI: PECL', $labels, true);
     $test_windows = in_array('CI: Windows', $labels, true);
 
     $jobs = [];
@@ -71,7 +73,7 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
             : ['type' => ['asan']];
         $jobs['COMMUNITY']['config']['symfony_version'] = version_compare($php_version, '8.4', '>=') ? '8.1' : '7.4';
     }
-    if ($trigger === 'schedule' && $ref === 'master') {
+    if (($all_jobs && $ref === 'master') || $test_coverage) {
         $jobs['COVERAGE'] = true;
     }
     if ($all_jobs || $test_libmysqlclient) {
@@ -119,7 +121,7 @@ function select_jobs($trigger, $labels, $php_version, $ref, $all_variations) {
     if ($all_jobs || $test_opcache_variation) {
         $jobs['OPCACHE_VARIATION'] = true;
     }
-    if ($trigger === 'schedule' && $ref === 'master') {
+    if (($all_jobs && $ref === 'master') || $test_pecl) {
         $jobs['PECL'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
@@ -157,11 +159,12 @@ $branches = $branch === 'master'
 
 $labels = json_decode($argv[4] ?? '[]', true) ?? [];
 $labels = array_column($labels, 'name');
-$all_variations = $trigger === 'schedule' || $trigger === 'workflow_dispatch' || in_array('CI: All variations', $labels, true);
+$nightly = $trigger === 'schedule' || $trigger === 'workflow_dispatch';
+$all_variations = $nightly || in_array('CI: All variations', $labels, true);
 
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
-    $branch['jobs'] = select_jobs($trigger, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['jobs'] = select_jobs($nightly, $labels, $php_version, $branch['ref'], $all_variations);
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
 }
 
