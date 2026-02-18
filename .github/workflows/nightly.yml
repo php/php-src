@@ -310,6 +310,7 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Update clang
+        timeout-minutes: 10
         uses: ./.github/actions/macos-update-clang
       - name: brew
         timeout-minutes: 10
