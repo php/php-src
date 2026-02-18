@@ -814,6 +814,9 @@ jobs:
         with:
           path: php
           ref: ${{ fromJson(inputs.branch).ref }}
+      # Used for ccache action
+      - name: Move .github
+        run: mv php/.github .
       - name: git checkout apcu
         uses: actions/checkout@v6
         with:
