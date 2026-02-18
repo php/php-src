@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Generate Matrix
         id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}" '${{ toJSON(github.event.pull_request.labels) }}' "${{ github.repository }}"
+        run: php .github/matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.ref }}" '${{ toJSON(github.event.pull_request.labels) }}' "${{ github.repository }}"
   PUSH:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}
