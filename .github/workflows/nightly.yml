@@ -90,10 +90,10 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-alpine
         with:
+          enableOpcache: true
           jitType: tracing
           runTestsParameters: >-
             --asan -x
-            -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
   LINUX_X64:
@@ -185,33 +185,33 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.asan && '--asan' || '' }}
             ${{ (matrix.asan && !inputs.all_variations) && '-x' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
-            -d opcache.enable_cli=1
       - name: Test OpCache
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
             ${{ matrix.asan && '--asan' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
-            -d opcache.enable_cli=1
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
         if: ${{ inputs.all_variations && !matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           jitType: function
           runTestsParameters: >-
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
-            -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
@@ -282,22 +282,19 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
       - name: Test OpCache
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-linux
         with:
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
+          enableOpcache: true
       - name: Test Function JIT
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           jitType: function
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
   MACOS:
@@ -340,22 +337,19 @@ jobs:
         if: ${{ matrix.arch == 'X64' || !matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
+          enableOpcache: true
           jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
       - name: Test OpCache
         if: ${{ inputs.all_variations || (matrix.arch == 'ARM64' && matrix.zts) }}
         uses: ./.github/actions/test-macos
         with:
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
+          enableOpcache: true
       - name: Test Function JIT
         if: ${{ inputs.all_variations && (matrix.arch == 'X64' || !matrix.zts) }}
         uses: ./.github/actions/test-macos
         with:
+          enableOpcache: true
           jitType: function
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
@@ -411,9 +405,8 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           jitType: tracing
-          runTestsParameters: >-
-            -d opcache.enable_cli=1
       - uses: codecov/codecov-action@v5
         if: ${{ !cancelled() }}
         with:
@@ -655,34 +648,34 @@ jobs:
       - name: Test File Cache (prime shm)
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
-            -d opcache.enable_cli=1
             --file-cache-prime
       - name: Test File Cache (prime shm, use shm)
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
-            -d opcache.enable_cli=1
             --file-cache-use
       - name: Test File Cache (prime shm, use file)
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
-            -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
       - name: Test File Cache Only (prime)
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
-            -d opcache.enable_cli=1
             --file-cache-prime
             -d opcache.file_cache_only=1
       - name: Test File Cache Only (use)
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
-            -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
@@ -769,9 +762,9 @@ jobs:
       - name: Test Opcache
         uses: ./.github/actions/test-linux
         with:
+          enableOpcache: true
           runTestsParameters: >-
             --msan
-            -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LIBMYSQLCLIENT:
