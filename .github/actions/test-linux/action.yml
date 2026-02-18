@@ -40,7 +40,7 @@ runs:
         fi
         export SKIP_IO_CAPTURE_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
-          ${{ inputs.enableOpcache == 'true' && '-d zend_extension=opcache.so -d opcache.enable_cli=1' }} \
+          ${{ inputs.enableOpcache == 'true' && '-d zend_extension=opcache.so -d opcache.enable_cli=1' || '' }} \
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.jit_buffer_size=16M \
           ${{ inputs.idleCpu == 'true' && '-j$(($(/usr/bin/nproc) - 1))' || '-j$(/usr/bin/nproc)' }} \
