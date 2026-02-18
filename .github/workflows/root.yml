@@ -36,7 +36,7 @@ jobs:
     needs: GENERATE_MATRIX
     name: ${{ matrix.branch.ref }}
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
-    uses: ./.github/workflows/nightly.yml
+    uses: ./.github/workflows/test-suite.yml
     strategy:
       fail-fast: false
       matrix:
