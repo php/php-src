@@ -46,7 +46,7 @@ jobs:
           # When running nightly, set fetch-depth to 0 to clone the full
           # repository including all branches. This is required to find the
           # correct commit hashes.
-          fetch-depth: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && "0" || "1" }}
+          fetch-depth: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '0' || '1' }}
       - name: Grab the commit mapping
         if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
         uses: actions/cache@v5
