@@ -4,8 +4,8 @@ Promoted readonly property reassignment in constructor - child redefines parent 
 <?php
 
 // Case 1: Parent uses CPP, child redefines as non-promoted, child tries to reassign.
-// The property is owned by C1; parent CPP sets its initial value, but child's
-// non-promoted redefinition means no reassignment window exists for the child.
+// P1 owns the CPP reassignment window; it is cleared when P1's constructor exits,
+// before C1's body runs. So C1's write attempt fails.
 class P1 {
     public function __construct(
         public readonly string $x = 'P',
