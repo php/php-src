@@ -123,6 +123,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
 	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
 	PDO_ATTR_DEFAULT_STR_PARAM, /* set the default string parameter type (see the PDO::PARAM_STR_* magic flags) */
+	PDO_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS, /* suppress exception from commit()/rollBack() when autocommit is off and no transaction is active */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -456,6 +457,10 @@ struct _pdo_dbh_t {
 
 	/* if true, commit or rollBack is allowed to be called */
 	bool in_txn:1;
+
+	/* if true, commit()/rollBack() return true instead of throwing when
+	 * autocommit is off and no transaction is active */
+	bool autocommit_aware_txn:1;
 
 	/* when set, convert int/floats to strings */
 	bool stringify:1;

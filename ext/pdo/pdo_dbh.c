@@ -726,6 +726,10 @@ PHP_METHOD(PDO, commit)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!pdo_is_in_transaction(dbh)) {
+		/* autocommit off: always logically in a transaction, no-op is safe */
+		if (dbh->autocommit_aware_txn && !dbh->auto_commit) {
+			RETURN_TRUE;
+		}
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -750,6 +754,10 @@ PHP_METHOD(PDO, rollBack)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!pdo_is_in_transaction(dbh)) {
+		/* see commit() */
+		if (dbh->autocommit_aware_txn && !dbh->auto_commit) {
+			RETURN_TRUE;
+		}
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
 	}
@@ -943,6 +951,13 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 			}
 			return true;
 		}
+		case PDO_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS:
+			if (!pdo_get_bool_param(&bval, value)) {
+				return false;
+			}
+			dbh->autocommit_aware_txn = bval;
+			return true;
+
 		/* Don't throw a ValueError as the attribute might be a driver specific one */
 		default:;
 	}
@@ -1029,6 +1044,9 @@ PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			RETURN_BOOL(dbh->stringify);
+
+		case PDO_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS:
+			RETURN_BOOL(dbh->autocommit_aware_txn);
 
 		default:
 			break;

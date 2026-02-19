@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_dbh.stub.php instead.
- * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
+ * Stub hash: fad3c79ca52abcd6e6c867d9f0563ed90fdca39f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -450,6 +450,12 @@ static zend_class_entry *register_class_PDO(void)
 	zend_string *const_ATTR_DEFAULT_STR_PARAM_name = zend_string_init_interned("ATTR_DEFAULT_STR_PARAM", sizeof("ATTR_DEFAULT_STR_PARAM") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_DEFAULT_STR_PARAM_name, &const_ATTR_DEFAULT_STR_PARAM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ATTR_DEFAULT_STR_PARAM_name, true);
+
+	zval const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_value;
+	ZVAL_LONG(&const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_value, LONG_CONST(PDO_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS));
+	zend_string *const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_name = zend_string_init_interned("ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS", sizeof("ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_name, &const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ATTR_AUTOCOMMIT_AWARE_TRANSACTIONS_name, true);
 
 	zval const_ERRMODE_SILENT_value;
 	ZVAL_LONG(&const_ERRMODE_SILENT_value, LONG_CONST(PDO_ERRMODE_SILENT));
