@@ -22,3 +22,8 @@ runs:
         append-timestamp: false
         restore-keys: "${{ steps.cache_key.outputs.prefix }}"
         #save: ${{ github.event_name != 'pull_request' }}
+    - name: Export CC/CXX
+      shell: bash
+      run: |
+        export CC=ccache gcc
+        export CXX=ccache g++

@@ -10,9 +10,6 @@ on:
         type: string
 permissions:
   contents: read
-env:
-  CC: ccache gcc
-  CXX: ccache g++
 jobs:
   LINUX_PPC64:
     if: ${{ fromJson(inputs.branch).jobs.LINUX_PPC64 }}
@@ -75,6 +72,10 @@ jobs:
           echo "::group::Show installed package versions"
           apk list
           echo "::endgroup::"
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "${{ github.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
@@ -395,6 +396,10 @@ jobs:
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
         run: sudo -H pip install gcovr
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "${{ github.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -436,6 +441,10 @@ jobs:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "COMMUNITY_${{ matrix.type }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -638,6 +647,10 @@ jobs:
         uses: ./.github/actions/setup-mssql
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "${{ matrix.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -695,6 +708,10 @@ jobs:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "${{ matrix.job }}"
       - name: ./configure
         run: |
           export CC=clang
@@ -809,9 +826,6 @@ jobs:
   PECL:
     if: ${{ fromJson(inputs.branch).jobs.PECL }}
     runs-on: ubuntu-24.04
-    env:
-      CC: ccache gcc
-      CXX: ccache g++
     steps:
       - name: git checkout PHP
         uses: actions/checkout@v6
