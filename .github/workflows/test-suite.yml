@@ -10,6 +10,9 @@ on:
         type: string
 permissions:
   contents: read
+env:
+  CC: ccache gcc
+  CXX: ccache g++
 jobs:
   LINUX_PPC64:
     if: ${{ fromJson(inputs.branch).jobs.LINUX_PPC64 }}
