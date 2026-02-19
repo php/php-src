@@ -82,7 +82,7 @@ static hash_spec_result php_hash_xxh32_unserialize(
 	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
 		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH32_SPEC)) == HASH_SPEC_SUCCESS
-		&& ctx->s.memsize < 16) {
+		&& ctx->s.bufferedSize < 16) {
 		return HASH_SPEC_SUCCESS;
 	}
 
@@ -238,7 +238,7 @@ static hash_spec_result php_hash_xxh64_unserialize(
 	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
 		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH64_SPEC)) == HASH_SPEC_SUCCESS
-		&& ctx->s.memsize < 32) {
+		&& ctx->s.bufferedSize < 32) {
 		return HASH_SPEC_SUCCESS;
 	}
 
