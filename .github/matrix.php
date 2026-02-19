@@ -1,11 +1,11 @@
 <?php
 
 const BRANCHES = [
-    ['name' => 'master', 'ref' => 'refs/heads/master', 'version' => [8, 6]],
-    ['name' => 'PHP-8.5', 'ref' => 'refs/heads/PHP-8.5', 'version' => [8, 5]],
-    ['name' => 'PHP-8.4', 'ref' => 'refs/heads/PHP-8.4', 'version' => [8, 4]],
-    ['name' => 'PHP-8.3', 'ref' => 'refs/heads/PHP-8.3', 'version' => [8, 3]],
-    ['name' => 'PHP-8.2', 'ref' => 'refs/heads/PHP-8.2', 'version' => [8, 2]],
+    ['name' => 'master', 'ref' => 'master', 'version' => [8, 6]],
+    ['name' => 'PHP-8.5', 'ref' => 'PHP-8.5', 'version' => [8, 5]],
+    ['name' => 'PHP-8.4', 'ref' => 'PHP-8.4', 'version' => [8, 4]],
+    ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => [8, 3]],
+    ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => [8, 2]],
 ];
 
 function get_branch_commit_cache_file_path(): string {
@@ -81,7 +81,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             : ['type' => ['asan']];
         $jobs['COMMUNITY']['config']['symfony_version'] = version_compare($php_version, '8.4', '>=') ? '8.1' : '7.4';
     }
-    if (($all_jobs && $ref === 'refs/heads/master') || $test_coverage) {
+    if (($all_jobs && $ref === 'master') || $test_coverage) {
         $jobs['COVERAGE'] = true;
     }
     if ($all_jobs || $test_libmysqlclient) {
@@ -129,7 +129,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     if ($all_jobs || $test_opcache_variation) {
         $jobs['OPCACHE_VARIATION'] = true;
     }
-    if (($all_jobs && $ref === 'refs/heads/master') || $test_pecl) {
+    if (($all_jobs && $ref === 'master') || $test_pecl) {
         $jobs['PECL'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
@@ -160,9 +160,9 @@ $discard_cache = $sunday
 if ($discard_cache) {
     @unlink(get_branch_commit_cache_file_path());
 }
-$branch = $argv[3] ?? 'refs/heads/master';
+$branch = $argv[3] ?? 'master';
 $nightly = $trigger === 'schedule' || $trigger === 'workflow_dispatch';
-$branches = $nightly && $branch === 'refs/heads/master'
+$branches = $nightly && $branch === 'master'
     ? get_branches()
     : [['name' => 'Suite', 'ref' => $branch, 'version' => get_current_version()]];
 
