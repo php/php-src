@@ -11,8 +11,8 @@ class NonPromoted {
         $this->prop = 'first';
         try {
             $this->prop = 'second';  // Should fail - not a promoted property
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 }
@@ -31,8 +31,8 @@ class MixedProps {
         $this->promoted = 'reassigned';  // Allowed (promoted, first reassignment)
         try {
             $this->nonPromoted = 'second';  // Should fail (non-promoted)
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 }
@@ -42,8 +42,8 @@ var_dump($m->promoted, $m->nonPromoted);
 
 ?>
 --EXPECT--
-Cannot modify readonly property NonPromoted::$prop
+Error: Cannot modify readonly property NonPromoted::$prop
 string(5) "first"
-Cannot modify readonly property MixedProps::$nonPromoted
+Error: Cannot modify readonly property MixedProps::$nonPromoted
 string(10) "reassigned"
 string(5) "first"

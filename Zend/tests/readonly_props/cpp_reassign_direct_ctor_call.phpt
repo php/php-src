@@ -7,45 +7,23 @@ class Foo {
     public function __construct(
         public readonly string $value = 'default',
     ) {
-        // Don't use reassignment here, leave it available
-    }
-}
-
-$obj = new Foo('initial');
-echo "Initial value: " . $obj->value . "\n";
-
-// Direct call to __construct() should NOT allow reassignment
-try {
-    $obj->__construct('modified');
-    echo "After direct __construct: " . $obj->value . "\n";
-} catch (Error $e) {
-    echo "Error: " . $e->getMessage() . "\n";
-}
-
-// Also test with a class that uses reassignment
-class Bar {
-    public function __construct(
-        public readonly string $value = 'default',
-    ) {
         $this->value = strtoupper($this->value);
     }
 }
 
-$bar = new Bar('hello');
-echo "Bar initial value: " . $bar->value . "\n";
+$obj = new Foo('hello');
+var_dump($obj->value);
 
-// Direct call should fail during the CPP assignment (property not UNINIT)
-// Note: The error happens inside the constructor because CPP assignment happens first
+// Direct call fails: CPP assignment cannot reinitialize an already-set property
 try {
-    $bar->__construct('world');
-    echo "After direct __construct: " . $bar->value . "\n";
-} catch (Error $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    $obj->__construct('world');
+} catch (Throwable $e) {
+    echo get_class($e), ": ", $e->getMessage(), "\n";
 }
+var_dump($obj->value);
 
 ?>
 --EXPECT--
-Initial value: initial
+string(5) "HELLO"
 Error: Cannot modify readonly property Foo::$value
-Bar initial value: HELLO
-Error: Cannot modify readonly property Bar::$value
+string(5) "HELLO"

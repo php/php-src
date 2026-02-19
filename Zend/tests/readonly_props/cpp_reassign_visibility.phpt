@@ -3,23 +3,24 @@ Promoted readonly property reassignment in constructor - visibility rules apply
 --FILE--
 <?php
 
-// Case 1: private(set) - child cannot reassign
+// Case 1: private(set) - child's init() cannot modify even within CPP window
 class Parent1 {
     public function __construct(
         private(set) public readonly string $prop = 'parent default',
     ) {
-        // Parent doesn't use reassignment
+        $this->init();
+    }
+
+    protected function init(): void {
     }
 }
 
 class Child1 extends Parent1 {
-    public function __construct() {
-        parent::__construct();
-        // Child cannot reassign - private(set) restricts to declaring class only
+    protected function init(): void {
         try {
             $this->prop = 'child override';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 }
@@ -27,69 +28,67 @@ class Child1 extends Parent1 {
 $child1 = new Child1();
 var_dump($child1->prop);
 
-// Case 2: protected(set) - child still cannot reassign parent-owned promoted property
+// Case 2: protected(set) - child's init() CAN modify within CPP window
 class Parent2 {
     public function __construct(
         protected(set) public readonly string $prop = 'parent default',
     ) {
-        // Parent doesn't use reassignment
+        $this->init();
+    }
+
+    protected function init(): void {
     }
 }
 
 class Child2 extends Parent2 {
-    public function __construct() {
-        parent::__construct();
-        try {
-            $this->prop = 'child override';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
-        }
+    protected function init(): void {
+        $this->prop = 'child set';
     }
 }
 
 $child2 = new Child2();
 var_dump($child2->prop);
 
-// Case 3: public (default) - child still cannot reassign parent-owned promoted property
+// Case 3: public - child's init() CAN modify within CPP window
 class Parent3 {
     public function __construct(
         public readonly string $prop = 'parent default',
     ) {
-        // Parent doesn't use reassignment
+        $this->init();
+    }
+
+    protected function init(): void {
     }
 }
 
 class Child3 extends Parent3 {
-    public function __construct() {
-        parent::__construct();
-        try {
-            $this->prop = 'child override';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
-        }
+    protected function init(): void {
+        $this->prop = 'child set';
     }
 }
 
 $child3 = new Child3();
 var_dump($child3->prop);
 
-// Case 4: protected(set) with parent using reassignment - child cannot (one reassignment rule)
+// Case 4: protected(set) with parent using reassignment - child cannot (window closed)
 class Parent4 {
     public function __construct(
         protected(set) public readonly string $prop = 'parent default',
     ) {
         $this->prop = 'parent set';  // Uses the one reassignment
+        $this->init();
+    }
+
+    protected function init(): void {
     }
 }
 
 class Child4 extends Parent4 {
-    public function __construct() {
-        parent::__construct();
-        // Child cannot reassign - parent already used the one reassignment
+    protected function init(): void {
         try {
             $this->prop = 'child override';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 }
@@ -99,11 +98,9 @@ var_dump($child4->prop);
 
 ?>
 --EXPECT--
-Cannot modify readonly property Parent1::$prop
+Error: Cannot modify private(set) property Parent1::$prop from scope Child1
 string(14) "parent default"
-Cannot modify readonly property Parent2::$prop
-string(14) "parent default"
-Cannot modify readonly property Parent3::$prop
-string(14) "parent default"
-Cannot modify readonly property Parent4::$prop
+string(9) "child set"
+string(9) "child set"
+Error: Cannot modify readonly property Parent4::$prop
 string(10) "parent set"

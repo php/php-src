@@ -1074,7 +1074,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
 		if (info->flags & ZEND_ACC_READONLY) {
-			if (!zend_is_readonly_property_modifiable(property_val, info->ce, zobj)) {
+			if (!zend_is_readonly_property_modifiable(property_val)) {
 				zend_readonly_property_modification_error(info);
 				return &EG(uninitialized_zval);
 			}
@@ -1093,7 +1093,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 		return &EG(uninitialized_zval);
 	}
 
-	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_REINITABLE|IS_PROP_CPP_REINITABLE);
+	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }

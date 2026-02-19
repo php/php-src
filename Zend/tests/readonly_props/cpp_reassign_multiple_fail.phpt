@@ -10,8 +10,8 @@ class Example {
         $this->value = 'first';   // OK - first reassignment
         try {
             $this->value = 'second';  // Error - second reassignment
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 }
@@ -21,5 +21,5 @@ var_dump($ex->value);
 
 ?>
 --EXPECT--
-Cannot modify readonly property Example::$value
+Error: Cannot modify readonly property Example::$value
 string(5) "first"

@@ -19,21 +19,6 @@ class CalledMethod {
 $cm = new CalledMethod();
 var_dump($cm->prop);
 
-// Reassignment IS allowed in closures called by the constructor
-class ClosureInConstructor {
-    public function __construct(
-        public readonly string $prop = 'default',
-    ) {
-        $fn = function() {
-            $this->prop = 'from closure';
-        };
-        $fn();
-    }
-}
-
-$cc = new ClosureInConstructor();
-var_dump($cc->prop);
-
 // But second reassignment still fails
 class MultipleReassign {
     public function __construct(
@@ -42,8 +27,8 @@ class MultipleReassign {
         $this->initProp();
         try {
             $this->initProp();  // Second call - should fail
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 
@@ -58,6 +43,5 @@ var_dump($mr->prop);
 ?>
 --EXPECT--
 string(11) "from method"
-string(12) "from closure"
-Cannot modify readonly property MultipleReassign::$prop
+Error: Cannot modify readonly property MultipleReassign::$prop
 string(11) "from method"

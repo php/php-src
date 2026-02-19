@@ -9,7 +9,7 @@ class User {
     ) {
         // Simple validation without filter extension
         if (!str_contains($email, '@')) {
-            throw new InvalidArgumentException('Invalid email');
+            throw new ValueError('Invalid email');
         }
         $this->email = strtolower($email);  // Normalize
     }
@@ -20,11 +20,11 @@ var_dump($user->email);
 
 try {
     new User('not-an-email');
-} catch (InvalidArgumentException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo get_class($e), ": ", $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(16) "test@example.com"
-Invalid email
+ValueError: Invalid email

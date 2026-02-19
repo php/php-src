@@ -7,17 +7,17 @@ class Config {
     public function __construct(
         public readonly ?string $cacheDir = null,
     ) {
-        $this->cacheDir ??= sys_get_temp_dir() . '/app_cache';
+        $this->cacheDir ??= '/tmp/app_cache';
     }
 }
 
 $config1 = new Config();
-var_dump(str_contains($config1->cacheDir, 'app_cache'));
+var_dump($config1->cacheDir);
 
 $config2 = new Config('/custom/cache');
 var_dump($config2->cacheDir);
 
 ?>
 --EXPECT--
-bool(true)
+string(14) "/tmp/app_cache"
 string(13) "/custom/cache"

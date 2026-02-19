@@ -858,7 +858,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
-#define IS_OBJ_CTOR_CALLED          (1U<<29) /* A constructor has completed on this object */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
@@ -1595,7 +1594,6 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define IS_PROP_UNINIT (1<<0)
 #define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
 #define IS_PROP_LAZY (1<<2)
-#define IS_PROP_CPP_REINITABLE (1<<3) /* Allows one reassignment of promoted readonly property in constructor */
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)
