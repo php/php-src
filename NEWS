@@ -41,7 +41,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
     (ilutov)
 
- OpenSSL:
+- OpenSSL:
   . Fix a bunch of leaks and error propagation. (ndossche)
 
 - Windows:
