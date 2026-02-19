@@ -11,8 +11,9 @@ runs:
       run: |
         major=$(cat main/php_version.h | sed -En 's/^#define PHP_MAJOR_VERSION ([0-9]+)/\1/p')
         minor=$(cat main/php_version.h | sed -En 's/^#define PHP_MINOR_VERSION ([0-9]+)/\1/p')
+        release=$(cat main/php_version.h | sed -En 's/^#define PHP_RELEASE_VERSION ([0-9]+)/\1/p')
         week=$(date +"%Y-%W")
-        prefix="${{ inputs.name }}-$major.$minor"
+        prefix="${{ inputs.name }}-$major.$minor.$release"
         echo "key=$prefix-$week" >> $GITHUB_OUTPUT
         echo "prefix=$prefix-" >> $GITHUB_OUTPUT
     - name: ccache
