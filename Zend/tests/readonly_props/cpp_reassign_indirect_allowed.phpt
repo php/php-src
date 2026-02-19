@@ -24,16 +24,16 @@ class MultipleReassign {
     public function __construct(
         public readonly string $prop = 'default',
     ) {
-        $this->initProp();
+        $this->initProp("first from method");
         try {
-            $this->initProp();  // Second call - should fail
+            $this->initProp("second from method");  // Second call - should fail
         } catch (Throwable $e) {
             echo get_class($e), ": ", $e->getMessage(), "\n";
         }
     }
 
-    private function initProp(): void {
-        $this->prop = 'from method';
+    private function initProp(string $v): void {
+        $this->prop = $v;
     }
 }
 
@@ -44,4 +44,4 @@ var_dump($mr->prop);
 --EXPECT--
 string(11) "from method"
 Error: Cannot modify readonly property MultipleReassign::$prop
-string(11) "from method"
+string(17) "first from method"

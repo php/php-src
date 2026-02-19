@@ -1073,11 +1073,9 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	zval tmp;
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if (info->flags & ZEND_ACC_READONLY) {
-			if (!zend_is_readonly_property_modifiable(property_val)) {
-				zend_readonly_property_modification_error(info);
-				return &EG(uninitialized_zval);
-			}
+		if (info->flags & ZEND_ACC_READONLY && !zend_is_readonly_property_modifiable(property_val)) {
+			zend_readonly_property_modification_error(info);
+			return &EG(uninitialized_zval);
 		}
 		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
 			zend_asymmetric_visibility_property_modification_error(info, "modify");

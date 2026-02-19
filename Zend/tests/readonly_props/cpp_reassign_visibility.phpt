@@ -49,10 +49,10 @@ class Child2 extends Parent2 {
 $child2 = new Child2();
 var_dump($child2->prop);
 
-// Case 3: public - child's init() CAN modify within CPP window
+// Case 3: public(set) - child's init() CAN modify within CPP window
 class Parent3 {
     public function __construct(
-        public readonly string $prop = 'parent default',
+        public public(set) readonly string $prop = 'parent default',
     ) {
         $this->init();
     }

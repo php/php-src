@@ -29,8 +29,8 @@ $c1 = new C1();
 var_dump($c1->x);
 
 // Case 2: Parent uses CPP and reassigns; child redefines as non-promoted.
-// Parent's CPP sets the initial value, but the reassignment fails because the
-// child's non-promoted redefinition does not open a reassignment window for the parent.
+// The child does not use CPP, so it does not claim CPP ownership of the property.
+// P2's CPP "owns" the reassignment window: P2's body write succeeds.
 class P2 {
     public function __construct(
         public readonly string $x = 'P1',
@@ -43,11 +43,7 @@ class C2 extends P2 {
     public readonly string $x;
 
     public function __construct() {
-        try {
-            parent::__construct();
-        } catch (Throwable $e) {
-            echo get_class($e), ": ", $e->getMessage(), "\n";
-        }
+        parent::__construct();
     }
 }
 
@@ -83,7 +79,6 @@ var_dump($c3->x);
 --EXPECT--
 Error: Cannot modify readonly property C1::$x
 string(1) "P"
-Error: Cannot modify readonly property C2::$x
-string(2) "P1"
+string(2) "P2"
 Error: Cannot modify readonly property C3::$x
 string(2) "C1"

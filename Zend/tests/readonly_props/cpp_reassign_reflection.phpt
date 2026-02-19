@@ -7,7 +7,7 @@ class Foo {
     public function __construct(
         public readonly string $bar = 'default',
     ) {
-        $this->bar = 'overwritten in constructor';
+        $this->bar = strtoupper($bar);
     }
 }
 
@@ -31,9 +31,11 @@ try {
 } catch (Throwable $e) {
     echo get_class($e), ": ", $e->getMessage(), "\n";
 }
+var_dump($obj->bar);
 
 ?>
 --EXPECT--
 Error: Typed property Foo::$bar must not be accessed before initialization
-string(26) "overwritten in constructor"
+string(13) "EXPLICIT CALL"
 Error: Cannot modify readonly property Foo::$bar
+string(13) "EXPLICIT CALL"
