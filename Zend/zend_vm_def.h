@@ -9795,7 +9795,7 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 		} else {
 			/* Rotate the key for better hash distribution. */
 			const int shift = sizeof(size_t) == 4 ? 6 : 7;
-			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
+			zend_ulong key = ZEND_PTR2ULONG(call->func);
 			key = (key >> shift) | (key << ((sizeof(key) * 8) - shift));
 			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {

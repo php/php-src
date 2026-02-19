@@ -670,6 +670,18 @@ static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib
 }
 /* }}} */
 
+static zend_long date_date_to_zlong(timelib_time *d, int *error)
+{
+#if SIZEOF_ZEND_LONG >= SIZEOF_LONG_LONG
+	if (error) {
+		*error = 0;
+	}
+	return (zend_long) d->sse;
+#else
+	return timelib_date_to_int(d, error);
+#endif
+}
+
 /* {{{ date_format - (gm)date helper */
 static zend_string *date_format(const char *format, size_t format_len, const timelib_time *t, bool localtime)
 {
@@ -883,7 +895,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 }
 /* }}} */
 
-PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime) /* {{{ */
+PHPAPI zend_string *php_format_date(const char *format, size_t format_len, zend_long ts, bool localtime) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -1134,7 +1146,7 @@ PHP_FUNCTION(strtotime)
 
 	timelib_fill_holes(t, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(t, tzi);
-	ts = timelib_date_to_int(t, &epoch_does_not_fit_in_zend_long);
+	ts = date_date_to_zlong(t, &epoch_does_not_fit_in_zend_long);
 
 	timelib_time_dtor(now);
 	timelib_time_dtor(t);
@@ -1217,8 +1229,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	}
 
 	/* Clean up and return */
-	ts = timelib_date_to_int(now, &epoch_does_not_fit_in_zend_long);
-
+	ts = date_date_to_zlong(now, &epoch_does_not_fit_in_zend_long);
 	if (epoch_does_not_fit_in_zend_long) {
 		timelib_time_dtor(now);
 		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
@@ -3938,7 +3949,7 @@ PHP_FUNCTION(date_timestamp_get)
 		timelib_update_ts(dateobj->time, NULL);
 	}
 
-	timestamp = timelib_date_to_int(dateobj->time, &epoch_does_not_fit_in_zend_long);
+	timestamp = date_date_to_zlong(dateobj->time, &epoch_does_not_fit_in_zend_long);
 
 	if (epoch_does_not_fit_in_zend_long) {
 		zend_throw_error(date_ce_date_range_error, "Epoch doesn't fit in a PHP integer");

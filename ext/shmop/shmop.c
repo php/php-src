@@ -197,10 +197,10 @@ PHP_FUNCTION(shmop_open)
 		goto err;
 	}
 
-	if (shm.shm_segsz > ZEND_LONG_MAX) {
-		zend_argument_value_error(4, "is too large");
-		goto err;
-	}
+//	if (shm.shm_segsz > ZEND_LONG_MAX) {
+//		zend_argument_value_error(4, "is too large");
+//		goto err;
+//	}
 
 	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {

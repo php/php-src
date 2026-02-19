@@ -37436,7 +37436,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 		} else {
 			/* Rotate the key for better hash distribution. */
 			const int shift = sizeof(size_t) == 4 ? 6 : 7;
-			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
+			zend_ulong key = ZEND_PTR2ULONG(call->func);
 			key = (key >> shift) | (key << ((sizeof(key) * 8) - shift));
 			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {
@@ -89838,7 +89838,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_S
 		} else {
 			/* Rotate the key for better hash distribution. */
 			const int shift = sizeof(size_t) == 4 ? 6 : 7;
-			zend_ulong key = (zend_ulong)(uintptr_t)call->func;
+			zend_ulong key = ZEND_PTR2ULONG(call->func);
 			key = (key >> shift) | (key << ((sizeof(key) * 8) - shift));
 			zval *closure_zv = zend_hash_index_lookup(&EG(callable_convert_cache), key);
 			if (Z_TYPE_P(closure_zv) == IS_NULL) {
@@ -122745,7 +122745,7 @@ static void init_opcode_serialiser(void)
 	Z_TYPE_INFO(tmp) = IS_LONG;
 	for (i = 0; i < zend_handlers_count; i++) {
 		Z_LVAL(tmp) = i;
-		zend_hash_index_add(zend_handlers_table, (zend_long)(uintptr_t)zend_opcode_handlers[i], &tmp);
+		zend_hash_index_add(zend_handlers_table, ZEND_PTR2ULONG(zend_opcode_handlers[i]), &tmp);
 	}
 }
 
@@ -122756,7 +122756,7 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op)
 	if (!zend_handlers_table) {
 		init_opcode_serialiser();
 	}
-	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
+	zv = zend_hash_index_find(zend_handlers_table, ZEND_PTR2ULONG(op->handler));
 	ZEND_ASSERT(zv != NULL);
 	op->handler = (zend_vm_opcode_handler_t)(uintptr_t)Z_LVAL_P(zv);
 }
@@ -122774,7 +122774,7 @@ ZEND_API const void* ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *o
 	if (!zend_handlers_table) {
 		init_opcode_serialiser();
 	}
-	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
+	zv = zend_hash_index_find(zend_handlers_table, ZEND_PTR2ULONG(op->handler));
 	ZEND_ASSERT(zv != NULL);
 	return zend_opcode_handler_funcs[Z_LVAL_P(zv)];
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL

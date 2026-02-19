@@ -2156,11 +2156,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		}
 	}
 
-	if ((size_t)offset >= ZSTR_LEN(s)) {
+	if (ZEND_SIZE_T_LTE_ZEND_LONG(ZSTR_LEN(s), offset)) {
 		/* Extend string if needed */
-		zend_long old_len = ZSTR_LEN(s);
+		size_t old_len = ZSTR_LEN(s);
 		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
-		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
+		memset(Z_STRVAL_P(str) + old_len, ' ', (size_t)offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else {
 		zend_string_forget_hash_val(Z_STR_P(str));
@@ -3146,7 +3146,7 @@ try_string_offset:
 		}
 		out:
 
-		if (UNEXPECTED(ZSTR_LEN(str) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
+		if (UNEXPECTED(ZEND_SIZE_T_LT_ZEND_ULONG(ZSTR_LEN(str), ((offset < 0) ? -(zend_ulong)offset : ((zend_ulong)offset + 1))))) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
 				ZVAL_EMPTY_STRING(result);
@@ -3307,7 +3307,7 @@ str_offset:
 			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
 				lval += (zend_long)Z_STRLEN_P(container);
 			}
-			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+			if (EXPECTED(lval >= 0) && ZEND_SIZE_T_GT_ZEND_LONG(Z_STRLEN_P(container), lval)) {
 				return 1;
 			} else {
 				return 0;
@@ -3346,7 +3346,7 @@ str_offset:
 			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
 				lval += (zend_long)Z_STRLEN_P(container);
 			}
-			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+			if (EXPECTED(lval >= 0) && ZEND_SIZE_T_GT_ZEND_LONG(Z_STRLEN_P(container), lval)) {
 				return (Z_STRVAL_P(container)[lval] == '0');
 			} else {
 				return 1;

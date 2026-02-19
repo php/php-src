@@ -1279,8 +1279,8 @@ PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, c
 		1, 10, 100, 1000, 10000,
 		100000, 1000000, 10000000, 100000000, 1000000000,
 #if SIZEOF_ZEND_LONG == 8
-		10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000,
-		1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000, 10000000000000000000ul
+		Z_UL(10000000000), Z_UL(100000000000), Z_UL(1000000000000), Z_UL(10000000000000), Z_UL(100000000000000),
+		Z_UL(1000000000000000), Z_UL(10000000000000000), Z_UL(100000000000000000), Z_UL(1000000000000000000), Z_UL(10000000000000000000)
 #elif SIZEOF_ZEND_LONG > 8
 # error "Unknown SIZEOF_ZEND_LONG"
 #endif
@@ -1310,7 +1310,7 @@ PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, c
 	// rounding the number
 	if (dec < 0) {
 		// Check rounding to more negative places than possible
-		if (dec < -(sizeof(powers) / sizeof(powers[0]) - 1)) {
+		if (dec < -(zend_long)(sizeof(powers) / sizeof(powers[0]) - 1)) {
 			tmpnum = 0;
 		} else {
 			power = powers[-dec];
