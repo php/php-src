@@ -14917,12 +14917,11 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			}
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				prop_info_ref,
 				arg3,
-				arg4,
-				obj_ref);
+				arg4);
 
 			if ((opline+1)->op1_type == IS_CONST) {
 				// TODO: ???
@@ -14990,12 +14989,11 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			} else {
 				arg4 = jit_ZVAL_ADDR(jit, res_addr);
 			}
-			ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				ref,
 				arg3,
-				arg4,
-				obj_ref);
+				arg4);
 
 			ir_END_list(end_inputs);
 		}
@@ -15333,12 +15331,11 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, prop_info_offset));
 			}
 
-			ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_prop),
+			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_prop),
 				prop_ref,
 				ref,
 				arg2,
-				ir_CONST_FC_FUNC(binary_op),
-				obj_ref);
+				ir_CONST_FC_FUNC(binary_op));
 
 			ir_END_list(end_inputs);
 		}
@@ -15738,7 +15735,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 						ZEND_UNREACHABLE();
 				}
 
-				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(func), prop_ref, ref, obj_ref);
+				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(func), prop_ref, ref);
 			} else {
 				switch (opline->opcode) {
 					case ZEND_PRE_INC_OBJ:
@@ -15756,11 +15753,10 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 					default:
 						ZEND_UNREACHABLE();
 				}
-				ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(func),
+				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(func),
 					prop_ref,
 					ref,
-					jit_ZVAL_ADDR(jit, res_addr),
-					obj_ref);
+					jit_ZVAL_ADDR(jit, res_addr));
 			}
 			ir_END_list(end_inputs);
 		}

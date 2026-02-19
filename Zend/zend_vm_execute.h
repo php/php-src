@@ -1160,19 +1160,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -1207,19 +1195,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -53906,19 +53882,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -53953,19 +53917,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -110200,19 +110152,7 @@ zend_leave_helper_SPEC_LABEL:
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -110247,19 +110187,7 @@ zend_leave_helper_SPEC_LABEL:
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		/* When a constructor exits, clear IS_PROP_REINITABLE from all promoted readonly
-		 * properties of the declaring class. Runs for both 'new Foo()' (RELEASE_THIS set)
-		 * and 'parent::__construct()' (only HAS_THIS set, no RELEASE_THIS). */
-		if ((call_info & ZEND_CALL_HAS_THIS) && (EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
-			zend_object *obj = Z_OBJ(execute_data->This);
-			zend_property_info *ctor_prop_info;
-			ZEND_HASH_MAP_FOREACH_PTR(&EX(func)->common.scope->properties_info, ctor_prop_info) {
-				if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
-				 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
-					Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {

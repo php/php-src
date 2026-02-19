@@ -1073,7 +1073,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	zval tmp;
 
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if (info->flags & ZEND_ACC_READONLY && !zend_is_readonly_property_modifiable(property_val)) {
+		if ((info->flags & ZEND_ACC_READONLY) && !zend_is_readonly_property_modifiable(property_val)) {
 			zend_readonly_property_modification_error(info);
 			return &EG(uninitialized_zval);
 		}
@@ -5896,6 +5896,22 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 /* This callback disables optimization of "vm_stack_data" variable in VM */
 ZEND_API void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data) = NULL;
+
+/* Clear IS_PROP_REINITABLE from all promoted readonly properties of the exiting
+ * constructor's scope. Called for both 'new Foo()' and 'parent::__construct()'. */
+static zend_always_inline void zend_ctor_clear_promoted_readonly_reinitable(zend_execute_data *ex, uint32_t call_info)
+{
+	if ((call_info & ZEND_CALL_HAS_THIS) && (ex->func->common.fn_flags & ZEND_ACC_CTOR)) {
+		zend_object *obj = Z_OBJ(ex->This);
+		zend_property_info *ctor_prop_info;
+		ZEND_HASH_MAP_FOREACH_PTR(&ex->func->common.scope->properties_info, ctor_prop_info) {
+			if ((ctor_prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)
+			 && IS_VALID_PROPERTY_OFFSET(ctor_prop_info->offset)) {
+				Z_PROP_FLAG_P(OBJ_PROP(obj, ctor_prop_info->offset)) &= ~IS_PROP_REINITABLE;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
 
 #include "zend_vm_execute.h"
 
