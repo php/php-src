@@ -26,5 +26,5 @@ runs:
     - name: Export CC/CXX
       shell: bash
       run: |
-        export CC=ccache gcc
-        export CXX=ccache g++
+        echo "CC=ccache gcc" >> $GITHUB_ENV
+        echo "CXX=ccache g++" >> $GITHUB_ENV
