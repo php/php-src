@@ -10,8 +10,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Sara Golemon <pollita@php.net>                               |
-  |         Scott MacVicar <scottmac@php.net>                            |
+  | Authors: Sara Golemon <pollita@php.net>                              |
+  |          Scott MacVicar <scottmac@php.net>                           |
   +----------------------------------------------------------------------+
 */
 
@@ -31,6 +31,10 @@
 #include "zend_smart_str.h"
 
 #include "hash_arginfo.h"
+
+#ifdef HAVE_CRC_FAST
+#include <libcrc_fast.h>
+#endif
 
 #ifdef PHP_WIN32
 # define __alignof__ __alignof
@@ -1624,6 +1628,11 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("crc32",			&php_hash_crc32_ops);
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);
 	php_hash_register_algo("crc32c",		&php_hash_crc32c_ops);
+	php_hash_register_algo("crc32-iso-hdlc",	&php_hash_crc32_iso_hdlc_ops);
+	php_hash_register_algo("crc32-iscsi",		&php_hash_crc32_iscsi_ops);
+	php_hash_register_algo("crc32-php",		&php_hash_crc32_php_ops);
+	php_hash_register_algo("crc64-nvme",		&php_hash_crc64_nvme_ops);
+	php_hash_register_algo("crc64-ecma-182",	&php_hash_crc64_ecma182_ops);
 	php_hash_register_algo("fnv132",		&php_hash_fnv132_ops);
 	php_hash_register_algo("fnv1a32",		&php_hash_fnv1a32_ops);
 	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
@@ -1698,7 +1707,19 @@ PHP_MINFO_FUNCTION(hash)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "hash support", "enabled");
 	php_info_print_table_row(2, "Hashing Engines", buffer);
+#ifdef HAVE_CRC_FAST
+	php_info_print_table_row(2, "crc-fast support", "enabled");
+#else
+	php_info_print_table_row(2, "crc-fast support", "disabled");
+#endif
 	php_info_print_table_end();
+
+#ifdef HAVE_CRC_FAST
+	php_info_print_table_start();
+	php_info_print_table_row(2, "crc-fast library version", crc_fast_get_version());
+	php_info_print_table_row(2, "crc-fast target", crc_fast_get_calculator_target(Crc32Iscsi));
+	php_info_print_table_end();
+#endif
 
 #ifdef PHP_MHASH_BC
 	php_info_print_table_start();
