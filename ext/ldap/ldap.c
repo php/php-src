@@ -2339,9 +2339,14 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			SEPARATE_ARRAY(attribute_values);
 			uint32_t num_values = zend_hash_num_elements(Z_ARRVAL_P(attribute_values));
 			if (num_values == 0) {
-				zend_argument_value_error(3, "attribute \"%s\" must be a non-empty list of attribute values", ZSTR_VAL(attribute));
-				RETVAL_FALSE;
-				goto cleanup;
+				if (UNEXPECTED(is_full_add)) {
+					zend_argument_value_error(3, "attribute \"%s\" must be a non-empty list of attribute values", ZSTR_VAL(attribute));
+					RETVAL_FALSE;
+					goto cleanup;
+				}
+				/* When we modify, we means we delete the attribute */
+				attribute_index ++;
+				continue;
 			}
 			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
 				zend_argument_value_error(3, "attribute \"%s\" must be an array of attribute values with numeric keys", ZSTR_VAL(attribute));
