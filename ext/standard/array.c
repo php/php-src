@@ -4569,10 +4569,10 @@ PHP_FUNCTION(array_column)
 	zend_long index_long = 0;
 	bool index_is_null = 1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY_HT(input)
-		Z_PARAM_STR_OR_LONG_OR_NULL(column_str, column_long, column_is_null)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG_OR_NULL(column_str, column_long, column_is_null)
 		Z_PARAM_STR_OR_LONG_OR_NULL(index_str, index_long, index_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
