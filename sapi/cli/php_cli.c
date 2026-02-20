@@ -565,6 +565,11 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
+		if (INI_INT("opcache.file_cache_only")) {
+			zend_stream_init_filename(file_handle, script_file);
+			file_handle->primary_script = 1;
+			return SUCCESS;
+		}
 		fprintf(stderr, "Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}

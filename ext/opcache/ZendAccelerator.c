@@ -1918,6 +1918,33 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 	}
 
 	if (!file_handle->opened_path) {
+		if (file_cache_only &&
+		    file_handle->type == ZEND_HANDLE_FILENAME &&
+		    IS_ABSOLUTE_PATH(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename))) {
+			char *expanded = expand_filepath_with_mode(
+				ZSTR_VAL(file_handle->filename), NULL, NULL, 0, CWD_EXPAND);
+			if (expanded) {
+				file_handle->opened_path = zend_string_init(expanded, strlen(expanded), 0);
+				efree(expanded);
+			} else {
+				file_handle->opened_path = zend_string_copy(file_handle->filename);
+			}
+			HANDLE_BLOCK_INTERRUPTIONS();
+			SHM_UNPROTECT();
+			persistent_script = zend_file_cache_script_load(file_handle);
+			SHM_PROTECT();
+			HANDLE_UNBLOCK_INTERRUPTIONS();
+			if (persistent_script) {
+				zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
+				if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+					zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
+				}
+				return zend_accel_load_script(persistent_script, 1);
+			}
+			zend_string_release(file_handle->opened_path);
+			file_handle->opened_path = NULL;
+		}
+
 		if (file_handle->type == ZEND_HANDLE_FILENAME &&
 		    accelerator_orig_zend_stream_open_function(file_handle) == FAILURE) {
 			if (!EG(exception)) {
@@ -2572,6 +2599,24 @@ static zend_result persistent_stream_open_function(zend_file_handle *handle)
 /* zend_resolve_path() replacement for PHP 5.3 and above */
 static zend_string* persistent_zend_resolve_path(zend_string *filename)
 {
+	if (file_cache_only && !strstr(ZSTR_VAL(filename), "://")) {
+		zend_string *resolved = accelerator_orig_zend_resolve_path(filename);
+		if (resolved) {
+			return resolved;
+		}
+		if (IS_ABSOLUTE_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+			return zend_string_copy(filename);
+		}
+		{
+			char *expanded = expand_filepath_with_mode(ZSTR_VAL(filename), NULL, NULL, 0, CWD_EXPAND);
+			if (expanded) {
+				zend_string *result = zend_string_init(expanded, strlen(expanded), 0);
+				efree(expanded);
+				return result;
+			}
+		}
+		return NULL;
+	}
 	if (!file_cache_only &&
 	    ZCG(accelerator_enabled)) {
 
