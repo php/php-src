@@ -1529,91 +1529,155 @@ PHP_FUNCTION(array_walk_recursive)
  */
 static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
 {
-	zval *entry; /* pointer to array entry */
+	zval *entry;
 	zend_ulong num_idx;
 	zend_string *str_idx;
 
 	if (strict) {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-				ZVAL_DEREF(entry);
-				if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
-					if (behavior == 0) {
-						RETURN_TRUE;
-					} else {
+			if (behavior == 0) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+						ZVAL_DEREF(entry);
+						if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry)
+					{
+						ZVAL_DEREF(entry);
+						if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} else {
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZVAL_DEREF(entry);
+					if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
 						if (str_idx) {
 							RETURN_STR_COPY(str_idx);
 						} else {
 							RETURN_LONG(num_idx);
 						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-				ZVAL_DEREF(entry);
-				if (fast_is_identical_function(value, entry)) {
-					if (behavior == 0) {
-						RETURN_TRUE;
-					} else {
+			if (behavior == 0) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+						ZVAL_DEREF(entry);
+						if (fast_is_identical_function(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+						ZVAL_DEREF(entry);
+						if (fast_is_identical_function(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} else {
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZVAL_DEREF(entry);
+					if (fast_is_identical_function(value, entry)) {
 						if (str_idx) {
 							RETURN_STR_COPY(str_idx);
 						} else {
 							RETURN_LONG(num_idx);
 						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 		}
 	} else {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-				if (fast_equal_check_long(value, entry)) {
-					if (behavior == 0) {
-						RETURN_TRUE;
-					} else {
+			if (behavior == 0) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+						if (fast_equal_check_long(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+						if (fast_equal_check_long(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} else {
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					if (fast_equal_check_long(value, entry)) {
 						if (str_idx) {
 							RETURN_STR_COPY(str_idx);
 						} else {
 							RETURN_LONG(num_idx);
 						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 		} else if (Z_TYPE_P(value) == IS_STRING) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-				if (fast_equal_check_string(value, entry)) {
-					if (behavior == 0) {
-						RETURN_TRUE;
-					} else {
+			if (behavior == 0) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+						if (fast_equal_check_string(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+						if (fast_equal_check_string(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} else {
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					if (fast_equal_check_string(value, entry)) {
 						if (str_idx) {
 							RETURN_STR_COPY(str_idx);
 						} else {
 							RETURN_LONG(num_idx);
 						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-				if (fast_equal_check_function(value, entry)) {
-					if (behavior == 0) {
-						RETURN_TRUE;
-					} else {
+			if (behavior == 0) {
+				if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+						if (fast_equal_check_function(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+						if (fast_equal_check_function(value, entry)) {
+							RETURN_TRUE;
+						}
+					} ZEND_HASH_FOREACH_END();
+				}
+			} else {
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					if (fast_equal_check_function(value, entry)) {
 						if (str_idx) {
 							RETURN_STR_COPY(str_idx);
 						} else {
 							RETURN_LONG(num_idx);
 						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 		}
 	}
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
  * 0 = return boolean
