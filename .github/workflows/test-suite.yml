@@ -650,7 +650,7 @@ jobs:
       - name: ccache
         uses: ./.github/actions/ccache
         with:
-          name: "${{ matrix.job }}"
+          name: "${{ github.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -711,7 +711,7 @@ jobs:
       - name: ccache
         uses: ./.github/actions/ccache
         with:
-          name: "${{ matrix.job }}"
+          name: "${{ github.job }}"
       - name: ./configure
         run: |
           export CC=clang
