@@ -37,6 +37,7 @@ PHP                                                                        NEWS
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
+  . Added grapheme_strrev (Yuya Hamada)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
