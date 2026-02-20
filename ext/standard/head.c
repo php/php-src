@@ -260,11 +260,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, partitioned, !is_raw) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, partitioned, !is_raw) == SUCCESS);
 
 	if (options) {
 cleanup:
@@ -328,11 +324,7 @@ PHP_FUNCTION(headers_sent)
 		break;
 	}
 
-	if (SG(headers_sent)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(SG(headers_sent));
 }
 /* }}} */
 
