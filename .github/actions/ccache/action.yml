@@ -20,7 +20,7 @@ runs:
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: "${{ steps.cache_key.outputs.key }}"
-        append-timestamp: false
+        append-timestamp: 0
         restore-keys: "${{ steps.cache_key.outputs.prefix }}"
         #save: ${{ github.event_name != 'pull_request' }}
     - name: Export CC/CXX
