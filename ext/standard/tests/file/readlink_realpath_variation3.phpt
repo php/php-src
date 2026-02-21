@@ -43,10 +43,14 @@ bool(false)
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: realpath(): Passing empty string to realpath() is deprecated, use getcwd() instead in %s on line %d
 string(%d) "%s"
 -- Iteration4 --
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: realpath(): Passing empty string to realpath() is deprecated, use getcwd() instead in %s on line %d
 string(%d) "%s"
 Done

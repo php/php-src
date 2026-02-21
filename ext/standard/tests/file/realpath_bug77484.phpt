@@ -36,6 +36,7 @@ $rp2 = realpath('./');
 var_dump($old_cwd, $new_cwd, $rp0, $rp1, $rp2);
 ?>
 --EXPECTF--
+Deprecated: realpath(): Passing empty string to realpath() is deprecated, use getcwd() instead in %s on line %d
 string(%d) "%s"
 bool(false)
 bool(false)
