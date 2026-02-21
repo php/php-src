@@ -93,7 +93,7 @@ typedef struct {
 	zend_string *last_key;
 	zend_string *basedir;
 	size_t dirdepth;
-	size_t st_size;
+	off_t st_size;
 	int filemode;
 	int fd;
 } ps_files;
@@ -226,7 +226,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 
 static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
-	size_t n = 0;
+	ssize_t n = 0;
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
@@ -266,7 +266,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 #endif
 
 	if (n != ZSTR_LEN(val)) {
-		if (n == (size_t)-1) {
+		if (n == -1) {
 			php_error_docref(NULL, E_WARNING, "Write failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Write wrote less bytes than requested");
@@ -489,7 +489,7 @@ PS_READ_FUNC(files)
 		return SUCCESS;
 	}
 
-	*val = zend_string_alloc(sbuf.st_size, false);
+	*val = zend_string_alloc((size_t)sbuf.st_size, false);
 
 #ifdef HAVE_PREAD
 	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
