@@ -38,7 +38,7 @@ PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI zend_result php_copy_file(const char *src, const char *dest);
 PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
-PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
+ZEND_ATTRIBUTE_NONNULL_ARGS(1,2) PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
 PHPAPI void php_fstat(php_stream *stream, zval *return_value);
 PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t operation_arg_num,
 	zval *wouldblock, zval *return_value);
