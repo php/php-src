@@ -2585,6 +2585,8 @@ static zend_always_inline bool zend_parse_arg_obj_or_str(
 	return zend_parse_arg_str(arg, destination_string, allow_null, arg_num);
 }
 
+ZEND_API bool zend_validate_file_permissions(zend_long mode, uint32_t arg_num);
+
 END_EXTERN_C()
 
 #endif /* ZEND_API_H */
