@@ -30,6 +30,14 @@ PHP 8.6 UPGRADE NOTES
     sessions. It only returns false now when the session data could not be
     encoded. This mainly happens with the default serialization handler
     if a key contains the pipe | character.
+  . When session.lazy_write is enabled and a session handler implements
+    SessionUpdateTimestampHandlerInterface, sessions that were read as empty
+    and remain empty at write time will now trigger updateTimestamp() instead
+    of write(). Previously, write() was always called for empty sessions
+    because session_encode() returned false, bypassing the lazy_write
+    comparison. Custom session handlers that rely on write() being called
+    with empty data (e.g. to destroy the session) should implement the same
+    logic in their updateTimestamp() method.
 
 - Standard:
   . Invalid mode values now throw in array_filter() instead of being silently
