@@ -294,7 +294,7 @@ struct _zend_vm_stack {
 };
 
 /* Ensure the correct alignment before slots calculation */
-ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
                    "zval must be aligned by ZEND_MM_ALIGNMENT");
 /* A number of call frame slots (zvals) reserved for _zend_vm_stack. */
 #define ZEND_VM_STACK_HEADER_SLOTS \
