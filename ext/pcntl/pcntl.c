@@ -798,15 +798,16 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* Add the function name to our signal table */
-	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
-	Z_TRY_ADDREF_P(handle);
-
+	/* we need to register in the OS side first before we update the internal list */
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+
+	/* Add the function name to our signal table */
+	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+	Z_TRY_ADDREF_P(handle);
 	RETURN_TRUE;
 }
 /* }}} */
