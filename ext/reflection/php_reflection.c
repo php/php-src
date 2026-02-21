@@ -4550,10 +4550,7 @@ ZEND_METHOD(ReflectionClass, hasProperty)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
-		if ((property_info->flags & ZEND_ACC_PRIVATE) && property_info->ce != ce) {
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
+		RETURN_BOOL(!(property_info->flags & ZEND_ACC_PRIVATE) || property_info->ce == ce);
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF) {
 			if (Z_OBJ_HANDLER(intern->obj, has_property)(Z_OBJ(intern->obj), name, ZEND_PROPERTY_EXISTS, NULL)) {
