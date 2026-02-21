@@ -996,7 +996,44 @@ function GREP_HEADER(header_name, regex, path_to_check)
 	return false;
 }
 
+/**
+ * Checks if specified header exists and adds its include path to C flags.
+ */
+function CHECK_HEADER(header_name, flag_name, path_to_check, use_env, add_dir_part)
+{
+	return _check_header(
+		header_name,
+		flag_name,
+		path_to_check,
+		use_env,
+		add_dir_part,
+		false,
+		false
+	);
+}
+
+/**
+ * Obsolete. Checks if specified header exists, adds its include path to C flags
+ * and defines the 'HAVE_<HEADER_NAME_H>' C preprocessor macro. In new code, use
+ * CHECK_HEADER() instead, and define the 'HAVE_' macro manually as needed.
+ */
 function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part, add_to_flag_only)
+{
+	return _check_header(
+		header_name,
+		flag_name,
+		path_to_check,
+		use_env,
+		add_dir_part,
+		add_to_flag_only,
+		true
+	);
+}
+
+/**
+ * Internal helper.
+ */
+function _check_header(header_name, flag_name, path_to_check, use_env, add_dir_part, add_to_flag_only, define_macro)
 {
 	var dir_part_to_add = "";
 
@@ -1019,8 +1056,6 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	}
 
 	var p = search_paths(header_name, path_to_check, use_env ? "INCLUDE" : null);
-	var have = 0;
-	var sym;
 
 	if (typeof(p) == "string") {
 		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
@@ -1035,6 +1070,18 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 			ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
 		}
 	}
+
+	if (define_macro == null) {
+		define_macro = false;
+	}
+
+	if(define_macro) {
+		return p;
+	}
+
+	var have = 0;
+	var sym;
+
 	have = p ? 1 : 0
 
 	sym = header_name.toUpperCase();
@@ -3657,7 +3704,7 @@ function SETUP_ZLIB_LIB(target, path_to_check)
 	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
 }
 
-function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
+function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part)
 {
 	var ret = 0;
 	var cflags_var = "CFLAGS_" + target.toUpperCase();
@@ -3665,7 +3712,7 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+			CHECK_HEADER("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part)) {
 		/* Openssl 1.1.x or later */
 		return 2;
 	}
@@ -3678,8 +3725,8 @@ function SETUP_SQLITE3(target, path_to_check, shared) {
 	var libs = (shared ? "libsqlite3.lib;libsqlite3_a.lib" : "libsqlite3_a.lib;libsqlite3.lib");
 
 	return CHECK_LIB(libs, target, path_to_check) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3.h", cflags_var) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3ext.h", cflags_var);
+		CHECK_HEADER("sqlite3.h", cflags_var) &&
+		CHECK_HEADER("sqlite3ext.h", cflags_var);
 }
 
 function check_binary_tools_sdk()
