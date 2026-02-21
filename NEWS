@@ -43,9 +43,11 @@ PHP                                                                        NEWS
 
 - PCNTL:
   . Fixed pcntl_setns() internal errors handling regarding errnos.
-    (David Carlier)
+    (David Carlier/ndossche)
   . Fixed cpuset leak in pcntl_setcpuaffinity on out-of-range CPU ID
     on NetBSD/Solaris platforms. (David Carlier)
+  . Fixed pcntl_signal() signal table registering the callback first
+    OS-wise before the internal list. (David Carlier)
 
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
