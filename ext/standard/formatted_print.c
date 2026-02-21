@@ -266,6 +266,19 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
 						(fmt == 'f')?LCONV_DECIMAL_POINT:'.',
 						&is_negative, &num_buf[1], &s_len);
+			/* Prevent negative sign when value rounds to zero (GH-12237) */
+			if (is_negative) {
+				double rounded;
+				if (fmt == 'f' || fmt == 'F') {
+					double factor = pow(10.0, (double)precision);
+					rounded = round(fabs(number) * factor) / factor;
+				} else {
+					rounded = fabs(number);
+				}
+				if (rounded == 0.0) {
+					is_negative = false;
+				}
+			}
 			if (is_negative) {
 				num_buf[0] = '-';
 				s = num_buf;
