@@ -1734,6 +1734,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 		if (cpu < 0 || cpu >= maxcpus) {
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			PCNTL_CPU_DESTROY(mask);
 			RETURN_THROWS();
 		}
 
