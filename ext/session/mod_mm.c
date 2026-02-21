@@ -264,48 +264,7 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	size_t save_path_len = ZSTR_LEN(PS(save_path));
-	size_t mod_name_len = strlen(sapi_module.name);
-	size_t euid_len;
-	char *ps_mm_path, euid[30];
-	zend_result ret;
-
-	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-	if (!ps_mm_instance) {
-		return FAILURE;
-	}
-
-	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
-		free(ps_mm_instance);
-		ps_mm_instance = NULL;
-		return FAILURE;
-	}
-
-	/* Directory + '/' + File + Module Name + Effective UID + \0 */
-	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
-
-	memcpy(ps_mm_path, ZSTR_VAL(PS(save_path)), save_path_len);
-	if (save_path_len && ZSTR_VAL(PS(save_path))[save_path_len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[save_path_len] = DEFAULT_SLASH;
-		save_path_len++;
-	}
-	memcpy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
-	save_path_len += sizeof(PS_MM_FILE) - 1;
-	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
-	save_path_len += mod_name_len;
-	memcpy(ps_mm_path + save_path_len, euid, euid_len);
-	ps_mm_path[save_path_len + euid_len] = '\0';
-
-	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
-
-	efree(ps_mm_path);
-
-	if (ret == FAILURE) {
-		free(ps_mm_instance);
-		ps_mm_instance = NULL;
-		return FAILURE;
-	}
-
+	ps_mm_instance = NULL;
 	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
 }
@@ -321,11 +280,54 @@ PHP_MSHUTDOWN_FUNCTION(ps_mm)
 
 PS_OPEN_FUNC(mm)
 {
-	ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
+	if (ps_mm_instance) {
+		ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
+		PS_SET_MOD_DATA(ps_mm_instance);
+		return SUCCESS;
+	}
 
+	char euid[30];
+	size_t euid_len = slprintf(euid, sizeof(euid), "%d", geteuid());
+	if (!euid_len) {
+		return FAILURE;
+	}
+
+	ps_mm_instance = calloc(1, sizeof(*ps_mm_instance));
 	if (!ps_mm_instance) {
 		return FAILURE;
 	}
+	ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
+
+	const char *save_path_cstr = ZSTR_VAL(save_path);
+	size_t save_path_len = ZSTR_LEN(save_path);
+	size_t mod_name_len = strlen(sapi_module.name);
+
+
+	/* Directory + '/' + File + Module Name + Effective UID + \0 */
+	char *ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
+
+	memcpy(ps_mm_path, save_path_cstr, save_path_len);
+	if (save_path_len && save_path_cstr[save_path_len - 1] != DEFAULT_SLASH) {
+		ps_mm_path[save_path_len] = DEFAULT_SLASH;
+		save_path_len++;
+	}
+	memcpy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
+	save_path_len += sizeof(PS_MM_FILE) - 1;
+	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
+	save_path_len += mod_name_len;
+	memcpy(ps_mm_path + save_path_len, euid, euid_len);
+	ps_mm_path[save_path_len + euid_len] = '\0';
+
+	zend_result ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
+
+	efree(ps_mm_path);
+
+	if (ret == FAILURE) {
+		free(ps_mm_instance);
+		ps_mm_instance = NULL;
+		return FAILURE;
+	}
+
 	PS_SET_MOD_DATA(ps_mm_instance);
 
 	return SUCCESS;
