@@ -1699,6 +1699,11 @@ function array_keys(array $array, mixed $filter_value = UNKNOWN, bool $strict = 
 /**
  * @compile-time-eval
  */
+function is_assoc_array(array $array): bool {}
+
+/**
+ * @compile-time-eval
+ */
 function array_key_first(array $array): int|string|null {}
 
 /**

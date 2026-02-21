@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 8d1c2a735f412f8571675c6b025c3a418b68fb65
+ * Stub hash: 08db3bddcb9566d062b02c7d21e5bec5a5c61f23
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -236,6 +236,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_keys, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strict, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_assoc_array, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_array_key_first, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -387,9 +391,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_combine, 0, 2, IS_ARRAY, 0
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_is_list, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_array_is_list arginfo_is_assoc_array
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base64_encode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -2366,6 +2368,7 @@ ZEND_FUNCTION(array_merge_recursive);
 ZEND_FUNCTION(array_replace);
 ZEND_FUNCTION(array_replace_recursive);
 ZEND_FUNCTION(array_keys);
+ZEND_FUNCTION(is_assoc_array);
 ZEND_FUNCTION(array_key_first);
 ZEND_FUNCTION(array_key_last);
 ZEND_FUNCTION(array_first);
@@ -2960,6 +2963,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_replace", zif_array_replace, arginfo_array_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_replace_recursive", zif_array_replace_recursive, arginfo_array_replace_recursive, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_keys", zif_array_keys, arginfo_array_keys, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("is_assoc_array", zif_is_assoc_array, arginfo_is_assoc_array, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_key_first", zif_array_key_first, arginfo_array_key_first, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_key_last", zif_array_key_last, arginfo_array_key_last, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_first", zif_array_first, arginfo_array_first, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

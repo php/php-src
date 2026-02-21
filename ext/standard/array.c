@@ -4385,6 +4385,39 @@ PHP_FUNCTION(array_keys)
 }
 /* }}} */
 
+/* {{{  */
+PHP_FUNCTION(is_assoc_array)
+{
+    zval *arr;
+    zend_array *ht;
+	zend_ulong idx, expected = 0;
+    zend_string *key;
+
+    ZEND_PARSE_PARAMETERS_START(1,1)
+        Z_PARAM_ARRAY(arr)
+    ZEND_PARSE_PARAMETERS_END();
+	
+	ht = Z_ARRVAL_P(arr);
+
+	if (zend_hash_num_elements(ht) == 0) {
+        RETURN_FALSE;
+    }
+
+	if(!HT_IS_PACKED(ht)){
+		RETURN_TRUE;
+	}
+
+    ZEND_HASH_FOREACH_KEY(ht, idx, key) {
+        if (key != NULL || idx != expected++) {
+            RETURN_TRUE; /* associative */
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    RETURN_FALSE;
+
+}
+/* }}} */
+
 /* {{{ Get the key of the first element of the array */
 PHP_FUNCTION(array_key_first)
 {
