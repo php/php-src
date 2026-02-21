@@ -543,6 +543,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
 
+	/* Declare 'last_query_error' property to store last failed query */
+	zend_declare_property_null(mysqli_link_class_entry, "last_query_error", sizeof("last_query_error")-1, ZEND_ACC_PUBLIC);
+
 	return SUCCESS;
 }
 /* }}} */

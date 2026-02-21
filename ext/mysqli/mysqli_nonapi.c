@@ -601,6 +601,8 @@ PHP_FUNCTION(mysqli_query)
 	if (resultmode & MYSQLI_ASYNC) {
 		if (mysqli_async_query(mysql->mysql, query, query_len)) {
 			MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+			/* Save failed query string to 'last_query_error' */
+			zend_update_property_string(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), "last_query_error", sizeof("last_query_error")-1, query);
 			RETURN_FALSE;
 		}
 		mysql->async_result_fetch_type = resultmode & ~MYSQLI_ASYNC;
@@ -609,6 +611,8 @@ PHP_FUNCTION(mysqli_query)
 
 	if (mysql_real_query(mysql->mysql, query, query_len)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		/* Save failed query string to 'last_query_error' */
+		zend_update_property_string(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), "last_query_error", sizeof("last_query_error")-1, query);
 		RETURN_FALSE;
 	}
 
