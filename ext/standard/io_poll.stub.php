@@ -36,7 +36,7 @@ namespace Io\Poll {
 
     abstract class Handle
     {
-        protected function getFileDescriptor(): int {}
+        abstract protected function getFileDescriptor(): int;
     }
 
     final class Watcher
@@ -141,5 +141,7 @@ namespace {
         public function getStream() {}
 
         public function isValid(): bool {}
+
+        protected function getFileDescriptor(): int {}
     }
 }

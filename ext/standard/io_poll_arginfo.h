@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: cc28ef37a38cc9beb6301f70e4ed70fddacf45c1 */
+ * Stub hash: b914a5ccf02c5741fd257c3197c8ab000c654068 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -74,10 +74,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_StreamPollHandle_isValid arginfo_class_Io_Poll_Backend_isAvailable
 
+#define arginfo_class_StreamPollHandle_getFileDescriptor arginfo_class_Io_Poll_Handle_getFileDescriptor
+
 ZEND_METHOD(Io_Poll_Backend, getAvailableBackends);
 ZEND_METHOD(Io_Poll_Backend, isAvailable);
 ZEND_METHOD(Io_Poll_Backend, supportsEdgeTriggering);
-ZEND_METHOD(Io_Poll_Handle, getFileDescriptor);
 ZEND_METHOD(Io_Poll_Watcher, __construct);
 ZEND_METHOD(Io_Poll_Watcher, getHandle);
 ZEND_METHOD(Io_Poll_Watcher, getWatchedEvents);
@@ -96,6 +97,7 @@ ZEND_METHOD(Io_Poll_Context, getBackend);
 ZEND_METHOD(StreamPollHandle, __construct);
 ZEND_METHOD(StreamPollHandle, getStream);
 ZEND_METHOD(StreamPollHandle, isValid);
+ZEND_METHOD(StreamPollHandle, getFileDescriptor);
 
 static const zend_function_entry class_Io_Poll_Backend_methods[] = {
 	ZEND_ME(Io_Poll_Backend, getAvailableBackends, arginfo_class_Io_Poll_Backend_getAvailableBackends, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -105,7 +107,7 @@ static const zend_function_entry class_Io_Poll_Backend_methods[] = {
 };
 
 static const zend_function_entry class_Io_Poll_Handle_methods[] = {
-	ZEND_ME(Io_Poll_Handle, getFileDescriptor, arginfo_class_Io_Poll_Handle_getFileDescriptor, ZEND_ACC_PROTECTED)
+	ZEND_RAW_FENTRY("getFileDescriptor", NULL, arginfo_class_Io_Poll_Handle_getFileDescriptor, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -136,6 +138,7 @@ static const zend_function_entry class_StreamPollHandle_methods[] = {
 	ZEND_ME(StreamPollHandle, __construct, arginfo_class_StreamPollHandle___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(StreamPollHandle, getStream, arginfo_class_StreamPollHandle_getStream, ZEND_ACC_PUBLIC)
 	ZEND_ME(StreamPollHandle, isValid, arginfo_class_StreamPollHandle_isValid, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamPollHandle, getFileDescriptor, arginfo_class_StreamPollHandle_getFileDescriptor, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
 

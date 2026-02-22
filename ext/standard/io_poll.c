@@ -435,20 +435,6 @@ PHP_METHOD(Io_Poll_Backend, supportsEdgeTriggering)
 	RETURN_BOOL(php_poll_backend_supports_edge_triggering(type));
 }
 
-PHP_METHOD(Io_Poll_Handle, getFileDescriptor)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
-	php_socket_t fd = php_poll_handle_get_fd(intern);
-
-	if (fd == SOCK_ERR) {
-		RETURN_LONG(0);
-	}
-
-	RETURN_LONG((zend_long) fd);
-}
-
 PHP_METHOD(StreamPollHandle, __construct)
 {
 	php_stream *stream;
@@ -489,6 +475,20 @@ PHP_METHOD(StreamPollHandle, isValid)
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
 	RETURN_BOOL(intern->ops->is_valid(intern));
+}
+
+PHP_METHOD(StreamPollHandle, getFileDescriptor)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
+	php_socket_t fd = php_poll_handle_get_fd(intern);
+
+	if (fd == SOCK_ERR) {
+		RETURN_LONG(0);
+	}
+
+	RETURN_LONG((zend_long) fd);
 }
 
 PHP_METHOD(Io_Poll_Watcher, __construct)
