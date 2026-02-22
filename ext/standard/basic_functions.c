@@ -2020,17 +2020,16 @@ PHP_FUNCTION(ini_restore)
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
-	char *old_value;
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	zend_string *old_value = zend_ini_str("include_path", sizeof("include_path") - 1, false);
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value);
+		RETVAL_STR_COPY(old_value);
 	} else {
 		RETVAL_FALSE;
 	}

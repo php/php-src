@@ -88,8 +88,8 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 
 ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, bool orig);
 ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
+ZEND_API const char *zend_ini_string(const char *name, size_t name_length, bool orig);
+ZEND_API const char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
 ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
@@ -194,12 +194,12 @@ END_EXTERN_C()
 #define INI_INT(name) zend_ini_long((name), strlen(name), 0)
 #define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
 #define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
-#define INI_BOOL(name) ((bool) INI_INT(name))
+#define INI_BOOL(name) zend_ini_parse_bool(zend_ini_str((name), strlen(name), false))
 
 #define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
 #define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
 #define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
-#define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
+#define INI_ORIG_BOOL(name) zend_ini_parse_bool(zend_ini_str((name), strlen(name), true))
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)

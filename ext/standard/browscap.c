@@ -399,7 +399,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 }
 /* }}} */
 
-static zend_result browscap_read_file(char *filename, browser_data *browdata, bool persistent) /* {{{ */
+static zend_result browscap_read_file(const char *filename, browser_data *browdata, bool persistent) /* {{{ */
 {
 	zend_file_handle fh;
 	browscap_parser_ctx ctx = {0};
@@ -499,7 +499,7 @@ PHP_INI_MH(OnChangeBrowscap)
 
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
-	char *browscap = INI_STR("browscap");
+	const char *browscap = INI_STR("browscap");
 
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data), (ts_allocate_ctor) browscap_globals_ctor, NULL);
