@@ -128,6 +128,8 @@ namespace Io\Poll {
 
     class FailedPollWaitException extends FailedPollOperationException {}
 
+    class BackendUnavailableException extends PollException {}
+
     class InactiveWatcherException extends PollException {}
 
     class HandleAlreadyWatchedException extends PollException {}

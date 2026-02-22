@@ -29,6 +29,7 @@ static zend_class_entry *php_io_poll_watcher_class_entry;
 static zend_class_entry *php_io_poll_handle_class_entry;
 static zend_class_entry *php_io_exception_class_entry;
 static zend_class_entry *php_io_poll_exception_class_entry;
+static zend_class_entry *php_io_poll_failed_backend_unavailable_class_entry;
 static zend_class_entry *php_io_poll_failed_operation_class_entry;
 static zend_class_entry *php_io_poll_failed_context_init_class_entry;
 static zend_class_entry *php_io_poll_failed_handle_add_class_entry;
@@ -662,7 +663,9 @@ PHP_METHOD(Io_Poll_Context, __construct)
 	intern->ctx = php_poll_create(backend_type, 0);
 
 	if (!intern->ctx) {
-		zend_argument_value_error(1, "must be available backend");
+		zend_throw_exception_ex(
+				php_io_poll_failed_backend_unavailable_class_entry, 0, "Backend %s not available",
+				php_io_poll_backend_type_to_name(backend_type));
 		RETURN_THROWS();
 	}
 
@@ -892,6 +895,9 @@ PHP_MINIT_FUNCTION(poll)
 
 	php_io_poll_failed_wait_class_entry = register_class_Io_Poll_FailedPollWaitException(
 			php_io_poll_failed_operation_class_entry);
+
+	php_io_poll_failed_backend_unavailable_class_entry = register_class_Io_Poll_BackendUnavailableException(
+		php_io_poll_exception_class_entry);
 
 	php_io_poll_inactive_watcher_class_entry = register_class_Io_Poll_InactiveWatcherException(
 			php_io_poll_exception_class_entry);

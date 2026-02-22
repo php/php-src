@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: aff40643f80d7f9b5a60bd676e83d48a4651875d */
+ * Stub hash: ea58f12aba793dcd3e95aa0dd1bcd2b8b58ebb3b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -350,6 +350,16 @@ static zend_class_entry *register_class_Io_Poll_FailedPollWaitException(zend_cla
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "FailedPollWaitException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_FailedPollOperationException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_BackendUnavailableException(zend_class_entry *class_entry_Io_Poll_PollException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "BackendUnavailableException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, 0);
 
 	return class_entry;
 }

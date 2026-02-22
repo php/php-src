@@ -1,5 +1,5 @@
 --TEST--
-Poll stream - backend name
+Poll context - backend on Unix
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -16,7 +16,13 @@ var_dump($poll_ctx->getBackend());
 $poll_ctx = new Io\Poll\Context(Io\Poll\Backend::Poll);
 $backend = $poll_ctx->getBackend();
 var_dump($backend->name);
+try {
+    new Io\Poll\Context(Io\Poll\Backend::WSAPoll);
+} catch (\Io\Poll\BackendUnavailableException $e) {
+    var_dump($e->getMessage());
+}
 ?>
 --EXPECTF--
 enum(Io\Poll\Backend::%s)
 string(4) "Poll"
+string(29) "Backend WSAPoll not available"

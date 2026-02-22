@@ -16,6 +16,7 @@ AssertionError
 Directory
 Io\IoException
 Io\Poll\Backend
+Io\Poll\BackendUnavailableException
 Io\Poll\Context
 Io\Poll\Event
 Io\Poll\FailedContextInitializationException
