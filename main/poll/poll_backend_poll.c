@@ -181,26 +181,16 @@ static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user
 	return true;
 }
 
-static void php_poll_msleep(int timeout_ms)
-{
-	if (timeout_ms <= 0) {
-		return;
-	}
-
-	struct timespec ts;
-	ts.tv_sec = timeout_ms / 1000;
-	ts.tv_nsec = (timeout_ms % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-}
-
-static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+static int poll_backend_wait(
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
-		if (timeout > 0) {
-			php_poll_msleep(timeout);
+		if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
+			nanosleep(timeout, NULL);
 		}
 		return 0;
 	}
@@ -221,7 +211,9 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
 
-	int nfds = poll(backend_data->temp_fds, fd_count, timeout);
+	/* Convert timespec to milliseconds (poll() only supports ms resolution) */
+	int timeout_ms = php_poll_timespec_to_ms(timeout);
+	int nfds = poll(backend_data->temp_fds, fd_count, timeout_ms);
 
 	if (nfds <= 0) {
 		return nfds; /* Return 0 for timeout, -1 for error */

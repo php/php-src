@@ -17,7 +17,7 @@ pt_expect_events($poll_ctx->wait(0), [
 
 fwrite($client, "test data");
 usleep(10000);
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'client_data'],
     ['events' => [Io\Poll\Event::Read, Io\Poll\Event::Write], 'data' => 'server_data', 'read' => 'test data']
 ]);

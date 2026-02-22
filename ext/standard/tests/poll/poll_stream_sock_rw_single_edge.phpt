@@ -19,7 +19,7 @@ pt_expect_events($poll_ctx->wait(0), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data']
 ]);
 fwrite($socket1w, "test data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'test data']
 ]);
 

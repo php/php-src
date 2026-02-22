@@ -46,7 +46,8 @@ typedef struct php_poll_backend_ops {
 	zend_result (*remove)(php_poll_ctx *ctx, int fd);
 
 	/* Wait for events */
-	int (*wait)(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout);
+	int (*wait)(php_poll_ctx *ctx, php_poll_event *events, int max_events,
+			const struct timespec *timeout);
 
 	/* Check if backend is available */
 	bool (*is_available)(void);
@@ -145,7 +146,7 @@ static inline bool php_poll_is_timeout_error(void)
 #elif defined(ETIME)
 	return errno == ETIME;
 #elif defined(ETIMEDOUT)
-	return errno = ETIMEDOUT;
+	return errno == ETIMEDOUT;
 #else
 	return false;
 #endif
@@ -155,6 +156,21 @@ static inline bool php_poll_is_timeout_error(void)
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
 	ctx->last_error = error;
+}
+
+static inline int php_poll_timespec_to_ms(const struct timespec *timeout)
+{
+	if (timeout == NULL) {
+		return -1;
+	}
+
+	int ms = (int) (timeout->tv_sec * 1000);
+	/* Round nanoseconds up to the next millisecond to avoid premature return */
+	if (timeout->tv_nsec > 0) {
+		ms += (int) ((timeout->tv_nsec + 999999) / 1000000);
+	}
+
+	return ms;
 }
 
 #endif /* PHP_POLL_INTERNAL_H */

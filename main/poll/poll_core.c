@@ -289,7 +289,8 @@ PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 }
 
 /* Wait for events */
-PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	if (UNEXPECTED(!ctx || !ctx->initialized || !events || max_events <= 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);

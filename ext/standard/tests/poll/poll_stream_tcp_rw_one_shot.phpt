@@ -16,10 +16,10 @@ pt_expect_events($poll_ctx->wait(0), [
 ]);
 
 pt_write_sleep($client, "test data");
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 pt_write_sleep($client, "test data");
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

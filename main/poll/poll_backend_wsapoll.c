@@ -187,14 +187,19 @@ static bool wsapoll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *u
 }
 
 static int wsapoll_backend_wait(
-		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	wsapoll_backend_data_t *backend_data = (wsapoll_backend_data_t *) ctx->backend_data;
 
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
-		if (timeout > 0) {
-			Sleep(timeout);
+		if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
+			/* Convert to milliseconds, rounding up */
+			int sleep_ms = php_poll_timespec_to_ms(timeout);
+			if (sleep_ms > 0) {
+				Sleep(sleep_ms);
+			}
 		}
 		return 0;
 	}
@@ -215,8 +220,11 @@ static int wsapoll_backend_wait(
 	wsapoll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, wsapoll_build_fds_callback, &build_ctx);
 
+	/* Convert timespec to milliseconds (WSAPoll only supports ms resolution, round up) */
+	int timeout_ms = php_poll_timespec_to_ms(timeout);
+
 	/* Call WSAPoll */
-	int nfds = WSAPoll(backend_data->temp_fds, fd_count, timeout);
+	int nfds = WSAPoll(backend_data->temp_fds, fd_count, timeout_ms);
 
 	if (nfds == SOCKET_ERROR) {
 		/* WSAPoll specific error handling */

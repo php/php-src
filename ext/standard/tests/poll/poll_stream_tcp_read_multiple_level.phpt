@@ -22,16 +22,16 @@ $expected_events = [];
 for ($i = 0; $i < 20; $i++) {
     $expected_events[] = ['events' => [Io\Poll\Event::Read], 'data' => "server{$i}_data", 'read' => "test $i data"];
 }
-pt_expect_events($poll_ctx->wait(100), $expected_events);
+pt_expect_events($poll_ctx->wait(0, 100000), $expected_events);
 
 pt_write_sleep($clients[1], "more data");
 pt_write_sleep($clients[2], "more data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'server1_data', 'read' => 'more data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'server2_data', 'read' => 'more data']
 ]);
 
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

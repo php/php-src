@@ -70,7 +70,7 @@ namespace Io\Poll {
 
         public function add(Handle $handle, array $events, mixed $data = null): Watcher {}
 
-        public function wait(int $timeout = -1, int $maxEvents = -1): array {}
+        public function wait(int $timeoutSeconds = -1, int $timeoutMicroseconds = 0, int $maxEvents = -1): array {}
 
         public function getBackend(): Backend {}
     }

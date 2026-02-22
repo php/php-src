@@ -1388,6 +1388,8 @@ AC_DEFUN([PHP_POLL_MECHANISMS],
   ])], [
     AC_DEFINE([HAVE_EPOLL], [1], [Define if epoll is available])
     poll_mechanisms="$poll_mechanisms epoll"
+
+    AC_CHECK_FUNCS([epoll_pwait2], [], [], [#include <sys/epoll.h>])
   ])
 
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([

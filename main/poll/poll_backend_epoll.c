@@ -163,7 +163,8 @@ static zend_result epoll_backend_remove(php_poll_ctx *ctx, int fd)
 }
 
 static int epoll_backend_wait(
-		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
@@ -179,7 +180,13 @@ static int epoll_backend_wait(
 		backend_data->events_capacity = max_events;
 	}
 
-	int nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events, timeout);
+	int nfds;
+#ifdef HAVE_EPOLL_PWAIT2
+	nfds = epoll_pwait2(backend_data->epoll_fd, backend_data->events, max_events, timeout, NULL);
+#else
+	int timeout_ms = php_poll_timespec_to_ms(timeout);
+	nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events, timeout_ms);
+#endif
 
 	if (nfds > 0) {
 		for (int i = 0; i < nfds; i++) {

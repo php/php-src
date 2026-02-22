@@ -13,7 +13,7 @@ pt_stream_poll_add($poll_ctx, $socket2w, [Io\Poll\Event::Write], "socket2w_data"
 
 fclose($socket1w);
 fclose($socket2w);
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

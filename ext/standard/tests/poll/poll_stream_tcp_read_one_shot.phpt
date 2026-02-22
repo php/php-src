@@ -17,14 +17,14 @@ pt_expect_events($poll_ctx->wait(0), []);
 
 pt_write_sleep($client1, "test data");
 pt_write_sleep($client2, "test data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'server1_data', 'read' => 'test data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'server2_data', 'read' => 'test data']
 ]);
 
 pt_write_sleep($client1, "more data");
 pt_write_sleep($client2, "more data");
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

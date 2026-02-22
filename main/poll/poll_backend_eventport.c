@@ -259,18 +259,16 @@ static bool eventport_associate_callback(int fd, php_poll_fd_entry *entry, void 
 
 /* Wait for events using event port */
 static int eventport_backend_wait(
-		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	eventport_backend_data_t *backend_data = (eventport_backend_data_t *) ctx->backend_data;
 
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
 		/* No fds to monitor, but we still need to respect timeout */
-		if (timeout > 0) {
-			struct timespec ts;
-			ts.tv_sec = timeout / 1000;
-			ts.tv_nsec = (timeout % 1000) * 1000000;
-			nanosleep(&ts, NULL);
+		if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
+			nanosleep(timeout, NULL);
 		}
 		return 0;
 	}
@@ -297,12 +295,14 @@ static int eventport_backend_wait(
 		backend_data->events_capacity = max_events;
 	}
 
-	/* Setup timeout structure */
-	struct timespec ts = { 0 }, *tsp = NULL;
-	if (timeout >= 0) {
-		ts.tv_sec = timeout / 1000;
-		ts.tv_nsec = (timeout % 1000) * 1000000;
-		tsp = &ts;
+	/* port_getn accepts NULL timeout for indefinite wait, or a timespec pointer -
+	 * this maps directly to our new API. We need a mutable copy since port_getn
+	 * may modify the timeout. */
+	struct timespec ts_copy;
+	struct timespec *tsp = NULL;
+	if (timeout != NULL) {
+		ts_copy = *timeout;
+		tsp = &ts_copy;
 	}
 
 	/* Retrieve events from port */

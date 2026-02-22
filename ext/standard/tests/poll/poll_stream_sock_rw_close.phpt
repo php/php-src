@@ -13,7 +13,7 @@ pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket2_data")
 fwrite($socket1w, "test data");
 
 fclose($socket1r);
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     [
         'events' => [
             'default' => [Io\Poll\Event::Write, Io\Poll\Event::Error, Io\Poll\Event::HangUp],
@@ -24,7 +24,7 @@ pt_expect_events($poll_ctx->wait(100), [
 ], $poll_ctx);
 
 fclose($socket1w);
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

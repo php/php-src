@@ -18,6 +18,8 @@
 #include "php.h"
 #include "php_network.h"
 
+#include <time.h>
+
 /* ----- Public generic API ----- */
 
 /* clang-format off */
@@ -104,7 +106,8 @@ PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void
 PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
 PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd);
 
-PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout);
+PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout);
 
 PHPAPI const char *php_poll_backend_name(php_poll_ctx *ctx);
 PHPAPI php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);

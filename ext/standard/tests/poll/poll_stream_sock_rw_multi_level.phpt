@@ -19,35 +19,35 @@ pt_expect_events($poll_ctx->wait(0), [
 ]);
 
 fwrite($socket1w, "test data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'test data']
 ]);
 
 fwrite($socket1w, "more data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data']
 ]);
 
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data']
 ]);
 
 fwrite($socket1w, " and even more data");
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'more data and even more data']
 ]);
 
 fclose($socket1r);
-pt_expect_events($poll_ctx->wait(100), [
+pt_expect_events($poll_ctx->wait(0, 100000), [
     ['events' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp], 'data' => 'socket2_data']
 ], $poll_ctx);
 
 fclose($socket1w);
-pt_expect_events($poll_ctx->wait(100), []);
+pt_expect_events($poll_ctx->wait(0, 100000), []);
 
 ?>
 --EXPECT--

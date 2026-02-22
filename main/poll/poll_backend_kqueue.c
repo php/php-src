@@ -298,7 +298,8 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 }
 
 static int kqueue_backend_wait(
-		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
@@ -316,15 +317,8 @@ static int kqueue_backend_wait(
 		backend_data->events_capacity = required_capacity;
 	}
 
-	struct timespec ts = { 0 }, *tsp = NULL;
-	if (timeout >= 0) {
-		ts.tv_sec = timeout / 1000;
-		ts.tv_nsec = (timeout % 1000) * 1000000;
-		tsp = &ts;
-	}
-
 	int nfds = kevent(
-			backend_data->kqueue_fd, NULL, 0, backend_data->events, required_capacity, tsp);
+			backend_data->kqueue_fd, NULL, 0, backend_data->events, required_capacity, timeout);
 
 	if (nfds > 0) {
 		if (ctx->raw_events) {

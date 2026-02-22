@@ -751,16 +751,34 @@ PHP_METHOD(Io_Poll_Context, add)
 
 PHP_METHOD(Io_Poll_Context, wait)
 {
-	zend_long timeout = -1;
+	zend_long timeout_seconds = -1;
+	zend_long timeout_microseconds = 0;
 	zend_long max_events = -1;
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timeout)
+		Z_PARAM_LONG(timeout_seconds)
+		Z_PARAM_LONG(timeout_microseconds)
 		Z_PARAM_LONG(max_events)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
+
+	/* Build timespec from seconds + microseconds, or NULL for indefinite */
+	struct timespec ts;
+	const struct timespec *timeout = NULL;
+	if (timeout_seconds >= 0) {
+		if (timeout_microseconds < 0) {
+			zend_argument_value_error(2, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
+
+		/* Allow microseconds >= 1000000, carry overflow into seconds
+		 * (same behavior as stream_select) */
+		ts.tv_sec = (time_t) (timeout_seconds + (timeout_microseconds / 1000000));
+		ts.tv_nsec = (long) ((timeout_microseconds % 1000000) * 1000);
+		timeout = &ts;
+	}
 
 	if (max_events <= 0) {
 		max_events = php_poll_get_suitable_max_events(intern->ctx);
@@ -770,7 +788,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 	}
 
 	php_poll_event *events = emalloc(sizeof(php_poll_event) * max_events);
-	int num_events = php_poll_wait(intern->ctx, events, max_events, (int) timeout);
+	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout);
 
 	if (num_events < 0) {
 		php_poll_error err = php_poll_get_error(intern->ctx);
