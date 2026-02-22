@@ -21,6 +21,8 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_API.h"
+#include "Zend/zend_extensions.h"
 
 #include "SAPI.h"
 
@@ -106,6 +108,28 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 }
 /* }}} */
 
+/* This helper handles the hybrid zend_{extension,module_entry} fallback path.
+ * It unloads the handle on failure but it does not free libpath. */
+static zend_result php_try_load_hybrid_zend_extension(
+	DL_HANDLE handle, const char *filename, char *libpath, int error_type)
+{
+	zend_extension *zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+	if (!zend_extension_entry) {
+		zend_extension_entry = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
+	}
+	if (zend_extension_entry && zend_extension_entry->module_entry) {
+		return zend_load_extension_handle(handle, libpath);
+	}
+	if (zend_extension_entry) {
+		php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
+		DL_UNLOAD(handle);
+		return FAILURE;
+	}
+	php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
+	DL_UNLOAD(handle);
+	return FAILURE;
+}
+
 /* {{{ php_load_extension */
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
@@ -173,13 +197,12 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 		efree(orig_libpath);
 		efree(err1);
 	}
-	efree(libpath);
-
 #ifdef PHP_WIN32
 	if (!php_win32_image_compatible(handle, &err1)) {
 			php_error_docref(NULL, error_type, "%s", err1);
 			efree(err1);
 			DL_UNLOAD(handle);
+			efree(libpath);
 			return FAILURE;
 	}
 #endif
@@ -195,15 +218,13 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	}
 
 	if (!get_module) {
-		if (DL_FETCH_SYMBOL(handle, "zend_extension_entry") || DL_FETCH_SYMBOL(handle, "_zend_extension_entry")) {
-			DL_UNLOAD(handle);
-			php_error_docref(NULL, error_type, "Invalid library (appears to be a Zend Extension, try loading using zend_extension=%s from php.ini)", filename);
-			return FAILURE;
-		}
-		DL_UNLOAD(handle);
-		php_error_docref(NULL, error_type, "Invalid library (maybe not a PHP library) '%s'", filename);
-		return FAILURE;
+		// If get_module still isn't found, maybe it's a zend_extension with a module entry.
+		zend_result result = php_try_load_hybrid_zend_extension(handle, filename, libpath, error_type);
+		efree(libpath);
+		return result;
 	}
+	efree(libpath);
+
 	module_entry = get_module();
 	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);

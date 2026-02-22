@@ -238,9 +238,11 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
 
+#define ZEND_MODULE_ENTRY(name) (&name##_module_entry)
+
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
-	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
+	ZEND_DLEXPORT zend_module_entry *get_module(void) { return ZEND_MODULE_ENTRY(name); }\
     END_EXTERN_C()
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
