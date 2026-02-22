@@ -1631,7 +1631,7 @@ PHP_FUNCTION(pcntl_setns)
 
 	pid = pid_is_null ? getpid() : pid;
 	fd = syscall(SYS_pidfd_open, pid, 0);
-	if (errno) {
+	if (fd == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EINVAL:
@@ -1657,11 +1657,12 @@ PHP_FUNCTION(pcntl_setns)
 		RETURN_FALSE;
 	}
 	ret = setns(fd, (int)nstype);
+	int setns_errno = errno;
 	close(fd);
 
 	if (ret == -1) {
-		PCNTL_G(last_error) = errno;
-		switch (errno) {
+		PCNTL_G(last_error) = setns_errno;
+		switch (setns_errno) {
 			case ESRCH:
 				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
 				RETURN_THROWS();
@@ -1671,11 +1672,11 @@ PHP_FUNCTION(pcntl_setns)
 				RETURN_THROWS();
 
 			case EPERM:
-				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", setns_errno);
 				break;
 
 			default:
-			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+			        php_error_docref(NULL, E_WARNING, "Error %d", setns_errno);
 		}
 		RETURN_FALSE;
 	} else {
