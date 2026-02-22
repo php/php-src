@@ -1579,17 +1579,21 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 }
 /* }}} */
 
-static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
+static inline void do_implement_interface_ex(zend_class_entry *ce, zend_class_entry *inherited_face, zend_class_entry *base_iface)
 {
-	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
-		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && inherited_face->interface_gets_implemented && inherited_face->interface_gets_implemented(base_iface, ce) == FAILURE) {
+		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(base_iface->name));
 	}
 	/* This should be prevented by the class lookup logic. */
-	ZEND_ASSERT(ce != iface);
+	ZEND_ASSERT(ce != base_iface);
 }
-/* }}} */
 
-static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */
+static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
+{
+	do_implement_interface_ex(ce, iface, iface);
+}
+
+static void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
 	uint32_t i, ce_num, if_num = iface->num_interfaces;
@@ -1618,7 +1622,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 
 	/* and now call the implementing handlers */
 	while (ce_num < ce->num_interfaces) {
-		do_implement_interface(ce, ce->interfaces[ce_num++]);
+		do_implement_interface_ex(ce, ce->interfaces[ce_num++], iface);
 	}
 }
 /* }}} */
@@ -2168,6 +2172,10 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	zend_class_constant *c;
 	uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
 
+	if (iface->num_interfaces) {
+		zend_do_inherit_interfaces(ce, iface);
+	}
+
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* We are not setting the prototype of overridden interface methods because of abstract
 		 * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
@@ -2199,9 +2207,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	} ZEND_HASH_FOREACH_END();
 
 	do_implement_interface(ce, iface);
-	if (iface->num_interfaces) {
-		zend_do_inherit_interfaces(ce, iface);
-	}
 }
 /* }}} */
 
