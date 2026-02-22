@@ -199,6 +199,10 @@ SAPI_API void sapi_read_post_data(void)
 	/* now try to find an appropriate POST content handler */
 	if ((post_entry = zend_hash_str_find_ptr(&SG(known_post_content_types), content_type,
 			content_type_length)) != NULL) {
+		if(!SG(allow_multipart_form) && !strcmp(content_type, MULTIPART_CONTENT_TYPE)) {
+			efree(content_type);
+			return;
+		}
 		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
