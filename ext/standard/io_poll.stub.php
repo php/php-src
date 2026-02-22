@@ -17,6 +17,7 @@ namespace Io\Poll {
         case EventPorts;
         case WSAPoll;
 
+        /** @return list<Backend> */
         static public function getAvailableBackends(): array {}
 
         public function isAvailable(): bool {}
@@ -45,8 +46,10 @@ namespace Io\Poll {
 
         public function getHandle(): Handle {}
 
+        /** @return list<Event> */
         public function getWatchedEvents(): array {}
 
+        /** @return list<Event> */
         public function getTriggeredEvents(): array {}
 
         public function getData(): mixed {}
@@ -70,6 +73,7 @@ namespace Io\Poll {
 
         public function add(Handle $handle, array $events, mixed $data = null): Watcher {}
 
+        /** @return list<Watcher> */
         public function wait(int $timeoutSeconds = -1, int $timeoutMicroseconds = 0, int $maxEvents = -1): array {}
 
         public function getBackend(): Backend {}
