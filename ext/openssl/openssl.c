@@ -7483,18 +7483,20 @@ PHP_FUNCTION(openssl_open)
 	cipher = EVP_get_cipherbyname(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_pkey;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
 			zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
-			RETURN_THROWS();
+			goto out_pkey;
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
 			php_error_docref(NULL, E_WARNING, "IV length is invalid");
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto out_pkey;
 		}
 		iv_buf = (unsigned char *)iv;
 	} else {
@@ -7516,8 +7518,9 @@ PHP_FUNCTION(openssl_open)
 	}
 
 	efree(buf);
-	EVP_PKEY_free(pkey);
 	EVP_CIPHER_CTX_free(ctx);
+out_pkey:
+	EVP_PKEY_free(pkey);
 }
 /* }}} */
 
