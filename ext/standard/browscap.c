@@ -337,7 +337,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					) {
 						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
 							"'Parent' value cannot be same as the section name: %s "
-							"(in file %s)", ZSTR_VAL(ctx->current_section_name), INI_STR("browscap"));
+							"(in file %s)", ZSTR_VAL(ctx->current_section_name), zend_ini_string_literal("browscap"));
 						return;
 					}
 
@@ -499,7 +499,7 @@ PHP_INI_MH(OnChangeBrowscap)
 
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
-	const char *browscap = INI_STR("browscap");
+	const char *browscap = zend_ini_string_literal("browscap");
 
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data), (ts_allocate_ctor) browscap_globals_ctor, NULL);

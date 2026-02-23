@@ -114,8 +114,8 @@ ZEND_API zend_result zend_multibyte_set_functions(const zend_multibyte_functions
 	 * populated, we need to reinitialize script_encoding here.
 	 */
 	{
-		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding") - 1, 0);
-		zend_multibyte_set_script_encoding_by_string(value, strlen(value));
+		const zend_string *value = zend_ini_str_literal("zend.script_encoding");
+		zend_multibyte_set_script_encoding_by_string(ZSTR_VAL(value), ZSTR_LEN(value));
 	}
 	return SUCCESS;
 }

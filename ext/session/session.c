@@ -1637,7 +1637,7 @@ PHPAPI zend_result php_session_start(void)
 			break;
 
 		case php_session_disabled: {
-			const char *value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
+			const char *value = zend_ini_string_literal("session.save_handler");
 			if (!PS(mod) && value) {
 				PS(mod) = _php_find_ps_module(value);
 				if (!PS(mod)) {
@@ -1645,7 +1645,7 @@ PHPAPI zend_result php_session_start(void)
 					return FAILURE;
 				}
 			}
-			value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
+			value = zend_ini_string_literal("session.serialize_handler");
 			if (!PS(serializer) && value) {
 				PS(serializer) = _php_find_ps_serializer(value);
 				if (!PS(serializer)) {
@@ -2768,14 +2768,14 @@ static zend_result php_rinit_session(bool auto_start)
 
 	PS(mod) = NULL;
 	{
-		const char *value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
+		const char *value = zend_ini_string_literal("session.save_handler");
 		if (value) {
 			PS(mod) = _php_find_ps_module(value);
 		}
 	}
 
 	if (PS(serializer) == NULL) {
-		const char *value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
+		const char *value = zend_ini_string_literal("session.serialize_handler");
 		if (value) {
 			PS(serializer) = _php_find_ps_serializer(value);
 		}

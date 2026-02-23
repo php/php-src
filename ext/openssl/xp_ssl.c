@@ -888,7 +888,7 @@ static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream
 	GET_VER_OPT_STRING("capath", capath);
 
 	if (cafile == NULL) {
-		const zend_string *cafile_str = zend_ini_str(ZEND_STRL("openssl.cafile"), false);
+		const zend_string *cafile_str = zend_ini_str_literal("openssl.cafile");
 		cafile = ZSTR_LEN(cafile_str) ? ZSTR_VAL(cafile_str) : NULL;
 	} else if (!sslsock->is_client) {
 		/* Servers need to load and assign CA names from the cafile */
@@ -902,7 +902,7 @@ static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream
 	}
 
 	if (capath == NULL) {
-		const zend_string *capath_str = zend_ini_str(ZEND_STRL("openssl.capath"), false);
+		const zend_string *capath_str = zend_ini_str_literal("openssl.capath");
 		capath = ZSTR_LEN(capath_str) ? ZSTR_VAL(capath_str) : NULL;
 	}
 

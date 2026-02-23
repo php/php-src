@@ -336,7 +336,7 @@ PHP_FUNCTION(mail)
 		subject_r = subject;
 	}
 
-	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
+	zend_string *force_extra_parameters = zend_ini_str_literal("mail.force_extra_parameters");
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
@@ -437,9 +437,9 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
-	const char *sendmail_path = INI_STR("sendmail_path");
+	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
 	char *sendmail_cmd = NULL;
-	const zend_string *mail_log = zend_ini_str(ZEND_STRL("mail.log"), false);
+	const zend_string *mail_log = zend_ini_str_literal("mail.log");
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
@@ -536,7 +536,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		char *tsm_errmsg = NULL;
 
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message) == FAILURE) {
+		if (TSendMail(zend_ini_string_literal("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
@@ -701,7 +701,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)
 {
-	const char *sendmail_path = INI_STR("sendmail_path");
+	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
 
 #ifdef PHP_WIN32
 	if (!sendmail_path) {

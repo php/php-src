@@ -139,7 +139,7 @@ static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
 		return S_FALSE;
 	}
 
-	const zend_string *version = zend_ini_str(ZEND_STRL("com.dotnet_version"), false);
+	const zend_string *version = zend_ini_str_literal("com.dotnet_version");
 	if (version == NULL || ZSTR_LEN(version) == 0) {
 		oleversion = NULL;
 	} else {

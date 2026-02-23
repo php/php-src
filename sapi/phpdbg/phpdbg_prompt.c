@@ -1190,7 +1190,7 @@ static void add_zendext_info(zend_extension *ext) /* {{{ */ {
 #ifdef HAVE_LIBDL
 PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char **name) /* {{{ */ {
 	DL_HANDLE handle;
-	zend_string *extension_dir = zend_ini_str(ZEND_STRL("extension_dir"), false);
+	zend_string *extension_dir = zend_ini_str_literal("extension_dir");
 
 	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
 		/* path is fine */
