@@ -39,6 +39,7 @@
 #include "zend_compile.h"
 #include "php_network.h"
 #include "zend_smart_str.h"
+#include "zend_smart_string.h"
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -91,8 +92,8 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	}
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
-	smart_str buf = {0};
-	ptr = pathbuf = estrdup(ZSTR_VAL(new_value));
+	smart_string buf = {0};
+	ptr = pathbuf = ZSTR_VAL(new_value);
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
@@ -101,33 +102,29 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 		}
 		char resolved_name[MAXPATHLEN + 1];
 		if (expand_filepath(ptr, resolved_name) == NULL) {
-			efree(pathbuf);
-			smart_str_free(&buf);
+			smart_string_free(&buf);
 			return FAILURE;
 		}
 		if (php_check_open_basedir_ex(resolved_name, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
-			efree(pathbuf);
-			smart_str_free(&buf);
+			smart_string_free(&buf);
 			return FAILURE;
 		}
-		if (smart_str_get_len(&buf) != 0) {
-			smart_str_appendc(&buf, DEFAULT_DIR_SEPARATOR);
+		if (buf.len != 0) {
+			smart_string_appendc(&buf, DEFAULT_DIR_SEPARATOR);
 		}
-		smart_str_appends(&buf, resolved_name);
+		smart_string_appends(&buf, resolved_name);
 		ptr = end;
 	}
-	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	zend_string *tmp = smart_str_extract(&buf);
-	char *result = estrdup(ZSTR_VAL(tmp));
+	smart_string_0(&buf);
+	char *result = buf.c;
 	if (PG(open_basedir_modified)) {
 		efree(*p);
 	}
 	*p = result;
 	PG(open_basedir_modified) = true;
-	zend_string_release(tmp);
 
 	return SUCCESS;
 }
