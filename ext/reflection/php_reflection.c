@@ -4792,7 +4792,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	HashTable *constants_table;
+	const HashTable *constants_table;
 	zend_class_constant *c;
 	zend_string *name, *key;
 
