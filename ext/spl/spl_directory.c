@@ -2499,12 +2499,7 @@ PHP_METHOD(SplFileObject, fscanf)
 		RETURN_THROWS();
 	}
 
-	int result = php_sscanf_internal(ZSTR_VAL(intern->u.file.current_line), ZSTR_VAL(format_str), (int)num_varargs, varargs, 0, return_value);
-
-	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		zend_wrong_param_count();
-		RETURN_THROWS();
-	}
+	php_sscanf_internal(ZSTR_VAL(intern->u.file.current_line), ZSTR_LEN(intern->u.file.current_line), format_str, 1, num_varargs, varargs, return_value);
 }
 /* }}} */
 
