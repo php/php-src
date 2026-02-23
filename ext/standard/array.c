@@ -1527,7 +1527,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
+static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior)
 {
 	zval *entry;
 	zend_ulong num_idx;
@@ -1544,8 +1544,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry)
-					{
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 						ZVAL_DEREF(entry);
 						if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
 							RETURN_TRUE;
@@ -1574,7 +1573,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 						ZVAL_DEREF(entry);
 						if (fast_is_identical_function(value, entry)) {
 							RETURN_TRUE;
@@ -1604,7 +1603,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 						if (fast_equal_check_long(value, entry)) {
 							RETURN_TRUE;
 						}
@@ -1630,7 +1629,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 						if (fast_equal_check_string(value, entry)) {
 							RETURN_TRUE;
 						}
@@ -1656,7 +1655,7 @@ static inline void _php_search_array(zval *return_value, zval *value, zval *arra
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 						if (fast_equal_check_function(value, entry)) {
 							RETURN_TRUE;
 						}
