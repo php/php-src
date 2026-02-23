@@ -306,6 +306,9 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				ADD_INTERNED_STRING(arg_info[i].name);
 			}
 			zend_persist_type_calc(&arg_info[i].type);
+			if (arg_info[i].doc_comment) {
+				ADD_INTERNED_STRING(arg_info[i].doc_comment);
+			}
 		}
 	}
 

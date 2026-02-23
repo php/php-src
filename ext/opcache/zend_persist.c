@@ -652,6 +652,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
 			zend_persist_type(&arg_info[i].type);
+			if (arg_info[i].doc_comment) {
+				zend_accel_store_interned_string(arg_info[i].doc_comment);
+			}
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
