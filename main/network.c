@@ -705,13 +705,13 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 	}
 
 	if (textaddr) {
-		char abuf[256];
+		char abuf[INET6_ADDRSTRLEN];
 		const char *buf = NULL;
 
 		switch (sa->sa_family) {
 			case AF_INET:
 				/* generally not thread safe, but it *is* thread safe under win32 */
-				buf = inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr, (char *)&abuf, sizeof(abuf));
+				buf = inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr, abuf, INET_ADDRSTRLEN);
 				if (buf) {
 					*textaddr = strpprintf(0, "%s:%d",
 						buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
@@ -721,7 +721,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 #ifdef HAVE_IPV6
 			case AF_INET6:
-				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
+				buf = inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, abuf, sizeof(abuf));
 				if (buf) {
 					*textaddr = strpprintf(0, "[%s]:%d",
 						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));

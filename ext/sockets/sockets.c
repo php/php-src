@@ -1046,7 +1046,7 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
-			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, INET_ADDRSTRLEN);
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (objint != NULL) {
@@ -1136,7 +1136,7 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
-			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, INET_ADDRSTRLEN);
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
@@ -1598,7 +1598,7 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
+			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, INET_ADDRSTRLEN);
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");

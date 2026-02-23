@@ -844,7 +844,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 	}
 
 	{
-		char addr_str[17] = {0};
+		char addr_str[INET_ADDRSTRLEN] = {0};
 		inet_ntop(AF_INET, addr, addr_str, sizeof(addr_str));
 		php_error_docref(NULL, E_WARNING,
 			"The interface with IP address %s was not found", addr_str);
