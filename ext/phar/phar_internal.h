@@ -441,6 +441,21 @@ static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
 }
 
+static inline time_t source_date_epoch_time(time_t *tloc)
+{
+	const char *sde;
+	time_t ts;
+
+	tsrm_env_lock();
+	sde = getenv("SOURCE_DATE_EPOCH");
+	ts = (sde) ? strtoul(sde, NULL, 10) : time(0);
+	tsrm_env_unlock();
+	if (tloc) {
+		*tloc = ts;
+	}
+	return ts;
+}
+
 #define PHAR_MIME_PHP '\0'
 #define PHAR_MIME_PHPS '\1'
 #define PHAR_MIME_OTHER '\2'
