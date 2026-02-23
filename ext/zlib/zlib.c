@@ -1280,7 +1280,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	}
 	const zend_string *ini_value = zend_ini_str_literal("output_handler");
 
-	if (ini_value && ZSTR_LEN(ini_value) && int_value) {
+	if (ini_value && ZSTR_LEN(ini_value) > 0 && int_value) {
 		php_error_docref("ref.outcontrol", E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}

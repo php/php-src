@@ -438,7 +438,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 {
 	FILE *sendmail;
 	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
-	char *sendmail_cmd = NULL;
+	const char *sendmail_cmd = NULL;
 	const zend_string *mail_log = zend_ini_str_literal("mail.log");
 	const char *hdr = headers;
 	char *ahdr = NULL;
@@ -553,7 +553,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	if (extra_cmd != NULL) {
 		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, ZSTR_VAL(extra_cmd));
 	} else {
-		sendmail_cmd = (char*)sendmail_path;
+		sendmail_cmd = sendmail_path;
 	}
 
 #if PHP_SIGCHILD
@@ -576,7 +576,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	sendmail = popen(sendmail_cmd, "w");
 #endif
 	if (extra_cmd != NULL) {
-		efree (sendmail_cmd);
+		efree((char*)sendmail_cmd);
 	}
 
 	if (sendmail) {

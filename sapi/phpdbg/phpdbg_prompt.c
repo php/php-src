@@ -1194,9 +1194,9 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 
 	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
 		/* path is fine */
-	} else if (extension_dir && ZSTR_LEN(extension_dir)) {
+	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
 		char *libpath;
-		if (IS_SLASH(ZSTR_VAL(extension_dir)[ZSTR_LEN(extension_dir-1)])) {
+		if (IS_SLASH(ZSTR_VAL(extension_dir)[ZSTR_LEN(extension_dir)-1])) {
 			spprintf(&libpath, 0, "%s%s", ZSTR_VAL(extension_dir), *path); /* SAFE */
 		} else {
 			spprintf(&libpath, 0, "%s%c%s", ZSTR_VAL(extension_dir), DEFAULT_SLASH, *path); /* SAFE */
