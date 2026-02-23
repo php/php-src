@@ -1216,17 +1216,17 @@ PHP_FUNCTION(mb_language)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
-		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
+		RETVAL_STRING(mbfl_no_language2name(MBSTRG(language)));
 	} else {
-		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", 0);
+		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", false);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
-			zend_string_release_ex(ini_name, 0);
+			zend_string_release_ex(ini_name, false);
 			RETURN_THROWS();
 		}
 		// TODO Make return void
 		RETVAL_TRUE;
-		zend_string_release_ex(ini_name, 0);
+		zend_string_release_ex(ini_name, false);
 	}
 }
 /* }}} */
@@ -1509,7 +1509,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 		php_error_docref(NULL, E_WARNING, "No MIME preferred name corresponding to \"%s\"", name);
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRING((char *)preferred_name);
+		RETVAL_STRING(preferred_name);
 	}
 }
 /* }}} */
@@ -3517,7 +3517,7 @@ PHP_FUNCTION(mb_detect_encoding)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING((char *)ret->name);
+	RETVAL_STRING(ret->name);
 }
 /* }}} */
 
@@ -3563,7 +3563,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 	array_init(return_value);
 	if (encoding->aliases != NULL) {
 		for (const char **alias = encoding->aliases; *alias; ++alias) {
-			add_next_index_string(return_value, (char *)*alias);
+			add_next_index_string(return_value, *alias);
 		}
 	}
 }
@@ -4768,7 +4768,7 @@ PHP_FUNCTION(mb_send_mail)
 
 	str_headers = smart_str_extract(&str);
 
-	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
+	zend_string *force_extra_parameters = zend_ini_str_literal("mail.force_extra_parameters");
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
@@ -4804,7 +4804,7 @@ PHP_FUNCTION(mb_get_info)
 {
 	zend_string *type = NULL;
 	size_t n;
-	char *name;
+	const char *name;
 	zval row;
 	const mbfl_encoding **entry;
 	const mbfl_language *lang = mbfl_no2language(MBSTRG(language));
@@ -4819,26 +4819,26 @@ PHP_FUNCTION(mb_get_info)
 	if (!type || zend_string_equals_literal_ci(type, "all")) {
 		array_init(return_value);
 		if (MBSTRG(current_internal_encoding)) {
-			add_assoc_string(return_value, "internal_encoding", (char *)MBSTRG(current_internal_encoding)->name);
+			add_assoc_string(return_value, "internal_encoding", MBSTRG(current_internal_encoding)->name);
 		}
 		if (MBSTRG(http_input_identify)) {
-			add_assoc_string(return_value, "http_input", (char *)MBSTRG(http_input_identify)->name);
+			add_assoc_string(return_value, "http_input", MBSTRG(http_input_identify)->name);
 		}
 		if (MBSTRG(current_http_output_encoding)) {
-			add_assoc_string(return_value, "http_output", (char *)MBSTRG(current_http_output_encoding)->name);
+			add_assoc_string(return_value, "http_output", MBSTRG(current_http_output_encoding)->name);
 		}
 
 		add_assoc_str(return_value, "http_output_conv_mimetypes",
-			zend_ini_str("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)
+			zend_string_copy(zend_ini_str_literal("mbstring.http_output_conv_mimetypes"))
 		);
 
-		name = (char *)mbfl_no_encoding2name(lang->mail_charset);
+		name = mbfl_no_encoding2name(lang->mail_charset);
 		add_assoc_string(return_value, "mail_charset", name);
 
-		name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding);
+		name = mbfl_no_encoding2name(lang->mail_header_encoding);
 		add_assoc_string(return_value, "mail_header_encoding", name);
 
-		name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding);
+		name = mbfl_no_encoding2name(lang->mail_body_encoding);
 		add_assoc_string(return_value, "mail_body_encoding", name);
 
 		add_assoc_long(return_value, "illegal_chars", MBSTRG(illegalchars));
@@ -4849,7 +4849,7 @@ PHP_FUNCTION(mb_get_info)
 			add_assoc_string(return_value, "encoding_translation", "Off");
 		}
 
-		name = (char *)mbfl_no_language2name(MBSTRG(language));
+		name = mbfl_no_language2name(MBSTRG(language));
 		add_assoc_string(return_value, "language", name);
 
 		// TODO Seems to always have one entry at least?
@@ -4880,31 +4880,25 @@ PHP_FUNCTION(mb_get_info)
 		}
 	} else if (zend_string_equals_literal_ci(type, "internal_encoding")) {
 		ZEND_ASSERT(MBSTRG(current_internal_encoding));
-		RETURN_STRING((char *)MBSTRG(current_internal_encoding)->name);
+		RETURN_STRING(MBSTRG(current_internal_encoding)->name);
 	} else if (zend_string_equals_literal_ci(type, "http_input")) {
 		if (MBSTRG(http_input_identify)) {
-			RETURN_STRING((char *)MBSTRG(http_input_identify)->name);
+			RETURN_STRING(MBSTRG(http_input_identify)->name);
 		}
 		RETURN_NULL();
 	} else if (zend_string_equals_literal_ci(type, "http_output")) {
 		ZEND_ASSERT(MBSTRG(current_http_output_encoding));
-		RETURN_STRING((char *)MBSTRG(current_http_output_encoding)->name);
+		RETURN_STRING(MBSTRG(current_http_output_encoding)->name);
 	} else if (zend_string_equals_literal_ci(type, "http_output_conv_mimetypes")) {
-		RETURN_STR(
-			zend_ini_str(
-				"mbstring.http_output_conv_mimetypes",
-				sizeof("mbstring.http_output_conv_mimetypes") - 1,
-				false
-			)
-		);
+		RETURN_STR_COPY(zend_ini_str_literal("mbstring.http_output_conv_mimetypes"));
 	} else if (zend_string_equals_literal_ci(type, "mail_charset")) {
-		name = (char *)mbfl_no_encoding2name(lang->mail_charset);
+		name = mbfl_no_encoding2name(lang->mail_charset);
 		RETURN_STRING(name);
 	} else if (zend_string_equals_literal_ci(type, "mail_header_encoding")) {
-		name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding);
+		name = mbfl_no_encoding2name(lang->mail_header_encoding);
 		RETURN_STRING(name);
 	} else if (zend_string_equals_literal_ci(type, "mail_body_encoding")) {
-		name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding);
+		name = mbfl_no_encoding2name(lang->mail_body_encoding);
 		RETURN_STRING(name);
 	} else if (zend_string_equals_literal_ci(type, "illegal_chars")) {
 		RETURN_LONG(MBSTRG(illegalchars));
@@ -4915,7 +4909,7 @@ PHP_FUNCTION(mb_get_info)
 			RETURN_STRING("Off");
 		}
 	} else if (zend_string_equals_literal_ci(type, "language")) {
-		name = (char *)mbfl_no_language2name(MBSTRG(language));
+		name = mbfl_no_language2name(MBSTRG(language));
 		RETURN_STRING(name);
 	} else if (zend_string_equals_literal_ci(type, "detect_order")) {
 		// TODO Seems to always have one entry at least?
