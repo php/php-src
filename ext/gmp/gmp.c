@@ -372,6 +372,15 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 			goto typeof_op_failure;
 		}
 
+		if (shift > INT_MAX / 1000) {
+			zend_throw_error(
+				zend_ce_value_error, "%s must be less than %d",
+				opcode == ZEND_POW ? "Exponent" : "Shift",
+				(INT_MAX / 1000)
+			);
+			ZVAL_UNDEF(return_value);
+			return FAILURE;
+		}
 		INIT_GMP_RETVAL(gmpnum_result);
 		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
 		return SUCCESS;
