@@ -10,11 +10,11 @@ if (getenv('SKIP_ASAN')) {
 }
 ?>
 --INI--
-zend.max_allowed_stack_size=128K
+zend.max_allowed_stack_size=256K
 --FILE--
 <?php
 $a = null;
-for ($i = 0; $i < 1000; $i++) {
+for ($i = 0; $i < 3000; $i++) {
  $a = [$i => $a];
 }
 try {
