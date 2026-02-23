@@ -2228,11 +2228,7 @@ ZEND_FUNCTION(extension_loaded)
 	}
 
 	lcname = zend_string_tolower(extension_name);
-	if (zend_hash_exists(&module_registry, lcname)) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_exists(&module_registry, lcname));
 	zend_string_release_ex(lcname, 0);
 }
 /* }}} */
