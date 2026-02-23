@@ -83,6 +83,8 @@ PHP 8.6 UPGRADE NOTES
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
   . Allowed casting casting filtered streams as file descriptor for select.
+  . Added "read_filters" and "write_filters" keys to stream_get_meta_data()
+    if the stream has read filters/write filters attached.
 
 ========================================
 3. Changes in SAPI modules

@@ -507,6 +507,20 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
+static void stream_fill_filters_array(zval *array, const char *name, const php_stream_filter_chain *chain)
+{
+	if (chain->head) {
+		zval filters;
+		array_init(&filters);
+
+		for (const php_stream_filter *filter = chain->head; filter != NULL; filter = filter->next) {
+			add_next_index_string(&filters, filter->fops->label);
+		}
+
+		add_assoc_zval(array, name, &filters);
+	}
+}
+
 /* {{{ Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
@@ -535,20 +549,8 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	add_assoc_string(return_value, "mode", stream->mode);
 
-#if 0	/* TODO: needs updating for new filter API */
-	if (stream->filterhead) {
-		php_stream_filter *filter;
-
-		MAKE_STD_ZVAL(newval);
-		array_init(newval);
-
-		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, filter->fops->label);
-		}
-
-		add_assoc_zval(return_value, "filters", newval);
-	}
-#endif
+	stream_fill_filters_array(return_value, "read_filters", &stream->readfilters);
+	stream_fill_filters_array(return_value, "write_filters", &stream->writefilters);
 
 	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 
