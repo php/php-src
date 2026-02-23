@@ -739,12 +739,7 @@ typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
 	} while(0)
 
 #else
-/*
 #ifdef COMPILE_DL_READLINE
-This dlsym() is always used as even the CGI SAPI is linked against "CLI"-only
-extensions. If that is being changed dlsym() should only be used when building
-this extension sharedto offer compatibility.
-*/
 #define GET_SHELL_CB(cb) \
 	do { \
 		(cb) = NULL; \
@@ -754,9 +749,9 @@ this extension sharedto offer compatibility.
 			(cb) = get_callbacks(); \
 		} \
 	} while(0)
-/*#else
+#else
 #define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()
-#endif*/
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(cli_readline)
