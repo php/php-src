@@ -677,7 +677,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 					if (arg_info[i].default_value) {
 						arg_info[i].default_value = new_interned_string(arg_info[i].default_value);
 					}
-					arg_info[i].doc_comment = new_interned_string(arg_info[i].doc_comment);
 				}
 				accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
 			}
