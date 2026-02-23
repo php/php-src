@@ -219,6 +219,7 @@ struct _zend_executor_globals {
 
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
+	zend_atomic_bool gc_requested;
 
 	HashTable autoload_current_classnames;
 

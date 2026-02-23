@@ -31,12 +31,15 @@ while ($i++ < 9999) {
     $t[] = &$t;
     unset($t);
 }
+flush(); // handle interrupts
 $t = [new C];
 $t[] = &$t;
 unset($t);
+flush(); // handle interrupts
 
 unset($a);
+flush(); // handle interrupts
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(2)
+int(0)

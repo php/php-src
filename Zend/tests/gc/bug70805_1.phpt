@@ -30,6 +30,7 @@ $i = 0;
 $c = new A;
 $array = array($c);
 unset($c);
+flush(); // handle interrupts
 
 while ($i++ < 9998) {
     $t = [];
@@ -39,9 +40,11 @@ while ($i++ < 9998) {
 $t = [new C];
 $t[] = &$t;
 unset($t);
+flush(); // handle interrupts
 unset($a);
+flush(); // handle interrupts
 
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(2)
+int(0)

@@ -423,7 +423,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
-			gc_collect_cycles();
+			gc_collect_cycles(0);
 		}
 #endif
 	} else {

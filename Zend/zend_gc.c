@@ -68,6 +68,7 @@
  */
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_atomic.h"
 #include "zend_compile.h"
 #include "zend_errors.h"
 #include "zend_fibers.h"
@@ -251,7 +252,16 @@
 #define GC_FETCH_NEXT_UNUSED() \
 	gc_fetch_next_unused()
 
-ZEND_API int (*gc_collect_cycles)(void);
+/* Collect flags */
+
+#define GC_RUN_FROM_INTERRUPT       (1<<0) /* GC is executed from a VM interrupt */
+#define GC_RUN_FROM_FCALL_INTERRUPT (1<<1) /* GC is executed from a VM internal
+                                              function call interrupt (after the
+                                              function has returned, while the
+                                              internal frame is still on the
+                                              stack) */
+
+ZEND_API int (*gc_collect_cycles)(int run_flags);
 
 /* The type of a root buffer entry.
  *
@@ -688,7 +698,25 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
-/* Perform a GC run and then add a node as a possible root. */
+static void gc_request_run(void)
+{
+	zend_atomic_bool_store_ex(&EG(gc_requested), true);
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+}
+
+void gc_run_from_interrupt(void)
+{
+	zend_atomic_bool_store_ex(&EG(gc_requested), false);
+	gc_adjust_threshold(gc_collect_cycles(GC_RUN_FROM_INTERRUPT));
+}
+
+void gc_run_from_fcall_interrupt(void)
+{
+	zend_atomic_bool_store_ex(&EG(gc_requested), false);
+	gc_adjust_threshold(gc_collect_cycles(GC_RUN_FROM_INTERRUPT|GC_RUN_FROM_FCALL_INTERRUPT));
+}
+
+/* Add a node as a possible root and request a GC run. */
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -697,20 +725,8 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	ZEND_ASSERT(GC_INFO(ref) == 0);
 
-	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
-		GC_ADDREF(ref);
-		gc_adjust_threshold(gc_collect_cycles());
-		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-			rc_dtor_func(ref);
-			return;
-		} else if (UNEXPECTED(GC_INFO(ref))) {
-			return;
-		}
-	}
-
-	if (GC_HAS_UNUSED()) {
-		idx = GC_FETCH_UNUSED();
-	} else if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
+	ZEND_ASSERT(!GC_HAS_UNUSED());
+	if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
 		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
@@ -731,6 +747,10 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	GC_BENCH_INC(zval_buffered);
 	GC_BENCH_INC(root_buf_length);
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+
+	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
+		gc_request_run();
+	}
 }
 
 /* Add a possible root node to the buffer.
@@ -1853,8 +1873,8 @@ next:
 }
 
 static void zend_get_gc_buffer_release(void);
-static void zend_gc_check_root_tmpvars(void);
-static void zend_gc_remove_root_tmpvars(void);
+static void zend_gc_check_root_tmpvars(int run_flags);
+static void zend_gc_remove_root_tmpvars(int run_flags);
 
 static zend_internal_function gc_destructor_fiber;
 
@@ -1982,6 +2002,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 		} else {
 			/* Fiber suspended itself after calling all destructors */
 			GC_TRACE("destructor fiber suspended itself");
+			if (EG(exception)) {
+				zend_rethrow_exception(EG(current_execute_data));
+			}
 			break;
 		}
 	}
@@ -1990,7 +2013,7 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 }
 
 /* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
-ZEND_API int zend_gc_collect_cycles(void)
+ZEND_API int zend_gc_collect_cycles(int run_flags)
 {
 	int total_count = 0;
 	bool should_rerun_gc = false;
@@ -1998,7 +2021,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 	zend_hrtime_t start_time = zend_hrtime();
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
-		zend_gc_remove_root_tmpvars();
+		zend_gc_remove_root_tmpvars(run_flags);
 	}
 
 rerun_gc:
@@ -2184,7 +2207,7 @@ finish:
 	/* Prevent GC from running during zend_gc_check_root_tmpvars, before
 	 * gc_threshold is adjusted, as this may result in unbounded recursion */
 	GC_G(gc_active) = 1;
-	zend_gc_check_root_tmpvars();
+	zend_gc_check_root_tmpvars(run_flags);
 	GC_G(gc_active) = 0;
 
 	GC_G(collector_time) += zend_hrtime() - start_time;
@@ -2233,11 +2256,84 @@ static void zend_get_gc_buffer_release(void) {
  * cycles. However, there are some rare exceptions where this is possible, in which case we rely
  * on the producing code to root the value. If a GC run occurs between the rooting and consumption
  * of the value, we would end up leaking it. To avoid this, root all live TMPVAR values here. */
-static void zend_gc_check_root_tmpvars(void) {
+static zend_always_inline void zend_gc_check_root_tmpvars_ex(int run_flags, void (*check)(zend_refcounted*)) {
 	zend_execute_data *ex = EG(current_execute_data);
+
+	if (!ex) {
+		return;
+	}
+
+	/* The result of the last executed op must be rooted explicitly as it won't
+	 * appear in live vars if it's consumed by the following op. */
+	if (run_flags & GC_RUN_FROM_FCALL_INTERRUPT) {
+		/* GC is called from an internal function call interrupt. The function
+		 * has returned, but EG(current_execute_data) still points to the
+		 * internal frame. The op result is those of the parent frame's saved
+		 * opline. */
+		ZEND_ASSERT((!ex->func || !ZEND_USER_CODE(ex->func->type))
+				&& ex->prev_execute_data && ex->prev_execute_data->func
+				&& ZEND_USER_CODE(ex->prev_execute_data->func->type));
+		zend_execute_data *result_ex = ex->prev_execute_data;
+		const zend_op *op = result_ex->opline;
+		if (op->result_type & (IS_VAR | IS_TMP_VAR)) {
+			zval *var = ZEND_CALL_VAR(result_ex, op->result.var);
+			if (Z_COLLECTABLE_P(var)) {
+				check(Z_COUNTED_P(var));
+			}
+		}
+	} else if (run_flags & GC_RUN_FROM_INTERRUPT) {
+		/* GC is called from the interrupt handler. EX(opline) is the next
+		 * opline to be executed. The result of the last executed op may be one
+		 * of EX(opline)'s inputs. */
+		ZEND_ASSERT(ex->func && ZEND_USER_CODE(ex->func->type));
+		const zend_op *op = ex->opline;
+		if (op->op1_type & (IS_VAR | IS_TMP_VAR)) {
+			zval *var = ZEND_CALL_VAR(ex, op->op1.var);
+			if (Z_COLLECTABLE_P(var)) {
+				check(Z_COUNTED_P(var));
+			}
+		}
+		if (op->op2_type & (IS_VAR | IS_TMP_VAR)) {
+			zval *var = ZEND_CALL_VAR(ex, op->op2.var);
+			if (Z_COLLECTABLE_P(var)) {
+				check(Z_COUNTED_P(var));
+			}
+		}
+		if (op + 1 - ex->func->op_array.opcodes < ex->func->op_array.last
+				&& (op + 1)->opcode == ZEND_OP_DATA
+				&& (op + 1)->opcode & (IS_VAR | IS_TMP_VAR)) {
+			zval *var = ZEND_CALL_VAR(ex, (op + 1)->op1.var);
+			if (Z_COLLECTABLE_P(var)) {
+				check(Z_COUNTED_P(var));
+			}
+		}
+	}
+
 	for (; ex; ex = ex->prev_execute_data) {
 		zend_function *func = ex->func;
-		if (!func || !ZEND_USER_CODE(func->type)) {
+		if (!func) {
+			continue;
+		}
+
+		if (!ZEND_USER_CODE(func->type)) {
+			/* Internal frames indicate that the parent frame is in the middle
+			 * of a DO_FCALL op. Arguments are not consumed yet. */
+			zend_execute_data *caller = ex->prev_execute_data;
+			if (!caller || !caller->func || !ZEND_USER_CODE(caller->func->type)) {
+				continue;
+			}
+
+			uint32_t num_args = ZEND_CALL_NUM_ARGS(ex);
+			if (EXPECTED(num_args > 0)) {
+				zval *p = ZEND_CALL_ARG(ex, 1);
+				do {
+					if (Z_COLLECTABLE_P(p)) {
+						check(Z_COUNTED_P(p));
+					}
+					p++;
+				} while (--num_args);
+			}
+
 			continue;
 		}
 
@@ -2256,41 +2352,23 @@ static void zend_gc_check_root_tmpvars(void) {
 				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
 				zval *var = ZEND_CALL_VAR(ex, var_num);
 				if (Z_COLLECTABLE_P(var)) {
-					gc_check_possible_root(Z_COUNTED_P(var));
+					check(Z_COUNTED_P(var));
 				}
 			}
 		}
 	}
 }
 
-static void zend_gc_remove_root_tmpvars(void) {
-	zend_execute_data *ex = EG(current_execute_data);
-	for (; ex; ex = ex->prev_execute_data) {
-		zend_function *func = ex->func;
-		if (!func || !ZEND_USER_CODE(func->type)) {
-			continue;
-		}
+static void zend_gc_check_root_tmpvars(int run_flags) {
+	zend_gc_check_root_tmpvars_ex(run_flags, gc_check_possible_root);
+}
 
-		uint32_t op_num = ex->opline - ex->func->op_array.opcodes;
-		for (uint32_t i = 0; i < func->op_array.last_live_range; i++) {
-			const zend_live_range *range = &func->op_array.live_range[i];
-			if (range->start > op_num) {
-				break;
-			}
-			if (range->end <= op_num) {
-				continue;
-			}
+static void gc_remove_from_buffer_cb(zend_refcounted *p) {
+	GC_REMOVE_FROM_BUFFER(p);
+}
 
-			uint32_t kind = range->var & ZEND_LIVE_MASK;
-			if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
-				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
-				zval *var = ZEND_CALL_VAR(ex, var_num);
-				if (Z_COLLECTABLE_P(var)) {
-					GC_REMOVE_FROM_BUFFER(Z_COUNTED_P(var));
-				}
-			}
-		}
-	}
+static void zend_gc_remove_root_tmpvars(int run_flags) {
+	zend_gc_check_root_tmpvars_ex(run_flags, gc_remove_from_buffer_cb);
 }
 
 #if GC_BENCH

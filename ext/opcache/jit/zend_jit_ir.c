@@ -2063,27 +2063,36 @@ static int zend_jit_exception_handler_free_op2_stub(zend_jit_ctx *jit)
 
 static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 {
-	ir_ref if_timeout, if_exception;
+	ir_ref if_timeout, if_exception, if_gc_requested, if_gc_requested_end;
 
 	// EX(opline) = opline
 	ir_STORE(jit_EX(opline), jit_IP(jit));
 
 	ir_STORE(jit_EG(vm_interrupt), ir_CONST_U8(0));
+
 	if_timeout = ir_IF(ir_EQ(ir_LOAD_U8(jit_EG(timed_out)), ir_CONST_U8(0)));
 	ir_IF_FALSE(if_timeout);
 	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_timeout));
 	ir_MERGE_WITH_EMPTY_TRUE(if_timeout);
 
+	if_gc_requested = ir_IF(ir_EQ(ir_LOAD_U8(jit_EG(gc_requested)), ir_CONST_U8(1)));
+	ir_IF_TRUE(if_gc_requested);
+	ir_CALL(IR_VOID, ir_CONST_FUNC(gc_run_from_interrupt));
+	if_gc_requested_end = ir_END();
+
+	ir_IF_FALSE(if_gc_requested);
 	if (zend_interrupt_function) {
 		ir_CALL_1(IR_VOID, ir_CONST_FUNC(zend_interrupt_function), jit_FP(jit));
-		if_exception = ir_IF(ir_LOAD_A(jit_EG(exception)));
-		ir_IF_TRUE(if_exception);
-		ir_CALL(IR_VOID, ir_CONST_FUNC(zend_jit_exception_in_interrupt_handler_helper));
-		ir_MERGE_WITH_EMPTY_FALSE(if_exception);
-
-		jit_STORE_FP(jit, ir_LOAD_A(jit_EG(current_execute_data)));
-		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	}
+	ir_MERGE_WITH(if_gc_requested_end);
+
+	if_exception = ir_IF(ir_LOAD_A(jit_EG(exception)));
+	ir_IF_TRUE(if_exception);
+	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_jit_exception_in_interrupt_handler_helper));
+	ir_MERGE_WITH_EMPTY_FALSE(if_exception);
+
+	jit_STORE_FP(jit, ir_LOAD_A(jit_EG(current_execute_data)));
+	jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 
 	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
