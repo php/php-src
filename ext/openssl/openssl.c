@@ -4705,6 +4705,9 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		}
 		EVP_PKEY_CTX_free(ctx);
 		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		if (!ctx) {
+			goto cleanup;
+		}
 	}
 
 	if (EVP_PKEY_check(ctx) || EVP_PKEY_public_check_quick(ctx)) {
