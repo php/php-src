@@ -8,10 +8,6 @@ opcache.jit_buffer_size=16M
 opcache.preload={PWD}/../gh18534_preload.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 $test = new DummyModel;

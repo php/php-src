@@ -7,10 +7,6 @@ opcache.optimization_level=-1
 opcache.preload={PWD}/preload_unresolved_prop_type.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 class Unknown {
