@@ -43,14 +43,6 @@
 #define FINFO_READ_FUNC read
 #endif
 
-#if defined(__hpux) && !defined(HAVE_STRTOULL)
-#if SIZEOF_LONG == 8
-# define strtoull strtoul
-#else
-# define strtoull __strtoull
-#endif
-#endif
-
 #ifndef offsetof
 #define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
 #endif

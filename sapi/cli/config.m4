@@ -8,8 +8,6 @@ PHP_ARG_ENABLE([cli],
 if test "$PHP_CLI" != "no"; then
   AC_CHECK_FUNCS([setproctitle])
 
-  AC_CHECK_HEADERS([sys/pstat.h])
-
   AC_CACHE_CHECK([for PS_STRINGS], [php_cv_var_PS_STRINGS],
     [AC_LINK_IFELSE([AC_LANG_PROGRAM([
       #include <machine/vmparam.h>

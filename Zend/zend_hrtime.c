@@ -44,7 +44,7 @@ ZEND_API mach_timebase_info_data_t zend_hrtime_timerlib_info = {
 	.denom = 1,
 };
 
-#elif ZEND_HRTIME_PLATFORM_HPUX
+#elif ZEND_HRTIME_PLATFORM_SUNOS
 
 # include <sys/time.h>
 

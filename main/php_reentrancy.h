@@ -38,13 +38,6 @@
 #undef HAVE_CTIME_R
 #endif
 
-#if defined(PHP_HPUX_TIME_R)
-#undef HAVE_LOCALTIME_R
-#undef HAVE_ASCTIME_R
-#undef HAVE_CTIME_R
-#undef HAVE_GMTIME_R
-#endif
-
 BEGIN_EXTERN_C()
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
