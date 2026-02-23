@@ -101,11 +101,6 @@ ZEND_API bool zend_ini_parse_bool(const zend_string *str);
 #define zend_ini_str_literal(name) zend_ini_str((name), sizeof("" name) - 1, false)
 #define zend_ini_string_literal(name) zend_ini_string((name), sizeof("" name) - 1, false)
 
-#define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
-#define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
-#define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
-#define INI_ORIG_BOOL(name) zend_ini_parse_bool(zend_ini_str((name), strlen(name), true))
-
 /**
  * Parses an ini quantity
  *
