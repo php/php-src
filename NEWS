@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     (Petr Sumbera)
   . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
     (ilutov)
+  . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
+    script). (ilutov)
 
 - OpenSSL:
   . Fix a bunch of leaks and error propagation. (ndossche)

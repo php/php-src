@@ -799,6 +799,9 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, zend_string *filename)
 	zend_class_entry *ce = Z_PTR_P(ce_zv);
 
 	if (ce->ce_flags & ZEND_ACC_PRELOADED) {
+		if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
+			return true;
+		}
 		Bucket *ce_bucket = (Bucket*)((uintptr_t)ce_zv - XtOffsetOf(Bucket, val));
 		size_t offset = ce_bucket - EG(class_table)->arData;
 		if (offset < EG(persistent_classes_count)) {
@@ -817,6 +820,9 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, zend_string *filename)
 		return false;
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		if (fbc->op_array.fn_flags & ZEND_ACC_PRELOADED) {
+			if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
+				return true;
+			}
 			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
 			size_t offset = fbc_bucket - EG(function_table)->arData;
 			if (offset < EG(persistent_functions_count)) {
