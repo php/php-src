@@ -28,8 +28,13 @@
 #include "Zend/Optimizer/zend_call_graph.h"
 #include "zend_vm_opcodes.h"
 
+#include "jit/zend_jit.h"
+#include "jit/ir/ir.h"
+
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
+
+typedef int8_t zend_reg;
 
 #define IS_CONST_ZVAL                  0
 #define IS_MEM_ZVAL                    1

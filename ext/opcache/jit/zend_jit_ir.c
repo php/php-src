@@ -22,61 +22,18 @@
 #include "jit/ir/ir_builder.h"
 #include "jit/tls/zend_jit_tls.h"
 
-#if defined(IR_TARGET_X86)
-# define IR_REG_SP            4 /* IR_REG_RSP */
-# define IR_REG_FP            5 /* IR_REG_RBP */
-# define ZREG_FP              6 /* IR_REG_RSI */
-# define ZREG_IP              7 /* IR_REG_RDI */
-# define ZREG_FIRST_FPR       8
-# define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7)) /* all preserved registers */
-# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
-#  error
-# endif
-#elif defined(IR_TARGET_X64)
-# define IR_REG_SP            4 /* IR_REG_RSP */
-# define IR_REG_FP            5 /* IR_REG_RBP */
-# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
-/* Use the first two arg registers of the preserve_none calling convention for FP/IP
- * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
-#  define ZREG_FP             12 /* IR_REG_R12 */
-#  define ZREG_IP             13 /* IR_REG_R13 */
-# else
-#  define ZREG_FP             14 /* IR_REG_R14 */
-#  define ZREG_IP             15 /* IR_REG_R15 */
-# endif
-# define ZREG_FIRST_FPR      16
-# if defined(_WIN64)
-#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
-/*
-#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15) | \
-                               (1<<(16+6)) | (1<<(16+7)) | (1<<(16+8)) | (1<<(16+9)) | (1<<(16+10)) | \
-                               (1<<(16+11)) | (1<<(16+12)) | (1<<(16+13)) | (1<<(16+14)) | (1<<(16+15)))
-*/
-#  define IR_SHADOW_ARGS     32
-# else
-#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<12) | (1<<13) | (1<<14) | (1<<15)) /* all preserved registers */
-# endif
-#elif defined(IR_TARGET_AARCH64)
-# define IR_REG_SP           31 /* IR_REG_RSP */
-# define IR_REG_LR           30 /* IR_REG_X30 */
-# define IR_REG_FP           29 /* IR_REG_X29 */
-# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
-/* Use the first two arg registers of the preserve_none calling convention for FP/IP
- * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L541 */
-#  define ZREG_FP             20 /* IR_REG_X20 */
-#  define ZREG_IP             21 /* IR_REG_X21 */
-# else
-#  define ZREG_FP             27 /* IR_REG_X27 */
-#  define ZREG_IP             28 /* IR_REG_X28 */
-# endif
-# define ZREG_FIRST_FPR      32
-# define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | \
-                              (1<<24) | (1<<25) | (1<<26) | (1<<27) | (1<<28)) /* all preserved registers */
-#else
-# error "Unknown IR target"
-#endif
+#include "Zend/zend_vm.h"
+#include "Zend/zend_exceptions.h"
+#include "Zend/zend_cpuinfo.h"
+#include "Zend/zend_observer.h"
+#include "Zend/zend_closures.h"
+#include "Zend/Optimizer/zend_inference.h"
+#include "Zend/Optimizer/zend_worklist.h"
+#include "zend_shared_alloc.h"
+#include "jit/zend_jit_internal.h"
+#include "jit/zend_jit_shared.h"
 
-#define ZREG_RX ZREG_IP
+#include "jit/zend_jit_helpers.c"
 
 #define OPTIMIZE_FOR_SIZE 0
 
@@ -174,13 +131,6 @@
 # define ir_LOAD_L         ir_LOAD_I32
 #endif
 
-/* A helper structure to collect IT rers for the following use in (MERGE/PHI)_N */
-typedef struct _ir_refs {
-  uint32_t count;
-  uint32_t limit;
-  ir_ref   refs[] ZEND_ELEMENT_COUNT(count);
-} ir_refs;
-
 #define ir_refs_size(_n)          (offsetof(ir_refs, refs) + sizeof(ir_ref) * (_n))
 #define ir_refs_init(_name, _n)   _name = alloca(ir_refs_size(_n)); \
                                   do {_name->count = 0; _name->limit = (_n);} while (0)
@@ -199,7 +149,6 @@ static size_t zend_jit_trace_prologue_size = (size_t)-1;
 static uint32_t allowed_opt_flags = 0;
 static uint32_t default_mflags = 0;
 #endif
-static bool delayed_call_chain = false; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
@@ -237,111 +186,11 @@ static size_t tsrm_tls_offset = -1;
 #define jit_RX(_field) \
 	jit_CALL(jit_IP(jit), _field)
 
-#define JIT_STUBS(_) \
-	_(exception_handler,              IR_SKIP_PROLOGUE) \
-	_(exception_handler_undef,        IR_SKIP_PROLOGUE) \
-	_(exception_handler_free_op2,     IR_SKIP_PROLOGUE) \
-	_(exception_handler_free_op1_op2, IR_SKIP_PROLOGUE) \
-	_(interrupt_handler,              IR_SKIP_PROLOGUE) \
-	_(leave_function_handler,         IR_SKIP_PROLOGUE) \
-	_(negative_shift,                 IR_SKIP_PROLOGUE) \
-	_(mod_by_zero,                    IR_SKIP_PROLOGUE) \
-	_(invalid_this,                   IR_SKIP_PROLOGUE) \
-	_(undefined_function,             IR_SKIP_PROLOGUE) \
-	_(throw_cannot_pass_by_ref,       IR_SKIP_PROLOGUE) \
-	_(icall_throw,                    IR_SKIP_PROLOGUE) \
-	_(leave_throw,                    IR_SKIP_PROLOGUE) \
-	_(hybrid_runtime_jit,             IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_profile_jit,             IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_func_hot_counter,        IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_loop_hot_counter,        IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_func_trace_counter,      IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_ret_trace_counter,       IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_loop_trace_counter,      IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(trace_halt,                     IR_SKIP_PROLOGUE) \
-	_(trace_escape,                   IR_SKIP_PROLOGUE) \
-	_(trace_exit,                     IR_SKIP_PROLOGUE) \
-	_(undefined_offset,               IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(undefined_key,                  IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(cannot_add_element,             IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_const,                   IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_tmp,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_var,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_cv_noref,                IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_cv,                      IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(new_array,                      IR_FUNCTION | IR_FASTCALL_FUNC) \
-
-#define JIT_STUB_ID(name, flags) \
-	jit_stub_ ## name,
-
 #define JIT_STUB_FORWARD(name, flags) \
 	static int zend_jit_ ## name ## _stub(zend_jit_ctx *jit);
 
 #define JIT_STUB(name, flags) \
 	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, flags},
-
-typedef enum _jit_stub_id {
-	JIT_STUBS(JIT_STUB_ID)
-	jit_last_stub
-} jit_stub_id;
-
-typedef struct _zend_jit_reg_var {
-	ir_ref   ref;
-	uint32_t flags;
-} zend_jit_reg_var;
-
-typedef struct _zend_jit_ctx {
-	ir_ctx               ctx;
-	const zend_op       *last_valid_opline;
-	bool                 use_last_valid_opline;
-	bool                 track_last_valid_opline;
-	bool                 reuse_ip;
-	uint32_t             delayed_call_level;
-	int                  b;           /* current basic block number or -1 */
-#ifdef ZTS
-	ir_ref               tls;
-#endif
-	ir_ref               fp;
-	ir_ref               poly_func_ref; /* restored from parent trace snapshot */
-	ir_ref               poly_this_ref; /* restored from parent trace snapshot */
-	ir_ref               trace_loop_ref;
-	ir_ref               return_inputs;
-	const zend_op_array *op_array;
-	const zend_op_array *current_op_array;
-	zend_ssa            *ssa;
-	zend_string         *name;
-	ir_ref              *bb_start_ref;      /* PHP BB -> IR ref mapping */
-	ir_ref              *bb_predecessors;   /* PHP BB -> index in bb_edges -> IR refs of predessors */
-	ir_ref              *bb_edges;
-	zend_jit_trace_info *trace;
-	zend_jit_reg_var    *ra;
-	int                  delay_var;
-	ir_refs             *delay_refs;
-	ir_ref               eg_exception_addr;
-	HashTable            addr_hash;
-	ir_ref               stub_addr[jit_last_stub];
-} zend_jit_ctx;
-
-typedef int8_t zend_reg;
-
-typedef struct _zend_jit_registers_buf {
-#if defined(IR_TARGET_X64)
-	uint64_t gpr[16]; /* general purpose integer register */
-	double   fpr[16]; /* floating point registers */
-#elif defined(IR_TARGET_X86)
-	uint32_t gpr[8]; /* general purpose integer register */
-	double   fpr[8]; /* floating point registers */
-#elif defined (IR_TARGET_AARCH64)
-	uint64_t gpr[32]; /* general purpose integer register */
-	double   fpr[32]; /* floating point registers */
-#else
-# error "Unknown IR target"
-#endif
-} zend_jit_registers_buf;
-
-/* Keep 32 exit points in a single code block */
-#define ZEND_JIT_EXIT_POINTS_SPACING   4  // push byte + short jmp = bytes
-#define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 
 static uint32_t zend_jit_exit_point_by_addr(const void *addr);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
@@ -369,16 +218,21 @@ typedef struct _zend_jit_stub {
 
 JIT_STUBS(JIT_STUB_FORWARD)
 
+#define JIT_STUB_PREFIX "JIT$$"
+
 static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUBS(JIT_STUB)
 };
 
-#if defined(_WIN32) || defined(IR_TARGET_AARCH64)
-/* We keep addresses in SHM to share them between sepaeate processes (on Windows) or to support veneers (on AArch64) */
-static void** zend_jit_stub_handlers = NULL;
+#ifdef ZEND_JIT_USE_RC_INFERENCE
+# define RC_MAY_BE_1(info)          (((info) & (MAY_BE_RC1|MAY_BE_REF)) != 0)
+# define RC_MAY_BE_N(info)          (((info) & (MAY_BE_RCN|MAY_BE_REF)) != 0)
 #else
-static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])];
+# define RC_MAY_BE_1(info)          1
+# define RC_MAY_BE_N(info)          1
 #endif
+
+#define BP_JIT_IS 6 /* Used for ISSET_ISEMPTY_DIM_OBJ. see BP_VAR_*defines in Zend/zend_compile.h */
 
 #if defined(IR_TARGET_AARCH64)
 
