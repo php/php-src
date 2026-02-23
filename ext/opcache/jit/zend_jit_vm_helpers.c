@@ -695,20 +695,38 @@ static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, 
  *  Trace Linking Rules
  *  ===================
  *
- *                                          flags
- *          +----------+----------+----------++----------+----------+----------+
- *          |                                ||              JIT               |
- *          +----------+----------+----------++----------+----------+----------+
- *   start  |   LOOP   |  ENTER   |  RETURN  ||   LOOP   |  ENTER   |  RETURN  |
- * +========+==========+==========+==========++==========+==========+==========+
- * | LOOP   |   loop   |          | loop-ret || COMPILED |   LINK   |   LINK   |
- * +--------+----------+----------+----------++----------+----------+----------+
- * | ENTER  |INNER_LOOP| rec-call |  return  ||   LINK   |   LINK   |   LINK   |
- * +--------+----------+----------+----------++----------+----------+----------+
- * | RETURN |INNER_LOOP|          |  rec-ret ||   LINK   |          |   LINK   |
- * +--------+----------+----------+----------++----------+----------+----------+
- * | SIDE   |  unroll  |          | side-ret ||   LINK   |   LINK   |   LINK   |
- * +--------+----------+----------+----------++----------+----------+----------+
+ *  We consider the start flags of the current trace, as well as the trace flags
+ *  of the opline to be recorded.
+ *
+ *                         opline trace flags
+ *                  +----------+----------+----------+
+ *                  |   LOOP   |  ENTER   |  RETURN  |
+ *         +========+==========+==========+==========+
+ *         | LOOP   |   loop   |          | loop-ret |
+ *         +--------+----------+----------+----------+
+ *         | ENTER  |INNER_LOOP| rec-call |  return  |
+ *  start  +--------+----------+----------+----------+
+ *  flags  | RETURN |INNER_LOOP|          |  rec-ret |
+ *         +--------+----------+----------+----------+
+ *         | SIDE   |  unroll  |          | side-ret |
+ *         +--------+----------+----------+----------+
+ *
+ *  When opline to be recorded is JIT'ed:
+ *
+ *                         opline trace flags
+ *                  +----------+----------+----------+
+ *                  |   LOOP   |  ENTER   |  RETURN  |
+ *         +========+==========+==========+==========+
+ *         | LOOP   | COMPILED |   LINK   |   LINK   |
+ *         +--------+----------+----------+----------+
+ *         | ENTER  |   LINK   |   LINK   |   LINK   |
+ *  start  +--------+----------+----------+----------+
+ *  flags  | RETURN |   LINK   |          |   LINK   |
+ *         +--------+----------+----------+----------+
+ *         | SIDE   |   LINK   |   LINK   |   LINK   |
+ *         +--------+----------+----------+----------+
+ *
+ *
  *
  * loop:       LOOP if "cycle" and level == 0, otherwise INNER_LOOP
  * INNER_LOOP: abort recording and start new one (wait for loop)
@@ -719,7 +737,7 @@ static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, 
  * return:     RETURN if level == 0
  * rec_ret:    RECURSIVE_RET if "cycle" and ret_level > N, otherwise continue
  * side_ret:   RETURN if level == 0 && ret_level == ret_depth, otherwise continue
- *
+ * LINK:       stop recording. End of new trace jumps to the other one.
  */
 
 zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
