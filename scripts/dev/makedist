@@ -160,20 +160,6 @@ fi
 # Remove not needed files.
 rm -rf autom4te.cache/
 
-# Download PEAR.
-echo ""
-echo "makedist: Attempting to download PEAR's phar archive."
-if test ! -x wget; then
-  wget https://pear.php.net/install-pear-nozlib.phar -nd -P pear/
-  if [ "x$?" != "x0" ]; then
-    echo "makedist: PEAR download failed." >&2
-    exit 1
-  fi
-else
-  echo "makedist: Missing wget binary needed for PEAR download." >&2
-  exit 1
-fi
-
 # Reset the modification and access times of all files to be packaged.
 commitDate="$(git log -1 --format=%cI $treeish)"
 echo "makedist: Resetting the modification and access times of package files to $commitDate"

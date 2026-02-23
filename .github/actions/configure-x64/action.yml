@@ -27,7 +27,6 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-pdo-pgsql' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-sqlite' || '' }} \
           --enable-intl \
-          --without-pear \
           --enable-gd \
           --with-jpeg \
           --with-webp \

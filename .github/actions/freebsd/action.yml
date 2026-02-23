@@ -60,7 +60,6 @@ runs:
             `#--with-pdo-sqlite` \
             --without-sqlite3 \
             --without-pdo-sqlite \
-            --without-pear \
             --with-bz2 \
             --with-avif \
             --with-jpeg \

@@ -249,8 +249,7 @@ Subscription \fIindex\fP to work on.
 Pack files into a PHAR archive.
 .P
 When using -s <stub>, then the stub file is being excluded from the
-list of input files/dirs.To create an archive that contains PEAR class
-PHP_Archive then point -p argument to PHP/Archive.php.
+list of input files/dirs.
 .P
 Required arguments:
 .TP 15
@@ -300,16 +299,7 @@ Number of preceding subdirectories to strip from file entries
 .TP
 .PD
 .B \-p \fIloader\fP
-Location of PHP_Archive class file (pear list-files
-PHP_Archive).You can use '0' or '1' to locate it
-automatically using the mentioned pear command. When
-using '0' the command does not error out when the class
-file cannot be located. This switch also adds some code
-around the stub so that class PHP_Archive gets
-registered as phar:// stream wrapper if necessary. And
-finally this switch will add the file phar.inc from
-this package and load it to ensure class Phar is
-present.
+Ignored option for PHP_Archive which is no longer supported.
 .TP
 .PD
 .B \-s \fIstub\fP
@@ -380,16 +370,8 @@ The hash mark itself '#!' and the newline character are optional.
 .TP
 .PD
 .B \-p \fIloader\fP
-Location of PHP_Archive class file (pear list-files
-PHP_Archive).You can use '0' or '1' to locate it
-automatically using the mentioned pear command. When
-using '0' the command does not error out when the class
-file cannot be located. This switch also adds some code
-around the stub so that class PHP_Archive gets
-registered as phar:// stream wrapper if necessary. And
-finally this switch will add the file phar.inc from
-this package and load it to ensure class Phar is
-present.
+This option no longer works. It used to be used for PHP_Archive which
+is no longer supported.
 .TP
 .PD
 .B \-s \fIstub\fP

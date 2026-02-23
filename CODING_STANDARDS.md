@@ -298,8 +298,9 @@ The file labelled `EXPERIMENTAL` should include the following information:
 * Any authoring information (known bugs, future directions of the module).
 * Ongoing status notes which may not be appropriate for Git comments.
 
-In general, new features should go to PECL or experimental branches until there
-are specific reasons for directly adding them to the core distribution.
+In general, new features should go to PIE extension or experimental branches
+until there are specific reasons for directly adding them to the core
+distribution.
 
 ## Aliases & legacy documentation
 

@@ -1,7 +1,7 @@
 PHP_ARG_ENABLE([cli],
   [for CLI build],
   [AS_HELP_STRING([--disable-cli],
-    [Disable building CLI version of PHP (this forces --without-pear)])],
+    [Disable building CLI version of PHP])],
   [yes],
   [no])
 

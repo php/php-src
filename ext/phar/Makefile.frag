@@ -25,10 +25,6 @@ PHP_PHARCMD_EXECUTABLE = ` \
 	fi;`
 PHP_PHARCMD_BANG = `$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)";`
 
-$(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
-	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
-	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc $(builddir)/phar/phar.inc
-
 TEST_PHP_EXECUTABLE = $(shell $(PHP_EXECUTABLE) -v 2>&1)
 TEST_PHP_EXECUTABLE_RES = $(shell echo "$(TEST_PHP_EXECUTABLE)" | grep -c 'Exec format error')
 
