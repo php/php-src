@@ -1392,6 +1392,7 @@ void pcntl_signal_dispatch(void)
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
+	PCNTL_G(tail) = NULL;
 
 	/* Allocate */
 	while (queue) {
@@ -1411,9 +1412,20 @@ void pcntl_signal_dispatch(void)
 #ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
 #endif
+				if (EG(exception)) {
+					break;
+				}
 			}
 		}
 
+		next = queue->next;
+		queue->next = PCNTL_G(spares);
+		PCNTL_G(spares) = queue;
+		queue = next;
+	}
+
+	/* drain the remaining in case of exception thrown */
+	while (queue) {
 		next = queue->next;
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
