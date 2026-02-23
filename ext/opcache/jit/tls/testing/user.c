@@ -1,9 +1,14 @@
 
 /* _tsrm_ls_cache is used / inspected here */
 
+#if __STDC_NO_THREADS__
+# define thread_local _Thread_local
+#else
+# include <threads.h>
+#endif
 #include "../zend_jit_tls.h"
 
-extern __thread void* _tsrm_ls_cache;
+extern thread_local void* _tsrm_ls_cache;
 
 int test(void)
 {

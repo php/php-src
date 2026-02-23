@@ -112,8 +112,8 @@ static pthread_key_t tls_key;
 # define tsrm_tls_get()			pthread_getspecific(tls_key)
 #endif
 
-TSRM_TLS bool in_main_thread = false;
-TSRM_TLS bool is_thread_shutdown = false;
+thread_local bool in_main_thread = false;
+thread_local bool is_thread_shutdown = false;
 
 /* Startup TSRM (call once for the entire process) */
 TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename)
