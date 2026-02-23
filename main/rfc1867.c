@@ -665,8 +665,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_llist header;
 	void *event_extra_data = NULL;
 	unsigned int llen = 0;
-	zend_long upload_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_file_uploads, INI_INT("max_file_uploads"));
-	zend_long body_parts_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_multipart_body_parts, INI_INT("max_multipart_body_parts"));
+	zend_long upload_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_file_uploads, zend_ini_long_literal("max_file_uploads"));
+	zend_long body_parts_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_multipart_body_parts, zend_ini_long_literal("max_multipart_body_parts"));
 	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
 	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 	zend_long upload_max_filesize = REQUEST_PARSE_BODY_OPTION_GET(upload_max_filesize, PG(upload_max_filesize));
