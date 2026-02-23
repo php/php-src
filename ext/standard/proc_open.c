@@ -1394,10 +1394,17 @@ PHP_FUNCTION(proc_open)
 	}
 
 	if (cwd) {
+#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+		r = posix_spawn_file_actions_addchdir(&factions, cwd);
+		if (r != 0) {
+			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir() failed: %s", strerror(r));
+		}
+#else
 		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
 		if (r != 0) {
 			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
 		}
+#endif
 	}
 
 	if (argv) {
