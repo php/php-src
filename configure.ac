@@ -517,17 +517,46 @@ dnl Checks for sockaddr_storage and sockaddr.sa_len.
 AC_CHECK_TYPES([struct sockaddr_storage],,,[#include <sys/socket.h>])
 AC_CHECK_MEMBERS([struct sockaddr.sa_len],,,[#include <sys/socket.h>])
 
-dnl Checks for GCC function attributes on all systems except ones without glibc
-dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
+dnl Check for GCC ifunc and target function attributes.
 dnl
-dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
-dnl bug #77284. Conservatively don't use ifuncs on FreeBSD prior to version 12.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true], [
-  if test "$(uname -s 2>/dev/null)" != "FreeBSD" || test "$(uname -U 2>/dev/null)" -ge 1200000; then
-    AX_GCC_FUNC_ATTRIBUTE([ifunc])
-    AX_GCC_FUNC_ATTRIBUTE([target])
-  fi
-])
+dnl These attributes are disabled on:
+dnl - Android, uclibc, musl, OpenBSD: No glibc or ifunc support issues (GCC 7+ should have fixes)
+dnl - FreeBSD < 12: Buggy ifunc support (see bug #77284)
+dnl - glibc <= 2.17 on x86_64: __builtin_cpu_* functions are unsafe in ifunc resolvers
+dnl   during dynamic linking (e.g., CentOS 7) and lead to segfaults. This issue does not
+dnl   affect arm64.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [],
+  [if test "$(uname -s 2>/dev/null)" != "FreeBSD" || test "$(uname -U 2>/dev/null)" -ge 1200000; then
+    AS_CASE([$host_cpu],
+      [x86_64*|amd64*|i?86*], [
+        AC_MSG_CHECKING([if glibc version supports safe ifunc resolvers])
+        AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+          #include <stdio.h>
+        ]], [[
+          #ifdef __GLIBC__
+          #if __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 17)
+          return 1;
+          #endif
+          #endif
+          return 0;
+        ]])],
+        [AC_MSG_RESULT([yes])
+         AX_GCC_FUNC_ATTRIBUTE([ifunc])
+         AX_GCC_FUNC_ATTRIBUTE([target])],
+        [AC_MSG_RESULT([no, glibc <= 2.17 detected])
+         AC_MSG_WARN([Disabling ifunc resolver checks due to old glibc version])],
+        [AC_MSG_RESULT([unknown, assuming yes])
+         AX_GCC_FUNC_ATTRIBUTE([ifunc])
+         AX_GCC_FUNC_ATTRIBUTE([target])])
+      ],
+      [*], [
+        dnl arm64 and other architectures are safe even with old glibc
+        AX_GCC_FUNC_ATTRIBUTE([ifunc])
+        AX_GCC_FUNC_ATTRIBUTE([target])
+      ]
+    )
+  fi]
+)
 
 dnl Check for __attribute__ ((__aligned__)) support in the compiler.
 PHP_CHECK_VARIABLE_ATTRIBUTE([aligned])
