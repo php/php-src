@@ -703,11 +703,7 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
-	if (zend_hash_del(intern->parameter, key) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_del(intern->parameter, key) == SUCCESS);
 	zend_string_release_ex(key, false);
 }
 /* }}} end XSLTProcessor::removeParameter */
