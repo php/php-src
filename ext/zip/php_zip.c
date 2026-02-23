@@ -357,6 +357,8 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
+	zend_long tmp;
+	bool failed = false;
 
 	/* default values */
 	opts->flags = ZIP_FL_OVERWRITE;
@@ -367,43 +369,45 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
-			php_error_docref(NULL, E_WARNING, "Option \"remove_all_path\" must be of type bool, %s given",
-				zend_zval_value_name(option));
+			zend_type_error("Option \"remove_all_path\" must be of type bool, %s given", zend_zval_value_name(option));
+			return FAILURE;
 		}
-		opts->remove_all_path = zval_get_long(option);
+		opts->remove_all_path = Z_TYPE_P(option) == IS_TRUE;
 	}
 
 	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
-		if (Z_TYPE_P(option) != IS_LONG) {
-			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be of type int, %s given",
-				zend_zval_value_name(option));
+		tmp = zval_try_get_long(option, &failed);
+		if (failed) {
+			zend_type_error("Option \"comp_method\" must be of type int, %s given", zend_zval_value_name(option));
+			return FAILURE;
 		}
-		zend_long comp_method = zval_get_long(option);
+		zend_long comp_method = tmp;
 		if (comp_method < 0 || comp_method > INT_MAX) {
 			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be between 0 and %d", INT_MAX);
 		}
 		opts->comp_method = (zip_int32_t)comp_method;
 
 		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
-			if (Z_TYPE_P(option) != IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
-					zend_zval_value_name(option));
+			tmp = zval_try_get_long(option, &failed);
+			if (failed) {
+				zend_type_error("Option \"comp_flags\" must be of type int, %s given", zend_zval_value_name(option));
+				return FAILURE;
 			}
-			zend_long comp_flags = zval_get_long(option);
-			if (comp_flags < 0 || comp_flags > USHRT_MAX) {
+			if (tmp < 0 || tmp > USHRT_MAX) {
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be between 0 and %u", USHRT_MAX);
 			}
-			opts->comp_flags = (zip_uint32_t)comp_flags;
+			opts->comp_flags = (zip_uint32_t)tmp;
 		}
 	}
 
 #ifdef HAVE_ENCRYPTION
 	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
-		if (Z_TYPE_P(option) != IS_LONG) {
-			php_error_docref(NULL, E_WARNING, "Option \"enc_method\" must be of type int, %s given",
-				zend_zval_value_name(option));
+		tmp = zval_try_get_long(option, &failed);
+		if (failed) {
+			zend_type_error("Option \"enc_method\" must be of type int, %s given", zend_zval_value_name(option));
+			return FAILURE;
 		}
-		opts->enc_method = zval_get_long(option);
+		opts->enc_method = tmp;
 
 		if ((option = zend_hash_str_find(options, "enc_password", sizeof("enc_password") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_STRING) {
@@ -457,12 +461,13 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 	}
 
 	if ((option = zend_hash_str_find(options, "flags", sizeof("flags") - 1)) != NULL) {
-		if (Z_TYPE_P(option) != IS_LONG) {
+		tmp = zval_try_get_long(option, &failed);
+		if (failed) {
 			zend_type_error("Option \"flags\" must be of type int, %s given",
 				zend_zval_value_name(option));
 			return FAILURE;
 		}
-		opts->flags = Z_LVAL_P(option);
+		opts->flags = tmp;
 	}
 
 	return SUCCESS;
@@ -512,13 +517,13 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 
 static zend_long php_zip_status(ze_zip_object *obj) /* {{{ */
 {
-	int zep = obj->err_zip; /* saved err if closed */
+	zend_long zep = (zend_long)obj->err_zip; /* saved err if closed */
 
 	if (obj->za) {
 		zip_error_t *err;
 
 		err = zip_get_error(obj->za);
-		zep = zip_error_code_zip(err);
+		zep = (zend_long)zip_error_code_zip(err);
 		zip_error_fini(err);
 	}
 	return zep;
@@ -533,13 +538,13 @@ static zend_long php_zip_last_id(ze_zip_object *obj) /* {{{ */
 
 static zend_long php_zip_status_sys(ze_zip_object *obj) /* {{{ */
 {
-	int syp = obj->err_sys;  /* saved err if closed */
+	zend_long syp = (zend_long)obj->err_sys;  /* saved err if closed */
 
 	if (obj->za) {
 		zip_error_t *err;
 
 		err = zip_get_error(obj->za);
-		syp = zip_error_code_system(err);
+		syp = (zend_long)zip_error_code_system(err);
 		zip_error_fini(err);
 	}
 	return syp;
