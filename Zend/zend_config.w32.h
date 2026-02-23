@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#ifndef ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+#if !defined(ZEND_INCLUDE_FULL_WINDOWS_HEADERS) && !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
