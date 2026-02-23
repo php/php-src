@@ -29,4 +29,5 @@ try {
 stream_set_option
 stream_stat
 stream_read
+stream_close
 Message
