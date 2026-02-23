@@ -232,7 +232,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(exception)) {
-		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
+		zend_throw_exception_zstr(assertion_error_ce, description_str, E_ERROR);
 		if (ASSERTG(bail)) {
 			/* When bail is turned on, the exception will not be caught. */
 			zend_exception_error(EG(exception), E_ERROR);
