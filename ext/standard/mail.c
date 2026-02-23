@@ -337,7 +337,7 @@ PHP_FUNCTION(mail)
 	}
 
 	zend_string *force_extra_parameters = zend_ini_str_literal("mail.force_extra_parameters");
-	if (force_extra_parameters) {
+	if (force_extra_parameters && ZSTR_LEN(force_extra_parameters) > 0) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
