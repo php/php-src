@@ -212,7 +212,7 @@ PHP_RINIT_FUNCTION(pcntl)
 	PCNTL_G(last_error) = 0;
 	PCNTL_G(num_signals) = NSIG;
 #ifdef SIGRTMAX
-	/* At least FreeBSD reports an incorrecrt NSIG that does not include realtime signals.
+	/* At least FreeBSD reports an incorrect NSIG that does not include realtime signals.
 	 * As SIGRTMAX may be a dynamic value, adjust the value in INIT. */
 	if (NSIG < SIGRTMAX + 1) {
 		PCNTL_G(num_signals) = SIGRTMAX + 1;
@@ -313,6 +313,11 @@ PHP_FUNCTION(pcntl_alarm)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(seconds);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (seconds < 0 || seconds > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+		RETURN_THROWS();
+	}
 
 	RETURN_LONG((zend_long) alarm(seconds));
 }
@@ -870,17 +875,8 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// note: max signal on mac is SIGUSR2 (31), no real time signals.
-	int sigmax = NSIG - 1;
-#if defined(SIGRTMAX)
-	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
-	if (sigmax < SIGRTMAX) {
-		sigmax = SIGRTMAX;
-	}
-#endif
-
-	if (signo < 1 || signo > sigmax) {
-		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
+	if (signo < 1 || signo >= PCNTL_G(num_signals)) {
+		zend_argument_value_error(1, "must be between 1 and %d", PCNTL_G(num_signals) - 1);
 		RETURN_THROWS();
 	}
 
@@ -1153,7 +1149,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				add_assoc_long_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
 				break;
 #if defined(SIGPOLL) && !defined(__CYGWIN__)
 			case SIGPOLL:

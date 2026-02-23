@@ -105,6 +105,10 @@ PHP 8.6 UPGRADE NOTES
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
 
+- PCNTL:
+  . pcntl_alarm() now throws a ValueError if the seconds argument is
+    lower than zero or greater than platform's UINT_MAX.
+
 - Phar:
   . Phar::mungServer() now supports reference values.
 
