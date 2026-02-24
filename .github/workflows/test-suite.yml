@@ -76,14 +76,14 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang-20
+          cxx: clang++-20
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-20
-            CXX=clang++-20
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
@@ -708,10 +708,10 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang
+          cxx: clang++
       - name: ./configure
         run: |
-          export CC=clang
-          export CXX=clang++
           export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
           ./buildconf --force
           # msan requires all used libraries to be instrumented,
