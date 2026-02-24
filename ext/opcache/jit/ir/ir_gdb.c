@@ -7,6 +7,10 @@
  * Based on Mike Pall's implementation of GDB interface for LuaJIT.
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
