@@ -89,6 +89,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Update timelib to 2022.16. (Derick)
+  . Fixed bug GH-20967 (DateTime[Immutable]::createFromTimestamp(float) misses
+    support for 64bit integers or 32bit environments). (marc-mabe) 
 
 - DOM:
   . Fixed GH-21041 (Dom\HTMLDocument corrupts closing tags within scripts).
