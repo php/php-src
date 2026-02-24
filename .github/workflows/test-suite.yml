@@ -1077,8 +1077,8 @@ jobs:
         run: |-
           set -x
           php benchmark/generate_diff.php \
-            ${{ github.sha }} \
-            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
+            ${{ github.event.pull_request.head.sha }} \
+            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}) \
             > $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v6
         with:
