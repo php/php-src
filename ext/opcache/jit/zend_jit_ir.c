@@ -14105,6 +14105,13 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 				return 0;
 			}
 		} else {
+			// JIT: ZVAL_DEREF(value);
+			if (val_info & MAY_BE_REF) {
+				ir_ref ref = jit_ZVAL_ADDR(jit, val_addr);
+				ref = jit_ZVAL_DEREF_ref(jit, ref);
+				val_addr = ZEND_ADDR_REF_ZVAL(ref);
+				val_info &= ~MAY_BE_REF;
+			}
 			// JIT: ZVAL_COPY(res, value);
 			jit_ZVAL_COPY(jit, var_addr, -1, val_addr, val_info, true);
 		}
