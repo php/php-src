@@ -2,6 +2,12 @@ name: ccache
 inputs:
   name:
     required: true
+  cc:
+    required: false
+    default: 'gcc'
+  cxx:
+    required: false
+    default: 'g++'
 runs:
   using: composite
   steps:
@@ -26,5 +32,5 @@ runs:
     - name: Export CC/CXX
       shell: bash
       run: |
-        echo "CC=ccache gcc" >> $GITHUB_ENV
-        echo "CXX=ccache g++" >> $GITHUB_ENV
+        echo "CC=ccache ${{ inputs.cc }}" >> $GITHUB_ENV
+        echo "CXX=ccache ${{ inputs.cxx }}" >> $GITHUB_ENV
