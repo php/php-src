@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.5
 
+- Opcache:
+  . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
+    script). (ilutov)
 
 12 Mar 2026, PHP 8.5.4
 
