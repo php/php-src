@@ -7,3 +7,7 @@ class A {
         return ['foo'];
     }
 }
+
+function test() {
+    return ['foo'];
+}

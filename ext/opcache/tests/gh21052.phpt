@@ -26,3 +26,7 @@ array(1) {
   [0]=>
   string(3) "foo"
 }
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
