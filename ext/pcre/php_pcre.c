@@ -1489,7 +1489,8 @@ ZEND_FRAMELESS_FUNCTION(preg_match, 2)
 	/* Compile regex or get it from cache. */
 	pcre_cache_entry *pce;
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto flf_clean;
 	}
 
 	pce->refcount++;
