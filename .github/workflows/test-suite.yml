@@ -76,14 +76,14 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang-20
+          cxx: clang++-20
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-20
-            CXX=clang++-20
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
@@ -396,10 +396,6 @@ jobs:
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
         run: sudo -H pip install gcovr
-      - name: ccache
-        uses: ./.github/actions/ccache
-        with:
-          name: "${{ github.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -712,10 +708,10 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang
+          cxx: clang++
       - name: ./configure
         run: |
-          export CC=clang
-          export CXX=clang++
           export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
           ./buildconf --force
           # msan requires all used libraries to be instrumented,
@@ -880,6 +876,7 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          php_directory: php
       - name: build PHP
         run: |
           cd php
@@ -1077,8 +1074,8 @@ jobs:
         run: |-
           set -x
           php benchmark/generate_diff.php \
-            ${{ github.sha }} \
-            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
+            ${{ github.event.pull_request.head.sha }} \
+            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}) \
             > $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v6
         with:
