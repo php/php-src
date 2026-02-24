@@ -5,6 +5,10 @@
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #include "ir.h"
 #include "ir_private.h"
 
@@ -188,9 +192,9 @@ static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t 
 							}
 						}
 					}
-					if (input > 0) {
-						ir_use_list_remove_one(ctx, input, bb->start);
-					}
+					IR_ASSERT(input > 0);
+					IR_ASSERT(ctx->use_lists[input].count == 1 && ctx->use_edges[ctx->use_lists[input].refs] == bb->start);
+					CLEAR_USES(input);
 				}
 			}
 			j--;
@@ -503,7 +507,8 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 	}
 
 	ir_mem_free(life_inputs);
-	ir_use_list_remove_all(ctx, from, merge);
+	IR_ASSERT(ctx->use_lists[from].count == 1 && ctx->use_edges[ctx->use_lists[from].refs] == merge);
+	CLEAR_USES(from);
 }
 
 /* CFG constructed after SCCP pass doesn't have unreachable BBs, otherwise they should be removed */
@@ -975,10 +980,107 @@ static bool ir_dominates(const ir_block *blocks, uint32_t b1, uint32_t b2)
 	return b1 == b2;
 }
 
+/* Identify loops. See Sreedhar et al, "Identifying Loops Using DJ Graphs" and
+ * G. Ramalingam "Identifying Loops In Almost Linear Time". */
+
+#define ENTRY_TIME(b) times[(b) * 2]
+#define EXIT_TIME(b)  times[(b) * 2 + 1]
+
+static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *times, ir_worklist *work, ir_list *list)
+{
+	ir_block *blocks = ctx->cfg_blocks;
+	uint32_t *edges = ctx->cfg_edges;
+
+	IR_ASSERT(ir_list_len(list) != 0);
+	if (ir_list_len(list) > 1) {
+		/* Sort list to process irreducible loops in DFS order (insertion sort) */
+		ir_ref *a = list->a.refs;
+		uint32_t n = ir_list_len(list);
+		uint32_t i = 1;
+		while (i < n) {
+			uint32_t j = i;
+			while (j > 0 && ENTRY_TIME(a[j-1]) > ENTRY_TIME(a[j])) {
+				ir_ref tmp = a[j];
+				a[j] = a[j-1];
+				a[j-1] = tmp;
+				j--;
+			}
+			i++;
+		}
+	}
+	while (ir_list_len(list)) {
+		uint32_t hdr = ir_list_pop(list);
+		ir_block *bb = &blocks[hdr];
+
+		IR_ASSERT(bb->flags & IR_BB_IRREDUCIBLE_LOOP);
+		IR_ASSERT(!bb->loop_depth);
+		if (!bb->loop_depth) {
+			/* process irreducible loop */
+
+			bb->flags |= IR_BB_LOOP_HEADER;
+			bb->loop_depth = 1;
+			if (ctx->ir_base[bb->start].op == IR_MERGE) {
+				ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
+			}
+
+			/* find the closing edge(s) of the irreucible loop */
+			IR_ASSERT(bb->predecessors_count > 1);
+			IR_ASSERT(ir_worklist_len(work) == 0);
+			ir_bitset_clear(work->visited, ir_bitset_len(ir_worklist_capasity(work)));
+			ir_bitset_incl(work->visited, hdr);
+
+			uint32_t *p = &edges[bb->predecessors];
+			uint32_t n = bb->predecessors_count;
+			do {
+				uint32_t pred = *p;
+				if (ENTRY_TIME(pred) > ENTRY_TIME(hdr) && EXIT_TIME(pred) < EXIT_TIME(hdr)) {
+					IR_ASSERT(blocks[pred].loop_header == 0);
+					// blocks[pred].loop_header = 0; /* support for merged loops */
+					ir_worklist_push(work, pred);
+				}
+				p++;
+			} while (--n);
+
+			/* collect members of the irreducible loop */
+			while (ir_worklist_len(work)) {
+				uint32_t b = ir_worklist_pop(work);
+
+				bb = &blocks[b];
+				bb->loop_header = hdr;
+
+				uint32_t *p = &edges[bb->predecessors];
+				uint32_t n = bb->predecessors_count;
+
+				for (; n > 0; p++, n--) {
+					uint32_t pred = *p;
+					if (!ir_bitset_in(work->visited, pred)) {
+						if (blocks[pred].loop_header) {
+							if (blocks[pred].loop_header == b) continue;
+							do {
+								pred = blocks[pred].loop_header;
+							} while (blocks[pred].loop_header > 0);
+						}
+						if (ENTRY_TIME(pred) > ENTRY_TIME(hdr) && EXIT_TIME(pred) < EXIT_TIME(hdr)) {
+							/* "pred" is a descendant of "hdr" */
+								ir_worklist_push(work, pred);
+						} else if (bb->predecessors_count > 1) {
+							/* another entry to the irreducible loop */
+							bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
+							if (ctx->ir_base[bb->start].op == IR_MERGE) {
+								ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 int ir_find_loops(ir_ctx *ctx)
 {
-	uint32_t b, j, n, count;
-	uint32_t *entry_times, *exit_times, *sorted_blocks, time = 1;
+	uint32_t b, j, n;
+	uint32_t *times, *sorted_blocks, time = 1;
 	ir_block *blocks = ctx->cfg_blocks;
 	uint32_t *edges = ctx->cfg_edges;
 	ir_worklist work;
@@ -987,52 +1089,43 @@ int ir_find_loops(ir_ctx *ctx)
 		return 1;
 	}
 
-	/* We don't materialize the DJ spanning tree explicitly, as we are only interested in ancestor
-	 * queries. These are implemented by checking entry/exit times of the DFS search. */
+	/* Compute entry/exit times for the CFG DFS spanning tree to perform ancestor and back-edge queries. */
 	ir_worklist_init(&work, ctx->cfg_blocks_count + 1);
-	entry_times = ir_mem_malloc((ctx->cfg_blocks_count + 1) * 3 * sizeof(uint32_t));
-	exit_times = entry_times + ctx->cfg_blocks_count + 1;
-	sorted_blocks = exit_times + ctx->cfg_blocks_count + 1;
-
-	memset(entry_times, 0, (ctx->cfg_blocks_count + 1) * sizeof(uint32_t));
+	times = ir_mem_malloc((ctx->cfg_blocks_count + 1) * 3 * sizeof(uint32_t));
+	sorted_blocks = times + (ctx->cfg_blocks_count + 1) * 2;
 
 	ir_worklist_push(&work, 1);
+	ENTRY_TIME(1) = time++;
+
 	while (ir_worklist_len(&work)) {
 		ir_block *bb;
-		int child;
 
-next:
 		b = ir_worklist_peek(&work);
-		if (!entry_times[b]) {
-			entry_times[b] = time++;
-		}
 
-		/* Visit blocks immediately dominated by "b". */
+		/* Visit successors of "b". */
+next:
 		bb = &blocks[b];
-		for (child = bb->dom_child; child > 0; child = blocks[child].dom_next_child) {
-			if (ir_worklist_push(&work, child)) {
-				goto next;
-			}
-		}
-
-		/* Visit join edges. */
-		if (bb->successors_count) {
+		n = bb->successors_count;
+		if (n) {
 			uint32_t *p = edges + bb->successors;
-			for (j = 0; j < bb->successors_count; j++, p++) {
+
+			for (; n > 0; p++, n--) {
 				uint32_t succ = *p;
 
-				if (blocks[succ].idom == b) {
-					continue;
-				} else if (ir_worklist_push(&work, succ)) {
+				if (ir_worklist_push(&work, succ)) {
+					b = succ;
+					ENTRY_TIME(b) = time++;
 					goto next;
 				}
 			}
 		}
-		exit_times[b] = time++;
+
+		EXIT_TIME(b) = time++;
 		ir_worklist_pop(&work);
 	}
 
 	/* Sort blocks by level, which is the opposite order in which we want to process them */
+	/* (Breadth First Search using "sorted_blocks" as a queue) */
 	sorted_blocks[1] = 1;
 	j = 1;
 	n = 2;
@@ -1046,127 +1139,64 @@ next:
 			}
 		}
 	}
-	count = n;
+	IR_ASSERT(n == ctx->cfg_blocks_count + 1);
 
-	/* Identify loops. See Sreedhar et al, "Identifying Loops Using DJ Graphs". */
+#if IR_DEBUG
 	uint32_t prev_dom_depth = blocks[sorted_blocks[n - 1]].dom_depth;
-	uint32_t prev_irreducible = 0;
+#endif
+	uint32_t irreducible_depth = 0;
+	ir_list irreducible_list = {0};
+
 	while (n > 1) {
 		b = sorted_blocks[--n];
 		ir_block *bb = &blocks[b];
 
 		IR_ASSERT(bb->dom_depth <= prev_dom_depth);
-		if (UNEXPECTED(prev_irreducible) && bb->dom_depth != prev_dom_depth) {
-			/* process delyed irreducible loops */
-			do {
-				b = sorted_blocks[prev_irreducible];
-				bb = &blocks[b];
-				if ((bb->flags & IR_BB_IRREDUCIBLE_LOOP) && !bb->loop_depth) {
-					/* process irreducible loop */
-					uint32_t hdr = b;
 
-					bb->loop_depth = 1;
-					if (ctx->ir_base[bb->start].op == IR_MERGE) {
-						ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
-					}
-
-					/* find the closing edge(s) of the irreucible loop */
-					IR_ASSERT(bb->predecessors_count > 1);
-					uint32_t *p = &edges[bb->predecessors];
-					j = bb->predecessors_count;
-					do {
-						uint32_t pred = *p;
-
-						if (entry_times[pred] > entry_times[b] && exit_times[pred] < exit_times[b]) {
-							if (!ir_worklist_len(&work)) {
-								ir_bitset_clear(work.visited, ir_bitset_len(ir_worklist_capasity(&work)));
-							}
-							blocks[pred].loop_header = 0; /* support for merged loops */
-							ir_worklist_push(&work, pred);
-						}
-						p++;
-					} while (--j);
-					if (ir_worklist_len(&work) == 0) continue;
-
-					/* collect members of the irreducible loop */
-					while (ir_worklist_len(&work)) {
-						b = ir_worklist_pop(&work);
-						if (b != hdr) {
-							ir_block *bb = &blocks[b];
-							bb->loop_header = hdr;
-							if (bb->predecessors_count) {
-								uint32_t *p = &edges[bb->predecessors];
-								uint32_t n = bb->predecessors_count;
-								do {
-									uint32_t pred = *p;
-									while (blocks[pred].loop_header > 0) {
-										pred = blocks[pred].loop_header;
-									}
-									if (pred != hdr) {
-										if (entry_times[pred] > entry_times[hdr] && exit_times[pred] < exit_times[hdr]) {
-											/* "pred" is a descendant of "hdr" */
-											ir_worklist_push(&work, pred);
-										} else {
-											/* another entry to the irreducible loop */
-											bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
-											if (ctx->ir_base[bb->start].op == IR_MERGE) {
-												ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
-											}
-										}
-									}
-									p++;
-								} while (--n);
-							}
-						}
-					}
-				}
-			} while (--prev_irreducible != n);
-			prev_irreducible = 0;
-			b = sorted_blocks[n];
-			bb = &blocks[b];
+		if (UNEXPECTED(bb->dom_depth < irreducible_depth)) {
+			ir_collect_irreducible_loops(ctx, times, &work, &irreducible_list);
+			irreducible_depth = 0;
 		}
 
 		if (bb->predecessors_count > 1) {
 			bool irreducible = 0;
+			uint32_t b_entry_time = ENTRY_TIME(b);
+			uint32_t b_exit_time = EXIT_TIME(b);
 			uint32_t *p = &edges[bb->predecessors];
 
-			j = bb->predecessors_count;
-			do {
+			for (j = bb->predecessors_count; j > 0; p++, j--) {
 				uint32_t pred = *p;
 
-				/* A join edge is one for which the predecessor does not
-				   immediately dominate the successor.  */
-				if (bb->idom != pred) {
-					/* In a loop back-edge (back-join edge), the successor dominates
-					   the predecessor.  */
+				/* Check back-edges */
+				if (ENTRY_TIME(pred) >= b_entry_time && EXIT_TIME(pred) <= b_exit_time) {
 					if (ir_dominates(blocks, b, pred)) {
+						/* In a loop back-edge (back-join edge), the successor dominates
+						   the predecessor.  */
 						if (!ir_worklist_len(&work)) {
 							ir_bitset_clear(work.visited, ir_bitset_len(ir_worklist_capasity(&work)));
 						}
-						blocks[pred].loop_header = 0; /* support for merged loops */
+						IR_ASSERT(!blocks[pred].loop_header);
+						// blocks[pred].loop_header = 0; /* support for merged loops */
 						ir_worklist_push(&work, pred);
 					} else {
-						/* Otherwise it's a cross-join edge.  See if it's a branch
-						   to an ancestor on the DJ spanning tree.  */
-						if (entry_times[pred] > entry_times[b] && exit_times[pred] < exit_times[b]) {
-							irreducible = 1;
-							break;
-						}
+						/* Otherwise it's a back-edge of irreducible loop. */
+						irreducible = 1;
+						break;
 					}
 				}
-				p++;
-			} while (--j);
+			}
 
 			if (UNEXPECTED(irreducible)) {
-				bb->flags |= IR_BB_LOOP_HEADER | IR_BB_IRREDUCIBLE_LOOP;
+				bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
 				ctx->flags2 |= IR_CFG_HAS_LOOPS | IR_IRREDUCIBLE_CFG;
-				/* Remember the position of the first irreducible loop to process all the irreducible loops
-				 * after the reducible loops with the same dominator tree depth
+				/* Delay processing of all irreducible loops
+				 * after all reducible loops with the same dominator tree depth
 				 */
-				if (!prev_irreducible) {
-					prev_irreducible = n;
-					prev_dom_depth = bb->dom_depth;
+				irreducible_depth = bb->dom_depth;
+				if (!ir_list_capasity(&irreducible_list)) {
+					ir_list_init(&irreducible_list, 16);
 				}
+				ir_list_push(&irreducible_list, b);
 				ir_list_clear(&work.l);
 			} else if (ir_worklist_len(&work)) {
 				/* collect members of the reducible loop */
@@ -1178,35 +1208,47 @@ next:
 				if (ctx->ir_base[bb->start].op == IR_MERGE) {
 					ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
 				}
+				ir_bitset_incl(work.visited, hdr);
 				while (ir_worklist_len(&work)) {
 					b = ir_worklist_pop(&work);
 					if (b != hdr) {
 						ir_block *bb = &blocks[b];
+
+						IR_ASSERT(!bb->loop_header);
 						bb->loop_header = hdr;
-						if (bb->predecessors_count) {
-							uint32_t *p = &edges[bb->predecessors];
-							uint32_t n = bb->predecessors_count;
-							do {
-								uint32_t pred = *p;
-								while (blocks[pred].loop_header > 0) {
-									pred = blocks[pred].loop_header;
-								}
-								if (pred != hdr) {
+
+						uint32_t *p = &edges[bb->predecessors];
+						uint32_t n = bb->predecessors_count;
+						for (; n > 0; p++, n--) {
+							uint32_t pred = *p;
+							if (!ir_bitset_in(work.visited, pred)) {
+								if (blocks[pred].loop_header) {
+									if (blocks[pred].loop_header == b) continue;
+									do {
+										pred = blocks[pred].loop_header;
+									} while (blocks[pred].loop_header > 0);
 									ir_worklist_push(&work, pred);
+								} else {
+									ir_bitset_incl(work.visited, pred);
+									ir_list_push_unchecked(&work.l, pred);
 								}
-								p++;
-							} while (--n);
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	IR_ASSERT(!prev_irreducible);
+
+	IR_ASSERT(!irreducible_depth);
+	if (ir_list_capasity(&irreducible_list)) {
+		ir_list_free(&irreducible_list);
+	}
 
 	if (ctx->flags2 & IR_CFG_HAS_LOOPS) {
-		for (n = 1; n < count; n++) {
-			b = sorted_blocks[n];
+		n = ctx->cfg_blocks_count + 1;
+		for (j = 1; j < n; j++) {
+			b = sorted_blocks[j];
 			ir_block *bb = &blocks[b];
 			if (bb->loop_header > 0) {
 				ir_block *loop = &blocks[bb->loop_header];
@@ -1237,7 +1279,7 @@ next:
 		}
 	}
 
-	ir_mem_free(entry_times);
+	ir_mem_free(times);
 	ir_worklist_free(&work);
 
 	return 1;
