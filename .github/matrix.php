@@ -52,7 +52,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_alpine = in_array('CI: Alpine', $labels, true);
     $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
-    $test_coverage = in_array('CI: COVERAGE', $labels, true);
+    $test_coverage = in_array('CI: Coverage', $labels, true);
     $test_freebsd = in_array('CI: FreeBSD', $labels, true);
     $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
     $test_linux_ppc64 = in_array('CI: Linux PPC64', $labels, true);
