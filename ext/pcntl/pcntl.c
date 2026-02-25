@@ -934,6 +934,9 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 2, /* allow_empty_signal_array */ how == SIG_SETMASK);
 	/* Some error occurred */
 	if (!status) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 
@@ -982,6 +985,9 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1, /* allow_empty_signal_array */ false);
 	/* Some error occurred */
 	if (!status) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 
@@ -1028,6 +1034,9 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1, /* allow_empty_signal_array */ false);
 	/* Some error occurred */
 	if (!status) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 	if (tv_sec < 0) {
