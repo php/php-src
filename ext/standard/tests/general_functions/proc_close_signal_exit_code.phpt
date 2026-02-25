@@ -3,16 +3,14 @@ proc_close() returns 128+signal when child is killed by a signal
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') die('skip Not for Windows');
-if (!function_exists('posix_kill') || !function_exists('posix_getpid')) die('skip posix extension required');
+if (!is_executable('/bin/sh')) die('skip /bin/sh not available');
 ?>
 --FILE--
 <?php
 
-// Child that kills itself with SIGTERM (15)
-$child = '<?php posix_kill(posix_getpid(), 15);';
-
+// Shell that kills itself with SIGKILL (9) — cannot be caught
 $process = proc_open(
-    [PHP_BINARY, '-r', $child],
+    ['/bin/sh', '-c', 'kill -9 $$'],
     [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
     $pipes
 );
@@ -22,14 +20,12 @@ foreach ($pipes as $pipe) {
 }
 
 $exitCode = proc_close($process);
-// Should be 128 + 15 = 143
+// Should be 128 + 9 = 137
 var_dump($exitCode);
 
 // Child that exits normally with code 42
-$child2 = '<?php exit(42);';
-
 $process2 = proc_open(
-    [PHP_BINARY, '-r', $child2],
+    ['/bin/sh', '-c', 'exit 42'],
     [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
     $pipes2
 );
@@ -44,5 +40,5 @@ var_dump($exitCode2);
 
 ?>
 --EXPECT--
-int(143)
+int(137)
 int(42)
