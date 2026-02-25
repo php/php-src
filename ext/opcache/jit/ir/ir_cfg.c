@@ -1034,8 +1034,6 @@ static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *
 			do {
 				uint32_t pred = *p;
 				if (ENTRY_TIME(pred) > ENTRY_TIME(hdr) && EXIT_TIME(pred) < EXIT_TIME(hdr)) {
-					IR_ASSERT(blocks[pred].loop_header == 0);
-					// blocks[pred].loop_header = 0; /* support for merged loops */
 					ir_worklist_push(work, pred);
 				}
 				p++;
@@ -1046,7 +1044,9 @@ static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *
 				uint32_t b = ir_worklist_pop(work);
 
 				bb = &blocks[b];
-				bb->loop_header = hdr;
+				if (!bb->loop_header) {
+					bb->loop_header = hdr;
+				}
 
 				uint32_t *p = &edges[bb->predecessors];
 				uint32_t n = bb->predecessors_count;
@@ -1175,8 +1175,6 @@ next:
 						if (!ir_worklist_len(&work)) {
 							ir_bitset_clear(work.visited, ir_bitset_len(ir_worklist_capasity(&work)));
 						}
-						IR_ASSERT(!blocks[pred].loop_header);
-						// blocks[pred].loop_header = 0; /* support for merged loops */
 						ir_worklist_push(&work, pred);
 					} else {
 						/* Otherwise it's a back-edge of irreducible loop. */
@@ -1214,8 +1212,9 @@ next:
 					if (b != hdr) {
 						ir_block *bb = &blocks[b];
 
-						IR_ASSERT(!bb->loop_header);
-						bb->loop_header = hdr;
+						if (!bb->loop_header) {
+							bb->loop_header = hdr;
+						}
 
 						uint32_t *p = &edges[bb->predecessors];
 						uint32_t n = bb->predecessors_count;
@@ -1479,6 +1478,19 @@ static void ir_dump_chains(ir_ctx *ctx, ir_chain *chains)
 		}
 	}
 }
+
+static bool ir_is_merged_loop_back_edge(ir_ctx *ctx, uint32_t hdr, uint32_t b)
+{
+	if (ctx->cfg_blocks[hdr].flags & IR_BB_LOOP_HEADER) {
+		uint32_t loop_depth = ctx->cfg_blocks[hdr].loop_depth;
+
+		while (ctx->cfg_blocks[b].loop_depth > loop_depth) {
+			b = ctx->cfg_blocks[b].loop_header;
+		}
+		return b == hdr;
+	}
+	return 0;
+}
 #endif
 
 static int ir_schedule_blocks_bottom_up(ir_ctx *ctx)
@@ -1535,7 +1547,8 @@ restart:
 					}
 				} else if (b != predecessor && ctx->cfg_blocks[predecessor].loop_header != b) {
 					/* not a loop back-edge */
-					IR_ASSERT(b == predecessor || ctx->cfg_blocks[predecessor].loop_header == b);
+					IR_ASSERT(b == predecessor || ctx->cfg_blocks[predecessor].loop_header == b ||
+						ir_is_merged_loop_back_edge(ctx, b, predecessor));
 				}
 			}
 		}
