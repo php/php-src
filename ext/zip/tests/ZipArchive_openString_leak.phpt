@@ -22,4 +22,5 @@ $zip = new ZipArchive;
 $zip->open(__DIR__ . '/test.zip');
 $zip->openString(file_get_contents(__DIR__ . '/test.zip'));
 $zip = null;
+?>
 --EXPECT--

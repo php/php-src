@@ -578,15 +578,8 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 /* Add a string to the list of buffers to be released when the object is destroyed.*/
 static void php_zipobj_add_buffer(ze_zip_object *obj, zend_string *str) /* {{{ */
 {
-	int pos = 0;
-	if (obj->buffers_cnt) {
-		obj->buffers = safe_erealloc(obj->buffers, sizeof(*obj->buffers), (obj->buffers_cnt + 1), 0);
-		pos = obj->buffers_cnt++;
-	} else {
-		obj->buffers = emalloc(sizeof(*obj->buffers));
-		obj->buffers_cnt++;
-		pos = 0;
-	}
+	size_t pos = obj->buffers_cnt++;
+	obj->buffers = safe_erealloc(obj->buffers, sizeof(*obj->buffers), pos, 0);
 	obj->buffers[pos] = zend_string_copy(str);
 }
 /* }}} */
@@ -598,6 +591,7 @@ static void php_zipobj_release_buffers(ze_zip_object *obj) /* {{{ */
 			zend_string_release(obj->buffers[i]);
 		}
 		efree(obj->buffers);
+		obj->buffers = NULL;
 	}
 	obj->buffers_cnt = 0;
 }
@@ -614,9 +608,7 @@ static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 		if (err) {
 			php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 			/* Save error for property reader */
-			zip_error_t *ziperr;
-
-			ziperr = zip_get_error(intern);
+			zip_error_t *ziperr = zip_get_error(intern);
 			obj->err_zip = zip_error_code_zip(ziperr);
 			obj->err_sys = zip_error_code_system(ziperr);
 			zip_error_fini(ziperr);
@@ -628,7 +620,7 @@ static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 		success = !err;
 	}
 
-	// if we have a filename, we need to free it
+	/* if we have a filename, we need to free it */
 	if (obj->filename) {
 		/* clear cache as empty zip are not created but deleted */
 		php_clear_stat_cache(1, obj->filename, obj->filename_len);
@@ -1500,7 +1492,7 @@ PHP_METHOD(ZipArchive, open)
 		RETURN_FALSE;
 	}
 
-	// If we already have an opened zip, free it
+	/* If we already have an opened zip, free it */
 	php_zipobj_close(ze_obj);
 
 	/* open for write without option to empty the archive */
@@ -1532,7 +1524,6 @@ PHP_METHOD(ZipArchive, open)
 /* {{{ Create new read-only zip using given string */
 PHP_METHOD(ZipArchive, openString)
 {
-	struct zip *intern;
 	zend_string *buffer;
 	zval *self = ZEND_THIS;
 
@@ -1556,7 +1547,7 @@ PHP_METHOD(ZipArchive, openString)
 
 	php_zipobj_close(ze_obj);
 
-	intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
+	struct zip *intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
 	if (!intern) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
 		ze_obj->err_sys = zip_error_code_system(&err);

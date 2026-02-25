@@ -13,6 +13,7 @@ $zip->addFile(__DIR__.'/close-fail-file');
 @unlink(__DIR__.'/close-fail-file');
 var_dump($zip->open(__DIR__ . '/test.zip', ZipArchive::RDONLY));
 var_dump($zip->getFromName('bar'));
+?>
 --EXPECTF--
 bool(true)
 
