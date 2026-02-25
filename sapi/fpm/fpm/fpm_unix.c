@@ -290,7 +290,10 @@ int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *pa
 	if (wp->socket_acl) {
 		acl_t aclfile, aclconf;
 		acl_entry_t entryfile, entryconf;
-		int i;
+		int ifile, iconf;
+		acl_tag_t tagfile, tagconf;
+		uid_t *uidfile, *uidconf;
+		gid_t *gidfile, *gidconf;
 
 		/* Read the socket ACL */
 		aclconf = wp->socket_acl;
@@ -300,7 +303,67 @@ int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *pa
 			return -1;
 		}
 		/* Copy the new ACL entry from config */
-		for (i=ACL_FIRST_ENTRY ; acl_get_entry(aclconf, i, &entryconf) ; i=ACL_NEXT_ENTRY) {
+		for (iconf=ACL_FIRST_ENTRY ; acl_get_entry(aclconf, iconf, &entryconf) ; iconf=ACL_NEXT_ENTRY) {
+			if (0 > acl_get_tag_type(entryconf, &tagconf)) {
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to get tag of the ACL entry of the pool", wp->config->name);
+				acl_free(aclfile);
+				return -1;
+			}
+			if (tagconf == ACL_USER) {
+				uidconf = acl_get_qualifier(entryfile);
+				if (!uidconf) {
+					zlog(ZLOG_SYSERROR, "[pool %s] failed to get user qualifier of the ACL entry of the pool", wp->config->name);
+					acl_free(aclfile);
+					return -1;
+				}
+			} else {
+				gidconf = acl_get_qualifier(entryfile);
+				if (!gidconf) {
+					zlog(ZLOG_SYSERROR, "[pool %s] failed to get group qualifier of the ACL entry of the pool", wp->config->name);
+					acl_free(aclfile);
+					return -1;
+				}
+			}
+			for (ifile=ACL_FIRST_ENTRY ; acl_get_entry(aclfile, ifile, &entryfile) ; ifile=ACL_NEXT_ENTRY) {
+				if (0 > acl_get_tag_type(entryfile, &tagfile)) {
+					zlog(ZLOG_SYSERROR, "[pool %s] failed to get tag of the ACL entry of the socket '%s'", wp->config->name, path);
+					acl_free(tagconf == ACL_USER ? uidconf : gidconf);
+					acl_free(aclfile);
+					return -1;
+				}
+				if (tagfile != ACL_USER && tagfile != ACL_GROUP)
+					continue;
+				if (tagfile != tagconf)
+					continue;
+				if (tagfile == ACL_USER) {
+					uidfile = acl_get_qualifier(entryfile);
+					if (!uidfile) {
+						zlog(ZLOG_SYSERROR, "[pool %s] failed to get user qualifier of the ACL entry of the socket '%s'", wp->config->name, path);
+						acl_free(uidconf);
+						acl_free(aclfile);
+						return -1;
+					}
+					if (*uidfile != *uidconf) {
+						acl_free(uidfile);
+						continue;
+					}
+				} else {
+					gidfile = acl_get_qualifier(entryfile);
+					if (!gidfile) {
+						zlog(ZLOG_SYSERROR, "[pool %s] failed to get group qualifier of the ACL entry of the socket '%s'", wp->config->name, path);
+						acl_free(gidconf);
+						acl_free(aclfile);
+						return -1;
+					}
+					if (*gidfile != *gidconf) {
+						acl_free(gidfile);
+						continue;
+					}
+				}
+				acl_free(tagfile == ACL_USER ? uidfile : gidfile);
+				acl_delete_entry(aclfile, entryfile);
+			}
+			acl_free(tagconf == ACL_USER ? uidconf : gidconf);
 			if (0 > acl_create_entry (&aclfile, &entryfile) ||
 				0 > acl_copy_entry(entryfile, entryconf)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to add entry to the ACL of the socket '%s'", wp->config->name, path);
