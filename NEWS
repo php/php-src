@@ -60,6 +60,9 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed preg_match memory leak with invalid regexes. (David Carlier)
+  . Fixed pcre2_code leak when pcre2_pattern_info() fails after a
+    successful pcre2_compile(), and match_sets/match_data/marks leaks
+    in php_pcre_match_impl(). (David Carlier)
 
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
