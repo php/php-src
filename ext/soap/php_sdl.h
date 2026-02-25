@@ -61,15 +61,19 @@ struct _sdl {
 	bool  is_persistent;
 };
 
+typedef struct qname_hash_table {
+	HashTable inner;
+} qname_hash_table;
+
 typedef struct sdlCtx {
 	sdlPtr     sdl;
 
 	HashTable  docs;             /* array of xmlDocPtr */
 
-	HashTable  messages;         /* array of xmlNodePtr */
-	HashTable  bindings;         /* array of xmlNodePtr */
-	HashTable  portTypes;        /* array of xmlNodePtr */
-	HashTable  services;         /* array of xmlNodePtr */
+	qname_hash_table messages;   /* array of xmlNodePtr */
+	qname_hash_table bindings;   /* array of xmlNodePtr */
+	qname_hash_table portTypes;  /* array of xmlNodePtr */
+	qname_hash_table services;   /* array of xmlNodePtr */
 
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
