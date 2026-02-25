@@ -579,7 +579,7 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 static void php_zipobj_add_buffer(ze_zip_object *obj, zend_string *str) /* {{{ */
 {
 	size_t pos = obj->buffers_cnt++;
-	obj->buffers = safe_erealloc(obj->buffers, sizeof(*obj->buffers), pos, 0);
+	obj->buffers = safe_erealloc(obj->buffers, sizeof(*obj->buffers), obj->buffers_cnt, 0);
 	obj->buffers[pos] = zend_string_copy(str);
 }
 /* }}} */
