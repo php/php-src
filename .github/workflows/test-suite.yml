@@ -187,6 +187,7 @@ jobs:
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
+        if: ${{ inputs.all_variations || matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -208,7 +209,7 @@ jobs:
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
-        if: ${{ inputs.all_variations && !matrix.asan }}
+        if: ${{ !matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
