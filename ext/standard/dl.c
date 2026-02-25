@@ -206,7 +206,7 @@ PHPAPI int php_load_extension_ex(const char *filename, int type, int start_now, 
 	char *libpath;
 	zend_module_entry *module_entry = NULL;
 	get_module_func_t get_module;
-	zend_extension *zend_extension_entry;
+	zend_extension *zend_extension_entry = NULL;
 	int error_type, slash_suffix = 0;
 	char *extension_dir;
 	char *err1, *err2;
