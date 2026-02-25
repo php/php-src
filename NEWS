@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.20
 
+- PCRE:
+  . Fixed re-entrancy issue on php_pcre_match_impl, php_pcre_replace_impl,
+    php_pcre_split_impl, and php_pcre_grep_impl. (David Carlier)
+
 - Standard:
   . Fixed bug GH-20906 (Assertion failure when messing up output buffers).
     (ndossche)
