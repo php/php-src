@@ -1097,17 +1097,19 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid));
 	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid));
 	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
-	array_init(&subitem);
+
+	int x509_count = X509_PURPOSE_get_count();
+	array_init_size(&subitem, x509_count);
 
 	/* NOTE: the purposes are added as integer keys - the keys match up to the X509_PURPOSE_SSL_XXX defines
 	   in x509v3.h */
-	for (i = 0; i < X509_PURPOSE_get_count(); i++) {
+	for (i = 0; i < x509_count; i++) {
 		int id, purpset;
 		char * pname;
 		X509_PURPOSE * purp;
 		zval subsub;
 
-		array_init(&subsub);
+		array_init_packed_size(&subsub, 3);
 
 		purp = X509_PURPOSE_get0(i);
 		id = X509_PURPOSE_get_id(purp);
@@ -4300,15 +4302,16 @@ PHP_FUNCTION(openssl_seal)
 		ZEND_TRY_ASSIGN_REF_NEW_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
 		efree(buf);
 
-		ekeys = zend_try_array_init(ekeys);
+		ekeys = zend_try_array_init_size(ekeys, nkeys);
 		if (!ekeys) {
 			EVP_CIPHER_CTX_free(ctx);
 			goto clean_exit;
 		}
+		zend_hash_real_init_packed(Z_ARRVAL_P(ekeys));
 
 		for (i=0; i<nkeys; i++) {
 			eks[i][eksl[i]] = '\0';
-			add_next_index_stringl(ekeys, (const char*)eks[i], eksl[i]);
+			add_index_stringl(ekeys, i, (const char*)eks[i], eksl[i]);
 			efree(eks[i]);
 			eks[i] = NULL;
 		}
@@ -4454,6 +4457,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 	}
 
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for (i = 0; i < len; i++) {
 		sname = OBJ_nid2sn(curves[i].nid);
 		if (sname != NULL) {
