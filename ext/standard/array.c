@@ -1612,12 +1612,21 @@ PHP_FUNCTION(array_search)
 static inline bool php_in_array(const HashTable *ht, zval *value, bool strict)
 {
 	if (strict) {
-		ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
-			ZVAL_DEREF(entry);
-			if (fast_is_identical_function(value, entry)) {
-				return true;
-			}
-		} ZEND_HASH_FOREACH_END();
+		if (Z_TYPE_P(value) == IS_LONG) {
+			ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
+				ZVAL_DEREF(entry);
+				if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
+					return true;
+				}
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
+				ZVAL_DEREF(entry);
+				if (fast_is_identical_function(value, entry)) {
+					return true;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	} else {
 		ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
 			ZVAL_DEREF(entry);
