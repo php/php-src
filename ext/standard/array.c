@@ -1619,6 +1619,13 @@ static inline bool php_in_array(const HashTable *ht, zval *value, bool strict)
 					return true;
 				}
 			} ZEND_HASH_FOREACH_END();
+		} else if (Z_TYPE_P(value) == IS_STRING) {
+			ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
+				ZVAL_DEREF(entry);
+				if (Z_TYPE_P(entry) == IS_STRING && zend_string_equals(Z_STR_P(value), Z_STR_P(entry))) {
+					return true;
+				}
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_VAL(ht, /* const */ zval *entry) {
 				ZVAL_DEREF(entry);
