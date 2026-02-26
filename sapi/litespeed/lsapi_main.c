@@ -234,7 +234,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
         return;
     }
 
-    tsrm_env_lock();
+    tsrm_env_lock(false);
     for (env = environ; env != NULL && *env != NULL; env++) {
         p = strchr(*env, '=');
         if (!p) {               /* malformed entry? */
@@ -249,7 +249,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
         t[nlen] = '\0';
         add_variable(t, nlen, p + 1, strlen( p + 1 ), array_ptr);
     }
-    tsrm_env_unlock();
+    tsrm_env_unlock(false);
     if (t != buf && t != NULL) {
         efree(t);
     }

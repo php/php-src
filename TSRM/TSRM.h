@@ -63,9 +63,11 @@ typedef int ts_rsrc_id;
 #ifdef TSRM_WIN32
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
+# define RWLOCK_T SRWLOCK *
 #else
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *
+# define RWLOCK_T pthread_rwlock_t *
 #endif
 
 #include <signal.h>
@@ -84,8 +86,8 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 TSRM_API void tsrm_shutdown(void);
 
 /* environ lock API */
-TSRM_API void tsrm_env_lock(void);
-TSRM_API void tsrm_env_unlock(void);
+TSRM_API void tsrm_env_lock(bool write);
+TSRM_API void tsrm_env_unlock(bool write);
 
 /* allocates a new thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
@@ -125,8 +127,14 @@ TSRM_API void tsrm_error_set(int level, const char *debug_filename);
 TSRM_API THREAD_T tsrm_thread_id(void);
 TSRM_API MUTEX_T tsrm_mutex_alloc(void);
 TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
+TSRM_API RWLOCK_T tsrm_rwlock_alloc(void);
+TSRM_API void tsrm_rwlock_free(RWLOCK_T rwlock);
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
+TSRM_API int tsrm_rwlock_wrlock(RWLOCK_T rwlock);
+TSRM_API int tsrm_rwlock_wrunlock(RWLOCK_T rwlock);
+TSRM_API int tsrm_rwlock_rlock(RWLOCK_T rwlock);
+TSRM_API int tsrm_rwlock_runlock(RWLOCK_T rwlock);
 #ifdef HAVE_SIGPROCMASK
 TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 #endif
@@ -188,8 +196,8 @@ TSRM_API bool tsrm_is_managed_thread(void);
 
 #else /* non ZTS */
 
-#define tsrm_env_lock()
-#define tsrm_env_unlock()
+#define tsrm_env_lock(write)
+#define tsrm_env_unlock(write)
 
 #define TSRMG_STATIC(id, type, element)
 #define TSRMLS_MAIN_CACHE_EXTERN()
