@@ -2990,7 +2990,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	if (PCRE_G(error_code) != PHP_PCRE_NO_ERROR) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
 }
 /* }}} */
