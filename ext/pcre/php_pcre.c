@@ -1245,13 +1245,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	old_mdata_used = mdata_used;
 	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		mdata_used = 1;
+		mdata_used = true;
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			mdata_used = old_mdata_used;
 			RETURN_FALSE;
 		}
 	}
@@ -1653,13 +1652,12 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	old_mdata_used = mdata_used;
 	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		mdata_used = 1;
+		mdata_used = true;
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			mdata_used = old_mdata_used;
 			return NULL;
 		}
 	}
@@ -2614,13 +2612,12 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	old_mdata_used = mdata_used;
 	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		mdata_used = 1;
+		mdata_used = true;
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			mdata_used = old_mdata_used;
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -2959,13 +2956,12 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	old_mdata_used = mdata_used;
 	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
-		mdata_used = 1;
+		mdata_used = true;
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, PCRE_G(gctx_zmm));
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			mdata_used = old_mdata_used;
 			return;
 		}
 	}
