@@ -831,6 +831,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
+		pcre2_code_free(new_entry.re);
 		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
@@ -841,6 +842,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
+		pcre2_code_free(new_entry.re);
 		php_error_docref(NULL, E_WARNING, "Internal pcre_pattern_info() error %d", rc);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
@@ -1286,7 +1288,18 @@ matched:
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
 				if (UNEXPECTED(offsets[1] < offsets[0])) {
-					if (match_sets) efree(match_sets);
+					if (match_sets) {
+						for (i = 0; i < num_subpats; i++) {
+							zend_array_destroy(match_sets[i]);
+						}
+						efree(match_sets);
+					}
+					if (marks) {
+						zend_array_destroy(marks);
+					}
+					if (match_data != mdata) {
+						pcre2_match_data_free(match_data);
+					}
 					php_error_docref(NULL, E_WARNING, "Get subpatterns list failed");
 					RETURN_FALSE;
 				}
