@@ -6676,8 +6676,20 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 
 	zend_class_entry *ce = obj ? obj->ce : intern->ce;
 	if (!prop) {
-		if (obj && obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
-			RETURN_TRUE;
+		if (obj) {
+			/* __isset call needs to happen on lazy object, so copy obj. */
+			zend_object *instance = obj;
+retry_dynamic:
+			if (zend_lazy_object_must_init(instance)) {
+				instance = zend_lazy_object_init(instance);
+				if (!instance) {
+					RETURN_THROWS();
+				}
+				goto retry_dynamic;
+			}
+			if (instance->properties && zend_hash_find_ptr(instance->properties, ref->unmangled_name)) {
+				RETURN_TRUE;
+			}
 		}
 handle_magic_get:
 		if (ce->__get) {
@@ -6717,8 +6729,16 @@ handle_magic_get:
 			RETURN_FALSE;
 		}
 	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
+retry_declared:;
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
 		if (Z_TYPE_P(prop_val) == IS_UNDEF) {
+			if (zend_lazy_object_must_init(obj) && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+				obj = zend_lazy_object_init(obj);
+				if (!obj) {
+					RETURN_THROWS();
+				}
+				goto retry_declared;
+			}
 			if (!(Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
 				goto handle_magic_get;
 			}
@@ -6801,7 +6821,17 @@ handle_magic_set:
 			RETURN_FALSE;
 		}
 	} else if (obj && (prop->flags & ZEND_ACC_READONLY)) {
+retry:;
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) == IS_UNDEF
+		 && zend_lazy_object_must_init(obj)
+		 && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			goto retry;
+		}
 		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
 			RETURN_FALSE;
 		}
