@@ -103,6 +103,103 @@ static inline const char *bc_skip_zero_reverse(const char *scanner, const char *
 	return scanner;
 }
 
+static bool bc_scientific_notation_str2num(
+	bc_num *num, const char *str, const char *end, const char *integer_ptr, const char *fractional_ptr, const char *exponent_ptr,
+	size_t digits, size_t *full_scale)
+{
+	const char *fractional_end = fractional_ptr != NULL ? exponent_ptr : NULL;
+
+	if (UNEXPECTED(*exponent_ptr != 'e' && *exponent_ptr != 'E')) {
+		goto fail;
+	}
+	exponent_ptr++;
+
+	sign exponent_sign = PLUS;
+	if (*exponent_ptr == '+') {
+		/* Skip Sign */
+		exponent_ptr++;
+	} else if (*exponent_ptr == '-') {
+		exponent_sign = MINUS;
+		exponent_ptr++;
+	}
+
+	/* Skip exponent leading zeros. This is rare, so don't do bulk processing. */
+	while (*exponent_ptr == '0') {
+		exponent_ptr++;
+	}
+
+	const char *exponent_end = bc_count_digits(exponent_ptr, end);
+	if (UNEXPECTED(*exponent_end != '\0')) {
+		/* invalid num */
+		goto fail;
+	}
+
+	size_t exponent = 0;
+	while (exponent_ptr < exponent_end) {
+		exponent = exponent * 10 + (*exponent_ptr - '0'); /* TODO: check overflow */
+		exponent_ptr++;
+	}
+
+	if (fractional_end != NULL) {
+		/* Skip fraction trailing zeros. This is rare, so don't do bulk processing. */
+		while (fractional_end[-1] == '0') {
+			fractional_end--;
+		}
+	}
+
+	const char *integer_end = integer_ptr + digits;
+
+	size_t str_scale = fractional_end - fractional_ptr;
+	size_t str_full_len = digits + str_scale;
+	size_t leading_zero_paddings = 0;
+
+	if (exponent_sign == PLUS) {
+		digits += exponent;
+		if (digits == 0) {
+			leading_zero_paddings = 1;
+		}
+		str_scale = str_scale > exponent ? str_scale - exponent : 0;
+	} else {
+		str_scale += exponent;
+		if (digits > exponent) {
+			digits -= exponent;
+		} else {
+			leading_zero_paddings = exponent - digits + 1; /* 1 is for interger part */
+			digits = 0;
+		}
+	}
+
+	*num = bc_new_num_nonzeroed(digits > 0 ? digits : 1, str_scale); /* 1 is for 0 */
+	(*num)->n_sign = *str == '-' ? MINUS : PLUS;
+	char *nptr = (*num)->n_value;
+
+	for (size_t i = 0; i < leading_zero_paddings; i++) {
+		*nptr++ = 0;
+	}
+
+	nptr = bc_copy_and_toggle_bcd(nptr, integer_ptr, integer_end);
+	if (fractional_ptr != NULL) {
+		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
+	}
+
+	if (digits > str_full_len) {
+		/* Fill the rest integer part with zeros */
+		for (size_t i = 0; i < digits - str_full_len; i++) {
+			*nptr++ = 0;
+		}
+	}
+
+	if (full_scale) {
+		*full_scale = str_scale;
+	}
+
+	return true;
+
+fail:
+	*num = bc_copy_num(BCG(_zero_));
+	return false;
+}
+
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
 bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale)
 {
@@ -131,8 +228,8 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 	const char *decimal_point = (*ptr == '.') ? ptr : NULL;
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
-	if (UNEXPECTED(!decimal_point && *ptr != '\0')) {
-		goto fail;
+	if (!decimal_point && *ptr != '\0') {
+		return bc_scientific_notation_str2num(num, str, end, integer_ptr, fractional_ptr, ptr, digits, full_scale);
 	}
 
 	/* search and validate fractional end if exists */
@@ -149,9 +246,8 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 
 		/* validate */
 		fractional_end = bc_count_digits(fractional_ptr, end);
-		if (UNEXPECTED(*fractional_end != '\0')) {
-			/* invalid num */
-			goto fail;
+		if (*fractional_end != '\0') {
+			return bc_scientific_notation_str2num(num, str, end, integer_ptr, fractional_ptr, fractional_end, digits, full_scale);
 		}
 
 		if (full_scale) {
@@ -222,8 +318,4 @@ after_fractional:
 zero:
 	*num = bc_copy_num(BCG(_zero_));
 	return true;
-
-fail:
-	*num = bc_copy_num(BCG(_zero_));
-	return false;
 }
