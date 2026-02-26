@@ -515,6 +515,7 @@ typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
 	zend_string *default_value;
+	zend_string *doc_comment;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,

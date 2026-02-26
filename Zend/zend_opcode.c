@@ -648,6 +648,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
+			if (arg_info[i].doc_comment) {
+				zend_string_release_ex(arg_info[i].doc_comment, 0);
+			}
 			zend_type_release(arg_info[i].type, /* persistent */ false);
 		}
 		efree(arg_info);

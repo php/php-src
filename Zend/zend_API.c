@@ -2997,6 +2997,7 @@ ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info, const 
 		new_arg_info->name = NULL;
 		new_arg_info->default_value = NULL;
 	}
+	new_arg_info->doc_comment = NULL;
 	new_arg_info->type = arg_info->type;
 	zend_convert_internal_arg_info_type(&new_arg_info->type, persistent);
 }

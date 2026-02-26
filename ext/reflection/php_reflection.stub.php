@@ -649,6 +649,9 @@ class ReflectionParameter implements Reflector
     public function __toString(): string {}
 
     /** @tentative-return-type */
+    public function getDocComment(): string|false {}
+
+    /** @tentative-return-type */
     public function getName(): string {}
 
     /** @tentative-return-type */
