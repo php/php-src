@@ -19,6 +19,11 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- PCRE:
+  . preg_grep() now returns false instead of a partial array when a PCRE
+    execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
+    This is consistent with other preg_* functions.
+
 - Phar:
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
