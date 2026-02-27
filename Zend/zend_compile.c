@@ -2527,6 +2527,9 @@ static bool zend_ast_is_short_circuited(const zend_ast *ast)
 			return zend_ast_is_short_circuited(ast->child[0]);
 		case ZEND_AST_NULLSAFE_PROP:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
+			if (ast->attr & ZEND_PARENTHESIZED_NULLSAFE) {
+				return 0;
+			}
 			return 1;
 		default:
 			return 0;
@@ -2548,6 +2551,9 @@ static void zend_assert_not_short_circuited(const zend_ast *ast)
 
 static void zend_short_circuiting_mark_inner(zend_ast *ast) {
 	if (zend_ast_kind_is_short_circuited(ast->kind)) {
+		if (ast->attr & ZEND_PARENTHESIZED_NULLSAFE) {
+			return;
+		}
 		ast->attr |= ZEND_SHORT_CIRCUITING_INNER;
 	}
 }
@@ -12343,6 +12349,11 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type, bool by_ref) /* {{{ */
 {
 	zend_check_stack_limit();
+
+	if ((ast->kind == ZEND_AST_NULLSAFE_PROP || ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL)
+			&& (ast->attr & ZEND_PARENTHESIZED_NULLSAFE)) {
+		return zend_compile_var(result, ast, type, by_ref);
+	}
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
