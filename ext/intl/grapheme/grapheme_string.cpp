@@ -1176,14 +1176,15 @@ U_CFUNC PHP_FUNCTION(grapheme_limit_codepoints)
 		RETURN_FALSE;
 	}
 
-	zend_ulong pos, before;
+	zend_ulong pos, before, pos_codepoint;
 	zend_bool ret = true;
 	for (before = pos = 0; pos != UBRK_DONE; ) {
 		pos = ubrk_next(bi);
 		if (pos != UBRK_DONE) {
-			for (zend_ulong i = before; i < (pos - before); i++) {
-				U8_FWD_1(string, before, (pos - before) - i);
-				if (i >= limit_codepoint) {
+			pos_codepoint = pos - before;
+			for (zend_ulong i = before, codepoint = 0; i < pos_codepoint; i++, codepoint++) {
+				U8_FWD_1(string, before, pos_codepoint - i);
+				if (codepoint >= limit_codepoint) {
 					ret = false;
 					goto bi_close;
 				}
