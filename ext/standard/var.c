@@ -838,14 +838,14 @@ static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *
 	zend_call_known_instance_method(fn, obj, &retval, /* param_count */ 0, /* params */ NULL);
 	BG(serialize_lock)--;
 
-	if (Z_ISUNDEF(retval) || EG(exception)) {
+	if (Z_ISUNDEF(retval) || Z_ISNULL(retval) || EG(exception)) {
 		zval_ptr_dtor(&retval);
 		return NULL;
 	}
 
 	if (Z_TYPE(retval) != IS_ARRAY) {
 		zval_ptr_dtor(&retval);
-		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
+		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array of property names, or return null/void to delegate to default serialization", ZSTR_VAL(obj->ce->name));
 		return NULL;
 	}
 
@@ -1221,20 +1221,18 @@ again:
 						zval tmp;
 
 						ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
-						if (!(ht = php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv)))) {
-							if (!EG(exception)) {
-								/* we should still add element even if it's not OK,
-								 * since we already wrote the length of the array before */
-								smart_str_appendl(buf, "N;", 2);
-							}
+						ht = php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv));
+						if (ht) {
+							php_var_serialize_class(buf, &tmp, ht, var_hash);
+							zend_array_release(ht);
 							OBJ_RELEASE(Z_OBJ(tmp));
 							return;
 						}
 
-						php_var_serialize_class(buf, &tmp, ht, var_hash);
-						zend_array_release(ht);
 						OBJ_RELEASE(Z_OBJ(tmp));
-						return;
+						if (EG(exception)) {
+							return;
+						}
 					}
 				}
 

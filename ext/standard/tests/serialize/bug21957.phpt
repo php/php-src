@@ -40,10 +40,15 @@ array(2) {
     int(2)
   }
 }
-a:2:{s:3:"one";s:3:"ABC";s:3:"two";N;}
+a:2:{s:3:"one";s:3:"ABC";s:3:"two";O:4:"test":2:{s:1:"a";i:7;s:1:"b";i:0;}}
 array(2) {
   ["one"]=>
   string(3) "ABC"
   ["two"]=>
-  NULL
+  object(test)#2 (2) {
+    ["a"]=>
+    int(7)
+    ["b"]=>
+    int(0)
+  }
 }
