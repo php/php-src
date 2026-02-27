@@ -134,8 +134,8 @@ PHP 8.6 UPGRADE NOTES
 
 - Reflection:
   . ReflectionConstant::inNamespace()
-  . ReflectionProperty::isReadable() ReflectionProperty::isWritable() were
-    added.
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    RFC: https://wiki.php.net/rfc/isreadable-iswriteable
 
 - Standard:
   . `clamp()` returns the given value if in range, else return the nearest

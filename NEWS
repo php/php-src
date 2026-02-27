@@ -87,6 +87,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    (ilutov)
 
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
