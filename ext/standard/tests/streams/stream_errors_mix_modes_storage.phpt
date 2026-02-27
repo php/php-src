@@ -47,7 +47,7 @@ function stream_test_errors($title, $context) {
     if ($error) {
         echo "Error details:\n";
         echo "- Message: " . $error->message . "\n";
-        echo "- Code: " . $error->code->name . " (" . $error->code->value . ")\n";
+        echo "- Code: $error->code\n";
         echo "- Wrapper: " . $error->wrapperName . "\n";
         echo "- Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
         echo "- Count: " . $error->count() . "\n";
@@ -56,7 +56,7 @@ function stream_test_errors($title, $context) {
         $current = $error;
         $idx = 0;
         while ($current) {
-            echo "  [$idx] " . $current->code->name . ": " . $current->message . "\n";
+            echo "  [$idx] " . $current->code . ": " . $current->message . "\n";
             $current = $current->next;
             $idx++;
         }
@@ -106,41 +106,41 @@ stream_test_errors('AUTO ERROR', [
 ALL
 Error details:
 - Message: TestStream::stream_cast is not implemented!
-- Code: NotImplemented (70)
+- Code: 70
 - Wrapper: user-space
 - Terminating: yes
 - Count: 2
-  [0] NotImplemented: TestStream::stream_cast is not implemented!
-  [1] CastNotSupported: Cannot represent a stream of type user-space as a select()able descriptor
+  [0] 70: TestStream::stream_cast is not implemented!
+  [1] 101: Cannot represent a stream of type user-space as a select()able descriptor
 
 NON TERMINATING
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: 161
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
-  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+  [0] 161: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
 
 TERMINATING
 Error details:
 - Message: TestStream::stream_cast is not implemented!
-- Code: NotImplemented (70)
+- Code: 70
 - Wrapper: user-space
 - Terminating: yes
 - Count: 2
-  [0] NotImplemented: TestStream::stream_cast is not implemented!
-  [1] CastNotSupported: Cannot represent a stream of type user-space as a select()able descriptor
+  [0] 70: TestStream::stream_cast is not implemented!
+  [1] 101: Cannot represent a stream of type user-space as a select()able descriptor
 
 AUTO EXCEPTION
 EXCEPTION: TestStream::stream_cast is not implemented!
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: 161
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
-  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+  [0] 161: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
 
 AUTO ERROR
 
@@ -151,8 +151,8 @@ Warning: stream_select(): TestStream::stream_cast is not implemented! in %s on l
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: 161
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
-  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+  [0] 161: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost

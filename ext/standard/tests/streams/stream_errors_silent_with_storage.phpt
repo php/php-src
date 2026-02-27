@@ -15,7 +15,7 @@ var_dump($stream);
 $error = stream_get_last_error();
 if ($error) {
     echo "Has error: yes\n";
-    echo "Error code: " . $error->code->name . "\n";
+    echo "Error code: " . $error->code . "\n";
     echo "Error wrapper: " . $error->wrapperName . "\n";
     echo "Error message: " . $error->message . "\n";
 }
@@ -24,6 +24,6 @@ if ($error) {
 --EXPECT--
 bool(false)
 Has error: yes
-Error code: OpenFailed
+Error code: 36
 Error wrapper: PHP
 Error message: Failed to open stream: operation failed

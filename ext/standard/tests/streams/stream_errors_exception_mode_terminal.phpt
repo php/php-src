@@ -18,7 +18,6 @@ try {
     $error = $e->getError();
     if ($error) {
         echo "Wrapper: " . $error->wrapperName . "\n";
-        echo "Error code name: " . $error->code->name . "\n";
     }
 }
 
@@ -27,4 +26,3 @@ try {
 Caught: Failed to open stream: operation failed
 Code: 36
 Wrapper: PHP
-Error code name: OpenFailed
