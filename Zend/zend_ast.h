@@ -183,8 +183,8 @@ enum _zend_ast_kind {
 	ZEND_AST_PARAM = 6 << ZEND_AST_NUM_CHILDREN_SHIFT,
 };
 
-typedef uint16_t zend_ast_kind;
-typedef uint16_t zend_ast_attr;
+typedef uint32_t zend_ast_kind;
+typedef uint32_t zend_ast_attr;
 
 struct _zend_ast {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
