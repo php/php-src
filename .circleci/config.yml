@@ -167,6 +167,7 @@ jobs:
           name: Test
           no_output_timeout: 30m
           command: |
+            export RUN_RESOURCE_HEAVY_TESTS=1
             sapi/cli/php run-tests.php \
               -d zend_extension=opcache.so \
               -d opcache.enable_cli=1 \
