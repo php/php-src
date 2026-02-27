@@ -13,4 +13,5 @@ runs:
         ext/tokenizer/tokenizer_data_gen.php
         build/gen_stub.php -f --generate-optimizer-info --verify
         ext/phar/makestub.php
+        .github/scripts/download-bundled/make-workflow-file.php
         .github/scripts/test-directory-unchanged.sh .
