@@ -27,18 +27,18 @@ class TestStream {
 
 stream_wrapper_register('test', 'TestStream');
 
-function stream_test_errors($title, $context) {
-    stream_context_set_default($context);
-    $stream = fopen('test://foo', 'r', false);
+function stream_test_errors($title, $contextOptions) {
+    $context = stream_context_create($contextOptions);
+    $stream = fopen('test://foo', 'r', false, $context);
     try {
         echo $title . "\n";
-        $readin = fopen('php://stdin', 'r');
+        $readin = fopen('php://stdin', 'r', false, $context);
         $data = fread($stream, 10);
 
         $read = [$readin, $stream];
         $write = NULL;
         $except = NULL;
-        stream_select($read, $write, $except, 0);
+        stream_select($read, $write, $except, 0, 0, $context);
     } catch (StreamException $e) {
         echo 'EXCEPTION: ' . $e->getMessage() . "\n";
     }

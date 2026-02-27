@@ -3376,7 +3376,10 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
+/**
+ * @param resource|null $context
+ */
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null, $context = null): int|false {}
 
 /**
  * @return resource
@@ -3479,17 +3482,19 @@ function stream_socket_shutdown($stream, int $mode): bool {}
 
 #ifdef HAVE_SOCKETPAIR
 /**
+ * @param resource|null $context
  * @return array<int, resource>|false
  * @refcount 1
  */
-function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+function stream_socket_pair(int $domain, int $type, int $protocol, $context = null): array|false {}
 #endif
 
 /**
  * @param resource $from
  * @param resource $to
+ * @param resource|null $context
  */
-function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0, $context = null): int|false {}
 
 /**
  * @param resource $stream
@@ -3560,8 +3565,11 @@ function stream_get_last_error(): ?StreamError {}
  */
 function stream_get_transports(): array {}
 
-/** @param resource|string $stream */
-function stream_is_local($stream): bool {}
+/** 
+ * @param resource|string $stream
+ * @param resource|null $context
+ */
+function stream_is_local($stream, $context = null): bool {}
 
 /** @param resource $stream */
 function stream_isatty($stream): bool {}
