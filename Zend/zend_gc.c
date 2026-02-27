@@ -984,6 +984,9 @@ handle_zvals:
 handle_ht:
 		n = ht->nNumUsed;
 		zv = ht->arPacked;
+		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
+			goto next;
+		}
 		if (HT_IS_PACKED(ht)) {
 			goto handle_zvals;
 		}
@@ -1042,7 +1045,7 @@ next:
  * counts and mark visited nodes grey. See MarkGray() in Bacon & Rajan. */
 static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
-	HashTable *ht;
+	HashTable *ht, *primitive_ht = NULL;
 	Bucket *p;
 	zval *zv;
 	uint32_t n;
@@ -1133,6 +1136,7 @@ tail_call:
 handle_zvals:
 			for (; n != 0; n--) {
 				if (Z_COLLECTABLE_P(zv)) {
+					primitive_ht = NULL;
 					ref = Z_COUNTED_P(zv);
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1154,12 +1158,20 @@ handle_zvals:
 				}
 				zv++;
 			}
+			if (primitive_ht) {
+				GC_ADD_FLAGS(primitive_ht, GC_NOT_COLLECTABLE);
+				primitive_ht = NULL;
+			}
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		ZEND_ASSERT(((zend_array*)ref) != &EG(symbol_table));
 		ht = (zend_array*)ref;
 handle_ht:
 		n = ht->nNumUsed;
+		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
+			goto next;
+		}
+		primitive_ht = ht;
 		if (HT_IS_PACKED(ht)) {
             zv = ht->arPacked;
             goto handle_zvals;
@@ -1172,6 +1184,7 @@ handle_ht:
 				zv = Z_INDIRECT_P(zv);
 			}
 			if (Z_COLLECTABLE_P(zv)) {
+				primitive_ht = NULL;
 				ref = Z_COUNTED_P(zv);
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1196,6 +1209,10 @@ handle_ht:
 				}
 			}
 			p++;
+		}
+		if (primitive_ht) {
+			GC_ADD_FLAGS(ht, GC_NOT_COLLECTABLE);
+			primitive_ht = NULL;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_COLLECTABLE(((zend_reference*)ref)->val)) {
@@ -1379,6 +1396,9 @@ handle_zvals:
 
 handle_ht:
 		n = ht->nNumUsed;
+		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
+			goto next;
+		}
 		if (HT_IS_PACKED(ht)) {
             zv = ht->arPacked;
             goto handle_zvals;
@@ -1624,6 +1644,9 @@ handle_zvals:
 
 handle_ht:
 		n = ht->nNumUsed;
+		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
+			goto next;
+		}
 		if (HT_IS_PACKED(ht)) {
 			zv = ht->arPacked;
 			goto handle_zvals;
@@ -1812,6 +1835,9 @@ handle_zvals:
 
 handle_ht:
 		n = ht->nNumUsed;
+		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
+			goto next;
+		}
 		if (HT_IS_PACKED(ht)) {
 			zv = ht->arPacked;
 			goto handle_zvals;
