@@ -13,8 +13,8 @@ $stream = fopen('php://nonexistent', 'r', false, $context);
 
 $error = stream_get_last_error();
 if ($error) {
-    echo "Has OpenFailed: " . ($error->hasCode(StreamErrorCode::OpenFailed) ? 'yes' : 'no') . "\n";
-    echo "Has NotFound: " . ($error->hasCode(StreamErrorCode::NotFound) ? 'yes' : 'no') . "\n";
+    echo "Has OpenFailed: " . ($error->hasCode(StreamError::CODE_OPEN_FAILED) ? 'yes' : 'no') . "\n";
+    echo "Has NotFound: " . ($error->hasCode(StreamError::CODE_NOT_FOUND) ? 'yes' : 'no') . "\n";
 }
 
 ?>

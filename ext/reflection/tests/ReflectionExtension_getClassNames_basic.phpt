@@ -17,7 +17,6 @@ Directory
 RoundingMode
 StreamBucket
 StreamError
-StreamErrorCode
 StreamErrorMode
 StreamErrorStore
 StreamException

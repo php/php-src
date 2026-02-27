@@ -61,102 +61,94 @@ BEGIN_EXTERN_C()
 #define STREAM_ERROR_CODE_USERSPACE_START 160
 #define STREAM_ERROR_CODE_USERSPACE_END 170
 
-/* X-macro defining all error codes */
-#define PHP_STREAM_ERROR_CODES(V) \
-	/* General errors */ \
-	V(NONE, None, 0) \
-	V(GENERIC, Generic, 1) \
-	/* I/O operation errors (10-29) */ \
-	V(READ_FAILED, ReadFailed, 10) \
-	V(WRITE_FAILED, WriteFailed, 11) \
-	V(SEEK_FAILED, SeekFailed, 12) \
-	V(SEEK_NOT_SUPPORTED, SeekNotSupported, 13) \
-	V(FLUSH_FAILED, FlushFailed, 14) \
-	V(TRUNCATE_FAILED, TruncateFailed, 15) \
-	V(CONNECT_FAILED, ConnectFailed, 16) \
-	V(BIND_FAILED, BindFailed, 17) \
-	V(LISTEN_FAILED, ListenFailed, 18) \
-	V(NOT_WRITABLE, NotWritable, 19) \
-	V(NOT_READABLE, NotReadable, 20) \
-	/* File system operations (30-69) */ \
-	V(DISABLED, Disabled, 30) \
-	V(NOT_FOUND, NotFound, 31) \
-	V(PERMISSION_DENIED, PermissionDenied, 32) \
-	V(ALREADY_EXISTS, AlreadyExists, 33) \
-	V(INVALID_PATH, InvalidPath, 34) \
-	V(PATH_TOO_LONG, PathTooLong, 35) \
-	V(OPEN_FAILED, OpenFailed, 36) \
-	V(CREATE_FAILED, CreateFailed, 37) \
-	V(DUP_FAILED, DupFailed, 38) \
-	V(UNLINK_FAILED, UnlinkFailed, 39) \
-	V(RENAME_FAILED, RenameFailed, 40) \
-	V(MKDIR_FAILED, MkdirFailed, 41) \
-	V(RMDIR_FAILED, RmdirFailed, 42) \
-	V(STAT_FAILED, StatFailed, 43) \
-	V(META_FAILED, MetaFailed, 44) \
-	V(CHMOD_FAILED, ChmodFailed, 45) \
-	V(CHOWN_FAILED, ChownFailed, 46) \
-	V(COPY_FAILED, CopyFailed, 47) \
-	V(TOUCH_FAILED, TouchFailed, 48) \
-	V(INVALID_MODE, InvalidMode, 49) \
-	V(INVALID_META, InvalidMeta, 50) \
-	V(MODE_NOT_SUPPORTED, ModeNotSupported, 51) \
-	V(READONLY, Readonly, 52) \
-	V(RECURSION_DETECTED, RecursionDetected, 53) \
-	/* Wrapper/protocol operations (70-89) */ \
-	V(NOT_IMPLEMENTED, NotImplemented, 70) \
-	V(NO_OPENER, NoOpener, 71) \
-	V(PERSISTENT_NOT_SUPPORTED, PersistentNotSupported, 72) \
-	V(WRAPPER_NOT_FOUND, WrapperNotFound, 73) \
-	V(WRAPPER_DISABLED, WrapperDisabled, 74) \
-	V(PROTOCOL_UNSUPPORTED, ProtocolUnsupported, 75) \
-	V(WRAPPER_REGISTRATION_FAILED, WrapperRegistrationFailed, 76) \
-	V(WRAPPER_UNREGISTRATION_FAILED, WrapperUnregistrationFailed, 77) \
-	V(WRAPPER_RESTORATION_FAILED, WrapperRestorationFailed, 78) \
-	/* Filter operations (90-99) */ \
-	V(FILTER_NOT_FOUND, FilterNotFound, 90) \
-	V(FILTER_FAILED, FilterFailed, 91) \
-	/* Cast/conversion operations (100-109) */ \
-	V(CAST_FAILED, CastFailed, 100) \
-	V(CAST_NOT_SUPPORTED, CastNotSupported, 101) \
-	V(MAKE_SEEKABLE_FAILED, MakeSeekableFailed, 102) \
-	V(BUFFERED_DATA_LOST, BufferedDataLost, 103) \
-	/* Network/socket operations (110-129) */ \
-	V(NETWORK_SEND_FAILED, NetworkSendFailed, 110) \
-	V(NETWORK_RECV_FAILED, NetworkRecvFailed, 111) \
-	V(SSL_NOT_SUPPORTED, SslNotSupported, 112) \
-	V(RESUMPTION_FAILED, ResumptionFailed, 113) \
-	V(SOCKET_PATH_TOO_LONG, SocketPathTooLong, 114) \
-	V(OOB_NOT_SUPPORTED, OobNotSupported, 115) \
-	V(PROTOCOL_ERROR, ProtocolError, 116) \
-	V(INVALID_URL, InvalidUrl, 117) \
-	V(INVALID_RESPONSE, InvalidResponse, 118) \
-	V(INVALID_HEADER, InvalidHeader, 119) \
-	V(INVALID_PARAM, InvalidParam, 120) \
-	V(REDIRECT_LIMIT, RedirectLimit, 121) \
-	V(AUTH_FAILED, AuthFailed, 122) \
-	/* Encoding/decoding/archiving operations (130-139) */ \
-	V(ARCHIVING_FAILED, ArchivingFailed, 130) \
-	V(ENCODING_FAILED, EncodingFailed, 131) \
-	V(DECODING_FAILED, DecodingFailed, 132) \
-	V(INVALID_FORMAT, InvalidFormat, 133) \
-	/* Resource/allocation operations (140-149) */ \
-	V(ALLOCATION_FAILED, AllocationFailed, 140) \
-	V(TEMPORARY_FILE_FAILED, TemporaryFileFailed, 141) \
-	/* Locking operations (150-159) */ \
-	V(LOCK_FAILED, LockFailed, 150) \
-	V(LOCK_NOT_SUPPORTED, LockNotSupported, 151) \
-	/* Userspace stream operations (160-169) */ \
-	V(USERSPACE_NOT_IMPLEMENTED, UserspaceNotImplemented, 160) \
-	V(USERSPACE_INVALID_RETURN, UserspaceInvalidReturn, 161) \
-	V(USERSPACE_CALL_FAILED, UserspaceCallFailed, 162)
-
-/* Generate C enum for internal use */
-typedef enum _StreamErrorCode {
-#define V(uc_name, name, val) STREAM_ERROR_CODE_##uc_name = val,
-	PHP_STREAM_ERROR_CODES(V)
-#undef V
-} StreamErrorCode;
+/* Error codes - exposed as StreamError::ERROR_CODE_* class constants */
+/* General errors */
+#define STREAM_ERROR_CODE_NONE 0
+#define STREAM_ERROR_CODE_GENERIC 1
+/* I/O operation errors (10-29) */
+#define STREAM_ERROR_CODE_READ_FAILED 10
+#define STREAM_ERROR_CODE_WRITE_FAILED 11
+#define STREAM_ERROR_CODE_SEEK_FAILED 12
+#define STREAM_ERROR_CODE_SEEK_NOT_SUPPORTED 13
+#define STREAM_ERROR_CODE_FLUSH_FAILED 14
+#define STREAM_ERROR_CODE_TRUNCATE_FAILED 15
+#define STREAM_ERROR_CODE_CONNECT_FAILED 16
+#define STREAM_ERROR_CODE_BIND_FAILED 17
+#define STREAM_ERROR_CODE_LISTEN_FAILED 18
+#define STREAM_ERROR_CODE_NOT_WRITABLE 19
+#define STREAM_ERROR_CODE_NOT_READABLE 20
+/* File system operations (30-69) */
+#define STREAM_ERROR_CODE_DISABLED 30
+#define STREAM_ERROR_CODE_NOT_FOUND 31
+#define STREAM_ERROR_CODE_PERMISSION_DENIED 32
+#define STREAM_ERROR_CODE_ALREADY_EXISTS 33
+#define STREAM_ERROR_CODE_INVALID_PATH 34
+#define STREAM_ERROR_CODE_PATH_TOO_LONG 35
+#define STREAM_ERROR_CODE_OPEN_FAILED 36
+#define STREAM_ERROR_CODE_CREATE_FAILED 37
+#define STREAM_ERROR_CODE_DUP_FAILED 38
+#define STREAM_ERROR_CODE_UNLINK_FAILED 39
+#define STREAM_ERROR_CODE_RENAME_FAILED 40
+#define STREAM_ERROR_CODE_MKDIR_FAILED 41
+#define STREAM_ERROR_CODE_RMDIR_FAILED 42
+#define STREAM_ERROR_CODE_STAT_FAILED 43
+#define STREAM_ERROR_CODE_META_FAILED 44
+#define STREAM_ERROR_CODE_CHMOD_FAILED 45
+#define STREAM_ERROR_CODE_CHOWN_FAILED 46
+#define STREAM_ERROR_CODE_COPY_FAILED 47
+#define STREAM_ERROR_CODE_TOUCH_FAILED 48
+#define STREAM_ERROR_CODE_INVALID_MODE 49
+#define STREAM_ERROR_CODE_INVALID_META 50
+#define STREAM_ERROR_CODE_MODE_NOT_SUPPORTED 51
+#define STREAM_ERROR_CODE_READONLY 52
+#define STREAM_ERROR_CODE_RECURSION_DETECTED 53
+/* Wrapper/protocol operations (70-89) */
+#define STREAM_ERROR_CODE_NOT_IMPLEMENTED 70
+#define STREAM_ERROR_CODE_NO_OPENER 71
+#define STREAM_ERROR_CODE_PERSISTENT_NOT_SUPPORTED 72
+#define STREAM_ERROR_CODE_WRAPPER_NOT_FOUND 73
+#define STREAM_ERROR_CODE_WRAPPER_DISABLED 74
+#define STREAM_ERROR_CODE_PROTOCOL_UNSUPPORTED 75
+#define STREAM_ERROR_CODE_WRAPPER_REGISTRATION_FAILED 76
+#define STREAM_ERROR_CODE_WRAPPER_UNREGISTRATION_FAILED 77
+#define STREAM_ERROR_CODE_WRAPPER_RESTORATION_FAILED 78
+/* Filter operations (90-99) */
+#define STREAM_ERROR_CODE_FILTER_NOT_FOUND 90
+#define STREAM_ERROR_CODE_FILTER_FAILED 91
+/* Cast/conversion operations (100-109) */
+#define STREAM_ERROR_CODE_CAST_FAILED 100
+#define STREAM_ERROR_CODE_CAST_NOT_SUPPORTED 101
+#define STREAM_ERROR_CODE_MAKE_SEEKABLE_FAILED 102
+#define STREAM_ERROR_CODE_BUFFERED_DATA_LOST 103
+/* Network/socket operations (110-129) */
+#define STREAM_ERROR_CODE_NETWORK_SEND_FAILED 110
+#define STREAM_ERROR_CODE_NETWORK_RECV_FAILED 111
+#define STREAM_ERROR_CODE_SSL_NOT_SUPPORTED 112
+#define STREAM_ERROR_CODE_RESUMPTION_FAILED 113
+#define STREAM_ERROR_CODE_SOCKET_PATH_TOO_LONG 114
+#define STREAM_ERROR_CODE_OOB_NOT_SUPPORTED 115
+#define STREAM_ERROR_CODE_PROTOCOL_ERROR 116
+#define STREAM_ERROR_CODE_INVALID_URL 117
+#define STREAM_ERROR_CODE_INVALID_RESPONSE 118
+#define STREAM_ERROR_CODE_INVALID_HEADER 119
+#define STREAM_ERROR_CODE_INVALID_PARAM 120
+#define STREAM_ERROR_CODE_REDIRECT_LIMIT 121
+#define STREAM_ERROR_CODE_AUTH_FAILED 122
+/* Encoding/decoding/archiving operations (130-139) */
+#define STREAM_ERROR_CODE_ARCHIVING_FAILED 130
+#define STREAM_ERROR_CODE_ENCODING_FAILED 131
+#define STREAM_ERROR_CODE_DECODING_FAILED 132
+#define STREAM_ERROR_CODE_INVALID_FORMAT 133
+/* Resource/allocation operations (140-149) */
+#define STREAM_ERROR_CODE_ALLOCATION_FAILED 140
+#define STREAM_ERROR_CODE_TEMPORARY_FILE_FAILED 141
+/* Locking operations (150-159) */
+#define STREAM_ERROR_CODE_LOCK_FAILED 150
+#define STREAM_ERROR_CODE_LOCK_NOT_SUPPORTED 151
+/* Userspace stream operations (160-169) */
+#define STREAM_ERROR_CODE_USERSPACE_NOT_IMPLEMENTED 160
+#define STREAM_ERROR_CODE_USERSPACE_INVALID_RETURN 161
+#define STREAM_ERROR_CODE_USERSPACE_CALL_FAILED 162
 
 /* Wrapper name for PHP errors */
 #define PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME ":na"
@@ -166,7 +158,7 @@ typedef enum _StreamErrorCode {
 /* Error entry in chain */
 typedef struct _php_stream_error_entry {
 	zend_string *message;
-	StreamErrorCode code;
+	int code;
 	char *wrapper_name;
 	char *param;
 	char *docref;

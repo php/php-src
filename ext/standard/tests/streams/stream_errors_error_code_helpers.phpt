@@ -1,5 +1,5 @@
 --TEST--
-Stream errors - StreamErrorCode helper methods
+Stream errors - StreamError helper methods
 --FILE--
 <?php
 
@@ -14,10 +14,10 @@ $stream = fopen('php://nonexistent', 'r', false, $context);
 
 $error = stream_get_last_error();
 if ($error) {
-    echo "Is I/O error: " . ($error->code->isIoError() ? 'yes' : 'no') . "\n";
-    echo "Is filesystem error: " . ($error->code->isFileSystemError() ? 'yes' : 'no') . "\n";
-    echo "Is network error: " . ($error->code->isNetworkError() ? 'yes' : 'no') . "\n";
-    echo "Is wrapper error: " . ($error->code->isWrapperError() ? 'yes' : 'no') . "\n";
+    echo "Is I/O error: " . ($error->isIoError() ? 'yes' : 'no') . "\n";
+    echo "Is filesystem error: " . ($error->isFileSystemError() ? 'yes' : 'no') . "\n";
+    echo "Is network error: " . ($error->isNetworkError() ? 'yes' : 'no') . "\n";
+    echo "Is wrapper error: " . ($error->isWrapperError() ? 'yes' : 'no') . "\n";
 }
 
 ?>

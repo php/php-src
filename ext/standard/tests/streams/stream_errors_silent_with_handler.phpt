@@ -12,7 +12,7 @@ $context = stream_context_create([
             $handler_called = true;
             echo "Handler called\n";
             echo "Wrapper: " . $error->wrapperName . "\n";
-            echo "Code: " . $error->code->name . "\n";
+            echo "Code: " . $error->code . "\n";
             echo "Message: " . $error->message . "\n";
             echo "Param: " . ($error->param ?? 'null') . "\n";
             echo "Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
@@ -28,7 +28,7 @@ var_dump($handler_called);
 --EXPECT--
 Handler called
 Wrapper: PHP
-Code: OpenFailed
+Code: 36
 Message: Failed to open stream: operation failed
 Param: php://nonexistent
 Terminating: yes
