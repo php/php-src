@@ -166,6 +166,11 @@ const IDNA_ERROR_BIDI = UNKNOWN;
  * @cvalue UIDNA_ERROR_CONTEXTJ
  */
 const IDNA_ERROR_CONTEXTJ = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GRAPHEME_LIMIT_CODEPOINTS
+ */
+const GRAPHEME_LIMIT_CODEPOINTS = UNKNOWN;
 
 class IntlException extends Exception
 {
@@ -444,6 +449,8 @@ function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle =
 function grapheme_str_split(string $string, int $length = 1): array|false {}
 
 function grapheme_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1, string $locale = ""): int|false {}
+
+function grapheme_limit_codepoints(string $string, int $limit = GRAPHEME_LIMIT_CODEPOINTS): bool {}
 
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}

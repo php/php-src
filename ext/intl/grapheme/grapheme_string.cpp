@@ -1135,4 +1135,68 @@ out_ustring1:
 	efree(ustring1);
 }
 
+U_CFUNC PHP_FUNCTION(grapheme_limit_codepoints)
+{
+	char *string;
+	size_t string_len = 0;
+	zend_long limit_codepoint = GRAPHEME_LIMIT_CODEPOINTS;
+	int ustring_len = 0;
+	UErrorCode status;
+	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(string, string_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit_codepoint)
+	ZEND_PARSE_PARAMETERS_END();
+
+	status = U_ZERO_ERROR;
+	UBreakIterator *bi;
+	UText ut = UTEXT_INITIALIZER;
+	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &status );
+
+	if( U_FAILURE(status) ) {
+		intl_error_set_code( nullptr, status );
+
+		/* Set error messages. */
+		intl_error_set_custom_msg( nullptr, "Error in grapheme_get_break_iterator" );
+		RETURN_FALSE;
+	}
+
+	utext_openUTF8(&ut, string, string_len, &status);
+	ubrk_setUText(bi, &ut, &status);
+
+	if ( U_FAILURE( status ) ) {
+		/* Set global error code. */
+		intl_error_set_code( nullptr, status );
+
+		/* Set error messages. */
+		intl_error_set_custom_msg( nullptr, "Error opening UTF-8 text");
+
+		RETURN_FALSE;
+	}
+
+	zend_ulong pos, before;
+	zend_bool ret = true;
+	for (before = pos = 0; pos != UBRK_DONE; ) {
+		pos = ubrk_next(bi);
+		if (pos != UBRK_DONE) {
+			for (zend_ulong i = before; i < (pos - before); i++) {
+				U8_FWD_1(string, before, (pos - before) - i);
+				if (i >= limit_codepoint) {
+					ret = false;
+					goto bi_close;
+				}
+			}
+		}
+		before = pos;
+	}
+
+bi_close:
+	ubrk_close(bi);
+	utext_close(&ut);
+
+	RETURN_BOOL(ret);
+
+}
 /* }}} */
