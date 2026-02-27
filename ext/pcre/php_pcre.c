@@ -826,19 +826,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	new_entry.refcount = 0;
 	new_entry.subpats_table = NULL;
 
-	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
-	if (rc < 0) {
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-		pcre2_code_free(new_entry.re);
-		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		return NULL;
-	}
-
-	rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &new_entry.name_count);
-	if (rc < 0) {
+	if ((rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count)) < 0 ||
+	    (rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &new_entry.name_count)) < 0) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
