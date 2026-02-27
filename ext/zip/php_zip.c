@@ -587,7 +587,7 @@ static void php_zipobj_add_buffer(ze_zip_object *obj, zend_string *str) /* {{{ *
 static void php_zipobj_release_buffers(ze_zip_object *obj) /* {{{ */
 {
 	if (obj->buffers_cnt > 0) {
-		for (int i = 0; i < obj->buffers_cnt; i++) {
+		for (size_t i = 0; i < obj->buffers_cnt; i++) {
 			zend_string_release(obj->buffers[i]);
 		}
 		efree(obj->buffers);
