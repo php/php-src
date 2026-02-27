@@ -86,6 +86,37 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 	}
 }/*}}}*/
 
+/**
+ * Converts Windows GetLastError() codes to POSIX errno values
+ * @param win32_error
+ */
+static void tsrm_set_errno_from_win32_error(const DWORD win32_error)
+{/*{{{*/
+	switch (win32_error) {
+		case ERROR_ACCESS_DENIED:
+			errno = EACCES;
+			break;
+		case ERROR_NOT_ENOUGH_MEMORY:
+		case ERROR_OUTOFMEMORY:
+			errno = ENOMEM;
+			break;
+		case ERROR_INVALID_PARAMETER:
+		case ERROR_INVALID_HANDLE:
+			errno = EINVAL;
+			break;
+		case ERROR_ALREADY_EXISTS:
+			errno = EEXIST;
+			break;
+		case ERROR_FILE_NOT_FOUND:
+		case ERROR_PATH_NOT_FOUND:
+			errno = ENOENT;
+			break;
+		default:
+			errno = EINVAL;
+			break;
+	}
+}/*}}}*/
+
 TSRM_API void tsrm_win32_startup(void)
 {/*{{{*/
 #ifdef ZTS
@@ -651,6 +682,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
 			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
+				errno = EINVAL;
 				return -1;
 			}
 			size += sizeof(shm->descriptor);
@@ -665,11 +697,13 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			created		= TRUE;
 		}
 		if (!shm_handle) {
+			tsrm_set_errno_from_win32_error(GetLastError());
 			return -1;
 		}
 	} else {
 		if (flags & IPC_EXCL) {
 			CloseHandle(shm_handle);
+			errno = EEXIST;
 			return -1;
 		}
 	}
@@ -690,6 +724,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	shm = shm_get(key, NULL);
 	if (!shm) {
 		CloseHandle(shm_handle);
+		errno = ENOMEM;
 		return -1;
 	}
 	shm->segment = shm_handle;
@@ -716,6 +751,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		}
 		UnmapViewOfFile(shm->descriptor);
 		shm->descriptor = NULL;
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -744,6 +780,7 @@ TSRM_API int shmdt(const void *shmaddr)
 	int ret;
 
 	if (!shm || !shm->segment) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -753,7 +790,10 @@ TSRM_API int shmdt(const void *shmaddr)
 
 	ret = 0;
 	if (shm->descriptor->shm_nattch <= 0) {
-		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+		if (!UnmapViewOfFile(shm->descriptor)) {
+			tsrm_set_errno_from_win32_error(GetLastError());
+			ret = -1;
+		}
 		shm->descriptor = NULL;
 	}
 	return ret;
@@ -764,6 +804,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	shm_pair *shm = shm_get(key, NULL);
 
 	if (!shm || !shm->segment) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -782,10 +823,16 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 		case IPC_RMID:
 			if (shm->descriptor->shm_nattch < 1) {
 				shm->descriptor->shm_perm.key = -1;
+				/* Close handle to allow Windows to destroy the named mapping object */
+				if (shm->segment && shm->segment != INVALID_HANDLE_VALUE) {
+					CloseHandle(shm->segment);
+					shm->segment = INVALID_HANDLE_VALUE;
+				}
 			}
 			return 0;
 
 		default:
+			errno = EINVAL;
 			return -1;
 	}
 }/*}}}*/
