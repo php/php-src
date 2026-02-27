@@ -171,11 +171,6 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket)
 {
-	/* TODO: this was added as a bad workaround for bug #35916 and should be removed in the future. */
-	if (brigade->tail == bucket) {
-		return;
-	}
-
 	bucket->prev = brigade->tail;
 	bucket->next = NULL;
 
