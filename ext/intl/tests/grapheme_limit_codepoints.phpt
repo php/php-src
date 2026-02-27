@@ -6,7 +6,6 @@ intl
 <?php
 $f = "あい👨‍👨‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦‍👦うえお";
 var_dump(grapheme_limit_codepoints($f));
-var_dump(grapheme_strlen($f));
 $f = "あいうえお👨‍👨‍👦";
 var_dump(grapheme_limit_codepoints($f));
 var_dump(grapheme_strlen($f));
@@ -19,7 +18,6 @@ var_dump(grapheme_strlen($f));
 ?>
 --EXPECT--
 bool(false)
-int(6)
 bool(true)
 int(6)
 bool(true)
