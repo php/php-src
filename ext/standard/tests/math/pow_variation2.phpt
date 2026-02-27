@@ -74,9 +74,9 @@ float(4.5055521304275)
 float(1)
 float(20.3)
 float(1)
-Unsupported operand types: float ** string
+Unsupported operand types: float ** empty-string
 Unsupported operand types: float ** array
-Unsupported operand types: float ** string
+Unsupported operand types: float ** non-numeric-string
 float(15532029.564086)
 float(412.09)
 float(1.2088495422866)

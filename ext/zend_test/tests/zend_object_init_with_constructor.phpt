@@ -150,7 +150,7 @@ Error: Call to private PrivateUser::__construct() from global scope
 Exception: Don't construct
 Testing param passing
 ArgumentCountError: Too few arguments to function TestUserWithConstructorArgs::__construct(), 0 passed and exactly 2 expected
-TypeError: TestUserWithConstructorArgs::__construct(): Argument #1 ($int_param) must be of type int, string given
+TypeError: TestUserWithConstructorArgs::__construct(): Argument #1 ($int_param) must be of type int, non-numeric-string given
 Error: Unknown named parameter $unused_param
 object(TestUserWithConstructorArgs)#1 (0) {
 }

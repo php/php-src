@@ -21,4 +21,4 @@ try {
 }   
 ?>
 --EXPECT--
-Unsupported operand types: string * int
+Unsupported operand types: non-numeric-string * int

@@ -150,6 +150,33 @@ ZEND_API const char *zend_zval_value_name(const zval *arg)
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
+ZEND_API const char *zend_zval_numeric_string_value_name(const zval *arg)
+{
+    const zval *val = arg;
+
+    ZVAL_DEREF(val);
+
+    if (Z_TYPE_P(val) == IS_STRING) {
+        if (Z_STRLEN_P(val) == 0) {
+            return "empty-string";
+        }
+
+		zend_long lval;
+        double dval;
+
+		bool trailing_data = false;
+        if (is_numeric_string_ex(Z_STRVAL_P(val), Z_STRLEN_P(val),&lval, &dval, 0, NULL, &trailing_data)) 
+		{
+            return "string";
+        }
+
+        return "non-numeric-string";
+    }
+
+    return zend_zval_type_name(val);
+}
+
+
 ZEND_API const char *zend_zval_type_name(const zval *arg)
 {
 	ZVAL_DEREF(arg);
