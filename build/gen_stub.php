@@ -3757,9 +3757,7 @@ class ClassInfo {
             $classSynopsisIndentation = str_repeat(" ", $classSynopsisIndentationLevel);
             $packageSynopsis = $doc->createElement("packagesynopsis");
             $packageSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation"));
-            $package = $doc->createElement("package");
-            $package->setAttribute("modifier", "namespace");
-            $package->setAttribute("class", $namespace);
+            $package = $doc->createElement("package", $namespace);
             $packageSynopsis->appendChild($package);
             $packageSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation"));
             $packageSynopsis->appendChild($classSynopsis);
