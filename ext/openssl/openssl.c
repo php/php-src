@@ -3390,8 +3390,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		php_openssl_store_errors();
 		goto cleanup;
 	}
-	X509_gmtime_adj(X509_getm_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days);
+	if (!X509_gmtime_adj(X509_getm_notBefore(new_cert), 0)
+	 || !X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days)) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		php_openssl_store_errors();
