@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
     script). (ilutov)
 
+- Standard:
+  . Fixed bug GH-20906 (Assertion failure when messing up output buffers).
+    (ndossche)
+
 12 Mar 2026, PHP 8.5.4
 
 - Core:
