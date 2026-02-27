@@ -2326,8 +2326,47 @@ void gdImageFilledRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int 
 	_gdImageFilledVRectangle(im, x1, y1, x2, y2, color);
 }
 
+static int _gdValidateCopyRectBounds(
+	const gdImagePtr dst,
+	const gdImagePtr src,
+	int dstX, int dstY,
+	int srcX, int srcY,
+	int w, int h
+) {
+	/* Check for null pointers */
+	if (!dst || !src) {
+		return 0;
+	}
+
+	/* Check for overflow in dstX + w */
+	if (w > 0 && dstX > INT_MAX - w) {
+		return 0;
+	}
+
+	/* Check for overflow in dstY + h */
+	if (h > 0 && dstY > INT_MAX - h) {
+		return 0;
+	}
+
+	/* Check for overflow in srcX + w */
+	if (w > 0 && srcX > INT_MAX - w) {
+		return 0;
+	}
+
+	/* Check for overflow in srcY + h */
+	if (h > 0 && srcY > INT_MAX - h) {
+		return 0;
+	}
+
+	return 1;
+}
+
 void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h)
 {
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, w, h)) {
+		return;
+	}
+
 	int c;
 	int x, y;
 	int tox, toy;
@@ -2409,6 +2448,10 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
    so it doesn't pay attention to the alpha channel. */
 void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)
 {
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, w, h)) {
+		return;
+	}
+
 	int c, dc;
 	int x, y;
 	int tox, toy;
@@ -2449,6 +2492,10 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
    so it doesn't pay attention to the alpha channel. */
 void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)
 {
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, w, h)) {
+		return;
+	}
+
 	int c, dc;
 	int x, y;
 	int tox, toy;
@@ -2503,6 +2550,14 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 
 void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH)
 {
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, dstW, dstH)) {
+		return;
+	}
+
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, srcW, srcH)) {
+		return;
+	}
+
 	int c;
 	int x, y;
 	int tox, toy;
@@ -2613,6 +2668,14 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 
 void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH)
 {
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, dstW, dstH)) {
+		return;
+	}
+
+	if (!_gdValidateCopyRectBounds(dst, src, dstX, dstY, srcX, srcY, srcW, srcH)) {
+		return;
+	}
+
 	int x, y;
 	double sy1, sy2, sx1, sx2;
 
