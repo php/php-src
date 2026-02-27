@@ -80,6 +80,8 @@ static char *zend_version_info;
 static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
+#define ZEND_ERR_BUF_SIZE(capacity) \
+	(XtOffsetOf(struct zend_err_buf, buf) + sizeof(zend_error_info *) * (capacity))
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
@@ -642,6 +644,13 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 }
 /* }}} */
 
+static void zend_init_errors_buf(zend_executor_globals *eg)
+{
+	eg->errors = pemalloc(ZEND_ERR_BUF_SIZE(2), true);
+	eg->errors->capacity = 2;
+	eg->errors->size = 0;
+}
+
 #ifdef ZTS
 static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
@@ -832,8 +841,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
 	executor_globals->record_errors = false;
-	executor_globals->num_errors = 0;
-	executor_globals->errors = NULL;
+	zend_init_errors_buf(executor_globals);
 	executor_globals->filename_override = NULL;
 	executor_globals->lineno_override = -1;
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -868,6 +876,8 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{
 		zend_hash_destroy(executor_globals->zend_constants);
 		free(executor_globals->zend_constants);
 	}
+
+	pefree(executor_globals->errors, true);
 }
 /* }}} */
 
@@ -1064,6 +1074,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
+	zend_init_errors_buf(&executor_globals);
 #endif
 
 	zend_ini_startup();
@@ -1146,6 +1157,7 @@ zend_result zend_post_startup(void) /* {{{ */
 	free(EG(zend_constants));
 	EG(zend_constants) = NULL;
 
+	pefree(executor_globals->errors, true);
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
@@ -1223,6 +1235,7 @@ void zend_shutdown(void) /* {{{ */
 		pefree(CG(internal_run_time_cache), 1);
 		CG(internal_run_time_cache) = NULL;
 	}
+	pefree(EG(errors), true);
 #endif
 	zend_map_ptr_static_last = 0;
 	zend_map_ptr_static_size = 0;
@@ -1445,8 +1458,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
 	bool orig_record_errors;
-	uint32_t orig_num_errors;
-	zend_error_info **orig_errors;
+	uint32_t orig_num_errors = 0;
+	uint32_t orig_cap_errors = 0;
 	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
@@ -1458,11 +1471,11 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	}
 
 	/* Emit any delayed error before handling fatal error */
-	if ((type & E_FATAL_ERRORS) && !(type & E_DONT_BAIL) && EG(num_errors)) {
-		uint32_t num_errors = EG(num_errors);
-		zend_error_info **errors = EG(errors);
-		EG(num_errors) = 0;
-		EG(errors) = NULL;
+	if ((type & E_FATAL_ERRORS) && !(type & E_DONT_BAIL) && EG(errors->size)) {
+		uint32_t num_errors = EG(errors->size);
+		uint32_t cap_errors = EG(errors->capacity);
+		zend_error_info **errors = EG(errors->buf);
+		EG(errors->size) = 0;
 
 		bool orig_record_errors = EG(record_errors);
 		EG(record_errors) = false;
@@ -1476,8 +1489,8 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 		EG(user_error_handler_error_reporting) = orig_user_error_handler_error_reporting;
 		EG(record_errors) = orig_record_errors;
-		EG(num_errors) = num_errors;
-		EG(errors) = errors;
+		EG(errors->size) = num_errors;
+		EG(errors->capacity) = cap_errors;
 	}
 
 	if (EG(record_errors)) {
@@ -1486,12 +1499,13 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		info->lineno = error_lineno;
 		info->filename = zend_string_copy(error_filename);
 		info->message = zend_string_copy(message);
-
-		/* This is very inefficient for a large number of errors.
-		 * Use pow2 realloc if it becomes a problem. */
-		EG(num_errors)++;
-		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
-		EG(errors)[EG(num_errors)-1] = info;
+		EG(errors->size)++;
+		if (EG(errors->size) >= EG(errors->capacity)) {
+			uint32_t capacity = EG(errors->capacity) + (EG(errors->capacity) >> 1);
+			EG(errors) = safe_perealloc(EG(errors), sizeof(zend_error_info *), capacity, XtOffsetOf(struct zend_err_buf, buf), true);
+			EG(errors->capacity) = capacity;
+		}
+		EG(errors->buf)[EG(errors->size)-1] = info;
 
 		/* Do not process non-fatal recorded error */
 		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
@@ -1574,17 +1588,18 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			}
 
 			orig_record_errors = EG(record_errors);
-			orig_num_errors = EG(num_errors);
-			orig_errors = EG(errors);
 			EG(record_errors) = false;
-			EG(num_errors) = 0;
-			EG(errors) = NULL;
+
+			orig_num_errors = EG(errors->size);
+			orig_cap_errors = EG(errors->capacity);
+			EG(errors->size) = 0;
 
 			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
 
 			EG(record_errors) = orig_record_errors;
-			EG(num_errors) = orig_num_errors;
-			EG(errors) = orig_errors;
+
+			EG(errors->capacity) = orig_cap_errors;
+			EG(errors->size) = orig_num_errors;
 
 			if (res == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
@@ -1779,8 +1794,7 @@ ZEND_API void zend_begin_record_errors(void)
 {
 	ZEND_ASSERT(!EG(record_errors) && "Error recording already enabled");
 	EG(record_errors) = true;
-	EG(num_errors) = 0;
-	EG(errors) = NULL;
+	EG(errors->size) = 0;
 }
 
 ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors)
@@ -1794,24 +1808,22 @@ ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info 
 ZEND_API void zend_emit_recorded_errors(void)
 {
 	EG(record_errors) = false;
-	zend_emit_recorded_errors_ex(EG(num_errors), EG(errors));
+	zend_emit_recorded_errors_ex(EG(errors->size), EG(errors->buf));
 }
 
 ZEND_API void zend_free_recorded_errors(void)
 {
-	if (!EG(num_errors)) {
+	if (!EG(errors->size)) {
 		return;
 	}
 
-	for (uint32_t i = 0; i < EG(num_errors); i++) {
-		zend_error_info *info = EG(errors)[i];
+	for (uint32_t i = 0; i < EG(errors->size); i++) {
+		zend_error_info *info = EG(errors->buf)[i];
 		zend_string_release(info->filename);
 		zend_string_release(info->message);
-		efree(info);
+		efree_size(info, sizeof(zend_error_info));
 	}
-	efree(EG(errors));
-	EG(errors) = NULL;
-	EG(num_errors) = 0;
+	EG(errors->size) = 0;
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
@@ -2019,12 +2031,12 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 }
 /* }}} */
 
-#define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
+#define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%u) : %s"
 
 ZEND_API char *zend_make_compiled_string_description(const char *name) /* {{{ */
 {
 	const char *cur_filename;
-	int cur_lineno;
+	uint32_t cur_lineno;
 	char *compiled_string_description;
 
 	if (zend_is_compiling()) {
