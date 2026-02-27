@@ -929,6 +929,11 @@ function OLD_CHECK_LIB(libnames, target, path_to_check)
 
 }
 
+/**
+ * Checks whether function exists in the given header. Same as GREP_HEADER() but
+ * it also defines the 'HAVE_<FUNC_NAME>' preprocessor macro to 1 or 0. In new
+ * code rather use GREP_HEADER() and define the macro explicitly when needed.
+ */
 function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check, add_to_flag)
 {
 	var c = false;
@@ -955,6 +960,9 @@ function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check, add_to_flag
 	return false;
 }
 
+/**
+ * Checks whether specified regular expression is found in the given header.
+ */
 function GREP_HEADER(header_name, regex, path_to_check)
 {
 	var c = false;
