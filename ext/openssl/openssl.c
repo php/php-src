@@ -2256,7 +2256,7 @@ PHP_FUNCTION(openssl_x509_parse)
 				goto err_subitem;
 			}
 		}
-		else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+		else if (X509V3_EXT_print(bio_out, extension, 0, 0) > 0) {
 			BIO_get_mem_ptr(bio_out, &bio_buf);
 			add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 		} else {
