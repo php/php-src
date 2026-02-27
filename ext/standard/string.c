@@ -829,16 +829,19 @@ PHP_FUNCTION(wordwrap)
 }
 /* }}} */
 
-/* {{{ php_explode */
-PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
+static void php_explode_ex(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit, const char *endp)
 {
 	const char *p1 = ZSTR_VAL(str);
-	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
-	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+	const char *p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
 	if (p2 == NULL) {
-		ZVAL_STR_COPY(&tmp, str);
+		if (endp == ZSTR_VAL(str) + ZSTR_LEN(str)) {
+			ZVAL_STR_COPY(&tmp, str);
+		} else {
+			ZEND_ASSERT(endp != ZSTR_VAL(str));
+			ZVAL_STRINGL_FAST(&tmp, ZSTR_VAL(str), endp - ZSTR_VAL(str));
+		}
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
@@ -859,46 +862,31 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		} ZEND_HASH_FILL_END();
 	}
 }
+
+/* {{{ php_explode */
+PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
+{
+	php_explode_ex(delim, str, return_value, limit, ZSTR_VAL(str) + ZSTR_LEN(str));
+}
 /* }}} */
 
 /* {{{ php_explode_negative_limit */
 PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
-#define EXPLODE_ALLOC_STEP 64
-	const char *p1 = ZSTR_VAL(str);
+	const char *p = ZSTR_VAL(str);
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
-	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
-	zval  tmp;
 
-	if (p2 == NULL) {
-		/*
-		do nothing since limit <= -1, thus if only one chunk - 1 + (limit) <= 0
-		by doing nothing we return empty array
-		*/
-	} else {
-		size_t allocated = EXPLODE_ALLOC_STEP, found = 0;
-		zend_long i, to_return;
-		const char **positions = emalloc(allocated * sizeof(char *));
-
-		positions[found++] = p1;
-		do {
-			if (found >= allocated) {
-				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
-				positions = erealloc(ZEND_VOIDP(positions), allocated*sizeof(char *));
-			}
-			positions[found++] = p1 = p2 + ZSTR_LEN(delim);
-			p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
-		} while (p2 != NULL);
-
-		to_return = limit + found;
-		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
-		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
-			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+	ZEND_ASSERT(limit < 0);
+	do {
+		endp = zend_memnrstr(p, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+		if (!endp) {
+			return;
 		}
-		efree((void *)positions);
-	}
-#undef EXPLODE_ALLOC_STEP
+		--endp;
+		++limit;
+	} while (limit < 0);
+
+	php_explode_ex(delim, str, return_value, ZEND_LONG_MAX, endp + 1);
 }
 /* }}} */
 
