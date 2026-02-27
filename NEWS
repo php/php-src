@@ -104,6 +104,9 @@ PHP                                                                        NEWS
   . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
     optional parameter). (David Carlier)
 
+- Sodium:
+  . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
