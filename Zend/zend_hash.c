@@ -2973,19 +2973,13 @@ ZEND_API void zend_hash_bucket_renum_swap(Bucket *p, Bucket *q)
 	q->val = val;
 }
 
-ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
+ZEND_API void zend_hash_packed_renum_swap(zval *p, zval *q)
 {
 	zval val;
-	zend_ulong h;
 
-	val = p->val;
-	h = p->h;
-
-	p->val = q->val;
-	p->h = q->h;
-
-	q->val = val;
-	q->h = h;
+	val = *p;
+	*p = *q;
+	*q = val;
 }
 
 static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
@@ -3000,30 +2994,47 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 		return;
 	}
 
-	if (HT_IS_PACKED(ht)) {
-		zend_hash_packed_to_hash(ht); // TODO: ???
-	}
-
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* Store original order of elements in extra space to allow stable sorting. */
-		for (i = 0; i < ht->nNumUsed; i++) {
-			Z_EXTRA(ht->arData[i].val) = i;
+		if (HT_IS_PACKED(ht)) {
+			for (i = 0; i < ht->nNumUsed; i++) {
+				Z_EXTRA(ht->arPacked[i]) = i;
+			}
+		} else {
+			for (i = 0; i < ht->nNumUsed; i++) {
+				Z_EXTRA(ht->arData[i].val) = i;
+			}
 		}
 	} else {
 		/* Remove holes and store original order. */
-		for (j = 0, i = 0; j < ht->nNumUsed; j++) {
-			p = ht->arData + j;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-			if (i != j) {
-				ht->arData[i] = *p;
+		if (HT_IS_PACKED(ht)) {
+			for (j = 0, i = 0; j < ht->nNumUsed; j++) {
+				zval *zv = ht->arPacked + j;
+				if (UNEXPECTED(Z_TYPE_P(zv) == IS_UNDEF)) continue;
+				if (i != j) {
+					ht->arPacked[i] = *zv;
+				}
+				Z_EXTRA(ht->arPacked[i]) = i;
+				i++;
 			}
-			Z_EXTRA(ht->arData[i].val) = i;
-			i++;
+		} else {
+			for (j = 0, i = 0; j < ht->nNumUsed; j++) {
+				p = ht->arData + j;
+				if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+				if (i != j) {
+					ht->arData[i] = *p;
+				}
+				Z_EXTRA(ht->arData[i].val) = i;
+				i++;
+			}
 		}
 		ht->nNumUsed = i;
 	}
 
-	if (!HT_IS_PACKED(ht)) {
+	if (HT_IS_PACKED(ht)) {
+		sort((void *)ht->arPacked, ht->nNumUsed, sizeof(zval), (compare_func_t) compar,
+			(swap_func_t)zend_hash_packed_renum_swap);
+	} else {
 		/* We broke the hash collisions chains overriding Z_NEXT() by Z_EXTRA().
 		 * Reset the hash headers table as well to avoid possible inconsistent
 		 * access on recursive data structures.
@@ -3031,21 +3042,22 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 	     * See Zend/tests/bug63882_2.phpt
 		 */
 		HT_HASH_RESET(ht);
+
+		sort((void *)ht->arData, ht->nNumUsed, sizeof(Bucket), (compare_func_t) compar,
+			(swap_func_t)(renumber? zend_hash_bucket_renum_swap : zend_hash_bucket_swap));
 	}
 
-	sort((void *)ht->arData, ht->nNumUsed, sizeof(Bucket), (compare_func_t) compar,
-			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
-				(HT_IS_PACKED(ht) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
-
 	ht->nInternalPointer = 0;
-
+// TODO: simpify some conditions prolly
 	if (renumber) {
-		for (j = 0; j < i; j++) {
-			p = ht->arData + j;
-			p->h = j;
-			if (p->key) {
-				zend_string_release(p->key);
-				p->key = NULL;
+		if (!HT_IS_PACKED(ht)) {
+			for (j = 0; j < i; j++) {
+				p = ht->arData + j;
+				p->h = j;
+				if (p->key) {
+					zend_string_release(p->key);
+					p->key = NULL;
+				}
 			}
 		}
 
@@ -3053,7 +3065,16 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 	}
 	if (HT_IS_PACKED(ht)) {
 		if (!renumber) {
+			/* Necessary to allow CoW violation due to the refcount increase in zend_array_sort() */
+#if ZEND_DEBUG
+			uint32_t keep_flags = HT_FLAGS(ht) & HASH_FLAG_ALLOW_COW_VIOLATION;
+			HT_ALLOW_COW_VIOLATION(ht);
+#endif
 			zend_hash_packed_to_hash(ht);
+#if ZEND_DEBUG
+			HT_FLAGS(ht) &= ~HASH_FLAG_ALLOW_COW_VIOLATION;
+			HT_FLAGS(ht) |= keep_flags;
+#endif
 		}
 	} else {
 		if (renumber) {
@@ -3083,6 +3104,11 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
 {
 	HT_ASSERT_RC1(ht);
+
+	if (!renumber && HT_IS_PACKED(ht)) {
+		zend_hash_packed_to_hash(ht);
+	}
+
 	zend_hash_sort_internal(ht, sort, compar, renumber);
 }
 
@@ -3090,8 +3116,7 @@ ZEND_API void ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort, 
 {
 	HT_ASSERT_RC1(ht);
 
-	/* Unpack the array early to avoid RCn assertion failures. */
-	if (HT_IS_PACKED(ht)) {
+	if (!renumber && HT_IS_PACKED(ht)) {
 		zend_hash_packed_to_hash(ht);
 	}
 
