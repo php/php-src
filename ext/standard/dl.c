@@ -66,7 +66,7 @@ PHPAPI PHP_FUNCTION(dl)
 	zend_rc_debug = false;
 #endif
 
-	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
+	php_dl(filename, MODULE_TEMPORARY, return_value, PHP_DL_START_NONE);
 	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
@@ -107,7 +107,7 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 /* }}} */
 
 /* {{{ php_load_extension */
-PHPAPI int php_load_extension(const char *filename, int type, int start_now)
+PHPAPI int php_load_extension(const char *filename, int type, int start_mode)
 {
 	void *handle;
 	char *libpath;
@@ -238,12 +238,13 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 	module_entry->handle = handle;
 
-	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry) == FAILURE) {
+	if ((type == MODULE_TEMPORARY || start_mode == PHP_DL_START_MODULE || start_mode == PHP_DL_START_REQUEST) &&
+			zend_startup_module_ex(module_entry) == FAILURE) {
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 
-	if ((type == MODULE_TEMPORARY || start_now) && module_entry->request_startup_func) {
+	if ((type == MODULE_TEMPORARY || (start_mode == PHP_DL_START_REQUEST)) && module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number) == FAILURE) {
 			php_error_docref(NULL, error_type, "Unable to initialize module '%s'", module_entry->name);
 			DL_UNLOAD(handle);
@@ -278,10 +279,10 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 #endif
 
 /* {{{ php_dl */
-PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
+PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_mode)
 {
 	/* Load extension */
-	if (php_load_extension(file, type, start_now) == FAILURE) {
+	if (php_load_extension(file, type, start_mode) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
