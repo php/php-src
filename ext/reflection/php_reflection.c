@@ -6676,20 +6676,8 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 
 	zend_class_entry *ce = obj ? obj->ce : intern->ce;
 	if (!prop) {
-		if (obj) {
-			/* __isset call needs to happen on lazy object, so copy obj. */
-			zend_object *instance = obj;
-retry_dynamic:
-			if (zend_lazy_object_must_init(instance)) {
-				instance = zend_lazy_object_init(instance);
-				if (!instance) {
-					RETURN_THROWS();
-				}
-				goto retry_dynamic;
-			}
-			if (instance->properties && zend_hash_find_ptr(instance->properties, ref->unmangled_name)) {
-				RETURN_TRUE;
-			}
+		if (obj && obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
+			RETURN_TRUE;
 		}
 handle_magic_get:
 		if (ce->__get) {
@@ -6707,6 +6695,15 @@ handle_magic_get:
 				}
 			}
 			RETURN_TRUE;
+		}
+		if (obj && zend_lazy_object_must_init(obj)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			if (obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
+				RETURN_TRUE;
+			}
 		}
 		RETURN_FALSE;
 	}
