@@ -21,7 +21,7 @@ readfile(__DIR__ . "/mb_send_mail02.eml");
 
 /* Japanese (EUC-JP) */
 if (mb_language("japanese")) {
-    mb_internal_encoding('EUC-JP');
+    ini_set('internal_encoding', 'EUC-JP');
     mb_send_mail($to, "テスト ".mb_language(), "テスト");
     readfile(__DIR__ . "/mb_send_mail02.eml");
 }

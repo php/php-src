@@ -65,7 +65,7 @@ echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_LOWER, "UTF-8"), "\n";
 echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_LOWER_SIMPLE, "UTF-8"), "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 String: ß
 Lower: ß
 Lower Simple: ß
@@ -96,6 +96,8 @@ Title Simple: İ
 Fold: i̇
 Fold Simple: İ
 
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 69
 69
 69

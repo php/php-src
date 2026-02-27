@@ -52,17 +52,41 @@ $enc = mb_http_output();
 print "$enc\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 OK_ASCII_SET
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 ASCII
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 OK_SJIS_SET
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 SJIS
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 OK_JIS_SET
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 JIS
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 OK_UTF-8_SET
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 UTF-8
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 OK_EUC-JP_SET
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 EUC-JP
 == INVALID PARAMETER ==
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 mb_http_output(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 EUC-JP
