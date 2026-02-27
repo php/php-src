@@ -392,6 +392,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
+  . Fixed bug GH-18988 (Check various unchecked error-prone OpenSSL function
+    return values). (alexandre-daubois)
 
 - PGSQL:
   . Fixed bug GH-19485 (potential use after free when using persistent pgsql
