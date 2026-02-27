@@ -546,6 +546,10 @@ static PHP_RSHUTDOWN_FUNCTION(sockets)
 		SOCKETS_G(strerror_buf) = NULL;
 	}
 
+#ifdef PHP_WIN32
+	zend_hash_clean(&SOCKETS_G(wsa_info));
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
