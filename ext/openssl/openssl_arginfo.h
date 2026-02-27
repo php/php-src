@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: 8233a8abc8ab7145d905d0fa51478edfe1e55a06 */
+ * Stub hash: 5e6f3b7c198b68fa8ad414f775daa6eb31d4ae3c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -406,6 +406,39 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession_export, 0, 0, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "OPENSSL_ENCODING_PEM")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OpenSSLSession_import, 0, 1, OpenSSLSession, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "OPENSSL_ENCODING_PEM")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession_isResumable, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession_getTimeout, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OpenSSLSession_getCreatedAt arginfo_class_OpenSSLSession_getTimeout
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession_getProtocol, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OpenSSLSession_getCipher arginfo_class_OpenSSLSession_getProtocol
+
+#define arginfo_class_OpenSSLSession_hasTicket arginfo_class_OpenSSLSession_isResumable
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession_getTicketLifetimeHint, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OpenSSLSession___serialize arginfo_openssl_get_cert_locations
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OpenSSLSession___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -473,6 +506,17 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_METHOD(OpenSSLSession, export);
+ZEND_METHOD(OpenSSLSession, import);
+ZEND_METHOD(OpenSSLSession, isResumable);
+ZEND_METHOD(OpenSSLSession, getTimeout);
+ZEND_METHOD(OpenSSLSession, getCreatedAt);
+ZEND_METHOD(OpenSSLSession, getProtocol);
+ZEND_METHOD(OpenSSLSession, getCipher);
+ZEND_METHOD(OpenSSLSession, hasTicket);
+ZEND_METHOD(OpenSSLSession, getTicketLifetimeHint);
+ZEND_METHOD(OpenSSLSession, __serialize);
+ZEND_METHOD(OpenSSLSession, __unserialize);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -545,6 +589,21 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_OpenSSLSession_methods[] = {
+	ZEND_ME(OpenSSLSession, export, arginfo_class_OpenSSLSession_export, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, import, arginfo_class_OpenSSLSession_import, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OpenSSLSession, isResumable, arginfo_class_OpenSSLSession_isResumable, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, getTimeout, arginfo_class_OpenSSLSession_getTimeout, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, getCreatedAt, arginfo_class_OpenSSLSession_getCreatedAt, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, getProtocol, arginfo_class_OpenSSLSession_getProtocol, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, getCipher, arginfo_class_OpenSSLSession_getCipher, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, hasTicket, arginfo_class_OpenSSLSession_hasTicket, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, getTicketLifetimeHint, arginfo_class_OpenSSLSession_getTicketLifetimeHint, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, __serialize, arginfo_class_OpenSSLSession___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(OpenSSLSession, __unserialize, arginfo_class_OpenSSLSession___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -777,6 +836,22 @@ static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
 
 	INIT_CLASS_ENTRY(ce, "OpenSSLAsymmetricKey", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OpenSSLSession(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "OpenSSLSession", class_OpenSSLSession_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_id_default_value;
+	ZVAL_UNDEF(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_id_name, true);
 
 	return class_entry;
 }
