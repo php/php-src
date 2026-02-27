@@ -2450,12 +2450,14 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)ZSTR_VAL(out_buffer)) == 1) {
 		ZSTR_VAL(out_buffer)[key_length] = 0;
-		RETURN_NEW_STR(out_buffer);
+		RETVAL_NEW_STR(out_buffer);
 	} else {
 		php_openssl_store_errors();
 		zend_string_release_ex(out_buffer, 0);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+
+	php_openssl_release_evp_md(digest);
 }
 /* }}} */
 
