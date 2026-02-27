@@ -172,49 +172,6 @@ struct glob_path_stat {
 	zend_stat_t	*gps_stat;
 };
 
-#ifndef HAVE_REALLOCARRAY
-/*
- * XXX: This is temporary to avoid having reallocarray be imported and part of
- * PHP's public API. Since it's only needed here and on Windows, we can just
- * put it here for now. Convert this file to ZendMM and remove this function
- * when that's complete.
- */
-
-/*	$OpenBSD: reallocarray.c,v 1.3 2015/09/13 08:31:47 guenther Exp $	*/
-/*
- * Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-/*
- * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
- * if both s1 < MUL_NO_OVERFLOW and s2 < MUL_NO_OVERFLOW
- */
-#define MUL_NO_OVERFLOW	((size_t)1 << (sizeof(size_t) * 4))
-
-static void *
-reallocarray(void *optr, size_t nmemb, size_t size)
-{
-	if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
-	    nmemb > 0 && SIZE_MAX / nmemb < size) {
-		errno = ENOMEM;
-		return NULL;
-	}
-	return realloc(optr, size * nmemb);
-}
-#endif
-
 static int	 compare(const void *, const void *);
 static int	 compare_gps(const void *, const void *);
 static int	 g_Ctoc(const Char *, char *, size_t);
@@ -652,8 +609,7 @@ static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp
 			size_t n = pglob->gl_pathc - oldpathc;
 			size_t o = pglob->gl_offs + oldpathc;
 
-			if ((path_stat = calloc(n, sizeof(*path_stat))) == NULL)
-				return PHP_GLOB_NOSPACE;
+			path_stat = ecalloc(n, sizeof(*path_stat));
 			for (i = 0; i < n; i++) {
 				path_stat[i].gps_path = pglob->gl_pathv[o + i];
 				path_stat[i].gps_stat = pglob->gl_statv[o + i];
@@ -663,7 +619,7 @@ static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp
 				pglob->gl_pathv[o + i] = path_stat[i].gps_path;
 				pglob->gl_statv[o + i] = path_stat[i].gps_stat;
 			}
-			free(path_stat);
+			efree(path_stat);
 		} else {
 			qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
 				pglob->gl_pathc - oldpathc, sizeof(char *),
@@ -883,21 +839,19 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
  nospace:
 		for (i = pglob->gl_offs; i < newn - 2; i++) {
 			if (pglob->gl_pathv && pglob->gl_pathv[i])
-				free(pglob->gl_pathv[i]);
+				efree(pglob->gl_pathv[i]);
 			if ((pglob->gl_flags & PHP_GLOB_KEEPSTAT) != 0 &&
 				pglob->gl_pathv && pglob->gl_pathv[i])
-				free(pglob->gl_statv[i]);
+				efree(pglob->gl_statv[i]);
 		}
-		free(pglob->gl_pathv);
+		efree(pglob->gl_pathv);
 		pglob->gl_pathv = NULL;
-		free(pglob->gl_statv);
+		efree(pglob->gl_statv);
 		pglob->gl_statv = NULL;
 		return(PHP_GLOB_NOSPACE);
 	}
 
-	pathv = reallocarray(pglob->gl_pathv, newn, sizeof(*pathv));
-	if (pathv == NULL)
-		goto nospace;
+	pathv = safe_erealloc(pglob->gl_pathv, newn, sizeof(*pathv), 0);
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
 		/* first time around -- clear initial gl_offs items */
 		pathv += pglob->gl_offs;
@@ -907,7 +861,7 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 	pglob->gl_pathv = pathv;
 
 	if ((pglob->gl_flags & PHP_GLOB_KEEPSTAT) != 0) {
-		statv = reallocarray(pglob->gl_statv, newn, sizeof(*statv));
+		statv = safe_erealloc(pglob->gl_statv, newn, sizeof(*statv), 0);
 		if (statv == NULL)
 			goto nospace;
 		if (pglob->gl_statv == NULL && pglob->gl_offs > 0) {
@@ -926,9 +880,8 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 				errno = 0;
 				return(PHP_GLOB_NOSPACE);
 			}
-			if ((statv[pglob->gl_offs + pglob->gl_pathc] =
-				malloc(sizeof(**statv))) == NULL)
-				goto copy_error;
+			statv[pglob->gl_offs + pglob->gl_pathc] =
+				emalloc(sizeof(**statv));
 			memcpy(statv[pglob->gl_offs + pglob->gl_pathc], sb,
 				sizeof(*sb));
 		}
@@ -939,13 +892,12 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		;
 	len = (size_t)(p - path);
 	limitp->glim_malloc += len;
-	if ((copy = malloc(len)) != NULL) {
-		if (g_Ctoc(path, copy, len)) {
-			free(copy);
-			return(PHP_GLOB_NOSPACE);
-		}
-		pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
+	copy = emalloc(len);
+	if (g_Ctoc(path, copy, len)) {
+		efree(copy);
+		return(PHP_GLOB_NOSPACE);
 	}
+	pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
 	pathv[pglob->gl_offs + pglob->gl_pathc] = NULL;
 
 	if ((pglob->gl_flags & PHP_GLOB_LIMIT) &&
@@ -954,7 +906,6 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		errno = 0;
 		return(PHP_GLOB_NOSPACE);
 	}
- copy_error:
 	return(copy == NULL ? PHP_GLOB_NOSPACE : 0);
 }
 
@@ -1046,15 +997,15 @@ PHPAPI void php_globfree(php_glob_t *pglob)
 	if (pglob->gl_pathv != NULL) {
 		pp = pglob->gl_pathv + pglob->gl_offs;
 		for (i = pglob->gl_pathc; i--; ++pp)
-			free(*pp);
-		free(pglob->gl_pathv);
+			efree(*pp);
+		efree(pglob->gl_pathv);
 		pglob->gl_pathv = NULL;
 	}
 	if (pglob->gl_statv != NULL) {
 		for (i = 0; i < pglob->gl_pathc; i++) {
-			free(pglob->gl_statv[i]);
+			efree(pglob->gl_statv[i]);
 		}
-		free(pglob->gl_statv);
+		efree(pglob->gl_statv);
 		pglob->gl_statv = NULL;
 	}
 }
