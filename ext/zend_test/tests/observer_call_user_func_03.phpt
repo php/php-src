@@ -22,8 +22,9 @@ namespace Test {
         echo 'my_function called' . PHP_EOL;
     }
 
-    call_user_func('Test\\MyClass::myMethod');
-    call_user_func('Test\\my_function');
+    $fn = 'call_user_func';
+    $fn('Test\\MyClass::myMethod');
+    $fn('Test\\my_function');
 }
 ?>
 --EXPECTF--
