@@ -750,21 +750,23 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	}
 
 	if (key != regex) {
-		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(ctype_string));
-		if (!tables) {
-			zend_string *_k;
+		zv = zend_hash_str_lookup(&char_tables, ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)));
+		if (Z_ISNULL_P(zv)) {
 			tables = pcre2_maketables(gctx);
 			if (UNEXPECTED(!tables)) {
+				/* Remove the placeholder entry created by zend_hash_str_lookup(),
+				 * set ptr to NULL first so the destructor (pefree) is safe. */
+				ZVAL_PTR(zv, NULL);
+				zend_hash_str_del(&char_tables, ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)));
 				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
 				pcre_handle_exec_error(PCRE2_ERROR_NOMEMORY);
 				zend_string_release_ex(key, 0);
 				efree(pattern);
 				return NULL;
 			}
-			_k = zend_string_init(ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)), 1);
-			GC_MAKE_PERSISTENT_LOCAL(_k);
-			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
-			zend_string_release(_k);
+			ZVAL_PTR(zv, (void *)tables);
+		} else {
+			tables = Z_PTR_P(zv);
 		}
 	}
 	pcre2_set_character_tables(cctx, tables);
