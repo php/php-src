@@ -555,7 +555,6 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	int len = 0;
 
 	/* Skip over non-numeric chars */
-
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
 			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
@@ -568,6 +567,7 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	str = timelib_calloc(1, max_length + 2);
 	str[0] = '+'; /* First position is the sign */
 	str_ptr = str + 1;
+
 
 	while ((**ptr == '+') || (**ptr == '-')) {
 		if (**ptr == '-') {
