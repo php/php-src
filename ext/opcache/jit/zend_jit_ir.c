@@ -10810,14 +10810,15 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 		ir_ref if_args = ir_IF(generic_args);
 		ir_IF_TRUE(if_args);
 
-		/* Load resolved_masks pointer */
-		ir_ref masks_ptr = ir_LOAD_A(ir_ADD_OFFSET(generic_args,
-			offsetof(zend_generic_args, resolved_masks)));
-		ir_ref if_masks = ir_IF(masks_ptr);
-		ir_IF_TRUE(if_masks);
+		/* Compute masks base: generic_args + offsetof(args) + num_args * sizeof(zend_type) */
+		ir_ref num_args = ir_LOAD_U32(ir_ADD_OFFSET(generic_args,
+			offsetof(zend_generic_args, num_args)));
+		ir_ref masks_base = ir_ADD_A(
+			ir_ADD_OFFSET(generic_args, offsetof(zend_generic_args, args)),
+			ir_MUL_A(ir_ZEXT_A(num_args), ir_CONST_ADDR(sizeof(zend_type))));
 
-		/* Load mask = resolved_masks[param_index] */
-		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_ptr, param_index * sizeof(uint32_t)));
+		/* Load mask = masks[param_index] */
+		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_base, param_index * sizeof(uint32_t)));
 		ir_ref if_mask = ir_IF(mask);
 		ir_IF_TRUE(if_mask);
 
@@ -10832,18 +10833,15 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 		ir_ref slow1 = ir_END();
 		ir_IF_FALSE_cold(if_mask);
 		ir_ref slow2 = ir_END();
-		ir_IF_FALSE_cold(if_masks);
-		ir_ref slow3 = ir_END();
 		ir_IF_FALSE_cold(if_args);
-		ir_ref slow4 = ir_END();
+		ir_ref slow3 = ir_END();
 		ir_IF_FALSE_cold(if_obj);
-		ir_ref slow5 = ir_END();
+		ir_ref slow4 = ir_END();
 
 		/* Merge all slow paths */
 		ir_MERGE_2(slow1, slow2);
 		ir_MERGE_WITH(slow3);
 		ir_MERGE_WITH(slow4);
-		ir_MERGE_WITH(slow5);
 
 		/* Call helper for slow path */
 		jit_SET_EX_OPLINE(jit, opline);
@@ -11044,14 +11042,15 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 		ir_ref if_args = ir_IF(generic_args);
 		ir_IF_TRUE(if_args);
 
-		/* Load resolved_masks pointer */
-		ir_ref masks_ptr = ir_LOAD_A(ir_ADD_OFFSET(generic_args,
-			offsetof(zend_generic_args, resolved_masks)));
-		ir_ref if_masks = ir_IF(masks_ptr);
-		ir_IF_TRUE(if_masks);
+		/* Compute masks base: generic_args + offsetof(args) + num_args * sizeof(zend_type) */
+		ir_ref num_args = ir_LOAD_U32(ir_ADD_OFFSET(generic_args,
+			offsetof(zend_generic_args, num_args)));
+		ir_ref masks_base = ir_ADD_A(
+			ir_ADD_OFFSET(generic_args, offsetof(zend_generic_args, args)),
+			ir_MUL_A(ir_ZEXT_A(num_args), ir_CONST_ADDR(sizeof(zend_type))));
 
-		/* Load mask = resolved_masks[param_index] */
-		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_ptr, param_index * sizeof(uint32_t)));
+		/* Load mask = masks[param_index] */
+		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_base, param_index * sizeof(uint32_t)));
 		ir_ref if_mask = ir_IF(mask);
 		ir_IF_TRUE(if_mask);
 
@@ -11066,18 +11065,15 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 		ir_ref slow1 = ir_END();
 		ir_IF_FALSE_cold(if_mask);
 		ir_ref slow2 = ir_END();
-		ir_IF_FALSE_cold(if_masks);
-		ir_ref slow3 = ir_END();
 		ir_IF_FALSE_cold(if_args);
-		ir_ref slow4 = ir_END();
+		ir_ref slow3 = ir_END();
 		ir_IF_FALSE_cold(if_obj);
-		ir_ref slow5 = ir_END();
+		ir_ref slow4 = ir_END();
 
 		/* Merge all slow paths */
 		ir_MERGE_2(slow1, slow2);
 		ir_MERGE_WITH(slow3);
 		ir_MERGE_WITH(slow4);
-		ir_MERGE_WITH(slow5);
 
 		/* Call helper for slow path */
 		jit_SET_EX_OPLINE(jit, opline);

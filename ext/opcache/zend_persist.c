@@ -421,14 +421,11 @@ static void zend_persist_type(zend_type *type) {
 static void zend_persist_generic_args(zend_generic_args **args_ptr)
 {
 	zend_generic_args *args = *args_ptr;
-	size_t size = sizeof(zend_generic_args) + (args->num_args > 1 ? (args->num_args - 1) * sizeof(zend_type) : 0);
+	size_t size = ZEND_GENERIC_ARGS_SIZE(args->num_args);
 	args = zend_shared_memdup_put_free(args, size);
+	args->refcount = 0; /* SHM: unmanaged, never freed via release */
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_persist_type(&args->args[i]);
-	}
-	if (args->resolved_masks) {
-		args->resolved_masks = zend_shared_memdup_free(args->resolved_masks,
-			args->num_args * sizeof(uint32_t));
 	}
 	*args_ptr = args;
 }

@@ -41,12 +41,17 @@ typedef struct _zend_generic_params_info {
 } zend_generic_params_info;
 
 /* Bound generic type arguments (e.g., <int, string>).
- * Variable-length struct: args[0..num_args-1]. */
+ * Refcounted, single contiguous allocation:
+ *   [refcount | num_args | args[0..N-1] | resolved_masks[0..N-1]]
+ * refcount=0 means unmanaged (SHM/persistent). */
 typedef struct _zend_generic_args {
+	uint32_t refcount;
 	uint32_t num_args;
-	uint32_t *resolved_masks;  /* Pre-computed MAY_BE_ANY masks, one per arg (NULL until computed) */
-	zend_type args[1]; /* Flexible array */
+	zend_type args[1]; /* Flexible array: args[0..num_args-1], followed by uint32_t masks[num_args] */
 } zend_generic_args;
+
+/* Access the pre-computed MAY_BE_ANY masks stored inline after the args array */
+#define ZEND_GENERIC_ARGS_MASKS(a) ((uint32_t*)(&(a)->args[(a)->num_args]))
 
 /* Reference to a generic type parameter in a zend_type.
  * Stored in zend_type.ptr when MAY_BE_GENERIC_PARAM is set. */
@@ -70,6 +75,10 @@ typedef struct _zend_generic_class_ref {
 	uint8_t *wildcard_bounds;  /* Array of ZEND_GENERIC_BOUND_* (NULL if no wildcards) */
 } zend_generic_class_ref;
 
+/* Allocation size for zend_generic_args with N args + N masks */
+#define ZEND_GENERIC_ARGS_SIZE(n) \
+	(offsetof(zend_generic_args, args) + (n) * sizeof(zend_type) + (n) * sizeof(uint32_t))
+
 /* Allocation */
 ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_params);
 ZEND_API zend_generic_args *zend_alloc_generic_args(uint32_t num_args);
@@ -79,14 +88,33 @@ ZEND_API void zend_generic_args_compute_masks(zend_generic_args *args);
 ZEND_API zend_type zend_copy_generic_type(zend_type src);
 ZEND_API zend_generic_args *zend_copy_generic_args(const zend_generic_args *src);
 
-/* Destruction */
+/* Destruction — frees types and the struct itself */
 ZEND_API void zend_generic_params_info_dtor(zend_generic_params_info *info);
 ZEND_API void zend_generic_args_dtor(zend_generic_args *args);
 ZEND_API void zend_generic_type_ref_dtor(zend_generic_type_ref *ref);
 ZEND_API void zend_generic_class_ref_dtor(zend_generic_class_ref *ref);
 
+/* Refcount management for generic args.
+ * refcount=0 means unmanaged (SHM/persistent) — addref/release are no-ops. */
+static zend_always_inline void zend_generic_args_addref(zend_generic_args *args) {
+	if (args->refcount > 0) {
+		args->refcount++;
+	}
+}
+
+static zend_always_inline void zend_generic_args_release(zend_generic_args *args) {
+	if (args->refcount > 0 && --args->refcount == 0) {
+		zend_generic_args_dtor(args);
+	}
+}
+
 /* Resolution: resolves a generic type param to its concrete type */
 ZEND_API zend_type zend_resolve_generic_type(zend_type type, const zend_generic_args *args);
+
+/* Resolve generic param refs in args using a context (e.g., new Box<T> inside Factory<int>).
+ * Returns a new resolved args struct if any param refs were resolved, or NULL if none found. */
+ZEND_API zend_generic_args *zend_resolve_generic_args_with_context(
+	const zend_generic_args *args, const zend_generic_args *context);
 
 /* Expand generic args with defaults from params_info.
  * Returns a new expanded args struct, or NULL if no expansion needed. */

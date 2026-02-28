@@ -6022,14 +6022,23 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		Z_OBJ_P(result)->generic_args = zend_copy_generic_args(compiled_args);
+		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
+		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+			compiled_args, zend_get_current_generic_args());
+		if (resolved) {
+			Z_OBJ_P(result)->generic_args = resolved;
+		} else {
+			/* No param refs — share via refcount instead of deep copy */
+			zend_generic_args_addref(compiled_args);
+			Z_OBJ_P(result)->generic_args = compiled_args;
+		}
 		/* Expand with defaults if fewer args than params (e.g., Map<int> → Map<int, string>) */
 		if (ce->generic_params_info &&
 			Z_OBJ_P(result)->generic_args->num_args < ce->generic_params_info->num_params) {
 			zend_generic_args *expanded = zend_expand_generic_args_with_defaults(
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
-				zend_generic_args_dtor(Z_OBJ_P(result)->generic_args);
+				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -6039,7 +6048,8 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		}
 	} else if (ce->bound_generic_args) {
 		/* Inherit bound generic args from class (e.g., IntList extends Collection<int>) */
-		Z_OBJ_P(result)->generic_args = zend_copy_generic_args(ce->bound_generic_args);
+		zend_generic_args_addref(ce->bound_generic_args);
+		Z_OBJ_P(result)->generic_args = ce->bound_generic_args;
 	}
 
 	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));

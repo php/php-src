@@ -2009,8 +2009,8 @@ static bool ZEND_FASTCALL zend_jit_verify_generic_arg(zval *arg, zend_arg_info *
 
 	if (generic_args && ref->param_index < generic_args->num_args) {
 		/* Fast path: use pre-computed mask */
-		if (generic_args->resolved_masks) {
-			uint32_t mask = generic_args->resolved_masks[ref->param_index];
+		{
+			uint32_t mask = ZEND_GENERIC_ARGS_MASKS(generic_args)[ref->param_index];
 			if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
 				return 1;
 			}
@@ -2038,8 +2038,8 @@ static void ZEND_FASTCALL zend_jit_verify_generic_return(
 
 	if (generic_args && ref->param_index < generic_args->num_args) {
 		/* Fast path: use pre-computed mask */
-		if (generic_args->resolved_masks) {
-			uint32_t mask = generic_args->resolved_masks[ref->param_index];
+		{
+			uint32_t mask = ZEND_GENERIC_ARGS_MASKS(generic_args)[ref->param_index];
 			if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
 				return;
 			}

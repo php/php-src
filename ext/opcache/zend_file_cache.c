@@ -487,9 +487,7 @@ static void zend_file_cache_serialize_generic_args(
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_file_cache_serialize_type(&args->args[i], script, info, buf);
 	}
-	if (args->resolved_masks) {
-		SERIALIZE_PTR(args->resolved_masks);
-	}
+	/* Masks are inline after args — no separate pointer to serialize */
 }
 
 static void zend_file_cache_serialize_generic_params_info(
@@ -1501,9 +1499,7 @@ static void zend_file_cache_unserialize_generic_args(
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_file_cache_unserialize_type(&args->args[i], NULL, script, buf);
 	}
-	if (args->resolved_masks) {
-		UNSERIALIZE_PTR(args->resolved_masks);
-	}
+	/* Masks are inline after args — no separate pointer to unserialize */
 }
 
 static void zend_file_cache_unserialize_generic_params_info(

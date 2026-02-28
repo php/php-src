@@ -242,12 +242,9 @@ static void zend_persist_type_calc(zend_type *type)
 
 static void zend_persist_generic_args_calc(zend_generic_args *args)
 {
-	ADD_SIZE(sizeof(zend_generic_args) + (args->num_args > 1 ? (args->num_args - 1) * sizeof(zend_type) : 0));
+	ADD_SIZE(ZEND_GENERIC_ARGS_SIZE(args->num_args));
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_persist_type_calc(&args->args[i]);
-	}
-	if (args->resolved_masks) {
-		ADD_SIZE(args->num_args * sizeof(uint32_t));
 	}
 }
 

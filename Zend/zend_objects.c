@@ -85,7 +85,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	}
 
 	if (object->generic_args) {
-		zend_generic_args_dtor(object->generic_args);
+		zend_generic_args_release(object->generic_args);
 		object->generic_args = NULL;
 	}
 
@@ -358,9 +358,10 @@ ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 
 	zend_objects_clone_members(new_object, old_object);
 
-	/* Preserve generic type arguments on the clone */
+	/* Preserve generic type arguments on the clone (shared via refcount) */
 	if (old_object->generic_args) {
-		new_object->generic_args = zend_copy_generic_args(old_object->generic_args);
+		zend_generic_args_addref(old_object->generic_args);
+		new_object->generic_args = old_object->generic_args;
 	}
 
 	return new_object;

@@ -5693,7 +5693,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 			has_generic_args_literal = true;
 		} else {
 			/* Non-const class references can't carry generic args in Phase 1 */
-			zend_generic_args_dtor(generic_args);
+			zend_generic_args_release(generic_args);
 		}
 	}
 
@@ -5796,7 +5796,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		if (generic_args) {
 			/* For non-const class references, we can't easily pass generic args.
 			 * For Phase 1, free and ignore (only const class names get generic args). */
-			zend_generic_args_dtor(generic_args);
+			zend_generic_args_release(generic_args);
 		}
 	}
 
@@ -11555,7 +11555,7 @@ static void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 	if (obj_node.op_type == IS_CONST) {
 		zend_do_free(&obj_node);
 		if (generic_args) {
-			zend_generic_args_dtor(generic_args);
+			zend_generic_args_release(generic_args);
 		}
 		result->op_type = IS_CONST;
 		ZVAL_FALSE(&result->u.constant);
@@ -11584,7 +11584,7 @@ static void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op2, &class_node);
 		if (generic_args) {
 			/* Dynamic class ref with generics — not yet supported, free args */
-			zend_generic_args_dtor(generic_args);
+			zend_generic_args_release(generic_args);
 		}
 	}
 }

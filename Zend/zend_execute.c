@@ -1038,6 +1038,27 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 	return false;
 }
 
+static zend_always_inline zend_generic_args *i_zend_get_current_generic_args(void)
+{
+	zend_execute_data *ex = EG(current_execute_data);
+	if (!ex) {
+		return NULL;
+	}
+	if (Z_TYPE(ex->This) == IS_OBJECT) {
+		zend_object *obj = Z_OBJ(ex->This);
+		if (obj->generic_args) {
+			return obj->generic_args;
+		}
+		if (obj->ce->bound_generic_args) {
+			return obj->ce->bound_generic_args;
+		}
+	}
+	if (EG(static_generic_args)) {
+		return EG(static_generic_args);
+	}
+	return NULL;
+}
+
 static zend_always_inline zend_generic_args *i_zend_get_generic_args_for_property(const zend_object *obj)
 {
 	/* First try the object's own generic args */
@@ -1051,7 +1072,7 @@ static zend_always_inline zend_generic_args *i_zend_get_generic_args_for_propert
 		}
 	}
 	/* Fall back to execution context (for method calls on $this) */
-	return zend_get_current_generic_args();
+	return i_zend_get_current_generic_args();
 }
 
 static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict, const zend_object *obj)
@@ -1064,8 +1085,8 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 		zend_generic_args *args = i_zend_get_generic_args_for_property(obj);
 		if (args && gref->param_index < args->num_args) {
 			/* Fast path: use pre-computed mask for scalar types */
-			if (args->resolved_masks) {
-				uint32_t mask = args->resolved_masks[gref->param_index];
+			{
+				uint32_t mask = ZEND_GENERIC_ARGS_MASKS(args)[gref->param_index];
 				if (mask != 0 && ((1u << Z_TYPE_P(property)) & mask)) {
 					return 1;
 				}
@@ -1235,14 +1256,14 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
-static zend_always_inline bool zend_check_type_slow(
+static inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
 {
 	/* Handle generic type parameter references (e.g., T in a generic class) */
 	if (ZEND_TYPE_IS_GENERIC_PARAM(*type)) {
 		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(*type);
-		zend_generic_args *args = zend_get_current_generic_args();
+		zend_generic_args *args = i_zend_get_current_generic_args();
 
 		/* Lazy type inference: if no generic args are bound and we're in a
 		 * constructor of a generic class, infer types from the actual arguments */
@@ -1260,8 +1281,8 @@ static zend_always_inline bool zend_check_type_slow(
 
 		if (args && gref->param_index < args->num_args) {
 			/* Fast path: use pre-computed mask for scalar types */
-			if (args->resolved_masks) {
-				uint32_t mask = args->resolved_masks[gref->param_index];
+			{
+				uint32_t mask = ZEND_GENERIC_ARGS_MASKS(args)[gref->param_index];
 				if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
 					return true;
 				}
@@ -1292,7 +1313,15 @@ static zend_always_inline bool zend_check_type_slow(
 			/* Check generic args match (respecting variance) */
 			zend_generic_args *obj_args = Z_OBJ_P(arg)->generic_args;
 			if (gcref->type_args && obj_args) {
-				return zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info, gcref->wildcard_bounds);
+				/* Resolve any generic param refs in expected type_args (e.g., Box<T> → Box<int>) */
+				zend_generic_args *resolved_expected = zend_resolve_generic_args_with_context(
+					gcref->type_args, i_zend_get_current_generic_args());
+				const zend_generic_args *expected_args = resolved_expected ? resolved_expected : gcref->type_args;
+				bool compatible = zend_generic_args_compatible(expected_args, obj_args, expected_ce->generic_params_info, gcref->wildcard_bounds);
+				if (resolved_expected) {
+					zend_generic_args_release(resolved_expected);
+				}
+				return compatible;
 			}
 			/* If no generic args on the object, just check the base class */
 			return true;

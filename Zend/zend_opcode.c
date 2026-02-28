@@ -391,12 +391,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 					zend_generic_params_info_dtor(ce->generic_params_info);
 				}
 				if (ce->bound_generic_args) {
-					zend_generic_args_dtor(ce->bound_generic_args);
+					zend_generic_args_release(ce->bound_generic_args);
 				}
 				if (ce->interface_bound_generic_args) {
 					zend_generic_args *gargs;
 					ZEND_HASH_MAP_FOREACH_PTR(ce->interface_bound_generic_args, gargs) {
-						zend_generic_args_dtor(gargs);
+						zend_generic_args_release(gargs);
 					} ZEND_HASH_FOREACH_END();
 					zend_hash_destroy(ce->interface_bound_generic_args);
 					FREE_HASHTABLE(ce->interface_bound_generic_args);
@@ -404,7 +404,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (ce->trait_bound_generic_args) {
 					zend_generic_args *gargs;
 					ZEND_HASH_MAP_FOREACH_PTR(ce->trait_bound_generic_args, gargs) {
-						zend_generic_args_dtor(gargs);
+						zend_generic_args_release(gargs);
 					} ZEND_HASH_FOREACH_END();
 					zend_hash_destroy(ce->trait_bound_generic_args);
 					FREE_HASHTABLE(ce->trait_bound_generic_args);
@@ -644,7 +644,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 				/* Generic args literal is at op1.constant + 2 */
 				zval *generic_args_zv = RT_CONSTANT(op, op->op1) + 2;
 				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
-					zend_generic_args_dtor((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					zend_generic_args_release((zend_generic_args *) Z_PTR_P(generic_args_zv));
 					ZVAL_NULL(generic_args_zv);
 				}
 			}
@@ -653,7 +653,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 				/* Generic args literal is at op1.constant + 2 */
 				zval *generic_args_zv = RT_CONSTANT(op, op->op1) + 2;
 				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
-					zend_generic_args_dtor((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					zend_generic_args_release((zend_generic_args *) Z_PTR_P(generic_args_zv));
 					ZVAL_NULL(generic_args_zv);
 				}
 			}
@@ -662,7 +662,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 				/* Generic args literal is at op2.constant + 2 */
 				zval *generic_args_zv = RT_CONSTANT(op, op->op2) + 2;
 				if (Z_TYPE_P(generic_args_zv) == IS_LONG && Z_LVAL_P(generic_args_zv) != 0) {
-					zend_generic_args_dtor((zend_generic_args *)(uintptr_t) Z_LVAL_P(generic_args_zv));
+					zend_generic_args_release((zend_generic_args *)(uintptr_t) Z_LVAL_P(generic_args_zv));
 					ZVAL_LONG(generic_args_zv, 0);
 				}
 			}

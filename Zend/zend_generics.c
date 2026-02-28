@@ -38,30 +38,26 @@ ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_p
 
 ZEND_API zend_generic_args *zend_alloc_generic_args(uint32_t num_args)
 {
-	zend_generic_args *args = safe_emalloc(
-		num_args - 1, sizeof(zend_type),
-		sizeof(zend_generic_args));
+	zend_generic_args *args = emalloc(ZEND_GENERIC_ARGS_SIZE(num_args));
+	args->refcount = 1;
 	args->num_args = num_args;
-	args->resolved_masks = NULL;
 	for (uint32_t i = 0; i < num_args; i++) {
 		args->args[i] = (zend_type) ZEND_TYPE_INIT_NONE(0);
 	}
+	memset(ZEND_GENERIC_ARGS_MASKS(args), 0, num_args * sizeof(uint32_t));
 	return args;
 }
 
 ZEND_API void zend_generic_args_compute_masks(zend_generic_args *args)
 {
-	if (args->resolved_masks) {
-		efree(args->resolved_masks);
-	}
-	args->resolved_masks = safe_emalloc(args->num_args, sizeof(uint32_t), 0);
+	uint32_t *masks = ZEND_GENERIC_ARGS_MASKS(args);
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_type t = args->args[i];
 		if (!ZEND_TYPE_HAS_NAME(t) && !ZEND_TYPE_IS_GENERIC_CLASS(t)
 		 && !ZEND_TYPE_HAS_LIST(t) && !ZEND_TYPE_IS_GENERIC_PARAM(t)) {
-			args->resolved_masks[i] = ZEND_TYPE_PURE_MASK(t) & MAY_BE_ANY;
+			masks[i] = ZEND_TYPE_PURE_MASK(t) & MAY_BE_ANY;
 		} else {
-			args->resolved_masks[i] = 0;  /* Complex type — requires slow path */
+			masks[i] = 0;  /* Complex type — requires slow path */
 		}
 	}
 }
@@ -100,20 +96,14 @@ ZEND_API zend_type zend_copy_generic_type(zend_type src)
 ZEND_API zend_generic_args *zend_copy_generic_args(const zend_generic_args *src)
 {
 	uint32_t num_args = src->num_args;
-	zend_generic_args *copy = safe_emalloc(
-		num_args - 1, sizeof(zend_type),
-		sizeof(zend_generic_args));
+	zend_generic_args *copy = emalloc(ZEND_GENERIC_ARGS_SIZE(num_args));
+	copy->refcount = 1;
 	copy->num_args = num_args;
 	for (uint32_t i = 0; i < num_args; i++) {
 		copy->args[i] = zend_copy_generic_type(src->args[i]);
 	}
-	if (src->resolved_masks) {
-		copy->resolved_masks = safe_emalloc(num_args, sizeof(uint32_t), 0);
-		memcpy(copy->resolved_masks, src->resolved_masks, num_args * sizeof(uint32_t));
-	} else {
-		copy->resolved_masks = NULL;
-		zend_generic_args_compute_masks(copy);
-	}
+	memcpy(ZEND_GENERIC_ARGS_MASKS(copy), ZEND_GENERIC_ARGS_MASKS(src),
+		num_args * sizeof(uint32_t));
 	return copy;
 }
 
@@ -134,9 +124,6 @@ ZEND_API void zend_generic_args_dtor(zend_generic_args *args)
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_type_release(args->args[i], /* persistent */ 0);
 	}
-	if (args->resolved_masks) {
-		efree(args->resolved_masks);
-	}
 	efree(args);
 }
 
@@ -154,7 +141,7 @@ ZEND_API void zend_generic_class_ref_dtor(zend_generic_class_ref *ref)
 		zend_string_release(ref->class_name);
 	}
 	if (ref->type_args) {
-		zend_generic_args_dtor(ref->type_args);
+		zend_generic_args_release(ref->type_args);
 	}
 	if (ref->wildcard_bounds) {
 		efree(ref->wildcard_bounds);
@@ -171,6 +158,40 @@ ZEND_API zend_type zend_resolve_generic_type(zend_type type, const zend_generic_
 		}
 	}
 	return type;
+}
+
+ZEND_API zend_generic_args *zend_resolve_generic_args_with_context(
+	const zend_generic_args *args, const zend_generic_args *context)
+{
+	if (!context) {
+		return NULL;
+	}
+
+	/* Check if any args need resolution */
+	bool needs_resolution = false;
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		if (ZEND_TYPE_IS_GENERIC_PARAM(args->args[i])) {
+			needs_resolution = true;
+			break;
+		}
+	}
+	if (!needs_resolution) {
+		return NULL;
+	}
+
+	/* Create resolved copy */
+	zend_generic_args *resolved = zend_alloc_generic_args(args->num_args);
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		if (ZEND_TYPE_IS_GENERIC_PARAM(args->args[i])) {
+			zend_type resolved_type = zend_resolve_generic_type(args->args[i], context);
+			/* Copy the resolved type (may still be a param ref if context doesn't have it) */
+			resolved->args[i] = zend_copy_generic_type(resolved_type);
+		} else {
+			resolved->args[i] = zend_copy_generic_type(args->args[i]);
+		}
+	}
+	zend_generic_args_compute_masks(resolved);
+	return resolved;
 }
 
 ZEND_API zend_generic_args *zend_expand_generic_args_with_defaults(
@@ -461,13 +482,13 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 
 	if (!all_inferred) {
 		/* Could not infer all type params — free and leave unbound */
-		zend_generic_args_dtor(inferred);
+		zend_generic_args_release(inferred);
 		return false;
 	}
 
 	/* Validate against constraints */
 	if (!zend_verify_generic_args(ce->generic_params_info, inferred)) {
-		zend_generic_args_dtor(inferred);
+		zend_generic_args_release(inferred);
 		return false;
 	}
 
@@ -479,31 +500,21 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 ZEND_API zend_generic_args *zend_get_current_generic_args(void)
 {
 	zend_execute_data *ex = EG(current_execute_data);
-
 	if (!ex) {
 		return NULL;
 	}
-
-	/* For method calls: get from the object instance */
 	if (Z_TYPE(ex->This) == IS_OBJECT) {
 		zend_object *obj = Z_OBJ(ex->This);
 		if (obj->generic_args) {
 			return obj->generic_args;
 		}
-		/* Fall back to class-level bound args (e.g., IntList extends Collection<int>) */
 		if (obj->ce->bound_generic_args) {
 			return obj->ce->bound_generic_args;
 		}
 	}
-
-	/* For static method calls with generic args (e.g., Collection<int>::create()) */
 	if (EG(static_generic_args)) {
 		return EG(static_generic_args);
 	}
-
-	/* For generic functions: stored in extra named args or similar mechanism */
-	/* Phase 1: function-level generics use a simpler approach */
-
 	return NULL;
 }
 
