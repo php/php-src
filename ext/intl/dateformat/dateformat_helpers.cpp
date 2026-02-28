@@ -26,6 +26,9 @@ extern "C" {
 #include "../calendar/calendar_class.h"
 }
 
+// Artificial value to set for a pure proleptic gregorian calendar (until icu provides it eventually)
+#define UCAL_PHP_PROLEPTIC_GREGORIAN -16
+
 using icu::GregorianCalendar;
 
 zend_result datefmt_process_calendar_arg(
@@ -43,22 +46,31 @@ zend_result datefmt_process_calendar_arg(
 
 	} else if (!calendar_obj) {
 		zend_long v = calendar_long;
-		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
+		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN &&
+		    v != (zend_long)UCAL_PHP_PROLEPTIC_GREGORIAN) {
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				"Invalid value for calendar type; it must be one of "
 				"IntlDateFormatter::TRADITIONAL (locale's default calendar) or"
-				" IntlDateFormatter::GREGORIAN. Alternatively, it can be an "
+				" IntlDateFormatter::GREGORIAN or IntlDateFormatter::PROLEPTIC_GREGORIAN."
+			        " Alternatively, it can be an "
 				"IntlCalendar object");
 			return FAILURE;
 		} else if (v == (zend_long)UCAL_TRADITIONAL) {
 			cal = Calendar::createInstance(locale, status);
 		} else { //UCAL_GREGORIAN
-			cal = new GregorianCalendar(locale, status);
+			GregorianCalendar *gcal = new GregorianCalendar(locale, status);
+			if (v == (zend_long)UCAL_PHP_PROLEPTIC_GREGORIAN) {
+				// set the Julian to gregorian cutover date to -infinity
+				// to make it a proleptic gregorian calendar
+				// TODO: consider making it default behavior over typical "gregorian" icu like calendar
+				gcal->setGregorianChange(-std::numeric_limits<double>::infinity(), status);
+			}
+			cal = gcal;
 		}
+
 		calendar_owned = true;
 
 		cal_int_type = calendar_long;
-
 	} else if (calendar_obj) {
 		cal = calendar_fetch_native_calendar(calendar_obj);
 		if (cal == NULL) {
