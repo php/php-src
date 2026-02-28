@@ -25,12 +25,6 @@ ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen);
 #include "php_io_linux.h"
 #elif defined(PHP_WIN32)
 #include "php_io_windows.h"
-#elif defined(__APPLE__)
-#include "php_io_macos.h"
-#elif defined(__sun)
-#include "php_io_solaris.h"
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#include "php_io_bsd.h"
 #else
 #include "php_io_generic.h"
 #endif
