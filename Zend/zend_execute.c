@@ -695,7 +695,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 		*fclass = "";
 	}
 
-	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
+	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope, /* TODO? */ NULL);
 
 	if (value) {
 		*given_kind = zend_zval_value_name(value);

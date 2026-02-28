@@ -54,6 +54,7 @@
 
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
+extern const zend_type zend_mixed_type;
 
 /* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
@@ -1034,7 +1035,7 @@ int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 
 void zend_assert_valid_class_name(const zend_string *const_name, const char *type);
 
-zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
+zend_string *zend_type_to_string_resolved(zend_type type, const zend_class_entry *scope, const HashTable *bound_types_to_scope);
 ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 /* class fetches */
