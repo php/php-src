@@ -2525,7 +2525,7 @@ ZEND_VM_C_LABEL(assign_obj_simple):
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, zobj EXECUTE_DATA_CC);
 						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 					} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
@@ -2660,7 +2660,7 @@ ZEND_VM_HANDLER(25, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=
 	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, NULL EXECUTE_DATA_CC);
 		FREE_OP_DATA();
 	} else {
 		value = zend_assign_to_variable_ex(prop, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES(), &garbage);
@@ -5968,17 +5968,21 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 	zend_function *constructor;
 	zend_class_entry *ce;
 	zend_execute_data *call;
+	uint32_t cache_slot;
+	bool has_generic_args = false;
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CONST) {
-		ce = CACHED_PTR(opline->op2.num);
+		cache_slot = opline->op2.num & 0x7FFFFFFF;
+		has_generic_args = (opline->op2.num & 0x80000000) != 0;
+		ce = CACHED_PTR(cache_slot);
 		if (UNEXPECTED(ce == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
-			CACHE_PTR(opline->op2.num, ce);
+			CACHE_PTR(cache_slot, ce);
 		}
 	} else if (OP1_TYPE == IS_UNUSED) {
 		ce = zend_fetch_class(NULL, opline->op1.num);
@@ -5994,6 +5998,22 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
+	}
+
+	/* Bind generic type arguments to the newly created object */
+	if (has_generic_args) {
+		/* Generic args literal is stored at op1.constant + 2
+		 * (after class name + lowercase class name) */
+		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
+		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
+		Z_OBJ_P(result)->generic_args = zend_copy_generic_args(compiled_args);
+		/* Verify type arguments satisfy constraints (e.g., T: Countable) */
+		if (ce->generic_params_info) {
+			zend_verify_generic_args(ce->generic_params_info, Z_OBJ_P(result)->generic_args);
+		}
+	} else if (ce->bound_generic_args) {
+		/* Inherit bound generic args from class (e.g., IntList extends Collection<int>) */
+		Z_OBJ_P(result)->generic_args = zend_copy_generic_args(ce->bound_generic_args);
 	}
 
 	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
@@ -8081,13 +8101,14 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMP|CV, UNUSED|CLASS_FETCH|CONST|VAR, CACH
 ZEND_VM_C_LABEL(try_instanceof):
 	if (Z_TYPE_P(expr) == IS_OBJECT) {
 		zend_class_entry *ce;
+		uint32_t cache_slot = opline->extended_value & ~ZEND_INSTANCEOF_GENERIC_FLAG;
 
 		if (OP2_TYPE == IS_CONST) {
-			ce = CACHED_PTR(opline->extended_value);
+			ce = CACHED_PTR(cache_slot);
 			if (UNEXPECTED(ce == NULL)) {
 				ce = zend_lookup_class_ex(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (EXPECTED(ce)) {
-					CACHE_PTR(opline->extended_value, ce);
+					CACHE_PTR(cache_slot, ce);
 				}
 			}
 		} else if (OP2_TYPE == IS_UNUSED) {
@@ -8101,6 +8122,21 @@ ZEND_VM_C_LABEL(try_instanceof):
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
 		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
+
+		/* Check generic type arguments if present */
+		if (result && OP2_TYPE == IS_CONST && (opline->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG)) {
+			zend_generic_args *expected_args = (zend_generic_args *)(uintptr_t)
+				Z_LVAL_P(RT_CONSTANT(opline, opline->op2) + 2);
+			zend_generic_args *obj_args = Z_OBJ_P(expr)->generic_args;
+			if (expected_args && obj_args) {
+				const zend_generic_params_info *params_info = ce ? ce->generic_params_info : NULL;
+				result = zend_generic_args_compatible(expected_args, obj_args, params_info);
+			} else if (expected_args && !obj_args) {
+				/* Object has no generic args but we expect specific ones */
+				result = 0;
+			}
+			/* If no expected_args, just check the base class (already done) */
+		}
 	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		ZEND_VM_C_GOTO(try_instanceof);

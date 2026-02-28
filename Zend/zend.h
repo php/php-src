@@ -227,6 +227,17 @@ struct _zend_class_entry {
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
+	/* Generic type parameters (NULL for non-generic classes) */
+	struct _zend_generic_params_info *generic_params_info;
+	/* Bound type arguments from parent (e.g., Collection<int> when extending) */
+	struct _zend_generic_args *bound_generic_args;
+	/* Bound type arguments for implemented interfaces.
+	 * HashTable mapping lc_interface_name => zend_generic_args* */
+	HashTable *interface_bound_generic_args;
+	/* Bound type arguments for used traits.
+	 * HashTable mapping lc_trait_name => zend_generic_args* */
+	HashTable *trait_bound_generic_args;
+
 	zend_string *doc_comment;
 
 	union {

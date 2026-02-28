@@ -31,6 +31,7 @@
 #include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_observer.h"
+#include "zend_generics.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
@@ -830,6 +831,36 @@ static inheritance_status zend_do_perform_implementation_check(
 	fe_num_args = fe->common.num_args + fe_is_variadic;
 	num_args = MAX(proto_num_args, fe_num_args);
 
+	/* Get bound generic args for resolving parent's generic type params.
+	 * When IntList extends Collection<int>, fe_scope->bound_generic_args = [int],
+	 * so parent's T (param_index=0) resolves to int.
+	 * For interfaces: look up in interface_bound_generic_args HashTable by name.
+	 * For traits: look up in trait_bound_generic_args HashTable by name. */
+	const zend_generic_args *bound_args = NULL;
+	if (fe_scope) {
+		if (proto_scope && proto_scope->name && fe_scope->interface_bound_generic_args) {
+			zend_string *lc_name = zend_string_tolower(proto_scope->name);
+			zend_generic_args *iface_args = zend_hash_find_ptr(
+				fe_scope->interface_bound_generic_args, lc_name);
+			zend_string_release(lc_name);
+			if (iface_args) {
+				bound_args = iface_args;
+			}
+		}
+		if (!bound_args && proto_scope && proto_scope->name && fe_scope->trait_bound_generic_args) {
+			zend_string *lc_name = zend_string_tolower(proto_scope->name);
+			zend_generic_args *trait_args = zend_hash_find_ptr(
+				fe_scope->trait_bound_generic_args, lc_name);
+			zend_string_release(lc_name);
+			if (trait_args) {
+				bound_args = trait_args;
+			}
+		}
+		if (!bound_args) {
+			bound_args = fe_scope->bound_generic_args;
+		}
+	}
+
 	status = INHERITANCE_SUCCESS;
 	for (uint32_t i = 0; i < num_args; i++) {
 		zend_arg_info *proto_arg_info =
@@ -849,8 +880,20 @@ static inheritance_status zend_do_perform_implementation_check(
 			return INHERITANCE_ERROR;
 		}
 
+		/* Resolve generic type params in parent's arg type using child's bound args */
+		zend_arg_info resolved_proto_arg;
+		zend_arg_info *effective_proto = proto_arg_info;
+		if (bound_args && ZEND_TYPE_IS_GENERIC_PARAM(proto_arg_info->type)) {
+			zend_type resolved = zend_resolve_generic_type(proto_arg_info->type, bound_args);
+			if (!ZEND_TYPE_IS_GENERIC_PARAM(resolved)) {
+				resolved_proto_arg = *proto_arg_info;
+				resolved_proto_arg.type = resolved;
+				effective_proto = &resolved_proto_arg;
+			}
+		}
+
 		local_status = zend_do_perform_arg_type_hint_check(
-			fe_scope, fe_arg_info, proto_scope, proto_arg_info);
+			fe_scope, fe_arg_info, proto_scope, effective_proto);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
@@ -880,8 +923,17 @@ static inheritance_status zend_do_perform_implementation_check(
 			return status;
 		}
 
+		/* Resolve generic type params in parent's return type */
+		zend_type proto_return_type = proto->common.arg_info[-1].type;
+		if (bound_args && ZEND_TYPE_IS_GENERIC_PARAM(proto_return_type)) {
+			zend_type resolved = zend_resolve_generic_type(proto_return_type, bound_args);
+			if (!ZEND_TYPE_IS_GENERIC_PARAM(resolved)) {
+				proto_return_type = resolved;
+			}
+		}
+
 		local_status = zend_perform_covariant_type_check(
-			fe_scope, fe->common.arg_info[-1].type, proto_scope, proto->common.arg_info[-1].type);
+			fe_scope, fe->common.arg_info[-1].type, proto_scope, proto_return_type);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (local_status == INHERITANCE_ERROR
@@ -1881,6 +1933,22 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	ce->default_object_handlers = parent_ce->default_object_handlers;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_PARENT;
 
+	/* Validate generic type arguments against parent's generic parameters */
+	if (parent_ce->generic_params_info) {
+		if (ce->bound_generic_args) {
+			if (ce->bound_generic_args->num_args != parent_ce->generic_params_info->num_params) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Class %s expects %u generic type argument(s), %u given in %s",
+					ZSTR_VAL(parent_ce->name),
+					parent_ce->generic_params_info->num_params,
+					ce->bound_generic_args->num_args,
+					ZSTR_VAL(ce->name));
+			}
+		}
+		/* Note: If parent is generic and child doesn't provide args, that's allowed
+		 * for Phase 1 — the type params remain unbound. */
+	}
+
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
 		zval *src, *dst, *end;
@@ -2448,7 +2516,63 @@ static void zend_traits_check_private_final_inheritance(uint32_t original_fn_fla
 	}
 }
 
-static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
+/* Resolve generic type parameters in a trait method's arg_info when copying
+ * into a class that uses the trait with bound type arguments.
+ * E.g., trait Cacheable<T> { public function cache(T $item): T; }
+ *       class Foo { use Cacheable<User>; }
+ * After resolution, Foo::cache has arg type User and return type User. */
+static void zend_resolve_trait_method_generics(zend_function *fn, const zend_generic_args *bound_args) /* {{{ */
+{
+	uint32_t num_args = fn->common.num_args + ((fn->common.fn_flags & ZEND_ACC_VARIADIC) ? 1 : 0);
+	bool has_return_type = (fn->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) != 0;
+	bool needs_resolution = false;
+
+	/* Check if any types need resolution */
+	if (has_return_type && ZEND_TYPE_IS_GENERIC_PARAM(fn->common.arg_info[-1].type)) {
+		needs_resolution = true;
+	}
+	if (!needs_resolution) {
+		for (uint32_t i = 0; i < num_args; i++) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM(fn->common.arg_info[i].type)) {
+				needs_resolution = true;
+				break;
+			}
+		}
+	}
+	if (!needs_resolution) {
+		return;
+	}
+
+	/* Allocate new arg_info in arena: num_args + 1 for return type slot at [-1] */
+	zend_arg_info *new_arg_info_base = zend_arena_alloc(&CG(arena),
+		(num_args + 1) * sizeof(zend_arg_info));
+	zend_arg_info *new_arg_info = new_arg_info_base + 1;
+
+	/* Copy return type info (at index -1) */
+	new_arg_info[-1] = fn->common.arg_info[-1];
+	if (has_return_type && ZEND_TYPE_IS_GENERIC_PARAM(fn->common.arg_info[-1].type)) {
+		zend_type resolved = zend_resolve_generic_type(fn->common.arg_info[-1].type, bound_args);
+		if (!ZEND_TYPE_IS_GENERIC_PARAM(resolved)) {
+			new_arg_info[-1].type = zend_copy_generic_type(resolved);
+		}
+	}
+
+	/* Copy and resolve argument types */
+	for (uint32_t i = 0; i < num_args; i++) {
+		new_arg_info[i] = fn->common.arg_info[i];
+		if (ZEND_TYPE_IS_GENERIC_PARAM(fn->common.arg_info[i].type)) {
+			zend_type resolved = zend_resolve_generic_type(fn->common.arg_info[i].type, bound_args);
+			if (!ZEND_TYPE_IS_GENERIC_PARAM(resolved)) {
+				new_arg_info[i].type = zend_copy_generic_type(resolved);
+			}
+		}
+	}
+
+	fn->common.arg_info = new_arg_info;
+}
+/* }}} */
+
+static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable *exclude_table, zend_class_entry **aliases, const zend_generic_args *trait_bound_args) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
 	zend_function      fn_copy;
@@ -2470,6 +2594,11 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				} else {
 					fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
+				}
+
+				/* Resolve generic type params in trait method signatures */
+				if (trait_bound_args) {
+					zend_resolve_trait_method_generics(&fn_copy, trait_bound_args);
 				}
 
 				zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, alias->alias);
@@ -2509,6 +2638,11 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				alias = *alias_ptr;
 				i++;
 			}
+		}
+
+		/* Resolve generic type params in trait method signatures */
+		if (trait_bound_args) {
+			zend_resolve_trait_method_generics(&fn_copy, trait_bound_args);
 		}
 
 		zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, fnname);
@@ -2696,6 +2830,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 	if (exclude_tables) {
 		for (i = 0; i < ce->num_traits; i++) {
 			if (traits[i]) {
+				/* Look up bound generic args for this trait */
+				const zend_generic_args *trait_bound_args = NULL;
+				if (ce->trait_bound_generic_args && traits[i]->name) {
+					zend_string *lc_name = zend_string_tolower(traits[i]->name);
+					trait_bound_args = zend_hash_find_ptr(ce->trait_bound_generic_args, lc_name);
+					zend_string_release(lc_name);
+				}
+
 				/* copies functions, applies defined aliasing, and excludes unused trait methods */
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
 					bool is_abstract = (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT);
@@ -2703,7 +2845,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 					if (verify_abstract != is_abstract) {
 						continue;
 					}
-					zend_traits_copy_functions(key, fn, ce, exclude_tables[i], aliases);
+					zend_traits_copy_functions(key, fn, ce, exclude_tables[i], aliases, trait_bound_args);
 				} ZEND_HASH_FOREACH_END();
 
 				if (exclude_tables[i]) {
@@ -2716,13 +2858,21 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 	} else {
 		for (i = 0; i < ce->num_traits; i++) {
 			if (traits[i]) {
+				/* Look up bound generic args for this trait */
+				const zend_generic_args *trait_bound_args = NULL;
+				if (ce->trait_bound_generic_args && traits[i]->name) {
+					zend_string *lc_name = zend_string_tolower(traits[i]->name);
+					trait_bound_args = zend_hash_find_ptr(ce->trait_bound_generic_args, lc_name);
+					zend_string_release(lc_name);
+				}
+
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
 					bool is_abstract = (bool) (fn->common.fn_flags & ZEND_ACC_ABSTRACT);
 					*contains_abstract_methods |= is_abstract;
 					if (verify_abstract != is_abstract) {
 						continue;
 					}
-					zend_traits_copy_functions(key, fn, ce, NULL, aliases);
+					zend_traits_copy_functions(key, fn, ce, NULL, aliases, trait_bound_args);
 				} ZEND_HASH_FOREACH_END();
 			}
 		}
@@ -2958,6 +3108,21 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			zend_string *doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 
 			zend_type type = property_info->type;
+
+			/* Resolve generic type params in trait property types */
+			if (ZEND_TYPE_IS_GENERIC_PARAM(type) && ce->trait_bound_generic_args && traits[i]->name) {
+				zend_string *lc_trait_name = zend_string_tolower(traits[i]->name);
+				const zend_generic_args *trait_gargs = zend_hash_find_ptr(
+					ce->trait_bound_generic_args, lc_trait_name);
+				zend_string_release(lc_trait_name);
+				if (trait_gargs) {
+					zend_type resolved = zend_resolve_generic_type(type, trait_gargs);
+					if (!ZEND_TYPE_IS_GENERIC_PARAM(resolved)) {
+						type = resolved;
+					}
+				}
+			}
+
 			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
 			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
 			zend_property_info *new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);

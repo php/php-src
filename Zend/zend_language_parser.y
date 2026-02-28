@@ -40,6 +40,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %code requires {
 #include "zend_compile.h"
+#include "zend_generics.h"
 }
 
 %define api.prefix {zend}
@@ -248,6 +249,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
 %token T_BAD_CHARACTER   "invalid character"
 
+/* Generic type parameter bracket */
+%token T_GENERIC_LT    "'<' (generic)"
+
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
 
@@ -288,6 +292,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
+%type <ast> optional_generic_params generic_param_list generic_param generic_type_arg_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -585,10 +590,10 @@ function_name:
 ;
 
 function_declaration_statement:
-	function returns_ref function_name backup_doc_comment '(' parameter_list ')' return_type
+	function returns_ref function_name optional_generic_params backup_doc_comment '(' parameter_list ')' return_type
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
-		      zend_ast_get_str($3), $6, NULL, $11, $8, NULL); CG(extra_fn_flags) = $9; }
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $14, $1, $5,
+		      zend_ast_get_str($3), $7, NULL, $12, $9, NULL, $4); CG(extra_fn_flags) = $10; }
 ;
 
 is_reference:
@@ -603,11 +608,11 @@ is_variadic:
 
 class_declaration_statement:
 		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
+		T_STRING optional_generic_params extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $8, zend_ast_get_str($4), $6, $7, $10, NULL, NULL, $5); }
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+		T_STRING optional_generic_params extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $7, zend_ast_get_str($3), $5, $6, $9, NULL, NULL, $4); }
 ;
 
 class_modifiers:
@@ -636,20 +641,20 @@ class_modifier:
 
 trait_declaration_statement:
 		T_TRAIT { $<num>$ = CG(zend_lineno); }
-		T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL, NULL); }
+		T_STRING optional_generic_params backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $5, zend_ast_get_str($3), NULL, NULL, $7, NULL, NULL, $4); }
 ;
 
 interface_declaration_statement:
 		T_INTERFACE { $<num>$ = CG(zend_lineno); }
-		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL, NULL); }
+		T_STRING optional_generic_params interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, NULL, $4); }
 ;
 
 enum_declaration_statement:
 		T_ENUM { $<num>$ = CG(zend_lineno); }
 		T_STRING enum_backing_type implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ENUM|ZEND_ACC_FINAL, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, $4); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ENUM|ZEND_ACC_FINAL, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, $4, NULL); }
 ;
 
 enum_backing_type:
@@ -670,6 +675,8 @@ enum_case_expr:
 extends_from:
 		%empty				{ $$ = NULL; }
 	|	T_EXTENDS class_name	{ $$ = $2; }
+	|	T_EXTENDS class_name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_TYPE, $2, $4); }
 ;
 
 interface_extends_list:
@@ -680,6 +687,66 @@ interface_extends_list:
 implements_list:
 		%empty		        		{ $$ = NULL; }
 	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
+;
+
+optional_generic_params:
+		%empty						{ $$ = NULL; }
+	|	T_GENERIC_LT generic_param_list '>'
+			{ $$ = $2; }
+;
+
+generic_param_list:
+		generic_param
+			{ $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_PARAMS, $1); }
+	|	generic_param_list ',' generic_param
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+generic_param:
+		T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL); $$->attr = 0; }
+	|	T_STRING ':' name
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3); $$->attr = 0; }
+	|	T_STRING T_STRING
+			{
+				/* "in T" or "out T" — variance annotation */
+				zend_string *kw = zend_ast_get_str($1);
+				if (zend_string_equals_literal_ci(kw, "out")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL);
+					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
+				} else if (zend_string_equals_literal_ci(kw, "in")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL);
+					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
+				} else {
+					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
+					YYERROR;
+				}
+				/* Release the keyword string from AST node $1 (node itself is arena-allocated) */
+				zend_string_release(kw);
+			}
+	|	T_STRING T_STRING ':' name
+			{
+				/* "in T: Constraint" or "out T: Constraint" */
+				zend_string *kw = zend_ast_get_str($1);
+				if (zend_string_equals_literal_ci(kw, "out")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4);
+					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
+				} else if (zend_string_equals_literal_ci(kw, "in")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4);
+					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
+				} else {
+					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
+					YYERROR;
+				}
+				zend_string_release(kw);
+			}
+;
+
+generic_type_arg_list:
+		type_expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_ARGS, $1); }
+	|	generic_type_arg_list ',' type_expr
+			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 foreach_variable:
@@ -874,6 +941,8 @@ type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
+	|	name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_TYPE, $1, $3); }
 ;
 
 union_type_without_static_element:
@@ -996,10 +1065,10 @@ attributed_class_statement:
 	|	class_const_modifiers T_CONST type_expr class_const_list ';'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $4, NULL, $3);
 			  $$->attr = $1; }
-	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+	|	method_modifiers function returns_ref identifier optional_generic_params backup_doc_comment '(' parameter_list ')'
 		return_type backup_fn_flags method_body backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
-				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $13, $2, $6,
+				  zend_ast_get_str($4), $8, NULL, $12, $10, NULL, $5); CG(extra_fn_flags) = $11; }
 	|	enum_case { $$ = $1; }
 ;
 
@@ -1012,7 +1081,13 @@ class_statement:
 
 class_name_list:
 		class_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	class_name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST,
+				zend_ast_create(ZEND_AST_GENERIC_TYPE, $1, $3)); }
 	|	class_name_list ',' class_name { $$ = zend_ast_list_add($1, $3); }
+	|	class_name_list ',' class_name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_list_add($1,
+				zend_ast_create(ZEND_AST_GENERIC_TYPE, $3, $5)); }
 ;
 
 trait_adaptations:
@@ -1165,7 +1240,7 @@ property_hook:
 		optional_parameter_list backup_fn_flags property_hook_body backup_fn_flags {
 			$$ = zend_ast_create_decl(
 				ZEND_AST_PROPERTY_HOOK, $1 | $2 | $9, $<num>5, $4, zend_ast_get_str($3),
-				$6, NULL, $8, NULL, NULL);
+				$6, NULL, $8, NULL, NULL, NULL);
 			CG(extra_fn_flags) = $7;
 		}
 ;
@@ -1231,7 +1306,7 @@ anonymous_class:
 		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
 			zend_ast *decl = zend_ast_create_decl(
 				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS | $1, $<num>3, $7, NULL,
-				$5, $6, $9, NULL, NULL);
+				$5, $6, $9, NULL, NULL, NULL);
 			$$ = zend_ast_create(ZEND_AST_NEW, decl, $4);
 		}
 ;
@@ -1239,6 +1314,9 @@ anonymous_class:
 new_dereferenceable:
 		T_NEW class_name_reference argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }
+	|	T_NEW class_name T_GENERIC_LT generic_type_arg_list '>' argument_list
+			{ $$ = zend_ast_create(ZEND_AST_NEW,
+				  zend_ast_create(ZEND_AST_GENERIC_TYPE, $2, $4), $6); }
 	|	T_NEW anonymous_class
 			{ $$ = $2; }
 	|	T_NEW attributes anonymous_class
@@ -1248,6 +1326,10 @@ new_dereferenceable:
 new_non_dereferenceable:
 		T_NEW class_name_reference
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, zend_ast_create_list(0, ZEND_AST_ARG_LIST)); }
+	|	T_NEW class_name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_create(ZEND_AST_NEW,
+				  zend_ast_create(ZEND_AST_GENERIC_TYPE, $2, $4),
+				  zend_ast_create_list(0, ZEND_AST_ARG_LIST)); }
 ;
 
 expr:
@@ -1350,6 +1432,9 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_SPACESHIP, $1, $3); }
 	|	expr T_INSTANCEOF class_name_reference
 			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1, $3); }
+	|	expr T_INSTANCEOF class_name T_GENERIC_LT generic_type_arg_list '>'
+			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1,
+				zend_ast_create(ZEND_AST_GENERIC_TYPE, $3, $5)); }
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
@@ -1395,16 +1480,16 @@ expr:
 
 
 inline_function:
-		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+		function returns_ref optional_generic_params backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $14, $1, $4,
 				  NULL,
-				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
-	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
+				  $6, $8, $12, $9, NULL, $3); CG(extra_fn_flags) = $10; }
+	|	fn returns_ref optional_generic_params backup_doc_comment '(' parameter_list ')' return_type
 		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
-				  NULL, $5, NULL, $11, $7, NULL);
-				  CG(extra_fn_flags) = $9; }
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $13, $1, $4,
+				  NULL, $6, NULL, $12, $8, NULL, $3);
+				  CG(extra_fn_flags) = $10; }
 ;
 
 fn:
@@ -1457,6 +1542,9 @@ function_call:
 		}
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
+	|	class_name T_GENERIC_LT generic_type_arg_list '>' T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL,
+				  zend_ast_create(ZEND_AST_GENERIC_TYPE, $1, $3), $6, $7); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list {

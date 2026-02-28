@@ -44,6 +44,7 @@
 #include "zend_system_id.h"
 #include "zend_call_stack.h"
 #include "zend_attributes.h"
+#include "zend_generics.h"
 #include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
@@ -1037,9 +1038,64 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 	return false;
 }
 
-static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)
+static zend_always_inline zend_generic_args *i_zend_get_generic_args_for_property(const zend_object *obj)
+{
+	/* First try the object's own generic args */
+	if (obj) {
+		if (obj->generic_args) {
+			return obj->generic_args;
+		}
+		/* Fall back to class-level bound args (e.g., IntList extends Collection<int>) */
+		if (obj->ce->bound_generic_args) {
+			return obj->ce->bound_generic_args;
+		}
+	}
+	/* Fall back to execution context (for method calls on $this) */
+	return zend_get_current_generic_args();
+}
+
+static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict, const zend_object *obj)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
+
+	/* Handle generic type parameter (e.g., T $value in a generic class) */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(info->type)) {
+		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(info->type);
+		zend_generic_args *args = i_zend_get_generic_args_for_property(obj);
+		if (args && gref->param_index < args->num_args) {
+			zend_type resolved = args->args[gref->param_index];
+			if (ZEND_TYPE_IS_SET(resolved)) {
+				/* Fast path: check type code directly (int, string, etc.) */
+				if (ZEND_TYPE_CONTAINS_CODE(resolved, Z_TYPE_P(property))) {
+					return 1;
+				}
+				/* Class type: check instanceof */
+				if (ZEND_TYPE_HAS_NAME(resolved) && Z_TYPE_P(property) == IS_OBJECT) {
+					zend_class_entry *ce = zend_lookup_class(ZEND_TYPE_NAME(resolved));
+					if (ce && instanceof_function(Z_OBJCE_P(property), ce)) {
+						return 1;
+					}
+				}
+				/* Generic class type (e.g., Box<int>): check instanceof + generic args */
+				if (ZEND_TYPE_IS_GENERIC_CLASS(resolved) && Z_TYPE_P(property) == IS_OBJECT) {
+					zend_generic_class_ref *gcref = ZEND_TYPE_GENERIC_CLASS_REF(resolved);
+					zend_class_entry *expected_ce = zend_lookup_class(gcref->class_name);
+					if (expected_ce && instanceof_function(Z_OBJCE_P(property), expected_ce)) {
+						zend_generic_args *obj_args = Z_OBJ_P(property)->generic_args;
+						if (!gcref->type_args || !obj_args || zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info)) {
+							return 1;
+						}
+					}
+					return 0;
+				}
+				/* Try scalar coercion */
+				return zend_verify_scalar_type_hint(
+					ZEND_TYPE_PURE_MASK(resolved), property, strict, 0);
+			}
+		}
+		return 1; /* unconstrained — allow any value */
+	}
+
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
 		return 1;
 	}
@@ -1054,10 +1110,29 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 	return zend_verify_scalar_type_hint(type_mask, property, strict, false);
 }
 
-static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
+static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict, const zend_object *obj)
 {
-	if (i_zend_check_property_type(info, property, strict)) {
+	if (i_zend_check_property_type(info, property, strict, obj)) {
 		return 1;
+	}
+
+	/* For generic param types, resolve T → concrete type name in error message */
+	if (obj && ZEND_TYPE_IS_GENERIC_PARAM(info->type)) {
+		zend_generic_args *args = i_zend_get_generic_args_for_property(obj);
+		if (args) {
+			zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(info->type);
+			if (gref->param_index < args->num_args) {
+				zend_type resolved = args->args[gref->param_index];
+				zend_string *type_str = zend_type_to_string(resolved);
+				zend_type_error("Cannot assign %s to property %s::$%s of type %s",
+					zend_zval_value_name(property),
+					ZSTR_VAL(info->ce->name),
+					zend_get_unmangled_property_name(info->name),
+					ZSTR_VAL(type_str));
+				zend_string_release(type_str);
+				return 0;
+			}
+		}
 	}
 
 	zend_verify_property_type_error(info, property);
@@ -1065,10 +1140,14 @@ static zend_always_inline bool i_zend_verify_property_type(const zend_property_i
 }
 
 ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_info *info, zval *property, bool strict) {
-	return i_zend_verify_property_type(info, property, strict);
+	return i_zend_verify_property_type(info, property, strict, NULL);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+ZEND_API bool zend_never_inline zend_verify_property_type_ex(const zend_property_info *info, zval *property, bool strict, const zend_object *obj) {
+	return i_zend_verify_property_type(info, property, strict, obj);
+}
+
+static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr, const zend_object *obj EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1086,7 +1165,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
 
-	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
+	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES(), obj))) {
 		zval_ptr_dtor(&tmp);
 		return &EG(uninitialized_zval);
 	}
@@ -1153,6 +1232,59 @@ static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
 {
+	/* Handle generic type parameter references (e.g., T in a generic class) */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(*type)) {
+		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(*type);
+		zend_generic_args *args = zend_get_current_generic_args();
+
+		/* Lazy type inference: if no generic args are bound and we're in a
+		 * constructor of a generic class, infer types from the actual arguments */
+		if (!args && !is_return_type) {
+			zend_execute_data *ex = EG(current_execute_data);
+			if (ex && Z_TYPE(ex->This) == IS_OBJECT) {
+				zend_object *obj = Z_OBJ(ex->This);
+				if (obj->ce->generic_params_info && !obj->generic_args
+						&& ex->func && ex->func->common.fn_flags & ZEND_ACC_CTOR) {
+					zend_infer_generic_args_from_constructor(obj, ex);
+					args = obj->generic_args; /* May be set now */
+				}
+			}
+		}
+
+		if (args && gref->param_index < args->num_args) {
+			zend_type resolved = args->args[gref->param_index];
+			if (ZEND_TYPE_IS_SET(resolved)) {
+				/* Check against the resolved concrete type */
+				if (ZEND_TYPE_CONTAINS_CODE(resolved, Z_TYPE_P(arg))) {
+					return true;
+				}
+				/* Recurse for complex type checks */
+				return zend_check_type_slow(&resolved, arg, ref, is_return_type, is_internal);
+			}
+		}
+		/* No generic args bound — allow any value (unconstrained) */
+		return true;
+	}
+
+	/* Handle generic class type references (e.g., Collection<int> as a type hint) */
+	if (ZEND_TYPE_IS_GENERIC_CLASS(*type)) {
+		if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+			zend_generic_class_ref *gcref = ZEND_TYPE_GENERIC_CLASS_REF(*type);
+			zend_class_entry *expected_ce = zend_lookup_class(gcref->class_name);
+			if (!expected_ce || !instanceof_function(Z_OBJCE_P(arg), expected_ce)) {
+				return false;
+			}
+			/* Check generic args match (respecting variance) */
+			zend_generic_args *obj_args = Z_OBJ_P(arg)->generic_args;
+			if (gcref->type_args && obj_args) {
+				return zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info);
+			}
+			/* If no generic args on the object, just check the base class */
+			return true;
+		}
+		return false;
+	}
+
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
@@ -4110,7 +4242,7 @@ ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_pro
 		}
 	} else {
 		ZVAL_DEREF(val);
-		if (i_zend_check_property_type(prop_info, val, strict)) {
+		if (i_zend_check_property_type(prop_info, val, strict, NULL)) {
 			return 1;
 		}
 	}

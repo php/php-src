@@ -575,6 +575,9 @@ struct _zend_op_array {
 	 * referenced by index from opcodes. */
 	zend_op_array **dynamic_func_defs;
 
+	/* Generic type parameters for generic functions/methods (NULL for non-generic) */
+	struct _zend_generic_params_info *generic_params_info;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
@@ -1051,6 +1054,9 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 #define ZEND_FETCH_CLASS_ALLOW_UNLINKED 0x0400
 #define ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED 0x0800
+
+/* Flag bit in ZEND_INSTANCEOF extended_value indicating generic type args are present */
+#define ZEND_INSTANCEOF_GENERIC_FLAG (1u << 30)
 
 /* These should not clash with ZEND_ACC_PPP_MASK and ZEND_ACC_PPP_SET_MASK */
 #define ZEND_PARAM_REF      (1<<3)
