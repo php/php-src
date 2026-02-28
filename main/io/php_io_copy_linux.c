@@ -179,18 +179,8 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 		ssize_t in_pipe = splice(src_fd, NULL, pipefd[1], NULL, to_copy, 0);
 
 		if (in_pipe < 0) {
-			/* Error on splice in - drain pipe if anything is there, then fall back */
-			char drain_buf[1024];
-			ssize_t drained;
-			while ((drained = read(pipefd[0], drain_buf, sizeof(drain_buf))) > 0) {
-				ssize_t written = write(dest_fd, drain_buf, drained);
-				if (written <= 0) {
-					close(pipefd[0]);
-					close(pipefd[1]);
-					return total_copied > 0 ? (ssize_t) total_copied : -1;
-				}
-				total_copied += written;
-			}
+			/* Nothing was spliced into the pipe this iteration, so nothing to drain.
+			 * Close pipe and fall back to generic copy for remaining data. */
 			close(pipefd[0]);
 			close(pipefd[1]);
 
