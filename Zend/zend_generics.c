@@ -19,6 +19,7 @@
 #include "zend_type_info.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+#include "zend_smart_str.h"
 
 ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_params)
 {
@@ -29,6 +30,7 @@ ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_p
 	for (uint32_t i = 0; i < num_params; i++) {
 		info->params[i].name = NULL;
 		info->params[i].constraint = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		info->params[i].default_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
 		info->params[i].variance = ZEND_GENERIC_VARIANCE_INVARIANT;
 	}
 	return info;
@@ -40,10 +42,28 @@ ZEND_API zend_generic_args *zend_alloc_generic_args(uint32_t num_args)
 		num_args - 1, sizeof(zend_type),
 		sizeof(zend_generic_args));
 	args->num_args = num_args;
+	args->resolved_masks = NULL;
 	for (uint32_t i = 0; i < num_args; i++) {
 		args->args[i] = (zend_type) ZEND_TYPE_INIT_NONE(0);
 	}
 	return args;
+}
+
+ZEND_API void zend_generic_args_compute_masks(zend_generic_args *args)
+{
+	if (args->resolved_masks) {
+		efree(args->resolved_masks);
+	}
+	args->resolved_masks = safe_emalloc(args->num_args, sizeof(uint32_t), 0);
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		zend_type t = args->args[i];
+		if (!ZEND_TYPE_HAS_NAME(t) && !ZEND_TYPE_IS_GENERIC_CLASS(t)
+		 && !ZEND_TYPE_HAS_LIST(t) && !ZEND_TYPE_IS_GENERIC_PARAM(t)) {
+			args->resolved_masks[i] = ZEND_TYPE_PURE_MASK(t) & MAY_BE_ANY;
+		} else {
+			args->resolved_masks[i] = 0;  /* Complex type — requires slow path */
+		}
+	}
 }
 
 ZEND_API zend_type zend_copy_generic_type(zend_type src)
@@ -54,6 +74,12 @@ ZEND_API zend_type zend_copy_generic_type(zend_type src)
 		zend_generic_class_ref *ref = emalloc(sizeof(zend_generic_class_ref));
 		ref->class_name = zend_string_copy(orig->class_name);
 		ref->type_args = orig->type_args ? zend_copy_generic_args(orig->type_args) : NULL;
+		if (orig->wildcard_bounds && orig->type_args) {
+			ref->wildcard_bounds = emalloc(orig->type_args->num_args * sizeof(uint8_t));
+			memcpy(ref->wildcard_bounds, orig->wildcard_bounds, orig->type_args->num_args * sizeof(uint8_t));
+		} else {
+			ref->wildcard_bounds = NULL;
+		}
 		return (zend_type) ZEND_TYPE_INIT_GENERIC_CLASS(ref, 0, 0);
 	}
 	if (ZEND_TYPE_IS_GENERIC_PARAM(src)) {
@@ -81,6 +107,13 @@ ZEND_API zend_generic_args *zend_copy_generic_args(const zend_generic_args *src)
 	for (uint32_t i = 0; i < num_args; i++) {
 		copy->args[i] = zend_copy_generic_type(src->args[i]);
 	}
+	if (src->resolved_masks) {
+		copy->resolved_masks = safe_emalloc(num_args, sizeof(uint32_t), 0);
+		memcpy(copy->resolved_masks, src->resolved_masks, num_args * sizeof(uint32_t));
+	} else {
+		copy->resolved_masks = NULL;
+		zend_generic_args_compute_masks(copy);
+	}
 	return copy;
 }
 
@@ -91,6 +124,7 @@ ZEND_API void zend_generic_params_info_dtor(zend_generic_params_info *info)
 			zend_string_release(info->params[i].name);
 		}
 		zend_type_release(info->params[i].constraint, /* persistent */ 0);
+		zend_type_release(info->params[i].default_type, /* persistent */ 0);
 	}
 	efree(info);
 }
@@ -99,6 +133,9 @@ ZEND_API void zend_generic_args_dtor(zend_generic_args *args)
 {
 	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_type_release(args->args[i], /* persistent */ 0);
+	}
+	if (args->resolved_masks) {
+		efree(args->resolved_masks);
 	}
 	efree(args);
 }
@@ -119,6 +156,9 @@ ZEND_API void zend_generic_class_ref_dtor(zend_generic_class_ref *ref)
 	if (ref->type_args) {
 		zend_generic_args_dtor(ref->type_args);
 	}
+	if (ref->wildcard_bounds) {
+		efree(ref->wildcard_bounds);
+	}
 	efree(ref);
 }
 
@@ -133,17 +173,61 @@ ZEND_API zend_type zend_resolve_generic_type(zend_type type, const zend_generic_
 	return type;
 }
 
+ZEND_API zend_generic_args *zend_expand_generic_args_with_defaults(
+	const zend_generic_params_info *params, const zend_generic_args *args)
+{
+	if (args->num_args >= params->num_params) {
+		return NULL; /* No expansion needed */
+	}
+
+	/* Verify that all missing args have defaults */
+	for (uint32_t i = args->num_args; i < params->num_params; i++) {
+		if (!ZEND_TYPE_IS_SET(params->params[i].default_type)) {
+			return NULL; /* Missing arg without default — can't expand */
+		}
+	}
+
+	/* Create expanded args with defaults filled in */
+	zend_generic_args *expanded = zend_alloc_generic_args(params->num_params);
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		expanded->args[i] = zend_copy_generic_type(args->args[i]);
+	}
+	for (uint32_t i = args->num_args; i < params->num_params; i++) {
+		expanded->args[i] = zend_copy_generic_type(params->params[i].default_type);
+	}
+	zend_generic_args_compute_masks(expanded);
+	return expanded;
+}
+
 ZEND_API bool zend_verify_generic_args(
 	const zend_generic_params_info *params, const zend_generic_args *args)
 {
 	if (args->num_args != params->num_params) {
-		zend_error(E_ERROR,
-			"Generic type expects %u type argument(s), %u given",
-			params->num_params, args->num_args);
-		return 0;
+		/* Check if the missing args all have defaults */
+		if (args->num_args < params->num_params) {
+			bool all_have_defaults = true;
+			for (uint32_t i = args->num_args; i < params->num_params; i++) {
+				if (!ZEND_TYPE_IS_SET(params->params[i].default_type)) {
+					all_have_defaults = false;
+					break;
+				}
+			}
+			if (!all_have_defaults) {
+				zend_error(E_ERROR,
+					"Generic type expects %u type argument(s), %u given",
+					params->num_params, args->num_args);
+				return 0;
+			}
+			/* Fewer args but all remaining have defaults — OK, skip validation for defaulted args */
+		} else {
+			zend_error(E_ERROR,
+				"Generic type expects %u type argument(s), %u given",
+				params->num_params, args->num_args);
+			return 0;
+		}
 	}
 
-	for (uint32_t i = 0; i < params->num_params; i++) {
+	for (uint32_t i = 0; i < args->num_args; i++) {
 		zend_type constraint = params->params[i].constraint;
 		if (!ZEND_TYPE_IS_SET(constraint)) {
 			continue; /* No constraint — any type is allowed */
@@ -201,7 +285,8 @@ static bool zend_generic_type_is_subtype(zend_type expected, zend_type actual)
 
 ZEND_API bool zend_generic_args_compatible(
 	const zend_generic_args *expected, const zend_generic_args *actual,
-	const zend_generic_params_info *params_info)
+	const zend_generic_params_info *params_info,
+	const uint8_t *wildcard_bounds)
 {
 	if (expected == NULL && actual == NULL) {
 		return 1;
@@ -217,7 +302,61 @@ ZEND_API bool zend_generic_args_compatible(
 		zend_type exp_type = expected->args[i];
 		zend_type act_type = actual->args[i];
 
-		/* Compare type masks for simple types */
+		/* Check wildcard bounds first */
+		uint8_t bound = (wildcard_bounds) ? wildcard_bounds[i] : ZEND_GENERIC_BOUND_NONE;
+
+		if (bound == ZEND_GENERIC_BOUND_UNBOUND) {
+			/* Unbounded wildcard (?) — matches any type */
+			continue;
+		}
+
+		if (bound == ZEND_GENERIC_BOUND_UPPER) {
+			/* ? extends Foo — actual must be a subtype of the bound */
+			if (ZEND_TYPE_HAS_NAME(exp_type) && ZEND_TYPE_HAS_NAME(act_type)) {
+				if (zend_generic_type_is_subtype(exp_type, act_type)) {
+					continue;
+				}
+				/* Also allow exact match */
+				if (zend_string_equals_ci(ZEND_TYPE_NAME(exp_type), ZEND_TYPE_NAME(act_type))) {
+					continue;
+				}
+			} else if (ZEND_TYPE_HAS_NAME(exp_type)) {
+				/* Bound is a class but actual is a primitive — never a subtype */
+				return 0;
+			}
+			/* For primitive bounds (unlikely but handle gracefully): exact match */
+			uint32_t exp_mask = ZEND_TYPE_PURE_MASK(exp_type);
+			uint32_t act_mask = ZEND_TYPE_PURE_MASK(act_type);
+			if (exp_mask == act_mask && !ZEND_TYPE_HAS_NAME(exp_type)) {
+				continue;
+			}
+			return 0;
+		}
+
+		if (bound == ZEND_GENERIC_BOUND_LOWER) {
+			/* ? super Foo — actual must be a supertype of the bound */
+			if (ZEND_TYPE_HAS_NAME(exp_type) && ZEND_TYPE_HAS_NAME(act_type)) {
+				if (zend_generic_type_is_subtype(act_type, exp_type)) {
+					continue;
+				}
+				/* Also allow exact match */
+				if (zend_string_equals_ci(ZEND_TYPE_NAME(exp_type), ZEND_TYPE_NAME(act_type))) {
+					continue;
+				}
+			} else if (ZEND_TYPE_HAS_NAME(exp_type)) {
+				/* Bound is a class but actual is a primitive — never a supertype */
+				return 0;
+			}
+			/* For primitive bounds: exact match */
+			uint32_t exp_mask = ZEND_TYPE_PURE_MASK(exp_type);
+			uint32_t act_mask = ZEND_TYPE_PURE_MASK(act_type);
+			if (exp_mask == act_mask && !ZEND_TYPE_HAS_NAME(exp_type)) {
+				continue;
+			}
+			return 0;
+		}
+
+		/* ZEND_GENERIC_BOUND_NONE — exact match (with variance support) */
 		uint32_t exp_mask = ZEND_TYPE_PURE_MASK(exp_type);
 		uint32_t act_mask = ZEND_TYPE_PURE_MASK(act_type);
 
@@ -332,6 +471,7 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 		return false;
 	}
 
+	zend_generic_args_compute_masks(inferred);
 	obj->generic_args = inferred;
 	return true;
 }
@@ -356,8 +496,124 @@ ZEND_API zend_generic_args *zend_get_current_generic_args(void)
 		}
 	}
 
+	/* For static method calls with generic args (e.g., Collection<int>::create()) */
+	if (EG(static_generic_args)) {
+		return EG(static_generic_args);
+	}
+
 	/* For generic functions: stored in extra named args or similar mechanism */
 	/* Phase 1: function-level generics use a simpler approach */
 
 	return NULL;
+}
+
+ZEND_API zend_string *zend_generic_args_to_string(const zend_generic_args *args)
+{
+	smart_str buf = {0};
+	smart_str_appendc(&buf, '<');
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		if (i > 0) {
+			smart_str_appends(&buf, ", ");
+		}
+		zend_string *type_str = zend_type_to_string(args->args[i]);
+		smart_str_append(&buf, type_str);
+		zend_string_release(type_str);
+	}
+	smart_str_appendc(&buf, '>');
+	smart_str_0(&buf);
+	return buf.s;
+}
+
+static zend_type zend_type_from_string(const char *str, size_t len)
+{
+	/* Map common type names to zend_type */
+	if (len == 3 && memcmp(str, "int", 3) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0);
+	} else if (len == 5 && memcmp(str, "float", 5) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_DOUBLE, 0, 0);
+	} else if (len == 6 && memcmp(str, "string", 6) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
+	} else if (len == 4 && memcmp(str, "bool", 4) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(_IS_BOOL, 0, 0);
+	} else if (len == 5 && memcmp(str, "array", 5) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_ARRAY, 0, 0);
+	} else if (len == 4 && memcmp(str, "null", 4) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_NULL, 0, 0);
+	} else if (len == 5 && memcmp(str, "mixed", 5) == 0) {
+		return (zend_type) ZEND_TYPE_INIT_CODE(IS_MIXED, 0, 0);
+	} else {
+		/* Assume it's a class name */
+		zend_string *name = zend_string_init(str, len, 0);
+		return (zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0);
+	}
+}
+
+ZEND_API zend_generic_args *zend_generic_args_from_string(const char *str, size_t len)
+{
+	/* Parse "<Type1, Type2, ...>" format */
+	if (len < 3 || str[0] != '<' || str[len - 1] != '>') {
+		return NULL;
+	}
+
+	/* Count commas to determine number of args (handling nesting) */
+	uint32_t num_args = 1;
+	int depth = 0;
+	for (size_t i = 1; i < len - 1; i++) {
+		if (str[i] == '<') depth++;
+		else if (str[i] == '>') depth--;
+		else if (str[i] == ',' && depth == 0) num_args++;
+	}
+
+	zend_generic_args *args = zend_alloc_generic_args(num_args);
+
+	/* Parse each type arg */
+	uint32_t arg_idx = 0;
+	const char *arg_start = str + 1;
+	depth = 0;
+	for (size_t i = 1; i < len - 1; i++) {
+		if (str[i] == '<') depth++;
+		else if (str[i] == '>') depth--;
+		else if ((str[i] == ',' && depth == 0) || i == len - 2) {
+			const char *arg_end = (str[i] == ',' || i == len - 2) ? str + i + (i == len - 2 ? 0 : 0) : str + i;
+			if (i == len - 2) {
+				arg_end = str + i + 1; /* Include last char before '>' */
+			}
+
+			/* Trim whitespace */
+			while (arg_start < arg_end && *arg_start == ' ') arg_start++;
+			const char *trimmed_end = (str[i] == ',') ? str + i : arg_end;
+			while (trimmed_end > arg_start && *(trimmed_end - 1) == ' ') trimmed_end--;
+
+			if (trimmed_end > arg_start && arg_idx < num_args) {
+				args->args[arg_idx] = zend_type_from_string(arg_start, trimmed_end - arg_start);
+				arg_idx++;
+			}
+
+			arg_start = str + i + 1;
+		}
+	}
+
+	zend_generic_args_compute_masks(args);
+	return args;
+}
+
+ZEND_API zend_string *zend_object_get_class_name_with_generics(const zend_object *obj)
+{
+	if (obj->generic_args) {
+		zend_string *generic_str = zend_generic_args_to_string(obj->generic_args);
+		zend_string *result = zend_string_concat2(
+			ZSTR_VAL(obj->ce->name), ZSTR_LEN(obj->ce->name),
+			ZSTR_VAL(generic_str), ZSTR_LEN(generic_str));
+		zend_string_release(generic_str);
+		return result;
+	}
+	if (obj->ce->bound_generic_args) {
+		zend_string *generic_str = zend_generic_args_to_string(obj->ce->bound_generic_args);
+		zend_string *result = zend_string_concat2(
+			ZSTR_VAL(obj->ce->name), ZSTR_LEN(obj->ce->name),
+			ZSTR_VAL(generic_str), ZSTR_LEN(generic_str));
+		zend_string_release(generic_str);
+		return result;
+	}
+	return zend_string_copy(obj->ce->name);
 }

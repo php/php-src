@@ -2383,6 +2383,11 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
 	}
 
+	/* Generic type parameters can resolve to any type at runtime */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(type)) {
+		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
+	}
+
 	uint32_t tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(type));
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
 		tmp |= MAY_BE_OBJECT;

@@ -18,6 +18,7 @@
 
 #include "Zend/zend_types.h"
 #include "Zend/zend_type_info.h"
+#include "Zend/zend_generics.h"
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
 #include "jit/tls/zend_jit_tls.h"
@@ -3134,6 +3135,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_free_call_frame);
 	REGISTER_HELPER(zend_jit_exception_in_interrupt_handler_helper);
 	REGISTER_HELPER(zend_jit_verify_arg_slow);
+	REGISTER_HELPER(zend_jit_verify_generic_arg);
+	REGISTER_HELPER(zend_jit_verify_generic_return);
 	REGISTER_HELPER(zend_missing_arg_error);
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_leave_func_helper);
@@ -10790,6 +10793,73 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 		}
 	}
 
+	/* For generic type parameters, try inline fast path then fall back to helper */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(arg_info->type)) {
+		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(arg_info->type);
+		uint32_t param_index = gref->param_index;
+		ir_ref generic_fast_path = IR_UNUSED;
+
+		/* Load Z_OBJ(EX(This)) — the object pointer */
+		ir_ref this_ref = ir_LOAD_A(jit_EX(This.value.ref));
+		ir_ref if_obj = ir_IF(this_ref);
+		ir_IF_TRUE(if_obj);
+
+		/* Load obj->generic_args */
+		ir_ref generic_args = ir_LOAD_A(ir_ADD_OFFSET(this_ref,
+			offsetof(zend_object, generic_args)));
+		ir_ref if_args = ir_IF(generic_args);
+		ir_IF_TRUE(if_args);
+
+		/* Load resolved_masks pointer */
+		ir_ref masks_ptr = ir_LOAD_A(ir_ADD_OFFSET(generic_args,
+			offsetof(zend_generic_args, resolved_masks)));
+		ir_ref if_masks = ir_IF(masks_ptr);
+		ir_IF_TRUE(if_masks);
+
+		/* Load mask = resolved_masks[param_index] */
+		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_ptr, param_index * sizeof(uint32_t)));
+		ir_ref if_mask = ir_IF(mask);
+		ir_IF_TRUE(if_mask);
+
+		/* Inline bitmask check: (1u << Z_TYPE_P(arg)) & mask */
+		ir_ref type_bit = ir_SHL_U32(ir_CONST_U32(1), ir_ZEXT_U32(jit_Z_TYPE_ref(jit, ref)));
+		ir_ref if_match = ir_IF(ir_AND_U32(type_bit, mask));
+		ir_IF_TRUE(if_match);
+		generic_fast_path = ir_END();
+
+		/* All failure paths merge to slow helper call */
+		ir_IF_FALSE_cold(if_match);
+		ir_ref slow1 = ir_END();
+		ir_IF_FALSE_cold(if_mask);
+		ir_ref slow2 = ir_END();
+		ir_IF_FALSE_cold(if_masks);
+		ir_ref slow3 = ir_END();
+		ir_IF_FALSE_cold(if_args);
+		ir_ref slow4 = ir_END();
+		ir_IF_FALSE_cold(if_obj);
+		ir_ref slow5 = ir_END();
+
+		/* Merge all slow paths */
+		ir_MERGE_2(slow1, slow2);
+		ir_MERGE_WITH(slow3);
+		ir_MERGE_WITH(slow4);
+		ir_MERGE_WITH(slow5);
+
+		/* Call helper for slow path */
+		jit_SET_EX_OPLINE(jit, opline);
+		ir_ref result = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_verify_generic_arg),
+			ref, ir_CONST_ADDR(arg_info));
+		if (check_exception) {
+			ir_GUARD(result, jit_STUB_ADDR(jit, jit_stub_exception_handler));
+		}
+
+		if (generic_fast_path) {
+			ir_MERGE_WITH(generic_fast_path);
+		}
+
+		return 1;
+	}
+
 	if (type_mask != 0) {
 		if (is_power_of_two(type_mask)) {
 			uint32_t type_code = concrete_type(type_mask);
@@ -10950,6 +11020,77 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 	bool needs_slow_check = true;
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
 	ir_ref fast_path = IR_UNUSED;
+
+	/* For generic type parameters, try inline fast path then fall back to helper */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(arg_info->type)) {
+		ir_ref ref;
+		ir_ref generic_fast_path = IR_UNUSED;
+		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(arg_info->type);
+		uint32_t param_index = gref->param_index;
+
+		ref = jit_ZVAL_ADDR(jit, op1_addr);
+		if (op1_info & MAY_BE_UNDEF) {
+			ref = zend_jit_zval_check_undef(jit, ref, opline->op1.var, NULL, 1);
+		}
+
+		/* Load Z_OBJ(EX(This)) — the object pointer */
+		ir_ref this_ref = ir_LOAD_A(jit_EX(This.value.ref));
+		ir_ref if_obj = ir_IF(this_ref);
+		ir_IF_TRUE(if_obj);
+
+		/* Load obj->generic_args */
+		ir_ref generic_args = ir_LOAD_A(ir_ADD_OFFSET(this_ref,
+			offsetof(zend_object, generic_args)));
+		ir_ref if_args = ir_IF(generic_args);
+		ir_IF_TRUE(if_args);
+
+		/* Load resolved_masks pointer */
+		ir_ref masks_ptr = ir_LOAD_A(ir_ADD_OFFSET(generic_args,
+			offsetof(zend_generic_args, resolved_masks)));
+		ir_ref if_masks = ir_IF(masks_ptr);
+		ir_IF_TRUE(if_masks);
+
+		/* Load mask = resolved_masks[param_index] */
+		ir_ref mask = ir_LOAD_U32(ir_ADD_OFFSET(masks_ptr, param_index * sizeof(uint32_t)));
+		ir_ref if_mask = ir_IF(mask);
+		ir_IF_TRUE(if_mask);
+
+		/* Inline bitmask check: (1u << Z_TYPE_P(arg)) & mask */
+		ir_ref type_bit = ir_SHL_U32(ir_CONST_U32(1), ir_ZEXT_U32(jit_Z_TYPE_ref(jit, ref)));
+		ir_ref if_match = ir_IF(ir_AND_U32(type_bit, mask));
+		ir_IF_TRUE(if_match);
+		generic_fast_path = ir_END();
+
+		/* All failure paths merge to slow helper call */
+		ir_IF_FALSE_cold(if_match);
+		ir_ref slow1 = ir_END();
+		ir_IF_FALSE_cold(if_mask);
+		ir_ref slow2 = ir_END();
+		ir_IF_FALSE_cold(if_masks);
+		ir_ref slow3 = ir_END();
+		ir_IF_FALSE_cold(if_args);
+		ir_ref slow4 = ir_END();
+		ir_IF_FALSE_cold(if_obj);
+		ir_ref slow5 = ir_END();
+
+		/* Merge all slow paths */
+		ir_MERGE_2(slow1, slow2);
+		ir_MERGE_WITH(slow3);
+		ir_MERGE_WITH(slow4);
+		ir_MERGE_WITH(slow5);
+
+		/* Call helper for slow path */
+		jit_SET_EX_OPLINE(jit, opline);
+		ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_verify_generic_return),
+			ref, ir_LOAD_A(jit_EX(func)), ir_CONST_ADDR(arg_info));
+		zend_jit_check_exception(jit);
+
+		if (generic_fast_path) {
+			ir_MERGE_WITH(generic_fast_path);
+		}
+
+		return 1;
+	}
 
 	if (type_mask != 0) {
 		if (((op1_info & MAY_BE_ANY) & type_mask) == 0) {

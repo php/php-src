@@ -292,7 +292,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
-%type <ast> optional_generic_params generic_param_list generic_param generic_type_arg_list
+%type <ast> optional_generic_params generic_param_list generic_param generic_type_arg generic_type_arg_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -704,18 +704,22 @@ generic_param_list:
 
 generic_param:
 		T_STRING
-			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL); $$->attr = 0; }
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL, NULL); $$->attr = 0; }
+	|	T_STRING '=' type_expr
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL, $3); $$->attr = 0; }
 	|	T_STRING ':' name
-			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3); $$->attr = 0; }
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3, NULL); $$->attr = 0; }
+	|	T_STRING ':' name '=' type_expr
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3, $5); $$->attr = 0; }
 	|	T_STRING T_STRING
 			{
 				/* "in T" or "out T" — variance annotation */
 				zend_string *kw = zend_ast_get_str($1);
 				if (zend_string_equals_literal_ci(kw, "out")) {
-					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL);
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL, NULL);
 					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
 				} else if (zend_string_equals_literal_ci(kw, "in")) {
-					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL);
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL, NULL);
 					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
 				} else {
 					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
@@ -724,15 +728,47 @@ generic_param:
 				/* Release the keyword string from AST node $1 (node itself is arena-allocated) */
 				zend_string_release(kw);
 			}
+	|	T_STRING T_STRING '=' type_expr
+			{
+				/* "in T = Default" or "out T = Default" — variance with default */
+				zend_string *kw = zend_ast_get_str($1);
+				if (zend_string_equals_literal_ci(kw, "out")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL, $4);
+					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
+				} else if (zend_string_equals_literal_ci(kw, "in")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, NULL, $4);
+					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
+				} else {
+					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
+					YYERROR;
+				}
+				zend_string_release(kw);
+			}
 	|	T_STRING T_STRING ':' name
 			{
 				/* "in T: Constraint" or "out T: Constraint" */
 				zend_string *kw = zend_ast_get_str($1);
 				if (zend_string_equals_literal_ci(kw, "out")) {
-					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4);
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4, NULL);
 					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
 				} else if (zend_string_equals_literal_ci(kw, "in")) {
-					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4);
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4, NULL);
+					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
+				} else {
+					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
+					YYERROR;
+				}
+				zend_string_release(kw);
+			}
+	|	T_STRING T_STRING ':' name '=' type_expr
+			{
+				/* "in T: Constraint = Default" or "out T: Constraint = Default" */
+				zend_string *kw = zend_ast_get_str($1);
+				if (zend_string_equals_literal_ci(kw, "out")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4, $6);
+					$$->attr = ZEND_GENERIC_VARIANCE_COVARIANT;
+				} else if (zend_string_equals_literal_ci(kw, "in")) {
+					$$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $2, $4, $6);
 					$$->attr = ZEND_GENERIC_VARIANCE_CONTRAVARIANT;
 				} else {
 					zend_throw_exception(zend_ce_compile_error, "Expected 'in' or 'out' variance annotation", 0);
@@ -742,10 +778,31 @@ generic_param:
 			}
 ;
 
-generic_type_arg_list:
+generic_type_arg:
 		type_expr
+			{ $$ = $1; }
+	|	'?' T_EXTENDS type_expr
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_WILDCARD, $3); $$->attr = 1; /* UPPER */ }
+	|	'?' T_STRING type_expr
+			{
+				/* Contextual keyword "super" for lower-bounded wildcards */
+				if (!zend_string_equals_literal_ci(zend_ast_get_str($2), "super")) {
+					zend_ast_destroy($2);
+					zend_throw_exception(zend_ce_compile_error,
+						"Expected 'extends' or 'super' after '?' in generic type argument", 0);
+					YYERROR;
+				}
+				zend_ast_destroy($2);
+				$$ = zend_ast_create(ZEND_AST_GENERIC_WILDCARD, $3); $$->attr = 2; /* LOWER */
+			}
+	|	'?'
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_WILDCARD, NULL); $$->attr = 3; /* UNBOUND */ }
+;
+
+generic_type_arg_list:
+		generic_type_arg
 			{ $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_ARGS, $1); }
-	|	generic_type_arg_list ',' type_expr
+	|	generic_type_arg_list ',' generic_type_arg
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 

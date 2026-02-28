@@ -19,6 +19,7 @@
 #include "Zend/zend_portability.h"
 #include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
+#include "Zend/zend_generics.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
@@ -1996,6 +1997,65 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 			&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ true))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
+}
+
+static bool ZEND_FASTCALL zend_jit_verify_generic_arg(zval *arg, zend_arg_info *arg_info)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+
+	zend_generic_type_ref *ref = ZEND_TYPE_GENERIC_PARAM_REF(arg_info->type);
+	zend_generic_args *generic_args = zend_get_current_generic_args();
+
+	if (generic_args && ref->param_index < generic_args->num_args) {
+		/* Fast path: use pre-computed mask */
+		if (generic_args->resolved_masks) {
+			uint32_t mask = generic_args->resolved_masks[ref->param_index];
+			if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
+				return 1;
+			}
+		}
+
+		/* Fall through to full check for class types / complex types */
+		zend_type resolved = generic_args->args[ref->param_index];
+		if (zend_check_user_type_slow(
+				&resolved, arg, NULL, /* is_return_type */ false)) {
+			return 1;
+		}
+	} else {
+		return 1;
+	}
+
+	zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
+	return 0;
+}
+
+static void ZEND_FASTCALL zend_jit_verify_generic_return(
+		zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info)
+{
+	zend_generic_type_ref *ref = ZEND_TYPE_GENERIC_PARAM_REF(arg_info->type);
+	zend_generic_args *generic_args = zend_get_current_generic_args();
+
+	if (generic_args && ref->param_index < generic_args->num_args) {
+		/* Fast path: use pre-computed mask */
+		if (generic_args->resolved_masks) {
+			uint32_t mask = generic_args->resolved_masks[ref->param_index];
+			if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
+				return;
+			}
+		}
+
+		/* Fall through to full check for class types / complex types */
+		zend_type resolved = generic_args->args[ref->param_index];
+		if (zend_check_user_type_slow(
+				&resolved, arg, NULL, /* is_return_type */ true)) {
+			return;
+		}
+	} else {
+		return;
+	}
+
+	zend_verify_return_error((zend_function*)op_array, arg);
 }
 
 static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj)

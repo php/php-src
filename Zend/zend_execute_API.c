@@ -39,6 +39,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_generics.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -198,6 +199,8 @@ void init_executor(void) /* {{{ */
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 
+	EG(static_generic_args) = NULL;
+
 	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
@@ -276,6 +279,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 	/* No PHP callback functions should be called after this point. */
 	EG(active) = 0;
+
+	/* Clear static generic args pointer (non-owning, points to op_array literals) */
+	EG(static_generic_args) = NULL;
 
 	if (!fast_shutdown) {
 		zval *zv;

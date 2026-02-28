@@ -33,6 +33,7 @@
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
 #include "zend_observer.h"
+#include "zend_generics.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -2444,7 +2445,7 @@ lazy_init:
 
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 {
-	return zend_string_copy(zobj->ce->name);
+	return zend_object_get_class_name_with_generics(zobj);
 }
 /* }}} */
 

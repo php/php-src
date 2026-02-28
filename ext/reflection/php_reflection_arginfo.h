@@ -725,6 +725,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionGenericParameter_getConstraint, 0, 0, ReflectionType, 1)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_ReflectionGenericParameter_hasDefaultType arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionGenericParameter_getDefaultType arginfo_class_ReflectionGenericParameter_getConstraint
+
 #define arginfo_class_ReflectionGenericParameter_isCovariant arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionGenericParameter_isContravariant arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
@@ -1027,6 +1031,8 @@ ZEND_METHOD(ReflectionFiber, getTrace);
 ZEND_METHOD(ReflectionGenericParameter, __toString);
 ZEND_METHOD(ReflectionGenericParameter, getName);
 ZEND_METHOD(ReflectionGenericParameter, getConstraint);
+ZEND_METHOD(ReflectionGenericParameter, hasDefaultType);
+ZEND_METHOD(ReflectionGenericParameter, getDefaultType);
 ZEND_METHOD(ReflectionGenericParameter, isCovariant);
 ZEND_METHOD(ReflectionGenericParameter, isContravariant);
 ZEND_METHOD(ReflectionGenericParameter, isInvariant);
@@ -1412,6 +1418,8 @@ static const zend_function_entry class_ReflectionGenericParameter_methods[] = {
 	ZEND_ME(ReflectionGenericParameter, __toString, arginfo_class_ReflectionGenericParameter___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenericParameter, getName, arginfo_class_ReflectionGenericParameter_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenericParameter, getConstraint, arginfo_class_ReflectionGenericParameter_getConstraint, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenericParameter, hasDefaultType, arginfo_class_ReflectionGenericParameter_hasDefaultType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionGenericParameter, getDefaultType, arginfo_class_ReflectionGenericParameter_getDefaultType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenericParameter, isCovariant, arginfo_class_ReflectionGenericParameter_isCovariant, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenericParameter, isContravariant, arginfo_class_ReflectionGenericParameter_isContravariant, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenericParameter, isInvariant, arginfo_class_ReflectionGenericParameter_isInvariant, ZEND_ACC_PUBLIC)

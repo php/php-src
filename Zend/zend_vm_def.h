@@ -3767,12 +3767,18 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 	uint32_t call_info;
 	zend_function *fbc;
 	zend_execute_data *call;
+	uint32_t result_num;
+	bool has_generic_args = false;
 
 	SAVE_OPLINE();
 
 	if (OP1_TYPE == IS_CONST) {
+		/* Mask out the generic args flag from cache slot */
+		result_num = opline->result.num & 0x7FFFFFFF;
+		has_generic_args = (opline->result.num & 0x80000000) != 0;
+
 		/* no function found. try a static method in class */
-		ce = CACHED_PTR(opline->result.num);
+		ce = CACHED_PTR(result_num);
 		if (UNEXPECTED(ce == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
@@ -3780,10 +3786,11 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 				HANDLE_EXCEPTION();
 			}
 			if (OP2_TYPE != IS_CONST) {
-				CACHE_PTR(opline->result.num, ce);
+				CACHE_PTR(result_num, ce);
 			}
 		}
 	} else if (OP1_TYPE == IS_UNUSED) {
+		result_num = opline->result.num;
 		ce = zend_fetch_class(NULL, opline->op1.num);
 		if (UNEXPECTED(ce == NULL)) {
 			FREE_OP2();
@@ -3791,16 +3798,17 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		}
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
+		result_num = opline->result.num;
 	}
 
 	if (OP1_TYPE == IS_CONST &&
 	    OP2_TYPE == IS_CONST &&
-	    EXPECTED((fbc = CACHED_PTR(opline->result.num + sizeof(void*))) != NULL)) {
+	    EXPECTED((fbc = CACHED_PTR(result_num + sizeof(void*))) != NULL)) {
 		/* nothing to do */
 	} else if (OP1_TYPE != IS_CONST &&
 	           OP2_TYPE == IS_CONST &&
-	           EXPECTED(CACHED_PTR(opline->result.num) == ce)) {
-		fbc = CACHED_PTR(opline->result.num + sizeof(void*));
+	           EXPECTED(CACHED_PTR(result_num) == ce)) {
+		fbc = CACHED_PTR(result_num + sizeof(void*));
 	} else if (OP2_TYPE != IS_UNUSED) {
 		function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		if (OP2_TYPE != IS_CONST) {
@@ -3839,7 +3847,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		if (OP2_TYPE == IS_CONST &&
 		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
 			EXPECTED(!(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT))) {
-			CACHE_POLYMORPHIC_PTR(opline->result.num, ce, fbc);
+			CACHE_POLYMORPHIC_PTR(result_num, ce, fbc);
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3882,6 +3890,14 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 			}
 		}
 		call_info = ZEND_CALL_NESTED_FUNCTION;
+	}
+
+	/* Bind generic type arguments for static generic calls (e.g., Collection<int>::create()) */
+	if (has_generic_args) {
+		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
+		/* Non-owning pointer to the compiled literal — no copy needed,
+		 * the literal persists for the lifetime of the op_array */
+		EG(static_generic_args) = (zend_generic_args *) Z_PTR_P(generic_args_zv);
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -6007,6 +6023,16 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
 		Z_OBJ_P(result)->generic_args = zend_copy_generic_args(compiled_args);
+		/* Expand with defaults if fewer args than params (e.g., Map<int> → Map<int, string>) */
+		if (ce->generic_params_info &&
+			Z_OBJ_P(result)->generic_args->num_args < ce->generic_params_info->num_params) {
+			zend_generic_args *expanded = zend_expand_generic_args_with_defaults(
+				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
+			if (expanded) {
+				zend_generic_args_dtor(Z_OBJ_P(result)->generic_args);
+				Z_OBJ_P(result)->generic_args = expanded;
+			}
+		}
 		/* Verify type arguments satisfy constraints (e.g., T: Countable) */
 		if (ce->generic_params_info) {
 			zend_verify_generic_args(ce->generic_params_info, Z_OBJ_P(result)->generic_args);
@@ -8130,7 +8156,7 @@ ZEND_VM_C_LABEL(try_instanceof):
 			zend_generic_args *obj_args = Z_OBJ_P(expr)->generic_args;
 			if (expected_args && obj_args) {
 				const zend_generic_params_info *params_info = ce ? ce->generic_params_info : NULL;
-				result = zend_generic_args_compatible(expected_args, obj_args, params_info);
+				result = zend_generic_args_compatible(expected_args, obj_args, params_info, NULL);
 			} else if (expected_args && !obj_args) {
 				/* Object has no generic args but we expect specific ones */
 				result = 0;

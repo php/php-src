@@ -648,6 +648,15 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 					ZVAL_NULL(generic_args_zv);
 				}
 			}
+			if (op->opcode == ZEND_INIT_STATIC_METHOD_CALL && op->op1_type == IS_CONST
+				&& (op->result.num & 0x80000000)) {
+				/* Generic args literal is at op1.constant + 2 */
+				zval *generic_args_zv = RT_CONSTANT(op, op->op1) + 2;
+				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
+					zend_generic_args_dtor((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					ZVAL_NULL(generic_args_zv);
+				}
+			}
 			if (op->opcode == ZEND_INSTANCEOF && op->op2_type == IS_CONST
 				&& (op->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG)) {
 				/* Generic args literal is at op2.constant + 2 */

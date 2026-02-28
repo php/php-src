@@ -32,6 +32,7 @@
 #include "zend_autoload.h"
 #include "zend_builtin_functions_arginfo.h"
 #include "zend_smart_str.h"
+#include "zend_generics.h"
 
 /* }}} */
 
@@ -2097,9 +2098,17 @@ not_frameless_call:
 				object = Z_OBJ(call->This);
 				/* $this may be passed into regular internal functions */
 				if (func->common.scope) {
-					ZVAL_STR_COPY(&tmp, func->common.scope->name);
+					/* Use the scope's class name (where method is defined) — append
+					 * generic args from the object if the scope matches the object's class */
+					if (object->generic_args && func->common.scope == object->ce) {
+						ZVAL_STR(&tmp, zend_object_get_class_name_with_generics(object));
+					} else if (object->ce->bound_generic_args && func->common.scope == object->ce) {
+						ZVAL_STR(&tmp, zend_object_get_class_name_with_generics(object));
+					} else {
+						ZVAL_STR_COPY(&tmp, func->common.scope->name);
+					}
 				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
-					ZVAL_STR_COPY(&tmp, object->ce->name);
+					ZVAL_STR(&tmp, zend_object_get_class_name_with_generics(object));
 				} else {
 					ZVAL_STR(&tmp, object->handlers->get_class_name(object));
 				}

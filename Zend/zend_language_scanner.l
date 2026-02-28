@@ -181,6 +181,25 @@ static bool zend_is_generic_lt(void)
 			continue;
 		}
 
+		/* Equals for default type (T = string) */
+		if (c == '=') {
+			p++;
+			continue;
+		}
+
+		/* Question mark for wildcard types (? extends Foo, ? super Foo, ?) */
+		if (c == '?') {
+			has_content = 1;
+			p++;
+			continue;
+		}
+
+		/* Pipe and ampersand for union/intersection types */
+		if (c == '|' || c == '&') {
+			p++;
+			continue;
+		}
+
 		/* Nested generic: < */
 		if (c == '<') {
 			depth++;
@@ -2677,6 +2696,11 @@ inline_char_handler:
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
+	/* Inside generic angle brackets, split ?> into ? and > */
+	if (SCNG(generic_depth) > 0) {
+		yyless(1); /* Push back everything after '?' */
+		RETURN_TOKEN('?');
+	}
 	BEGIN(INITIAL);
 	if (yytext[yyleng-1] != '>') {
 		CG(increment_lineno) = 1;

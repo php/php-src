@@ -29,6 +29,7 @@
 typedef struct _zend_generic_param {
 	zend_string *name;        /* "T", "K", "V", etc. */
 	zend_type constraint;     /* Bound type (e.g., Countable), or IS_UNDEF */
+	zend_type default_type;   /* Default type (e.g., string in V = string), or IS_UNDEF */
 	uint8_t variance;         /* ZEND_GENERIC_VARIANCE_* */
 } zend_generic_param;
 
@@ -43,6 +44,7 @@ typedef struct _zend_generic_params_info {
  * Variable-length struct: args[0..num_args-1]. */
 typedef struct _zend_generic_args {
 	uint32_t num_args;
+	uint32_t *resolved_masks;  /* Pre-computed MAY_BE_ANY masks, one per arg (NULL until computed) */
 	zend_type args[1]; /* Flexible array */
 } zend_generic_args;
 
@@ -54,16 +56,26 @@ typedef struct _zend_generic_type_ref {
 	uint8_t variance;        /* ZEND_GENERIC_VARIANCE_* (copied from param decl) */
 } zend_generic_type_ref;
 
+/* Wildcard bound kinds for generic type arguments */
+#define ZEND_GENERIC_BOUND_NONE    0  /* Exact type: Collection<int> */
+#define ZEND_GENERIC_BOUND_UPPER   1  /* ? extends Foo: Collection<? extends Countable> */
+#define ZEND_GENERIC_BOUND_LOWER   2  /* ? super Foo: Collection<? super Dog> */
+#define ZEND_GENERIC_BOUND_UNBOUND 3  /* ?: Collection<?> (any type) */
+
 /* A class type reference with generic arguments (e.g., Collection<int>).
  * Stored in zend_type.ptr when _ZEND_TYPE_GENERIC_CLASS_BIT is set. */
 typedef struct _zend_generic_class_ref {
 	zend_string *class_name;
 	zend_generic_args *type_args;
+	uint8_t *wildcard_bounds;  /* Array of ZEND_GENERIC_BOUND_* (NULL if no wildcards) */
 } zend_generic_class_ref;
 
 /* Allocation */
 ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_params);
 ZEND_API zend_generic_args *zend_alloc_generic_args(uint32_t num_args);
+
+/* Pre-compute MAY_BE_ANY bitmasks for O(1) scalar type checking */
+ZEND_API void zend_generic_args_compute_masks(zend_generic_args *args);
 ZEND_API zend_type zend_copy_generic_type(zend_type src);
 ZEND_API zend_generic_args *zend_copy_generic_args(const zend_generic_args *src);
 
@@ -76,15 +88,22 @@ ZEND_API void zend_generic_class_ref_dtor(zend_generic_class_ref *ref);
 /* Resolution: resolves a generic type param to its concrete type */
 ZEND_API zend_type zend_resolve_generic_type(zend_type type, const zend_generic_args *args);
 
+/* Expand generic args with defaults from params_info.
+ * Returns a new expanded args struct, or NULL if no expansion needed. */
+ZEND_API zend_generic_args *zend_expand_generic_args_with_defaults(
+	const zend_generic_params_info *params, const zend_generic_args *args);
+
 /* Validation: checks that generic args satisfy constraints */
 ZEND_API bool zend_verify_generic_args(
 	const zend_generic_params_info *params, const zend_generic_args *args);
 
 /* Comparison: checks if two sets of generic args are compatible.
- * params_info is optional (may be NULL) — when provided, variance annotations are respected. */
+ * params_info is optional (may be NULL) — when provided, variance annotations are respected.
+ * wildcard_bounds is optional (may be NULL) — array of ZEND_GENERIC_BOUND_* per expected arg. */
 ZEND_API bool zend_generic_args_compatible(
 	const zend_generic_args *expected, const zend_generic_args *actual,
-	const zend_generic_params_info *params_info);
+	const zend_generic_params_info *params_info,
+	const uint8_t *wildcard_bounds);
 
 /* Infer a zend_type from a runtime zval value */
 ZEND_API zend_type zend_infer_type_from_zval(const zval *value);
@@ -95,5 +114,14 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 
 /* Get current generic args from execution context */
 ZEND_API zend_generic_args *zend_get_current_generic_args(void);
+
+/* Format generic args as a string, e.g. "<int, string>" */
+ZEND_API zend_string *zend_generic_args_to_string(const zend_generic_args *args);
+
+/* Parse generic args from a string, e.g. "<int, string>" → zend_generic_args */
+ZEND_API zend_generic_args *zend_generic_args_from_string(const char *str, size_t len);
+
+/* Get class name with generic args for display, e.g. "Box<int>" */
+ZEND_API zend_string *zend_object_get_class_name_with_generics(const zend_object *obj);
 
 #endif /* ZEND_GENERICS_H */

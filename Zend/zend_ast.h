@@ -114,6 +114,7 @@ enum _zend_ast_kind {
 	ZEND_AST_BREAK,
 	ZEND_AST_CONTINUE,
 	ZEND_AST_PROPERTY_HOOK_SHORT_BODY,
+	ZEND_AST_GENERIC_WILDCARD,    /* ? / ? extends Foo / ? super Foo — attr=bound_kind, child[0]=bound_type or NULL */
 
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -157,7 +158,6 @@ enum _zend_ast_kind {
 	ZEND_AST_NAMED_ARG,
 	ZEND_AST_PARENT_PROPERTY_HOOK_CALL,
 	ZEND_AST_PIPE,
-	ZEND_AST_GENERIC_PARAM,       /* child[0]=name(ZVAL), child[1]=constraint(type) or NULL */
 	ZEND_AST_GENERIC_TYPE,        /* child[0]=class_name, child[1]=ZEND_AST_GENERIC_ARGS list */
 
 	/* 3 child nodes */
@@ -171,6 +171,10 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_CLASS_CONST_GROUP,
+
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
+	ZEND_AST_GENERIC_PARAM,       /* child[0]=name(ZVAL), child[1]=constraint or NULL, child[2]=default_type or NULL */
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,

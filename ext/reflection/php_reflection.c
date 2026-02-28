@@ -8313,6 +8313,36 @@ ZEND_METHOD(ReflectionGenericParameter, getConstraint)
 }
 /* }}} */
 
+/* {{{ Returns true if the parameter has a default type */
+ZEND_METHOD(ReflectionGenericParameter, hasDefaultType)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_BOOL(ZEND_TYPE_IS_SET(param->param->default_type));
+}
+/* }}} */
+
+/* {{{ Returns the default type of the parameter, or null */
+ZEND_METHOD(ReflectionGenericParameter, getDefaultType)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (ZEND_TYPE_IS_SET(param->param->default_type)) {
+		reflection_type_factory(param->param->default_type, return_value, 0);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 /* {{{ Returns true if the parameter is covariant (out) */
 ZEND_METHOD(ReflectionGenericParameter, isCovariant)
 {

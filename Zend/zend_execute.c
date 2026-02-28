@@ -1063,6 +1063,13 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 		zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(info->type);
 		zend_generic_args *args = i_zend_get_generic_args_for_property(obj);
 		if (args && gref->param_index < args->num_args) {
+			/* Fast path: use pre-computed mask for scalar types */
+			if (args->resolved_masks) {
+				uint32_t mask = args->resolved_masks[gref->param_index];
+				if (mask != 0 && ((1u << Z_TYPE_P(property)) & mask)) {
+					return 1;
+				}
+			}
 			zend_type resolved = args->args[gref->param_index];
 			if (ZEND_TYPE_IS_SET(resolved)) {
 				/* Fast path: check type code directly (int, string, etc.) */
@@ -1082,7 +1089,7 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 					zend_class_entry *expected_ce = zend_lookup_class(gcref->class_name);
 					if (expected_ce && instanceof_function(Z_OBJCE_P(property), expected_ce)) {
 						zend_generic_args *obj_args = Z_OBJ_P(property)->generic_args;
-						if (!gcref->type_args || !obj_args || zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info)) {
+						if (!gcref->type_args || !obj_args || zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info, gcref->wildcard_bounds)) {
 							return 1;
 						}
 					}
@@ -1252,6 +1259,14 @@ static zend_always_inline bool zend_check_type_slow(
 		}
 
 		if (args && gref->param_index < args->num_args) {
+			/* Fast path: use pre-computed mask for scalar types */
+			if (args->resolved_masks) {
+				uint32_t mask = args->resolved_masks[gref->param_index];
+				if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
+					return true;
+				}
+			}
+			/* Existing path for complex types / mask==0 */
 			zend_type resolved = args->args[gref->param_index];
 			if (ZEND_TYPE_IS_SET(resolved)) {
 				/* Check against the resolved concrete type */
@@ -1277,7 +1292,7 @@ static zend_always_inline bool zend_check_type_slow(
 			/* Check generic args match (respecting variance) */
 			zend_generic_args *obj_args = Z_OBJ_P(arg)->generic_args;
 			if (gcref->type_args && obj_args) {
-				return zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info);
+				return zend_generic_args_compatible(gcref->type_args, obj_args, expected_ce->generic_params_info, gcref->wildcard_bounds);
 			}
 			/* If no generic args on the object, just check the base class */
 			return true;

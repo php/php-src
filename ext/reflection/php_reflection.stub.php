@@ -934,6 +934,10 @@ final class ReflectionGenericParameter implements Reflector
 
     public function getConstraint(): ?ReflectionType {}
 
+    public function hasDefaultType(): bool {}
+
+    public function getDefaultType(): ?ReflectionType {}
+
     public function isCovariant(): bool {}
 
     public function isContravariant(): bool {}

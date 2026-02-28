@@ -19,6 +19,7 @@
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
 #include "zend_exceptions.h"
+#include "zend_generics.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
@@ -1182,7 +1183,19 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init_interned(str, len, 0);
+	/* Check for generic type args in class name (e.g., "Box<int>") */
+	zend_string *generic_args_str = NULL;
+	{
+		const char *lt_pos = memchr(str, '<', len);
+		if (lt_pos && str[len - 1] == '>') {
+			size_t base_len = lt_pos - str;
+			/* Extract generic args string (including < and >) */
+			generic_args_str = zend_string_init(lt_pos, len - base_len, 0);
+			class_name = zend_string_init_interned(str, base_len, 0);
+		} else {
+			class_name = zend_string_init_interned(str, len, 0);
+		}
+	}
 
 	do {
 		zend_string *lc_name;
@@ -1199,6 +1212,7 @@ object ":" uiv ":" ["]	{
 			zend_string_release_ex(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
 				zend_string_release_ex(class_name, 0);
+				if (generic_args_str) { zend_string_release(generic_args_str); }
 				return 0;
 			}
 			incomplete_class = 1;
@@ -1225,6 +1239,7 @@ object ":" uiv ":" ["]	{
 		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
 			zend_string_release_ex(lc_name, 0);
 			zend_string_release_ex(class_name, 0);
+			if (generic_args_str) { zend_string_release(generic_args_str); }
 			return 0;
 		}
 
@@ -1235,6 +1250,7 @@ object ":" uiv ":" ["]	{
 		zend_string_release_ex(lc_name, 0);
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
+			if (generic_args_str) { zend_string_release(generic_args_str); }
 			return 0;
 		}
 
@@ -1261,6 +1277,7 @@ object ":" uiv ":" ["]	{
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			zval_ptr_dtor(&user_func);
+			if (generic_args_str) { zend_string_release(generic_args_str); }
 			return 0;
 		}
 
@@ -1282,6 +1299,7 @@ object ":" uiv ":" ["]	{
 		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
 			ZSTR_VAL(ce->name));
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 
@@ -1294,18 +1312,21 @@ object ":" uiv ":" ["]	{
 			php_store_class_name(rval, class_name);
 		}
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return ret;
 	}
 
 	if (*p >= max - 2) {
 		zend_error(E_WARNING, "Bad unserialize data");
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 
 	elements = parse_iv2(*p + 2, p);
 	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 
@@ -1313,11 +1334,13 @@ object ":" uiv ":" ["]	{
 
 	if (*(YYCURSOR) != ':') {
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 	if (*(YYCURSOR+1) != '{') {
 		*p = YYCURSOR+1;
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 
@@ -1332,12 +1355,30 @@ object ":" uiv ":" ["]	{
 	if (ce->serialize != NULL && !has_unserialize) {
 		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) { zend_string_release(generic_args_str); }
 		return 0;
 	}
 
 	if (object_init_ex(rval, ce) == FAILURE) {
 		zend_string_release_ex(class_name, 0);
+		if (generic_args_str) {
+			zend_string_release(generic_args_str);
+		}
 		return 0;
+	}
+
+	/* Restore generic type args if present in serialized class name */
+	if (generic_args_str && !incomplete_class) {
+		zend_generic_args *gargs = zend_generic_args_from_string(
+			ZSTR_VAL(generic_args_str), ZSTR_LEN(generic_args_str));
+		if (gargs) {
+			Z_OBJ_P(rval)->generic_args = gargs;
+		}
+		zend_string_release(generic_args_str);
+		generic_args_str = NULL;
+	}
+	if (generic_args_str) {
+		zend_string_release(generic_args_str);
 	}
 
 	if (incomplete_class) {
