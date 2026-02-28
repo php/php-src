@@ -17,7 +17,7 @@ odbc_exec($conn, 'INSERT INTO fetch_array VALUES (1), (2)');
 $res = odbc_exec($conn, 'SELECT * FROM fetch_array');
 
 var_dump(odbc_fetch_array($res));
-var_dump(odbc_fetch_array($res, 0));
+var_dump(odbc_fetch_array($res));
 var_dump(odbc_fetch_array($res, 2));
 var_dump(odbc_fetch_array($res, 4));
 
