@@ -5123,6 +5123,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_
 	char *allow_free = NULL;
 	char is_xml = 0;
 
+	if (len == 0) {
+		*rbuf = '\0';
+		return 0;
+	}
+
 	buf = estrndup(rbuf, len);
 	end = buf + len;
 	lc = '\0';
