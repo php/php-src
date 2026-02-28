@@ -2106,6 +2106,10 @@ PHP_FUNCTION(realpath)
 		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (filename_len == 0) {
+        php_error_docref(NULL, E_DEPRECATED, "Passing empty string to realpath() is deprecated, use getcwd() instead");
+    }
+
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
 		if (php_check_open_basedir(resolved_path_buff)) {
 			RETURN_FALSE;

@@ -86,7 +86,11 @@ bool(false)
 -- Iteration2 --
 bool(false)
 -- Iteration3 --
+
+Deprecated: realpath(): Passing empty string to realpath() is deprecated, use getcwd() instead in %s on line %d
 string(%d) "%s"
 -- Iteration4 --
+
+Deprecated: realpath(): Passing empty string to realpath() is deprecated, use getcwd() instead in %s on line %d
 string(%d) "%s"
 Done
