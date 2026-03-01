@@ -26,6 +26,7 @@
 #include "zend_exceptions.h"
 #include "zend_weakrefs.h"
 #include "zend_lazy_objects.h"
+#include "zend_generics.h"
 
 static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
@@ -35,6 +36,7 @@ static zend_always_inline void _zend_object_std_init(zend_object *object, zend_c
 	object->extra_flags = 0;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
+	object->generic_args = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		zval *guard_value = object->properties_table + object->ce->default_properties_count;
@@ -80,6 +82,23 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
 		zend_weakrefs_notify(object);
+	}
+
+	/* Clean up progressive generic state before releasing frozen args */
+	if (OBJ_EXTRA_FLAGS(object) & IS_OBJ_GENERIC_PROGRESSIVE) {
+		if (EG(progressive_generic_state)) {
+			zval *found = zend_hash_index_find(EG(progressive_generic_state), object->handle);
+			if (found) {
+				zend_progressive_state_destroy(Z_PTR_P(found));
+				zend_hash_index_del(EG(progressive_generic_state), object->handle);
+			}
+		}
+		OBJ_EXTRA_FLAGS(object) &= ~IS_OBJ_GENERIC_PROGRESSIVE;
+	}
+
+	if (object->generic_args) {
+		zend_generic_args_release(object->generic_args);
+		object->generic_args = NULL;
 	}
 
 	if (UNEXPECTED(zend_object_is_lazy(object))) {
@@ -350,6 +369,28 @@ ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 	}
 
 	zend_objects_clone_members(new_object, old_object);
+
+	/* Preserve generic type arguments on the clone (shared via refcount) */
+	if (old_object->generic_args) {
+		zend_generic_args_addref(old_object->generic_args);
+		new_object->generic_args = old_object->generic_args;
+	}
+
+	/* Clone progressive generic state independently */
+	if (OBJ_EXTRA_FLAGS(old_object) & IS_OBJ_GENERIC_PROGRESSIVE) {
+		zend_progressive_state *old_state = zend_progressive_get_state(old_object);
+		if (old_state) {
+			zend_progressive_state *new_state = zend_progressive_state_clone(old_state);
+			if (!EG(progressive_generic_state)) {
+				EG(progressive_generic_state) = emalloc(sizeof(HashTable));
+				zend_hash_init(EG(progressive_generic_state), 16, NULL, NULL, 0);
+			}
+			zval zv;
+			ZVAL_PTR(&zv, new_state);
+			zend_hash_index_add(EG(progressive_generic_state), new_object->handle, &zv);
+			OBJ_EXTRA_FLAGS(new_object) |= IS_OBJ_GENERIC_PROGRESSIVE;
+		}
+	}
 
 	return new_object;
 }

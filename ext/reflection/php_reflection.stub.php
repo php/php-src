@@ -115,6 +115,11 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function getTentativeReturnType(): ?ReflectionType {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function isGeneric(): bool {}
+
+    /** @return ReflectionGenericParameter[] */
+    public function getGenericParameters(): array {}
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -436,11 +441,19 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function isGeneric(): bool {}
+
+    /** @return ReflectionGenericParameter[] */
+    public function getGenericParameters(): array {}
 }
 
 class ReflectionObject extends ReflectionClass
 {
     public function __construct(object $object) {}
+
+    /** @return ReflectionType[] */
+    public function getGenericArguments(): array {}
 }
 
 enum PropertyHookType: string
@@ -905,6 +918,31 @@ final class ReflectionFiber
     public function getCallable(): callable {}
 
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
+}
+
+/** @not-serializable */
+final class ReflectionGenericParameter implements Reflector
+{
+    public string $name;
+
+    /** @implementation-alias ReflectionClass::__clone */
+    private function __clone(): void {}
+
+    public function __toString(): string {}
+
+    public function getName(): string {}
+
+    public function getConstraint(): ?ReflectionType {}
+
+    public function hasDefaultType(): bool {}
+
+    public function getDefaultType(): ?ReflectionType {}
+
+    public function isCovariant(): bool {}
+
+    public function isContravariant(): bool {}
+
+    public function isInvariant(): bool {}
 }
 
 /**

@@ -94,11 +94,28 @@ static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
 			Z_STRVAL_P(literal), Z_STRLEN_P(literal),
 			Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1));
 	} else if (num_related == 3) {
-		ZEND_ASSERT(Z_TYPE_P(literal + 1) == IS_STRING && Z_TYPE_P(literal + 2) == IS_STRING);
-		key = zend_string_concat3(
-			Z_STRVAL_P(literal), Z_STRLEN_P(literal),
-			Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1),
-			Z_STRVAL_P(literal + 2), Z_STRLEN_P(literal + 2));
+		if (Z_TYPE_P(literal + 2) == IS_PTR || Z_TYPE_P(literal + 2) == IS_LONG) {
+			/* Generic args literal (IS_PTR or IS_LONG pointer) — include pointer value
+			 * in key to prevent merging across different generic instantiations */
+			char ptr_buf[32];
+			uintptr_t ptr_val = (Z_TYPE_P(literal + 2) == IS_PTR)
+				? (uintptr_t)Z_PTR_P(literal + 2)
+				: (uintptr_t)Z_LVAL_P(literal + 2);
+			int ptr_len = snprintf(ptr_buf, sizeof(ptr_buf), "G%lx", (unsigned long)ptr_val);
+			ZEND_ASSERT(Z_TYPE_P(literal + 1) == IS_STRING);
+			size_t len = Z_STRLEN_P(literal) + Z_STRLEN_P(literal + 1) + ptr_len;
+			key = zend_string_alloc(len, 0);
+			memcpy(ZSTR_VAL(key), Z_STRVAL_P(literal), Z_STRLEN_P(literal));
+			memcpy(ZSTR_VAL(key) + Z_STRLEN_P(literal), Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1));
+			memcpy(ZSTR_VAL(key) + Z_STRLEN_P(literal) + Z_STRLEN_P(literal + 1), ptr_buf, ptr_len);
+			ZSTR_VAL(key)[len] = '\0';
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(literal + 1) == IS_STRING && Z_TYPE_P(literal + 2) == IS_STRING);
+			key = zend_string_concat3(
+				Z_STRVAL_P(literal), Z_STRLEN_P(literal),
+				Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1),
+				Z_STRVAL_P(literal + 2), Z_STRLEN_P(literal + 2));
+		}
 	} else {
 		ZEND_ASSERT(0 && "Currently not needed");
 	}
@@ -151,7 +168,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_INIT_STATIC_METHOD_CALL:
 					if (opline->op1_type == IS_CONST) {
-						LITERAL_INFO(opline->op1.constant, 2);
+						LITERAL_INFO(opline->op1.constant,
+							(opline->result.num & 0x80000000) ? 3 : 2);
 					}
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, 2);
@@ -201,14 +219,20 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, 2);
 					}
 					break;
+				case ZEND_INSTANCEOF:
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant,
+							(opline->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG) ? 3 : 2);
+					}
+					break;
 				case ZEND_NEW:
 					if (opline->op1_type == IS_CONST) {
-						LITERAL_INFO(opline->op1.constant, 2);
+						LITERAL_INFO(opline->op1.constant,
+							(opline->op2.num & 0x80000000) ? 3 : 2);
 					}
 					break;
 				case ZEND_DECLARE_CLASS:
@@ -569,7 +593,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						}
 					}
 					break;
-				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_STATIC_METHOD_CALL: {
+					uint32_t generic_flag = opline->result.num & 0x80000000;
 					if (opline->op2_type == IS_CONST) {
 						// op2 static method
 						if (opline->op1_type == IS_CONST) {
@@ -577,22 +602,23 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 								opline->op1.constant,
 								opline->op2.constant,
 								LITERAL_STATIC_METHOD,
-								&cache_size);
+								&cache_size) | generic_flag;
 						} else {
-							opline->result.num = cache_size;
+							opline->result.num = cache_size | generic_flag;
 							cache_size += 2 * sizeof(void *);
 						}
 					} else if (opline->op1_type == IS_CONST) {
 						// op1 class
 						if (class_slot[opline->op1.constant] >= 0) {
-							opline->result.num = class_slot[opline->op1.constant];
+							opline->result.num = class_slot[opline->op1.constant] | generic_flag;
 						} else {
-							opline->result.num = cache_size;
+							opline->result.num = cache_size | generic_flag;
 							cache_size += sizeof(void *);
-							class_slot[opline->op1.constant] = opline->result.num;
+							class_slot[opline->op1.constant] = cache_size - sizeof(void *);
 						}
 					}
 					break;
+				}
 				case ZEND_DEFINED:
 					// op1 const
 					if (const_slot[opline->op1.constant] >= 0) {
@@ -666,7 +692,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS:
-				case ZEND_INSTANCEOF:
 					if (opline->op2_type == IS_CONST) {
 						// op2 class
 						if (class_slot[opline->op2.constant] >= 0) {
@@ -678,15 +703,29 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						}
 					}
 					break;
+				case ZEND_INSTANCEOF:
+					if (opline->op2_type == IS_CONST) {
+						// op2 class — preserve generic flag
+						uint32_t generic_flag = opline->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG;
+						if (class_slot[opline->op2.constant] >= 0) {
+							opline->extended_value = class_slot[opline->op2.constant] | generic_flag;
+						} else {
+							opline->extended_value = cache_size | generic_flag;
+							cache_size += sizeof(void *);
+							class_slot[opline->op2.constant] = cache_size - sizeof(void *);
+						}
+					}
+					break;
 				case ZEND_NEW:
 					if (opline->op1_type == IS_CONST) {
-						// op1 class
+						// op1 class — preserve generic flag
+						uint32_t generic_flag = opline->op2.num & 0x80000000;
 						if (class_slot[opline->op1.constant] >= 0) {
-							opline->op2.num = class_slot[opline->op1.constant];
+							opline->op2.num = class_slot[opline->op1.constant] | generic_flag;
 						} else {
-							opline->op2.num = cache_size;
+							opline->op2.num = cache_size | generic_flag;
 							cache_size += sizeof(void *);
-							class_slot[opline->op1.constant] = opline->op2.num;
+							class_slot[opline->op1.constant] = cache_size - sizeof(void *);
 						}
 					}
 					break;

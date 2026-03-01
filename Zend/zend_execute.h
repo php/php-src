@@ -589,6 +589,7 @@ ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, cons
 ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
+ZEND_API bool zend_verify_property_type_ex(const zend_property_info *info, zval *property, bool strict, const zend_object *obj);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
 ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property);
 

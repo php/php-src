@@ -60,6 +60,8 @@ typedef struct _zend_lex_state {
 
 	zend_ast *ast;
 	zend_arena *ast_arena;
+
+	int generic_depth;
 } zend_lex_state;
 
 typedef struct _zend_heredoc_label {

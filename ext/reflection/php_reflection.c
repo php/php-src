@@ -51,6 +51,7 @@
 #include "zend_smart_str.h"
 #include "zend_enum.h"
 #include "zend_fibers.h"
+#include "zend_generics.h"
 
 #define REFLECTION_ATTRIBUTE_IS_INSTANCEOF (1 << 1)
 
@@ -104,6 +105,7 @@ PHPAPI zend_class_entry *reflection_enum_unit_case_ptr;
 PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
 PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI zend_class_entry *reflection_constant_ptr;
+PHPAPI zend_class_entry *reflection_generic_parameter_ptr;
 PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 
 /* Exception throwing macro */
@@ -159,6 +161,12 @@ typedef struct _attribute_reference {
 	uint32_t target;
 } attribute_reference;
 
+/* Struct for generic type parameters */
+typedef struct _generic_parameter_reference {
+	zend_generic_param *param;
+	zend_generic_params_info *params_info;
+} generic_parameter_reference;
+
 typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
@@ -168,7 +176,8 @@ typedef enum {
 	REF_TYPE_TYPE,
 	REF_TYPE_PROPERTY,
 	REF_TYPE_CLASS_CONSTANT,
-	REF_TYPE_ATTRIBUTE
+	REF_TYPE_ATTRIBUTE,
+	REF_TYPE_GENERIC_PARAMETER
 } reflection_type_t;
 
 /* Struct for reflection objects */
@@ -270,6 +279,9 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			efree(intern->ptr);
 			break;
 		}
+		case REF_TYPE_GENERIC_PARAMETER:
+			efree(intern->ptr);
+			break;
 		case REF_TYPE_GENERATOR:
 		case REF_TYPE_FIBER:
 		case REF_TYPE_CLASS_CONSTANT:
@@ -8115,6 +8127,261 @@ ZEND_METHOD(ReflectionConstant, __toString)
 	RETURN_STR(smart_str_extract(&str));
 }
 
+/* {{{ ReflectionGenericParameter factory */
+static void reflection_generic_parameter_factory(zend_generic_param *param, zend_generic_params_info *params_info, zval *object)
+{
+	reflection_object *intern;
+	generic_parameter_reference *reference;
+
+	object_init_ex(object, reflection_generic_parameter_ptr);
+	intern = Z_REFLECTION_P(object);
+
+	reference = (generic_parameter_reference *) emalloc(sizeof(generic_parameter_reference));
+	reference->param = param;
+	reference->params_info = params_info;
+
+	intern->ptr = reference;
+	intern->ref_type = REF_TYPE_GENERIC_PARAMETER;
+
+	ZVAL_STR_COPY(reflection_prop_name(object), param->name);
+}
+/* }}} */
+
+/* {{{ Returns whether the class is generic */
+ZEND_METHOD(ReflectionClass, isGeneric)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_BOOL(ce->generic_params_info != NULL);
+}
+/* }}} */
+
+/* {{{ Returns an array of ReflectionGenericParameter for the class's generic type parameters */
+ZEND_METHOD(ReflectionClass, getGenericParameters)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+
+	if (ce->generic_params_info) {
+		uint32_t i;
+		for (i = 0; i < ce->generic_params_info->num_params; i++) {
+			zval param_obj;
+			reflection_generic_parameter_factory(
+				&ce->generic_params_info->params[i],
+				ce->generic_params_info,
+				&param_obj
+			);
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &param_obj);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ Returns an array of ReflectionType for the object's bound generic type arguments */
+ZEND_METHOD(ReflectionObject, getGenericArguments)
+{
+	reflection_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	intern = Z_REFLECTION_P(ZEND_THIS);
+
+	array_init(return_value);
+
+	if (!Z_ISUNDEF(intern->obj)) {
+		zend_object *obj = Z_OBJ(intern->obj);
+
+		if (obj->generic_args) {
+			uint32_t i;
+			for (i = 0; i < obj->generic_args->num_args; i++) {
+				zval type_obj;
+				reflection_type_factory(obj->generic_args->args[i], &type_obj, 0);
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &type_obj);
+			}
+		}
+	}
+}
+/* }}} */
+
+/* {{{ Returns whether the function is generic */
+ZEND_METHOD(ReflectionFunctionAbstract, isGeneric)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (fptr->type == ZEND_USER_FUNCTION) {
+		RETURN_BOOL(fptr->op_array.generic_params_info != NULL);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ Returns an array of ReflectionGenericParameter for the function's generic type parameters */
+ZEND_METHOD(ReflectionFunctionAbstract, getGenericParameters)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	array_init(return_value);
+
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.generic_params_info) {
+		uint32_t i;
+		for (i = 0; i < fptr->op_array.generic_params_info->num_params; i++) {
+			zval param_obj;
+			reflection_generic_parameter_factory(
+				&fptr->op_array.generic_params_info->params[i],
+				fptr->op_array.generic_params_info,
+				&param_obj
+			);
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &param_obj);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ Returns the string representation of the generic parameter */
+ZEND_METHOD(ReflectionGenericParameter, __toString)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	smart_str str = {0};
+
+	if (param->param->variance == ZEND_GENERIC_VARIANCE_COVARIANT) {
+		smart_str_appends(&str, "out ");
+	} else if (param->param->variance == ZEND_GENERIC_VARIANCE_CONTRAVARIANT) {
+		smart_str_appends(&str, "in ");
+	}
+
+	smart_str_append(&str, param->param->name);
+
+	if (ZEND_TYPE_IS_SET(param->param->constraint)) {
+		smart_str_appends(&str, ": ");
+		zend_string *type_str = zend_type_to_string(param->param->constraint);
+		smart_str_append(&str, type_str);
+		zend_string_release(type_str);
+	}
+
+	RETURN_STR(smart_str_extract(&str));
+}
+/* }}} */
+
+/* {{{ Returns the name of the generic parameter */
+ZEND_METHOD(ReflectionGenericParameter, getName)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_STR_COPY(param->param->name);
+}
+/* }}} */
+
+/* {{{ Returns the constraint type, or null if unconstrained */
+ZEND_METHOD(ReflectionGenericParameter, getConstraint)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (ZEND_TYPE_IS_SET(param->param->constraint)) {
+		reflection_type_factory(param->param->constraint, return_value, 0);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ Returns true if the parameter has a default type */
+ZEND_METHOD(ReflectionGenericParameter, hasDefaultType)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_BOOL(ZEND_TYPE_IS_SET(param->param->default_type));
+}
+/* }}} */
+
+/* {{{ Returns the default type of the parameter, or null */
+ZEND_METHOD(ReflectionGenericParameter, getDefaultType)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (ZEND_TYPE_IS_SET(param->param->default_type)) {
+		reflection_type_factory(param->param->default_type, return_value, 0);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ Returns true if the parameter is covariant (out) */
+ZEND_METHOD(ReflectionGenericParameter, isCovariant)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_BOOL(param->param->variance == ZEND_GENERIC_VARIANCE_COVARIANT);
+}
+/* }}} */
+
+/* {{{ Returns true if the parameter is contravariant (in) */
+ZEND_METHOD(ReflectionGenericParameter, isContravariant)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_BOOL(param->param->variance == ZEND_GENERIC_VARIANCE_CONTRAVARIANT);
+}
+/* }}} */
+
+/* {{{ Returns true if the parameter is invariant (no variance annotation) */
+ZEND_METHOD(ReflectionGenericParameter, isInvariant)
+{
+	reflection_object *intern;
+	generic_parameter_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETURN_BOOL(param->param->variance == ZEND_GENERIC_VARIANCE_INVARIANT);
+}
+/* }}} */
+
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -8217,6 +8484,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_constant_ptr = register_class_ReflectionConstant(reflector_ptr);
 	reflection_constant_ptr->create_object = reflection_objects_new;
 	reflection_constant_ptr->default_object_handlers = &reflection_object_handlers;
+
+	reflection_generic_parameter_ptr = register_class_ReflectionGenericParameter(reflector_ptr);
+	reflection_generic_parameter_ptr->create_object = reflection_objects_new;
+	reflection_generic_parameter_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_property_hook_type_ptr = register_class_PropertyHookType();
 

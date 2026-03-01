@@ -119,6 +119,149 @@ do {																			\
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
+/* Check if '<' at the current position starts a generic type argument/parameter list.
+ * Scans ahead looking for a balanced <...> containing valid type patterns. */
+static bool zend_is_generic_lt(void)
+{
+	const unsigned char *p = SCNG(yy_cursor); /* points past the '<' */
+	const unsigned char *limit = SCNG(yy_limit);
+	int depth = 1;
+	bool has_content = 0;
+
+	while (p < limit && depth > 0) {
+		unsigned char c = *p;
+
+		/* Skip whitespace */
+		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+			p++;
+			continue;
+		}
+
+		/* Skip comments */
+		if (c == '/' && (p + 1) < limit) {
+			if (p[1] == '/') {
+				/* Single-line comment: skip to end of line */
+				p += 2;
+				while (p < limit && *p != '\n' && *p != '\r') p++;
+				continue;
+			}
+			if (p[1] == '*') {
+				/* Multi-line comment */
+				p += 2;
+				while (p < limit) {
+					if (*p == '*' && (p + 1) < limit && p[1] == '/') {
+						p += 2;
+						break;
+					}
+					p++;
+				}
+				continue;
+			}
+		}
+
+		/* Label (type name) */
+		if (IS_LABEL_START(c)) {
+			has_content = 1;
+			p++;
+			while (p < limit && (IS_LABEL_SUCCESSOR(*p) || *p == '\\')) {
+				p++;
+			}
+			continue;
+		}
+
+		/* Comma between type arguments */
+		if (c == ',') {
+			p++;
+			continue;
+		}
+
+		/* Colon for constraint (T: Foo) */
+		if (c == ':') {
+			p++;
+			continue;
+		}
+
+		/* Equals for default type (T = string) */
+		if (c == '=') {
+			p++;
+			continue;
+		}
+
+		/* Question mark for wildcard types (? extends Foo, ? super Foo, ?) */
+		if (c == '?') {
+			has_content = 1;
+			p++;
+			continue;
+		}
+
+		/* Pipe and ampersand for union/intersection types */
+		if (c == '|' || c == '&') {
+			p++;
+			continue;
+		}
+
+		/* Nested generic: < */
+		if (c == '<') {
+			depth++;
+			p++;
+			continue;
+		}
+
+		/* Closing generic: > */
+		if (c == '>') {
+			depth--;
+			if (depth == 0) {
+				p++;
+				/* Check what follows the closing '>'.
+				 * Valid followers: ( ) $ , ; { } > identifier extends implements whitespace */
+				while (p < limit && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')) {
+					p++;
+				}
+				if (p >= limit) {
+					return has_content;
+				}
+				c = *p;
+				/* Valid token after '>' in generic context */
+				if (c == '(' || c == ')' || c == '$' || c == ',' || c == ';'
+					|| c == '{' || c == '}' || c == '>' || c == ':'
+					|| IS_LABEL_START(c) || c == '|' || c == '&'
+					|| c == '?') {
+					return has_content;
+				}
+				return 0;
+			}
+			continue;
+		}
+
+		/* '>>' (T_SR) — could close two generic levels */
+		if (c == '>' && (p + 1) < limit && p[1] == '>') {
+			depth -= 2;
+			if (depth <= 0) {
+				return has_content && depth == 0;
+			}
+			p += 2;
+			continue;
+		}
+
+		/* Union type '|' or intersection '&' in type args */
+		if (c == '|' || c == '&') {
+			p++;
+			continue;
+		}
+
+		/* Nullable type '?' */
+		if (c == '?') {
+			p++;
+			continue;
+		}
+
+		/* Anything else — not a generic bracket */
+		return 0;
+	}
+
+	return 0;
+}
+
 
 static void strip_underscores(char *str, size_t *len)
 {
@@ -195,6 +338,8 @@ void startup_scanner(void)
 	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
+	SCNG(last_token) = 0;
+	SCNG(generic_depth) = 0;
 }
 
 static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
@@ -251,6 +396,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
+
+	lex_state->generic_depth = SCNG(generic_depth);
+	SCNG(generic_depth) = 0;
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
@@ -294,6 +442,8 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
+
+	SCNG(generic_depth) = lex_state->generic_depth;
 
 	RESET_DOC_COMMENT();
 }
@@ -1379,7 +1529,7 @@ ONUM	"0o"[0-7]+(_[0-7]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.|^&+-/*=%!~$<>?@]
+TOKENS [;:,.|^&+-/*=%!~$<?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
 OPTIONAL_WHITESPACE [ \n\r\t]*
@@ -1944,6 +2094,12 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_IN_SCRIPTING>">>" {
+	/* Inside generic angle brackets, split >> into two > tokens */
+	if (SCNG(generic_depth) > 0) {
+		yyless(1); /* Push back the second '>' */
+		SCNG(generic_depth)--;
+		RETURN_TOKEN('>');
+	}
 	RETURN_TOKEN(T_SR);
 }
 
@@ -1964,6 +2120,27 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 <ST_IN_SCRIPTING>"["|"(" {
 	enter_nesting(yytext[0]);
 	RETURN_TOKEN(yytext[0]);
+}
+
+<ST_IN_SCRIPTING>"<" {
+	/* Check if this '<' starts a generic type argument/parameter list */
+	int prev = SCNG(last_token);
+	if ((prev == T_STRING || prev == T_NAME_QUALIFIED
+		|| prev == T_NAME_FULLY_QUALIFIED || prev == T_NAME_RELATIVE
+		|| prev == T_FUNCTION || prev == T_FN)
+		&& zend_is_generic_lt()) {
+		SCNG(generic_depth)++;
+		RETURN_TOKEN(T_GENERIC_LT);
+	}
+	RETURN_TOKEN('<');
+}
+
+<ST_IN_SCRIPTING>">" {
+	/* Track closing of generic angle brackets */
+	if (SCNG(generic_depth) > 0) {
+		SCNG(generic_depth)--;
+	}
+	RETURN_TOKEN('>');
 }
 
 <ST_IN_SCRIPTING>{TOKENS} {
@@ -2524,6 +2701,11 @@ inline_char_handler:
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
+	/* Inside generic angle brackets, split ?> into ? and > */
+	if (SCNG(generic_depth) > 0) {
+		yyless(1); /* Push back everything after '?' */
+		RETURN_TOKEN('?');
+	}
 	BEGIN(INITIAL);
 	if (yytext[yyleng-1] != '>') {
 		CG(increment_lineno) = 1;
@@ -3195,11 +3377,13 @@ emit_token_with_val:
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
 		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
 	}
+	SCNG(last_token) = token;
 
 emit_token:
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
+	SCNG(last_token) = token;
 	return token;
 
 emit_token_with_ident:
@@ -3209,6 +3393,7 @@ emit_token_with_ident:
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
+	SCNG(last_token) = token;
 	return token;
 
 return_whitespace:

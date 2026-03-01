@@ -244,6 +244,7 @@ static zend_always_inline void zend_ffi_object_init(zend_object *object, zend_cl
 	object->ce = ce;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
+	object->generic_args = NULL;
 	zend_objects_store_put(object);
 }
 /* }}} */

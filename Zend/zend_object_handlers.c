@@ -33,6 +33,7 @@
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
 #include "zend_observer.h"
+#include "zend_generics.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -1089,7 +1090,7 @@ typed_property:
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
-				bool type_matched = zend_verify_property_type(prop_info, &tmp, property_uses_strict_types());
+				bool type_matched = zend_verify_property_type_ex(prop_info, &tmp, property_uses_strict_types(), zobj);
 				if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
 					zend_object_released_while_assigning_to_property_error(prop_info);
 					zend_objects_store_del(zobj);
@@ -2444,7 +2445,7 @@ lazy_init:
 
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 {
-	return zend_string_copy(zobj->ce->name);
+	return zend_object_get_class_name_with_generics(zobj);
 }
 /* }}} */
 
