@@ -5793,6 +5793,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		}
 	} else {
 		SET_NODE(opline->op1, &class_node);
+		opline->op2.num = 0; /* Clear — SET_UNUSED leaves 0xFFFFFFFF which looks like generic flag */
 		if (generic_args) {
 			/* For non-const class references, we can't easily pass generic args.
 			 * For Phase 1, free and ignore (only const class names get generic args). */

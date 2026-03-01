@@ -2402,6 +2402,10 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 			}
 		}
 	}
+	/* Generic class types (e.g., Box<int>) are always objects */
+	if (ZEND_TYPE_IS_GENERIC_CLASS(type)) {
+		tmp |= MAY_BE_OBJECT;
+	}
 	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}

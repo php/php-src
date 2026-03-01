@@ -396,6 +396,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
+
+	lex_state->generic_depth = SCNG(generic_depth);
+	SCNG(generic_depth) = 0;
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
@@ -439,6 +442,8 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
+
+	SCNG(generic_depth) = lex_state->generic_depth;
 
 	RESET_DOC_COMMENT();
 }

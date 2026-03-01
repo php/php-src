@@ -360,7 +360,15 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info_ex(uint8_t type, 
 	if (type == IS_UNKNOWN) {
 		return info;
 	}
-	ZEND_ASSERT(info & (1 << type));
+	if (UNEXPECTED(!(info & (1 << type)))) {
+		/* Generic type parameters may cause the trace SSA to lack type info
+		 * for variables whose types are resolved at runtime. Widen to include
+		 * the observed type to avoid crashing. */
+		info |= (1 << type);
+		if (type >= IS_STRING) {
+			info |= MAY_BE_RC1 | MAY_BE_RCN;
+		}
+	}
 	if (type < IS_STRING) {
 		return (1 << type);
 	} else if (type != IS_ARRAY) {
@@ -399,6 +407,11 @@ static zend_always_inline void zend_jit_trace_add_op_guard(zend_ssa             
 		if (UNEXPECTED(tssa->vars[ssa_var].alias != NO_ALIAS)) {
 			info->type |= MAY_BE_GUARD;
 		} else {
+			if (UNEXPECTED(!(info->type & (1 << op_type)))) {
+				/* Generics: trace SSA may lack type info for variables
+				 * in generic-typed contexts. Widen to MAY_BE_ANY. */
+				info->type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
+			}
 			info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op_type, info->type);
 		}
 	}
@@ -4247,6 +4260,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 				ZEND_ASSERT(ssa->vars[i].use_chain < 0 && !ssa->vars[i].phi_use_chain);
 				SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i), 1);
 			} else if ((info & MAY_BE_GUARD) != 0
+			 && has_concrete_type(info)
 			 && (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 			  || (trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET
@@ -4356,7 +4370,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 					if (RA_REG_FLAGS(phi->ssa_var) & ZREG_LOAD) {
 						uint32_t info = ssa->var_info[phi->ssa_var].type;
 
-						if (info & MAY_BE_GUARD) {
+						if ((info & MAY_BE_GUARD) && has_concrete_type(info)) {
 							if (!zend_jit_type_guard(&ctx, opline, EX_NUM_TO_VAR(phi->var), concrete_type(info))) {
 								goto jit_failure;
 							}
@@ -5604,6 +5618,9 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 
 									info = zend_ssa_cv_info(op_array, op_array_ssa, j);
 									type = STACK_TYPE(stack, j);
+									if (type != IS_UNKNOWN && UNEXPECTED(!(info & (1 << type)))) {
+										fprintf(stderr, "CV ASSERT: j=%d type=%u info=0x%08x func=%s\n", j, type, info, op_array->function_name ? ZSTR_VAL(op_array->function_name) : "(main)");
+									}
 									info = zend_jit_trace_type_to_info_ex(type, info);
 									if (opline->op1_type == IS_CV
 									 && EX_VAR_TO_NUM(opline->op1.var) == j

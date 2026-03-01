@@ -17203,7 +17203,13 @@ static bool zend_jit_fetch_indirect_var(zend_jit_ctx *jit, const zend_op *opline
 		jit_guard_Z_TYPE(jit, var_addr, var_type, exit_addr);
 
 		//var_info = zend_jit_trace_type_to_info_ex(var_type, var_info);
-		ZEND_ASSERT(var_info & (1 << var_type));
+		if (UNEXPECTED(!(var_info & (1 << var_type)))) {
+			/* Generic type parameters: widen to include observed type */
+			var_info |= (1 << var_type);
+			if (var_type >= IS_STRING) {
+				var_info |= MAY_BE_RC1 | MAY_BE_RCN;
+			}
+		}
 		if (var_type < IS_STRING) {
 			var_info = (1 << var_type);
 		} else if (var_type != IS_ARRAY) {

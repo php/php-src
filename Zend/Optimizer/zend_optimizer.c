@@ -302,18 +302,14 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_NEW: {
-			uint32_t generic_flag = opline->op2.num & 0x80000000;
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
+			/* Non-const ZEND_NEW converted to const can never have generic args.
+			 * Generic args are only added during compilation for const class names.
+			 * Clear the flag to prevent false positives from uninitialized op2.num. */
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			opline->op2.num = alloc_cache_slots(op_array, 1) | generic_flag;
+			opline->op2.num = alloc_cache_slots(op_array, 1);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			if (generic_flag) {
-				/* Copy the generic args IS_PTR literal (was at old op1.constant + 2) */
-				/* Note: the generic args are already in the literal table from compilation,
-				 * but we need to add a placeholder since the optimizer rebuilds literals.
-				 * The actual IS_PTR will be re-added by the caller. */
-			}
 			break;
 		}
 		case ZEND_INIT_STATIC_METHOD_CALL: {

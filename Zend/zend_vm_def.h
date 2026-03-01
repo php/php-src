@@ -4616,6 +4616,18 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|CV, ANY, SPEC(OBSERVER))
 			}
 		}
 	}
+	/* Eager generic type inference: when returning from a constructor of a
+	 * generic class that hasn't had its type args inferred yet, infer them now.
+	 * This must happen before zend_leave_helper frees the CVs (including
+	 * constructor arguments), and ensures inference works even when the JIT
+	 * or optimizer bypasses RECV type checks. */
+	if (UNEXPECTED(EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS)
+			&& UNEXPECTED(EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
+		zend_object *obj = Z_OBJ(execute_data->This);
+		if (obj->ce->generic_params_info && !obj->generic_args) {
+			zend_infer_generic_args_from_constructor(obj, execute_data);
+		}
+	}
 	ZEND_OBSERVER_SAVE_OPLINE();
 	ZEND_OBSERVER_FCALL_END(execute_data, return_value);
 	ZEND_OBSERVER_FREE_RETVAL();
