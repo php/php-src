@@ -40862,7 +40862,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_BIND_STATIC_S
 				ZVAL_COPY(&ref->val, get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R));
 				FREE_OP(opline->op2_type, opline->op2.var);
 			}
-			ref->sources.ptr = NULL;
+			ref->sources.ptr = 0;
 			Z_REF_P(value) = ref;
 			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 			i_zval_ptr_dtor(variable_ptr);
@@ -93264,7 +93264,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_BIND_STATIC_SPEC_C
 				ZVAL_COPY(&ref->val, get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R));
 				FREE_OP(opline->op2_type, opline->op2.var);
 			}
-			ref->sources.ptr = NULL;
+			ref->sources.ptr = 0;
 			Z_REF_P(value) = ref;
 			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 			i_zval_ptr_dtor(variable_ptr);

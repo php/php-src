@@ -1082,11 +1082,10 @@ try_again:
 		}
 
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-			Z_TRY_ADDREF_P(value);
+			ZVAL_COPY(&tmp, value);
 
 			if (prop_info) {
 typed_property:
-				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
 				bool type_matched = zend_verify_property_type(prop_info, &tmp, property_uses_strict_types());
@@ -1103,14 +1102,13 @@ typed_property:
 					goto exit;
 				}
 				Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
-				value = &tmp;
 			}
 
 found:;
 			zend_refcounted *garbage = NULL;
 
 			variable_ptr = zend_assign_to_variable_ex(
-				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types(), &garbage);
+				variable_ptr, &tmp, IS_TMP_VAR, property_uses_strict_types(), &garbage);
 
 			if (garbage) {
 				if (GC_DELREF(garbage) == 0) {
@@ -1150,7 +1148,7 @@ found:;
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, name)) != NULL) {
-				Z_TRY_ADDREF_P(value);
+				ZVAL_COPY(&tmp, value);
 				goto found;
 			}
 		}
@@ -1245,12 +1243,12 @@ write_std_property:
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
-			Z_TRY_ADDREF_P(value);
 			if (prop_info) {
+				ZVAL_COPY(&tmp, value);
 				goto typed_property;
 			}
 
-			ZVAL_COPY_VALUE(variable_ptr, value);
+			ZVAL_COPY(variable_ptr, value);
 		} else {
 			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
 				zend_forbidden_dynamic_property(zobj->ce, name);

@@ -5014,17 +5014,15 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 	}
 
 	ZEND_ASSERT(!Z_ISREF_P(value));
-	Z_TRY_ADDREF_P(value);
+	ZVAL_COPY(&tmp, value);
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		ZVAL_COPY_VALUE(&tmp, value);
 		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
-			Z_TRY_DELREF_P(value);
+			zval_ptr_dtor(&tmp);
 			return FAILURE;
 		}
-		value = &tmp;
 	}
 
-	zend_assign_to_variable(property, value, IS_TMP_VAR, /* strict */ 0);
+	zend_assign_to_variable(property, &tmp, IS_TMP_VAR, /* strict */ 0);
 	return SUCCESS;
 }
 /* }}} */
