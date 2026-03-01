@@ -2,6 +2,10 @@
 Pdo\Sqlite create through PDO::connect and function define.
 --EXTENSIONS--
 pdo_sqlite
+--SKIPIF--
+<?php
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC requires SQLite library >= 3.8.3');
+?>
 --FILE--
 <?php
 
