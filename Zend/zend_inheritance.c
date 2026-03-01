@@ -31,6 +31,7 @@
 #include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
@@ -2862,6 +2863,54 @@ static const zend_class_entry* find_first_property_definition(const zend_class_e
 }
 /* }}} */
 
+static bool zend_compare_constant_ast(zend_ast *lhs, zend_ast *rhs) {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return true;
+	}
+#endif
+
+	if (lhs->kind != rhs->kind) {
+		return false;
+	}
+	if (lhs->attr != rhs->attr) {
+		return false;
+	}
+	if (lhs->kind == ZEND_AST_ZVAL) {
+		if (!zend_is_identical(zend_ast_get_zval(lhs), zend_ast_get_zval(rhs))) {
+			return false;
+		}
+	} else if (lhs->kind == ZEND_AST_CONSTANT) {
+		if (!zend_string_equals(zend_ast_get_constant_name(lhs), zend_ast_get_constant_name(rhs))) {
+			return false;
+		}
+	} else if (zend_ast_is_list(lhs)) {
+		zend_ast_list *lhs_list = zend_ast_get_list(lhs);
+		zend_ast_list *rhs_list = zend_ast_get_list(rhs);
+		if (lhs_list->children != rhs_list->children) {
+			return false;
+		}
+		for (uint32_t i = 0; i < rhs_list->children; i++) {
+			zend_ast *lhs_child = lhs_list->child[i];
+			zend_ast *rhs_child = rhs_list->child[i];
+			if (!zend_compare_constant_ast(lhs_child, rhs_child)) {
+				return false;
+			}
+		}
+	} else {
+		for (uint32_t i = 0; i < zend_ast_get_num_children(lhs); i++) {
+			zend_ast *lhs_child = lhs->child[i];
+			zend_ast *rhs_child = rhs->child[i];
+			if (!zend_compare_constant_ast(lhs_child, rhs_child)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -2915,6 +2964,43 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 							op2 = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
 						is_compatible = check_trait_property_or_constant_value_compatibility(ce, op1, op2);
+					}
+
+					if ((bool)property_info->attributes != (bool)colliding_prop->attributes) {
+attributes_incompatible:
+						is_compatible = false;
+					} else if (property_info->attributes) {
+						if (zend_hash_num_elements(property_info->attributes) != zend_hash_num_elements(colliding_prop->attributes)) {
+							goto attributes_incompatible;
+						}
+						zval *colliding_attr_zv = colliding_prop->attributes->arPacked;
+						ZEND_HASH_PACKED_FOREACH_PTR(property_info->attributes, zend_attribute *attr) {
+							zend_attribute *colliding_attr = Z_PTR_P(colliding_attr_zv);
+							if (!zend_string_equals(attr->lcname, colliding_attr->lcname)) {
+								goto attributes_incompatible;
+							}
+							if (attr->argc != colliding_attr->argc) {
+								goto attributes_incompatible;
+							}
+							for (uint32_t i = 0; i < attr->argc; i++) {
+								zend_attribute_arg *attr_arg = &attr->args[i];
+								zend_attribute_arg *colliding_attr_arg = &colliding_attr->args[i];
+								if ((bool)attr_arg->name != (bool)colliding_attr_arg->name) {
+									goto attributes_incompatible;
+								}
+								if (attr_arg->name && !zend_string_equals(attr_arg->name, colliding_attr_arg->name)) {
+									goto attributes_incompatible;
+								}
+								if (Z_TYPE(attr_arg->value) == IS_CONSTANT_AST && Z_TYPE(colliding_attr_arg->value) == IS_CONSTANT_AST) {
+									if (!zend_compare_constant_ast(Z_ASTVAL(attr_arg->value), Z_ASTVAL(colliding_attr_arg->value))) {
+										goto attributes_incompatible;
+									}
+								} else if (!zend_is_identical(&attr_arg->value, &colliding_attr_arg->value)) {
+									goto attributes_incompatible;
+								}
+							}
+							colliding_attr_zv++;
+						} ZEND_HASH_FOREACH_END();
 					}
 
 					if (!is_compatible) {
