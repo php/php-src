@@ -1174,6 +1174,9 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 
 	ubrk_setUText(bi, ut, &ustatus);
 	pos = ubrk_last(bi);
+	if (pos == UBRK_DONE) {
+		goto close;
+	}
 
 	current = ZSTR_LEN(string);
 	for (end = pstr; pos != UBRK_DONE; ) {
