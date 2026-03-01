@@ -74,8 +74,8 @@ ZEND_API zend_type zend_copy_generic_type(zend_type src)
 		ref->class_name = zend_string_copy(orig->class_name);
 		ref->type_args = orig->type_args ? zend_copy_generic_args(orig->type_args) : NULL;
 		if (orig->wildcard_bounds && orig->type_args) {
-			ref->wildcard_bounds = emalloc(orig->type_args->num_args * sizeof(uint8_t));
-			memcpy(ref->wildcard_bounds, orig->wildcard_bounds, orig->type_args->num_args * sizeof(uint8_t));
+			ref->wildcard_bounds = emalloc(orig->type_args->num_args * sizeof(zend_generic_bound));
+			memcpy(ref->wildcard_bounds, orig->wildcard_bounds, orig->type_args->num_args * sizeof(zend_generic_bound));
 		} else {
 			ref->wildcard_bounds = NULL;
 		}
@@ -310,7 +310,7 @@ static bool zend_generic_type_is_subtype(zend_type expected, zend_type actual)
 ZEND_API bool zend_generic_args_compatible(
 	const zend_generic_args *expected, const zend_generic_args *actual,
 	const zend_generic_params_info *params_info,
-	const uint8_t *wildcard_bounds)
+	const zend_generic_bound *wildcard_bounds)
 {
 	if (expected == NULL && actual == NULL) {
 		return 1;
@@ -327,7 +327,7 @@ ZEND_API bool zend_generic_args_compatible(
 		zend_type act_type = actual->args[i];
 
 		/* Check wildcard bounds first */
-		uint8_t bound = (wildcard_bounds) ? wildcard_bounds[i] : ZEND_GENERIC_BOUND_NONE;
+		zend_generic_bound bound = (wildcard_bounds) ? wildcard_bounds[i] : ZEND_GENERIC_BOUND_NONE;
 
 		if (bound == ZEND_GENERIC_BOUND_UNBOUND) {
 			/* Unbounded wildcard (?) — matches any type */
@@ -391,7 +391,7 @@ ZEND_API bool zend_generic_args_compatible(
 					continue; /* exact match */
 				}
 				/* Names differ — check variance */
-				uint8_t variance = (params_info && i < params_info->num_params)
+				zend_generic_variance variance = (params_info && i < params_info->num_params)
 					? params_info->params[i].variance : ZEND_GENERIC_VARIANCE_INVARIANT;
 
 				if (variance == ZEND_GENERIC_VARIANCE_COVARIANT) {

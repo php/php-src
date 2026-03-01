@@ -21,21 +21,23 @@
 #include "zend_string.h"
 
 /* Variance annotations for generic type parameters */
-#define ZEND_GENERIC_VARIANCE_INVARIANT    0  /* default: no variance */
-#define ZEND_GENERIC_VARIANCE_COVARIANT    1  /* "out T" — only in return positions */
-#define ZEND_GENERIC_VARIANCE_CONTRAVARIANT 2 /* "in T" — only in parameter positions */
+C23_ENUM(zend_generic_variance, uint8_t) {
+	ZEND_GENERIC_VARIANCE_INVARIANT    = 0, /* default: no variance */
+	ZEND_GENERIC_VARIANCE_COVARIANT    = 1, /* "out T" — only in return positions */
+	ZEND_GENERIC_VARIANCE_CONTRAVARIANT = 2, /* "in T" — only in parameter positions */
+};
 
 /* A single generic type parameter declaration (e.g., "T", "T: Countable", "out T") */
-typedef struct _zend_generic_param {
-	zend_string *name;        /* "T", "K", "V", etc. */
-	zend_type constraint;     /* Bound type (e.g., Countable), or IS_UNDEF */
-	zend_type default_type;   /* Default type (e.g., string in V = string), or IS_UNDEF */
-	uint8_t variance;         /* ZEND_GENERIC_VARIANCE_* */
+typedef struct zend_generic_param {
+	zend_string *name;              /* "T", "K", "V", etc. */
+	zend_type constraint;           /* Bound type (e.g., Countable), or IS_UNDEF */
+	zend_type default_type;         /* Default type (e.g., string in V = string), or IS_UNDEF */
+	zend_generic_variance variance; /* ZEND_GENERIC_VARIANCE_* */
 } zend_generic_param;
 
 /* Generic parameters info attached to a generic class/function.
  * Variable-length struct: params[0..num_params-1]. */
-typedef struct _zend_generic_params_info {
+typedef struct zend_generic_params_info {
 	uint32_t num_params;
 	zend_generic_param params[1]; /* Flexible array */
 } zend_generic_params_info;
@@ -44,7 +46,7 @@ typedef struct _zend_generic_params_info {
  * Refcounted, single contiguous allocation:
  *   [refcount | num_args | args[0..N-1] | resolved_masks[0..N-1]]
  * refcount=0 means unmanaged (SHM/persistent). */
-typedef struct _zend_generic_args {
+typedef struct zend_generic_args {
 	uint32_t refcount;
 	uint32_t num_args;
 	zend_type args[1]; /* Flexible array: args[0..num_args-1], followed by uint32_t masks[num_args] */
@@ -55,24 +57,26 @@ typedef struct _zend_generic_args {
 
 /* Reference to a generic type parameter in a zend_type.
  * Stored in zend_type.ptr when MAY_BE_GENERIC_PARAM is set. */
-typedef struct _zend_generic_type_ref {
-	zend_string *name;       /* "T" — for error messages */
-	uint32_t param_index;    /* Index into generic_params_info */
-	uint8_t variance;        /* ZEND_GENERIC_VARIANCE_* (copied from param decl) */
+typedef struct zend_generic_type_ref {
+	zend_string *name;              /* "T" — for error messages */
+	uint32_t param_index;           /* Index into generic_params_info */
+	zend_generic_variance variance; /* ZEND_GENERIC_VARIANCE_* (copied from param decl) */
 } zend_generic_type_ref;
 
 /* Wildcard bound kinds for generic type arguments */
-#define ZEND_GENERIC_BOUND_NONE    0  /* Exact type: Collection<int> */
-#define ZEND_GENERIC_BOUND_UPPER   1  /* ? extends Foo: Collection<? extends Countable> */
-#define ZEND_GENERIC_BOUND_LOWER   2  /* ? super Foo: Collection<? super Dog> */
-#define ZEND_GENERIC_BOUND_UNBOUND 3  /* ?: Collection<?> (any type) */
+C23_ENUM(zend_generic_bound, uint8_t) {
+	ZEND_GENERIC_BOUND_NONE    = 0, /* Exact type: Collection<int> */
+	ZEND_GENERIC_BOUND_UPPER   = 1, /* ? extends Foo: Collection<? extends Countable> */
+	ZEND_GENERIC_BOUND_LOWER   = 2, /* ? super Foo: Collection<? super Dog> */
+	ZEND_GENERIC_BOUND_UNBOUND = 3, /* ?: Collection<?> (any type) */
+};
 
 /* A class type reference with generic arguments (e.g., Collection<int>).
  * Stored in zend_type.ptr when _ZEND_TYPE_GENERIC_CLASS_BIT is set. */
-typedef struct _zend_generic_class_ref {
+typedef struct zend_generic_class_ref {
 	zend_string *class_name;
 	zend_generic_args *type_args;
-	uint8_t *wildcard_bounds;  /* Array of ZEND_GENERIC_BOUND_* (NULL if no wildcards) */
+	zend_generic_bound *wildcard_bounds; /* Array of ZEND_GENERIC_BOUND_* (NULL if no wildcards) */
 } zend_generic_class_ref;
 
 /* Allocation size for zend_generic_args with N args + N masks */
@@ -144,7 +148,7 @@ ZEND_API bool zend_verify_generic_args(
 ZEND_API bool zend_generic_args_compatible(
 	const zend_generic_args *expected, const zend_generic_args *actual,
 	const zend_generic_params_info *params_info,
-	const uint8_t *wildcard_bounds);
+	const zend_generic_bound *wildcard_bounds);
 
 /* Infer a zend_type from a runtime zval value */
 ZEND_API zend_type zend_infer_type_from_zval(const zval *value);

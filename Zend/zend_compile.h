@@ -576,7 +576,7 @@ struct _zend_op_array {
 	zend_op_array **dynamic_func_defs;
 
 	/* Generic type parameters for generic functions/methods (NULL for non-generic) */
-	struct _zend_generic_params_info *generic_params_info;
+	zend_generic_params_info *generic_params_info;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

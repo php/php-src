@@ -160,7 +160,7 @@ struct _zend_compiler_globals {
 	zend_stack short_circuiting_opnums;
 
 	/* Generic type parameters currently in scope during compilation */
-	struct _zend_generic_params_info *active_generic_params;
+	zend_generic_params_info *active_generic_params;
 #ifdef ZTS
 	uint32_t copied_functions_count;
 #endif
@@ -226,7 +226,7 @@ struct _zend_executor_globals {
 	HashTable autoload_current_classnames;
 
 	/* Generic args for current static method call context (e.g., Collection<int>::create()) */
-	struct _zend_generic_args *static_generic_args;
+	zend_generic_args *static_generic_args;
 
 	zend_long hard_timeout;
 	void *stack_base;

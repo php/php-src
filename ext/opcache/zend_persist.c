@@ -384,7 +384,7 @@ static void zend_persist_type(zend_type *type) {
 		}
 		if (new_ref->wildcard_bounds && new_ref->type_args) {
 			new_ref->wildcard_bounds = zend_shared_memdup_put_free(
-				new_ref->wildcard_bounds, new_ref->type_args->num_args * sizeof(uint8_t));
+				new_ref->wildcard_bounds, new_ref->type_args->num_args * sizeof(zend_generic_bound));
 		}
 		ZEND_TYPE_SET_PTR(*type, new_ref);
 		return;
@@ -1213,6 +1213,30 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 		if (ce->bound_generic_args) {
 			zend_persist_generic_args(&ce->bound_generic_args);
+		}
+		if (ce->interface_bound_generic_args) {
+			zend_hash_persist(ce->interface_bound_generic_args);
+			ZEND_HASH_MAP_FOREACH_BUCKET(ce->interface_bound_generic_args, p) {
+				ZEND_ASSERT(p->key != NULL);
+				zend_accel_store_interned_string(p->key);
+				zend_generic_args *args = Z_PTR(p->val);
+				zend_persist_generic_args(&args);
+				Z_PTR(p->val) = args;
+			} ZEND_HASH_FOREACH_END();
+			ce->interface_bound_generic_args = zend_shared_memdup_put_free(
+				ce->interface_bound_generic_args, sizeof(HashTable));
+		}
+		if (ce->trait_bound_generic_args) {
+			zend_hash_persist(ce->trait_bound_generic_args);
+			ZEND_HASH_MAP_FOREACH_BUCKET(ce->trait_bound_generic_args, p) {
+				ZEND_ASSERT(p->key != NULL);
+				zend_accel_store_interned_string(p->key);
+				zend_generic_args *args = Z_PTR(p->val);
+				zend_persist_generic_args(&args);
+				Z_PTR(p->val) = args;
+			} ZEND_HASH_FOREACH_END();
+			ce->trait_bound_generic_args = zend_shared_memdup_put_free(
+				ce->trait_bound_generic_args, sizeof(HashTable));
 		}
 	}
 

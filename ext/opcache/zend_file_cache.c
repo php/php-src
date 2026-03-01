@@ -505,6 +505,29 @@ static void zend_file_cache_serialize_generic_params_info(
 	}
 }
 
+static void zend_file_cache_serialize_generic_args_entry(
+		zval *zv, zend_persistent_script *script,
+		zend_file_cache_metainfo *info, void *buf)
+{
+	zend_file_cache_serialize_generic_args((zend_generic_args **)&Z_PTR_P(zv), script, info, buf);
+}
+
+static void zend_file_cache_serialize_bound_generic_args_ht(
+		HashTable **ht_ptr, zend_persistent_script *script,
+		zend_file_cache_metainfo *info, void *buf)
+{
+	HashTable *ht = *ht_ptr;
+	if (!ht || IS_SERIALIZED(ht)) {
+		return;
+	}
+	SERIALIZE_PTR(*ht_ptr);
+	ht = *ht_ptr;
+	UNSERIALIZE_PTR(ht);
+
+	zend_file_cache_serialize_hash(ht, script, info, buf,
+		(serialize_callback_t)zend_file_cache_serialize_generic_args_entry);
+}
+
 static void zend_file_cache_serialize_type(
 		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
 {
@@ -1061,6 +1084,14 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	if (ce->bound_generic_args) {
 		zend_file_cache_serialize_generic_args(&ce->bound_generic_args, script, info, buf);
 	}
+	if (ce->interface_bound_generic_args) {
+		zend_file_cache_serialize_bound_generic_args_ht(
+			&ce->interface_bound_generic_args, script, info, buf);
+	}
+	if (ce->trait_bound_generic_args) {
+		zend_file_cache_serialize_bound_generic_args_ht(
+			&ce->trait_bound_generic_args, script, info, buf);
+	}
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
@@ -1513,6 +1544,26 @@ static void zend_file_cache_unserialize_generic_params_info(
 		zend_file_cache_unserialize_type(&ginfo->params[i].constraint, NULL, script, buf);
 		zend_file_cache_unserialize_type(&ginfo->params[i].default_type, NULL, script, buf);
 	}
+}
+
+static void zend_file_cache_unserialize_generic_args_entry(
+		zval *zv, zend_persistent_script *script, void *buf)
+{
+	zend_file_cache_unserialize_generic_args((zend_generic_args **)&Z_PTR_P(zv), script, buf);
+}
+
+static void zend_file_cache_unserialize_bound_generic_args_ht(
+		HashTable **ht_ptr, zend_persistent_script *script, void *buf)
+{
+	HashTable *ht = *ht_ptr;
+	if (!ht || IS_UNSERIALIZED(ht)) {
+		return;
+	}
+	UNSERIALIZE_PTR(*ht_ptr);
+	ht = *ht_ptr;
+
+	zend_file_cache_unserialize_hash(ht, script, buf,
+		(unserialize_callback_t)zend_file_cache_unserialize_generic_args_entry, NULL);
 }
 
 static void zend_file_cache_unserialize_type(
@@ -2028,6 +2079,14 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	}
 	if (ce->bound_generic_args) {
 		zend_file_cache_unserialize_generic_args(&ce->bound_generic_args, script, buf);
+	}
+	if (ce->interface_bound_generic_args) {
+		zend_file_cache_unserialize_bound_generic_args_ht(
+			&ce->interface_bound_generic_args, script, buf);
+	}
+	if (ce->trait_bound_generic_args) {
+		zend_file_cache_unserialize_bound_generic_args_ht(
+			&ce->trait_bound_generic_args, script, buf);
 	}
 
 	if (!(script->corrupted)) {

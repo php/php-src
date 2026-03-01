@@ -11429,13 +11429,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -30265,13 +30273,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -37414,13 +37430,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -64387,13 +64411,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -83123,13 +83155,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -90272,13 +90312,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 		 * (after class name + lowercase class name) */
 		zval *generic_args_zv = RT_CONSTANT(opline, opline->op1) + 2;
 		zend_generic_args *compiled_args = (zend_generic_args *) Z_PTR_P(generic_args_zv);
-		/* Resolve generic param refs (e.g., new Box<T> inside Factory<int>::create()) */
-		zend_generic_args *resolved = zend_resolve_generic_args_with_context(
-			compiled_args, zend_get_current_generic_args());
-		if (resolved) {
-			Z_OBJ_P(result)->generic_args = resolved;
+		/* Resolve generic param refs only when inside a generic context
+		 * (e.g., new Box<T> inside Factory<int>::create()). Skip the
+		 * function call entirely when at top-level scope. */
+		zend_generic_args *context = i_zend_get_current_generic_args();
+		if (context) {
+			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
+				compiled_args, context);
+			if (resolved) {
+				Z_OBJ_P(result)->generic_args = resolved;
+			} else {
+				zend_generic_args_addref(compiled_args);
+				Z_OBJ_P(result)->generic_args = compiled_args;
+			}
 		} else {
-			/* No param refs — share via refcount instead of deep copy */
+			/* No context — share via refcount (common case) */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}

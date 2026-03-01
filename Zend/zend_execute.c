@@ -1324,8 +1324,9 @@ static inline bool zend_check_type_slow(
 					uint8_t source_type = Z_TYPE_P(source_arg);
 					uint8_t return_type = Z_TYPE_P(arg);
 
-					/* Ultra-fast path: exact type code match (covers all scalars) */
-					if (source_type == return_type) {
+					/* Ultra-fast path: exact type code match (covers all scalars).
+				 * Objects must fall through to instanceof check below. */
+					if (source_type == return_type && source_type != IS_OBJECT) {
 						return true;
 					}
 					/* Bool: IS_TRUE/IS_FALSE both satisfy bool */
@@ -1453,19 +1454,56 @@ static zend_always_inline bool zend_check_type(
 		return 1;
 	}
 
-	/* Fast path for generic param types in parameter position:
-	 * For free generic functions, param checks always pass (no args bound).
-	 * Skip the non-inlined zend_check_type_slow() call entirely.
-	 * Constructors of generic classes still need the slow path for inference. */
-	if (ZEND_TYPE_IS_GENERIC_PARAM(*type) && !is_return_type) {
+	/* Fast path for generic param types: resolve using pre-computed masks
+	 * inline to avoid the zend_check_type_slow() function call entirely. */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(*type)) {
 		zend_generic_args *gargs = i_zend_get_current_generic_args();
-		if (!gargs) {
+		if (gargs) {
+			/* Generic args are bound — check the pre-computed mask inline */
+			zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(*type);
+			if (gref->param_index < gargs->num_args) {
+				uint32_t mask = ZEND_GENERIC_ARGS_MASKS(gargs)[gref->param_index];
+				if (mask != 0 && ((1u << Z_TYPE_P(arg)) & mask)) {
+					return 1;
+				}
+			}
+			/* mask==0 means complex type (class, union, etc.) — fall through to slow path */
+		} else if (!is_return_type) {
+			/* No args bound in param position: for free generic functions,
+			 * param checks always pass. Constructors of generic classes
+			 * still need the slow path for inference. */
 			zend_execute_data *ex = EG(current_execute_data);
 			if (!(ex && Z_TYPE(ex->This) == IS_OBJECT
 					&& Z_OBJ(ex->This)->ce->generic_params_info
 					&& (ex->func->common.fn_flags & ZEND_ACC_CTOR))) {
 				return 1;
 			}
+		} else {
+			/* Return type in free generic function — inline lazy inference
+			 * fast path using the pre-computed param-to-arg map. */
+			zend_execute_data *ex = EG(current_execute_data);
+			if (ex && ex->func && ex->func->type == ZEND_USER_FUNCTION
+					&& ex->func->op_array.generic_params_info) {
+				zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(*type);
+				zend_generic_params_info *gpi = ex->func->op_array.generic_params_info;
+				if (gref->param_index < gpi->num_params) {
+					int16_t arg_idx = ZEND_GENERIC_PARAMS_ARG_MAP(gpi)[gref->param_index];
+					if (arg_idx >= 0 && (uint32_t)arg_idx < ZEND_CALL_NUM_ARGS(ex)) {
+						uint8_t source_type = Z_TYPE_P(ZEND_CALL_VAR_NUM(ex, arg_idx));
+						uint8_t return_type = Z_TYPE_P(arg);
+						/* Exact scalar match (covers int, float, string, array, null) */
+						if (source_type == return_type && source_type != IS_OBJECT) {
+							return 1;
+						}
+						/* Bool: IS_TRUE/IS_FALSE both satisfy bool */
+						if ((source_type == IS_TRUE || source_type == IS_FALSE)
+								&& (return_type == IS_TRUE || return_type == IS_FALSE)) {
+							return 1;
+						}
+					}
+				}
+			}
+			/* Object types, variadics, complex cases — fall through to slow path */
 		}
 	}
 

@@ -89,9 +89,11 @@ typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
 
-typedef struct _zend_generic_type_ref  zend_generic_type_ref;
-typedef struct _zend_generic_class_ref zend_generic_class_ref;
-typedef struct _zend_generic_args      zend_generic_args;
+typedef struct zend_generic_type_ref   zend_generic_type_ref;
+typedef struct zend_generic_class_ref  zend_generic_class_ref;
+typedef struct zend_generic_args       zend_generic_args;
+typedef struct zend_generic_param      zend_generic_param;
+typedef struct zend_generic_params_info zend_generic_params_info;
 
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*swap_func_t)(void *, void *);
@@ -598,7 +600,7 @@ struct _zend_object {
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
-	struct _zend_generic_args *generic_args; /* Per-instance type arguments (NULL if non-generic) */
+	zend_generic_args *generic_args; /* Per-instance type arguments (NULL if non-generic) */
 	zval              properties_table[1];
 };
 

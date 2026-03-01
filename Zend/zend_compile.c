@@ -9984,13 +9984,13 @@ static zend_type zend_compile_generic_type(zend_ast *ast) /* {{{ */
 	}
 
 	if (has_wildcards) {
-		ref->wildcard_bounds = ecalloc(args_list->children, sizeof(uint8_t));
+		ref->wildcard_bounds = ecalloc(args_list->children, sizeof(zend_generic_bound));
 	}
 
 	for (uint32_t i = 0; i < args_list->children; i++) {
 		zend_ast *arg_ast = args_list->child[i];
 		if (arg_ast->kind == ZEND_AST_GENERIC_WILDCARD) {
-			uint8_t bound_kind = arg_ast->attr;
+			zend_generic_bound bound_kind = (zend_generic_bound)arg_ast->attr;
 			if (ref->wildcard_bounds) {
 				ref->wildcard_bounds[i] = bound_kind;
 			}
