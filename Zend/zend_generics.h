@@ -77,7 +77,10 @@ typedef struct zend_generic_class_ref {
 	zend_string *class_name;
 	zend_generic_args *type_args;
 	zend_generic_bound *wildcard_bounds; /* Array of ZEND_GENERIC_BOUND_* (NULL if no wildcards) */
+	uint32_t cache_slot;                 /* Run-time cache slot offset, or ZEND_GENERIC_CLASS_REF_NO_CACHE */
 } zend_generic_class_ref;
+
+#define ZEND_GENERIC_CLASS_REF_NO_CACHE ((uint32_t)-1)
 
 /* Allocation size for zend_generic_args with N args + N masks */
 #define ZEND_GENERIC_ARGS_SIZE(n) \
@@ -173,5 +176,70 @@ ZEND_API zend_generic_args *zend_generic_args_from_string(const char *str, size_
 
 /* Get class name with generic args for display, e.g. "Box<int>" */
 ZEND_API zend_string *zend_object_get_class_name_with_generics(const zend_object *obj);
+
+/* Intern (deduplicate) generic args.
+ * Returns the canonical instance (addref'd) — may be the same pointer or a shared one.
+ * Skips SHM args (refcount=0) and args containing unresolved generic param refs. */
+ZEND_API zend_generic_args *zend_intern_generic_args(zend_generic_args *args);
+
+/* ---- Progressive generic inference ----
+ *
+ * When a generic class is instantiated without explicit type args and constructor
+ * inference fails (e.g., `new Collection()`), the object enters progressive mode.
+ * Each type parameter tracks:
+ *   - min-type (lower bound): union of all observed types, starts as never
+ *   - max-type (upper bound): intersection of all constraints, starts as mixed
+ *
+ * Values are accepted if they're within max-type, then min-type is widened.
+ * Passing to a typed function narrows max-type. When min == max, auto-freeze. */
+
+/* Per-type-parameter progressive bounds */
+typedef struct zend_progressive_bound {
+	uint32_t min_scalar_mask;       /* MAY_BE_* union of observed scalar types (0 = never) */
+	uint32_t max_scalar_mask;       /* MAY_BE_* allowed scalar types (MAY_BE_ANY = mixed) */
+	bool max_constrained;           /* false = max never narrowed (still mixed) */
+	/* Class tracking for min (observed) */
+	uint32_t min_class_count;
+	uint32_t min_class_alloc;
+	zend_string **min_class_names;
+	/* Class tracking for max (constraint) */
+	uint32_t max_class_count;
+	uint32_t max_class_alloc;
+	zend_string **max_class_names;
+} zend_progressive_bound;
+
+/* Per-object progressive state (all type params) */
+typedef struct zend_progressive_state {
+	uint32_t num_params;
+	zend_progressive_bound bounds[1]; /* Flexible array [0..num_params-1] */
+} zend_progressive_state;
+
+#define ZEND_PROGRESSIVE_STATE_SIZE(n) \
+	(offsetof(zend_progressive_state, bounds) + (n) * sizeof(zend_progressive_bound))
+
+/* Progressive state lifecycle */
+ZEND_API zend_progressive_state *zend_progressive_state_create(zend_object *obj);
+ZEND_API void zend_progressive_state_destroy(zend_progressive_state *state);
+ZEND_API zend_progressive_state *zend_progressive_state_clone(const zend_progressive_state *src);
+
+/* Get progressive state for an object (NULL if not progressive) */
+ZEND_API zend_progressive_state *zend_progressive_get_state(const zend_object *obj);
+
+/* Check value against upper bound. Returns false if value violates max-type. */
+ZEND_API bool zend_progressive_check_max(const zend_progressive_bound *bound, const zval *value);
+
+/* Widen lower bound to include value's type. */
+ZEND_API void zend_progressive_widen_min(zend_progressive_bound *bound, const zval *value);
+
+/* Narrow upper bound from a function parameter constraint.
+ * Returns false if existing min-type exceeds the new constraint. */
+ZEND_API bool zend_progressive_narrow_max(zend_progressive_bound *bound, zend_type constraint);
+
+/* Auto-freeze if min == max for all params. Converts to regular generic_args. */
+ZEND_API void zend_progressive_try_freeze(zend_object *obj, zend_progressive_state *state);
+
+/* Build a snapshot of the current min-types as a zend_generic_args (for serialization/display).
+ * Returns NULL if all params are still empty (never). Caller must release. */
+ZEND_API zend_generic_args *zend_progressive_snapshot_min(const zend_progressive_state *state);
 
 #endif /* ZEND_GENERICS_H */

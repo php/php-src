@@ -11437,13 +11437,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -11454,6 +11457,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -30281,13 +30285,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -30298,6 +30305,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -37438,13 +37446,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -37455,6 +37466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -64419,13 +64431,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -64436,6 +64451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -83163,13 +83179,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -83180,6 +83199,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}
@@ -90320,13 +90340,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 			zend_generic_args *resolved = zend_resolve_generic_args_with_context(
 				compiled_args, context);
 			if (resolved) {
+				/* resolved is a fresh allocation — already interned by resolve func */
 				Z_OBJ_P(result)->generic_args = resolved;
 			} else {
 				zend_generic_args_addref(compiled_args);
 				Z_OBJ_P(result)->generic_args = compiled_args;
 			}
 		} else {
-			/* No context — share via refcount (common case) */
+			/* No context — share the compiled literal via refcount (common case).
+			 * Don't intern compiled literals; they're already shared across all
+			 * instances of this opcode and their types are owned by the literal table. */
 			zend_generic_args_addref(compiled_args);
 			Z_OBJ_P(result)->generic_args = compiled_args;
 		}
@@ -90337,6 +90360,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 				ce->generic_params_info, Z_OBJ_P(result)->generic_args);
 			if (expanded) {
 				zend_generic_args_release(Z_OBJ_P(result)->generic_args);
+				/* expanded is a fresh allocation — already interned by expand func */
 				Z_OBJ_P(result)->generic_args = expanded;
 			}
 		}

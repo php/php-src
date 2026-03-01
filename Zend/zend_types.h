@@ -890,6 +890,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+#define IS_OBJ_GENERIC_PROGRESSIVE  (1U<<29) /* Progressive generic inference active */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 

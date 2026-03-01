@@ -201,6 +201,11 @@ void init_executor(void) /* {{{ */
 
 	EG(static_generic_args) = NULL;
 
+	EG(interned_generic_args) = emalloc(sizeof(HashTable));
+	zend_hash_init(EG(interned_generic_args), 64, NULL, NULL, 0);
+
+	EG(progressive_generic_state) = NULL; /* Lazy — allocated on first progressive object */
+
 	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
@@ -282,6 +287,35 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 	/* Clear static generic args pointer (non-owning, points to op_array literals) */
 	EG(static_generic_args) = NULL;
+
+	/* Release interned generic args before object store — objects hold their own refs.
+	 * The table values are generic_args pointers that were addref'd on insert;
+	 * release each one to drop the intern table's reference. */
+	if (EG(interned_generic_args)) {
+		if (!fast_shutdown) {
+			zval *zv_tmp;
+			ZEND_HASH_FOREACH_VAL(EG(interned_generic_args), zv_tmp) {
+				zend_generic_args *args = Z_PTR_P(zv_tmp);
+				zend_generic_args_release(args);
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(EG(interned_generic_args));
+			efree(EG(interned_generic_args));
+		}
+		EG(interned_generic_args) = NULL;
+	}
+
+	/* Destroy progressive generic state table */
+	if (EG(progressive_generic_state)) {
+		if (!fast_shutdown) {
+			zval *zv_tmp;
+			ZEND_HASH_FOREACH_VAL(EG(progressive_generic_state), zv_tmp) {
+				zend_progressive_state_destroy(Z_PTR_P(zv_tmp));
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(EG(progressive_generic_state));
+			efree(EG(progressive_generic_state));
+		}
+		EG(progressive_generic_state) = NULL;
+	}
 
 	if (!fast_shutdown) {
 		zval *zv;

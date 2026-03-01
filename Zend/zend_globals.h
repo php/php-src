@@ -228,6 +228,12 @@ struct _zend_executor_globals {
 	/* Generic args for current static method call context (e.g., Collection<int>::create()) */
 	zend_generic_args *static_generic_args;
 
+	/* Intern table for deduplicating generic args at runtime (e.g., Box<int> created 1000x) */
+	HashTable *interned_generic_args;
+
+	/* Progressive generic state: obj->handle => zend_progressive_state* (lazy, NULL until needed) */
+	HashTable *progressive_generic_state;
+
 	zend_long hard_timeout;
 	void *stack_base;
 	void *stack_limit;

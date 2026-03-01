@@ -9970,6 +9970,8 @@ static zend_type zend_compile_generic_type(zend_ast *ast) /* {{{ */
 	ref->class_name = zend_new_interned_string(ref->class_name);
 	zend_alloc_ce_cache(ref->class_name);
 	ref->wildcard_bounds = NULL;
+	/* 2 cache slots: [0] = cached CE, [1] = last-seen compatible generic_args pointer */
+	ref->cache_slot = zend_alloc_cache_slots(2);
 
 	ref->type_args = zend_alloc_generic_args(args_list->children);
 

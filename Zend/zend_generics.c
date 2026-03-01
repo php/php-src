@@ -79,6 +79,8 @@ ZEND_API zend_type zend_copy_generic_type(zend_type src)
 		} else {
 			ref->wildcard_bounds = NULL;
 		}
+		/* Copies used in different op_array contexts shouldn't inherit cache slots */
+		ref->cache_slot = ZEND_GENERIC_CLASS_REF_NO_CACHE;
 		return (zend_type) ZEND_TYPE_INIT_GENERIC_CLASS(ref, 0, 0);
 	}
 	if (ZEND_TYPE_IS_GENERIC_PARAM(src)) {
@@ -194,7 +196,7 @@ ZEND_API zend_generic_args *zend_resolve_generic_args_with_context(
 		}
 	}
 	zend_generic_args_compute_masks(resolved);
-	return resolved;
+	return zend_intern_generic_args(resolved);
 }
 
 ZEND_API zend_generic_args *zend_expand_generic_args_with_defaults(
@@ -220,7 +222,7 @@ ZEND_API zend_generic_args *zend_expand_generic_args_with_defaults(
 		expanded->args[i] = zend_copy_generic_type(params->params[i].default_type);
 	}
 	zend_generic_args_compute_masks(expanded);
-	return expanded;
+	return zend_intern_generic_args(expanded);
 }
 
 ZEND_API bool zend_verify_generic_args(
@@ -312,7 +314,8 @@ ZEND_API bool zend_generic_args_compatible(
 	const zend_generic_params_info *params_info,
 	const zend_generic_bound *wildcard_bounds)
 {
-	if (expected == NULL && actual == NULL) {
+	/* Fast path: interned pointer equality (covers NULL==NULL and same interned args) */
+	if (expected == actual) {
 		return 1;
 	}
 	if (expected == NULL || actual == NULL) {
@@ -380,12 +383,16 @@ ZEND_API bool zend_generic_args_compatible(
 			return 0;
 		}
 
-		/* ZEND_GENERIC_BOUND_NONE — exact match (with variance support) */
+		/* ZEND_GENERIC_BOUND_NONE — check type compatibility.
+		 * Actual type args must be a subtype of expected: Box<int> is compatible with
+		 * Box<int|string> because int is a subtype of int|string. This is safe because
+		 * PHP's generics enforce types at runtime on property writes, so the actual
+		 * object's concrete type provides the safety net. */
 		uint32_t exp_mask = ZEND_TYPE_PURE_MASK(exp_type);
 		uint32_t act_mask = ZEND_TYPE_PURE_MASK(act_type);
 
-		if (exp_mask == act_mask) {
-			/* Same type code — check class names if present */
+		if ((act_mask & exp_mask) == act_mask) {
+			/* Actual scalar bits are a subset of expected (e.g., int ⊆ int|string) */
 			if (ZEND_TYPE_HAS_NAME(exp_type) && ZEND_TYPE_HAS_NAME(act_type)) {
 				if (zend_string_equals_ci(ZEND_TYPE_NAME(exp_type), ZEND_TYPE_NAME(act_type))) {
 					continue; /* exact match */
@@ -406,7 +413,12 @@ ZEND_API bool zend_generic_args_compatible(
 					}
 				}
 				return 0;
-			} else if (ZEND_TYPE_HAS_NAME(exp_type) != ZEND_TYPE_HAS_NAME(act_type)) {
+			} else if (ZEND_TYPE_HAS_NAME(exp_type) && !ZEND_TYPE_HAS_NAME(act_type)) {
+				/* Expected has class name but actual doesn't — actual is pure scalar subset,
+				 * which is compatible (e.g., actual=int, expected=int|SomeClass) */
+				continue;
+			} else if (!ZEND_TYPE_HAS_NAME(exp_type) && ZEND_TYPE_HAS_NAME(act_type)) {
+				/* Actual has a class name but expected doesn't — not compatible */
 				return 0;
 			}
 		} else {
@@ -414,6 +426,107 @@ ZEND_API bool zend_generic_args_compatible(
 		}
 	}
 	return 1;
+}
+
+/* Compute a canonical hash key for generic args.
+ * Format: binary blob of [num_args, mask0, name0_hash, mask1, name1_hash, ...] */
+static zend_string *zend_generic_args_compute_key(const zend_generic_args *args)
+{
+	/* Key size: num_args uint32_t + per arg (mask uint32_t + name_hash uint32_t) */
+	size_t key_size = sizeof(uint32_t) + args->num_args * 2 * sizeof(uint32_t);
+	zend_string *key = zend_string_alloc(key_size, 0);
+	uint32_t *buf = (uint32_t *)ZSTR_VAL(key);
+
+	buf[0] = args->num_args;
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		zend_type t = args->args[i];
+		buf[1 + i * 2] = ZEND_TYPE_PURE_MASK(t);
+		if (ZEND_TYPE_HAS_NAME(t)) {
+			buf[2 + i * 2] = (uint32_t)ZSTR_HASH(ZEND_TYPE_NAME(t));
+		} else if (ZEND_TYPE_IS_GENERIC_CLASS(t)) {
+			zend_generic_class_ref *gcref = ZEND_TYPE_GENERIC_CLASS_REF(t);
+			buf[2 + i * 2] = (uint32_t)ZSTR_HASH(gcref->class_name);
+		} else {
+			buf[2 + i * 2] = 0;
+		}
+	}
+	ZSTR_VAL(key)[key_size] = '\0';
+	return key;
+}
+
+/* Check if two generic args are structurally equal (for intern table dedup).
+ * This is a fast bitwise comparison since we only intern simple (non-param-ref) args. */
+static bool zend_generic_args_structurally_equal(const zend_generic_args *a, const zend_generic_args *b)
+{
+	if (a->num_args != b->num_args) {
+		return false;
+	}
+	for (uint32_t i = 0; i < a->num_args; i++) {
+		zend_type ta = a->args[i];
+		zend_type tb = b->args[i];
+		if (ZEND_TYPE_PURE_MASK(ta) != ZEND_TYPE_PURE_MASK(tb)) {
+			return false;
+		}
+		if (ZEND_TYPE_HAS_NAME(ta)) {
+			if (!ZEND_TYPE_HAS_NAME(tb)) return false;
+			if (!zend_string_equals(ZEND_TYPE_NAME(ta), ZEND_TYPE_NAME(tb))) return false;
+		} else if (ZEND_TYPE_IS_GENERIC_CLASS(ta)) {
+			if (!ZEND_TYPE_IS_GENERIC_CLASS(tb)) return false;
+			zend_generic_class_ref *ga = ZEND_TYPE_GENERIC_CLASS_REF(ta);
+			zend_generic_class_ref *gb = ZEND_TYPE_GENERIC_CLASS_REF(tb);
+			if (!zend_string_equals(ga->class_name, gb->class_name)) return false;
+			/* Recursively compare type_args */
+			if (ga->type_args && gb->type_args) {
+				if (!zend_generic_args_structurally_equal(ga->type_args, gb->type_args)) return false;
+			} else if (ga->type_args != gb->type_args) {
+				return false;
+			}
+		} else if (ZEND_TYPE_HAS_NAME(tb) || ZEND_TYPE_IS_GENERIC_CLASS(tb)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ZEND_API zend_generic_args *zend_intern_generic_args(zend_generic_args *args)
+{
+	if (!args) {
+		return NULL;
+	}
+	/* Skip SHM/persistent args (refcount=0 — already shared) */
+	if (args->refcount == 0) {
+		return args;
+	}
+	/* Skip args containing unresolved generic param refs (context-dependent) */
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		if (ZEND_TYPE_IS_GENERIC_PARAM(args->args[i])) {
+			return args;
+		}
+	}
+
+	zend_string *key = zend_generic_args_compute_key(args);
+	zval *found = zend_hash_find(EG(interned_generic_args), key);
+
+	if (found) {
+		zend_generic_args *existing = Z_PTR_P(found);
+		/* Hash collision check: verify structural equality */
+		if (zend_generic_args_structurally_equal(existing, args)) {
+			zend_generic_args_addref(existing);
+			zend_generic_args_release(args);
+			zend_string_release(key);
+			return existing;
+		}
+		/* Hash collision with different args — fall through, keep the input */
+	} else {
+		/* Not found — insert into intern table (addref for the table's reference) */
+		zend_generic_args_addref(args);
+		zval zv;
+		ZVAL_PTR(&zv, args);
+		zend_hash_add_new(EG(interned_generic_args), key, &zv);
+	}
+
+	zend_string_release(key);
+	return args;
 }
 
 ZEND_API zend_type zend_infer_type_from_zval(const zval *value)
@@ -496,7 +609,7 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 	}
 
 	zend_generic_args_compute_masks(inferred);
-	obj->generic_args = inferred;
+	obj->generic_args = zend_intern_generic_args(inferred);
 	return true;
 }
 
@@ -558,7 +671,7 @@ ZEND_API zend_generic_args *zend_infer_generic_args_from_call(zend_execute_data 
 	}
 
 	zend_generic_args_compute_masks(inferred);
-	return inferred;
+	return zend_intern_generic_args(inferred);
 }
 
 ZEND_API zend_generic_args *zend_get_current_generic_args(void)
@@ -690,5 +803,405 @@ ZEND_API zend_string *zend_object_get_class_name_with_generics(const zend_object
 		zend_string_release(generic_str);
 		return result;
 	}
+	/* Progressive objects: display current min-types */
+	if (OBJ_EXTRA_FLAGS(obj) & IS_OBJ_GENERIC_PROGRESSIVE) {
+		zend_progressive_state *prog = zend_progressive_get_state(obj);
+		if (prog) {
+			zend_generic_args *snapshot = zend_progressive_snapshot_min(prog);
+			if (snapshot) {
+				zend_string *generic_str = zend_generic_args_to_string(snapshot);
+				zend_string *result = zend_string_concat2(
+					ZSTR_VAL(obj->ce->name), ZSTR_LEN(obj->ce->name),
+					ZSTR_VAL(generic_str), ZSTR_LEN(generic_str));
+				zend_string_release(generic_str);
+				zend_generic_args_release(snapshot);
+				return result;
+			}
+		}
+	}
 	return zend_string_copy(obj->ce->name);
+}
+
+/* ---- Progressive generic inference ---- */
+
+ZEND_API zend_progressive_state *zend_progressive_state_create(zend_object *obj)
+{
+	uint32_t num_params = obj->ce->generic_params_info->num_params;
+	zend_progressive_state *state = emalloc(ZEND_PROGRESSIVE_STATE_SIZE(num_params));
+	state->num_params = num_params;
+
+	for (uint32_t i = 0; i < num_params; i++) {
+		state->bounds[i].min_scalar_mask = 0;          /* never */
+		state->bounds[i].max_scalar_mask = MAY_BE_ANY; /* mixed */
+		state->bounds[i].max_constrained = false;
+		state->bounds[i].min_class_count = 0;
+		state->bounds[i].min_class_alloc = 0;
+		state->bounds[i].min_class_names = NULL;
+		state->bounds[i].max_class_count = 0;
+		state->bounds[i].max_class_alloc = 0;
+		state->bounds[i].max_class_names = NULL;
+	}
+
+	/* Lazy-init the EG hash table */
+	if (!EG(progressive_generic_state)) {
+		EG(progressive_generic_state) = emalloc(sizeof(HashTable));
+		zend_hash_init(EG(progressive_generic_state), 16, NULL, NULL, 0);
+	}
+
+	zval zv;
+	ZVAL_PTR(&zv, state);
+	zend_hash_index_add(EG(progressive_generic_state), obj->handle, &zv);
+	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_GENERIC_PROGRESSIVE;
+
+	return state;
+}
+
+ZEND_API void zend_progressive_state_destroy(zend_progressive_state *state)
+{
+	for (uint32_t i = 0; i < state->num_params; i++) {
+		zend_progressive_bound *b = &state->bounds[i];
+		for (uint32_t j = 0; j < b->min_class_count; j++) {
+			zend_string_release(b->min_class_names[j]);
+		}
+		if (b->min_class_names) {
+			efree(b->min_class_names);
+		}
+		for (uint32_t j = 0; j < b->max_class_count; j++) {
+			zend_string_release(b->max_class_names[j]);
+		}
+		if (b->max_class_names) {
+			efree(b->max_class_names);
+		}
+	}
+	efree(state);
+}
+
+ZEND_API zend_progressive_state *zend_progressive_state_clone(const zend_progressive_state *src)
+{
+	zend_progressive_state *dst = emalloc(ZEND_PROGRESSIVE_STATE_SIZE(src->num_params));
+	dst->num_params = src->num_params;
+
+	for (uint32_t i = 0; i < src->num_params; i++) {
+		const zend_progressive_bound *sb = &src->bounds[i];
+		zend_progressive_bound *db = &dst->bounds[i];
+
+		db->min_scalar_mask = sb->min_scalar_mask;
+		db->max_scalar_mask = sb->max_scalar_mask;
+		db->max_constrained = sb->max_constrained;
+
+		/* Deep copy min class names */
+		db->min_class_count = sb->min_class_count;
+		db->min_class_alloc = sb->min_class_count;
+		if (sb->min_class_count > 0) {
+			db->min_class_names = emalloc(sb->min_class_count * sizeof(zend_string *));
+			for (uint32_t j = 0; j < sb->min_class_count; j++) {
+				db->min_class_names[j] = zend_string_copy(sb->min_class_names[j]);
+			}
+		} else {
+			db->min_class_names = NULL;
+		}
+
+		/* Deep copy max class names */
+		db->max_class_count = sb->max_class_count;
+		db->max_class_alloc = sb->max_class_count;
+		if (sb->max_class_count > 0) {
+			db->max_class_names = emalloc(sb->max_class_count * sizeof(zend_string *));
+			for (uint32_t j = 0; j < sb->max_class_count; j++) {
+				db->max_class_names[j] = zend_string_copy(sb->max_class_names[j]);
+			}
+		} else {
+			db->max_class_names = NULL;
+		}
+	}
+	return dst;
+}
+
+ZEND_API zend_progressive_state *zend_progressive_get_state(const zend_object *obj)
+{
+	if (!(OBJ_EXTRA_FLAGS(obj) & IS_OBJ_GENERIC_PROGRESSIVE)) {
+		return NULL;
+	}
+	if (!EG(progressive_generic_state)) {
+		return NULL;
+	}
+	zval *found = zend_hash_index_find(EG(progressive_generic_state), obj->handle);
+	return found ? Z_PTR_P(found) : NULL;
+}
+
+ZEND_API bool zend_progressive_check_max(const zend_progressive_bound *bound, const zval *value)
+{
+	if (!bound->max_constrained) {
+		return true; /* Max is still mixed — anything goes */
+	}
+
+	uint8_t type = Z_TYPE_P(value);
+	if (type == IS_OBJECT) {
+		/* Check if the object's class is allowed by max class list */
+		for (uint32_t i = 0; i < bound->max_class_count; i++) {
+			zend_class_entry *ce = zend_lookup_class(bound->max_class_names[i]);
+			if (ce && instanceof_function(Z_OBJCE_P(value), ce)) {
+				return true;
+			}
+		}
+		/* Also check if generic MAY_BE_OBJECT is in the scalar mask */
+		return (bound->max_scalar_mask & MAY_BE_OBJECT) != 0;
+	}
+
+	/* Scalar type check */
+	uint32_t value_bit = (type == IS_TRUE || type == IS_FALSE)
+		? MAY_BE_BOOL : (1u << type);
+	return (bound->max_scalar_mask & value_bit) != 0;
+}
+
+ZEND_API void zend_progressive_widen_min(zend_progressive_bound *bound, const zval *value)
+{
+	uint8_t type = Z_TYPE_P(value);
+	if (type == IS_OBJECT) {
+		zend_string *name = Z_OBJCE_P(value)->name;
+		/* Check if already tracked */
+		for (uint32_t i = 0; i < bound->min_class_count; i++) {
+			if (zend_string_equals_ci(bound->min_class_names[i], name)) {
+				return; /* Already in min */
+			}
+		}
+		/* Grow array if needed */
+		if (bound->min_class_count >= bound->min_class_alloc) {
+			bound->min_class_alloc = bound->min_class_alloc ? bound->min_class_alloc * 2 : 4;
+			bound->min_class_names = erealloc(bound->min_class_names,
+				bound->min_class_alloc * sizeof(zend_string *));
+		}
+		bound->min_class_names[bound->min_class_count++] = zend_string_copy(name);
+		bound->min_scalar_mask |= MAY_BE_OBJECT;
+	} else {
+		uint32_t value_bit = (type == IS_TRUE || type == IS_FALSE)
+			? MAY_BE_BOOL : (1u << type);
+		bound->min_scalar_mask |= value_bit;
+	}
+}
+
+/* Helper: extract class names from a zend_type into max_class_names */
+static void zend_progressive_extract_classes_from_type(
+	zend_progressive_bound *bound, zend_type type)
+{
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		if (bound->max_class_count >= bound->max_class_alloc) {
+			bound->max_class_alloc = bound->max_class_alloc ? bound->max_class_alloc * 2 : 4;
+			bound->max_class_names = erealloc(bound->max_class_names,
+				bound->max_class_alloc * sizeof(zend_string *));
+		}
+		bound->max_class_names[bound->max_class_count++] = zend_string_copy(ZEND_TYPE_NAME(type));
+	}
+	if (ZEND_TYPE_HAS_LIST(type) && ZEND_TYPE_IS_UNION(type)) {
+		const zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				if (bound->max_class_count >= bound->max_class_alloc) {
+					bound->max_class_alloc = bound->max_class_alloc ? bound->max_class_alloc * 2 : 4;
+					bound->max_class_names = erealloc(bound->max_class_names,
+						bound->max_class_alloc * sizeof(zend_string *));
+				}
+				bound->max_class_names[bound->max_class_count++] =
+					zend_string_copy(ZEND_TYPE_NAME(*list_type));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	}
+}
+
+ZEND_API bool zend_progressive_narrow_max(zend_progressive_bound *bound, zend_type constraint)
+{
+	uint32_t constraint_mask = ZEND_TYPE_PURE_MASK(constraint) & MAY_BE_ANY;
+
+	if (!bound->max_constrained) {
+		/* First narrowing: initialize max from constraint */
+		bound->max_scalar_mask = constraint_mask;
+		bound->max_constrained = true;
+		zend_progressive_extract_classes_from_type(bound, constraint);
+	} else {
+		/* Subsequent: intersect scalar masks */
+		bound->max_scalar_mask &= constraint_mask;
+
+		/* Intersect class lists: keep only classes that are in both old max and constraint */
+		if (bound->max_class_count > 0) {
+			/* Build list of constraint class names */
+			uint32_t constraint_class_count = 0;
+			zend_string **constraint_classes = NULL;
+
+			if (ZEND_TYPE_HAS_NAME(constraint)) {
+				constraint_class_count = 1;
+				constraint_classes = emalloc(sizeof(zend_string *));
+				constraint_classes[0] = ZEND_TYPE_NAME(constraint);
+			}
+			if (ZEND_TYPE_HAS_LIST(constraint) && ZEND_TYPE_IS_UNION(constraint)) {
+				const zend_type *list_type;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(constraint), list_type) {
+					if (ZEND_TYPE_HAS_NAME(*list_type)) {
+						constraint_class_count++;
+						constraint_classes = erealloc(constraint_classes,
+							constraint_class_count * sizeof(zend_string *));
+						constraint_classes[constraint_class_count - 1] = ZEND_TYPE_NAME(*list_type);
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			}
+
+			/* Keep only max classes that are also in constraint (or subtypes) */
+			uint32_t new_count = 0;
+			for (uint32_t i = 0; i < bound->max_class_count; i++) {
+				bool keep = false;
+				zend_class_entry *max_ce = zend_lookup_class(bound->max_class_names[i]);
+				for (uint32_t j = 0; j < constraint_class_count; j++) {
+					zend_class_entry *con_ce = zend_lookup_class(constraint_classes[j]);
+					if (max_ce && con_ce && (max_ce == con_ce
+							|| instanceof_function(max_ce, con_ce)
+							|| instanceof_function(con_ce, max_ce))) {
+						keep = true;
+						break;
+					}
+				}
+				if (keep) {
+					if (new_count != i) {
+						bound->max_class_names[new_count] = bound->max_class_names[i];
+					}
+					new_count++;
+				} else {
+					zend_string_release(bound->max_class_names[i]);
+				}
+			}
+			bound->max_class_count = new_count;
+
+			if (constraint_classes) {
+				efree(constraint_classes);
+			}
+		}
+	}
+
+	/* Validate: min must be subset of new max */
+	uint32_t min_scalars_only = bound->min_scalar_mask & ~MAY_BE_OBJECT;
+	if ((min_scalars_only & ~bound->max_scalar_mask) != 0) {
+		return false; /* Min has scalar types not in max */
+	}
+
+	/* Check min classes are all subtypes of some max class */
+	for (uint32_t i = 0; i < bound->min_class_count; i++) {
+		bool found = false;
+		zend_class_entry *min_ce = zend_lookup_class(bound->min_class_names[i]);
+		for (uint32_t j = 0; j < bound->max_class_count; j++) {
+			zend_class_entry *max_ce = zend_lookup_class(bound->max_class_names[j]);
+			if (min_ce && max_ce && instanceof_function(min_ce, max_ce)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			return false; /* Min class not allowed by max */
+		}
+	}
+
+	return true;
+}
+
+/* Helper: build a zend_type from a progressive bound's min-type */
+static zend_type zend_progressive_build_type(const zend_progressive_bound *b)
+{
+	uint32_t mask = b->min_scalar_mask & ~MAY_BE_OBJECT;
+
+	if (b->min_class_count == 0) {
+		/* Pure scalar type */
+		return (zend_type) ZEND_TYPE_INIT_MASK(mask);
+	}
+	if (b->min_class_count == 1 && mask == 0) {
+		/* Single class type */
+		return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(b->min_class_names[0]), 0, 0);
+	}
+
+	/* Union type (scalars + classes or multiple classes) — use mask with single class name.
+	 * Full union type list construction would require zend_type_list allocation.
+	 * For simplicity, use the first class name with the scalar mask. */
+	if (b->min_class_count == 1) {
+		return (zend_type) ZEND_TYPE_INIT_CLASS_MASK(
+			zend_string_copy(b->min_class_names[0]), mask);
+	}
+
+	/* Multiple classes: build a zend_type_list */
+	uint32_t total = b->min_class_count;
+	zend_type_list *list = emalloc(ZEND_TYPE_LIST_SIZE(total));
+	list->num_types = total;
+	for (uint32_t i = 0; i < total; i++) {
+		list->types[i] = (zend_type) ZEND_TYPE_INIT_CLASS(
+			zend_string_copy(b->min_class_names[i]), 0, 0);
+	}
+	return (zend_type) ZEND_TYPE_INIT_UNION(list, mask);
+}
+
+ZEND_API void zend_progressive_try_freeze(zend_object *obj, zend_progressive_state *state)
+{
+	for (uint32_t i = 0; i < state->num_params; i++) {
+		zend_progressive_bound *b = &state->bounds[i];
+		if (!b->max_constrained) {
+			return; /* Max still unconstrained, can't freeze */
+		}
+		/* Check scalar masks match */
+		uint32_t min_scalars = b->min_scalar_mask & ~MAY_BE_OBJECT;
+		if (min_scalars != (b->max_scalar_mask & ~MAY_BE_OBJECT)) {
+			return;
+		}
+		/* Check class lists match (same count and all min classes are max classes) */
+		if (b->min_class_count != b->max_class_count) {
+			return;
+		}
+		/* If both have classes, verify they match */
+		for (uint32_t j = 0; j < b->min_class_count; j++) {
+			bool found = false;
+			for (uint32_t k = 0; k < b->max_class_count; k++) {
+				if (zend_string_equals_ci(b->min_class_names[j], b->max_class_names[k])) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return;
+			}
+		}
+	}
+
+	/* All params have min == max: freeze! */
+	zend_generic_args *frozen = zend_alloc_generic_args(state->num_params);
+	for (uint32_t i = 0; i < state->num_params; i++) {
+		frozen->args[i] = zend_progressive_build_type(&state->bounds[i]);
+	}
+	zend_generic_args_compute_masks(frozen);
+	obj->generic_args = zend_intern_generic_args(frozen);
+
+	/* Clean up progressive state */
+	OBJ_EXTRA_FLAGS(obj) &= ~IS_OBJ_GENERIC_PROGRESSIVE;
+	zend_progressive_state_destroy(state);
+	if (EG(progressive_generic_state)) {
+		zend_hash_index_del(EG(progressive_generic_state), obj->handle);
+	}
+}
+
+ZEND_API zend_generic_args *zend_progressive_snapshot_min(const zend_progressive_state *state)
+{
+	/* Check if any param has observed types */
+	bool any_set = false;
+	for (uint32_t i = 0; i < state->num_params; i++) {
+		if (state->bounds[i].min_scalar_mask != 0 || state->bounds[i].min_class_count > 0) {
+			any_set = true;
+			break;
+		}
+	}
+	if (!any_set) {
+		return NULL;
+	}
+
+	zend_generic_args *snapshot = zend_alloc_generic_args(state->num_params);
+	for (uint32_t i = 0; i < state->num_params; i++) {
+		if (state->bounds[i].min_scalar_mask != 0 || state->bounds[i].min_class_count > 0) {
+			snapshot->args[i] = zend_progressive_build_type(&state->bounds[i]);
+		} else {
+			/* Unobserved param → mixed */
+			snapshot->args[i] = (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY);
+		}
+	}
+	zend_generic_args_compute_masks(snapshot);
+	return snapshot;
 }

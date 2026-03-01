@@ -1121,7 +1121,22 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 					ZEND_TYPE_PURE_MASK(resolved), property, strict, 0);
 			}
 		}
-		return 1; /* unconstrained — allow any value */
+		/* Progressive mode: check max, widen min */
+		if (obj && obj->ce->generic_params_info && !obj->generic_args) {
+			zend_progressive_state *prog = zend_progressive_get_state(obj);
+			if (!prog) {
+				prog = zend_progressive_state_create((zend_object *)obj);
+			}
+			if (gref->param_index < prog->num_params) {
+				if (!zend_progressive_check_max(&prog->bounds[gref->param_index], property)) {
+					return 0;
+				}
+				zend_progressive_widen_min(&prog->bounds[gref->param_index], property);
+				zend_progressive_try_freeze((zend_object *)obj, prog);
+			}
+			return 1;
+		}
+		return 1; /* non-generic class — allow any value */
 	}
 
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
@@ -1349,7 +1364,28 @@ static inline bool zend_check_type_slow(
 				}
 			}
 		}
-		/* No generic args bound — allow any value (unconstrained) */
+		/* Progressive mode: check max, widen min for method params */
+		if (!is_return_type) {
+			zend_execute_data *ex = EG(current_execute_data);
+			if (ex && Z_TYPE(ex->This) == IS_OBJECT) {
+				zend_object *obj = Z_OBJ(ex->This);
+				if (obj->ce->generic_params_info && !obj->generic_args) {
+					zend_progressive_state *prog = zend_progressive_get_state(obj);
+					if (!prog) {
+						prog = zend_progressive_state_create(obj);
+					}
+					if (gref->param_index < prog->num_params) {
+						if (!zend_progressive_check_max(&prog->bounds[gref->param_index], arg)) {
+							return false;
+						}
+						zend_progressive_widen_min(&prog->bounds[gref->param_index], arg);
+						zend_progressive_try_freeze(obj, prog);
+					}
+					return true;
+				}
+			}
+		}
+		/* No generic args bound and not a generic class — allow any value */
 		return true;
 	}
 
@@ -1357,7 +1393,97 @@ static inline bool zend_check_type_slow(
 	if (ZEND_TYPE_IS_GENERIC_CLASS(*type)) {
 		if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 			zend_generic_class_ref *gcref = ZEND_TYPE_GENERIC_CLASS_REF(*type);
-			zend_class_entry *expected_ce = zend_lookup_class(gcref->class_name);
+			zend_class_entry *expected_ce = NULL;
+
+			/* Try to use inline cache for CE lookup and monomorphic generic args.
+			 * The cache_slot is only valid when the type was compiled in the current
+			 * function's op_array. We verify by checking that `type` points into
+			 * the current function's arg_info array (not a resolved stack-local type
+			 * from generic param substitution or a type from a different op_array). */
+			if (gcref->cache_slot != ZEND_GENERIC_CLASS_REF_NO_CACHE) {
+				zend_execute_data *ex = EG(current_execute_data);
+				if (ex && ex->run_time_cache && ex->func
+				 && ex->func->type == ZEND_USER_FUNCTION
+				 && ex->func->common.arg_info) {
+					/* Verify `type` points into this function's arg_info array.
+					 * The type field is at a fixed offset within zend_arg_info,
+					 * so we check if the containing arg_info is in range. */
+					zend_arg_info *ai_start = ex->func->common.arg_info;
+					uint32_t num_ai = ex->func->common.num_args;
+					if (ex->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+						ai_start--;
+						num_ai++;
+					}
+					if (ex->func->common.fn_flags & ZEND_ACC_VARIADIC) {
+						num_ai++;
+					}
+					const char *type_ptr = (const char *)type;
+					const char *ai_begin = (const char *)ai_start;
+					const char *ai_end = (const char *)(ai_start + num_ai);
+					ptrdiff_t offset = type_ptr - ai_begin;
+					bool type_in_arg_info = (type_ptr >= ai_begin && type_ptr < ai_end
+						&& (offset % sizeof(zend_arg_info)) == offsetof(zend_arg_info, type));
+					if (type_in_arg_info) {
+						void **cache = (void**)((char*)ex->run_time_cache + gcref->cache_slot);
+						expected_ce = (zend_class_entry *)cache[0];
+						if (!expected_ce) {
+							expected_ce = zend_lookup_class(gcref->class_name);
+							cache[0] = expected_ce;
+						}
+						if (!expected_ce || !instanceof_function(Z_OBJCE_P(arg), expected_ce)) {
+							return false;
+						}
+						/* Monomorphic generic args cache */
+						zend_generic_args *obj_args = Z_OBJ_P(arg)->generic_args;
+						if (gcref->type_args && obj_args) {
+							if (cache[1] && cache[1] == (void*)obj_args) {
+								return true;
+							}
+							zend_generic_args *resolved_expected = zend_resolve_generic_args_with_context(
+								gcref->type_args, i_zend_get_current_generic_args());
+							const zend_generic_args *expected_args = resolved_expected ? resolved_expected : gcref->type_args;
+							bool compatible = zend_generic_args_compatible(expected_args, obj_args, expected_ce->generic_params_info, gcref->wildcard_bounds);
+							if (resolved_expected) {
+								zend_generic_args_release(resolved_expected);
+							}
+							if (compatible) {
+								cache[1] = (void*)obj_args;
+							}
+							return compatible;
+						}
+						/* Progressive mode: narrow max via inline-cached path */
+						if (gcref->type_args && !obj_args
+								&& (OBJ_EXTRA_FLAGS(Z_OBJ_P(arg)) & IS_OBJ_GENERIC_PROGRESSIVE)) {
+							zend_progressive_state *prog = zend_progressive_get_state(Z_OBJ_P(arg));
+							if (prog) {
+								zend_generic_args *resolved_expected = zend_resolve_generic_args_with_context(
+									gcref->type_args, i_zend_get_current_generic_args());
+								const zend_generic_args *expected_args = resolved_expected ? resolved_expected : gcref->type_args;
+								bool ok = true;
+								for (uint32_t i = 0; i < expected_args->num_args && i < prog->num_params; i++) {
+									if (!zend_progressive_narrow_max(&prog->bounds[i], expected_args->args[i])) {
+										ok = false;
+										break;
+									}
+								}
+								if (resolved_expected) {
+									zend_generic_args_release(resolved_expected);
+								}
+								if (ok) {
+									zend_progressive_try_freeze(Z_OBJ_P(arg), prog);
+								}
+								return ok;
+							}
+						}
+						return true;
+					}
+				}
+			}
+
+			/* Fallback: no cache, or type from different context (e.g., resolved generic param) */
+			if (!expected_ce) {
+				expected_ce = zend_lookup_class(gcref->class_name);
+			}
 			if (!expected_ce || !instanceof_function(Z_OBJCE_P(arg), expected_ce)) {
 				return false;
 			}
@@ -1373,6 +1499,30 @@ static inline bool zend_check_type_slow(
 					zend_generic_args_release(resolved_expected);
 				}
 				return compatible;
+			}
+			/* Progressive mode: narrow max-type when passing to typed function */
+			if (gcref->type_args && !obj_args
+					&& (OBJ_EXTRA_FLAGS(Z_OBJ_P(arg)) & IS_OBJ_GENERIC_PROGRESSIVE)) {
+				zend_progressive_state *prog = zend_progressive_get_state(Z_OBJ_P(arg));
+				if (prog) {
+					zend_generic_args *resolved_expected = zend_resolve_generic_args_with_context(
+						gcref->type_args, i_zend_get_current_generic_args());
+					const zend_generic_args *expected_args = resolved_expected ? resolved_expected : gcref->type_args;
+					bool ok = true;
+					for (uint32_t i = 0; i < expected_args->num_args && i < prog->num_params; i++) {
+						if (!zend_progressive_narrow_max(&prog->bounds[i], expected_args->args[i])) {
+							ok = false;
+							break;
+						}
+					}
+					if (resolved_expected) {
+						zend_generic_args_release(resolved_expected);
+					}
+					if (ok) {
+						zend_progressive_try_freeze(Z_OBJ_P(arg), prog);
+					}
+					return ok;
+				}
 			}
 			/* If no generic args on the object, just check the base class */
 			return true;
@@ -1470,12 +1620,12 @@ static zend_always_inline bool zend_check_type(
 			/* mask==0 means complex type (class, union, etc.) — fall through to slow path */
 		} else if (!is_return_type) {
 			/* No args bound in param position: for free generic functions,
-			 * param checks always pass. Constructors of generic classes
-			 * still need the slow path for inference. */
+			 * param checks always pass. Constructors and progressive
+			 * generic objects still need the slow path for inference/tracking. */
 			zend_execute_data *ex = EG(current_execute_data);
 			if (!(ex && Z_TYPE(ex->This) == IS_OBJECT
 					&& Z_OBJ(ex->This)->ce->generic_params_info
-					&& (ex->func->common.fn_flags & ZEND_ACC_CTOR))) {
+					&& ((ex->func->common.fn_flags & ZEND_ACC_CTOR) || !Z_OBJ(ex->This)->generic_args))) {
 				return 1;
 			}
 		} else {
