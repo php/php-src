@@ -95,6 +95,26 @@ static zend_function *incomplete_class_get_method(zend_object **object, zend_str
 }
 /* }}} */
 
+/* {{{ Private constructor preventing instantiation */
+static ZEND_COLD zend_function *incomplete_class_get_constructor(zend_object *object) /* {{{ */
+{
+	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
+	return NULL;
+}
+
+ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __construct)
+{
+	zend_throw_error(NULL, "Instantiation of class __PHP_Incomplete_Class is not allowed");
+}
+/* }}} */
+
+/* {{{ Private clone preventing cloning */
+ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __clone)
+{
+	zend_throw_error(NULL, "Cannot clone __PHP_Incomplete_Class using __clone()");
+}
+/* }}} */
+
 /* {{{ php_create_incomplete_class */
 static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 {
@@ -121,26 +141,6 @@ PHPAPI void php_register_incomplete_class_handlers(void)
 	php_incomplete_object_handlers.get_method = incomplete_class_get_method;
 
 	php_ce_incomplete_class->create_object = php_create_incomplete_object;
-}
-/* }}} */
-
-/* {{{ Private constructor preventing instantiation */
-static ZEND_COLD zend_function *incomplete_class_get_constructor(zend_object *object) /* {{{ */
-{
-	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
-	return NULL;
-}
-
-ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __construct)
-{
-	zend_throw_error(NULL, "Instantiation of class __PHP_Incomplete_Class is not allowed");
-}
-/* }}} */
-
-/* {{{ Private clone preventing cloning */
-ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __clone)
-{
-	zend_throw_error(NULL, "Cannot clone __PHP_Incomplete_Class using __clone()");
 }
 /* }}} */
 
