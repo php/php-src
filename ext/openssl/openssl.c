@@ -5019,6 +5019,10 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
 		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			php_openssl_store_errors();
+			goto out;
+		}
 
 		if (passphrase && req.priv_key_encrypt) {
 			if (req.priv_key_encrypt_cipher) {
@@ -5047,6 +5051,7 @@ PHP_FUNCTION(openssl_pkey_export)
 			php_openssl_store_errors();
 		}
 	}
+out:
 	PHP_SSL_REQ_DISPOSE(&req);
 	EVP_PKEY_free(key);
 	BIO_free(bio_out);
