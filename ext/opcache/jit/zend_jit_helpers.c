@@ -2058,6 +2058,16 @@ static void ZEND_FASTCALL zend_jit_verify_generic_return(
 	zend_verify_return_error((zend_function*)op_array, arg);
 }
 
+static void ZEND_FASTCALL zend_jit_infer_generic_ctor_args(zend_execute_data *execute_data)
+{
+	if (UNEXPECTED(EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
+		zend_object *obj = Z_OBJ(execute_data->This);
+		if (obj->ce->generic_params_info && !obj->generic_args) {
+			zend_infer_generic_args_from_constructor(obj, execute_data);
+		}
+	}
+}
+
 static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj)
 {
 	zval *retval;

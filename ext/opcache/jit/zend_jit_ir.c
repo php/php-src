@@ -3137,6 +3137,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_verify_arg_slow);
 	REGISTER_HELPER(zend_jit_verify_generic_arg);
 	REGISTER_HELPER(zend_jit_verify_generic_return);
+	REGISTER_HELPER(zend_jit_infer_generic_ctor_args);
 	REGISTER_HELPER(zend_missing_arg_error);
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_leave_func_helper);
@@ -11286,6 +11287,8 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 			fast_path = ir_END();
 			ir_IF_TRUE(if_release);
 		}
+		// JIT: Infer generic args from constructor before releasing $this
+		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_infer_generic_ctor_args), jit_FP(jit));
 		// JIT: OBJ_RELEASE(execute_data->This))
 		jit_OBJ_RELEASE(jit, ir_LOAD_A(jit_EX(This.value.obj)));
 		if (fast_path) {
