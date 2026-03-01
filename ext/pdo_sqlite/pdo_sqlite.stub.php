@@ -94,4 +94,6 @@ class Sqlite extends \PDO
     ) {}
 
     public function setAuthorizer(?callable $callback): void {}
+
+    public function backup(Sqlite $destination, string $sourceDatabase = "main", string $destinationDatabase = "main"): bool {}
 }

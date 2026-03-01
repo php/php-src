@@ -362,6 +362,57 @@ free_fcc:
 	RETURN_THROWS();
 }
 
+PHP_METHOD(Pdo_Sqlite, backup)
+{
+	zval *destination_object;
+	char *source_dbname = "main", *destination_dbname = "main";
+	size_t source_dbname_len, destination_dbname_len;
+	int rc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJECT_OF_CLASS(destination_object, pdosqlite_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_PATH(source_dbname, source_dbname_len)
+		Z_PARAM_PATH(destination_dbname, destination_dbname_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(destination_object);
+	PDO_CONSTRUCT_CHECK;
+	pdo_sqlite_db_handle *destination_db_handle = dbh->driver_data;
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+	pdo_sqlite_db_handle *source_db_handle = dbh->driver_data;
+
+	sqlite3_backup *dbBackup = sqlite3_backup_init(destination_db_handle->db, destination_dbname, source_db_handle->db, source_dbname);
+
+	if (dbBackup) {
+		do {
+			rc = sqlite3_backup_step(dbBackup, -1);
+		} while (rc == SQLITE_OK);
+
+		/* Release resources allocated by sqlite3_backup_init(). */
+		rc = sqlite3_backup_finish(dbBackup);
+	} else {
+		rc = sqlite3_errcode(source_db_handle->db);
+	}
+
+	if (rc != SQLITE_OK) {
+		if (rc == SQLITE_BUSY) {
+			pdo_raise_impl_error(dbh, NULL, "HY000", "Backup failed: source database is busy");
+		} else if (rc == SQLITE_LOCKED) {
+			pdo_raise_impl_error(dbh, NULL, "HY000", "Backup failed: source database is locked");
+		} else {
+			char *message;
+			spprintf(&message, 0, "Backup failed: %s", sqlite3_errmsg(source_db_handle->db));
+			pdo_raise_impl_error(dbh, NULL, "HY000", message);
+			efree(message);
+		}
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
