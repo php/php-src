@@ -8,7 +8,7 @@ var_dump(new __PHP_Incomplete_Class());
 --EXPECTF--
 string(22) "__PHP_Incomplete_Class"
 
-Fatal error: Uncaught Error: Call to private __PHP_Incomplete_Class::__construct() from global scope in %s:%d
+Fatal error: Uncaught Error: Instantiation of class Closure is not allowed in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -13,7 +13,7 @@ var_dump(clone($o));
 string(22) "__PHP_Incomplete_Class"
 bool(false)
 
-Fatal error: Uncaught Error: Call to private method __PHP_Incomplete_Class::__clone() from global scope in %s:%d
+Fatal error: Uncaught Error: Trying to clone an uncloneable object of class __PHP_Incomplete_Class in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

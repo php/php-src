@@ -104,14 +104,9 @@ static ZEND_COLD zend_function *incomplete_class_get_constructor(zend_object *ob
 
 ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __construct)
 {
-	zend_throw_error(NULL, "Instantiation of class __PHP_Incomplete_Class is not allowed");
-}
-/* }}} */
+	ZEND_PARSE_PARAMETERS_NONE();
 
-/* {{{ Private clone preventing cloning */
-ZEND_COLD ZEND_METHOD(__PHP_Incomplete_Class, __clone)
-{
-	zend_throw_error(NULL, "Cannot clone __PHP_Incomplete_Class using __clone()");
+	zend_throw_error(NULL, "Instantiation of class __PHP_Incomplete_Class is not allowed");
 }
 /* }}} */
 
@@ -139,6 +134,7 @@ PHPAPI void php_register_incomplete_class_handlers(void)
 	php_incomplete_object_handlers.write_property = incomplete_class_write_property;
 	php_incomplete_object_handlers.get_property_ptr_ptr = incomplete_class_get_property_ptr_ptr;
 	php_incomplete_object_handlers.get_method = incomplete_class_get_method;
+	php_incomplete_object_handlers.clone_obj = NULL;
 
 	php_ce_incomplete_class->create_object = php_create_incomplete_object;
 }

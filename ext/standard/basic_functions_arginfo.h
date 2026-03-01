@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: bf06c50808ee7aa18cf3a9135cb7d080a4622848
+ * Stub hash: 905d53e204a8ab18d493d4730ec2bceb27dc98bb
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2193,8 +2193,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class___PHP_Incomplete_Class___construct arginfo_tmpfile
 
-#define arginfo_class___PHP_Incomplete_Class___clone arginfo_flush
-
 
 ZEND_FRAMELESS_FUNCTION(min, 2);
 static const zend_frameless_function_info frameless_function_infos_min[] = {
@@ -2898,7 +2896,6 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
 ZEND_METHOD(__PHP_Incomplete_Class, __construct);
-ZEND_METHOD(__PHP_Incomplete_Class, __clone);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(set_time_limit, arginfo_set_time_limit)
@@ -3517,7 +3514,6 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
 	ZEND_ME(__PHP_Incomplete_Class, __construct, arginfo_class___PHP_Incomplete_Class___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME(__PHP_Incomplete_Class, __clone, arginfo_class___PHP_Incomplete_Class___clone, ZEND_ACC_PRIVATE)
 	ZEND_FE_END
 };
 
