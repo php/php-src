@@ -1384,7 +1384,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 {
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
-	zval *retval;
+	zval *retval, *prev_class_callback;
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
 
@@ -1396,10 +1396,11 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
+	prev_class_callback = php_var_unserialize_get_allowed_classes_callback(var_hash);
 	prev_max_depth = php_var_unserialize_get_max_depth(var_hash);
 	prev_cur_depth = php_var_unserialize_get_cur_depth(var_hash);
 	if (options != NULL) {
-		zval *classes, *max_depth;
+		zval *classes, *classes_callback, *max_depth;
 
 		classes = zend_hash_str_find_deref(options, "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
@@ -1438,6 +1439,13 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			} ZEND_HASH_FOREACH_END();
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
+
+		classes_callback = zend_hash_str_find_deref(options, "allowed_classes_callback", sizeof("allowed_classes_callback")-1);
+		if (classes_callback && !zend_is_callable(classes_callback, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
+			zend_type_error("%s(): Option \"allowed_classes_callback\" must be a valid callback", function_name);
+			goto cleanup;
+		}
+		php_var_unserialize_set_allowed_classes_callback(var_hash, classes_callback);
 
 		max_depth = zend_hash_str_find_deref(options, "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
@@ -1494,6 +1502,7 @@ cleanup:
 
 	/* Reset to previous options in case this is a nested call */
 	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+	php_var_unserialize_set_allowed_classes_callback(var_hash, prev_class_callback);
 	php_var_unserialize_set_max_depth(var_hash, prev_max_depth);
 	php_var_unserialize_set_cur_depth(var_hash, prev_cur_depth);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
