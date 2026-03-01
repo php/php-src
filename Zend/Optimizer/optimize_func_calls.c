@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_generics.h"
 
 typedef struct _optimizer_call_info {
 	zend_function *func;
@@ -129,6 +130,17 @@ static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, 
 				SET_UNUSED(opline->op2);
 			} else {
 				MAKE_NOP(opline);
+			}
+
+			/* Release generic args literal before the INIT opcode is NOPed */
+			if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
+					&& fcall->op1_type == IS_CONST
+					&& (fcall->result.num & 0x80000000)) {
+				zval *generic_args_zv = &op_array->literals[fcall->op1.constant + 2];
+				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
+					zend_generic_args_release((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					ZVAL_NULL(generic_args_zv);
+				}
 			}
 
 			zend_delete_call_instructions(op_array, opline-1);

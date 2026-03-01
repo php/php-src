@@ -9905,9 +9905,8 @@ static void zend_verify_generic_variance(zend_class_entry *ce) /* {{{ */
 	}
 
 	/* Check all methods */
-	zend_string *key;
 	zend_function *fn;
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->function_table, key, fn) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 		if (fn->common.scope != ce) {
 			continue; /* Skip inherited methods */
 		}
