@@ -132,6 +132,9 @@ PHP 8.6 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Pdo_Sqlite:
+  . Pdo\Sqlite::backup() analogous to Sqlite3::backup().
+
 - Reflection:
   . ReflectionConstant::inNamespace()
   . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
