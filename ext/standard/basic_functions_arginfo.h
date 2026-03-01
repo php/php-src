@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 8d1c2a735f412f8571675c6b025c3a418b68fb65
+ * Stub hash: bf06c50808ee7aa18cf3a9135cb7d080a4622848
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2191,6 +2191,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+#define arginfo_class___PHP_Incomplete_Class___construct arginfo_tmpfile
+
+#define arginfo_class___PHP_Incomplete_Class___clone arginfo_flush
+
 
 ZEND_FRAMELESS_FUNCTION(min, 2);
 static const zend_frameless_function_info frameless_function_infos_min[] = {
@@ -2893,6 +2897,8 @@ ZEND_FUNCTION(sapi_windows_cp_is_utf8);
 ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_METHOD(__PHP_Incomplete_Class, __construct);
+ZEND_METHOD(__PHP_Incomplete_Class, __clone);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(set_time_limit, arginfo_set_time_limit)
@@ -3509,6 +3515,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
+	ZEND_ME(__PHP_Incomplete_Class, __construct, arginfo_class___PHP_Incomplete_Class___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(__PHP_Incomplete_Class, __clone, arginfo_class___PHP_Incomplete_Class___clone, ZEND_ACC_PRIVATE)
+	ZEND_FE_END
+};
+
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -3984,7 +3996,7 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", NULL);
+	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", class___PHP_Incomplete_Class_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 
 	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, true);
