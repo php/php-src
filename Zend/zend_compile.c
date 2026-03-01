@@ -8330,8 +8330,24 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			| (is_promoted ? _ZEND_IS_PROMOTED_BIT : 0);
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
-			opline->op2.num = type_ast ?
-				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
+			if (type_ast) {
+				uint32_t type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
+				/* For free function generic params (e.g., T $v), use MAY_BE_ANY
+				 * so the RECV handler's fast path always matches (or better,
+				 * the RECV_NOTYPE specialization is used). These params can't be
+				 * checked at receive time (no bound generic args for free
+				 * functions), and return type enforcement handles correctness.
+				 * Methods/constructors keep the original mask for proper checking. */
+				if ((type_mask & MAY_BE_GENERIC_PARAM)
+						&& !(type_mask & _ZEND_TYPE_MASK & ~MAY_BE_GENERIC_PARAM)
+						&& !CG(active_class_entry)) {
+					opline->op2.num = MAY_BE_ANY;
+				} else {
+					opline->op2.num = type_mask;
+				}
+			} else {
+				opline->op2.num = MAY_BE_ANY;
+			}
 		}
 
 		if (is_promoted) {
@@ -9086,6 +9102,34 @@ static zend_op_array *zend_compile_func_decl_ex(
 	/* Store function-level generic params on the op_array (class-level ones are on the CE) */
 	if (CG(active_generic_params) != saved_generic_params) {
 		op_array->generic_params_info = CG(active_generic_params);
+
+		/* Build param-to-arg map for O(1) return type inference.
+		 * Maps each generic param index to the function argument index where
+		 * it first appears, enabling direct lookup instead of linear scan. */
+		zend_generic_params_info *gpi = op_array->generic_params_info;
+		int16_t *map = ZEND_GENERIC_PARAMS_ARG_MAP(gpi);
+		/* Scan regular params */
+		for (uint32_t i = 0; i < op_array->num_args; i++) {
+			zend_arg_info *ai = &op_array->arg_info[i];
+			if (ZEND_TYPE_IS_GENERIC_PARAM(ai->type)) {
+				zend_generic_type_ref *ref = ZEND_TYPE_GENERIC_PARAM_REF(ai->type);
+				if (ref->param_index < gpi->num_params
+						&& map[ref->param_index] == ZEND_GENERIC_ARG_UNMAPPED) {
+					map[ref->param_index] = (int16_t)i;
+				}
+			}
+		}
+		/* Scan variadic param */
+		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+			zend_arg_info *ai = &op_array->arg_info[op_array->num_args];
+			if (ZEND_TYPE_IS_GENERIC_PARAM(ai->type)) {
+				zend_generic_type_ref *ref = ZEND_TYPE_GENERIC_PARAM_REF(ai->type);
+				if (ref->param_index < gpi->num_params
+						&& map[ref->param_index] == ZEND_GENERIC_ARG_UNMAPPED) {
+					map[ref->param_index] = ZEND_GENERIC_ARG_VARIADIC;
+				}
+			}
+		}
 	} else {
 		op_array->generic_params_info = NULL;
 	}

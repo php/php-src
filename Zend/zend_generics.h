@@ -79,6 +79,19 @@ typedef struct _zend_generic_class_ref {
 #define ZEND_GENERIC_ARGS_SIZE(n) \
 	(offsetof(zend_generic_args, args) + (n) * sizeof(zend_type) + (n) * sizeof(uint32_t))
 
+/* Allocation size for zend_generic_params_info with N params + N arg map entries */
+#define ZEND_GENERIC_PARAMS_INFO_SIZE(n) \
+	(offsetof(zend_generic_params_info, params) + (n) * sizeof(zend_generic_param) + (n) * sizeof(int16_t))
+
+/* Pre-computed mapping: param_to_arg_map[param_index] = function arg index.
+ * Stored inline after the params[] array. Only meaningful for function-level
+ * generic params. Eliminates O(N) arg_info scanning during return type checks. */
+#define ZEND_GENERIC_PARAMS_ARG_MAP(info) \
+	((int16_t*)(&(info)->params[(info)->num_params]))
+
+#define ZEND_GENERIC_ARG_UNMAPPED  ((int16_t)-1)  /* Param doesn't appear in any argument */
+#define ZEND_GENERIC_ARG_VARIADIC  ((int16_t)-2)  /* Param appears in the variadic argument */
+
 /* Allocation */
 ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_params);
 ZEND_API zend_generic_args *zend_alloc_generic_args(uint32_t num_args);

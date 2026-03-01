@@ -10901,8 +10901,17 @@ static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op
 		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
 			arg_info = &op_array->arg_info[op_array->num_args];
 		}
-		if (arg_info && !ZEND_TYPE_IS_SET(arg_info->type)) {
-			arg_info = NULL;
+		if (arg_info) {
+			if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+				arg_info = NULL;
+			} else if (ZEND_TYPE_IS_GENERIC_PARAM(arg_info->type)
+					&& !(ZEND_TYPE_FULL_MASK(arg_info->type) & _ZEND_TYPE_MASK & ~MAY_BE_GENERIC_PARAM)
+					&& !op_array->scope) {
+				/* Free function generic param: skip JIT type check (matches
+				 * interpreter RECV_NOTYPE behavior). Return type enforcement
+				 * handles correctness via lazy inference. */
+				arg_info = NULL;
+			}
 		}
 	}
 

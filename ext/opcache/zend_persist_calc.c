@@ -250,7 +250,7 @@ static void zend_persist_generic_args_calc(zend_generic_args *args)
 
 static void zend_persist_generic_params_info_calc(zend_generic_params_info *info)
 {
-	ADD_SIZE(sizeof(zend_generic_params_info) + (info->num_params > 1 ? (info->num_params - 1) * sizeof(zend_generic_param) : 0));
+	ADD_SIZE(ZEND_GENERIC_PARAMS_INFO_SIZE(info->num_params));
 	for (uint32_t i = 0; i < info->num_params; i++) {
 		ADD_INTERNED_STRING(info->params[i].name);
 		zend_persist_type_calc(&info->params[i].constraint);

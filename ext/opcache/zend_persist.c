@@ -433,7 +433,7 @@ static void zend_persist_generic_args(zend_generic_args **args_ptr)
 static void zend_persist_generic_params_info(zend_generic_params_info **info_ptr)
 {
 	zend_generic_params_info *info = *info_ptr;
-	size_t size = sizeof(zend_generic_params_info) + (info->num_params > 1 ? (info->num_params - 1) * sizeof(zend_generic_param) : 0);
+	size_t size = ZEND_GENERIC_PARAMS_INFO_SIZE(info->num_params);
 	info = zend_shared_memdup_put_free(info, size);
 	for (uint32_t i = 0; i < info->num_params; i++) {
 		zend_accel_store_interned_string(info->params[i].name);

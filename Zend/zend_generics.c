@@ -23,15 +23,18 @@
 
 ZEND_API zend_generic_params_info *zend_alloc_generic_params_info(uint32_t num_params)
 {
-	zend_generic_params_info *info = safe_emalloc(
-		num_params - 1, sizeof(zend_generic_param),
-		sizeof(zend_generic_params_info));
+	zend_generic_params_info *info = emalloc(ZEND_GENERIC_PARAMS_INFO_SIZE(num_params));
 	info->num_params = num_params;
 	for (uint32_t i = 0; i < num_params; i++) {
 		info->params[i].name = NULL;
 		info->params[i].constraint = (zend_type) ZEND_TYPE_INIT_NONE(0);
 		info->params[i].default_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
 		info->params[i].variance = ZEND_GENERIC_VARIANCE_INVARIANT;
+	}
+	/* Initialize param-to-arg map to unmapped */
+	int16_t *map = ZEND_GENERIC_PARAMS_ARG_MAP(info);
+	for (uint32_t i = 0; i < num_params; i++) {
+		map[i] = ZEND_GENERIC_ARG_UNMAPPED;
 	}
 	return info;
 }
