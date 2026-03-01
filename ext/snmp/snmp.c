@@ -745,7 +745,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].type = ptype;
 						idx_type++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no type set", ZSTR_VAL(tmp));
+						zend_value_error("'%s': no type set", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -780,7 +780,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].value = ZSTR_VAL(tmp);
 						idx_value++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no value set", ZSTR_VAL(tmp));
+						zend_value_error("'%s': no value set", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -906,7 +906,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 			}
 			*pptr = '\0';
 		} else {
-			php_error_docref(NULL, E_WARNING, "Malformed IPv6 address, closing square bracket missing");
+			zend_value_error("Malformed IPv6 address, closing square bracket missing");
 			return false;
 		}
 	} else { /* IPv4 address */
@@ -1128,8 +1128,7 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
-		// TODO Promote to Error?
-		php_error_docref(NULL, E_WARNING, "Bad engine ID value '%s'", ZSTR_VAL(contextEngineID));
+		zend_value_error("Bad engine ID value '%s'", ZSTR_VAL(contextEngineID));
 		efree(ebuf);
 		return false;
 	}
