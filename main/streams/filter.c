@@ -224,7 +224,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	const php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	size_t n;
-	char *period;
+	const char *period;
 
 	n = strlen(filtername);
 
@@ -236,17 +236,17 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
-		period = wildname + (period - filtername);
-		while (period && !filter) {
-			ZEND_ASSERT(period[0] == '.');
-			period[1] = '*';
-			period[2] = '\0';
+		char *new_period = wildname + (period - filtername);
+		while (new_period && !filter) {
+			ZEND_ASSERT(new_period[0] == '.');
+			new_period[1] = '*';
+			new_period[2] = '\0';
 			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
 				filter = factory->create_filter(filtername, filterparams, persistent);
 			}
 
-			*period = '\0';
-			period = strrchr(wildname, '.');
+			*new_period = '\0';
+			new_period = strrchr(wildname, '.');
 		}
 		efree(wildname);
 	}
