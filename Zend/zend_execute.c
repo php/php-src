@@ -1298,6 +1298,72 @@ static inline bool zend_check_type_slow(
 				return zend_check_type_slow(&resolved, arg, ref, is_return_type, is_internal);
 			}
 		}
+		/* Lazy inference for generic functions (not just constructors).
+		 * Targeted: find the ONE argument that maps to gref->param_index,
+		 * infer its type, and check directly — zero allocation. */
+		if (!args && is_return_type) {
+			zend_execute_data *ex = EG(current_execute_data);
+			if (ex && ex->func && ex->func->type == ZEND_USER_FUNCTION
+					&& ex->func->op_array.generic_params_info) {
+				zend_function *func = ex->func;
+				uint32_t target_idx = gref->param_index;
+				uint32_t num_func_args = func->common.num_args;
+				uint32_t num_call_args = ZEND_CALL_NUM_ARGS(ex);
+				zval *source_arg = NULL;
+
+				/* Scan regular params for the one matching target_idx */
+				for (uint32_t i = 0; i < num_func_args && i < num_call_args; i++) {
+					zend_arg_info *ai = &func->common.arg_info[i];
+					if (ZEND_TYPE_IS_GENERIC_PARAM(ai->type)) {
+						zend_generic_type_ref *r = ZEND_TYPE_GENERIC_PARAM_REF(ai->type);
+						if (r->param_index == target_idx) {
+							source_arg = ZEND_CALL_VAR_NUM(ex, i);
+							break;
+						}
+					}
+				}
+
+				/* Check variadic if not found */
+				if (!source_arg && (func->common.fn_flags & ZEND_ACC_VARIADIC)
+						&& num_call_args > num_func_args) {
+					zend_arg_info *ai = &func->common.arg_info[num_func_args];
+					if (ZEND_TYPE_IS_GENERIC_PARAM(ai->type)) {
+						zend_generic_type_ref *r = ZEND_TYPE_GENERIC_PARAM_REF(ai->type);
+						if (r->param_index == target_idx) {
+							source_arg = ZEND_CALL_VAR_NUM(ex,
+								func->op_array.last_var + func->op_array.T);
+						}
+					}
+				}
+
+				if (source_arg) {
+					uint8_t source_type = Z_TYPE_P(source_arg);
+					uint8_t return_type = Z_TYPE_P(arg);
+
+					/* Ultra-fast path: exact type code match (covers all scalars) */
+					if (source_type == return_type) {
+						return true;
+					}
+					/* Bool: IS_TRUE/IS_FALSE both satisfy bool */
+					if ((source_type == IS_TRUE || source_type == IS_FALSE)
+							&& (return_type == IS_TRUE || return_type == IS_FALSE)) {
+						return true;
+					}
+					/* Object: instanceof check (no string alloc needed) */
+					if (source_type == IS_OBJECT && return_type == IS_OBJECT) {
+						return instanceof_function(Z_OBJCE_P(arg), Z_OBJCE_P(source_arg));
+					}
+					/* Fall through to full type check for coercion (weak mode) */
+					zend_type inferred = zend_infer_type_from_zval(source_arg);
+					if (ZEND_TYPE_IS_SET(inferred)) {
+						bool result = ZEND_TYPE_CONTAINS_CODE(inferred, return_type)
+							|| zend_check_type_slow(&inferred, arg, ref, is_return_type, is_internal);
+						zend_type_release(inferred, 0);
+						return result;
+					}
+				}
+			}
+		}
 		/* No generic args bound — allow any value (unconstrained) */
 		return true;
 	}

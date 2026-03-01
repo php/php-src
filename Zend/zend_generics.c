@@ -497,6 +497,67 @@ ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_ex
 	return true;
 }
 
+ZEND_API zend_generic_args *zend_infer_generic_args_from_call(zend_execute_data *ex)
+{
+	zend_function *func = ex->func;
+	if (!func || func->type != ZEND_USER_FUNCTION || !func->op_array.generic_params_info) {
+		return NULL;
+	}
+
+	zend_generic_params_info *gpi = func->op_array.generic_params_info;
+	uint32_t num_params = gpi->num_params;
+	zend_generic_args *inferred = zend_alloc_generic_args(num_params);
+
+	uint32_t num_func_args = func->common.num_args;
+	uint32_t num_call_args = ZEND_CALL_NUM_ARGS(ex);
+
+	for (uint32_t i = 0; i < num_func_args && i < num_call_args; i++) {
+		zend_arg_info *arg_info = &func->common.arg_info[i];
+		if (ZEND_TYPE_IS_GENERIC_PARAM(arg_info->type)) {
+			zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(arg_info->type);
+			if (gref->param_index < num_params && !ZEND_TYPE_IS_SET(inferred->args[gref->param_index])) {
+				zval *arg_val = ZEND_CALL_VAR_NUM(ex, i);
+				zend_type inferred_type = zend_infer_type_from_zval(arg_val);
+				if (ZEND_TYPE_IS_SET(inferred_type)) {
+					inferred->args[gref->param_index] = inferred_type;
+				}
+			}
+		}
+	}
+
+	/* Handle variadic parameter: if it's a generic param, infer from first variadic arg.
+	 * The variadic arg_info is at index num_func_args (after regular params).
+	 * Extra args (beyond num_func_args) are moved by zend_copy_extra_args() to
+	 * EX_VAR_NUM(last_var + T), so we read from there. */
+	if (func->common.fn_flags & ZEND_ACC_VARIADIC) {
+		zend_arg_info *variadic_info = &func->common.arg_info[num_func_args];
+		if (ZEND_TYPE_IS_GENERIC_PARAM(variadic_info->type)) {
+			zend_generic_type_ref *gref = ZEND_TYPE_GENERIC_PARAM_REF(variadic_info->type);
+			if (gref->param_index < num_params && !ZEND_TYPE_IS_SET(inferred->args[gref->param_index])
+					&& num_call_args > num_func_args) {
+				/* Extra args were relocated after CVs+TMPs by zend_copy_extra_args() */
+				zval *arg_val = ZEND_CALL_VAR_NUM(ex,
+					func->op_array.last_var + func->op_array.T);
+				zend_type inferred_type = zend_infer_type_from_zval(arg_val);
+				if (ZEND_TYPE_IS_SET(inferred_type)) {
+					inferred->args[gref->param_index] = inferred_type;
+				}
+			}
+		}
+	}
+
+	/* Check that all type params got inferred */
+	for (uint32_t i = 0; i < num_params; i++) {
+		if (!ZEND_TYPE_IS_SET(inferred->args[i])) {
+			zend_generic_args_release(inferred);
+			return NULL;
+		}
+	}
+
+	zend_generic_args_compute_masks(inferred);
+	return inferred;
+}
+
 ZEND_API zend_generic_args *zend_get_current_generic_args(void)
 {
 	zend_execute_data *ex = EG(current_execute_data);

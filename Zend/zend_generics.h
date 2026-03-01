@@ -140,6 +140,11 @@ ZEND_API zend_type zend_infer_type_from_zval(const zval *value);
  * Returns true if inference succeeded and args were bound to the object. */
 ZEND_API bool zend_infer_generic_args_from_constructor(zend_object *obj, zend_execute_data *call);
 
+/* Infer generic type args from a generic function's call arguments.
+ * Returns a new zend_generic_args (refcount=1) or NULL if inference fails.
+ * Caller must call zend_generic_args_release() on the result. */
+ZEND_API zend_generic_args *zend_infer_generic_args_from_call(zend_execute_data *ex);
+
 /* Get current generic args from execution context */
 ZEND_API zend_generic_args *zend_get_current_generic_args(void);
 
