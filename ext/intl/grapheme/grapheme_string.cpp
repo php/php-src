@@ -1188,9 +1188,8 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 		}
 		current = pos;
 	}
-
-	RETVAL_NEW_STR(ret);
 ubrk_end:
+	RETVAL_NEW_STR(ret);
 	ubrk_close(bi);
 close:
 	utext_close(ut);
