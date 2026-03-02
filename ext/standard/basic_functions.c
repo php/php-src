@@ -598,6 +598,17 @@ PHP_FUNCTION(ip2long)
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
+#ifdef _AIX
+        /*
+        AIX accepts IP strings with excedentary 0 (192.168.042.42 will be treated as
+        192.168.42.42), while Linux don't.
+        For consistency, we convert back the IP to a string and check if it is equal to
+        the original string. If not, the IP should be considered invalid.
+        */
+        if (strcmp(addr, inet_ntoa(ip)) != 0) {
+                RETURN_FALSE;
+       }
+#endif
 	RETURN_LONG(ntohl(ip.s_addr));
 }
 /* }}} */
