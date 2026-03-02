@@ -22,11 +22,13 @@ runs:
 
           ./buildconf -f
           CC=gcc CXX=g++ \
+          CFLAGS="-Wno-char-subscripts" \
           PATH=/usr/gnu/bin:/usr/bin \
           PKG_CONFIG_PATH=/usr/lib/amd64/pkgconfig \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
+            --enable-werror \
             --enable-option-checking=fatal \
             --enable-fpm \
             --without-pear \
