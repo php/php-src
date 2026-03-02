@@ -1,0 +1,47 @@
+--TEST--
+Promoted readonly property reassignment in constructor - indirect reassignment allowed
+--FILE--
+<?php
+
+// Reassignment IS allowed in methods called by the constructor
+class CalledMethod {
+    public function __construct(
+        public readonly string $prop = 'default',
+    ) {
+        $this->initProp();
+    }
+
+    private function initProp(): void {
+        $this->prop = 'from method';
+    }
+}
+
+$cm = new CalledMethod();
+var_dump($cm->prop);
+
+// But second reassignment still fails
+class MultipleReassign {
+    public function __construct(
+        public readonly string $prop = 'default',
+    ) {
+        $this->initProp("first from method");
+        try {
+            $this->initProp("second from method");  // Second call - should fail
+        } catch (Throwable $e) {
+            echo get_class($e), ": ", $e->getMessage(), "\n";
+        }
+    }
+
+    private function initProp(string $v): void {
+        $this->prop = $v;
+    }
+}
+
+$mr = new MultipleReassign();
+var_dump($mr->prop);
+
+?>
+--EXPECT--
+string(11) "from method"
+Error: Cannot modify readonly property MultipleReassign::$prop
+string(17) "first from method"

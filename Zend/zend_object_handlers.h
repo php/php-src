@@ -277,6 +277,12 @@ ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope);
 ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_function *fbc);
 
+/* Check if a readonly property can be modified (has REINITABLE flag set by clone or CPP initialization) */
+static zend_always_inline bool zend_is_readonly_property_modifiable(const zval *property_val)
+{
+	return (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) != 0;
+}
+
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
 	if (UNEXPECTED(zend_lazy_object_must_init(object))) {

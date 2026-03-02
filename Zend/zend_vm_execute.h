@@ -1160,6 +1160,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -1194,6 +1195,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -53880,6 +53882,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -53914,6 +53917,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -110148,6 +110152,7 @@ zend_leave_helper_SPEC_LABEL:
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -110182,6 +110187,7 @@ zend_leave_helper_SPEC_LABEL:
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
+		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
