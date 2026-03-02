@@ -1100,8 +1100,6 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
    Set default options for a handle */
 static void _php_curl_set_default_options(php_curl *ch)
 {
-	char *cainfo;
-
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1L);
 	curl_easy_setopt(ch->cp, CURLOPT_VERBOSE,           0L);
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
@@ -1114,9 +1112,9 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120L);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20L); /* prevent infinite redirects */
 
-	cainfo = INI_STR("openssl.cafile");
+	const char* cainfo = zend_ini_string_literal("openssl.cafile");
 	if (!(cainfo && cainfo[0] != '\0')) {
-		cainfo = INI_STR("curl.cainfo");
+		cainfo = zend_ini_string_literal("curl.cainfo");
 	}
 	if (cainfo && cainfo[0] != '\0') {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);

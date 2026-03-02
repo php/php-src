@@ -74,6 +74,14 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     longer is a pointer, but a directly embedded HashTable struct.
   . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
     enums.
+  . The INI_STR(), INI_INT(), INI_FLT(), and INI_BOOL() macros have been
+    removed. Instead new zend_ini_{bool|long|double|str|string}_literal()
+    macros have been added. This fixes an internal naming inconsistency as
+    "str" usually means zend_string*, and "string" means char*.
+    However INI_STR() returned a char*
+  . The INI_ORIG_{INT|STR|FLT|BOOL}() macros have been removed as they are
+    unused. If this behaviour is required fall back to the zend_ini_*
+    functions.
 
 ========================
 2. Build system changes

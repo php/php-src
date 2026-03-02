@@ -1267,7 +1267,6 @@ ZEND_GET_MODULE(php_zlib)
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	int int_value;
-	char *ini_value;
 	if (new_value == NULL) {
 		return FAILURE;
 	}
@@ -1279,9 +1278,9 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else {
 		int_value = (int) zend_ini_parse_quantity_warn(new_value, entry->name);
 	}
-	ini_value = zend_ini_string("output_handler", sizeof("output_handler") - 1, 0);
+	const zend_string *ini_value = zend_ini_str_literal("output_handler");
 
-	if (ini_value && *ini_value && int_value) {
+	if (ini_value && ZSTR_LEN(ini_value) > 0 && int_value) {
 		php_error_docref("ref.outcontrol", E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}
