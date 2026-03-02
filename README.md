@@ -49,7 +49,7 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 On Fedora, you can install these using:
 
 ```shell
-sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+sudo dnf install re2c bison autoconf make ccache libxml2-devel sqlite-devel
 ```
 
 On MacOS, you can install these using `brew`:
