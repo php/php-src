@@ -2332,8 +2332,13 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	add_assoc_stringl(return_value, "key", pbio, pbio_len);
 	
 	zend_long ktype = php_openssl_pkey_get_details(return_value, pkey);
-
-	add_assoc_long(return_value, "type", ktype);
+	if (ktype != -2) {
+		add_assoc_long(return_value, "type", ktype);
+	} else {
+		php_openssl_store_errors();
+		zval_ptr_dtor(return_value);
+		RETVAL_FALSE;
+	}
 
 	BIO_free(out);
 }
