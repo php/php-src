@@ -320,7 +320,7 @@ static zend_result php_iconv_output_handler(void **nothing, php_output_context *
 
 		if (mimetype != NULL && (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || ((output_context->op & PHP_OUTPUT_HANDLER_START) && !(output_context->op & PHP_OUTPUT_HANDLER_FINAL)))) {
 			size_t len;
-			char *p = strstr(get_output_encoding(), "//");
+			const char *p = strstr(get_output_encoding(), "//");
 
 			if (p) {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int) (p - get_output_encoding()), get_output_encoding());
@@ -2577,7 +2577,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 {
 	php_stream_filter *retval = NULL;
 	php_iconv_stream_filter *inst;
-	char *from_charset = NULL, *to_charset = NULL;
+	const char *from_charset = NULL, *to_charset = NULL;
 	size_t from_charset_len, to_charset_len;
 
 	if ((from_charset = strchr(name, '.')) == NULL) {
