@@ -23,20 +23,18 @@
                                 /* upper limit to keep resources in check and   */
                                 /* minimize the possibility of exploits         */
 
-#define SCAN_SUCCESS			SUCCESS
+#define SCAN_SUCCESS			0
 #define SCAN_ERROR_EOF			-1	/* indicates premature termination of scan 	*/
 									/* can be caused by bad parameters or format*/
 									/* string.									*/
 #define SCAN_ERROR_INVALID_FORMAT		(SCAN_ERROR_EOF - 1)
-#define SCAN_ERROR_WRONG_PARAM_COUNT	(SCAN_ERROR_INVALID_FORMAT - 1)
 
 /*
  * The following are here solely for the benefit of the scanf type functions
  * e.g. fscanf
  */
-PHPAPI int ValidateFormat(char *format, int numVars, int *totalVars);
-PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval *args,
-				int varStart, zval *return_value);
+PHPAPI int php_sscanf_internal(const char *string, size_t string_len, const zend_string *format, uint32_t format_arg_num, uint32_t argCount, zval *args,
+				zval *return_value);
 
 
 #endif /* SCANF_H */
