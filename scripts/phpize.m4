@@ -9,7 +9,7 @@ m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.71])
 AC_INIT
 AC_CONFIG_SRCDIR([config.m4])
 AC_CONFIG_AUX_DIR([build])
@@ -30,6 +30,11 @@ PHP_INIT_BUILD_SYSTEM
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
+
+dnl Check if C compiler accepts C11.
+AS_CASE([$ac_prog_cc_stdc], [c99|c89|no],
+  [AC_MSG_ERROR([C compiler would not accept C11 code.])])
+
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 

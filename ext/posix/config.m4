@@ -12,7 +12,7 @@ if test "$PHP_POSIX" = "yes"; then
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  AC_CHECK_FUNCS(m4_normalize([
+  AC_CHECK_FUNCS([
     ctermid
     eaccess
     getgrgid_r
@@ -28,7 +28,7 @@ if test "$PHP_POSIX" = "yes"; then
     seteuid
     setrlimit
     setsid
-  ]))
+  ])
 
   dnl Check for makedev. If it's defined as a macro, AC_CHECK_FUNCS won't work.
   dnl Required headers are included by the AC_HEADER_MAJOR logic.

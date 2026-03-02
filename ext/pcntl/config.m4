@@ -9,7 +9,7 @@ if test "$PHP_PCNTL" != "no"; then
       [AC_MSG_FAILURE([ext/pcntl: required function $function() not found.])])
   done
 
-  AC_CHECK_FUNCS(m4_normalize([
+  AC_CHECK_FUNCS([
     forkx
     getcpuid
     getpriority
@@ -26,7 +26,7 @@ if test "$PHP_PCNTL" != "no"; then
     waitid
     wait6
     syscall
-  ]))
+  ])
 
   AC_CHECK_FUNCS([WIFCONTINUED],,
     [AC_CHECK_DECL([WIFCONTINUED], [AC_DEFINE([HAVE_WIFCONTINUED], [1])],,
