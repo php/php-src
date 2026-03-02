@@ -122,14 +122,22 @@ var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $ol
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID, single type in array, multiple value\n";
-$z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s'), array($newvalue1, $newvalue2), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s'), array($newvalue1, $newvalue2), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID & type, single value in array\n";
-$z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s', 's'), array($newvalue1), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s', 's'), array($newvalue1), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
@@ -215,15 +223,11 @@ Type must be a single character
 bool(true)
 bool(true)
 Multiple OID, single type in array, multiple value
-
-Warning: snmpset(): '%s': no type set in %s on line %d
-bool(false)
+'SNMPv2-MIB::sysLocation.0': no type set
 bool(true)
 bool(true)
 Multiple OID & type, single value in array
-
-Warning: snmpset(): '%s': no value set in %s on line %d
-bool(false)
+'SNMPv2-MIB::sysLocation.0': no value set
 bool(true)
 bool(true)
 Multiple OID, 1st bogus, single type, multiple value
