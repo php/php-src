@@ -114,9 +114,43 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
 		EG(error_reporting) = E_ALL;
-	} else {
-		EG(error_reporting) = atoi(ZSTR_VAL(new_value));
+		return SUCCESS;
 	}
+
+	char *endptr = NULL;
+	long val = strtol(ZSTR_VAL(new_value), &endptr, 0);
+	if (endptr && *endptr == '\0') {
+		EG(error_reporting) = val;
+		return SUCCESS;
+	}
+
+	zval result;
+	zend_string *expr_code = zend_strpprintf(0, "%s;", ZSTR_VAL(new_value));
+	zend_ast *ast = NULL;
+	zend_arena *ast_arena = NULL;
+	int success = 0;
+
+	ast = zend_compile_string_to_ast(expr_code, &ast_arena, ZSTR_EMPTY_ALLOC());
+	zend_string_release(expr_code);
+	if (ast) {
+		zend_ast_list *stmt_list = zend_ast_get_list(ast);
+		zend_ast *expr_ast = (stmt_list && stmt_list->children > 0) ? stmt_list->child[0] : NULL;
+		if (expr_ast) {
+			zend_const_expr_to_zval(&result, &expr_ast, 0);
+			if (Z_TYPE(result) != IS_LONG && Z_TYPE(result) != IS_UNDEF) {
+				zval_ptr_dtor(&result);
+			} else {
+				EG(error_reporting) = Z_LVAL(result);
+				zval_ptr_dtor(&result);
+				zend_ast_destroy(ast);
+				zend_arena_destroy(ast_arena);
+				return SUCCESS;
+			}
+		}
+		zend_ast_destroy(ast);
+		zend_arena_destroy(ast_arena);
+	}
+	EG(error_reporting) = E_ALL;
 	return SUCCESS;
 }
 /* }}} */
