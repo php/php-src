@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -1021,35 +1019,78 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 
 	if (flag & PHP_INFO_LICENSE) {
 		if (!sapi_module.phpinfo_as_text) {
-			SECTION("PHP License");
+			SECTION("License");
 			php_info_print_box_start(0);
 			php_info_print("<p>\n");
-			php_info_print("This program is free software; you can redistribute it and/or modify ");
-			php_info_print("it under the terms of the PHP License as published by the PHP Group ");
-			php_info_print("and included in the distribution in the file:  LICENSE\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the ");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
 			php_info_print("</p>\n");
-			php_info_print("<p>");
-			php_info_print("This program is distributed in the hope that it will be useful, ");
-			php_info_print("but WITHOUT ANY WARRANTY; without even the implied warranty of ");
-			php_info_print("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+			php_info_print("<p>\n");
+			php_info_print("Copyright &copy; The PHP Group and Contributors.<br>\n");
+			php_info_print("Copyright &copy; Zend Technologies Ltd., a subsidiary company of Perforce Software, Inc.\n");
 			php_info_print("</p>\n");
-			php_info_print("<p>");
-			php_info_print("If you did not receive a copy of the PHP license, or have any questions about ");
-			php_info_print("PHP licensing, please contact license@php.net.\n");
+			php_info_print("<p>\n");
+			php_info_print("Redistribution and use in source and binary forms, with or without ");
+			php_info_print("modification, are permitted provided that the following conditions are met:\n");
+			php_info_print("</p>\n");
+			php_info_print("<ol>\n");
+			php_info_print("<li>Redistributions of source code must retain the above copyright notice, this ");
+			php_info_print("list of conditions and the following disclaimer.</li>\n");
+			php_info_print("<li>Redistributions in binary form must reproduce the above copyright notice, ");
+			php_info_print("this list of conditions and the following disclaimer in the documentation ");
+			php_info_print("and/or other materials provided with the distribution.</li>\n");
+			php_info_print("<li>Neither the name of the copyright holder nor the names of its ");
+			php_info_print("contributors may be used to endorse or promote products derived from ");
+			php_info_print("this software without specific prior written permission.</li>\n");
+			php_info_print("</ol>\n");
+			php_info_print("<p>\n");
+			php_info_print("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" ");
+			php_info_print("AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE ");
+			php_info_print("IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE ");
+			php_info_print("DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE ");
+			php_info_print("FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL ");
+			php_info_print("DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR ");
+			php_info_print("SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER ");
+			php_info_print("CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, ");
+			php_info_print("OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE ");
+			php_info_print("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n");
 			php_info_print("</p>\n");
 			php_info_print_box_end();
 		} else {
-			php_info_print("\nPHP License\n");
-			php_info_print("This program is free software; you can redistribute it and/or modify\n");
-			php_info_print("it under the terms of the PHP License as published by the PHP Group\n");
-			php_info_print("and included in the distribution in the file:  LICENSE\n");
 			php_info_print("\n");
-			php_info_print("This program is distributed in the hope that it will be useful,\n");
-			php_info_print("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-			php_info_print("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+			php_info_print("License\n");
 			php_info_print("\n");
-			php_info_print("If you did not receive a copy of the PHP license, or have any\n");
-			php_info_print("questions about PHP licensing, please contact license@php.net.\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the\n");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
+			php_info_print("\n");
+			php_info_print("Copyright © The PHP Group and Contributors.\n");
+			php_info_print("Copyright © Zend Technologies Ltd., a subsidiary company of\n");
+			php_info_print("    Perforce Software, Inc.\n");
+			php_info_print("\n");
+			php_info_print("Redistribution and use in source and binary forms, with or without\n");
+			php_info_print("modification, are permitted provided that the following conditions are met:\n");
+			php_info_print("\n");
+			php_info_print("1. Redistributions of source code must retain the above copyright notice, this\n");
+			php_info_print("   list of conditions and the following disclaimer.\n");
+			php_info_print("\n");
+			php_info_print("2. Redistributions in binary form must reproduce the above copyright notice,\n");
+			php_info_print("   this list of conditions and the following disclaimer in the documentation\n");
+			php_info_print("   and/or other materials provided with the distribution.\n");
+			php_info_print("\n");
+			php_info_print("3. Neither the name of the copyright holder nor the names of its\n");
+			php_info_print("   contributors may be used to endorse or promote products derived from\n");
+			php_info_print("   this software without specific prior written permission.\n");
+			php_info_print("\n");
+			php_info_print("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n");
+			php_info_print("AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n");
+			php_info_print("IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n");
+			php_info_print("DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\n");
+			php_info_print("FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n");
+			php_info_print("DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n");
+			php_info_print("SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n");
+			php_info_print("CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n");
+			php_info_print("OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n");
+			php_info_print("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n");
 		}
 	}
 
