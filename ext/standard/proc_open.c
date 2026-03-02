@@ -302,11 +302,13 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 
 	if (wait_pid <= 0) {
 		FG(pclose_ret) = -1;
+	} else if (WIFEXITED(wstatus)) {
+		FG(pclose_ret) = WEXITSTATUS(wstatus);
+	} else if (WIFSIGNALED(wstatus)) {
+		/* Follow the bash/shell convention: 128 + signal number */
+		FG(pclose_ret) = 128 + WTERMSIG(wstatus);
 	} else {
-		if (WIFEXITED(wstatus)) {
-			wstatus = WEXITSTATUS(wstatus);
-		}
-		FG(pclose_ret) = wstatus;
+		FG(pclose_ret) = -1;
 	}
 
 #else
