@@ -118,6 +118,7 @@ typedef struct _zend_fiber_vm_state {
 	void *stack_base;
 	void *stack_limit;
 #endif
+	uint32_t guard_context;
 } zend_fiber_vm_state;
 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
@@ -135,6 +136,7 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->stack_base = EG(stack_base);
 	state->stack_limit = EG(stack_limit);
 #endif
+	state->guard_context = EG(guard_context);
 }
 
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
@@ -152,6 +154,7 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(stack_base) = state->stack_base;
 	EG(stack_limit) = state->stack_limit;
 #endif
+	EG(guard_context) = state->guard_context;
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -453,6 +456,7 @@ ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *
 
 	context->kind = kind;
 	context->function = coroutine;
+	context->guard_context = ++EG(guard_context_counter);
 
 	// Set status in case memory has not been zeroed.
 	context->status = ZEND_FIBER_STATUS_INIT;
@@ -507,6 +511,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	transfer->context = from;
 
 	EG(current_fiber_context) = to;
+	EG(guard_context) = to->guard_context;
 
 #ifdef __SANITIZE_ADDRESS__
 	void *fake_stack = NULL;
