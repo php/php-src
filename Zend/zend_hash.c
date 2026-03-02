@@ -3209,7 +3209,7 @@ static zend_always_inline int zend_hash_compare_impl(const HashTable *ht1, const
 	return 0;
 }
 
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered)
+ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_func_t compar, bool ordered)
 {
 	int result;
 	IS_CONSISTENT(ht1);
