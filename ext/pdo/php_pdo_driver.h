@@ -123,6 +123,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
 	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
 	PDO_ATTR_DEFAULT_STR_PARAM, /* set the default string parameter type (see the PDO::PARAM_STR_* magic flags) */
+	PDO_ATTR_PERSISTENT_NEW_CONNECTION, /* throw away old persistent connection and make a new one */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
