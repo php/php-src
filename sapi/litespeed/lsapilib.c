@@ -2022,15 +2022,6 @@ ssize_t gsendfile( int fdOut, int fdIn, off_t *off, size_t size )
 #define gsendfile sendfile
 #endif
 
-
-#if defined(HPUX)
-ssize_t gsendfile( int fdOut, int fdIn, off_t * off, size_t size )
-{
-    return sendfile( fdOut, fdIn, off, size, NULL, 0 );
-}
-#endif
-
-
 ssize_t LSAPI_sendfile_r( LSAPI_Request * pReq, int fdIn, off_t* off, size_t size )
 {
     struct lsapi_packet_header * pHeader = pReq->m_respPktHeader;

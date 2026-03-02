@@ -40,8 +40,6 @@ AC_DEFUN([PTHREADS_FLAGS],[
     PTHREAD_FLAGS=-D_REENTRANT;;
   *aix*)
     PTHREAD_FLAGS=-D_THREAD_SAFE;;
-  *hpux*)
-    PTHREAD_FLAGS=-D_REENTRANT;;
   *sco*)
     PTHREAD_FLAGS=-D_REENTRANT;;
   esac
@@ -91,13 +89,12 @@ dnl  -mthreads         gcc (AIX)
 dnl  -pthread          gcc (Linux, FreeBSD, NetBSD, OpenBSD)
 dnl  -pthreads         gcc (Solaris)
 dnl  -qthreaded        AIX cc V5
-dnl  -threads          gcc (HP-UX)
 dnl
 AC_DEFUN([PTHREADS_CHECK],[
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=
 if test "$pthreads_working" != "yes"; then
-  for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads -mt -qthreaded; do
+  for flag in -kthread -pthread -pthreads -mthreads -Kthread -mt -qthreaded; do
     ac_save=$CFLAGS
     CFLAGS="$CFLAGS $flag"
     PTHREADS_CHECK_COMPILE

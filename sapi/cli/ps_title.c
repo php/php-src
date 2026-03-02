@@ -51,9 +51,6 @@ extern char** environ;
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_SYS_PSTAT_H
-#include <sys/pstat.h> /* for HP-UX */
-#endif
 #ifdef HAVE_PS_STRINGS
 #include <machine/vmparam.h> /* for old BSD */
 #include <sys/exec.h>
@@ -68,9 +65,6 @@ extern char** environ;
  * PS_USE_SETPROCTITLE
  *         use the function setproctitle(const char *, ...)
  *         (newer BSD systems)
- * PS_USE_PSTAT
- *         use the pstat(PSTAT_SETCMD, )
- *         (HPUX)
  * PS_USE_PS_STRINGS
  *         assign PS_STRINGS->ps_argvstr = "string"
  *         (some BSD systems)
@@ -88,8 +82,6 @@ extern char** environ;
  */
 #if defined(HAVE_SETPROCTITLE)
 #define PS_USE_SETPROCTITLE
-#elif defined(HAVE_SYS_PSTAT_H) && defined(PSTAT_SETCMD)
-#define PS_USE_PSTAT
 #elif defined(HAVE_PS_STRINGS)
 #define PS_USE_PS_STRINGS
 #elif defined(BSD) && !defined(__APPLE__)
@@ -359,15 +351,6 @@ ps_title_status set_ps_title(const char *title, size_t title_len)
 #ifdef PS_USE_SETPROCTITLE
     setproctitle("%s", ps_buffer);
 #endif
-
-#ifdef PS_USE_PSTAT
-    {
-        union pstun pst;
-
-        pst.pst_command = ps_buffer;
-        pstat(PSTAT_SETCMD, pst, ps_buffer_cur_len, 0, 0);
-    }
-#endif /* PS_USE_PSTAT */
 
 #ifdef PS_USE_PS_STRINGS
     PS_STRINGS->ps_nargvstr = 1;

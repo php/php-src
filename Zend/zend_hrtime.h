@@ -35,7 +35,7 @@
 #define ZEND_HRTIME_PLATFORM_WINDOWS 0
 #define ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE 0
 #define ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC 0
-#define ZEND_HRTIME_PLATFORM_HPUX    0
+#define ZEND_HRTIME_PLATFORM_SUNOS    0
 #define ZEND_HRTIME_PLATFORM_AIX     0
 
 #if defined(_POSIX_TIMERS) && ((_POSIX_TIMERS > 0) || defined(__OpenBSD__)) && defined(_POSIX_MONOTONIC_CLOCK) && defined(CLOCK_MONOTONIC)
@@ -50,15 +50,15 @@
 #elif defined(__APPLE__)
 # undef  ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 # define ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE 1
-#elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
-# undef  ZEND_HRTIME_PLATFORM_HPUX
-# define ZEND_HRTIME_PLATFORM_HPUX 1
+#elif (defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__))
+# undef  ZEND_HRTIME_PLATFORM_SUNOS
+# define ZEND_HRTIME_PLATFORM_SUNOS 1
 #elif defined(_AIX)
 # undef  ZEND_HRTIME_PLATFORM_AIX
 # define ZEND_HRTIME_PLATFORM_AIX 1
 #endif
 
-#define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE || ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
+#define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE || ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC || ZEND_HRTIME_PLATFORM_SUNOS || ZEND_HRTIME_PLATFORM_AIX)
 
 BEGIN_EXTERN_C()
 
@@ -98,7 +98,7 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
 	clock_gettime(zend_hrtime_posix_clock_id, &ts);
 	return ((zend_hrtime_t) ts.tv_sec * (zend_hrtime_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
-#elif ZEND_HRTIME_PLATFORM_HPUX
+#elif ZEND_HRTIME_PLATFORM_SUNOS
 	return (zend_hrtime_t) gethrtime();
 #elif  ZEND_HRTIME_PLATFORM_AIX
 	timebasestruct_t t;
