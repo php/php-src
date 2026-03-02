@@ -1487,6 +1487,7 @@ const CODESET = UNKNOWN;
 #[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {
+    private function __construct() {}
 }
 
 class AssertionError extends Error

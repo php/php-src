@@ -3,7 +3,8 @@
 --FILE--
 <?php
 
-$d = serialize(new __PHP_Incomplete_Class);
+$orig = unserialize('O:7:"Unknown":0:{}');
+$d = serialize($orig);
 $o = unserialize($d);
 var_dump($o);
 
@@ -18,13 +19,15 @@ var_dump($o->test2);
 echo "Done\n";
 ?>
 --EXPECTF--
-object(__PHP_Incomplete_Class)#%d (0) {
+object(__PHP_Incomplete_Class)#%d (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(7) "Unknown"
 }
-The script tried to modify a property on an incomplete object. Please ensure that the class definition "unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
+The script tried to modify a property on an incomplete object. Please ensure that the class definition "Unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition
 
-Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "Unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
 
-Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+Warning: main(): The script tried to access a property on an incomplete object. Please ensure that the class definition "Unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
 NULL
 Done
