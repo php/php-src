@@ -27,7 +27,7 @@ typedef struct _php_random_bytes_insecure_state_for_zend {
 	php_random_status_state_xoshiro256starstar xoshiro256starstar_state;
 } php_random_bytes_insecure_state_for_zend;
 
-ZEND_STATIC_ASSERT(sizeof(zend_random_bytes_insecure_state) >= sizeof(php_random_bytes_insecure_state_for_zend), "");
+static_assert(sizeof(zend_random_bytes_insecure_state) >= sizeof(php_random_bytes_insecure_state_for_zend), "");
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI void php_random_bytes_insecure_for_zend(
 		zend_random_bytes_insecure_state *state, void *bytes, size_t size);

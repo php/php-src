@@ -839,14 +839,6 @@ extern "C++" {
 /** @deprecated */
 #define ZEND_CGG_DIAGNOSTIC_IGNORED_END ZEND_DIAGNOSTIC_IGNORED_END
 
-#if defined(__cplusplus)
-# define ZEND_STATIC_ASSERT(c, m) static_assert((c), m)
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
-# define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
-#else
-# define ZEND_STATIC_ASSERT(c, m)
-#endif
-
 #if ((defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */ \
   || (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */) && !defined(ZEND_WIN32)
 typedef max_align_t zend_max_align_t;
