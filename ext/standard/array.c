@@ -4863,6 +4863,18 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
+	zend_long base_sort = sort_type & ~PHP_SORT_FLAG_CASE;
+
+	if (base_sort != PHP_SORT_REGULAR
+	 && base_sort != PHP_SORT_NUMERIC
+	 && base_sort != PHP_SORT_STRING
+	 && base_sort != PHP_SORT_LOCALE_STRING) {
+
+		zend_argument_value_error(
+			2, "must be one of SORT_REGULAR, SORT_NUMERIC, SORT_STRING, or SORT_LOCALE_STRING");
+		RETURN_THROWS();
+	}
+
 	if (sort_type == PHP_SORT_STRING) {
 		HashTable seen;
 		zend_long num_key;
