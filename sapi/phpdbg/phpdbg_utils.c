@@ -111,7 +111,7 @@ PHPDBG_API int phpdbg_is_addr(const char *str) /* {{{ */
 
 PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
 {
-	char *sep = NULL;
+	const char *sep = NULL;
 
 	if (strstr(str, "#") != NULL)
 		return 0;

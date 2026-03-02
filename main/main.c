@@ -995,7 +995,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 {
 	zend_string *replace_origin = NULL;
 	char *docref_buf = NULL, *target = NULL;
-	char *docref_target = "", *docref_root = "";
+	const char *docref_target = "", *docref_root = "";
 	char *p;
 	const char *space = "";
 	const char *class_name = "";

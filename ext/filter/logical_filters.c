@@ -723,7 +723,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ */
+static int _php_filter_validate_ipv4(const char *str, size_t str_len, int *ip) /* {{{ */
 {
 	const char *end = str + str_len;
 	int num, m;
@@ -764,7 +764,7 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 	int blocks = 0;
 	unsigned int num, n;
 	int i;
-	char *ipv4;
+	const char *ipv4;
 	const char *end;
 	int ip4elm[4];
 	const char *s = str;
