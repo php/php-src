@@ -742,6 +742,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_CALLABLE_CONVERT:
+				case ZEND_DECLARE_LAMBDA_FUNCTION:
 					if (opline->extended_value != (uint32_t)-1) {
 						opline->extended_value = cache_size;
 						cache_size += sizeof(void *);

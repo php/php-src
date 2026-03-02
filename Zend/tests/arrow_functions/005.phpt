@@ -40,8 +40,7 @@ class Test {
 
 ?>
 --EXPECT--
-object(Test)#1 (0) {
-}
+NULL
 object(Test)#1 (0) {
 }
 object(Test)#1 (0) {

@@ -41,7 +41,7 @@ object(ArrayObject)#2 (1) {
 }
 
 Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
-object(ArrayObject)#3 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   object(ArrayObject)#2 (1) {
     ["storage":"ArrayObject":private]=>
@@ -59,18 +59,18 @@ Deprecated: ArrayObject::exchangeArray(): Using an object as a backing array for
 Deprecated: Creation of dynamic property ArrayObject::$a is deprecated in %s on line %d
 
 Deprecated: Creation of dynamic property ArrayObject::$b is deprecated in %s on line %d
-object(ArrayObject)#4 (2) {
+object(ArrayObject)#%d (2) {
   ["b"]=>
   int(1)
   ["a"]=>
   int(2)
 }
-object(ArrayObject)#5 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-object(ArrayObject)#6 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     ["b"]=>
