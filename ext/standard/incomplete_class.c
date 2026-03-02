@@ -98,7 +98,7 @@ static zend_function *incomplete_class_get_method(zend_object **object, zend_str
 /* {{{ Private constructor preventing instantiation */
 static ZEND_COLD zend_function *incomplete_class_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
+	zend_throw_error(NULL, "Instantiation of class __PHP_Incomplete_Class is not allowed");
 	return NULL;
 }
 
