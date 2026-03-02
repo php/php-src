@@ -20,6 +20,8 @@
 #define DL_H
 
 PHPAPI int php_load_extension(const char *filename, int type, int start_now);
+PHPAPI int php_load_extension_ex(
+	const char *filename, int type, int start_now, bool primary_as_zend_extension, bool try_additional);
 PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now);
 PHPAPI void *php_load_shlib(const char *path, char **errp);
 
