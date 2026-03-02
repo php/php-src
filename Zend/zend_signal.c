@@ -160,13 +160,15 @@ ZEND_API void zend_signal_handler_unblock(void)
 	if (EXPECTED(SIGG(active))) {
 		SIGNAL_BEGIN_CRITICAL(); /* procmask to protect handler_defer as if it were called by the kernel */
 		queue = SIGG(phead);
-		SIGG(phead) = queue->next;
-		zend_signal = queue->zend_signal;
-		queue->next = SIGG(pavail);
-		queue->zend_signal.signo = 0;
-		SIGG(pavail) = queue;
+		if (EXPECTED(queue)) {
+			SIGG(phead) = queue->next;
+			zend_signal = queue->zend_signal;
+			queue->next = SIGG(pavail);
+			queue->zend_signal.signo = 0;
+			SIGG(pavail) = queue;
 
-		zend_signal_handler_defer(zend_signal.signo, zend_signal.siginfo, zend_signal.context);
+			zend_signal_handler_defer(zend_signal.signo, zend_signal.siginfo, zend_signal.context);
+		}
 		SIGNAL_END_CRITICAL();
 	}
 }
