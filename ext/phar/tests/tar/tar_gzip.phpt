@@ -1,20 +1,17 @@
 --TEST--
 Phar: tar-based phar, gzipped tar
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
-if (!extension_loaded("zlib")) die("skip zlib not available");
-?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_gzip.phar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/tar_gzip.phar';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_gzip.phar.tar';
+$fname2 = __DIR__ . '/tar_gzip.phar.tar';
 $pname2 = 'phar://' . $fname2;
 
 $a = new tarmaker($fname, 'zlib');
@@ -39,15 +36,13 @@ $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::TAR));
 var_dump($b->isCompressed() == Phar::GZ);
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_gzip.phar');
-@unlink(dirname(__FILE__) . '/tar_gzip.phar.tar');
+@unlink(__DIR__ . '/tar_gzip.phar');
+@unlink(__DIR__ . '/tar_gzip.phar.tar');
 ?>
 --EXPECTF--
 string(9) "it worked"
 string(%d) "phar://%star_gzip.phar/tar_004.php"
 bool(true)
 bool(true)
-===DONE===

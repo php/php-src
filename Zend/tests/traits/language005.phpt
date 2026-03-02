@@ -24,10 +24,10 @@ trait B {
 
 class Talker {
     use A, B {
-		B::smallTalk insteadof A;
-		A::bigTalk insteadof B;
-		B::bigTalk as talk;
-	}
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+        B::bigTalk as talk;
+    }
 }
 
 $t = new Talker;
@@ -36,5 +36,5 @@ $t->bigTalk();
 $t->talk();
 
 ?>
---EXPECTF--
+--EXPECT--
 bAB

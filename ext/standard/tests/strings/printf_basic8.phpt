@@ -3,16 +3,11 @@ Test printf() function : basic functionality - octal format
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	    die("skip this test is for 32bit platform only");
+        die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : basic functionality - using octal format ***\n";
 
 // Initialise all required variables
@@ -45,8 +40,7 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using octal format ***
 
 -- Calling printf() with no arguments --
@@ -64,4 +58,3 @@ int(14)
 -- Calling printf() with three arguments --
 21 37777777431 567
 int(18)
-===DONE===

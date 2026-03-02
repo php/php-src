@@ -9,5 +9,5 @@ var_dump(fseek($fd, 1024*1024, SEEK_SET));
 --EXPECTF--
 resource(%d) of type (stream)
 
-Warning: fseek(): stream does not support seeking in %s
+Warning: fseek(): Stream does not support seeking in %s
 int(-1)

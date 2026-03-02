@@ -2,12 +2,6 @@
 Test array_product() function : variation
 --FILE--
 <?php
-/* Prototype  : mixed array_product(array input)
- * Description: Returns the product of the array entries
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 echo "*** Testing array_product() : variations ***\n";
 
 echo "\n-- Testing array_product() function with a very large array --\n";
@@ -20,10 +14,8 @@ for ($i = 0; $i < 999; $i++) {
 
 var_dump( array_product($array) );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_product() : variations ***
 
 -- Testing array_product() function with a very large array --
 float(INF)
-===DONE===

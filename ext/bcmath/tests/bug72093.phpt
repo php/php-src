@@ -1,22 +1,20 @@
 --TEST--
-Bug 72093: bcpowmod accepts negative scale and corrupts _one_ definition
---SKIPIF--
-<?php
-if(!extension_loaded("bcmath")) print "skip";
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-	$cur = PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD;
-	$req = "10.0.17134";
-	if (version_compare($cur, $req) < 0) {
-		echo "skip Compatible on Windows systems >= $req";
-	}
-}
-?>
+Bug 72093: bcpowmod fails on negative scale and corrupts _one_ definition
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
-var_dump(bcpowmod(1, "A", 128, -200));
-var_dump(bcpowmod(1, 1.2, 1, 1));
+try {
+    var_dump(bcpowmod(1, 0, 128, -200));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(bcpowmod(1, 1.2, 1, 1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
-string(1) "1"
-bc math warning: non-zero scale in exponent
-string(3) "0.0"
+--EXPECT--
+bcpowmod(): Argument #4 ($scale) must be between 0 and 2147483647
+bcpowmod(): Argument #2 ($exponent) cannot have a fractional part

@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - common key and value(Bug#43559)
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing
  * arrays having common key and value.
@@ -48,7 +43,7 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : arrays with common key and value ***
 -- Integer values --
 array(3) {

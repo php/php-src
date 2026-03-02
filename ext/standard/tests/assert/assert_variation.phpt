@@ -5,106 +5,146 @@ assert.active = 1
 assert.warning = 0
 assert.callback = f1
 assert.bail = 0
-assert.quiet_eval = 0
+assert.exception=0
 --FILE--
 <?php
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 function f2()
 {
-	echo "f2 called\n";
+    echo "f2 called\n";
 }
 function f3()
 {
-	echo "f3 called\n";
+    echo "f3 called\n";
 }
 class c1
 {
-	function assert($file, $line, $myev)
-	{
-		echo "Class assertion failed $line, \"$myev\"\n";
-	}
+    static function assert($file, $line, $unused, $desc)
+    {
+        echo "Class assertion failed $line, \"$desc\"\n";
+    }
 }
 echo "Initial values: assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "Initial values: ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
-$sa = "0 != 0";
-var_dump($r2=assert($sa));
+var_dump($r2=assert(0 != 0));
 echo"\n";
 
-echo "Change callback function using ini.set and test return value \n";
+echo "Change callback function using ini.set and test return value\n";
 var_dump($rv = ini_set("assert.callback","f2"));
 echo "assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
-var_dump($r2=assert($sa));
+var_dump($r2=assert(0 != 0));
 echo"\n";
 
-echo "Change callback function using assert_options and test return value \n";
+echo "Change callback function using assert_options and test return value\n";
 var_dump($rv=assert_options(ASSERT_CALLBACK, "f3"));
 echo "assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
-var_dump($r2=assert($sa));
+var_dump($r2=assert(0 != 0));
 echo"\n";
 
 
-echo "Reset the name of the callback routine to a class method and check that it works\n";
+echo "Reset the name of the callback routine to a class method\n";
 var_dump($rc=assert_options(ASSERT_CALLBACK, "c1"));
 echo "assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
-var_dump($r2=assert($sa));
+try {
+    var_dump($r2=assert(0 != 0));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 echo"\n";
 
-echo "Reset callback options to use a class method \n";
+echo "Reset callback options to use a class method\n";
 var_dump($rc = assert_options(ASSERT_CALLBACK,array("c1","assert")));
 var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
-var_dump($r2=assert($sa));
+var_dump($r2=assert(0 != 0));
 echo"\n";
 
-echo "Reset callback options to use an object method \n";
+echo "Reset callback options to use an object method\n";
 $o = new c1();
 var_dump($rc=assert_options(ASSERT_CALLBACK,array(&$o,"assert")));
 var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
-var_dump($r2=assert($sa));
+var_dump($r2=assert(0 != 0));
 echo"\n";
+
+echo "Set callback to something silly\n";
+assert_options(ASSERT_CALLBACK, 3.141);
+var_dump($rao = assert_options(ASSERT_CALLBACK));
+
+?>
 --EXPECTF--
+Deprecated: PHP Startup: assert.warning INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.callback") => [f1]
-
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f1 called
 bool(false)
 
-Change callback function using ini.set and test return value 
+Change callback function using ini.set and test return value
+
+Deprecated: ini_set(): assert.callback INI setting is deprecated in %s on line %d
 string(2) "f1"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [f2]
 ini.get("assert.callback") => [f2]
-
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f2 called
 bool(false)
 
-Change callback function using assert_options and test return value 
+Change callback function using assert_options and test return value
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f2"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [f3]
 ini.get("assert.callback") => [f2]
-
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f3 called
 bool(false)
 
-Reset the name of the callback routine to a class method and check that it works
+Reset the name of the callback routine to a class method
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f3"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [c1]
 ini.get("assert.callback") => [f2]
+Invalid callback c1, function "c1" not found or invalid function name
 
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-bool(false)
+Reset callback options to use a class method
 
-Reset callback options to use a class method 
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "c1"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
   [0]=>
   string(2) "c1"
@@ -113,30 +153,43 @@ array(2) {
 }
 ini.get("assert.callback") => [f2]
 
-
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-
-Deprecated: Non-static method c1::assert() should not be called statically in %s on line 53
-Class assertion failed 53, "0 != 0"
+Class assertion failed 56, "assert(0 != 0)"
 bool(false)
 
-Reset callback options to use an object method 
+Reset callback options to use an object method
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
   [0]=>
   string(2) "c1"
   [1]=>
   string(6) "assert"
 }
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
   [0]=>
-  &object(c1)#1 (0) {
+  &object(c1)#2 (0) {
   }
   [1]=>
   string(6) "assert"
 }
 ini.get("assert.callback") => [f2]
 
-
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-Class assertion failed 61, "0 != 0"
+Class assertion failed 64, "assert(0 != 0)"
 bool(false)
+
+Set callback to something silly
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+float(3.141)

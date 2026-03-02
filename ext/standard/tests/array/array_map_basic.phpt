@@ -2,11 +2,6 @@
 Test array_map() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_map() : basic functionality ***\n";
 
 function multiply($p, $q) {
@@ -40,7 +35,7 @@ var_dump( array_map('concatenate', $arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : basic functionality ***
 -- With two integer array --
 array(3) {

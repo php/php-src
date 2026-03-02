@@ -1,73 +1,57 @@
 --TEST--
 mysqli_fetch_field()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
+    require 'table.inc';
+    $mysqli = $link;
 
-	$tmp    = NULL;
-	$link   = NULL;
+    // Make sure that client, connection and result charsets are all the
+    // same. Not sure whether this is strictly necessary.
+    if (!$mysqli->set_charset('utf8'))
+        printf("[%d] %s\n", $mysqli->errno, $mysqli->errno);
 
-	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_field()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $charsetInfo = $mysqli->get_charset();
 
-	require('table.inc');
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
+    if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
+    }
 
-	if (!is_null($tmp = @$res->fetch_field($link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    var_dump($res->fetch_field());
 
-	// Make sure that client, connection and result charsets are all the
-	// same. Not sure whether this is strictly necessary.
-	if (!$mysqli->set_charset('utf8'))
-		printf("[%d] %s\n", $mysqli->errno, $mysqli->errno);
+    $tmp = $res->fetch_field();
+    var_dump($tmp);
+    if ($tmp->charsetnr != $charsetInfo->number) {
+        printf("[005] Expecting charset %s/%d got %d\n",
+            $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
+    }
+    if ($tmp->db != $db) {
+        printf("[007] Expecting database '%s' got '%s'\n",
+          $db, $tmp->db);
+    }
 
-	$charsetInfo = $mysqli->get_charset();
+    var_dump($res->fetch_field());
 
-	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
-	}
+    $res->free_result();
 
-	var_dump($res->fetch_field());
+    try {
+        $res->fetch_field();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	$tmp = $res->fetch_field();
-	var_dump($tmp);
-	if ($tmp->charsetnr != $charsetInfo->number) {
-		printf("[005] Expecting charset %s/%d got %d\n",
-			$charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-	}
-	if ($tmp->length != $charsetInfo->max_length) {
-		printf("[006] Expecting length %d got %d\n",
-			$charsetInfo->max_length, $tmp->max_length);
-	}
-	if ($tmp->db != $db) {
-		printf("[007] Expecting database '%s' got '%s'\n",
-		  $db, $tmp->db);
-	}
-
-	var_dump($res->fetch_field());
-
-	$res->free_result();
-
-	if (NULL !== ($tmp = $res->fetch_field()))
-		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	$mysqli->close();
-	print "done!";
+    $mysqli->close();
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
@@ -86,7 +70,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>
@@ -127,6 +111,5 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-
-Warning: mysqli_result::fetch_field(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

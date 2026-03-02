@@ -1,5 +1,7 @@
 --TEST--
 Bug #79037: global buffer-overflow in `mbfl_filt_conv_big5_wchar`
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

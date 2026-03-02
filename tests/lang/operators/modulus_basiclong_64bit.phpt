@@ -24,9 +24,9 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	  echo "--- testing: $longVal % $otherVal ---\n";
-	  try {
-	    var_dump($longVal%$otherVal);
+      echo "--- testing: $longVal % $otherVal ---\n";
+      try {
+        var_dump($longVal%$otherVal);
       } catch (DivisionByZeroError $e) {
         echo "Exception: " . $e->getMessage() . "\n";
       }
@@ -35,8 +35,8 @@ foreach ($longVals as $longVal) {
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	  echo "--- testing: $otherVal % $longVal ---\n";
-	  try {
+      echo "--- testing: $otherVal % $longVal ---\n";
+      try {
         var_dump($otherVal%$longVal);
       } catch (DivisionByZeroError $e) {
         echo "Exception: " . $e->getMessage() . "\n";
@@ -45,7 +45,6 @@ foreach ($otherVals as $otherVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 % 0 ---
 Exception: Modulo by zero
@@ -587,4 +586,3 @@ int(9223372036854775807)
 int(0)
 --- testing: 9223372036854775807 % -9.2233720368548E+18 ---
 int(9223372036854775807)
-===DONE===

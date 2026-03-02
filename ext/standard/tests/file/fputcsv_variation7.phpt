@@ -3,11 +3,6 @@ Test fputcsv() : usage variations - with different delimiter and same enclosure
 --FILE--
 <?php
 /*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
-/*
    Testing fputcsv() to write to a file when enclosure is same but delimiter is different from those
    present in the field to be written to the file
  */
@@ -30,7 +25,7 @@ $csv_lists = array (
   array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
 
 );
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fputcsv_variation7.tmp";
 
 $file_modes = array ("r+", "r+b", "r+t",
@@ -58,7 +53,7 @@ foreach ($csv_lists as $csv_list) {
     $csv_field = $csv_list[2];
 
     // write to a file in csv format
-    var_dump( fputcsv($file_handle, $csv_field, '+', $enclosure) );
+    var_dump( fputcsv($file_handle, $csv_field, '+', $enclosure, escape: "\\") );
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

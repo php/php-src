@@ -8,14 +8,6 @@ if( substr(PHP_OS, 0, 3) != 'WIN' ) {
 ?>
 --FILE--
 <?php
-/*
- Prototype: int fwrite ( resource $handle,string string, [, int $length] );
- Description: fwrite() writes the contents of string to the file stream pointed to by handle.
-              If the length arquement is given,writing will stop after length bytes have been
-              written or the end of string reached, whichever comes first.
-              fwrite() returns the number of bytes written or FALSE on error
-*/
-
 // include the file.inc for Function: function delete_file($filename)
 include ("file.inc");
 
@@ -29,7 +21,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
 
 foreach($file_content_types as $file_content_type) {
   echo "\n-- Testing fwrite() with file having data of type ". $file_content_type ." --\n";
-  $filename = dirname(__FILE__)."/fwrite_basic-win32私はガラスを食べられます.tmp"; // this is name of the file
+  $filename = __DIR__."/fwrite_basic-win32私はガラスを食べられます.tmp"; // this is name of the file
 
   for($inner_loop_counter = 0;
       $inner_loop_counter < count($file_modes);
@@ -75,7 +67,7 @@ foreach($file_content_types as $file_content_type) {
 } // end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fwrite() basic operations ***
 
 -- Testing fwrite() with file having data of type numeric --

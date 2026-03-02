@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_alnum() function : usage variations - Different data types as $c arg
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_alnum() to test behaviour
  */
@@ -98,53 +93,82 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ctype_alnum() : usage variations ***
 
 -- Iteration 1 --
+
+Deprecated: ctype_alnum(): Argument of type int will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 2 --
+
+Deprecated: ctype_alnum(): Argument of type int will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 3 --
+
+Deprecated: ctype_alnum(): Argument of type int will be interpreted as string in the future in %s on line %d
 bool(true)
 
 -- Iteration 4 --
+
+Deprecated: ctype_alnum(): Argument of type int will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 5 --
+
+Deprecated: ctype_alnum(): Argument of type float will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 6 --
+
+Deprecated: ctype_alnum(): Argument of type float will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 7 --
+
+Deprecated: ctype_alnum(): Argument of type float will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 8 --
+
+Deprecated: ctype_alnum(): Argument of type float will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 9 --
+
+Deprecated: ctype_alnum(): Argument of type float will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 10 --
+
+Deprecated: ctype_alnum(): Argument of type null will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 11 --
+
+Deprecated: ctype_alnum(): Argument of type null will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 12 --
+
+Deprecated: ctype_alnum(): Argument of type bool will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 13 --
+
+Deprecated: ctype_alnum(): Argument of type bool will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 14 --
+
+Deprecated: ctype_alnum(): Argument of type bool will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 15 --
+
+Deprecated: ctype_alnum(): Argument of type bool will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 16 --
@@ -154,6 +178,8 @@ bool(false)
 bool(false)
 
 -- Iteration 18 --
+
+Deprecated: ctype_alnum(): Argument of type array will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -166,14 +192,21 @@ bool(true)
 bool(true)
 
 -- Iteration 22 --
+
+Deprecated: ctype_alnum(): Argument of type classA will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 23 --
+
+Deprecated: ctype_alnum(): Argument of type null will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 24 --
+
+Deprecated: ctype_alnum(): Argument of type null will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 25 --
+
+Deprecated: ctype_alnum(): Argument of type resource will be interpreted as string in the future in %s on line %d
 bool(false)
-===DONE===

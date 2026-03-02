@@ -1,14 +1,14 @@
 --TEST--
 Phar::compressFiles(Phar::BZ2) zip format
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
+--EXTENSIONS--
+phar
+bz2
 --INI--
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $pname = 'phar://' . $fname;
 $pname2 = 'phar://' . $fname2;
 
@@ -42,13 +42,12 @@ var_dump($c['a']->isCompressed(Phar::GZ));
 var_dump($c['a']->isCompressed(Phar::BZ2));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "a"
 bool(false)
 string(1) "b"
@@ -67,4 +66,3 @@ bool(true)
 string(1) "a"
 bool(false)
 bool(true)
-===DONE===

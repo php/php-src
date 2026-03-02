@@ -1,65 +1,64 @@
 --TEST--
 gmp_setbit() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
 $n = gmp_init(-1);
-gmp_setbit($n, 10, -1);
+gmp_setbit($n, 10, true);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-var_dump(gmp_setbit($n, -20, 0));
+try {
+    gmp_setbit($n, -20, false);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-gmp_setbit($n, 2, 0);
+gmp_setbit($n, 2, false);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-gmp_setbit($n, 1, 1);
+gmp_setbit($n, 1, true);
 var_dump(gmp_strval($n));
 
 $n = gmp_init("100000000000");
-gmp_setbit($n, 23, 1);
+gmp_setbit($n, 23, true);
 var_dump(gmp_strval($n));
 
-gmp_setbit($n, 23, 0);
+gmp_setbit($n, 23, false);
 var_dump(gmp_strval($n));
 
 gmp_setbit($n, 3);
 var_dump(gmp_strval($n));
 
 $b = "";
-gmp_setbit($b, 23);
-gmp_setbit($b);
-gmp_setbit($b, 23,1,1);
-gmp_setbit($b,array());
+try {
+    gmp_setbit($b, 23);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 $a = array();
-gmp_setbit($a,array());
+try {
+    gmp_setbit($a, array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
 --EXPECTF--
 string(2) "-1"
-
-Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
+gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 string(1) "5"
 string(1) "1"
 string(1) "7"
 string(12) "100008388608"
 string(12) "100000000000"
 string(12) "100000000008"
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
-
-Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, string given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 1 to be GMP, array given in %s on line %d
+gmp_setbit(): Argument #1 ($num) must be of type GMP, string given
+gmp_setbit(): Argument #1 ($num) must be of type GMP, array given
 Done

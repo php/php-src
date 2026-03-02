@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::changes() tests
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -25,7 +25,7 @@ echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Creating Table
 bool(true)
 INSERT into table

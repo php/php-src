@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 <?php
 
 foreach (array('N','l') as $v) {
-	print_r(unpack($v, pack($v, -30000)));
+    print_r(unpack($v, pack($v, -30000)));
 }
 
 echo "Done\n";

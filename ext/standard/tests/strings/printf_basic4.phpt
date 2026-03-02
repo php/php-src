@@ -2,11 +2,6 @@
 Test printf() function : basic functionality - bool format
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : basic functionality - using bool format ***\n";
 
 
@@ -39,8 +34,7 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using bool format ***
 
 -- Calling printf() with no arguments --
@@ -58,4 +52,3 @@ int(3)
 -- Calling printf() with three arguments--
 1 0 1
 int(5)
-===DONE===

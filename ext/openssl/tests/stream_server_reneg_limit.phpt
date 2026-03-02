@@ -1,8 +1,9 @@
 --TEST--
 TLS server rate-limits client-initiated renegotiation
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
@@ -28,6 +29,8 @@ $serverCode = <<<'CODE'
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
+        // TLS 1.3 does not support renegotiation.
+        'max_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_2,
         'reneg_limit' => 0,
         'reneg_window' => 30,
         'reneg_limit_callback' => function($stream) use (&$printed) {
@@ -68,6 +71,8 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
+    phpt_wait();
+
     $cmd = 'openssl s_client -connect 127.0.0.1:64321';
     $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
     $process = proc_open($cmd, $descriptorSpec, $pipes);
@@ -94,7 +99,7 @@ $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey('stream_security_level', $certFile);
 
 include 'ServerClientTestCase.inc';
-ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
+ServerClientTestCase::getInstance()->run($serverCode, $clientCode, false);
 ?>
 --CLEAN--
 <?php

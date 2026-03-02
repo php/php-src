@@ -2,14 +2,15 @@
 Test mkdir/rmdir cp1256 to UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
 skip_if_wrong_cp(1256, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1256
 --INI--
 internal_encoding=cp1256
 --FILE--
@@ -19,13 +20,13 @@ internal_encoding=cp1256
 #vim: set encoding=cp1256
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ";
-$prefix = create_data("dir_cp1256", "${item}42", 1256);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_cp1256", "{$item}42", 1256);
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -39,7 +40,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1256");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +51,3 @@ bool(true)
 string(%d) "%s\ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ42\ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ4"
 Active code page: %d
 bool(true)
-===DONE===

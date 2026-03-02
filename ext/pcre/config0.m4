@@ -1,113 +1,140 @@
-dnl
-dnl $Id$
-dnl
+dnl By default we'll compile and link against the bundled PCRE library. If
+dnl --with-external-pcre is supplied, we'll use that for linking.
+PHP_ARG_WITH([external-pcre],,
+  [AS_HELP_STRING([--with-external-pcre],
+    [Use external library for PCRE support])],
+  [no],
+  [no])
 
-dnl By default we'll compile and link against the bundled PCRE library
-dnl if DIR is supplied, we'll use that for linking
+PHP_ARG_WITH([pcre-jit],
+  [whether to enable PCRE JIT functionality],
+  [AS_HELP_STRING([--without-pcre-jit],
+    [Disable PCRE JIT functionality])],
+  [yes],
+  [no])
 
-PHP_ARG_WITH(pcre-regex,,
-[  --with-pcre-regex=DIR   Include Perl Compatible Regular Expressions support.
-                          DIR is the PCRE install prefix [BUNDLED]], yes, no)
+AH_TEMPLATE([PCRE2_CODE_UNIT_WIDTH],
+  [Number of bits in non-UTF mode for PCRE library.])
+AH_TEMPLATE([HAVE_PCRE_JIT_SUPPORT],
+  [Define to 1 if PCRE JIT is enabled and supported.])
 
-PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality (BUNDLED only)], yes, no)
+if test "$PHP_EXTERNAL_PCRE" != "no"; then
+  PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >= 10.30])
 
-  if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
-    AC_MSG_CHECKING([for PCRE headers location])
-    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre $PHP_PCRE_REGEX/local/include; do
-      test -f $i/pcre.h && PCRE_INCDIR=$i
-    done
+  PHP_EVAL_INCLINE([$PCRE2_CFLAGS])
+  PHP_EVAL_LIBLINE([$PCRE2_LIBS])
+  AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])
 
-    if test -z "$PCRE_INCDIR"; then
-      AC_MSG_ERROR([Could not find pcre.h in $PHP_PCRE_REGEX])
-    fi
-    AC_MSG_RESULT([$PCRE_INCDIR])
+  AS_VAR_IF([PHP_PCRE_JIT], [no],,
+    [AC_CACHE_CHECK([whether external PCRE2 library has JIT supported],
+      [php_cv_have_pcre2_jit],
+      [
+        CFLAGS_SAVE=$CFLAGS
+        LIBS_SAVE=$LIBS
+        CFLAGS="$CFLAGS $PCRE2_CFLAGS"
+        LIBS="$LIBS $PCRE2_LIBS"
+        AC_RUN_IFELSE([AC_LANG_SOURCE([
+          #include <pcre2.h>
+          #include <stdlib.h>
+          int main(void) {
+            uint32_t have_jit;
+            pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
+            return !have_jit;
+          }
+        ])],
+        [php_cv_have_pcre2_jit=yes],
+        [php_cv_have_pcre2_jit=no],
+        [AS_CASE([$host_cpu],
+          [arm*|i[[34567]]86|x86_64|mips*|powerpc*|sparc],
+            [php_cv_have_pcre2_jit=yes],
+          [php_cv_have_pcre2_jit=no])])
+        CFLAGS=$CFLAGS_SAVE
+        LIBS=$LIBS_SAVE
+      ])
+    AS_VAR_IF([php_cv_have_pcre2_jit], [yes],
+      [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])])
+  ])
 
-    AC_MSG_CHECKING([for PCRE library location])
-    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
-      test -f $j/libpcre.a || test -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
-    done
+  PHP_NEW_EXTENSION([pcre],
+    [php_pcre.c],
+    [no],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
+else
+  AC_MSG_CHECKING([for PCRE library to use])
+  AC_MSG_RESULT([bundled])
+  pcrelib_sources=m4_normalize(["
+    pcre2lib/pcre2_auto_possess.c
+    pcre2lib/pcre2_chartables.c
+    pcre2lib/pcre2_chkdint.c
+    pcre2lib/pcre2_compile.c
+    pcre2lib/pcre2_config.c
+    pcre2lib/pcre2_context.c
+    pcre2lib/pcre2_convert.c
+    pcre2lib/pcre2_dfa_match.c
+    pcre2lib/pcre2_error.c
+    pcre2lib/pcre2_extuni.c
+    pcre2lib/pcre2_find_bracket.c
+    pcre2lib/pcre2_jit_compile.c
+    pcre2lib/pcre2_maketables.c
+    pcre2lib/pcre2_match_data.c
+    pcre2lib/pcre2_match.c
+    pcre2lib/pcre2_newline.c
+    pcre2lib/pcre2_ord2utf.c
+    pcre2lib/pcre2_pattern_info.c
+    pcre2lib/pcre2_script_run.c
+    pcre2lib/pcre2_serialize.c
+    pcre2lib/pcre2_string_utils.c
+    pcre2lib/pcre2_study.c
+    pcre2lib/pcre2_substitute.c
+    pcre2lib/pcre2_substring.c
+    pcre2lib/pcre2_tables.c
+    pcre2lib/pcre2_ucd.c
+    pcre2lib/pcre2_valid_utf.c
+    pcre2lib/pcre2_xclass.c
+  "])
 
-    if test -z "$PCRE_LIBDIR" ; then
-      AC_MSG_ERROR([Could not find libpcre.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
-    fi
-    AC_MSG_RESULT([$PCRE_LIBDIR])
+  AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
+    [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"])
 
-    changequote({,})
-    pcre_major=`grep PCRE_MAJOR $PCRE_INCDIR/pcre.h | sed -e 's/[^0-9]//g'`
-    pcre_minor=`grep PCRE_MINOR $PCRE_INCDIR/pcre.h | sed -e 's/[^0-9]//g'`
-    changequote([,])
-    pcre_minor_length=`echo "$pcre_minor" | wc -c | sed -e 's/[^0-9]//g'`
-    if test "$pcre_minor_length" -eq 2 ; then
-      pcre_minor="$pcre_minor"0
-    fi
-    pcre_version=$pcre_major$pcre_minor
-    if test "$pcre_version" -lt 660; then
-      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 6.6])
-    fi
+  PHP_PCRE_CFLAGS=m4_normalize(["
+    $PHP_PCRE_CFLAGS
+    -DHAVE_CONFIG_H
+    -DHAVE_MEMMOVE
+    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+    -I@ext_srcdir@/pcre2lib
+  "])
 
-    PHP_CHECK_LIBRARY(pcre, pcre_jit_exec,
-    [
-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-    ],[
-    ],[
-      -L$PCRE_LIBDIR
+  AC_DEFINE([HAVE_BUNDLED_PCRE], [1],
+    [Define to 1 if PHP uses the bundled PCRE library.])
+  AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])
+
+  AS_VAR_IF([PHP_PCRE_JIT], [no],,
+    [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])
+    AC_CACHE_CHECK([whether Intel CET is enabled],
+      [php_cv_have_pcre2_intel_cet],
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+          #ifndef __CET__
+          # error CET is not enabled
+          #endif
+        ])],
+        [php_cv_have_pcre2_intel_cet=yes],
+        [php_cv_have_pcre2_intel_cet=no])
     ])
-    PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
+    AS_VAR_IF([php_cv_have_pcre2_intel_cet], [yes],
+      [PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"])
+  ])
 
-    AC_DEFINE(HAVE_PCRE, 1, [ ])
-    PHP_ADD_INCLUDE($PCRE_INCDIR)
-    PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
-  else
-    AC_MSG_CHECKING([for PCRE library to use])
-    AC_MSG_RESULT([bundled])
-    pcrelib_sources="pcrelib/pcre_chartables.c pcrelib/pcre_ucd.c \
-    				 pcrelib/pcre_compile.c pcrelib/pcre_config.c pcrelib/pcre_exec.c \
-    				 pcrelib/pcre_fullinfo.c pcrelib/pcre_get.c pcrelib/pcre_globals.c \
-    				 pcrelib/pcre_maketables.c pcrelib/pcre_newline.c \
-    				 pcrelib/pcre_ord2utf8.c pcrelib/pcre_refcount.c pcrelib/pcre_study.c \
-    				 pcrelib/pcre_tables.c pcrelib/pcre_valid_utf8.c \
-    				 pcrelib/pcre_version.c pcrelib/pcre_xclass.c \
-    				 pcrelib/pcre_jit_compile.c"
-    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-    PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
-    PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
-    PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
-    AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
+  dnl Enable pcre Valgrind support only in DEBUG build (it affects performance).
+  AS_VAR_IF([PHP_VALGRIND], [no],,
+    [AS_VAR_IF([ZEND_DEBUG], [yes],
+      [AC_DEFINE([HAVE_PCRE_VALGRIND_SUPPORT], [1],
+        [Define to 1 if pcre has Valgrind support enabled.])])])
 
-    if test "$PHP_PCRE_REGEX" != "no"; then
-      AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
-      if test "$PHP_PCRE_JIT" != "no"; then
-        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-        AC_MSG_RESULT([yes])
-      else
-      AC_MSG_RESULT([no])
-      fi
-    fi
-  fi
-
-PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                          Enable PCRE valgrind support. Developers only!], no, no)
-  if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
-    AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
-  else
-    if test "$PHP_PCRE_VALGRIND" != "no"; then
-      PHP_PCRE_VALGRIND_INCDIR=
-      AC_MSG_CHECKING([for Valgrind headers location])
-      for i in $PHP_PCRE_VALGRIND $PHP_PCRE_VALGRIND/include $PHP_PCRE_VALGRIND/local/include /usr/include /usr/local/include; do
-        if test -f $i/valgrind/memcheck.h
-        then
-          PHP_PCRE_VALGRIND_INCDIR=$i
-          break
-        fi
-      done
-      if test -z "$PHP_PCRE_VALGRIND_INCDIR"
-      then
-        AC_MSG_ERROR([Could not find valgrind/memcheck.h])
-      else
-        AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
-        PHP_ADD_INCLUDE($PHP_PCRE_VALGRIND_INCDIR)
-        AC_MSG_RESULT([$PHP_PCRE_VALGRIND_INCDIR])
-      fi
-    fi
-  fi
+  PHP_NEW_EXTENSION([pcre],
+    [$pcrelib_sources php_pcre.c],
+    [no],,
+    [$PHP_PCRE_CFLAGS])
+  PHP_ADD_BUILD_DIR([$ext_builddir/pcre2lib])
+  PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
+fi

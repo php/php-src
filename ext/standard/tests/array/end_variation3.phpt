@@ -2,11 +2,6 @@
 Test end() function : usage variations - Referenced variables
 --FILE--
 <?php
-/* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how the internal pointer is affected when two variables are referenced to each other
  */
@@ -28,8 +23,7 @@ var_dump(current($array1));
 echo "\$array2: ";
 var_dump(current($array2));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing end() : usage variations ***
 
 -- Initial position of internal pointer --
@@ -38,4 +32,3 @@ string(4) "zero"
 -- Position after calling end() --
 $array1: string(3) "two"
 $array2: string(3) "two"
-===DONE===

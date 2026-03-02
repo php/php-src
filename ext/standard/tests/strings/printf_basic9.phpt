@@ -2,11 +2,6 @@
 Test printf() function : basic functionality - hexadecimal format
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialise all required variables
@@ -55,8 +50,7 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using hexadecimal format ***
 
 -- Calling printf() with no arguments --
@@ -80,4 +74,3 @@ b 84 b1
 int(7)
 B 84 B1
 int(7)
-===DONE===

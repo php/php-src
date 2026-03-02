@@ -5,18 +5,18 @@ Simas Toleikis simast@gmail.com
 --FILE--
 <?php
 
-	trait TestTrait {
-		public static function test() {
-			return 'Test';
-		}
-	}
+    trait TestTrait {
+        public static function test() {
+            return 'Test';
+        }
+    }
 
-	class A {
-		use TestTrait;
-	}
+    class A {
+        use TestTrait;
+    }
 
-	$class = "A";
-	echo $class::test();
+    $class = "A";
+    echo $class::test();
 
 ?>
 --EXPECT--

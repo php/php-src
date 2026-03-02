@@ -1,9 +1,7 @@
 --TEST--
 Bug #66828 (iconv_mime_encode Q-encoding longer than it should be)
---SKIPIF--
-<?php
-if (!extension_loaded('iconv')) die('skip iconv extension not available');
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $preferences = array(
@@ -15,7 +13,5 @@ $preferences = array(
 );
 var_dump(iconv_mime_encode("Subject", "Test Test Test Test Test Test Test Test", $preferences));
 ?>
-===DONE===
 --EXPECT--
 string(74) "Subject: =?UTF-8?Q?Test=20Test=20Test=20Test=20Test=20Test=20Test=20Test?="
-===DONE===

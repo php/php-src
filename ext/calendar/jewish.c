@@ -260,10 +260,6 @@
  *
  **************************************************************************/
 
-#if defined(PHP_WIN32)
-#pragma setlocale("english")
-#endif
-
 #include "sdncal.h"
 
 #define HALAKIM_PER_HOUR 1080
@@ -272,7 +268,7 @@
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
 #define JEWISH_SDN_OFFSET 347997
-#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises interger overflow */
+#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises integer overflow */
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -287,19 +283,19 @@
 #define AM3_11_20 ((9 * HALAKIM_PER_HOUR) + 204)
 #define AM9_32_43 ((15 * HALAKIM_PER_HOUR) + 589)
 
-int monthsPerYear[19] =
+const int monthsPerYear[19] =
 {
 12, 12, 13, 12, 12, 13, 12, 13, 12, 12, 13, 12, 12, 13, 12, 12, 13, 12, 13
 };
 
-static int yearOffset[19] =
+static const int yearOffset[19] =
 {
 	0, 12, 24, 37, 49, 61, 74, 86, 99, 111, 123,
 	136, 148, 160, 173, 185, 197, 210, 222
 };
 
 /* names for leap (13-month) year */
-char *JewishMonthNameLeap[14] =
+const char * const JewishMonthNameLeap[14] =
 {
 	"",
 	"Tishri",
@@ -318,7 +314,7 @@ char *JewishMonthNameLeap[14] =
 };
 
 /* names for regular year */
-char *JewishMonthName[14] =
+const char * const JewishMonthName[14] =
 {
 	"",
 	"Tishri",
@@ -337,7 +333,7 @@ char *JewishMonthName[14] =
 };
 
 /* names for leap (13-month) year */
-char *JewishMonthHebNameLeap[14] =
+const char * const JewishMonthHebNameLeap[14] =
 {
 	"",
 	"\xFA\xF9\xF8\xE9",
@@ -356,7 +352,7 @@ char *JewishMonthHebNameLeap[14] =
 };
 
 /* names for regular year */
-char *JewishMonthHebName[14] =
+const char * const JewishMonthHebName[14] =
 {
 	"",
 	"\xFA\xF9\xF8\xE9",
@@ -433,16 +429,31 @@ static void MoladOfMetonicCycle(
 								   zend_long *pMoladHalakim)
 {
 	register zend_ulong r1, r2, d1, d2;
+	zend_long chk;
 
 	/* Start with the time of the first molad after creation. */
 	r1 = NEW_MOON_OF_CREATION;
+	chk = (zend_long)metonicCycle;
+
+	if (chk > (ZEND_LONG_MAX - NEW_MOON_OF_CREATION) / (HALAKIM_PER_METONIC_CYCLE & 0xFFFF)) {
+		*pMoladDay = 0;
+		*pMoladHalakim = 0;
+		return;
+	}
 
 	/* Calculate metonicCycle * HALAKIM_PER_METONIC_CYCLE.  The upper 32
 	 * bits of the result will be in r2 and the lower 16 bits will be
 	 * in r1. */
-	r1 += metonicCycle * (HALAKIM_PER_METONIC_CYCLE & 0xFFFF);
+	r1 += chk * (HALAKIM_PER_METONIC_CYCLE & 0xFFFF);
+
+	if (chk > (ZEND_LONG_MAX - (r1 >> 16)) / ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF)) {
+		*pMoladDay = 0;
+		*pMoladHalakim = 0;
+		return;
+	}
+
 	r2 = r1 >> 16;
-	r2 += metonicCycle * ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF);
+	r2 += chk * ((HALAKIM_PER_METONIC_CYCLE >> 16) & 0xFFFF);
 
 	/* Calculate r2r1 / HALAKIM_PER_DAY.  The remainder will be in r1, the
 	 * upper 16 bits of the quotient will be in d2 and the lower 16 bits
@@ -699,7 +710,7 @@ zend_long JewishToSdn(
 	int yearLength;
 	int lengthOfAdarIAndII;
 
-	if (year <= 0 || day <= 0 || day > 30) {
+	if (year <= 0 || year >= 6000 || day <= 0 || day > 30) {
 		return (0);
 	}
 	switch (month) {
@@ -793,12 +804,3 @@ zend_long JewishToSdn(
 	}
 	return (sdn + JEWISH_SDN_OFFSET);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

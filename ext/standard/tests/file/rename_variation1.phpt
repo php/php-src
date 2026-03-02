@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 <?php
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
@@ -51,10 +51,10 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir($file_path."/rename_variation1_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() : renaming directory across directories ***
 -- Iteration 1 --
 bool(true)

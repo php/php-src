@@ -4,17 +4,6 @@ Test serialize() & unserialize() functions: arrays (circular references)
 serialize_precision=100
 --FILE--
 <?php
-/* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized)
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-/* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 echo "\n--- Testing Circular reference of an array ---\n";
 
 echo "-- Normal array --\n";
@@ -35,7 +24,7 @@ var_dump($arr_asso);
 
 echo "\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 --- Testing Circular reference of an array ---
 -- Normal array --
 string(238) "a:7:{i:0;i:0;i:1;i:1;i:2;i:-2;i:3;d:3.333333000000000101437080957111902534961700439453125;i:4;s:1:"a";i:5;a:0:{}i:6;a:7:{i:0;i:0;i:1;i:1;i:2;i:-2;i:3;d:3.333333000000000101437080957111902534961700439453125;i:4;s:1:"a";i:5;a:0:{}i:6;R:8;}}"
@@ -47,7 +36,7 @@ array(7) {
   [2]=>
   int(-2)
   [3]=>
-  float(3.333333)
+  float(3.333333000000000101437080957111902534961700439453125)
   [4]=>
   string(1) "a"
   [5]=>
@@ -62,7 +51,7 @@ array(7) {
     [2]=>
     int(-2)
     [3]=>
-    float(3.333333)
+    float(3.333333000000000101437080957111902534961700439453125)
     [4]=>
     string(1) "a"
     [5]=>

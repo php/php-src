@@ -45,6 +45,7 @@ class Obj
     function array(){ echo __METHOD__, PHP_EOL; }
     function print(){ echo __METHOD__, PHP_EOL; }
     function echo(){ echo __METHOD__, PHP_EOL; }
+    function readonly(){ echo __METHOD__, PHP_EOL; }
     function require(){ echo __METHOD__, PHP_EOL; }
     function require_once(){ echo __METHOD__, PHP_EOL; }
     function return(){ echo __METHOD__, PHP_EOL; }
@@ -56,6 +57,7 @@ class Obj
     function switch(){ echo __METHOD__, PHP_EOL; }
     function yield(){ echo __METHOD__, PHP_EOL; }
     function function(){ echo __METHOD__, PHP_EOL; }
+    function fn(){ echo __METHOD__, PHP_EOL; }
     function if(){ echo __METHOD__, PHP_EOL; }
     function endswitch(){ echo __METHOD__, PHP_EOL; }
     function finally(){ echo __METHOD__, PHP_EOL; }
@@ -124,6 +126,7 @@ $obj->throw();
 $obj->array();
 $obj->print();
 $obj->echo();
+$obj->readonly();
 $obj->require();
 $obj->require_once();
 $obj->return();
@@ -135,6 +138,7 @@ $obj->continue();
 $obj->switch();
 $obj->yield();
 $obj->function();
+$obj->fn();
 $obj->if();
 $obj->endswitch();
 $obj->finally();
@@ -161,7 +165,8 @@ $obj->__DIR__();
 $obj->__NAMESPACE__();
 
 echo "\nDone\n";
---EXPECTF--
+?>
+--EXPECT--
 Obj::empty
 Obj::callable
 Obj::class
@@ -202,6 +207,7 @@ Obj::throw
 Obj::array
 Obj::print
 Obj::echo
+Obj::readonly
 Obj::require
 Obj::require_once
 Obj::return
@@ -213,6 +219,7 @@ Obj::continue
 Obj::switch
 Obj::yield
 Obj::function
+Obj::fn
 Obj::if
 Obj::endswitch
 Obj::finally

@@ -15,7 +15,7 @@
 
 */
 
-define('file_not_found', 2, 1);
+const FILE_NOT_FOUND = 2;
 
 /*
  Function: bool create_file(string $filename, string $mode = "w");
@@ -68,7 +68,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
     return false;
   }
 
-  $tmp_buff = str_repeat($data, ($fill_size/$size_divider) + $add_value );
+  $tmp_buff = str_repeat($data, (int)(($fill_size/$size_divider) + $add_value) );
 
   if ( strlen($tmp_buff) > $fill_size ) {
     $buffer = substr($tmp_buff, 0, $fill_size);
@@ -128,7 +128,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       if ( $size <= $chunk_size ) {
         $chunk_size = $size;
       }
-      $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+      $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
       $bytes_written = fwrite($file_handle, $num_values, $chunk_size);
       if ( $bytes_written != $chunk_size ) {
             return false;
@@ -136,7 +136,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       $size -= $chunk_size;
     } while ( $size > 0 );
   } else {
-    $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+    $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
     $bytes_written = fwrite($file_handle, $num_values, $file_size);
     if ( $bytes_written != $file_size ) {
       return false;
@@ -202,7 +202,7 @@ function change_file_perms($file_path,
    permissions. File is filled with content of size specified.
    $file_path = dir where files will be created
    $name_prefix = prefix to be used for names, name is suffix with a
-     unqiue numeric value to make the file name unique, default = file
+     unique numeric value to make the file name unique, default = file
    $name_suffix = suffix to be used for the name, default = 1
    $count = total no. of files to be created, default = 1
    $mode = file open mode as specified in fopen() call. Do not use
@@ -210,15 +210,15 @@ function change_file_perms($file_path,
    $permission = An octal number, This should be similar to $mode
      specified in chmod() call.
    $content_type = Specify type of the content to fill in the file.
-     "numeric" = fill file with numeric vlaues
+     "numeric" = fill file with numeric values
      "text" = fill file with regular text
      "empty" = empty file
      "text_with_new_line" = similar to text fill type, but writes with new line char
      "alphanumeric" = fill file with alpha numeric text
-     If imporper $content type is specified, file is created as empty
+     If improper $content type is specified, file is created as empty
    $size = size of the fill in terms of kilobyte, i.e size of the file.
            if $flag is specified as "byte", then then given size is taken in bytes
-   $flag = specifiy if size has to be treated as no of total bytes or
+   $flag = specify if size has to be treated as no of total bytes or
            multiple of KB.
      "kilobytes" = take size in terms of multiple of KB
      "byte" = take size in terms of bytes
@@ -309,7 +309,7 @@ function create_files( $file_path,
 
 /*
  Function: function create_links( $file_path,
-		       $filename,
+               $filename,
                        $link_count = 1,
                        $link_type = "soft",
                        $link_size = 1024,
@@ -330,7 +330,7 @@ function create_files( $file_path,
    $link_perms = An octal number, This should be similar to $mode
      specified in chmod() call.
    $link_file_content = Type of the content to fill in the file.
-     numeric = fill file with numeric vlaues
+     numeric = fill file with numeric values
      text = fill file with regular text
      text_with_new_line = same as text but new lines are written
      alphanumeric = fill with alphanumeric text
@@ -432,7 +432,7 @@ function create_links($file_path,
  Description: delete a given file if exists
  Returns: true on success
           false on failure
-          file_not_found if file doesn't exist
+          FILE_NOT_FOUND if file doesn't exist
 */
 function delete_file($filename) {
   // check if file exists
@@ -442,7 +442,7 @@ function delete_file($filename) {
     else
       return false;
   }
-  return file_not_found;
+  return FILE_NOT_FOUND;
 }
 
 /*
@@ -475,7 +475,7 @@ function delete_files($file_path,
     $status = delete_file($filename);
     if($status == true) {
       $return_value['deleted']++;
-    } else if($status == file_not_found) {
+    } else if($status == FILE_NOT_FOUND) {
       $return_value['notfound']++;
     } else {
       $return_value['failed']++;
@@ -528,7 +528,7 @@ function delete_links($file_path,
   corresponding next 13 values of the same stat for equality
   $stat = stat array
 
- Retuns: true when all of them match, false otherwise
+ Returns: true when all of them match, false otherwise
 */
 function compare_self_stat( array $stat )
 {
@@ -591,6 +591,8 @@ $all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                        "blksize", "blocks");
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
+  $stat_time_diff_keys = array(8, 'atime');
+
   // dump the stat if requested
   if ( $flag == true ) {
     var_dump($stat1);
@@ -606,8 +608,13 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
     {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
-           $result = false;
-           echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
+          if ( ! in_array( $fields[$index], $stat_time_diff_keys ) ) {
+            $result = false;
+            echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
+          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 2) {
+            $result = false;
+            echo "Error: stat1 differs too much from stat2 at key value: $fields[$index]\n";
+          }
          }
          break;
 

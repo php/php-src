@@ -1,9 +1,8 @@
 --TEST--
 Testing whether ftp_nb_continue() fetches more data
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';
@@ -14,7 +13,7 @@ $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
 if (!$ftp) die("Couldn't connect to the server");
 
-$local_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . $file;
+$local_file = __DIR__ . DIRECTORY_SEPARATOR . $file;
 touch($local_file);
 
 $r = ftp_nb_get($ftp, $local_file, $file, FTP_BINARY);
@@ -27,7 +26,7 @@ echo file_get_contents($local_file);
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "mediumfile.txt");
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . "mediumfile.txt");
 ?>
 --EXPECT--
 This is line 0 of the test data.

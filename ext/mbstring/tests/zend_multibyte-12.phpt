@@ -1,5 +1,7 @@
 --TEST--
 zend multibyte (12)
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 --FILE--

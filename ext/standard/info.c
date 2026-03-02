@@ -1,24 +1,20 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Colin Viebrock <colin@viebrock.ca>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_ini.h"
@@ -38,7 +34,6 @@
 #include <sys/utsname.h>
 #endif
 #include "url.h"
-#include "php_string.h"
 
 #ifdef PHP_WIN32
 # include "winver.h"
@@ -56,19 +51,19 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
+static ZEND_COLD size_t php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 {
 	size_t written;
 	zend_string *new_str;
 
-	new_str = php_escape_html_entities((unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
+	new_str = php_escape_html_entities((const unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
 	written = php_output_write(ZSTR_VAL(new_str), ZSTR_LEN(new_str));
 	zend_string_free(new_str);
 	return written;
 }
 /* }}} */
 
-static int php_info_printf(const char *fmt, ...) /* {{{ */
+static ZEND_COLD size_t php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
 	size_t len, written;
@@ -84,13 +79,13 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static int php_info_print(const char *str) /* {{{ */
+static zend_always_inline size_t php_info_print(const char *str) /* {{{ */
 {
 	return php_output_write(str, strlen(str));
 }
 /* }}} */
 
-static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ */
+static ZEND_COLD void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ */
 {
 	zend_string *key;
 
@@ -104,20 +99,22 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 				php_info_printf("\nRegistered %s => ", name);
 			}
 
-			ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-				if (key) {
-					if (first) {
-						first = 0;
-					} else {
-						php_info_print(", ");
+			if (!HT_IS_PACKED(ht)) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
+					if (key) {
+						if (first) {
+							first = 0;
+						} else {
+							php_info_print(", ");
+						}
+						if (!sapi_module.phpinfo_as_text) {
+							php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
+						} else {
+							php_info_print(ZSTR_VAL(key));
+						}
 					}
-					if (!sapi_module.phpinfo_as_text) {
-						php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
-					} else {
-						php_info_print(ZSTR_VAL(key));
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -133,14 +130,14 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 }
 /* }}} */
 
-PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 {
 	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
-			php_strtolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
+			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
+			php_info_printf("<h2><a name=\"module_%s\" href=\"#module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
 		} else {
@@ -166,31 +163,10 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 }
 /* }}} */
 
-static int _display_module_info_func(zval *el) /* {{{ */
+/* {{{ php_print_gpcse_array */
+static ZEND_COLD void php_print_gpcse_array(char *name, size_t name_length)
 {
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (module->info_func || module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-static int _display_module_info_def(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (!module->info_func && !module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-/* {{{ php_print_gpcse_array
- */
-static void php_print_gpcse_array(char *name, uint32_t name_length)
-{
-	zval *data, *tmp, tmp2;
+	zval *data, *tmp;
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_string *key;
@@ -198,7 +174,7 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find_deref(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -224,37 +200,32 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print(" => ");
 			}
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
 					php_info_print("<pre>");
 					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
-					zend_string_release(str);
+					zend_string_release_ex(str, 0);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}
 			} else {
-				ZVAL_COPY_VALUE(&tmp2, tmp);
-				if (Z_TYPE(tmp2) != IS_STRING) {
-					tmp = NULL;
-					zval_copy_ctor(&tmp2);
-					convert_to_string(&tmp2);
-				}
+				zend_string *tmp2;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp2);
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (ZSTR_LEN(str) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					}
 				} else {
-					php_info_print(Z_STRVAL(tmp2));
+					php_info_print(ZSTR_VAL(str));
 				}
 
-				if (!tmp) {
-					zval_dtor(&tmp2);
-				}
+				zend_tmp_string_release(tmp2);
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -263,13 +234,12 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-	zend_string_free(key);
+	zend_string_efree(key);
 }
 /* }}} */
 
-/* {{{ php_info_print_style
- */
-void php_info_print_style(void)
+/* {{{ php_info_print_style */
+PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 {
 	php_info_printf("<style type=\"text/css\">\n");
 	php_info_print_css();
@@ -277,23 +247,15 @@ void php_info_print_style(void)
 }
 /* }}} */
 
-/* {{{ php_info_html_esc
- */
-PHPAPI zend_string *php_info_html_esc(char *string)
-{
-	return php_escape_html_entities((unsigned char *) string, strlen(string), 0, ENT_QUOTES, NULL);
-}
-/* }}} */
-
 #ifdef PHP_WIN32
 /* {{{  */
 
-char* php_get_windows_name()
+static char* php_get_windows_name()
 {
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
 	DWORD dwType;
-	char *major = NULL, *sub = NULL, *retval;
+	const char *major = NULL, *sub = NULL;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
 
@@ -301,29 +263,43 @@ char* php_get_windows_name()
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows 10";
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
+					if (osvi.dwBuildNumber >= 22000) {
+						major = "Windows 11";
+					} else {
+						major = "Windows 10";
+					}
 				} else {
-					major = "Windows Server 2016";
+					if (osvi.dwBuildNumber >= 26100) {
+						major = "Windows Server 2025";
+					} else if (osvi.dwBuildNumber >= 20348) {
+						major = "Windows Server 2022";
+					} else if (osvi.dwBuildNumber >= 19042) {
+						major = "Windows Server, version 20H2";
+					} else if (osvi.dwBuildNumber >= 19041) {
+						major = "Windows Server, version 2004";
+					} else if (osvi.dwBuildNumber >= 18363) {
+						major = "Windows Server, version 1909";
+					} else if (osvi.dwBuildNumber >= 18362) {
+						major = "Windows Server, version 1903";
+					} else if (osvi.dwBuildNumber >= 17763) {
+						// could also be Windows Server, version 1809, but there's no easy way to tell
+						major = "Windows Server 2019";
+					} else if (osvi.dwBuildNumber >= 17134) {
+						major = "Windows Server, version 1803";
+					} else if (osvi.dwBuildNumber >= 16299) {
+						major = "Windows Server, version 1709";
+					} else {
+						major = "Windows Server 2016";
+					}
 				}
 			}
 		}
 	} else if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6) {
 		if (osvi.dwMajorVersion == 6) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows Vista";
-				} else {
-					major = "Windows Server 2008";
-				}
-			} else if ( osvi.dwMinorVersion == 1 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
-					major = "Windows 7";
-				} else {
-					major = "Windows Server 2008 R2";
-				}
-			} else if ( osvi.dwMinorVersion == 2 ) {
+			ZEND_ASSERT(osvi.dwMinorVersion >= 2);
+			if (osvi.dwMinorVersion == 2) {
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
@@ -348,20 +324,20 @@ char* php_get_windows_name()
 					VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
 					dwlConditionMask)) {
 					osvi.dwMinorVersion = 3; /* Windows 8.1/Windows Server 2012 R2 */
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8.1";
 					} else {
 						major = "Windows Server 2012 R2";
 					}
 				} else {
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8";
 					} else {
 						major = "Windows Server 2012";
 					}
 				}
 			} else if (osvi.dwMinorVersion == 3) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+				if (osvi.wProductType == VER_NT_WORKSTATION)  {
 					major = "Windows 8.1";
 				} else {
 					major = "Windows Server 2012 R2";
@@ -617,22 +593,23 @@ char* php_get_windows_name()
 			}
 		}
 	} else {
-		return NULL;
+		ZEND_UNREACHABLE();
 	}
 
+	char *retval;
 	spprintf(&retval, 0, "%s%s%s%s%s", major, sub?" ":"", sub?sub:"", osvi.szCSDVersion[0] != '\0'?" ":"", osvi.szCSDVersion);
 	return retval;
 }
 /* }}}  */
 
 /* {{{  */
-void php_get_windows_cpu(char *buf, int bufsize)
+static void php_get_windows_cpu(char *buf, size_t bufsize)
 {
 	SYSTEM_INFO SysInfo;
 	GetSystemInfo(&SysInfo);
 	switch (SysInfo.wProcessorArchitecture) {
 		case PROCESSOR_ARCHITECTURE_INTEL :
-			snprintf(buf, bufsize, "i%d", SysInfo.dwProcessorType);
+			snprintf(buf, bufsize, "i%lu", SysInfo.dwProcessorType);
 			break;
 		case PROCESSOR_ARCHITECTURE_MIPS :
 			snprintf(buf, bufsize, "MIPS R%d000", SysInfo.wProcessorLevel);
@@ -656,6 +633,11 @@ void php_get_windows_cpu(char *buf, int bufsize)
 			snprintf(buf, bufsize, "AMD64");
 			break;
 #endif
+#if defined(PROCESSOR_ARCHITECTURE_ARM64)
+		case PROCESSOR_ARCHITECTURE_ARM64 :
+			snprintf(buf, bufsize, "ARM64");
+			break;
+#endif
 		case PROCESSOR_ARCHITECTURE_UNKNOWN :
 		default:
 			snprintf(buf, bufsize, "Unknown");
@@ -665,17 +647,22 @@ void php_get_windows_cpu(char *buf, int bufsize)
 /* }}}  */
 #endif
 
-/* {{{ php_get_uname
- */
+static inline bool php_is_valid_uname_mode(char mode) {
+	return mode == 'a' || mode == 'm' || mode == 'n' || mode == 'r' || mode == 's' || mode == 'v';
+}
+
+/* {{{ php_get_uname */
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
-	char tmp_uname[256];
+
+	ZEND_ASSERT(php_is_valid_uname_mode(mode));
 #ifdef PHP_WIN32
-	DWORD dwBuild=0;
-	DWORD dwVersion = GetVersion();
-	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
-	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
+	char tmp_uname[256];
+	OSVERSIONINFOEX osvi = EG(windows_version_info);
+	DWORD dwWindowsMajorVersion = osvi.dwMajorVersion;
+	DWORD dwWindowsMinorVersion = osvi.dwMinorVersion;
+	DWORD dwBuild = osvi.dwBuildNumber;
 	DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
 	char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
 
@@ -684,22 +671,17 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (mode == 's') {
 		php_uname = "Windows NT";
 	} else if (mode == 'r') {
-		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
-		php_uname = tmp_uname;
+		return strpprintf(0, "%lu.%lu", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
 		char *winver = php_get_windows_name();
-		dwBuild = (DWORD)(HIWORD(dwVersion));
-		if(winver == NULL) {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
-		} else {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d (%s)", dwBuild, winver);
-		}
-		php_uname = tmp_uname;
-		if(winver) {
-			efree(winver);
-		}
+
+		ZEND_ASSERT(winver != NULL);
+
+		zend_string *build_with_version = strpprintf(0, "build %lu (%s)", dwBuild, winver);
+		efree(winver);
+		return build_with_version;
 	} else if (mode == 'm') {
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
 		php_uname = tmp_uname;
@@ -710,22 +692,19 @@ PHPAPI zend_string *php_get_uname(char mode)
 		ZEND_ASSERT(winver != NULL);
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
-		dwBuild = (DWORD)(HIWORD(dwVersion));
 
 		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
 		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
-			if (strncmp(winver, "Windows 8.1", 11) == 0 || strncmp(winver, "Windows Server 2012 R2", 22) == 0) {
+			if (strncmp(winver, "Windows 8.1", strlen("Windows 8.1")) == 0 || strncmp(winver, "Windows Server 2012 R2", strlen("Windows Server 2012 R2")) == 0) {
 				dwWindowsMinorVersion = 3;
 			}
 		}
 
-		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
-				 "Windows NT", ComputerName,
-				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
-		if(winver) {
-			efree(winver);
-		}
-		php_uname = tmp_uname;
+		zend_string *build_with_all_info = strpprintf(0, "%s %s %lu.%lu build %lu (%s) %s",
+			"Windows NT", ComputerName, dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild,
+			winver ? winver: "unknown", wincpu);
+		efree(winver);
+		return build_with_all_info;
 	}
 #else
 #ifdef HAVE_SYS_UTSNAME_H
@@ -744,10 +723,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 		} else if (mode == 'm') {
 			php_uname = buf.machine;
 		} else { /* assume mode == 'a' */
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
-					 buf.sysname, buf.nodename, buf.release, buf.version,
-					 buf.machine);
-			php_uname = tmp_uname;
+			return strpprintf(0, "%s %s %s %s %s", buf.sysname, buf.nodename, buf.release, buf.version, buf.machine);
 		}
 	}
 #else
@@ -758,15 +734,14 @@ PHPAPI zend_string *php_get_uname(char mode)
 }
 /* }}} */
 
-/* {{{ php_print_info_htmlhead
- */
-PHPAPI void php_print_info_htmlhead(void)
+/* {{{ php_print_info_htmlhead */
+PHPAPI ZEND_COLD void php_print_info_htmlhead(void)
 {
 	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
 	php_info_print("<head>\n");
 	php_info_print_style();
-	php_info_print("<title>phpinfo()</title>");
+	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
@@ -774,19 +749,15 @@ PHPAPI void php_print_info_htmlhead(void)
 /* }}} */
 
 /* {{{ module_name_cmp */
-static int module_name_cmp(const void *a, const void *b)
+static int module_name_cmp(Bucket *f, Bucket *s)
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	return strcasecmp(((zend_module_entry *)Z_PTR(f->val))->name,
 				  ((zend_module_entry *)Z_PTR(s->val))->name);
 }
 /* }}} */
 
-/* {{{ php_print_info
- */
-PHPAPI void php_print_info(int flag)
+/* {{{ php_print_info */
+PHPAPI ZEND_COLD void php_print_info(int flag)
 {
 	char **env, *tmp1, *tmp2;
 	zend_string *php_uname;
@@ -798,7 +769,7 @@ PHPAPI void php_print_info(int flag)
 	}
 
 	if (flag & PHP_INFO_GENERAL) {
-		char *zend_version = get_zend_version();
+		const char *zend_version = get_zend_version();
 		char temp_api[10];
 
 		php_uname = php_get_uname('a');
@@ -814,7 +785,7 @@ PHPAPI void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"https://www.php.net/\"><img src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -830,12 +801,18 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
-#ifdef COMPILER
-		php_info_print_table_row(2, "Compiler", COMPILER);
+		php_info_print_table_row(2, "Build Date", php_build_date);
+#ifdef PHP_BUILD_SYSTEM
+		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif
-#ifdef ARCHITECTURE
-		php_info_print_table_row(2, "Architecture", ARCHITECTURE);
+		if (php_build_provider()) {
+			php_info_print_table_row(2, "Build Provider", php_build_provider());
+		}
+#ifdef PHP_BUILD_COMPILER
+		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
+#endif
+#ifdef PHP_BUILD_ARCH
+		php_info_print_table_row(2, "Architecture", PHP_BUILD_ARCH);
 #endif
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
@@ -868,6 +845,9 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_row(2, "Zend Extension Build", ZEND_EXTENSION_BUILD_ID);
 		php_info_print_table_row(2, "PHP Extension Build", ZEND_MODULE_BUILD_ID);
 
+		snprintf(temp_api, sizeof(temp_api), "%d bits", SIZEOF_ZEND_LONG * 8);
+		php_info_print_table_row(2, "PHP Integer Size", temp_api);
+
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "Debug Build", "yes" );
 #else
@@ -876,6 +856,7 @@ PHPAPI void php_print_info(int flag)
 
 #ifdef ZTS
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
+		php_info_print_table_row(2, "Thread API", tsrm_api_name() );
 #else
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
@@ -896,17 +877,23 @@ PHPAPI void php_print_info(int flag)
 			} else {
 				descr = estrdup("disabled");
 			}
-            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			php_info_print_table_row(2, "Zend Multibyte Support", descr);
 			efree(descr);
 		}
 
-#if HAVE_IPV6
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+		php_info_print_table_row(2, "Zend Max Execution Timers", "enabled" );
+#else
+		php_info_print_table_row(2, "Zend Max Execution Timers", "disabled" );
+#endif
+
+#ifdef HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else
 		php_info_print_table_row(2, "IPv6 Support", "disabled" );
 #endif
 
-#if HAVE_DTRACE
+#ifdef HAVE_DTRACE
 		php_info_print_table_row(2, "DTrace Support", (zend_dtrace_enabled ? "enabled" : "available, disabled"));
 #else
 		php_info_print_table_row(2, "DTrace Support", "disabled" );
@@ -921,7 +908,7 @@ PHPAPI void php_print_info(int flag)
 		/* Zend Engine */
 		php_info_print_box_start(0);
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_print("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"https://www.zend.com/\"><img src=\"");
 			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
 		}
 		php_info_print("This program makes use of the Zend Scripting Language Engine:");
@@ -952,17 +939,26 @@ PHPAPI void php_print_info(int flag)
 
 	if (flag & PHP_INFO_MODULES) {
 		HashTable sorted_registry;
+		zend_module_entry *module;
 
 		zend_hash_init(&sorted_registry, zend_hash_num_elements(&module_registry), NULL, NULL, 1);
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
 		zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 
-		zend_hash_apply(&sorted_registry, _display_module_info_func);
+		ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
+			if (module->info_func || module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		zend_hash_apply(&sorted_registry, _display_module_info_def);
+		ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
+			if (!module->info_func && !module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 		php_info_print_table_end();
 
 		zend_hash_destroy(&sorted_registry);
@@ -972,6 +968,7 @@ PHPAPI void php_print_info(int flag)
 		SECTION("Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
+		tsrm_env_lock();
 		for (env=environ; env!=NULL && *env !=NULL; env++) {
 			tmp1 = estrdup(*env);
 			if (!(tmp2=strchr(tmp1,'='))) { /* malformed entry? */
@@ -983,6 +980,7 @@ PHPAPI void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
+		tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 
@@ -1016,7 +1014,7 @@ PHPAPI void php_print_info(int flag)
 	}
 
 
-	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {
+	if (flag & PHP_INFO_CREDITS) {
 		php_info_print_hr();
 		php_print_credits(PHP_CREDITS_ALL & ~PHP_CREDITS_FULLPAGE);
 	}
@@ -1061,7 +1059,7 @@ PHPAPI void php_print_info(int flag)
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_start(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_start(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<table>\n");
@@ -1071,7 +1069,7 @@ PHPAPI void php_info_print_table_start(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_end(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_end(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</table>\n");
@@ -1080,7 +1078,7 @@ PHPAPI void php_info_print_table_end(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_box_start(int flag) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_box_start(int flag) /* {{{ */
 {
 	php_info_print_table_start();
 	if (flag) {
@@ -1097,7 +1095,7 @@ PHPAPI void php_info_print_box_start(int flag) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_box_end(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_box_end(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</td></tr>\n");
@@ -1106,7 +1104,7 @@ PHPAPI void php_info_print_box_end(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_hr(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_hr(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<hr />\n");
@@ -1116,7 +1114,7 @@ PHPAPI void php_info_print_hr(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_colspan_header(int num_cols, const char *header) /* {{{ */
 {
 	int spaces;
 
@@ -1129,9 +1127,8 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {
 }
 /* }}} */
 
-/* {{{ php_info_print_table_header
- */
-PHPAPI void php_info_print_table_header(int num_cols, ...)
+/* {{{ php_info_print_table_header */
+PHPAPI ZEND_COLD void php_info_print_table_header(int num_cols, ...)
 {
 	int i;
 	va_list row_elements;
@@ -1167,9 +1164,8 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 }
 /* }}} */
 
-/* {{{ php_info_print_table_row_internal
- */
-static void php_info_print_table_row_internal(int num_cols,
+/* {{{ php_info_print_table_row_internal */
+static ZEND_COLD void php_info_print_table_row_internal(int num_cols,
 		const char *value_class, va_list row_elements)
 {
 	int i;
@@ -1213,9 +1209,8 @@ static void php_info_print_table_row_internal(int num_cols,
 }
 /* }}} */
 
-/* {{{ php_info_print_table_row
- */
-PHPAPI void php_info_print_table_row(int num_cols, ...)
+/* {{{ php_info_print_table_row */
+PHPAPI ZEND_COLD void php_info_print_table_row(int num_cols, ...)
 {
 	va_list row_elements;
 
@@ -1225,9 +1220,8 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 }
 /* }}} */
 
-/* {{{ php_info_print_table_row_ex
- */
-PHPAPI void php_info_print_table_row_ex(int num_cols, const char *value_class,
+/* {{{ php_info_print_table_row_ex */
+PHPAPI ZEND_COLD void php_info_print_table_row_ex(int num_cols, const char *value_class,
 		...)
 {
 	va_list row_elements;
@@ -1238,31 +1232,7 @@ PHPAPI void php_info_print_table_row_ex(int num_cols, const char *value_class,
 }
 /* }}} */
 
-/* {{{ register_phpinfo_constants
- */
-void register_phpinfo_constants(INIT_FUNC_ARGS)
-{
-	REGISTER_LONG_CONSTANT("INFO_GENERAL", PHP_INFO_GENERAL, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_CREDITS", PHP_INFO_CREDITS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_CONFIGURATION", PHP_INFO_CONFIGURATION, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_MODULES", PHP_INFO_MODULES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_ENVIRONMENT", PHP_INFO_ENVIRONMENT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_VARIABLES", PHP_INFO_VARIABLES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_LICENSE", PHP_INFO_LICENSE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("INFO_ALL", PHP_INFO_ALL, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_GROUP",	PHP_CREDITS_GROUP, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_GENERAL",	PHP_CREDITS_GENERAL, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_SAPI",	PHP_CREDITS_SAPI, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_MODULES",	PHP_CREDITS_MODULES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_DOCS",	PHP_CREDITS_DOCS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_FULLPAGE",	PHP_CREDITS_FULLPAGE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_QA",	PHP_CREDITS_QA, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("CREDITS_ALL",	PHP_CREDITS_ALL, CONST_PERSISTENT|CONST_CS);
-}
-/* }}} */
-
-/* {{{ proto void phpinfo([int what])
-   Output a page of useful information about PHP and the current request */
+/* {{{ Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
 	zend_long flag = PHP_INFO_ALL;
@@ -1282,8 +1252,7 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string phpversion([string extension])
-   Return the current PHP version */
+/* {{{ Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
@@ -1291,7 +1260,7 @@ PHP_FUNCTION(phpversion)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(ext_name, ext_name_len)
+		Z_PARAM_STRING_OR_NULL(ext_name, ext_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ext_name) {
@@ -1307,8 +1276,7 @@ PHP_FUNCTION(phpversion)
 }
 /* }}} */
 
-/* {{{ proto void phpcredits([int flag])
-   Prints the list of people who've contributed to the PHP project */
+/* {{{ Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
 	zend_long flag = PHP_CREDITS_ALL;
@@ -1323,13 +1291,10 @@ PHP_FUNCTION(phpcredits)
 }
 /* }}} */
 
-/* {{{ proto string php_sapi_name(void)
-   Return the current SAPI module name */
+/* {{{ Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (sapi_module.name) {
 		RETURN_STRING(sapi_module.name);
@@ -1340,30 +1305,37 @@ PHP_FUNCTION(php_sapi_name)
 
 /* }}} */
 
-/* {{{ proto string php_uname(void)
-   Return information about the system PHP was built on */
+/* {{{ Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-	char *mode = "a";
+	char *mode_str = "a";
 	size_t modelen = sizeof("a")-1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(mode, modelen)
+		Z_PARAM_STRING(mode_str, modelen)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_get_uname(*mode));
+	if (modelen != 1) {
+		zend_argument_value_error(1, "must be a single character");
+		RETURN_THROWS();
+	}
+
+	char mode = *mode_str;
+	if (!php_is_valid_uname_mode(mode)) {
+		zend_argument_value_error(1, "must be one of \"a\", \"m\", \"n\", \"r\", \"s\", or \"v\"");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(php_get_uname(mode));
 }
 
 /* }}} */
 
-/* {{{ proto string php_ini_scanned_files(void)
-   Return comma-separated string of .ini files parsed from the additional ini dir */
+/* {{{ Return comma-separated string of .ini files parsed from the additional ini dir */
 PHP_FUNCTION(php_ini_scanned_files)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_ini_scanned_files) {
 		RETURN_STRING(php_ini_scanned_files);
@@ -1373,13 +1345,10 @@ PHP_FUNCTION(php_ini_scanned_files)
 }
 /* }}} */
 
-/* {{{ proto string php_ini_loaded_file(void)
-   Return the actual loaded ini filename */
+/* {{{ Return the actual loaded ini filename */
 PHP_FUNCTION(php_ini_loaded_file)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_ini_opened_path) {
 		RETURN_STRING(php_ini_opened_path);
@@ -1388,12 +1357,3 @@ PHP_FUNCTION(php_ini_loaded_file)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

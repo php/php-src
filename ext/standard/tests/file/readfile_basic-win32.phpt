@@ -8,14 +8,11 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
 // common file used
-require(dirname(__FILE__) . '/file.inc');
+require(__DIR__ . '/file.inc');
 
 echo "*** Testing readfile() : basic functionality ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_prefix = "readfile_basic";  // temp files created with this prefix
 
 // the content that is filled into the temp files as created

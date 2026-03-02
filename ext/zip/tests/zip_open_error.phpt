@@ -3,26 +3,26 @@ zip_open() error conditions
 --CREDITS--
 Birgitte Kvarme <bitta@redpill-linpro.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 echo "Test case 1:";
-$zip = zip_open("");
+try {
+    $zip = zip_open("");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Test case 2:";
-$zip = zip_open("i_dont_care_about_this_parameter", "this_is_one_to_many");
-
-echo "Test case 3:\n";
+echo "Test case 2:\n";
 $zip = zip_open("/non_exisitng_directory/test_procedural.zip");
 echo is_resource($zip) ? "OK" : "Failure";
 ?>
 --EXPECTF--
 Test case 1:
-Warning: zip_open(): Empty string as source in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
+zip_open(): Argument #1 ($filename) must not be empty
 Test case 2:
-Warning: zip_open() expects exactly 1 parameter, 2 given in %s on line %d
-Test case 3:
+
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 Failure

@@ -1,8 +1,9 @@
 --TEST--
 imagewebp() and imagecreatefromwebp() - basic test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.0', '<')) {
     die("skip test requires GD 2.2.0 or higher");
 }
@@ -11,7 +12,7 @@ if (!function_exists('imagewebp') || !function_exists('imagecreatefromwebp'))
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/similarity.inc';
+require_once __DIR__ . '/func.inc';
 
 $filename = __DIR__ . '/webp_basic.webp';
 
@@ -28,11 +29,26 @@ imagewebp($im1, $filename);
 
 $im2 = imagecreatefromwebp($filename);
 imagewebp($im2, $filename);
-var_dump(calc_image_dissimilarity($im1, $im2) < 10e5);
+echo 'Is lossy conversion close enough? ';
+var_dump(mse($im1, $im2) < 500);
+
+imagewebp($im1, $filename, IMG_WEBP_LOSSLESS);
+$im_lossless = imagecreatefromwebp($filename);
+echo 'Does lossless conversion work? ';
+var_dump(mse($im1, $im_lossless) == 0);
+
+try {
+	imagewebp($im1, $filename, -10);
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
+
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/webp_basic.webp');
 ?>
 --EXPECT--
-bool(true)
+Is lossy conversion close enough? bool(true)
+Does lossless conversion work? bool(true)
+imagewebp(): Argument #3 ($quality) must be greater than or equal to -1

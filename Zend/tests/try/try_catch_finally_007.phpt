@@ -20,7 +20,7 @@ function foo($ret = FALSE) {
     } catch (Exception $e) {
         goto local;
 local:
-        var_dump("catched");
+        var_dump("caught");
         if ($ret) return "return";
     } finally {
        var_dump("finally2");
@@ -34,13 +34,13 @@ var_dump(foo());
 var_dump(foo(true));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "finally1"
-string(7) "catched"
+string(6) "caught"
 string(8) "finally2"
 string(5) "label"
 NULL
 string(8) "finally1"
-string(7) "catched"
+string(6) "caught"
 string(8) "finally2"
 string(6) "return"

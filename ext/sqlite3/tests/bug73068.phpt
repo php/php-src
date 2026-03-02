@@ -1,7 +1,12 @@
 --TEST--
 Bug #73068 SQLite3 may fail to DELETE
+--EXTENSIONS--
+sqlite3
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php
+$version = SQLite3::version()['versionNumber'];
+if ($version >= 3011000 && $version < 3014002) die('skip libsqlite 3.11.0 to 3.14.1 exhibit erroneous behavior');
+?>
 --FILE--
 <?php
 

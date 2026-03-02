@@ -9,5 +9,5 @@ extract($a, EXTR_OVERWRITE|EXTR_REFS);
 $foo = 'changed.foo';
 var_dump($a['foo']);
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "changed.foo"

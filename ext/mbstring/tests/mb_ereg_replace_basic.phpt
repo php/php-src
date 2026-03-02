@@ -1,25 +1,21 @@
 --TEST--
 Test mb_ereg_replace() function : basic
+--EXTENSIONS--
+mbstring
+--INI--
+internal_encoding=UTF-8
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_ereg_replace(string $pattern, string $replacement,
- * string $string [, string o$ption])
- * Description: Replace regular expression for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test Basic Functionality of mb_ereg_replace()
  */
 
 echo "*** Testing mb_ereg_replace() : basic functionality ***\n";
 
-mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
 $string_ascii = 'abc def';

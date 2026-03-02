@@ -1,14 +1,7 @@
 --TEST--
 Test is_a() function : usage variations  - wrong type for arg 1
---INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED
 --FILE--
 <?php
-/* Prototype  : proto bool is_a(object object, string class_name)
- * Description: Returns true if the object is of this class or has this class as one of its parents
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
 // Note: basic use cases in Zend/tests/is_a.phpt
 echo "*** Testing is_a() : usage variations ***\n";
 
@@ -79,9 +72,9 @@ echo "Done";
 --EXPECTF--
 *** Testing is_a() : usage variations ***
 
-Notice: Undefined variable: undefined_var in %s on line 59
+Warning: Undefined variable $undefined_var in %s on line %d
 
-Notice: Undefined variable: unset_var in %s on line 62
+Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value 0 
 bool(false)

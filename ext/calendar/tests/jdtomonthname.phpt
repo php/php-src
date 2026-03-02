@@ -1,7 +1,7 @@
 --TEST--
 jdtomonthname() test
---SKIPIF--
-<?php if (!extension_loaded("calendar")) print "skip"; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 
@@ -9,25 +9,24 @@ $jd_days = Array(
     2453396,
     2440588,
     -1,
-    array(),
     10000000
     );
 
 foreach ($jd_days as $jd_day) {
-	echo "=== ", $jd_day, "\n";
+    echo "=== ", $jd_day, "\n";
     var_dump(jdmonthname($jd_day,0));
     var_dump(jdmonthname($jd_day,1));
     var_dump(jdmonthname($jd_day,2));
     var_dump(jdmonthname($jd_day,3));
     var_dump(jdmonthname($jd_day,4));
     var_dump(jdmonthname($jd_day,5));
-	echo "\n";
+    echo "\n";
 }
 
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 === 2453396
 string(3) "Jan"
 string(7) "January"
@@ -51,28 +50,6 @@ string(0) ""
 string(0) ""
 string(0) ""
 string(0) ""
-
-=== 
-Notice: Array to string conversion in %sjdtomonthname.php on line %d
-Array
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
 
 === 10000000
 string(3) "Dec"

@@ -27,7 +27,7 @@ foreach ( $variation_array as $var ) {
   var_dump(get_cfg_var( $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with int values ***
 bool(false)
 bool(false)

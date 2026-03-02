@@ -1,7 +1,7 @@
 --TEST--
 Cloning GMP instances
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -11,7 +11,7 @@ gmp_clrbit($a, 0);
 var_dump($a, $b); // $b should be unaffected
 
 ?>
---EXPECTF--
+--EXPECT--
 object(GMP)#1 (1) {
   ["num"]=>
   string(1) "2"

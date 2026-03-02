@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() iterator, 1 file passed in
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -14,47 +14,46 @@ class myIterator implements Iterator
     {
         $this->a = $a;
     }
-    function next() {
+    function next(): void {
         echo "next\n";
-        return next($this->a);
+        next($this->a);
     }
-    function current() {
+    function current(): mixed {
         echo "current\n";
         return current($this->a);
     }
-    function key() {
+    function key(): mixed {
         echo "key\n";
         return key($this->a);
     }
-    function valid() {
+    function valid(): bool {
         echo "valid\n";
         return current($this->a);
     }
-    function rewind() {
+    function rewind(): void {
         echo "rewind\n";
-        return reset($this->a);
+        reset($this->a);
     }
 }
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator4.phar');
-	var_dump($phar->buildFromIterator(new myIterator(
-		array(
-			'a' => basename(__FILE__, 'php') . 'phpt',
-			// demonstrate that none of these are added
-			'.phar/stub.php' => basename(__FILE__, 'php') . 'phpt',
-			'.phar/alias.txt' => basename(__FILE__, 'php') . 'phpt',
-			'.phar/oops' => basename(__FILE__, 'php') . 'phpt',
-		))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator4.phar');
+    var_dump($phar->buildFromIterator(new myIterator(
+        array(
+            'a' => basename(__FILE__, 'php') . 'phpt',
+            // demonstrate that none of these are added
+            '.phar/stub.php' => basename(__FILE__, 'php') . 'phpt',
+            '.phar/alias.txt' => basename(__FILE__, 'php') . 'phpt',
+            '.phar/oops' => basename(__FILE__, 'php') . 'phpt',
+        ))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromiterator4.phar');
+unlink(__DIR__ . '/buildfromiterator4.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -80,4 +79,3 @@ array(1) {
   ["a"]=>
   string(%d) "%sphar_buildfromiterator4.phpt"
 }
-===DONE===

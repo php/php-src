@@ -1,5 +1,7 @@
 --TEST--
 Test session_encode() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -9,18 +11,12 @@ session.serialize_handler=blah
 
 ob_start();
 
-/*
- * Prototype : string session_encode(void)
- * Description : Encodes the current session data as a string
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_encode() : variation ***\n";
 
 var_dump(session_start());
 $_SESSION["foo"] = 1234567890;
 $encoded = session_encode();
-var_dump(base64_encode($encoded));
+var_dump($encoded);
 var_dump(session_destroy());
 
 echo "Done";
@@ -29,11 +25,11 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 
-Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
+Warning: session_start(): Cannot find session serialization handler "blah" - session startup failed in %s on line %d
 bool(false)
 
 Warning: session_encode(): Cannot encode non-existent session in %s on line %d
-string(0) ""
+bool(false)
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)

@@ -2,16 +2,10 @@
 Test array_udiff_uassoc() function : usage variation
 --FILE--
 <?php
-/* Prototype  : array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions.
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 echo "*** Testing array_udiff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr2 = array(1, 2);
+$array2 = array(1, 2);
 
 include('compare_function.inc');
 $data_comp_func = 'compare_function';
@@ -24,9 +18,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -89,140 +83,92 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for arr1
+// loop through each element of the array for array1
 
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( array_udiff_uassoc($value, $arr2, $data_comp_func, $key_comp_func) );
+    echo "\n--$key--\n";
+    try {
+        var_dump( array_udiff_uassoc($value, $array2, $data_comp_func, $key_comp_func) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_udiff_uassoc() : usage variation ***
 
 --int 0--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, int given
 
 --int 1--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, int given
 
 --int 12345--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, int given
 
 --int -12345--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, int given
 
 --float 10.5--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, float given
 
 --float -10.5--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, float given
 
 --float 12.3456789000e10--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, float given
 
 --float -12.3456789000e10--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, float given
 
 --float .5--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, float given
 
 --uppercase NULL--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, null given
 
 --lowercase null--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, null given
 
 --lowercase true--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, true given
 
 --lowercase false--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, false given
 
 --uppercase TRUE--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, true given
 
 --uppercase FALSE--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, false given
 
 --empty string DQ--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --empty string SQ--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --string DQ--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --string SQ--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --mixed case string--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --heredoc--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, string given
 
 --instance of classWithToString--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, classWithoutToString given
 
 --undefined var--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, null given
 
 --unset var--
-
-Warning: array_udiff_uassoc(): Argument #1 is not an array in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
-===DONE===
+array_udiff_uassoc(): Argument #1 ($array) must be of type array, null given

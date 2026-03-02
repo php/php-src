@@ -4,13 +4,13 @@ ZE2 A protected method can only be called inside the class
 <?php
 
 class pass {
-	protected function fail() {
-		echo "Call fail()\n";
-	}
+    protected function fail() {
+        echo "Call fail()\n";
+    }
 
-	public function good() {
-		$this->fail();
-	}
+    public function good() {
+        $this->fail();
+    }
 }
 
 $t = new pass();
@@ -22,7 +22,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call fail()
 
-Fatal error: Uncaught Error: Call to protected method pass::fail() from context '' in %s:%d
+Fatal error: Uncaught Error: Call to protected method pass::fail() from global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

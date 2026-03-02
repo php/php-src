@@ -1,8 +1,7 @@
 --TEST--
 Phar object: access through SplFileObject
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -12,11 +11,11 @@ require_once 'files/phar_oo_test.inc';
 
 class MyFile extends SplFileObject
 {
-	function __construct($name)
-	{
-		echo __METHOD__ . "(" . str_replace(str_replace('\\', '/', dirname(__FILE__)), '*', $name) . ")\n";
-		parent::__construct($name);
-	}
+    function __construct($name)
+    {
+        echo __METHOD__ . "(" . str_replace(str_replace('\\', '/', __DIR__), '*', $name) . ")\n";
+        parent::__construct($name);
+    }
 }
 
 $phar = new Phar($fname);
@@ -56,10 +55,9 @@ var_dump($f->eof());
 //unset($f); without unset we check for working refcounting
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/phar_oo_007.phar.php');
+unlink(__DIR__ . '/files/phar_oo_007.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
@@ -84,4 +82,3 @@ int(0)
 bool(false)
 string(32) "<?php echo "This is a.php\n"; ?>"
 bool(true)
-===DONE===

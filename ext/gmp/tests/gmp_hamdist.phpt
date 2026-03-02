@@ -1,7 +1,7 @@
 --TEST--
 gmp_hamdist() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -16,15 +16,25 @@ var_dump(gmp_hamdist($n, "8333765434567897654333334567"));
 var_dump(gmp_hamdist($n, $n));
 var_dump(gmp_hamdist($n, $n1));
 
-var_dump(gmp_hamdist($n, $n1, 1));
-var_dump(gmp_hamdist($n, array()));
-var_dump(gmp_hamdist(array(), $n));
-var_dump(gmp_hamdist(array(), array()));
-var_dump(gmp_hamdist());
+try {
+    var_dump(gmp_hamdist($n, array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_hamdist(array(), $n));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_hamdist(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(13)
 int(-1)
 int(36)
@@ -32,19 +42,7 @@ int(-1)
 int(43)
 int(0)
 int(26)
-
-Warning: gmp_hamdist() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_hamdist() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+gmp_hamdist(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
+gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

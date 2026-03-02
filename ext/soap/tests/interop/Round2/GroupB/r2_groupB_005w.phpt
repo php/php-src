@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 groupB 005 (php/wsdl): echoNestedArray
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
@@ -12,7 +12,7 @@ $param = (object)array(
   'varInt'=>34,
   'varFloat'=>325.325,
   'varArray' => array('red','blue','green'));
-$client = new SoapClient(dirname(__FILE__)."/round2_groupB.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round2_groupB.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoNestedArray($param);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

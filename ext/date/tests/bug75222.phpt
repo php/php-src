@@ -11,7 +11,7 @@ var_dump($diff->f);
 var_dump(get_object_vars($diff)['f']);
 var_dump($diff->f === get_object_vars($diff)['f']);
 ?>
---EXPECTF--
+--EXPECT--
 float(0.123456)
 float(0.123456)
 bool(true)

@@ -21,7 +21,7 @@ foo();
 echo "\n";
 foo(true);
 ?>
---EXPECTF--
+--EXPECT--
 try
 finally
 end

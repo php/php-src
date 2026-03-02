@@ -1,14 +1,14 @@
 --TEST--
 Phar: context/compress=BZip2
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
+--EXTENSIONS--
+phar
+bz2
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
 
@@ -48,12 +48,11 @@ var_dump(file_get_contents($pname . '/e'));
 var_dump($phar['e']->isCompressed());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "a"
 bool(false)
 string(1) "b"
@@ -70,4 +69,3 @@ string(5) "new d"
 bool(false)
 string(5) "new e"
 bool(true)
-===DONE===

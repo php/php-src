@@ -1,14 +1,15 @@
 --TEST--
 SOAP XML Schema 10: simpleType/list (as array)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<simpleType name="testType">
-		<list itemType="token"/>
-	</simpleType>
+    <simpleType name="testType">
+        <list itemType="token"/>
+    </simpleType>
 EOF;
 test_schema($schema,'type="tns:testType"',array("one","two"));
 echo "ok";

@@ -4,40 +4,42 @@ ReflectionGenerator basic test
 <?php
 
 function foo() {
-	yield;
+    yield;
 }
 
 $gens = [
-	(new class() {
-		function a() {
-			yield from foo();
-		}
-	})->a(),
-	(function() {
-		yield;
-	})(),
-	foo(),
+    (new class() {
+        function a() {
+            yield from foo();
+        }
+    })->a(),
+    (function() {
+        yield;
+    })(),
+    foo(),
 ];
 
 foreach ($gens as $gen) {
-	var_dump($gen);
+    var_dump($gen);
 
-	$gen->valid(); // start Generator
-	$ref = new ReflectionGenerator($gen);
+    $gen->valid(); // start Generator
+    $ref = new ReflectionGenerator($gen);
 
-	var_dump($ref->getTrace());
-	var_dump($ref->getExecutingLine());
-	var_dump($ref->getExecutingFile());
-	var_dump($ref->getExecutingGenerator());
-	var_dump($ref->getFunction());
-	var_dump($ref->getThis());
+    var_dump($ref->getTrace());
+    var_dump($ref->getExecutingLine());
+    var_dump($ref->getExecutingFile());
+    var_dump($ref->getExecutingGenerator());
+    var_dump($ref->getFunction());
+    var_dump($ref->getThis());
 }
 
 ?>
 --EXPECTF--
-object(Generator)#2 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(%d) "class@anonymous%s::a"
 }
-array(1) {
+array(2) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -50,10 +52,27 @@ array(1) {
     array(0) {
     }
   }
+  [1]=>
+  array(5) {
+    ["function"]=>
+    string(1) "a"
+    ["class"]=>
+    string(%d) "class@anonymous%s"
+    ["object"]=>
+    object(class@anonymous)#%d (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
 int(%d)
 string(%d) "%sReflectionGenerator_basic.%s"
-object(Generator)#6 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "foo"
 }
 object(ReflectionMethod)#8 (2) {
   ["name"]=>
@@ -63,26 +82,50 @@ object(ReflectionMethod)#8 (2) {
 }
 object(class@anonymous)#1 (0) {
 }
-object(Generator)#4 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(%d) "{closure:%s:%d}"
 }
-array(0) {
+array(1) {
+  [0]=>
+  array(2) {
+    ["function"]=>
+    string(%d) "{closure:%s:%d}"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
 int(%d)
 string(%d) "%sReflectionGenerator_basic.%s"
-object(Generator)#4 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(%d) "{closure:%s:%d}"
 }
 object(ReflectionFunction)#7 (1) {
   ["name"]=>
-  string(9) "{closure}"
+  string(%d) "{closure:%s:%d}"
 }
 NULL
-object(Generator)#5 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "foo"
 }
-array(0) {
+array(1) {
+  [0]=>
+  array(2) {
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
 int(%d)
 string(%d) "%sReflectionGenerator_basic.%s"
-object(Generator)#5 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "foo"
 }
 object(ReflectionFunction)#8 (1) {
   ["name"]=>

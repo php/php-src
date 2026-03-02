@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement::setFetchMode
+--EXTENSIONS--
+pdo
 --SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
+<?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -10,38 +11,47 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')');
+$db->exec('CREATE TABLE test012(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec("INSERT INTO test012 VALUES(1, 'A', 'Group1')");
+$db->exec("INSERT INTO test012 VALUES(2, 'B', 'Group2')");
 
-$SELECT = 'SELECT val, grp FROM test';
+$SELECT = 'SELECT val, grp FROM test012';
 
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
 var_dump($stmt->fetchAll());
 
-class Test
+class TestClass
 {
-	function __construct($name = 'N/A')
-	{
-		echo __METHOD__ . "($name)\n";
-	}
+    public $val;
+    public $grp;
+
+    function __construct($name = 'N/A')
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 }
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test');
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class);
 var_dump($stmt->fetchAll());
 
 unset($stmt);
 
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
-$stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', array('Changed'));
+$stmt->setFetchMode(PDO::FETCH_CLASS, TestClass::class, array('Changed'));
 var_dump($stmt->fetchAll());
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test012");
 ?>
 --EXPECTF--
 array(2) {
@@ -60,36 +70,36 @@ array(2) {
     string(6) "Group2"
   }
 }
-Test::__construct(N/A)
-Test::__construct(N/A)
+TestClass::__construct(N/A)
+TestClass::__construct(N/A)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>
     string(6) "Group2"
   }
 }
-Test::__construct(Changed)
-Test::__construct(Changed)
+TestClass::__construct(Changed)
+TestClass::__construct(Changed)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>

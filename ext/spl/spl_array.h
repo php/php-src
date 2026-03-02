@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,14 +14,18 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef SPL_ARRAY_H
 #define SPL_ARRAY_H
 
 #include "php.h"
-#include "php_spl.h"
-#include "spl_iterators.h"
+
+#define SPL_ARRAY_STD_PROP_LIST      0x00000001
+#define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
+#define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
+#define SPL_ARRAY_IS_SELF            0x01000000
+#define SPL_ARRAY_USE_OTHER          0x02000000
+#define SPL_ARRAY_INT_MASK           0xFFFF0000
+#define SPL_ARRAY_CLONE_MASK         0x0100FFFF
 
 extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
 extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
@@ -35,12 +37,3 @@ extern void spl_array_iterator_append(zval *object, zval *append_value);
 extern void spl_array_iterator_key(zval *object, zval *return_value);
 
 #endif /* SPL_ARRAY_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

@@ -1,7 +1,5 @@
 --TEST--
 Ensure the ReflectionMethod constructor triggers autoload.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 spl_autoload_register(function ($name) {
@@ -10,12 +8,12 @@ spl_autoload_register(function ($name) {
 });
 
 try {
-  new ReflectionMethod("UndefC::test");
+  new ReflectionMethod("UndefC", "test");
 }
 catch (ReflectionException $e) {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "UndefC"
-Class UndefC does not exist
+Class "UndefC" does not exist

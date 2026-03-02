@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,10 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -53,7 +49,7 @@ static void com_iter_dtor(zend_object_iterator *iter)
 	zval_ptr_dtor(&I->zdata);
 }
 
-static int com_iter_valid(zend_object_iterator *iter)
+static zend_result com_iter_valid(zend_object_iterator *iter)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 
@@ -102,18 +98,18 @@ static void com_iter_move_forwards(zend_object_iterator *iter)
 			I->key++;
 		} else {
 			/* indicate that there are no more items */
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 			return;
 		}
 	} else {
 		/* safe array */
 		if (I->key >= (ULONG) I->sa_max) {
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 			return;
 		}
 		I->key++;
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key) == 0) {
-			I->key = (ulong)-1;
+		if (!php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key)) {
+			I->key = (zend_ulong)-1;
 			return;
 		}
 	}
@@ -125,13 +121,14 @@ static void com_iter_move_forwards(zend_object_iterator *iter)
 }
 
 
-static zend_object_iterator_funcs com_iter_funcs = {
+static const zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_dtor,
 	com_iter_valid,
 	com_iter_get_data,
 	com_iter_get_key,
 	com_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref)
@@ -145,13 +142,15 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	zval ptr;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH && !V_ISARRAY(&obj->v)) {
-		php_error_docref(NULL, E_WARNING, "variant is not an object or array VT=%d", V_VT(&obj->v));
+		/* TODO Promote to TypeError? */
+		php_error_docref(NULL, E_WARNING, "Variant is not an object or array VT=%d", V_VT(&obj->v));
 		return NULL;
 	}
 
@@ -174,6 +173,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		dims = SafeArrayGetDim(V_ARRAY(&obj->v));
 
 		if (dims != 1) {
+			/* TODO Promote to ValueError? */
 			php_error_docref(NULL, E_WARNING,
 				   "Can only handle single dimension variant arrays (this array has %d)", dims);
 			goto fail;
@@ -188,19 +188,19 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		SafeArrayGetUBound(V_ARRAY(&I->safe_array), 1, &I->sa_max);
 
 		/* pre-fetch the element */
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
+		if (I->sa_max >= bound && php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
 			I->key = bound;
 			ZVAL_NULL(&ptr);
 			php_com_zval_from_variant(&ptr, &I->v, I->code_page);
 			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 		}
 
 	} else {
 		/* can we enumerate it? */
 		if (FAILED(IDispatch_Invoke(V_DISPATCH(&obj->v), DISPID_NEWENUM,
-						&IID_NULL, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
+						&IID_NULL, LOCALE_NEUTRAL, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
 						&dp, &v, NULL, NULL))) {
 			goto fail;
 		}
@@ -229,7 +229,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
 			/* indicate that there are no more items */
-			I->key = (ulong)-1;
+			I->key = (zend_ulong)-1;
 		}
 	}
 

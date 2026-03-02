@@ -2,19 +2,15 @@
 Test fgetc() function : usage variations - read when file pointer at EOF
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
 // include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with file whose file pointer is pointing to EOF --\n";
 // create a file
-create_files(dirname(__FILE__), 1, "text_with_new_line", 0755, 1, "w", "fgetc_variation");
+create_files(__DIR__, 1, "text_with_new_line", 0755, 1, "w", "fgetc_variation");
 
-$filename = dirname(__FILE__)."/fgetc_variation1.tmp";
+$filename = __DIR__."/fgetc_variation1.tmp";
 
 // loop to check the file opened in different read modes
 $file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t");
@@ -44,9 +40,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink( dirname(__FILE__)."/fgetc_variation1.tmp");
+unlink( __DIR__."/fgetc_variation1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with file whose file pointer is pointing to EOF --
 -- File opened in mode : r --

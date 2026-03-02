@@ -1,9 +1,7 @@
 --TEST--
 bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() Produces invalid Markup)
---SKIPIF--
-<?php
-extension_loaded("dom") or die("skip need ext/dom");
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument();
@@ -19,8 +17,6 @@ $frag2->appendChild($dom->createElement('div'));
 $frag2->appendChild($dom->createElement('div'));
 var_dump($dom->saveHTML($frag2));
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
 string(46) "<div><span></span></div><div></div><div></div>"
-===DONE===

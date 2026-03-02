@@ -1,10 +1,10 @@
 --TEST--
-Reflection on invokable objects
+Reflection on invocable objects
 --FILE--
 <?php
 
 class Test {
-	function __invoke($a, $b = 0) { }
+    function __invoke($a, $b = 0) { }
 }
 
 $rm = new ReflectionMethod(new Test, '__invoke');
@@ -19,11 +19,9 @@ $rp = new ReflectionParameter(array(new Test, '__invoke'), 1);
 var_dump($rp->isOptional());
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 string(8) "__invoke"
 int(2)
 int(1)
 bool(false)
 bool(true)
-===DONE===

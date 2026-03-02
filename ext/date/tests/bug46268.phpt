@@ -16,6 +16,7 @@ echo $now->format("Y-m-d H:i:s") . PHP_EOL;
 $now->setTime(0, 0, 0);
 //date_time_set($now, 0, 0, 0);
 echo $now->format("Y-m-d H:i:s") . PHP_EOL;
+?>
 --EXPECT--
 2008-10-10 01:02:03
 2008-10-11 01:02:03

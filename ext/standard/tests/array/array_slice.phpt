@@ -11,34 +11,14 @@ $var_array = array(
                    array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"),
                    array("1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"),
                    array(1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"),
-                   array("f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-                         "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five"),
+                   array("f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+                         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five"),
                    array(12, "name", 'age', '45'),
                    array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array())
                  );
 
 $num = 4;
 $str = "john";
-
-/* Zero args */
-echo"\n*** Output for Zero Argument ***\n";
-array_slice();
-
-/* Single args */
-echo"\n*** Output for Single array Argument ***\n";
-array_slice($var_array);
-
-/* More than valid no. of args (ie. >4 )  */
-echo"\n*** Output for invalid number of Arguments ***\n";
-array_slice($var_array, 2, 4, true, 3);
-
-/* Scalar arg */
-echo"\n*** Output for scalar Argument ***\n";
-array_slice($num, 2);
-
-/* String arg */
-echo"\n*** Output for string Argument ***\n";
-array_slice($str, 2);
 
 $counter = 1;
 foreach ($var_array as $sub_array)
@@ -88,27 +68,7 @@ foreach ($var_array as $sub_array)
   var_dump (array_slice($var_array[2], -3, -2, false) );
 
 ?>
---EXPECTF--
-*** Output for Zero Argument ***
-
-Warning: array_slice() expects at least 2 parameters, 0 given in %s on line %d
-
-*** Output for Single array Argument ***
-
-Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
-
-*** Output for invalid number of Arguments ***
-
-Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
-
-*** Output for scalar Argument ***
-
-Warning: array_slice() expects parameter 1 to be array, integer given in %s on line %d
-
-*** Output for string Argument ***
-
-Warning: array_slice() expects parameter 1 to be array, string given in %s on line %d
-
+--EXPECT--
 *** Iteration 1 ***
 
 *** Variation with first two Arguments ***

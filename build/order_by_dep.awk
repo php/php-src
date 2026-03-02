@@ -10,14 +10,14 @@ function get_deps(module_name, module_dir,       depline, cmd)
 {
 	# this could probably be made *much* better
 	RS=orig_rs;
-	FS="[(,) \t]+"
+	FS="[ \t]*[(,)][ \t]*"
 	cmd = "grep PHP_ADD_EXTENSION_DEP " module_dir "/config*.m4"
 	while (cmd | getline) {
-#		printf("GOT: %s,%s,%s,%s,%s\n", $1, $2, $3, $4, $5);
-		if (!length($5)) {
-			$5 = 0;
+		#printf("GOT: %s,%s,%s,%s\n", $1, $2, $3, $4);
+		if (!length($4)) {
+			$4 = 0;
 		}
-		mod_deps[module_name, $4] = $5;
+		mod_deps[module_name, $3] = $4;
 	}
 	close(cmd)
 	RS=" ";

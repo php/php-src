@@ -3,30 +3,24 @@ Test lstat() and stat() functions: usage variations - effects of touch() on link
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (!(stristr(PHP_OS, 'linux')))  {
-    die('skip.. test valid for linux only');
-}
 
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
+} else {
 // checking for atime update whether it is enabled or disabled
-exec("mount", $mount_output);
-foreach( $mount_output as $out )  {
-  if( stristr($out, "noatime") )
-     die('skip.. atime update is disabled, hence skip the test');
+    exec("mount", $mount_output);
+    foreach( $mount_output as $out )  {
+    if( stristr($out, "noatime") )
+        die('skip.. atime update is disabled, hence skip the test');
+    }
 }
-
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of touch() on stats of link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -64,11 +58,11 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation6.tmp");
 unlink("$file_path/lstat_stat_variation_link6.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lstat() for link after using touch() on the link ***
 bool(true)
 bool(true)

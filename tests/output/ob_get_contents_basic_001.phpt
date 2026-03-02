@@ -4,13 +4,6 @@ Test ob_get_contents() function : basic functionality
 Iain Lewis <ilewis@php.net>
 --FILE--
 <?php
-/* Prototype  : proto string ob_get_contents(void)
- * Description: Return the contents of the output buffer
- * Source code: main/output.c
- * Alias to functions:
- */
-
-
 echo "*** Testing ob_get_contents() : basic functionality ***\n";
 
 // Zero arguments
@@ -25,7 +18,7 @@ var_dump($hello);
 ob_end_flush();
 
 
-echo "\ncheck that we dont have a reference\n";
+echo "\ncheck that we don't have a reference\n";
 ob_start();
 echo "Hello World\n";
 $hello2 = ob_get_contents();
@@ -49,7 +42,7 @@ var_dump(ob_get_contents());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ob_get_contents() : basic functionality ***
 
 -- Testing ob_get_contents() function with Zero arguments --
@@ -58,7 +51,7 @@ Hello World
 string(12) "Hello World
 "
 
-check that we dont have a reference
+check that we don't have a reference
 Hello World
 string(12) "Hello World
 "

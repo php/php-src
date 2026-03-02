@@ -2,8 +2,8 @@
 Phar: default web stub, with phar extension
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/withphar_web.php
 REQUEST_URI=/withphar_web.php/web.php

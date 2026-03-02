@@ -4,26 +4,26 @@ Static variables in methods & nested functions & evals.
 <?php
 
 Class C {
-	function f() {
-		static $a = array(1,2,3);
-		eval(' static $k = array(4,5,6); ');
+    function f() {
+        static $a = array(1,2,3);
+        eval(' static $k = array(4,5,6); ');
 
-		function cfg() {
-			static $a = array(7,8,9);
-			eval(' static $k = array(10,11,12); ');
-			var_dump($a, $k);
-		}
-		var_dump($a, $k);
-	}
+        function cfg() {
+            static $a = array(7,8,9);
+            eval(' static $k = array(10,11,12); ');
+            var_dump($a, $k);
+        }
+        var_dump($a, $k);
+    }
 }
 $c = new C;
 $c->f();
 cfg();
 
 Class D {
-	static function f() {
-		eval('function dfg() { static $b = array(1,2,3); var_dump($b); } ');
-	}
+    static function f() {
+        eval('function dfg() { static $b = array(1,2,3); var_dump($b); } ');
+    }
 }
 D::f();
 dfg();
@@ -33,7 +33,7 @@ $e = new E;
 $e->f();
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

@@ -19,6 +19,7 @@ function foo() {
 foreach (foo() as $value) {
   var_dump($value);
 }
+?>
 --EXPECT--
 int(42)
 int(24)

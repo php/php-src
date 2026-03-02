@@ -1,8 +1,9 @@
 --TEST--
 pcntl_exec()
+--EXTENSIONS--
+pcntl
 --SKIPIF--
 <?php
-if (!extension_loaded("pcntl")) print "skip";
 if (!getenv("TEST_PHP_EXECUTABLE") || !is_executable(getenv("TEST_PHP_EXECUTABLE"))) die("skip TEST_PHP_EXECUTABLE not set");
 ?>
 --FILE--

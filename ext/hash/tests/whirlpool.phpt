@@ -1,7 +1,5 @@
 --TEST--
-whirlpool
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: whirlpool algorithm
 --FILE--
 <?php
 echo hash('whirlpool', ''), "\n";

@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -16,8 +14,6 @@
   |          Sara Golemon <pollita@php.net>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_hash.h"
 #include "php_hash_gost.h"
@@ -239,15 +235,15 @@ static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char inpu
 	Gost(context, data);
 }
 
-PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context)
+PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->tables = &tables_test;
 }
 
-PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context)
+PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	PHP_GOSTInit(context);
+	PHP_GOSTInit(context, NULL);
 	context->tables = &tables_crypto;
 }
 
@@ -265,7 +261,7 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length += len;
+		context->length += (unsigned char)len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
 
@@ -281,7 +277,7 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 
 		memcpy(context->buffer, input + i, r);
 		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
-		context->length = r;
+		context->length = (unsigned char)r;
 	}
 }
 
@@ -308,11 +304,28 @@ PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static hash_spec_result php_gost_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_GOST_CTX *ctx = (PHP_GOST_CTX *) hash->context;
+	hash_spec_result r = HASH_SPEC_FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_GOST_SPEC)) == HASH_SPEC_SUCCESS
+		&& ctx->length < sizeof(ctx->buffer)) {
+		return HASH_SPEC_SUCCESS;
+	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
+}
+
 const php_hash_ops php_hash_gost_ops = {
+	"gost",
 	(php_hash_init_func_t) PHP_GOSTInit,
 	(php_hash_update_func_t) PHP_GOSTUpdate,
 	(php_hash_final_func_t) PHP_GOSTFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_gost_unserialize,
+	PHP_GOST_SPEC,
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
@@ -320,21 +333,16 @@ const php_hash_ops php_hash_gost_ops = {
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
+	"gost-crypto",
 	(php_hash_init_func_t) PHP_GOSTInitCrypto,
 	(php_hash_update_func_t) PHP_GOSTUpdate,
 	(php_hash_final_func_t) PHP_GOSTFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_gost_unserialize,
+	PHP_GOST_SPEC,
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

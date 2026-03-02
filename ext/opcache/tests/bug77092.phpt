@@ -3,8 +3,8 @@ Bug #77092: array_diff_key() - segmentation fault
 --INI--
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test() {

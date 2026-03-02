@@ -2,19 +2,13 @@
 Test fpassthru() function: Basic functionality
 --FILE--
 <?php
-/*
-Prototype: int fpassthru ( resource $handle );
-Description: Reads to EOF on the given file pointer from the current position
-  and writes the results to the output buffer.
-*/
-
-$file_name = dirname(__FILE__)."/passthru.tmp";
+$file_name = __DIR__."/passthru.tmp";
 $write_handle = fopen($file_name, "w");
 
-$string = "Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^ 
+$string = "Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^
           Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^\n";
 if(substr(PHP_OS, 0, 3) == "WIN")  {
-	$string = str_replace("\r",'', $string);
+    $string = str_replace("\r",'', $string);
 }
 fwrite($write_handle, $string);
 fclose($write_handle);
@@ -60,68 +54,68 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/passthru.tmp");
+unlink(__DIR__."/passthru.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Test basic functionality of fpassthru() function ***
 
 -- Before seek operation --
 Hello, world
 , abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+8u2394723947	$%$%#$%#$%#^#%^
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(133)
+int(132)
 
 -- After seeking position to 0 --
 Hello, world
 , abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+8u2394723947	$%$%#$%#$%#^#%^
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(133)
+int(132)
 
 -- After seeking position to 3 --
 lo, world
 , abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+8u2394723947	$%$%#$%#$%#^#%^
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(130)
+int(129)
 
 -- After seeking position to 13 --
 , abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
-          Hello, world
-, abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(120)
-
--- After seeking position to 14 --
- abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
 int(119)
 
+-- After seeking position to 14 --
+ abcdefg	adsdsfdf
+8u2394723947	$%$%#$%#$%#^#%^
+          Hello, world
+, abcdefg	adsdsfdf
+8u2394723947	$%$%#$%#$%#^#%^
+int(118)
+
 -- After seeking position to 23 --
 adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+8u2394723947	$%$%#$%#$%#^#%^
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(110)
+int(109)
 
 -- After seeking position to 34 --
-2394723947	$%$%#$%#$%#^#%^ 
+2394723947	$%$%#$%#$%#^#%^
           Hello, world
 , abcdefg	adsdsfdf
 8u2394723947	$%$%#$%#$%#^#%^
-int(99)
+int(98)
 
 -- After seeking position to 1000 --
 int(0)

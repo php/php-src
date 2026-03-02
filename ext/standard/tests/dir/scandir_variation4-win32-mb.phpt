@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test scandir() with relative paths as $dir argument
  */
@@ -20,9 +15,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/scandir_variation4-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_path = "$base_dir_path/私はガラスを食べられますlevel_one";
 $level_two_dir_path = "$level_one_dir_path/私はガラスを食べられますlevel_two";
@@ -64,14 +60,14 @@ var_dump(scandir('../../私はガラスを食べられますlevel_one'));
 @delete_files($level_one_dir_path, 2, '私はガラスを食べられますlevel_one');
 @delete_files($level_two_dir_path, 2, '私はガラスを食べられますlevel_two');
 ?>
-===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__);
-rmdir("$dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$dir_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/scandir_variation4-win32-mb';
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 
 -- $path = './私はガラスを食べられますlevel_one': --
@@ -172,4 +168,3 @@ array(5) {
   [4]=>
   string(45) "私はガラスを食べられますlevel_two"
 }
-===DONE===

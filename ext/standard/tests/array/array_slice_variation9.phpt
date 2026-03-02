@@ -2,11 +2,6 @@
 Test array_slice() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_slice() when:
  * 1. Passed an array of referenced variables
@@ -29,7 +24,7 @@ var_dump(array_slice($input, 1, 2, true));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Array of referenced variables ($preserve_keys = default) --

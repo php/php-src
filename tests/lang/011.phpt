@@ -4,8 +4,8 @@ Testing nested functions
 <?php
 function F()
 {
-	$a = "Hello ";
-	return($a);
+    $a = "Hello ";
+    return($a);
 }
 
 function G()

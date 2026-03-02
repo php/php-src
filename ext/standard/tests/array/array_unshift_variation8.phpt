@@ -2,11 +2,6 @@
 Test array_unshift() function : usage variations - single quoted strings for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unshift() by passing different
  * single quoted strings for $var argument that is prepended to the array
@@ -54,7 +49,7 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : single quoted strings for $var argument ***
 -- Iteration 1 --
 int(5)

@@ -7,8 +7,6 @@
 # cdb-0.75 lacks support for installing header files and creating a
 # library which programs can link against.  This shell script fills
 # the gap.
-#
-# $Id: install_cdb.sh,v 1.2 2002-11-04 17:53:04 helly Exp $
 
 if test -r "cdb.a" && test -r "auto-str.c" && test -r "byte.a"; then
   :

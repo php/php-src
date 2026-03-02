@@ -1,5 +1,7 @@
 --TEST--
 Bug #78804: Segmentation fault in Locale::filterMatches
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

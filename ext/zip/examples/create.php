@@ -9,9 +9,9 @@ $zip = new ZipArchive();
 $filename = "./test112.zip";
 
 if (!$zip->open($filename, ZIPARCHIVE::CREATE)) {
-	exit("cannot open <$filename>\n");
+    exit("cannot open <$filename>\n");
 } else {
-	echo "file <$filename> OK\n";
+    echo "file <$filename> OK\n";
 }
 
 $zip->addFromString("testfilephp.txt" . time(), "#1 This is a test string added as testfilephp.txt.\n");

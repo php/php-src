@@ -1,14 +1,14 @@
 --TEST--
 PHP bug #74196: PharData->decompress() does not correctly support dot names
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.2.3.phar.tar.gz';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.2.3.phar.tar.gz';
 $decompressed_name = str_replace( ".gz", "",  $fname);
 var_dump(file_exists($fname));
 
@@ -18,6 +18,6 @@ var_dump(file_exists($decompressed_name));
 unlink($decompressed_name);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)

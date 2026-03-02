@@ -4,16 +4,17 @@ Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes from valu
 <?php
 
 $array = parse_ini_string('
-		int = 123
-		constant = INSTALL_ROOT
-		quotedString = "string"
-		a = INSTALL_ROOT "waa"
-		b = "INSTALL_ROOT"
-		c = "waa" INSTALL_ROOT
-		d = INSTALL_ROOT "INSTALL_ROOT"', false, INI_SCANNER_RAW);
+        int = 123
+        constant = INSTALL_ROOT
+        quotedString = "string"
+        a = INSTALL_ROOT "waa"
+        b = "INSTALL_ROOT"
+        c = "waa" INSTALL_ROOT
+        d = INSTALL_ROOT "INSTALL_ROOT"', false, INI_SCANNER_RAW);
 
 var_dump($array);
---EXPECTF--
+?>
+--EXPECT--
 array(7) {
   ["int"]=>
   string(3) "123"

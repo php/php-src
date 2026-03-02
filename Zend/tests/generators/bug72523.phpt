@@ -4,9 +4,9 @@ Bug #72523 (dtrace issue with reflection (failed test))
 <?php
 
 $gen = (new class() {
-	function a() {
-		yield "okey";
-	}
+    function a() {
+        yield "okey";
+    }
 })->a();
 
 var_dump($gen->current());

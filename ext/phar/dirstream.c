@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -21,11 +21,9 @@
 #include "phar_internal.h"
 #include "dirstream.h"
 
-BEGIN_EXTERN_C()
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
-END_EXTERN_C()
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_dir);
 
-php_stream_ops phar_dir_ops = {
+static const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */
@@ -44,9 +42,8 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && data->u.flags) {
+	if (data) {
 		zend_hash_destroy(data);
-		data->u.flags = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
@@ -90,27 +87,30 @@ static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend
 /**
  * Used for readdir() on an opendir()ed phar directory handle
  */
-static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
-	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
 	zend_string *str_key;
 	zend_ulong unused;
+
+	if (count != sizeof(php_stream_dirent)) {
+		return -1;
+	}
 
 	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key(data, &str_key, &unused)) {
 		return 0;
 	}
 
 	zend_hash_move_forward(data);
-	to_read = MIN(ZSTR_LEN(str_key), count);
 
-	if (to_read == 0 || count < ZSTR_LEN(str_key)) {
+	php_stream_dirent *dirent = (php_stream_dirent *) buf;
+
+	if (sizeof(dirent->d_name) <= ZSTR_LEN(str_key)) {
 		return 0;
 	}
 
-	memset(buf, 0, sizeof(php_stream_dirent));
-	memcpy(((php_stream_dirent *) buf)->d_name, ZSTR_VAL(str_key), to_read);
-	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
+	memset(dirent, 0, sizeof(php_stream_dirent));
+	PHP_STRLCPY(dirent->d_name, ZSTR_VAL(str_key), sizeof(dirent->d_name), ZSTR_LEN(str_key));
 
 	return sizeof(php_stream_dirent);
 }
@@ -119,9 +119,9 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ 
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
-	return 0;
+	return -1;
 }
 /* }}} */
 
@@ -135,40 +135,13 @@ static int phar_dir_flush(php_stream *stream) /* {{{ */
 /* }}} */
 
 /**
- * add an empty element with a char * key to a hash table, avoiding duplicates
- *
- * This is used to get a unique listing of virtual directories within a phar,
- * for iterating over opendir()ed phar directories.
- */
-static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {{{ */
-{
-	zval dummy;
-
-	ZVAL_NULL(&dummy);
-	return (zend_hash_str_update(ht, arKey, nKeyLength, &dummy) != NULL) ? SUCCESS : FAILURE;
-}
-/* }}} */
-
-/**
  * Used for sorting directories alphabetically
  */
-static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
+static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	int result;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-	result = zend_binary_strcmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
-
-	if (result < 0) {
-		return -1;
-	} else if (result > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	int result = zend_binary_strcmp(
+		ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+	return ZEND_NORMALIZE_BOOL(result);
 }
 /* }}} */
 
@@ -177,14 +150,10 @@ static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
  * files in a phar and retrieving its relative path.  From this, construct
  * a list of files/directories that are "in" the directory represented by dir
  */
-static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
+static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
-	size_t dirlen = strlen(dir);
-	char *entry, *found, *save;
-	zend_string *str_key;
-	uint32_t keylen;
-	zend_ulong unused;
+	char *entry;
 
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, NULL, NULL, 0);
@@ -192,106 +161,84 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
 		/* make empty root directory for empty phar */
 		/* make empty directory for .phar magic directory */
-		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 
-	zend_hash_internal_pointer_reset(manifest);
-
-	while (FAILURE != zend_hash_has_more_elements(manifest)) {
-		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key(manifest, &str_key, &unused)) {
-			break;
-		}
-
-		keylen = ZSTR_LEN(str_key);
-		if (keylen <= (uint32_t)dirlen) {
-			if (keylen == 0 || keylen < (uint32_t)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
-				if (SUCCESS != zend_hash_move_forward(manifest)) {
-					break;
-				}
+	zend_string *str_key;
+	ZEND_HASH_MAP_FOREACH_STR_KEY(manifest, str_key) {
+		size_t keylen = ZSTR_LEN(str_key);
+		if (keylen <= dirlen) {
+			if (keylen == 0 || keylen < dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				continue;
 			}
 		}
 
 		if (*dir == '/') {
 			/* root directory */
-			if (keylen >= sizeof(".phar")-1 && !memcmp(ZSTR_VAL(str_key), ".phar", sizeof(".phar")-1)) {
+			if (zend_string_starts_with_literal(str_key, ".phar")) {
 				/* do not add any magic entries to this directory */
-				if (SUCCESS != zend_hash_move_forward(manifest)) {
-					break;
-				}
 				continue;
 			}
 
-			if (NULL != (found = (char *) memchr(ZSTR_VAL(str_key), '/', keylen))) {
+			const char *has_slash = memchr(ZSTR_VAL(str_key), '/', keylen);
+			if (has_slash) {
 				/* the entry has a path separator and is a subdirectory */
-				entry = (char *) safe_emalloc(found - ZSTR_VAL(str_key), 1, 1);
-				memcpy(entry, ZSTR_VAL(str_key), found - ZSTR_VAL(str_key));
-				keylen = found - ZSTR_VAL(str_key);
-				entry[keylen] = '\0';
-			} else {
-				entry = (char *) safe_emalloc(keylen, 1, 1);
-				memcpy(entry, ZSTR_VAL(str_key), keylen);
-				entry[keylen] = '\0';
+				keylen = has_slash - ZSTR_VAL(str_key);
 			}
-
-			goto PHAR_ADD_ENTRY;
+			entry = safe_emalloc(keylen, 1, 1);
+			memcpy(entry, ZSTR_VAL(str_key), keylen);
+			entry[keylen] = '\0';
 		} else {
 			if (0 != memcmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				/* entry in directory not found */
-				if (SUCCESS != zend_hash_move_forward(manifest)) {
-					break;
-				}
 				continue;
 			} else {
 				if (ZSTR_VAL(str_key)[dirlen] != '/') {
-					if (SUCCESS != zend_hash_move_forward(manifest)) {
-						break;
-					}
 					continue;
 				}
 			}
+
+			const char *save = ZSTR_VAL(str_key);
+			save += dirlen + 1; /* seek to just past the path separator */
+
+			const char *has_slash = memchr(save, '/', keylen - dirlen - 1);
+			if (has_slash) {
+				/* is subdirectory */
+				save -= dirlen + 1;
+				entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
+				keylen = has_slash - save - dirlen - 1;
+				entry[keylen] = '\0';
+			} else {
+				/* is file */
+				save -= dirlen + 1;
+				entry = safe_emalloc(keylen - dirlen, 1, 1);
+				memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
+				entry[keylen - dirlen - 1] = '\0';
+				keylen = keylen - dirlen - 1;
+			}
 		}
 
-		save = ZSTR_VAL(str_key);
-		save += dirlen + 1; /* seek to just past the path separator */
-
-		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
-			/* is subdirectory */
-			save -= dirlen + 1;
-			entry = (char *) safe_emalloc(found - save + dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, found - save - dirlen - 1);
-			keylen = found - save - dirlen - 1;
-			entry[keylen] = '\0';
-		} else {
-			/* is file */
-			save -= dirlen + 1;
-			entry = (char *) safe_emalloc(keylen - dirlen, 1, 1);
-			memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
-			entry[keylen - dirlen - 1] = '\0';
-			keylen = keylen - dirlen - 1;
-		}
-PHAR_ADD_ENTRY:
 		if (keylen) {
-			phar_add_empty(data, entry, keylen);
+			/**
+			 * Add an empty element to avoid duplicates
+			 *
+			 * This is used to get a unique listing of virtual directories within a phar,
+			 * for iterating over opendir()ed phar directories.
+			 */
+			zval dummy;
+
+			ZVAL_NULL(&dummy);
+			zend_hash_str_update(data, entry, keylen, &dummy);
 		}
 
 		efree(entry);
-
-		if (SUCCESS != zend_hash_move_forward(manifest)) {
-			break;
-		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
-		efree(dir);
-		if (zend_hash_sort(data, phar_compare_dir_name, 0) == FAILURE) {
-			FREE_HASHTABLE(data);
-			return NULL;
-		}
+		zend_hash_sort(data, phar_compare_dir_name, 0);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
-		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 }
@@ -303,13 +250,8 @@ PHAR_ADD_ENTRY:
 php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
-	php_stream *ret;
-	char *internal_file, *error;
-	zend_string *str_key;
-	zend_ulong unused;
+	char *error;
 	phar_archive_data *phar;
-	phar_entry_info *entry = NULL;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
@@ -319,7 +261,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		if (resource->host && !resource->path) {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", path, resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", path, ZSTR_VAL(resource->host));
 			php_url_free(resource);
 			return NULL;
 		}
@@ -328,22 +270,20 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	if (strcasecmp("phar", resource->scheme)) {
+	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar url \"%s\"", path);
 		return NULL;
 	}
 
-	host_len = strlen(resource->host);
 	phar_request_initialize();
-	internal_file = resource->path + 1; /* strip leading "/" */
 
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "%s", error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "phar file \"%s\" is unknown", resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar file \"%s\" is unknown", ZSTR_VAL(resource->host));
 		}
 		php_url_free(resource);
 		return NULL;
@@ -353,51 +293,46 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		efree(error);
 	}
 
-	if (*internal_file == '\0') {
+	if (zend_string_equals(resource->path, ZSTR_CHAR('/'))) {
 		/* root directory requested */
-		internal_file = estrndup(internal_file - 1, 1);
-		ret = phar_make_dirstream(internal_file, &phar->manifest);
 		php_url_free(resource);
-		return ret;
+		return phar_make_dirstream("/", strlen("/"), &phar->manifest);
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_IS_INITIALIZED(&phar->manifest)) {
 		php_url_free(resource);
 		return NULL;
 	}
 
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, strlen(internal_file))) && !entry->is_dir) {
+	const char *internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
+	size_t internal_file_len = ZSTR_LEN(resource->path) - 1;
+	phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
+	php_stream *ret;
+
+	if (NULL != entry && !entry->is_dir) {
 		php_url_free(resource);
 		return NULL;
 	} else if (entry && entry->is_dir) {
 		if (entry->is_mounted) {
+			ret = php_stream_opendir(entry->tmp, options, context);
 			php_url_free(resource);
-			return php_stream_opendir(entry->tmp, options, context);
+			return ret;
 		}
-		internal_file = estrdup(internal_file);
+		ret = phar_make_dirstream(internal_file, internal_file_len, &phar->manifest);
 		php_url_free(resource);
-		return phar_make_dirstream(internal_file, &phar->manifest);
+		return ret;
 	} else {
-		int i_len = strlen(internal_file);
+		zend_string *str_key;
 
 		/* search for directory */
-		zend_hash_internal_pointer_reset(&phar->manifest);
-		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-			if (HASH_KEY_NON_EXISTENT !=
-					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (ZSTR_LEN(str_key) > (uint32_t)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
-					/* directory found */
-					internal_file = estrndup(internal_file,
-							i_len);
-					php_url_free(resource);
-					return phar_make_dirstream(internal_file, &phar->manifest);
-				}
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
+			if (zend_string_starts_with_cstr(str_key, internal_file, internal_file_len)) {
+				/* directory found */
+				ret = phar_make_dirstream(internal_file, internal_file_len, &phar->manifest);
+				php_url_free(resource);
+				return ret;
 			}
-
-			if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
-				break;
-			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	php_url_free(resource);
@@ -412,13 +347,12 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 {
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
-	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	char *error, *arch;
+	size_t arch_len;
 	php_url *resource = NULL;
-	uint32_t host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, NULL, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
 		return 0;
 	}
@@ -428,7 +362,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	}
 
 	efree(arch);
-	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
@@ -446,48 +379,46 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if (strcasecmp("phar", resource->scheme)) {
+	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url_from);
 		return 0;
 	}
 
-	host_len = strlen(resource->host);
-
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path) + 1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error, 1))) {
+	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, true))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
-			efree(e->filename);
+			zend_string_efree(e->filename);
 			efree(e);
 		}
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", resource->path+1, resource->host);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
 		php_url_free(resource);
 		return 0;
 	}
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
 	}
 
-	if (phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error, 1)) {
+	if (phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 0, &error, true)) {
 		/* entry exists as a file */
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", resource->path+1, resource->host);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
 		php_url_free(resource);
 		return 0;
 	}
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
@@ -500,14 +431,13 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		entry.is_zip = 1;
 	}
 
-	entry.filename = estrdup(resource->path + 1);
+	entry.filename = zend_string_init(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, false);
 
 	if (phar->is_tar) {
 		entry.is_tar = 1;
 		entry.tar_type = TAR_DIR;
 	}
 
-	entry.filename_len = strlen(resource->path + 1);
 	php_url_free(resource);
 	entry.is_dir = 1;
 	entry.phar = phar;
@@ -516,23 +446,22 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	entry.flags = PHAR_ENT_PERM_DEF_DIR;
 	entry.old_flags = PHAR_ENT_PERM_DEF_DIR;
 
-	if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", entry.filename, phar->fname);
-		efree(error);
-		efree(entry.filename);
+	if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
+		zend_string_efree(entry.filename);
 		return 0;
 	}
 
-	phar_flush(phar, 0, 0, 0, &error);
+	phar_flush(phar, &error);
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
-		zend_hash_str_del(&phar->manifest, entry.filename, entry.filename_len);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry.filename), phar->fname, error);
+		zend_hash_del(&phar->manifest, entry.filename);
 		efree(error);
 		return 0;
 	}
 
-	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len);
+	phar_add_virtual_dirs(phar, ZSTR_VAL(entry.filename), ZSTR_LEN(entry.filename));
 	return 1;
 }
 /* }}} */
@@ -544,16 +473,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
-	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	char *error, *arch;
+	size_t arch_len;
 	php_url *resource = NULL;
-	uint32_t host_len;
-	zend_string *str_key;
-	zend_ulong unused;
-	uint32_t path_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, NULL, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
 		return 0;
 	}
@@ -563,7 +488,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	}
 
 	efree(arch);
-	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
@@ -581,81 +505,78 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	if (strcasecmp("phar", resource->scheme)) {
+	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url);
 		return 0;
 	}
 
-	host_len = strlen(resource->host);
-
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
 	}
 
-	path_len = strlen(resource->path+1);
+	size_t path_len = ZSTR_LEN(resource->path) - 1;
 
-	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, path_len, 2, &error, 1))) {
+	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, true))) {
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", directory does not exist", resource->path+1, resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", directory does not exist", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host));
 		}
 		php_url_free(resource);
 		return 0;
 	}
 
 	if (!entry->is_deleted) {
-		for (zend_hash_internal_pointer_reset(&phar->manifest);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->manifest, &str_key, &unused);
-			zend_hash_move_forward(&phar->manifest)
-		) {
-			if (ZSTR_LEN(str_key) > path_len &&
-				memcmp(ZSTR_VAL(str_key), resource->path+1, path_len) == 0 &&
-				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
+		zend_string *str_key;
+
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->manifest, str_key) {
+			if (
+				zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource->path)+1, path_len)
+				&& IS_SLASH(ZSTR_VAL(str_key)[path_len])
+			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
-					efree(entry->filename);
+					zend_string_efree(entry->filename);
 					efree(entry);
 				}
 				php_url_free(resource);
 				return 0;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 
-		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->virtual_dirs, &str_key, &unused);
-			zend_hash_move_forward(&phar->virtual_dirs)) {
-
-			if (ZSTR_LEN(str_key) > path_len &&
-				memcmp(ZSTR_VAL(str_key), resource->path+1, path_len) == 0 &&
-				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->virtual_dirs, str_key) {
+			ZEND_ASSERT(str_key);
+			if (
+				zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource->path)+1, path_len)
+				&& IS_SLASH(ZSTR_VAL(str_key)[path_len])
+			) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
-					efree(entry->filename);
+					zend_string_efree(entry->filename);
 					efree(entry);
 				}
 				php_url_free(resource);
 				return 0;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (entry->is_temp_dir) {
-		zend_hash_str_del(&phar->virtual_dirs, resource->path+1, path_len);
-		efree(entry->filename);
+		zend_hash_str_del(&phar->virtual_dirs, ZSTR_VAL(resource->path)+1, path_len);
+		zend_string_efree(entry->filename);
 		efree(entry);
 	} else {
 		entry->is_deleted = 1;
 		entry->is_modified = 1;
-		phar_flush(phar, 0, 0, 0, &error);
+		phar_flush(phar, &error);
 
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry->filename), phar->fname, error);
 			php_url_free(resource);
 			efree(error);
 			return 0;
@@ -666,12 +587,3 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	return 1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

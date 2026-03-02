@@ -1,21 +1,21 @@
 --TEST--
-Bug #75607 (Comparision of initial static properties failing)
+Bug #75607 (Comparison of initial static properties failing)
 --FILE--
 <?php
 
 trait T1
 {
-	public static $prop1 = 1;
+    public static $prop1 = 1;
 }
 
 trait T2
 {
-	public static $prop1 = 1;
+    public static $prop1 = 1;
 }
 
 class Base
 {
-	use T1;
+    use T1;
 }
 
 class Child extends base
@@ -25,7 +25,7 @@ class Child extends base
 
 class Grand extends Child
 {
-	use T2;
+    use T2;
 }
 
 $c = new Grand();

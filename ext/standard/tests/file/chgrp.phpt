@@ -7,9 +7,11 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
-echo "ALIVE\n";
+try {
+    chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
-Warning: chgrp(): parameter 2 should be string or integer, null given in %schgrp.php on line 2
-ALIVE
+Warning: chgrp(): No such file or directory in %s on line %d

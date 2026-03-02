@@ -1,15 +1,11 @@
 --TEST--
 Bug #74240 (deflate_add can allocate too much memory)
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
+--INI--
+memory_limit=64M
 --FILE--
 <?php
-
-ini_set('memory_limit', '64M');
 
 $deflator = deflate_init(ZLIB_ENCODING_RAW);
 

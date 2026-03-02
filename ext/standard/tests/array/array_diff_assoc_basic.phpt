@@ -2,12 +2,6 @@
 Test array_diff_assoc() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not
- * present in any of the others arguments but do additional checks whether the keys are equal
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of array_diff_assoc
  */
@@ -36,7 +30,7 @@ var_dump(array_diff_assoc($array_string_key, $array_numeric_key));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : basic functionality ***
 -- Compare Default keys to numeric keys --
 array(3) {

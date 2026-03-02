@@ -1,7 +1,7 @@
 --TEST--
-input_get_args()
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+filter_var_array()
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $data = array(

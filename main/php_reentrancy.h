@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,8 +13,6 @@
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_REENTRANCY_H
 #define PHP_REENTRANCY_H
@@ -51,13 +47,6 @@
 
 BEGIN_EXTERN_C()
 
-#if defined(HAVE_POSIX_READDIR_R)
-#define php_readdir_r readdir_r
-#else
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
-		struct dirent **result);
-#endif
-
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 #define PHP_NEED_REENTRANCY 1
 PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm);
@@ -91,7 +80,7 @@ char *asctime_r(const struct tm *tm, char *buf);
 #endif
 
 
-#if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME) || defined(__BEOS__)
+#if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 #define PHP_NEED_REENTRANCY 1
 PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm);
 #else
@@ -110,12 +99,6 @@ char *strtok_r(char *s, const char *delim, char **last);
 #endif
 #endif
 
-#if !defined(HAVE_RAND_R)
-PHPAPI int php_rand_r(unsigned int *seed);
-#else
-#define php_rand_r rand_r
-#endif
-
 END_EXTERN_C()
 
 #if !defined(ZTS)
@@ -131,11 +114,3 @@ void reentrancy_shutdown(void);
 #endif
 
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

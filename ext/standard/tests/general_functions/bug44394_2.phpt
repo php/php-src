@@ -1,16 +1,16 @@
 --TEST--
 Bug #44394 (Last two bytes missing from output) with session.use_trans_id
---SKIPIF--
-<?php if (!extension_loaded("session")) print "skip"; ?>
+--EXTENSIONS--
+session
 --INI--
 session.name=PHPSESSID
 session.use_only_cookies=0
+session.use_trans_sid=1
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
 --FILE--
 <?php
 
-ini_set('session.use_trans_sid', 1);
 session_save_path(__DIR__);
 session_start();
 
@@ -34,4 +34,7 @@ foreach (glob(__DIR__ . '/sess_*') as $filename) {
 }
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 <a href='a?q=1&a=b&PHPSESSID=%s'>asd</a>

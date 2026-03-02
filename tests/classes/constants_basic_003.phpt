@@ -21,7 +21,7 @@ Ensure class properties and constants can be defined in terms of constants that 
   var_dump(B::ca);
   var_dump(B::cc);
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "hello from A"
 string(12) "hello from C"
 string(12) "hello from A"

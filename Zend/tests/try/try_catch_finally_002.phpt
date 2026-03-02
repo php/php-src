@@ -38,5 +38,5 @@ function foo () {
 
 var_dump(foo());
 ?>
---EXPECTF--
+--EXPECT--
 123456int(7)

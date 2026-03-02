@@ -2,11 +2,6 @@
 Test prev() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of prev()
  */
@@ -33,8 +28,7 @@ for ($i = $length; $i > 0; $i--) {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing prev() : basic functionality ***
 2 => two
 string(3) "one"
@@ -50,4 +44,3 @@ int(3)
 string(4) "help"
 string(3) "one"
 bool(false)
-===DONE===

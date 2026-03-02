@@ -3,8 +3,8 @@ DOMComment::__construct() with more arguments than acceptable.
 --CREDITS--
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-24
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 try {
@@ -13,5 +13,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-DOMComment::__construct() expects at most 1 parameter, 2 given
+--EXPECT--
+DOMComment::__construct() expects at most 1 argument, 2 given

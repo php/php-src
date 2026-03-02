@@ -1,9 +1,7 @@
 --TEST--
 Bug #37360 (gdimagecreatefromgif, bad image sizes)
---SKIPIF--
-<?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $small = imagecreatetruecolor(10, 10);
@@ -27,5 +25,5 @@ imagesavealpha($img, 1);
 $c = imagecolorat($img, 0,0);
 printf("%X", $c);
 ?>
---EXPECTF--
+--EXPECT--
 32FF0000

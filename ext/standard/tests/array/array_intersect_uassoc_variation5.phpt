@@ -2,16 +2,11 @@
 Test array_intersect_uassoc() function : usage variation - Intersection of integers with floats and strings.
 --FILE--
 <?php
-/* Prototype  : array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays with additional index check, compares indexes by a callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables
 $arr_default_int = array(1, 2 );
-$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00);
+$arr_float = array(0 => 1.00, 1 => 2.00, 2 => 3.00);
 $arr_string = array('1', '2', '3');
 $arr_string_float = array('1.00', '2.00');
 
@@ -32,8 +27,7 @@ var_dump( array_intersect_uassoc($arr_default_int, $arr_string, "key_compare_fun
 echo "\n-- Result of integers and strings containing floating points intersection --\n";
 var_dump( array_intersect_uassoc($arr_default_int, $arr_string_float, "key_compare_func") );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
 -- Result of integers and floating point intersection --
@@ -55,4 +49,3 @@ array(2) {
 -- Result of integers and strings containing floating points intersection --
 array(0) {
 }
-===DONE===

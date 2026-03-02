@@ -2,8 +2,12 @@
 Phar front controller other
 --INI--
 phar.cache_list={PWD}/frontcontroller1.php [cache_list]
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php
+if (getenv('SKIP_ASAN')) die('xleak LSan crashes for this test');
+?>
 --ENV--
 SCRIPT_NAME=/frontcontroller1.php
 REQUEST_URI=/frontcontroller1.php/a.jpg

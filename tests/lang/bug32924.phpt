@@ -5,8 +5,8 @@ include_path={PWD}
 auto_prepend_file=inc.inc
 --FILE--
 <?php
-include_once(dirname(__FILE__).'/inc.inc');
-require_once(dirname(__FILE__).'/inc.inc');
+include_once(__DIR__.'/inc.inc');
+require_once(__DIR__.'/inc.inc');
 ?>
 END
 --EXPECT--

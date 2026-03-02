@@ -1,24 +1,24 @@
 --TEST--
 Bug #72735 (Samsung picture thumb not read (zero size))
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 foreach (['nokia.jpg', 'samsung.jpg', 'panasonic.jpg'] as $picture) {
-	echo $picture . ': ';
+    echo $picture . ': ';
 
-	$len = strlen(exif_thumbnail(__DIR__ . DIRECTORY_SEPARATOR . $picture));
+    $len = strlen(exif_thumbnail(__DIR__ . DIRECTORY_SEPARATOR . $picture));
 
-	if (!$len) {
-		echo 'Error, no length returned', PHP_EOL;
+    if (!$len) {
+        echo 'Error, no length returned', PHP_EOL;
 
-		continue;
-	}
+        continue;
+    }
 
-	echo 'int(' . $len . ')', PHP_EOL;
+    echo 'int(' . $len . ')', PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 nokia.jpg: int(5899)
 samsung.jpg: int(5778)
 panasonic.jpg: int(651)

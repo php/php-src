@@ -6,8 +6,9 @@ function test1() : array {
     return 1;
 }
 test1();
+?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of test1() must be of the type array, integer returned in %s:%d
+Fatal error: Uncaught TypeError: test1(): Return value must be of type array, int returned in %s:%d
 Stack trace:
 #0 %s(%d): test1()
 #1 {main}

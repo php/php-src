@@ -3,18 +3,22 @@ Bug #60909 (custom error handler throwing Exception + fatal error = no shutdown 
 --FILE--
 <?php
 register_shutdown_function(function(){echo("\n\n!!!shutdown!!!\n\n");});
-set_error_handler(function($errno, $errstr, $errfile, $errline){throw new Exception("Foo");});
 
 class Bad {
     public function __toString() {
-        throw new Exception('Oops, I cannot do this');
+        throw new Exception('I CAN DO THIS');
     }
 }
 
 $bad = new Bad();
 echo "$bad";
+?>
 --EXPECTF--
-Fatal error: Method Bad::__toString() must not throw an exception, caught Exception: Oops, I cannot do this in %sbug60909_2.php on line %d
+Fatal error: Uncaught Exception: I CAN DO THIS in %s:%d
+Stack trace:
+#0 %s(%d): Bad->__toString()
+#1 {main}
+  thrown in %s on line %d
 
 
 !!!shutdown!!!

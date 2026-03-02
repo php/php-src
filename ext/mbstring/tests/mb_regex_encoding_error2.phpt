@@ -1,31 +1,26 @@
 --TEST--
 Test mb_regex_encoding() function : error conditions - Pass an unknown encoding
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_regex_encoding') or die("skip mb_regex_encoding() is not available in this build");
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_regex_encoding([string $encoding])
- * Description: Returns the current encoding for regex as a string.
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Pass mb_regex_encoding an unknown type of encoding
  */
 
 echo "*** Testing mb_regex_encoding() : error conditions ***\n";
 
-var_dump(mb_regex_encoding('unknown'));
+try {
+    var_dump(mb_regex_encoding('unknown'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_regex_encoding() : error conditions ***
-
-Warning: mb_regex_encoding(): Unknown encoding "unknown" in %s on line %d
-bool(false)
-Done
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "unknown" given

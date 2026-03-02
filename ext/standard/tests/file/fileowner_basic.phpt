@@ -2,11 +2,6 @@
 Test fileowner() function: basic functionality
 --FILE--
 <?php
-/* Prototype: int fileowner ( string $filename )
- * Description: Returns the user ID of the owner of the file, or
- *              FALSE in case of an error.
- */
-
 echo "*** Testing fileowner(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
@@ -15,7 +10,7 @@ var_dump( fileowner(".") );
 var_dump( fileowner("./..") );
 
 /* Newly created files and dirs */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_name = $file_path."/fileowner_basic.tmp";
 $file_handle = fopen($file_name, "w");
 $string = "Hello, world\n1234\n123Hello";
@@ -31,7 +26,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_name = $file_path."/fileowner_basic.tmp";
 $dir_name = $file_path."/fileowner_basic";
 unlink($file_name);

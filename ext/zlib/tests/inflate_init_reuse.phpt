@@ -1,11 +1,7 @@
 --TEST--
 Test incremental inflate_init() context reuse
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $resource = inflate_init(ZLIB_ENCODING_GZIP);
@@ -28,5 +24,5 @@ $inflated .= inflate_add($resource, "", ZLIB_FINISH);
 assert($inflated === $uncompressed);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

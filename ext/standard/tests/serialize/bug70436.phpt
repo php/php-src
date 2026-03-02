@@ -5,17 +5,17 @@ Bug #70436: Use After Free Vulnerability in unserialize()
 
 class obj implements Serializable
 {
-	var $data;
+    var $data;
 
-	function serialize()
-	{
-		return serialize($this->data);
-	}
+    function serialize()
+    {
+        return serialize($this->data);
+    }
 
-	function unserialize($data)
-	{
-		$this->data = unserialize($data);
-	}
+    function unserialize($data)
+    {
+        $this->data = unserialize($data);
+    }
 }
 
 $fakezval = ptr2str(1122334455);
@@ -34,20 +34,22 @@ var_dump($data);
 
 function ptr2str($ptr)
 {
-	$out = '';
+    $out = '';
 
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
 
-	return $out;
+    return $out;
 }
 ?>
 DONE
 --EXPECTF--
-Notice: unserialize(): Error at offset 0 of 3 bytes in %sbug70436.php on line %d
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
-Notice: unserialize(): Error at offset 93 of 94 bytes in %sbug70436.php on line %d
+Warning: unserialize(): Error at offset 0 of 3 bytes in %s on line %d
+
+Warning: unserialize(): Error at offset 93 of 94 bytes in %s on line %d
 bool(false)
 DONE

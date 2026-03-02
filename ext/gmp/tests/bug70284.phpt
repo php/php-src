@@ -1,7 +1,7 @@
 --TEST--
 Bug #70284 (Use after free vulnerability in unserialize() with GMP)
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -18,7 +18,7 @@ $fakezval .= "\x00";
 $fakezval .= "\x00\x00";
 
 for ($i = 0; $i < 5; $i++) {
-	$v[$i] = $fakezval.$i;
+    $v[$i] = $fakezval.$i;
 }
 
 var_dump($data);
@@ -26,25 +26,16 @@ var_dump($data);
 function ptr2str($ptr)
 {
 $out = '';
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
-	return $out;
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
+    return $out;
 }
 ?>
 --EXPECTF--
-array(2) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  object(GMP)#%d (2) {
-    [0]=>
-    array(1) {
-      [0]=>
-      string(1) "1"
-    }
-    ["num"]=>
-    string(1) "1"
-  }
-}
+Fatal error: Uncaught Exception: Could not unserialize number in %sbug70284.php:6
+Stack trace:
+#0 %sbug70284.php(6): unserialize('%s')
+#1 {main}
+  thrown in %sbug70284.php on line 6

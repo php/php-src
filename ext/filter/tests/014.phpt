@@ -1,15 +1,15 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_BOOLEAN
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
 class test {
 
-	function __toString() {
-		return "blah";
-	}
+    function __toString() {
+        return "blah";
+    }
 }
 
 $t = new test;

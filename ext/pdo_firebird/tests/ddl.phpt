@@ -1,35 +1,42 @@
 --TEST--
 PDO_Firebird: DDL/transactions
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
-<?php include("skipif.inc"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
-	require("testdb.inc");
+require("testdb.inc");
 
-	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$dbh = getDbConnection();
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+@$dbh->exec('DROP TABLE test_ddl');
+@$dbh->exec('DROP GENERATOR gen_test_ddl_id');
+@$dbh->exec('DROP TRIGGER test_ddl_bi');
 
-	$db->exec("CREATE TABLE ddl (id INT NOT NULL PRIMARY KEY, text BLOB SUB_TYPE 1)");
-	$db->exec("CREATE GENERATOR gen_ddl_id");
-	$db->exec("CREATE TRIGGER ddl_bi FOR ddl BEFORE INSERT AS
-		BEGIN IF (NEW.id IS NULL) THEN NEW.id=GEN_ID(gen_ddl_id,1); END");
+$dbh->exec("CREATE TABLE test_ddl (id INT NOT NULL PRIMARY KEY, text BLOB SUB_TYPE 1)");
+$dbh->exec("CREATE GENERATOR gen_test_ddl_id");
+$dbh->exec("CREATE TRIGGER test_ddl_bi FOR test_ddl BEFORE INSERT AS
+    BEGIN IF (NEW.id IS NULL) THEN NEW.id=GEN_ID(gen_test_ddl_id,1); END");
 
-	$db->setAttribute(PDO::ATTR_AUTOCOMMIT,0);
+$dbh->setAttribute(PDO::ATTR_AUTOCOMMIT,0);
 
-	$db->beginTransaction();
-	var_dump($db->exec("INSERT INTO ddl (text) VALUES ('bla')"));
-	var_dump($db->exec("UPDATE ddl SET text='blabla'"));
-	$db->rollback();
+$dbh->beginTransaction();
+var_dump($dbh->exec("INSERT INTO test_ddl (text) VALUES ('bla')"));
+var_dump($dbh->exec("UPDATE test_ddl SET text='blabla'"));
+$dbh->rollback();
 
-	$db->beginTransaction();
-	var_dump($db->exec("DELETE FROM ddl"));
-	$db->commit();
+$dbh->beginTransaction();
+var_dump($dbh->exec("DELETE FROM test_ddl"));
+$dbh->commit();
 
-	unset($db);
-	echo "done\n";
+@$dbh->exec('DROP TABLE test_ddl');
+@$dbh->exec('DROP GENERATOR gen_test_ddl_id');
+@$dbh->exec('DROP TRIGGER test_ddl_bi');
 
+unset($dbh);
+echo "done\n";
 ?>
 --EXPECT--
 int(1)

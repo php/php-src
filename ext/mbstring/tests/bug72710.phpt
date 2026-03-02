@@ -1,9 +1,10 @@
 --TEST--
 Bug #72710 (`mb_ereg` causes buffer overflow on regexp compile error)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
-if (!function_exists('mb_ereg')) die('skip mb_ereg() not available');
+if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--
 <?php

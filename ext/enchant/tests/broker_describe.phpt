@@ -2,10 +2,24 @@
 enchant_broker_describe() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if(!extension_loaded('enchant')) die('skip, enchant not loader');
-if(!enchant_broker_init()) die("failed, broker_init failure\n");
+$broker = enchant_broker_init();
+
+if (!$broker) {
+    echo "skip: Unable to init broker\n";
+    exit;
+}
+
+if (!enchant_broker_describe($broker)) {
+    @enchant_broker_free($broker);
+
+    echo "skip: No broker providers found\n";
+}
+
+@enchant_broker_free($broker);
 ?>
 --FILE--
 <?php
@@ -19,16 +33,18 @@ if($broker) {
     if (is_array($provider)) {
         echo("OK\n");
 
-	if ((isset($provider[$counter]['name']) && isset($provider[$counter]['desc']) && isset($provider[$counter]['file']))) {
-	   echo("OK\n");
+    if ((isset($provider[$counter]['name']) && isset($provider[$counter]['desc']) && isset($provider[$counter]['file']))) {
+       echo("OK\n");
 
-	} else {
-	   echo("failed, broker describe\n");
-
-	}
     } else {
-        echo "failed, brocker describe array \n";
+       echo("failed, broker describe\n");
+
     }
+    } else {
+        echo "failed, broker describe array \n";
+    }
+
+    @enchant_broker_free($broker);
 
 } else {
     echo("failed, broker_init failure\n");

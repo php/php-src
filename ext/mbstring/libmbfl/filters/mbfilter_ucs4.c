@@ -22,252 +22,191 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_ucs4.h"
 
+static size_t mb_ucs4_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static size_t mb_ucs4be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs4be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static size_t mb_ucs4le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs4le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
+
+/* This library historically had encodings called 'byte4be' and 'byte4le'
+ * which were almost identical to UCS-4
+ * Maintain minimal support by aliasing to UCS-4 */
+static const char *mbfl_encoding_ucs4be_aliases[] = {"byte4be", NULL};
+static const char *mbfl_encoding_ucs4le_aliases[] = {"byte4le", NULL};
 
 const mbfl_encoding mbfl_encoding_ucs4 = {
 	mbfl_no_encoding_ucs4,
 	"UCS-4",
 	"UCS-4",
-	(const char *(*)[])&mbfl_encoding_ucs4_aliases,
+	mbfl_encoding_ucs4_aliases,
 	NULL,
-	MBFL_ENCTYPE_WCS4BE
+	MBFL_ENCTYPE_WCS4,
+	NULL,
+	NULL,
+	mb_ucs4_to_wchar,
+	mb_wchar_to_ucs4be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_ucs4be = {
 	mbfl_no_encoding_ucs4be,
 	"UCS-4BE",
 	"UCS-4BE",
+	mbfl_encoding_ucs4be_aliases,
+	NULL,
+	MBFL_ENCTYPE_WCS4,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_WCS4BE
+	mb_ucs4be_to_wchar,
+	mb_wchar_to_ucs4be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_ucs4le = {
 	mbfl_no_encoding_ucs4le,
 	"UCS-4LE",
 	"UCS-4LE",
+	mbfl_encoding_ucs4le_aliases,
+	NULL,
+	MBFL_ENCTYPE_WCS4,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_WCS4LE
+	mb_ucs4le_to_wchar,
+	mb_wchar_to_ucs4le,
+	NULL,
+	NULL,
 };
 
-const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
-	mbfl_no_encoding_ucs4,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_ucs4_wchar,
-	mbfl_filt_conv_common_flush
-};
+#define DETECTED_BE 1
+#define DETECTED_LE 2
 
-const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs4,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush
-};
-
-const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
-	mbfl_no_encoding_ucs4be,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_ucs4be_wchar,
-	mbfl_filt_conv_common_flush
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs4be,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush
-};
-
-const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
-	mbfl_no_encoding_ucs4le,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_ucs4le_wchar,
-	mbfl_filt_conv_common_flush
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_ucs4le,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_ucs4le,
-	mbfl_filt_conv_common_flush
-};
-
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-/*
- * UCS-4 => wchar
- */
-int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
+static size_t mb_ucs4_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
-	int n, endian;
+	if (*state == DETECTED_BE) {
+		return mb_ucs4be_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*state == DETECTED_LE) {
+		return mb_ucs4le_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*in_len >= 4) {
+		unsigned char *p = *in;
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
 
-	endian = filter->status & 0xff00;
-	switch (filter->status & 0xff) {
-	case 0:
-		if (endian) {
-			n = c & 0xff;
-		} else {
-			n = (c & 0xff) << 24;
+		if (w == 0xFFFE0000) {
+			/* Little-endian BOM */
+			*in = p;
+			*in_len -= 4;
+			*state = DETECTED_LE;
+			return mb_ucs4le_to_wchar(in, in_len, buf, bufsize, NULL);
+		} else if (w == 0xFEFF) {
+			/* Big-endian BOM; don't send it to output */
+			*in = p;
+			*in_len -= 4;
 		}
-		filter->cache = n;
-		filter->status++;
-		break;
-	case 1:
-		if (endian) {
-			n = (c & 0xff) << 8;
-		} else {
-			n = (c & 0xff) << 16;
-		}
-		filter->cache |= n;
-		filter->status++;
-		break;
-	case 2:
-		if (endian) {
-			n = (c & 0xff) << 16;
-		} else {
-			n = (c & 0xff) << 8;
-		}
-		filter->cache |= n;
-		filter->status++;
-		break;
-	default:
-		if (endian) {
-			n = (c & 0xff) << 24;
-		} else {
-			n = c & 0xff;
-		}
-		n |= filter->cache;
-		if ((n & 0xffff) == 0 && ((n >> 16) & 0xffff) == 0xfffe) {
-			if (endian) {
-				filter->status = 0;		/* big-endian */
-			} else {
-				filter->status = 0x100;		/* little-endian */
-			}
-			CK((*filter->output_function)(0xfeff, filter->data));
-		} else {
-			filter->status &= ~0xff;
-			CK((*filter->output_function)(n, filter->data));
-		}
-		break;
 	}
 
-	return c;
+	*state = DETECTED_BE;
+	return mb_ucs4be_to_wchar(in, in_len, buf, bufsize, NULL);
 }
 
-/*
- * UCS-4BE => wchar
- */
-int mbfl_filt_conv_ucs4be_wchar(int c, mbfl_convert_filter *filter)
+static size_t mb_ucs4be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
-	int n;
+	unsigned char *p = *in, *e = p + (*in_len & ~3);
+	uint32_t *out = buf, *limit = buf + bufsize;
 
-	if (filter->status == 0) {
-		filter->status = 1;
-		n = (c & 0xff) << 24;
-		filter->cache = n;
-	} else if (filter->status == 1) {
-		filter->status = 2;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
-	} else if (filter->status == 2) {
-		filter->status = 3;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
-	} else {
-		filter->status = 0;
-		n = (c & 0xff) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+	while (p < e && out < limit) {
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
+		*out++ = w;
 	}
-	return c;
+
+	if (p == e && (*in_len & 0x3) && out < limit) {
+		/* There are 1-3 trailing bytes, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p = *in + *in_len;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
 }
 
-/*
- * wchar => UCS-4BE
- */
-int mbfl_filt_conv_wchar_ucs4be(int c, mbfl_convert_filter *filter)
+static void mb_wchar_to_ucs4be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
 {
-	if (c >= 0 && c < MBFL_WCSGROUP_UCS4MAX) {
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(c & 0xff, filter->data));
-	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w != MBFL_BAD_INPUT) {
+			out = mb_convert_buf_add4(out, (w >> 24) & 0xFF, (w >> 16) & 0xFF, (w >> 8) & 0xFF, w & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs4be);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
 		}
 	}
 
-	return c;
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
-/*
- * UCS-4LE => wchar
- */
-int mbfl_filt_conv_ucs4le_wchar(int c, mbfl_convert_filter *filter)
+static size_t mb_ucs4le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
-	int n;
+	unsigned char *p = *in, *e = p + (*in_len & ~3);
+	uint32_t *out = buf, *limit = buf + bufsize;
 
-	if (filter->status == 0) {
-		filter->status = 1;
-		n = (c & 0xff);
-		filter->cache = n;
-	} else if (filter->status == 1) {
-		filter->status = 2;
-		n = (c & 0xff) << 8;
-		filter->cache |= n;
-	} else if (filter->status == 2) {
-		filter->status = 3;
-		n = (c & 0xff) << 16;
-		filter->cache |= n;
-	} else {
-		filter->status = 0;
-		n = ((c & 0xff) << 24) | filter->cache;
-		CK((*filter->output_function)(n, filter->data));
+	while (p < e && out < limit) {
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
+		*out++ = w;
 	}
-	return c;
+
+	if (p == e && (*in_len & 0x3) && out < limit) {
+		/* There are 1-3 trailing bytes, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p = *in + *in_len;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
 }
 
-/*
- * wchar => UCS-4LE
- */
-int mbfl_filt_conv_wchar_ucs4le(int c, mbfl_convert_filter *filter)
+static void mb_wchar_to_ucs4le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
 {
-	if (c >= 0 && c < MBFL_WCSGROUP_UCS4MAX) {
-		CK((*filter->output_function)(c & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 16) & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
-	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w != MBFL_BAD_INPUT) {
+			out = mb_convert_buf_add4(out, w & 0xFF, (w >> 8) & 0xFF, (w >> 16) & 0xFF, (w >> 24) & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs4le);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
 		}
 	}
 
-	return c;
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

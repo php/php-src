@@ -1,26 +1,19 @@
 --TEST--
 openssl_pkcs7_read() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
-$infile = file_get_contents(dirname(__FILE__) . "/cert.p7b");
-$certfile = file_get_contents(dirname(__FILE__) . "/cert.crt");
+$infile = file_get_contents(__DIR__ . "/cert.p7b");
+$certfile = file_get_contents(__DIR__ . "/cert.crt");
 $result = [];
 
-var_dump(openssl_pkcs7_read());
-var_dump(openssl_pkcs7_read(""));
 var_dump(openssl_pkcs7_read("", $result));
 var_dump(openssl_pkcs7_read($certfile, $result));
 var_dump(openssl_pkcs7_read($infile, $result));
 var_dump($result);
 ?>
---EXPECTF--
-Warning: openssl_pkcs7_read() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: openssl_pkcs7_read() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)

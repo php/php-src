@@ -2,12 +2,6 @@
 Test array_count_values() function : Test all normal parameter variations
 --FILE--
 <?php
-/* Prototype  : proto array array_count_values(array input)
- * Description: Return the value as key and the frequency of that value in input as value
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 /*
  * Test behaviour with parameter variations
  */
@@ -15,9 +9,9 @@ Test array_count_values() function : Test all normal parameter variations
 echo "*** Testing array_count_values() : parameter variations ***\n";
 
 class A {
-	static function hello() {
-	  echo "Hello\n";
-	}
+    static function hello() {
+      echo "Hello\n";
+    }
 }
 
 $ob = new A();
@@ -36,7 +30,7 @@ echo "Done";
 <?php
 unlink("array_count_file");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_count_values() : parameter variations ***
 array(3) {
   ["bobv"]=>

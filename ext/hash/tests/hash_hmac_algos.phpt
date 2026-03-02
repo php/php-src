@@ -1,11 +1,10 @@
 --TEST--
-Test hash_hmac_algos() function : basic functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_hmac_algos() function : basic functionality
 --FILE--
 <?php
 
 print_r(hash_hmac_algos());
+?>
 --EXPECTF--
 Array
 (

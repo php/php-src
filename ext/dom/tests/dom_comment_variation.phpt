@@ -1,9 +1,7 @@
 --TEST--
 DOM Comment : Variation
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -18,12 +16,13 @@ var_dump($root->hasChildNodes());
 $children = $root->childNodes;
 
 for ($index = 0; $index < $children->length; $index++) {
-	echo "--- child $index ---\n";
-	$current = $children->item($index);
-	echo get_class($current), "\n";
-	var_dump($current->textContent);
+    echo "--- child $index ---\n";
+    $current = $children->item($index);
+    echo get_class($current), "\n";
+    var_dump($current->textContent);
 }
---EXPECTF--
+?>
+--EXPECT--
 bool(true)
 --- child 0 ---
 DOMComment

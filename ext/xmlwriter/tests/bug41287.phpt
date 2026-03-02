@@ -1,9 +1,7 @@
 --TEST--
 Bug #41287 (Namespace functions don't allow xmlns definition to be optional)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 
@@ -31,7 +29,7 @@ $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <test:test xmlns:test="urn:x-test:">
  <test:foo></test:foo>

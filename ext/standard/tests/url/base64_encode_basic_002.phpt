@@ -2,12 +2,6 @@
 Test base64_encode() function : basic functionality - check algorithm round trips
 --FILE--
 <?php
-/* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm
- * Source code: ext/standard/base64.c
- * Alias to functions:
- */
-
 /*
  * Test base64_encode with single byte values.
  */
@@ -15,34 +9,37 @@ Test base64_encode() function : basic functionality - check algorithm round trip
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
 $values = array(
-	"Hello World",
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
-	"\n\t Line with control characters\r\n",
-	"\xC1\xC2\xC3\xC4\xC5\xC6",
-	"\75\76\77\78\79\80"
+    "Hello World",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
+    "\n\t Line with control characters\r\n",
+    "\xC1\xC2\xC3\xC4\xC5\xC6",
+    "\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80"
 );
 
 echo "\n--- Testing base64_encode() with binary string input ---\n";
 
 $counter = 1;
 foreach($values as $str) {
-  	echo "-- Iteration $counter --\n";
+    echo "-- Iteration $counter --\n";
 
-  	$enc = base64_encode($str);
-	$dec = base64_decode($enc);
+    $enc = base64_encode($str);
+    $dec = base64_decode($enc);
 
-	if ($dec != $str) {
-		echo "TEST FAILED\n";
-	} else {
-		echo "TEST PASSED\n";
-	}
+    if ($dec != $str) {
+        echo "TEST FAILED\n";
+    } else {
+        echo "TEST PASSED\n";
+    }
 
-  	$counter ++;
+    $counter ++;
 }
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing base64_encode() : basic functionality ***
 
 --- Testing base64_encode() with binary string input ---
@@ -56,4 +53,11 @@ TEST PASSED
 TEST PASSED
 -- Iteration 5 --
 TEST PASSED
-===Done===
+-- Iteration 6 --
+TEST PASSED
+-- Iteration 7 --
+TEST PASSED
+-- Iteration 8 --
+TEST PASSED
+-- Iteration 9 --
+TEST PASSED

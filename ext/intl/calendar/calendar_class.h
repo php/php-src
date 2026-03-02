@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,6 +24,8 @@
 
 #ifndef USE_CALENDAR_POINTER
 typedef void Calendar;
+#else
+using icu::Calendar;
 #endif
 
 typedef struct {
@@ -55,20 +55,19 @@ static inline Calendar_object *php_intl_calendar_fetch_object(zend_object *obj) 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (co->ucal == NULL) \
 	{ \
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlCalendar", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlCalendar"); \
+		RETURN_THROWS(); \
 	}
 
 void calendar_object_create(zval *object, Calendar *calendar);
 
-Calendar *calendar_fetch_native_calendar(zval *object);
+Calendar *calendar_fetch_native_calendar(zend_object *object);
 
 void calendar_object_construct(zval *object, Calendar *calendar);
 
 void calendar_register_IntlCalendar_class(void);
 
-extern zend_class_entry *Calendar_ce_ptr,
-						*GregorianCalendar_ce_ptr;
+extern zend_class_entry *Calendar_ce_ptr, *GregorianCalendar_ce_ptr;
 
 extern zend_object_handlers Calendar_handlers;
 

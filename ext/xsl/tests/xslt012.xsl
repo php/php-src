@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: xslt012.xsl,v 1.1 2004-08-05 13:31:17 tony2001 Exp $ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >
 
     <xsl:output  method="xml" encoding="iso-8859-1" indent="no"/>

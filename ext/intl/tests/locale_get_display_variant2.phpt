@@ -1,8 +1,7 @@
 --TEST--
 locale_get_display_variant() icu >= 4.8
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -249,14 +248,14 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_variant=
-disp_locale=fr :  display_variant=
-disp_locale=de :  display_variant=
+disp_locale=en :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
+disp_locale=fr :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
+disp_locale=de :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
 -----------------
 locale='en-a-myExt-b-another'
-disp_locale=en :  display_variant=(MYEXT_B_ANOTHER)?
-disp_locale=fr :  display_variant=(MYEXT_B_ANOTHER)?
-disp_locale=de :  display_variant=(MYEXT_B_ANOTHER)?
+disp_locale=en :  display_variant=((A_)?MYEXT_B_ANOTHER)?
+disp_locale=fr :  display_variant=((A_)?MYEXT_B_ANOTHER)?
+disp_locale=de :  display_variant=((A_)?MYEXT_B_ANOTHER)?
 -----------------
 locale='de-419-DE'
 disp_locale=en :  display_variant=DE
@@ -269,7 +268,7 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='ar-a-aaa-b-bbb-a-ccc'
-disp_locale=en :  display_variant=(AAA_B_BBB_A_CCC)?
-disp_locale=fr :  display_variant=(AAA_B_BBB_A_CCC)?
-disp_locale=de :  display_variant=(AAA_B_BBB_A_CCC)?
+disp_locale=en :  display_variant=((A_)?AAA_B_BBB_A_CCC)?
+disp_locale=fr :  display_variant=((A_)?AAA_B_BBB_A_CCC)?
+disp_locale=de :  display_variant=((A_)?AAA_B_BBB_A_CCC)?
 -----------------

@@ -1,17 +1,27 @@
 --TEST--
 PDO_sqlite: Testing invalid callback for sqliteCreateAggregate()
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
 $pdo = new PDO('sqlite::memory:');
 
-$pdo->sqliteCreateAggregate('foo', 'a', '');
-$pdo->sqliteCreateAggregate('foo', 'strlen', '');
+try {
+    $pdo->sqliteCreateAggregate('foo', 'a', '');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $pdo->sqliteCreateAggregate('foo', 'strlen', '');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: PDO::sqliteCreateAggregate(): function 'a' is not callable in %s on line %d
+Deprecated: Method PDO::sqliteCreateAggregate() is deprecated since 8.5, use Pdo\Sqlite::createAggregate() instead in %s on line %d
+PDO::sqliteCreateAggregate(): Argument #2 ($step) must be a valid callback, function "a" not found or invalid function name
 
-Warning: PDO::sqliteCreateAggregate(): function '' is not callable in %s on line %d
+Deprecated: Method PDO::sqliteCreateAggregate() is deprecated since 8.5, use Pdo\Sqlite::createAggregate() instead in %s on line %d
+PDO::sqliteCreateAggregate(): Argument #3 ($finalize) must be a valid callback, function "" not found or invalid function name

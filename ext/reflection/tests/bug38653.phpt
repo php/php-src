@@ -4,9 +4,9 @@ Bug #38653 (memory leak in ReflectionClass::getConstant())
 <?php
 
 class foo {
-	    const cons = 10;
-	    const cons1 = "";
-	    const cons2 = "test";
+        const cons = 10;
+        const cons1 = "";
+        const cons2 = "test";
 }
 
 class bar extends foo {
@@ -24,5 +24,7 @@ echo "Done\n";
 int(10)
 string(0) ""
 string(4) "test"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Done

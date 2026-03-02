@@ -18,8 +18,6 @@ unset ($parameter);
 echo $method->getName ()."\n";
 
 ?>
-===DONE===
 --EXPECTF--
-{closure}
-{closure}
-===DONE===
+{closure:%s:%d}
+{closure:%s:%d}

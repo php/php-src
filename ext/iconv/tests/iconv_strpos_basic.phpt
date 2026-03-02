@@ -1,19 +1,11 @@
 --TEST--
 Test iconv_strpos() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
-/* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
- * Description: Find position of first occurrence of a string within another
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test basic functionality of iconv_strpos with ASCII and multibyte characters
  */
@@ -42,7 +34,7 @@ var_dump(iconv_strpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_strpos() : basic functionality***
 
 -- ASCII string 1 --

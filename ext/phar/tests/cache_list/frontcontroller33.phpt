@@ -3,8 +3,12 @@ Phar front controller with valid callback that does not return any value [cache_
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller33.php
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php
+if (getenv('SKIP_ASAN')) die('xleak LSan crashes for this test');
+?>
 --ENV--
 SCRIPT_NAME=/frontcontroller33.php
 REQUEST_URI=/frontcontroller33.php
@@ -12,5 +16,5 @@ REQUEST_URI=/frontcontroller33.php
 Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller18.phar
---EXPECTF--
+--EXPECT--
 phar error: rewrite callback must return a string or false

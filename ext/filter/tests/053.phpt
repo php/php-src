@@ -1,7 +1,7 @@
 --TEST--
 filter_var() - using callback
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
@@ -13,5 +13,5 @@ filter_var('durty/boy', FILTER_CALLBACK, array(
 print "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Done

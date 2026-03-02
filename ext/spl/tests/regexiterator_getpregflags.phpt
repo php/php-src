@@ -8,11 +8,11 @@ Lance Kesson jac_kesson@hotmail.com
 
 class myIterator implements Iterator {
 
-function current (){}
-function key ( ){}
-function next ( ){}
-function rewind ( ){}
-function valid ( ){}
+function current (): mixed { return null; }
+function key ( ): mixed { return ""; }
+function next ( ): void {}
+function rewind ( ): void {}
+function valid ( ): bool {}
 
 
 }
@@ -29,5 +29,5 @@ $r->setPregFlags(PREG_OFFSET_CAPTURE);
 echo is_long($r->getPregFlags());
 
 ?>
---EXPECTF--
+--EXPECT--
 1

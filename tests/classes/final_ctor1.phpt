@@ -5,9 +5,9 @@ ZE2 cannot override final __construct
 
 class Base
 {
-	public final function __construct()
-	{
-	}
+    public final function __construct()
+    {
+    }
 }
 
 class Works extends Base
@@ -16,15 +16,11 @@ class Works extends Base
 
 class Extended extends Base
 {
-	public function Extended()
-	{
-	}
+    public function __construct()
+    {
+    }
 }
-
-ReflectionClass::export('Extended');
 
 ?>
 --EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; Extended has a deprecated constructor in %s on line %d
-
-Fatal error: Cannot override final Base::__construct() with Extended::Extended() in %sfinal_ctor1.php on line %d
+Fatal error: Cannot override final method Base::__construct() in %s on line %d

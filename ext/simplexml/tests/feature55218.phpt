@@ -1,10 +1,7 @@
 --TEST--
 Bug #55218 getDocNamespaces from current element and not root
---SKIPIF--
-<?php
-if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -48,8 +45,7 @@ var_dump( $x->person[0]->getDocNamespaces(false, false) );
 var_dump( $x->person[1]->getDocNamespaces(false, false) );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 getDocNamespaces
 
 Backwards Compatibility:
@@ -114,4 +110,3 @@ array(1) {
 }
 array(0) {
 }
-===DONE===

@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_cntrl() function : usage variations - different integers
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different integers to ctype_cntrl() to test which character codes are considered
  * valid control characters
@@ -19,15 +14,14 @@ echo "*** Testing ctype_cntrl() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_cntrl($i)) {
-		echo "character code $i is control character\n";
-	}
+    if (ctype_cntrl(chr($i))) {
+        echo "character code $i is control character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 character code 0 is control character
 character code 1 is control character
@@ -62,4 +56,3 @@ character code 29 is control character
 character code 30 is control character
 character code 31 is control character
 character code 127 is control character
-===DONE===

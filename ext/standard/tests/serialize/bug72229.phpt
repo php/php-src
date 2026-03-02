@@ -22,7 +22,7 @@ print_r($Obj1);
 $Obj2->arr2[0] = 50;
 print_r($Obj2);
 ?>
---EXPECTF--
+--EXPECT--
 C1 Object
 (
     [arr1] => Array

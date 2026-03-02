@@ -7,15 +7,13 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
 ?>
 --FILE--
 <?php
-/* Prototype: string basename ( string $path [, string $suffix] );
-   Description: Given a string containing a path to a file,
-                this function will return the base name of the file.
-                If the filename ends in suffix this will also be cut off.
-*/
-
-var_dump(basename(chr(-1)));
+setlocale(LC_CTYPE, "C");
+var_dump(bin2hex(basename("\xff")));
+var_dump(bin2hex(basename("a\xffb")));
 
 echo "Done\n";
---EXPECTF--
-string(0) ""
+?>
+--EXPECT--
+string(2) "ff"
+string(6) "61ff62"
 Done

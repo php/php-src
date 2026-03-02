@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - unexpected values for $arr2 argument
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing non array values to 'arr2' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
@@ -88,9 +83,13 @@ $arrays = array (
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;
 foreach($arrays as $arr2) {
-  echo "\n-- Iteration $iterator --";
-  var_dump( array_merge_recursive($arr1, $arr2) );
-  $iterator++;
+    echo "\n-- Iteration $iterator --";
+    try {
+        var_dump( array_merge_recursive($arr1, $arr2) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 }
 
 // close the file resource used
@@ -98,102 +97,54 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : Passing non array values to $arr2 argument ***
 
--- Iteration 1 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 1 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 2 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 2 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 3 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 3 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 4 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 4 --array_merge_recursive(): Argument #2 must be of type array, int given
 
--- Iteration 5 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 5 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 6 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 6 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 7 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 7 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 8 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 8 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 9 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 9 --array_merge_recursive(): Argument #2 must be of type array, float given
 
--- Iteration 10 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 10 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 11 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 11 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 12 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 12 --array_merge_recursive(): Argument #2 must be of type array, true given
 
--- Iteration 13 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 13 --array_merge_recursive(): Argument #2 must be of type array, false given
 
--- Iteration 14 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 14 --array_merge_recursive(): Argument #2 must be of type array, true given
 
--- Iteration 15 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 15 --array_merge_recursive(): Argument #2 must be of type array, false given
 
--- Iteration 16 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 16 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 17 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 17 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 18 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 18 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 19 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 19 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 20 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 20 --array_merge_recursive(): Argument #2 must be of type array, string given
 
--- Iteration 21 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 21 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 22 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 22 --array_merge_recursive(): Argument #2 must be of type array, null given
 
--- Iteration 23 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 23 --array_merge_recursive(): Argument #2 must be of type array, resource given
 
--- Iteration 24 --
-Warning: array_merge_recursive(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, A given
 Done

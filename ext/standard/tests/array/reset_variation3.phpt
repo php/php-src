@@ -2,11 +2,6 @@
 Test reset() function : usage variations - Referenced variables
 --FILE--
 <?php
-/* Prototype  : mixed reset(array $array_arg)
- * Description: Set array argument's internal pointer to the first element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Reference two arrays to each other then call reset() to test position of
  * internal pointer in both arrays
@@ -38,8 +33,7 @@ var_dump(current($array1));
 echo "\$array2: ";
 var_dump(current($array2));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : usage variations ***
 
 -- Initial position of internal pointer --
@@ -53,4 +47,3 @@ $array2: string(3) "one"
 string(4) "zero"
 $array1: string(4) "zero"
 $array2: string(4) "zero"
-===DONE===

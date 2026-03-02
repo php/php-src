@@ -3,8 +3,8 @@ Execution ordering with comparison operators.
 --FILE--
 <?php
 function f($x) {
-	echo "f($x) ";
-	return $x;
+    echo "f($x) ";
+    return $x;
 }
 
 echo "Function call args:\n";
@@ -22,7 +22,7 @@ var_dump($a[$i=1][++$i] <= $a[++$i][++$i]);
 var_dump($a[$i=1][++$i] > $a[++$i][++$i]);
 var_dump($a[$i=1][++$i] >= $a[++$i][++$i]);
 ?>
---EXPECTF--
+--EXPECT--
 Function call args:
 f(0) f(1) bool(true)
 f(0) f(1) bool(true)

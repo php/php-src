@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,11 +16,15 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "php_main.h"
 #include "php_ini.h"
 #include "php_variables.h"
@@ -44,7 +46,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 
 #include "php_apache.h"
@@ -57,7 +58,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php7-script"
+#define PHP_SCRIPT "php-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -180,6 +181,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	php_struct *ctx = SG(server_context);
 	request_rec *r;
 	apr_bucket_brigade *brigade;
+	apr_status_t status;
 
 	r = ctx->r;
 	brigade = ctx->brigade;
@@ -187,11 +189,11 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 
 	/*
 	 * This loop is needed because ap_get_brigade() can return us partial data
-	 * which would cause premature termination of request read. Therefor we
+	 * which would cause premature termination of request read. Therefore we
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
-	while (ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len) == APR_SUCCESS) {
+	while ((status = ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
 		tlen += len;
@@ -200,6 +202,10 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		}
 		buf += len;
 		len = count_bytes - tlen;
+	}
+
+	if (status != APR_SUCCESS) {
+		return 0;
 	}
 
 	return tlen;
@@ -241,7 +247,7 @@ php_apache_sapi_read_cookies(void)
 }
 
 static char *
-php_apache_sapi_getenv(char *name, size_t name_len)
+php_apache_sapi_getenv(const char *name, size_t name_len)
 {
 	php_struct *ctx = SG(server_context);
 	const char *env_var;
@@ -303,7 +309,7 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
+static void php_apache_sapi_log_message(const char *msg, int syslog_type_int)
 {
 	php_struct *ctx;
 	int aplog_type = APLOG_ERR;
@@ -352,7 +358,7 @@ static void php_apache_sapi_log_message(char *msg, int syslog_type_int)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(const char *msg, request_rec *r)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
@@ -361,25 +367,27 @@ static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
 	}
 }
 
-static double php_apache_sapi_get_request_time(void)
+static zend_result php_apache_sapi_get_request_time(double *request_time)
 {
 	php_struct *ctx = SG(server_context);
-	return ((double) apr_time_as_msec(ctx->r->request_time)) / 1000.0;
+	if (!ctx) {
+		return FAILURE;
+	}
+
+	*request_time = ((double) ctx->r->request_time) / 1000000.0;
+	return SUCCESS;
 }
 
 extern zend_module_entry php_apache_module;
 
 static int php_apache2_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, &php_apache_module, 1)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, &php_apache_module);
 }
 
 static sapi_module_struct apache2_sapi_module = {
 	"apache2handler",
-	"Apache 2.0 Handler",
+	"Apache 2 Handler",
 
 	php_apache2_startup,				/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
@@ -457,6 +465,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
+	zend_set_dl_use_deepbind(true);
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
@@ -476,15 +485,23 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	(void)ts_resource(0);
+	int expected_threads;
+	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
+		expected_threads = 1;
+	}
+
+	php_tsrm_startup_ex(expected_threads);
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 	zend_signal_startup();
 
 	sapi_startup(&apache2_sapi_module);
-	apache2_sapi_module.startup(&apache2_sapi_module);
+	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
+		return DONE;
+	}
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 
@@ -514,7 +531,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
 	if (content_length) {
-		ZEND_ATOL(SG(request_info).content_length, content_length);
+		SG(request_info).content_length = ZEND_ATOL(content_length);
 	} else {
 		SG(request_info).content_length = 0;
 	}
@@ -550,9 +567,9 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		zend_string *str;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php7_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php_module);
 
-		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -574,12 +591,14 @@ static int php_handler(request_rec *r)
 #ifdef ZTS
 	/* initial resource fetch */
 	(void)ts_resource(0);
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req);
 
-	conf = ap_get_module_config(r->per_dir_config, &php7_module);
+	conf = ap_get_module_config(r->per_dir_config, &php_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);
@@ -668,7 +687,7 @@ zend_first_try {
 		/*
 		 * check if coming due to ErrorDocument
 		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
-		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
+		 * during processing of the request by PHP during POST processing. Therefore we need to re-use the exiting
 		 * PHP instance to handle the request rather then creating a new one.
 		*/
 		if (parent_req && parent_req->status != HTTP_OK && parent_req->status != 413 && strcmp(r->protocol, "INCLUDED")) {
@@ -691,17 +710,15 @@ zend_first_try {
 		highlight_file((char *)r->filename, &syntax_highlighter_ini);
 	} else {
 		zend_file_handle zfd;
-
-		zfd.type = ZEND_HANDLE_FILENAME;
-		zfd.filename = (char *) r->filename;
-		zfd.free_filename = 0;
-		zfd.opened_path = NULL;
+		zend_stream_init_filename(&zfd, (char *) r->filename);
+		zfd.primary_script = 1;
 
 		if (!parent_req) {
 			php_execute_script(&zfd);
 		} else {
 			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
 		}
+		zend_destroy_file_handle(&zfd);
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
 			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));
@@ -734,6 +751,7 @@ zend_first_try {
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 {
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
+	php_child_init();
 }
 
 #ifdef ZEND_SIGNALS
@@ -753,12 +771,3 @@ void php_ap2_register_hook(apr_pool_t *p)
 #endif
 	ap_hook_child_init(php_apache_child_init, NULL, NULL, APR_HOOK_MIDDLE);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

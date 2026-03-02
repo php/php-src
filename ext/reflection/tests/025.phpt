@@ -1,7 +1,5 @@
 --TEST--
 ReflectionFunction basic tests
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --INI--
 opcache.save_comments=1
 --FILE--
@@ -11,12 +9,12 @@ opcache.save_comments=1
 hoho
 */
 function test ($a, $b = 1, $c = "") {
-	static $var = 1;
+    static $var = 1;
 }
 
 $func = new ReflectionFunction("test");
 
-var_dump($func->export("test"));
+echo $func;
 echo "--getName--\n";
 var_dump($func->getName());
 echo "--isInternal--\n";
@@ -62,8 +60,6 @@ Function [ <user> function test ] {
     Parameter #2 [ <optional> $c = '' ]
   }
 }
-
-NULL
 --getName--
 string(4) "test"
 --isInternal--

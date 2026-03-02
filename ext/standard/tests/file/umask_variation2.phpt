@@ -8,11 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: int umask ( [int $mask] );
-   Description: Changes the current umask
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 /* Check umask() on file/dir */
 
@@ -57,7 +53,7 @@ for($mask = 0351; $mask <= 0777; $mask++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing umask() on file and directory ***
 -- Setting umask to 351 --
 File permission : 426

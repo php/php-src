@@ -30,7 +30,7 @@ Class C {
   public static $staticFoo;
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

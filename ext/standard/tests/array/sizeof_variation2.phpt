@@ -2,13 +2,6 @@
 Test sizeof() function : usage variations - different array values for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
- * Description: Counts an elements in an array. If Standard PHP library is installed,
- * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
- */
-
 echo "*** Testing sizeof() : usage variations ***\n";
 
 // get a resource variable
@@ -59,7 +52,7 @@ for($i = 0; $i < count($values); $i++)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : usage variations ***
 --- Testing sizeof() with different array values for 'var' argument ---
 -- Iteration 1 --

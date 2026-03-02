@@ -30,8 +30,8 @@ class counter {
   }
 
   static public function destroy(&$obj) {
-  	$obj = NULL;
-  	}
+    $obj = NULL;
+    }
 }
 Show();
 $obj1 = new counter;

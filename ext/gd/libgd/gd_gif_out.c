@@ -97,12 +97,18 @@ static void cl_hash (register count_int chsize, GifCtx *ctx);
 static void char_init (GifCtx *ctx);
 static void char_out (int c, GifCtx *ctx);
 static void flush_char (GifCtx *ctx);
+
+static int _gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out);
+
 void * gdImageGifPtr (gdImagePtr im, int *size)
 {
   void *rv;
   gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
-  gdImageGifCtx (im, out);
-  rv = gdDPExtractData (out, size);
+	if (!_gdImageGifCtx(im, out)) {
+		rv = gdDPExtractData(out, size);
+	} else {
+		rv = NULL;
+	}
   out->gd_free (out);
   return rv;
 }
@@ -116,6 +122,12 @@ void gdImageGif (gdImagePtr im, FILE * outFile)
 
 void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 {
+	_gdImageGifCtx(im, out);
+}
+
+/* returns 0 on success, 1 on failure */
+static int _gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
+{
 	gdImagePtr pim = 0, tim = im;
 	int interlace, BitsPerPixel;
 	interlace = im->interlace;
@@ -125,7 +137,7 @@ void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 			based temporary image. */
 		pim = gdImageCreatePaletteFromTrueColor(im, 1, 256);
 		if (!pim) {
-			return;
+			return 1;
 		}
 		tim = pim;
 	}
@@ -138,6 +150,8 @@ void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 		/* Destroy palette based temporary image. */
 		gdImageDestroy(	pim);
 	}
+
+    return 0;
 }
 
 static int
@@ -319,7 +333,7 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
         /*
          * OR in the resolution
          */
-        B |= (Resolution - 1) << 5;
+        B |= (Resolution - 1) << 4;
 
         /*
          * OR in the Bits per Pixel

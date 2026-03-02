@@ -3,20 +3,19 @@ running code with -r
 --SKIPIF--
 <?php
 include "skipif.inc";
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
-}
 ?>
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -r 'var_dump("hello");'`);
+var_dump(shell_exec(<<<SHELL
+$php -n -r "var_dump('hello');"
+SHELL));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(18) "string(5) "hello"
 "
 Done

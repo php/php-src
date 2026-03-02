@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,8 +17,14 @@
 
 #include <php.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "intl_common.h"
 #include "intl_error.h"
+#ifdef __cplusplus
+}
+#endif
 
 #include <unicode/utrans.h>
 
@@ -54,10 +58,13 @@ static inline Transliterator_object *php_intl_transliterator_fetch_object(zend_o
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if( to->utrans == NULL ) \
 	{ \
-		intl_errors_set( &to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed transliterator", 0 ); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed transliterator"); \
+		RETURN_THROWS(); \
 	}
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int transliterator_object_construct( zval *object,
 									 UTransliterator *utrans,
 									 UErrorCode *status );
@@ -66,5 +73,8 @@ void transliterator_register_Transliterator_class( void );
 
 extern zend_class_entry *Transliterator_ce_ptr;
 extern zend_object_handlers Transliterator_handlers;
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* #ifndef TRANSLITERATOR_CLASS_H */

@@ -3,8 +3,8 @@ Tests DOMNode::hasChildNodes()
 --CREDITS--
 Michael Stillwell <mjs@beebo.org>
 # TestFest 2008
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -33,7 +33,7 @@ $dom->loadXML('<root><a/><b/></root>');
 var_dump($dom->documentElement->hasChildNodes());
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root/>
 Document has child nodes

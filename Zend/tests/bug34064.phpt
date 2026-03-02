@@ -6,7 +6,7 @@ class XmlTest {
 
     function test_ref(&$test)
     {
-    	$test = "ok";
+        $test = "ok";
     }
 
     function test($test)

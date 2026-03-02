@@ -1,5 +1,5 @@
 --TEST--
-D (PCRE_DOLLAR_ENDONLY) modififer
+D (PCRE_DOLLAR_ENDONLY) modifier
 --FILE--
 <?php
 

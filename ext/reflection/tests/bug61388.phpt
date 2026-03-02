@@ -11,15 +11,10 @@ print_r($reflObj->getProperties(ReflectionProperty::IS_PUBLIC));
 $x = (object)array("a", "oo" => "b");
 $reflObj = new ReflectionObject($x);
 print_r($reflObj->getProperties(ReflectionProperty::IS_PUBLIC));
+?>
 --EXPECT--
 Array
 (
-    [0] => ReflectionProperty Object
-        (
-            [name] => test
-            [class] => ArrayObject
-        )
-
 )
 Array
 (

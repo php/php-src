@@ -1,8 +1,8 @@
 --TEST--
 pcntl_signal_get_handler()
---SKIPIF--
-<?php if (!extension_loaded("pcntl")) print "skip"; ?>
-<?php if (!extension_loaded("posix")) die("skip posix extension not available"); ?>
+--EXTENSIONS--
+pcntl
+posix
 --FILE--
 <?php
 var_dump(pcntl_signal_get_handler(SIGUSR1));
@@ -22,7 +22,7 @@ pcntl_signal_dispatch();
 
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(10) "pcntl_test"
 int(0)

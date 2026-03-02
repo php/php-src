@@ -7,8 +7,11 @@ Havard Eide <nucleuz@gmail.com>
 <?php
 $it = new DirectoryIterator(__DIR__);
 foreach( $it as &$file ) {
-	echo $file . "\n";
+    echo $file . "\n";
 }
 ?>
 --EXPECTF--
-Fatal error: An iterator cannot be used with foreach by reference in %s on line %d
+Fatal error: Uncaught Error: An iterator cannot be used with foreach by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

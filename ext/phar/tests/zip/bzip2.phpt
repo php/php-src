@@ -1,23 +1,23 @@
 --TEST--
 Phar: process bzip2-compressed zip entry
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
+--INI--
+phar.require_hash=0
+--EXTENSIONS--
+phar
+bz2
 --FILE--
 <?php
 try {
-	$a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
-	foreach ($a as $entry => $file) {
-		echo $file->getContent();
-	}
-	$a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
-	var_dump($a->getAlias());
+    $a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
+    foreach ($a as $entry => $file) {
+        echo $file->getContent();
+    }
+    $a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
+    var_dump($a->getAlias());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 <?php
 include dirname(__FILE__) . '/corrupt_zipmaker.php.inc';
@@ -80,4 +80,3 @@ $a->addFile('hi', null, 'hii', null, null, 'compress', 'compress', 11);
 $a->writeZip(dirname(__FILE__) . '/compress_unsupunknown.zip');
 ?>
 string(175) "hitheresuperlongzipistoostupidtodowhatIsaysoIhavetousethisridiculouslylongaliasbecauseitisstupiddidImentionthatalreadythemadnessdoesnotstopIhateinfozipIhateinfozipIhateinfozip"
-===DONE===

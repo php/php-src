@@ -1,14 +1,14 @@
 --TEST--
 openssl_x509_read() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
-$fp = fopen(dirname(__FILE__) . "/cert.crt","r");
+$fp = fopen(__DIR__ . "/cert.crt","r");
 $a = fread($fp,8192);
 fclose($fp);
 
-$b = "file://" . dirname(__FILE__) . "/cert.crt";
+$b = "file://" . __DIR__ . "/cert.crt";
 $c = "invalid cert";
 $d = openssl_x509_read($a);
 $e = array();
@@ -18,19 +18,29 @@ var_dump(openssl_x509_read($a)); // read cert as a string
 var_dump(openssl_x509_read($b)); // read cert as a filename string
 var_dump(openssl_x509_read($c)); // read an invalid cert, fails
 var_dump(openssl_x509_read($d)); // read cert from a resource
-var_dump(openssl_x509_read($e)); // read an array
-var_dump(openssl_x509_read($f)); // read an array with the filename
+
+try {
+    openssl_x509_read($e); // read an array
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    openssl_x509_read($f); // read an array with the filename
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL X.509)
-resource(%d) of type (OpenSSL X.509)
+object(OpenSSLCertificate)#%d (0) {
+}
+object(OpenSSLCertificate)#%d (0) {
+}
 
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
+Warning: openssl_x509_read(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-resource(%d) of type (OpenSSL X.509)
-
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
-bool(false)
-
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
-bool(false)
+object(OpenSSLCertificate)#%d (0) {
+}
+openssl_x509_read(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
+openssl_x509_read(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given

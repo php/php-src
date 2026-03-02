@@ -1,14 +1,9 @@
 --TEST--
 Test token_get_all() function : usage variations - with bitwise operators
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different bitwise operators to test them for token
  *  << - T_SL(287)

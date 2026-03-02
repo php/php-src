@@ -1,11 +1,11 @@
 <?php
-$thisTestDir = "zlibVariation.dir";
+$thisTestDir = $testName . '.dir';
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
 //create the include directory structure
 $workingDir = "workdir";
-$filename = "afile.txt.gz";
+$filename = $testName . ".txt.gz";
 $scriptDir = dirname(__FILE__);
 $baseDir = getcwd();
 $secondFile = $baseDir."/dir2/".$filename;

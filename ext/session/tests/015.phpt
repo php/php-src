@@ -1,5 +1,7 @@
 --TEST--
 use_trans_sid should not affect SID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -16,12 +18,18 @@ session.save_handler=files
 <?php
 error_reporting(E_ALL);
 
-session_id("abtest");
+session_id("test015");
 session_start();
+$sid = SID;
 ?>
-<a href="/link?<?php echo SID; ?>">
+<a href="/link?<?=$sid ?>">
 <?php
 session_destroy();
 ?>
---EXPECT--
-<a href="/link?PHPSESSID=abtest&PHPSESSID=abtest">
+--EXPECTF--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant SID is deprecated since 8.4, as GET/POST sessions were deprecated in %s on line %d
+<a href="/link?PHPSESSID=test015&PHPSESSID=test015">

@@ -4,14 +4,14 @@ SPL SplTempFileObject constructor sets correct defaults when pass 0 arguments
 <?php
 var_dump(new SplTempFileObject());
 ?>
---EXPECTF--
+--EXPECT--
 object(SplTempFileObject)#1 (5) {
   ["pathName":"SplFileInfo":private]=>
   string(10) "php://temp"
   ["fileName":"SplFileInfo":private]=>
   string(10) "php://temp"
   ["openMode":"SplFileObject":private]=>
-  string(1) "w"
+  string(2) "wb"
   ["delimiter":"SplFileObject":private]=>
   string(1) ","
   ["enclosure":"SplFileObject":private]=>

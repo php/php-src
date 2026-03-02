@@ -2,12 +2,12 @@
   +----------------------------------------------------------------------+
   | Zend Signal Handling                                                 |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2008-2018 The PHP Group                                     |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -25,17 +25,14 @@
    All other licensing and usage conditions are those of the PHP Group.
 */
 
- /* $Id$ */
-
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include <string.h>
 
 #include "zend.h"
 #include "zend_globals.h"
-
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -47,6 +44,7 @@
 
 #ifdef ZTS
 ZEND_API int zend_signal_globals_id;
+ZEND_API size_t zend_signal_globals_offset;
 #else
 ZEND_API zend_signal_globals_t zend_signal_globals;
 #endif /* not ZTS */
@@ -64,15 +62,16 @@ ZEND_API zend_signal_globals_t zend_signal_globals;
 #endif
 
 static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context);
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
+static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
 
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__PASE__)
+/* Matches zend_execute_API.c; these platforms don't support ITIMER_PROF. */
 #define TIMEOUT_SIG SIGALRM
 #else
 #define TIMEOUT_SIG SIGPROF
 #endif
 
-static int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, SIGUSR1, SIGUSR2 };
+static const int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, SIGUSR1, SIGUSR2 };
 
 #define SA_FLAGS_MASK ~(SA_NODEFER | SA_RESETHAND)
 
@@ -82,21 +81,23 @@ static sigset_t            global_sigmask;
 
 /* {{{ zend_signal_handler_defer
  *  Blocks signals if in critical section */
-void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
+static void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
-	zend_bool is_handling_safe = 1;
 
 #ifdef ZTS
-	ZEND_TSRMLS_CACHE_UPDATE();
-	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
-		is_handling_safe = 0;
+	/* A signal could hit after TSRM shutdown, in this case globals are already freed.
+	 * Or it could be delivered to a thread that didn't execute PHP yet.
+	 * In the latter case we act as if SIGG(active) is false. */
+	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
+		/* Forward to default handler handler */
+		zend_signal_handler(signo, siginfo, context);
+		return;
 	}
 #endif
 
-	if (EXPECTED(is_handling_safe && SIGG(active))) {
+	if (EXPECTED(SIGG(active))) {
 		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
 			if (UNEXPECTED(SIGG(blocked))) {
 				SIGG(blocked) = 0;
@@ -121,7 +122,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		} else { /* delay signal handling */
 			SIGG(blocked) = 1; /* signal is blocked */
 
-			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotton */
+			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotten */
 				SIGG(pavail) = queue->next;
 				queue->zend_signal.signo = signo;
 				queue->zend_signal.siginfo = siginfo;
@@ -181,9 +182,8 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
-		p_sig.flags = 0;
-		p_sig.handler = SIG_DFL;
+	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
+		p_sig = global_orig_handlers[signo-1];
 	} else
 #endif
 	p_sig = SIGG(handlers)[signo-1];
@@ -227,7 +227,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 
 /* {{{ zend_sigaction
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
+ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
 {
 	struct sigaction sa;
 	sigset_t sigset;
@@ -249,7 +249,7 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
 			sa.sa_sigaction = (void *) SIG_IGN;
 		} else {
-			sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
+			sa.sa_flags     = SA_ONSTACK | SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
 			sa.sa_sigaction = zend_signal_handler_defer;
 			sa.sa_mask      = global_sigmask;
 		}
@@ -263,14 +263,12 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		sigaddset(&sigset, signo);
 		zend_sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_signal
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_signal(int signo, void (*handler)(int))
+ZEND_API void zend_signal(int signo, void (*handler)(int))
 {
 	struct sigaction sa;
 
@@ -279,7 +277,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
 	sa.sa_handler = handler;
 	sa.sa_mask    = global_sigmask;
 
-	return zend_sigaction(signo, &sa, NULL);
+	zend_sigaction(signo, &sa, NULL);
 }
 /* }}} */
 
@@ -287,7 +285,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
  *  Set a handler for a signal we want to defer.
  *  Previously set handler must have been saved before.
  */
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
+static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
 {
 	struct sigaction sa;
 
@@ -324,17 +322,17 @@ void zend_signal_activate(void)
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
-	for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
-		zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
+	if (SIGG(reset)) {
+		for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
+			zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
+		}
 	}
 
 	SIGG(active) = 1;
 	SIGG(depth)  = 0;
-	SIGG(check)  = ZEND_DEBUG;
 } /* }}} */
 
-/* {{{ zend_signal_deactivate
- * */
+/* {{{ zend_signal_deactivate */
 void zend_signal_deactivate(void)
 {
 	if (SIGG(check)) {
@@ -378,6 +376,7 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 	size_t x;
 
 	memset(zend_signal_globals, 0, sizeof(*zend_signal_globals));
+	zend_signal_globals->reset = 1;
 
 	for (x = 0; x < sizeof(zend_signal_globals->pstorage) / sizeof(*zend_signal_globals->pstorage); ++x) {
 		zend_signal_queue_t *queue = &zend_signal_globals->pstorage[x];
@@ -414,7 +413,7 @@ ZEND_API void zend_signal_startup(void)
 {
 
 #ifdef ZTS
-	ts_allocate_id(&zend_signal_globals_id, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
+	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else
 	zend_signal_globals_ctor(&zend_signal_globals);
 #endif
@@ -447,13 +446,3 @@ ZEND_API void zend_signal_startup(void)
 
 
 #endif /* ZEND_SIGNALS */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

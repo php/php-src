@@ -1,7 +1,5 @@
 --TEST--
 ReflectionExtension::getINIEntries()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --INI--
 user_agent=php
 --FILE--

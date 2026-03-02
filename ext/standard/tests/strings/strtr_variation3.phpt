@@ -2,12 +2,6 @@
 Test strtr() function : usage variations - string containing escape sequences for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
- * Source code: ext/standard/string.c
-*/
-
 /* Testing strtr() function by passing the
  *   string containing various escape sequences for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments
@@ -65,7 +59,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() : string containing escape sequences for 'str' arg ***
 -- Iteration 1 --
 string(9) "SesSTsttE"

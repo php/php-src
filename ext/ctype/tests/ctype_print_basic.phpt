@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_print() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 echo "*** Testing ctype_print() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -21,9 +16,9 @@ var_dump(ctype_print($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ctype_print() : basic functionality ***
 bool(true)
+
+Deprecated: ctype_print(): Argument of type null will be interpreted as string in the future in %s on line %d
 bool(false)
-===DONE===

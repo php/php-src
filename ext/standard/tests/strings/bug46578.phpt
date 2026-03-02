@@ -16,10 +16,10 @@ var_dump(strip_tags('<! a>'));
 var_dump(strip_tags('<? ax'));
 
 ?>
---EXPECTF--
-%string|unicode%(6) "foobar"
-%string|unicode%(6) "foobar"
-%string|unicode%(6) "foobar"
-%string|unicode%(4) "< ax"
-%string|unicode%(0) ""
-%string|unicode%(0) ""
+--EXPECT--
+string(6) "foobar"
+string(6) "foobar"
+string(6) "foobar"
+string(4) "< ax"
+string(0) ""
+string(0) ""

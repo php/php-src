@@ -3,13 +3,13 @@ DOMDocument::$preserveWhiteSpace - test ability to read and write property
 --CREDITS--
 Lev Radin <prokurator@gmail.com>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $doc = new DOMDocument;
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
 var_dump($doc->preserveWhiteSpace);
 

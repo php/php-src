@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller mime type override, other
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller14.php
 REQUEST_URI=/frontcontroller14.php/a.jpg

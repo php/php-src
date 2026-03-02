@@ -1,5 +1,7 @@
 --TEST--
 Bug #69267: mb_strtolower fails on titlecase characters
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
@@ -38,7 +40,7 @@ string(8) "ǅǉǌǳ"
 string(8) "ǅǉǌǳ"
 string(3) "ᾳ"
 string(3) "ᾳ"
-string(3) "ᾼ"
-string(3) "ᾼ"
+string(4) "ΑΙ"
+string(4) "ΑΙ"
 string(3) "ᾼ"
 string(3) "ᾼ"

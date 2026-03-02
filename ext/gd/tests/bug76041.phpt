@@ -1,9 +1,7 @@
 --TEST--
 Bug #76041 (null pointer access crashed php)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im=imagecreate(100, 100);

@@ -1,5 +1,11 @@
 --TEST--
 Test simple watchpoint with replace
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --PHPDBG--
 b 6
 r

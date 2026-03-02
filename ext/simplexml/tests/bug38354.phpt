@@ -1,26 +1,26 @@
 --TEST--
 Bug #38354 (Unwanted reformatting of XML when using AsXML)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
 $xml = simplexml_load_string(
 '<code>
-	<a href="javascript:alert(\'1\');"><strong>Item Two</strong></a>
+    <a href="javascript:alert(\'1\');"><strong>Item Two</strong></a>
 </code>'
 );
 
 foreach ($xml->xpath("//*") as $element) {
-	var_dump($element->asXML());
+    var_dump($element->asXML());
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
-string(101) "<?xml version="1.0"?>
+--EXPECT--
+string(104) "<?xml version="1.0"?>
 <code>
-	<a href="javascript:alert('1');"><strong>Item Two</strong></a>
+    <a href="javascript:alert('1');"><strong>Item Two</strong></a>
 </code>
 "
 string(62) "<a href="javascript:alert('1');"><strong>Item Two</strong></a>"

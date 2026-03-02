@@ -3,17 +3,14 @@ Test fflush() function: usage variations - links as resource
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == 'WIN')
-  die("skip Links not valid on Windows");
+  die("skip not for Windows");
 ?>
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 /* test fflush() with handle to symbollic link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with soft links to files opened in diff modes ***\n";
@@ -65,7 +62,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with soft links to files opened in diff modes ***
 -- Iteration 1 with file containing empty data --
 -- link opened in w mode --

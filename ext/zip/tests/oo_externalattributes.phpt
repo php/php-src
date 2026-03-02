@@ -1,10 +1,7 @@
 --TEST--
 ZipArchive::*ExternalAttributes*() function
---SKIPIF--
-<?php
-/* $Id$ */
-if (!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
@@ -44,7 +41,7 @@ $zip->close();
 $name = __DIR__ . '/withattr.zip';
 @unlink($name);
 ?>
---EXPECTF--
+--EXPECT--
 == Set
 bool(true)
 bool(true)

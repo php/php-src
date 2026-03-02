@@ -1,17 +1,13 @@
 --TEST--
 Test session_decode() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_decode() : variation ***\n";
 
@@ -31,7 +27,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_decode() : variation ***
 bool(true)
 bool(true)

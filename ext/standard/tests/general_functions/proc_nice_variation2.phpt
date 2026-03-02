@@ -29,7 +29,7 @@ foreach ( $variation_array as $var ) {
   var_dump(proc_nice( $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with boolean values ***
 bool(true)
 bool(true)

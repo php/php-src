@@ -5,29 +5,17 @@ Test unlink() function : usage variations - unlinking file in a directory
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip only on Linux');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/unlink_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* Delete file having default permission but its dir having readonly permission
    Delete file having readonly permission but dir having default permission
 */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp dir name used here
 $dirname = "$file_path/unlink_variation1";

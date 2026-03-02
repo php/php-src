@@ -2,17 +2,9 @@
 Test file_get_contents() and file_put_contents() functions : usage variations - use_include_path
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[,
- *                                      resource $context[, int $offset[, int $maxlen]]]] )
- * Description: Reads entire file into a string
- */
-
-/* Prototype: int file_put_contents( string $filename, mixed $data[,int $flags[, resource $context]] )
- * Description: Write a string to a file
- */
 
 /* Testing variation using use_include_path argument */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "*** Testing with variation in use_include_path argument ***\n";
@@ -41,11 +33,11 @@ echo "--- Done ---";
 <?php
 //Deleting the temporary files and directory used in the testcase
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_get_contents_variation2/file_get_contents_variation2.tmp");
 rmdir($file_path."/file_get_contents_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing with variation in use_include_path argument ***
 string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
 string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"

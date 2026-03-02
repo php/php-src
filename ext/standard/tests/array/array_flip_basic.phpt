@@ -2,11 +2,6 @@
 Test array_flip() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_flip() : basic functionality ***\n";
 
 // array with default keys - numeric values
@@ -30,7 +25,7 @@ $input = array(1 => 'one','two', 3 => 'three', 4, "five" => 5);
 var_dump( array_flip($input) );
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_flip() : basic functionality ***
 array(2) {
   [1]=>

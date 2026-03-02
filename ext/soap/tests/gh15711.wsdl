@@ -1,0 +1,39 @@
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.nothing.com" targetNamespace="http://schemas.nothing.com">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://schemas.nothing.com">
+			<xsd:complexType name="book">
+				<xsd:all>
+					<xsd:element name="base64" type="xsd:base64Binary"/>
+					<xsd:element name="string" type="xsd:string"/>
+                    <xsd:element name="any" type="xsd:any"/>
+                    <xsd:element name="hexbin" type="xsd:hexBinary"/>
+                    <xsd:element name="nmtokens" type="xsd:NMTOKENS"/>
+                    <xsd:element name="integer" type="xsd:integer"/>
+                    <xsd:element name="short" type="xsd:short"/>
+				</xsd:all>
+			</xsd:complexType>
+  </xsd:schema>
+	</wsdl:types>
+	<message name="dotestRequest">
+		<part name="dotestReturn" type="tns:book"/>
+  </message>
+	<portType name="testPortType">
+		<operation name="dotest">
+			<input message="tns:dotestRequest"/>
+		</operation>
+	</portType>
+	<binding name="testBinding" type="tns:testPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="dotest">
+			<soap:operation soapAction="http://localhost:81/test/interface.php?class=test/dotest" style="rpc"/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://schemas.nothing.com"/>
+			</input>
+		</operation>
+	</binding>
+	<service name="test">
+		<port name="testPort" binding="tns:testBinding">
+			<soap:address location="http://localhost:81/test/interface.php?class=test"/>
+		</port>
+	</service>
+</wsdl:definitions>

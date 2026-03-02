@@ -1,23 +1,23 @@
 --TEST--
 tidy_get_body() crash
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 
 // bug report taken from http://news.php.net/php.notes/130628
 
 $inputs = array(
-	'<frameset > </frameset>',
-	'<html><frameset> </frameset> </html',
+    '<frameset > </frameset>',
+    '<html><frameset> </frameset> </html',
 );
 
 
 foreach ($inputs as $input) {
 
-	$t = tidy_parse_string($input);
-	$t->cleanRepair();
-	var_dump(tidy_get_body($t));
+    $t = tidy_parse_string($input);
+    $t->cleanRepair();
+    var_dump(tidy_get_body($t));
 }
 
 echo "Done\n";

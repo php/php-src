@@ -8,7 +8,5 @@ Leon Luijkx <leon@phpgg.nl>
 $obj = new ReflectionExtension('reflection');
 var_dump($obj->getName());
 ?>
-==DONE==
 --EXPECT--
 string(10) "Reflection"
-==DONE==

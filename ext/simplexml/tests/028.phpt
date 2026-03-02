@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: Adding an elements without text
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF
@@ -31,12 +31,10 @@ $people->person['name'] = 'John';
 traverse_xml($people);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 <people>
 </people>
 <people>
   <person name="John">
   </person>
 </people>
-===DONE===

@@ -3,9 +3,9 @@
 --FILE--
 <?php
 function foo () {
-	while (1) {
-		break 2;
-	}
+    while (1) {
+        break 2;
+    }
 }
 ?>
 --EXPECTF--

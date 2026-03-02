@@ -1,18 +1,18 @@
 --TEST--
 Phar::setAlias() zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip no zlib"); ?>
-<?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
+--EXTENSIONS--
+phar
+zlib
+bz2
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.zip';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '3.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.zip';
 
 $phar = new Phar($fname);
 $phar->setStub('<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
@@ -25,7 +25,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 $phar->stopBuffering();
 
@@ -46,17 +46,14 @@ $p2->setAlias('unused2');
 $p3 = new Phar($fname3);
 echo $p3->getAlias(), "\n";
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '3.phar.zip');
-__HALT_COMPILER();
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
 ?>
 --EXPECT--
 hio
 test
 test
 test
-===DONE===

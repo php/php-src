@@ -2,18 +2,12 @@
 Test get_parent_class() function : usage variations  - unexpected argument type.
 --FILE--
 <?php
-/* Prototype  : proto string get_parent_class([mixed object])
- * Description: Retrieves the parent class name for object or class or current scope.
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 spl_autoload_register(function ($className) {
-	echo "In autoload($className)\n";
+    echo "In autoload($className)\n";
 });
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -76,104 +70,107 @@ $values = array(
 
 // loop through each element of the array for object
 
-foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( get_parent_class($value) );
-};
+foreach ($values as $value) {
+    echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . "\n";
+    try {
+        var_dump(get_parent_class($value));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_parent_class() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(68)
-Error: 8 - Undefined variable: unset_var, %s(71)
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
-Arg value 0 
-bool(false)
+Arg value 0
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
-Arg value 1 
-bool(false)
+Arg value 1
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
-Arg value 12345 
-bool(false)
+Arg value 12345
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
-Arg value -2345 
-bool(false)
+Arg value -2345
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 
-Arg value 10.5 
-bool(false)
+Arg value 10.5
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
-Arg value -10.5 
-bool(false)
+Arg value -10.5
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
-Arg value 101234567000 
-bool(false)
+Arg value 101234567000
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
-Arg value 1.07654321E-9 
-bool(false)
+Arg value 1.07654321E-9
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
 
-Arg value 0.5 
-bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Arg value 0.5
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, float given
+Error: 2 - Array to string conversion
 
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Arg value Array
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
+Error: 2 - Array to string conversion
 
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Arg value Array
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
+Error: 2 - Array to string conversion
 
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Arg value Array
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
+Error: 2 - Array to string conversion
 
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Arg value Array
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
+Error: 2 - Array to string conversion
 
-Arg value Array 
-bool(false)
+Arg value Array
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
-Arg value 1 
-bool(false)
+Arg value 1
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, true given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, false given
 
-Arg value 1 
-bool(false)
+Arg value 1
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, true given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, false given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value string 
+Arg value string
 In autoload(string)
-bool(false)
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value String 
+Arg value String
 In autoload(String)
-bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value  
-bool(false)
-
-Arg value  
+Arg value stdClass
 bool(false)
 
-Arg value  
-bool(false)
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
+
+Arg value 
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 Done

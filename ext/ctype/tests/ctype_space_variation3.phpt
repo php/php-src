@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_space() function : usage variations - different strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_space(mixed $c)
- * Description: Checks for whitespace character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_space() to test
  * which are considered valid whitespace character only strings
@@ -56,8 +51,7 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 
 -- Iteration 1 --
@@ -137,4 +131,3 @@ bool(true)
 
 -- Iteration 26 --
 bool(true)
-===DONE===

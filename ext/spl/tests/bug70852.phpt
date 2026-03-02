@@ -7,11 +7,13 @@ $y = new ArrayObject();
 var_dump($y[NULL]);
 var_dump($y[NULL]++);
 ?>
-===DONE===
 --EXPECTF--
-Notice: Undefined index:  in %s on line %d
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Warning: Undefined array key "" in %s on line %d
 NULL
 
-Notice: Undefined index:  in %s on line %d
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Warning: Undefined array key "" in %s on line %d
 NULL
-===DONE===

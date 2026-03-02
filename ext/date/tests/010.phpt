@@ -7,7 +7,7 @@ date_default_timezone_set('UTC');
   var_dump($timezone_abbreviations["utc"]);
   echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(5) {
   [0]=>
   array(3) {

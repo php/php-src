@@ -1,6 +1,6 @@
 <?php
 if (function_exists("date_default_timezone_set")) {
-	date_default_timezone_set("UTC");
+    date_default_timezone_set("UTC");
 }
 
 function simple() {
@@ -220,30 +220,30 @@ function heapsort_r($n, &$ra) {
     $ir = $n;
 
     while (1) {
-	if ($l > 1) {
-	    $rra = $ra[--$l];
-	} else {
-	    $rra = $ra[$ir];
-	    $ra[$ir] = $ra[1];
-	    if (--$ir == 1) {
-		$ra[1] = $rra;
-		return;
-	    }
-	}
-	$i = $l;
-	$j = $l << 1;
-	while ($j <= $ir) {
-	    if (($j < $ir) && ($ra[$j] < $ra[$j+1])) {
-		$j++;
-	    }
-	    if ($rra < $ra[$j]) {
-		$ra[$i] = $ra[$j];
-		$j += ($i = $j);
-	    } else {
-		$j = $ir + 1;
-	    }
-	}
-	$ra[$i] = $rra;
+    if ($l > 1) {
+        $rra = $ra[--$l];
+    } else {
+        $rra = $ra[$ir];
+        $ra[$ir] = $ra[1];
+        if (--$ir == 1) {
+        $ra[1] = $rra;
+        return;
+        }
+    }
+    $i = $l;
+    $j = $l << 1;
+    while ($j <= $ir) {
+        if (($j < $ir) && ($ra[$j] < $ra[$j+1])) {
+        $j++;
+        }
+        if ($rra < $ra[$j]) {
+        $ra[$i] = $ra[$j];
+        $j += ($i = $j);
+        } else {
+        $j = $ir + 1;
+        }
+    }
+    $ra[$i] = $rra;
     }
 }
 
@@ -268,9 +268,9 @@ function mkmatrix ($rows, $cols) {
     $count = 1;
     $mx = array();
     for ($i=0; $i<$rows; $i++) {
-	for ($j=0; $j<$cols; $j++) {
-	    $mx[$i][$j] = $count++;
-	}
+    for ($j=0; $j<$cols; $j++) {
+        $mx[$i][$j] = $count++;
+    }
     }
     return($mx);
 }
@@ -278,13 +278,13 @@ function mkmatrix ($rows, $cols) {
 function mmult ($rows, $cols, $m1, $m2) {
     $m3 = array();
     for ($i=0; $i<$rows; $i++) {
-	for ($j=0; $j<$cols; $j++) {
-	    $x = 0;
-	    for ($k=0; $k<$cols; $k++) {
-		$x += $m1[$i][$k] * $m2[$k][$j];
-	    }
-	    $m3[$i][$j] = $x;
-	}
+    for ($j=0; $j<$cols; $j++) {
+        $x = 0;
+        for ($k=0; $k<$cols; $k++) {
+        $x += $m1[$i][$k] * $m2[$k][$j];
+        }
+        $m3[$i][$j] = $x;
+    }
     }
     return($m3);
 }
@@ -345,30 +345,30 @@ function strcat($n) {
 
 /*****/
 
-function getmicrotime()
+function gethrtime()
 {
-  $t = gettimeofday();
-  return ($t['sec'] + $t['usec'] / 1000000);
+  $hrtime = hrtime();
+  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
 }
 
 function start_test()
 {
-	ob_start();
-  return getmicrotime();
+    ob_start();
+  return gethrtime();
 }
 
 function end_test($start, $name)
 {
   global $total;
-  $end = getmicrotime();
+  $end = gethrtime();
   ob_end_clean();
   $total += $end-$start;
   $num = number_format($end-$start,3);
   $pad = str_repeat(" ", 24-strlen($name)-strlen($num));
 
   echo $name.$pad.$num."\n";
-	ob_start();
-  return getmicrotime();
+    ob_start();
+  return gethrtime();
 }
 
 function total()
@@ -418,5 +418,5 @@ sieve(30);
 $t = end_test($t, "sieve(30)");
 strcat(200000);
 $t = end_test($t, "strcat(200000)");
-total($t0, "Total");
+total();
 ?>

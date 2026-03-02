@@ -1,14 +1,14 @@
 --TEST--
 Phar: create and modify tar-based phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
 $pname = 'phar://' . $fname;
 
 @unlink($fname);
@@ -16,11 +16,13 @@ $pname = 'phar://' . $fname;
 file_put_contents($pname . '/a.php', "brand new!\n");
 
 if (function_exists("opcache_get_status")) {
-	$status = opcache_get_status();
-	if ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"])) {
-		ini_set("opcache.revalidate_freq", "0");
-		sleep(2);
-	}
+    $status = opcache_get_status();
+    if (is_array($status) && ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"]))) {
+        opcache_invalidate($pname . '/a.php', true);
+        // opcache_invalidate is buggy and doesn't work as expected so we add a
+        // minor delay here.
+        sleep(2);
+    }
 }
 
 $phar = new Phar($fname);
@@ -41,13 +43,11 @@ include $pname . '/a.php';
 include $pname . '/b.php';
 
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
---EXPECTF--
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
+--EXPECT--
 bool(true)
 brand new!
 bool(true)
 modified!
 another!
-===DONE===

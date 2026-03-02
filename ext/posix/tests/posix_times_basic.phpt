@@ -1,9 +1,7 @@
 --TEST--
 Test posix_times() function : basic functionality
---SKIPIF--
-<?php
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
   echo "Basic test of POSIX times function\n";
@@ -14,8 +12,8 @@ Test posix_times() function : basic functionality
 
 
   if ($times == FALSE) {
-  	$errno= posix_get_last_error();
-  	var_dump(posix_strerror($errno));
+    $errno= posix_get_last_error();
+    var_dump(posix_strerror($errno));
   }
 
 ?>

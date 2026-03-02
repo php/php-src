@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +22,7 @@
 #include "mysqlnd_debug.h"
 
 /*--------------------------------------------------------------------*/
-#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
+#if MYSQLND_DBG_ENABLED == 1
 static enum_func_status mysqlnd_example_plugin_end(void * p);
 
 static MYSQLND_STATS * mysqlnd_plugin_example_stats = NULL;
@@ -86,7 +84,7 @@ mysqlnd_example_plugin_register(void)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin);
 }
 /* }}} */
-#endif /* defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1 */
+#endif /* MYSQLND_DBG_ENABLED == 1 */
 /*--------------------------------------------------------------------*/
 
 static HashTable mysqlnd_registered_plugins;
@@ -127,7 +125,7 @@ mysqlnd_plugin_subsystem_end(void)
 
 
 /* {{{ mysqlnd_plugin_register */
-PHPAPI unsigned int mysqlnd_plugin_register()
+PHPAPI unsigned int mysqlnd_plugin_register(void)
 {
 	return mysqlnd_plugin_register_ex(NULL);
 }
@@ -169,7 +167,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 	zval *val;
 	int result;
 
-	ZEND_HASH_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
+	ZEND_HASH_MAP_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
 		result = apply_func(val, argument);
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
@@ -183,18 +181,8 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 
 
 /* {{{ mysqlnd_plugin_count */
-PHPAPI unsigned int mysqlnd_plugin_count()
+PHPAPI unsigned int mysqlnd_plugin_count(void)
 {
 	return mysqlnd_plugins_counter;
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

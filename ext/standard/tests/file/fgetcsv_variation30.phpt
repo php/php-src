@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - with file handle and length, file pointer po
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
    Testing fgetcsv() to read a file whose file pointer is pointing to end of file
    and fgetcsv() provided with file handle and length arguments
 */
@@ -25,7 +20,7 @@ $csv_lists = array (
   array('\\', '"water"\\"fruit"\\"""'),
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation30.tmp';
+$filename = __DIR__ . '/fgetcsv_variation30.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
@@ -71,7 +66,7 @@ foreach ($csv_lists as $csv_list) {
 
     // now file pointer should point to end of the file, try reading again
     var_dump( feof($file_handle) );
-    var_dump( fgetcsv($file_handle, 1024) );
+    var_dump( fgetcsv($file_handle, 1024, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

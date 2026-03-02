@@ -1,14 +1,7 @@
 --TEST--
 Test strip_tags() function : basic functionality - with all arguments
---INI--
-short_open_tag = on
 --FILE--
 <?php
-/* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
 // Calling strip_tags() with all possible arguments
@@ -38,7 +31,7 @@ foreach($allowed_tags_array as $tags)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 string(33) "<html>helloworldOther text</html>"

@@ -1,8 +1,9 @@
 --TEST--
 Bug #70102 (imagecreatefromwebm() shifts colors)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.0', '<')) {
     die("skip test requires GD 2.2.0 or higher");
 }
@@ -18,7 +19,6 @@ $white = imagecolorallocate($im, 255, 255, 255);
 var_dump($white & 0xffffff);
 imagefilledrectangle($im, 0, 0, 7, 7, $white);
 imagewebp($im, $filename);
-imagedestroy($im);
 
 $im = imagecreatefromwebp($filename);
 $color = imagecolorat($im, 4, 4);

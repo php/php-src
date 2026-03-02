@@ -1,8 +1,12 @@
 --TEST--
 Test posix_getgroups() function : basic functionality
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
 ?>
 --FILE--
 <?php
@@ -11,14 +15,12 @@ Test posix_getgroups() function : basic functionality
   $groups = posix_getgroups();
 
   if (!is_array($groups)) {
-  	echo "TEST FAILED - array result expected\n";
+    echo "TEST FAILED: ", posix_strerror(posix_get_last_error()), "\n";
   } else {
-  	echo "TEST PASSED\n";
+    echo "TEST PASSED\n";
   }
 
 ?>
-===DONE===
 --EXPECT--
 Basic test of POSIX getgroups
 TEST PASSED
-===DONE===

@@ -5,7 +5,7 @@ Bug #32828 (Throwing exception in output_callback function with ob_start and ob_
 
 function output_handler($buffer)
 {
-	throw new Exception;
+    throw new Exception;
 }
 
 ob_start('output_handler');

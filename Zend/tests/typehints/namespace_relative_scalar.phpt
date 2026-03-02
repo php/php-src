@@ -8,4 +8,4 @@ test(0);
 
 ?>
 --EXPECTF--
-Fatal error: Scalar type declaration 'int' must be unqualified in %s on line %d
+Fatal error: Type declaration 'int' must be unqualified in %s on line %d

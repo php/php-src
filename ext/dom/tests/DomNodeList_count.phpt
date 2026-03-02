@@ -2,8 +2,8 @@
 Test count nodes in DOMNodeList
 --CREDITS--
 Andreas Treichel <gmblar+github@gmail.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ var_dump($root->childNodes->count());
 var_dump(count($root->childNodes));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(7)
 int(7)
 int(7)

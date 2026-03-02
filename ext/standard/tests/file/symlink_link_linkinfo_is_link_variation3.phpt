@@ -2,32 +2,20 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - access/update file through softlink
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 /* Variation 3 : Create file and a soft link to the file
                  Access data of the file through the soft link
                  Update the file through soft link
                  Check size of file and soft link link
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 echo "*** Accessing and updating data of file through soft link ***\n";
 // Creating file and inserting data into it
 $filename = "$file_path/symlink_link_linkinfo_is_link_variation3.tmp";
@@ -113,7 +101,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through soft link ***
 bool(true)
 

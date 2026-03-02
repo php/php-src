@@ -1,46 +1,36 @@
 --TEST--
 socket_export_stream: Bad arguments
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-	die('SKIP sockets extension not available.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 
-var_dump(socket_export_stream());
-var_dump(socket_export_stream(1, 2));
-var_dump(socket_export_stream(1));
-var_dump(socket_export_stream(new stdclass));
-var_dump(socket_export_stream(fopen(__FILE__, "rb")));
-var_dump(socket_export_stream(stream_socket_server("udp://127.0.0.1:58392", $errno, $errstr, STREAM_SERVER_BIND)));
+try {
+    socket_export_stream(fopen(__FILE__, "rb"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    socket_export_stream(stream_socket_server("udp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 var_dump($s);
 socket_close($s);
-var_dump(socket_export_stream($s));
 
+try {
+    var_dump(socket_export_stream($s));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done.";
+?>
 --EXPECTF--
-Warning: socket_export_stream() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: socket_export_stream() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: socket_export_stream() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
-
-Warning: socket_export_stream() expects parameter 1 to be resource, object given in %s on line %d
-NULL
-
-Warning: socket_export_stream(): supplied resource is not a valid Socket resource in %s on line %d
-bool(false)
-
-Warning: socket_export_stream(): supplied resource is not a valid Socket resource in %s on line %d
-bool(false)
-resource(%d) of type (Socket)
-
-Warning: socket_export_stream(): supplied resource is not a valid Socket resource in %s on line %d
-bool(false)
+socket_export_stream(): Argument #1 ($socket) must be of type Socket, resource given
+socket_export_stream(): Argument #1 ($socket) must be of type Socket, resource given
+object(Socket)#%d (0) {
+}
+socket_export_stream(): Argument #1 ($socket) has already been closed
 Done.

@@ -1,0 +1,13 @@
+name: Setup Caddy server
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -x
+        gh release -R caddyserver/caddy download --pattern 'caddy_*_linux_amd64.tar.gz' -O - | sudo tar -xz -C /usr/bin caddy
+        sudo chmod +x /usr/bin/caddy
+        sudo caddy start --config ext/curl/tests/Caddyfile
+      continue-on-error: true

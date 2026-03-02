@@ -17,6 +17,7 @@ class Foo {
 
 $foo = new Foo;
 var_dump($foo->foo([]));
+?>
 --EXPECTF--
 object(EmptyIterator)#%d (%d) {
 }

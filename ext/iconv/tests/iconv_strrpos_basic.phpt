@@ -1,19 +1,11 @@
 --TEST--
 Test iconv_strrpos() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
-/* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])
- * Description: Find position of last occurrence of a string within another
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test basic functionality of iconv_strrpos()
  */
@@ -42,7 +34,7 @@ var_dump(iconv_strrpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_strrpos() : basic ***
 
 -- ASCII string 1 --

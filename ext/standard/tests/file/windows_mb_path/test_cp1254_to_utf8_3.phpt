@@ -2,13 +2,11 @@
 cp1254 cmd test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
 ?>
+--CONFLICTS--
+file_cp1254
 --FILE--
 <?php
 /*
@@ -16,7 +14,7 @@ skip_if_no_required_exts();
 #vim: set encoding=cp1254
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "çokbaytlı işleri";
@@ -31,10 +29,8 @@ system("dir /b \"" . $fn . "\"");
 remove_data("file_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\çokbaytlı işleri"
 bool(true)
 bool(true)
 çokbaytlı işleri
-===DONE===

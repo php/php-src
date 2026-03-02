@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() iterator, 1 file resource passed in
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -14,42 +14,35 @@ class myIterator implements Iterator
     {
         $this->a = $a;
     }
-    function next() {
+    function next(): void {
         echo "next\n";
-        return next($this->a);
+        next($this->a);
     }
-    function current() {
+    function current(): mixed {
         echo "current\n";
         return current($this->a);
     }
-    function key() {
+    function key(): mixed {
         echo "key\n";
         return key($this->a);
     }
-    function valid() {
+    function valid(): bool {
         echo "valid\n";
-        return current($this->a);
+        return is_resource(current($this->a));
     }
-    function rewind() {
+    function rewind(): void {
         echo "rewind\n";
-        return reset($this->a);
+        reset($this->a);
     }
 }
-try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
-	fclose($a);
-} catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
-}
+chdir(__DIR__);
+$phar = new Phar(__DIR__ . '/buildfromiterator9.phar');
+var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
+fclose($a);
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromiterator.phar');
-__HALT_COMPILER();
+unlink(__DIR__ . '/buildfromiterator9.phar');
 ?>
 --EXPECTF--
 rewind
@@ -62,4 +55,3 @@ array(1) {
   ["a"]=>
   string(%d) "[stream]"
 }
-===DONE===

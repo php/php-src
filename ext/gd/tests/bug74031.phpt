@@ -1,8 +1,12 @@
 --TEST--
 (Bug #74031) ReflectionFunction for imagepng returns wrong number of parameters
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die("skip gd extension not available\n");
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

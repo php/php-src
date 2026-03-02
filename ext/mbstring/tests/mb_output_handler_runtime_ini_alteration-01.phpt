@@ -1,13 +1,13 @@
 --TEST--
 mb_output_handler() and mbstring.http_output_conv_mimetypes alteration in runtime (1)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
+output_encoding=EUC-JP
 mbstring.http_output_conv_mimetypes=plain
 --FILE--
 <?php
-mb_http_output("EUC-JP");
 ini_set('mbstring.http_output_conv_mimetypes', 'text');
 header("Content-Type: text/html");
 ob_start();

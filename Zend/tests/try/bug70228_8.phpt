@@ -9,9 +9,9 @@ function foo() {
         var_dump($value);
         try {
             try {
-            	switch (str_repeat("b", 2)) {
-            		case "bb":
-	                    return str_repeat("a", 2);
+                switch (str_repeat("b", 2)) {
+                    case "bb":
+                        return str_repeat("a", 2);
                 }
             } finally {
                 throw new Exception;
@@ -22,9 +22,7 @@ function foo() {
 
 foo();
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(2)
 int(3)
-===DONE===

@@ -1,14 +1,7 @@
 --TEST--
 Test strip_tags() function : usage variations - invalid values for 'str' and 'allowable_tags'
---INI--
-short_open_tag = on
 --FILE--
 <?php
-/* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * testing functionality of strip_tags() by giving invalid values for $str and $allowable_tags argument
 */
@@ -43,7 +36,7 @@ foreach($strings as $string_value)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(43) "<abc>hello</abc> 		world... strip_tags_test"

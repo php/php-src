@@ -1,7 +1,7 @@
 --TEST--
 Semantic of alias operation is to provide an additional identifier for the
 method body of the original method.
-It should also work incase the method is fully qualified.
+It should also work in case the method is fully qualified.
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -13,7 +13,7 @@ trait THello {
 }
 
 class TraitsTest {
-	use THello { THello::a as b; }
+    use THello { THello::a as b; }
 }
 
 $test = new TraitsTest();
@@ -21,5 +21,5 @@ $test->a();
 $test->b();
 
 ?>
---EXPECTF--
+--EXPECT--
 AA

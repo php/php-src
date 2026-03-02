@@ -2,10 +2,6 @@
 Testing get_defined_vars() Function
 --FILE--
 <?php
-/* Prototype: array get_defined_vars(void);
- * Description: Returns a  multidimentional array of all defined variables.
- */
-
 /* Various variables definitions used for testing of the function */
 
 $number = 22.33; //number
@@ -64,7 +60,7 @@ func1();
 
 echo "\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Displaying various variables through the array captured by the get_defined_vars function call ***
 int(1)
 float(22.33)

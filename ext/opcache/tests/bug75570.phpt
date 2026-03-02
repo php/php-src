@@ -1,7 +1,7 @@
 --TEST--
 Bug #75570 ("Narrowing occurred during type inference" error)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function renderRawGraph(array $parents) {

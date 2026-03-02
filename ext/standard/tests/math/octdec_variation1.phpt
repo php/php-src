@@ -4,15 +4,7 @@ Test octdec() function : usage variations - different data types as $octal_strin
 precision=14
 --FILE--
 <?php
-/* Prototype  : number octdec  ( string $octal_string  )
- * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing octdec() : usage variations ***\n";
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -39,10 +31,6 @@ $inputs = array(
        12.3456789000E-10,
        .5,
 
-       // null data
-/*12*/ NULL,
-       null,
-
        // boolean data
 /*14*/ true,
        false,
@@ -59,12 +47,6 @@ $inputs = array(
        'abcxyz',
        $heredoc,
 
-       // undefined data
-/*24*/ @$undefined_var,
-
-       // unset data
-/*25*/ @$unset_var,
-
        // resource variable
 /*26*/ $fp
 );
@@ -72,9 +54,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of octdec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(octdec($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(octdec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
@@ -92,31 +78,47 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1253)
 
 -- Iteration 5 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134037)
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134038)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(175304192)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(342391)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
-int(0)
+int(1)
 
 -- Iteration 13 --
 int(0)
@@ -128,37 +130,29 @@ int(1)
 int(0)
 
 -- Iteration 16 --
-int(1)
+int(0)
 
 -- Iteration 17 --
 int(0)
 
 -- Iteration 18 --
-int(0)
+octdec(): Argument #1 ($octal_string) must be of type string, array given
 
 -- Iteration 19 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 20 --
 
-Notice: Array to string conversion in %s on line %d
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 22 --
-int(0)
-
--- Iteration 23 --
-int(0)
-
--- Iteration 24 --
-int(0)
-
--- Iteration 25 --
-int(0)
-
--- Iteration 26 --
-int(%d)
+octdec(): Argument #1 ($octal_string) must be of type string, resource given
 ---Done---

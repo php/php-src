@@ -2,30 +2,16 @@
 Test is_readable() function: usage variations - diff. file notations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-  // Skip if being run by root (files are always readable, writeable and executable)
-  $filename = dirname(__FILE__)."/is_readable_root_check.tmp";
-  $fp = fopen($filename, 'w');
-  fclose($fp);
-  if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-  }
-  unlink($filename);
-}
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable.
-*/
-
 /* test is_readable() with file having different filepath notation */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 echo "*** Testing is_readable(): usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/is_readable_variation1");
 
 // create a new temporary file
@@ -60,7 +46,11 @@ $counter = 1;
    is a writable file */
 foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";
-  var_dump( is_readable($file) );
+  try {
+    var_dump( is_readable($file) );
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
   clearstatcache();
 }
@@ -69,8 +59,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/is_readable_variation1/bar.tmp");
-rmdir(dirname(__FILE__)."/is_readable_variation1/");
+unlink(__DIR__."/is_readable_variation1/bar.tmp");
+rmdir(__DIR__."/is_readable_variation1/");
 ?>
 --EXPECTF--
 *** Testing is_readable(): usage variations ***
@@ -87,17 +77,11 @@ bool(false)
 -- Iteration 6 --
 bool(false)
 -- Iteration 7 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 8 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 9 --
-
-Warning: is_readable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 10 --
 bool(true)
 -- Iteration 11 --

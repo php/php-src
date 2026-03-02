@@ -9,7 +9,7 @@ class foo {
   public $a;
   public $b;
   function display() {
-  	echo "This is class foo\n";
+    echo "This is class foo\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";
   }
@@ -43,6 +43,7 @@ $bar1->b = 3;
 $bar1->c = 12;
 $bar1->display();
 echo $bar1->mul()."\n";
+?>
 --EXPECT--
 This is class foo
 a = 2

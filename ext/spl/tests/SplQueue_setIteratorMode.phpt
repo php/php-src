@@ -11,5 +11,5 @@ try {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen

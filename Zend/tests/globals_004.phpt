@@ -6,7 +6,7 @@ variables_order="egpcs"
 <?php
 
 function test() {
-	include dirname(__FILE__)."/globals.inc";
+    include __DIR__."/globals.inc";
 }
 
 test();
@@ -20,9 +20,9 @@ string(5) "array"
 int(%d)
 string(%d) "%s"
 
-Notice: Undefined index: PHP_SELF in %s on line %d
+Warning: Undefined array key "PHP_SELF" in %s on line %d
 NULL
 
-Notice: Undefined variable: _SERVER in %s on line %d
+Warning: Undefined global variable $_SERVER in %s on line %d
 NULL
 Done

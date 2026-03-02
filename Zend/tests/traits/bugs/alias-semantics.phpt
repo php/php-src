@@ -11,7 +11,7 @@ trait THello {
 }
 
 class TraitsTest {
-	use THello { a as b; }
+    use THello { a as b; }
 }
 
 $test = new TraitsTest();
@@ -19,5 +19,5 @@ $test->a();
 $test->b();
 
 ?>
---EXPECTF--
+--EXPECT--
 AA

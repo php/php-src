@@ -10,7 +10,7 @@ class Test implements IteratorAggregate {
         $this->data = $data;
     }
 
-    public function getIterator() {
+    public function getIterator(): Traversable {
         foreach ($this->data as $value) {
             yield $value;
         }

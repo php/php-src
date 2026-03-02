@@ -10,16 +10,10 @@
 
 #ifdef PHP_WIN32
 # define __alignof__ __alignof
-# define alloca _alloca
 #else
 # ifndef HAVE_ALIGNOF
 #  include <stddef.h>
 #  define __alignof__(type) offsetof (struct { char c; type member;}, member)
-# endif
-# if HAVE_ATTRIBUTE_ALIGNED
-#  define ALIGNED(size) __attribute__ ((__aligned__ (size)))
-# else
-#  define ALIGNED(size)
 # endif
 #endif
 
@@ -31,11 +25,7 @@
 #else
 # include <sys/param.h>
 # include <sys/types.h>
-# if HAVE_STRING_H
-#  include <string.h>
-# else
-#  include <strings.h>
-# endif
+# include <string.h>
 #endif
 
 char * __php_stpncpy(char *dst, const char *src, size_t len)
@@ -45,11 +35,6 @@ char * __php_stpncpy(char *dst, const char *src, size_t len)
 		n = len;
 	}
 	return strncpy(dst, src, len) + n;
-}
-
-void * __php_mempcpy(void * dst, const void * src, size_t len)
-{
-	return (((char *)memcpy(dst, src, len)) + len);
 }
 
 #ifndef MIN
@@ -328,24 +313,17 @@ static const char sha256_rounds_prefix[] = "rounds=";
 #define ROUNDS_MAX 999999999
 
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[64] ZEND_NONSTRING =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 {
 #ifdef PHP_WIN32
-# if _MSC <= 1300
-#  pragma pack(push, 16)
-	unsigned char alt_result[32];
-	unsigned char temp_result[32];
-#  pragma pack(pop)
-# else
-	__declspec(align(32)) unsigned char alt_result[32];
-	__declspec(align(32)) unsigned char temp_result[32];
-# endif
+	ZEND_SET_ALIGNED(32, unsigned char alt_result[32]);
+	ZEND_SET_ALIGNED(32, unsigned char temp_result[32]);
 #else
-	unsigned char alt_result[32] ALIGNED(__alignof__ (uint32_t));
-	unsigned char temp_result[32] ALIGNED(__alignof__ (uint32_t));
+	ZEND_SET_ALIGNED(__alignof__ (uint32_t), unsigned char alt_result[32]);
+	ZEND_SET_ALIGNED(__alignof__ (uint32_t), unsigned char temp_result[32]);
 #endif
 
 	struct sha256_ctx ctx;
@@ -360,7 +338,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	zend_bool rounds_custom = 0;
+	bool rounds_custom = false;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	be present.  Just in case it is not.  */
@@ -375,23 +353,34 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 		zend_ulong srounds = ZEND_STRTOUL(num, &endp, 10);
 		if (*endp == '$') {
 			salt = endp + 1;
-			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
-			rounds_custom = 1;
+			if (srounds < ROUNDS_MIN || srounds > ROUNDS_MAX) {
+				return NULL;
+			}
+
+			rounds = srounds;
+			rounds_custom = true;
 		}
 	}
 
 	salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
 	key_len = strlen(key);
+	char *tmp_key = NULL;
+	ALLOCA_FLAG(use_heap_key);
+	char *tmp_salt = NULL;
+	ALLOCA_FLAG(use_heap_salt);
 
-	if ((key - (char *) 0) % __alignof__ (uint32_t) != 0) {
-		char *tmp = (char *) alloca(key_len + __alignof__(uint32_t));
-		key = copied_key = memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__(uint32_t), key, key_len);
+	SET_ALLOCA_FLAG(use_heap_key);
+	SET_ALLOCA_FLAG(use_heap_salt);
+
+	if ((uintptr_t)key % __alignof__ (uint32_t) != 0) {
+		tmp_key = (char *) do_alloca(key_len + __alignof__(uint32_t), use_heap_key);
+		key = copied_key = memcpy(tmp_key + __alignof__(uint32_t) - (uintptr_t)tmp_key % __alignof__(uint32_t), key, key_len);
 	}
 
-	if ((salt - (char *) 0) % __alignof__(uint32_t) != 0) {
-		char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint32_t));
+	if ((uintptr_t)salt % __alignof__(uint32_t) != 0) {
+		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint32_t), use_heap_salt);
 		salt = copied_salt =
-		memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
+		memcpy(tmp_salt + __alignof__(uint32_t) - (uintptr_t)tmp_salt % __alignof__ (uint32_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
 	}
 
@@ -455,9 +444,10 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence P.  */
-	cp = p_bytes = alloca(key_len);
+	ALLOCA_FLAG(use_heap_p_bytes);
+	cp = p_bytes = do_alloca(key_len, use_heap_p_bytes);
 	for (cnt = key_len; cnt >= 32; cnt -= 32) {
-		cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
+		cp = zend_mempcpy((void *)cp, (const void *)temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -473,9 +463,10 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence S.  */
-	cp = s_bytes = alloca(salt_len);
+	ALLOCA_FLAG(use_heap_s_bytes);
+	cp = s_bytes = do_alloca(salt_len, use_heap_s_bytes);
 	for (cnt = salt_len; cnt >= 32; cnt -= 32) {
-		cp = __php_mempcpy(cp, temp_result, 32);
+		cp = zend_mempcpy(cp, temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -583,6 +574,14 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	if (copied_salt != NULL) {
 		ZEND_SECURE_ZERO(copied_salt, salt_len);
 	}
+	if (tmp_key != NULL) {
+		free_alloca(tmp_key, use_heap_key);
+	}
+	if (tmp_salt != NULL) {
+		free_alloca(tmp_salt, use_heap_salt);
+	}
+	free_alloca(p_bytes, use_heap_p_bytes);
+	free_alloca(s_bytes, use_heap_s_bytes);
 
 	return buffer;
 }

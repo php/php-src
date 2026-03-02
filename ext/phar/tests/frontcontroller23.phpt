@@ -2,8 +2,8 @@
 Phar front controller with generic action router test
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller23.php
 REQUEST_URI=/frontcontroller23.php/hi/there

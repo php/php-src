@@ -3,10 +3,8 @@ DOMDocument::validate() should validate an internal DTD declaration
 --CREDITS--
 Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php
-require_once dirname(__FILE__) .'/skipif.inc';
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = "<?xml version=\"1.0\"?>
@@ -27,5 +25,5 @@ $dom = new DOMDocument('1.0');
 $dom->loadXML($xml);
 var_dump($dom->validate());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

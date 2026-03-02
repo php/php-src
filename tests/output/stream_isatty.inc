@@ -12,7 +12,6 @@ function testToStdOut()
         'STDERR (constant)'             => STDERR,
         'STDERR (fopen)'                => fopen('php://stderr', 'wb'),
         'STDERR (php://fd/2)'           => fopen('php://fd/2', 'wb'),
-        'Not a stream'                  => 'foo',
         'Invalid stream (php://temp)'   => fopen('php://temp', 'wb'),
         'Invalid stream (php://input)'  => fopen('php://input', 'wb'),
         'Invalid stream (php://memory)' => fopen('php://memory', 'wb'),

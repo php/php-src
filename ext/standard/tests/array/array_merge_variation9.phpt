@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /* Test array_merge() when:
  * 1. Passed an array made up of referenced variables
  * 2. Passed an array as the first argument and a reference to that array as the second.
@@ -33,7 +28,7 @@ var_dump(array_merge($arr2, $arr1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 
 -- Merge an array made up of referenced variables to an assoc. array --

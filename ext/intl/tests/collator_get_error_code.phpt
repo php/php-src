@@ -1,7 +1,7 @@
 --TEST--
 get_error_code()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -35,9 +35,6 @@ function ut_main()
 
     return $res;
 }
-
-# Suppress warning messages.
-error_reporting( E_ERROR );
 
 include_once( 'ut_common.inc' );
 ut_run();

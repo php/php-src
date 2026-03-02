@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -17,18 +15,15 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -46,7 +41,7 @@ static char *pdo_dblib_get_field_name(int type)
 	 * (example: varchar is reported as char by dbprtype)
 	 *
 	 * FIX ME: Cache datatypes from server systypes table in pdo_dblib_handle_factory()
-	 * 		   to make this future proof.
+	 * 		   to make this future-proof.
 	 */
 
 	switch (type) {
@@ -124,20 +119,29 @@ static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
+	int num_fields;
 
-	ret = dbresults(H->link);
+	do {
+		ret = dbresults(H->link);
+		num_fields = dbnumcols(H->link);
+	} while (H->skip_empty_rowsets && num_fields <= 0 && ret == SUCCEED);
+
 
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");
 		return 0;
 	}
 
-	if(NO_MORE_RESULTS == ret) {
+	if (NO_MORE_RESULTS == ret) {
+		return 0;
+	}
+
+	if (H->skip_empty_rowsets && num_fields <= 0) {
 		return 0;
 	}
 
 	stmt->row_count = DBCOUNT(H->link);
-	stmt->column_count = dbnumcols(H->link);
+	stmt->column_count = num_fields;
 
 	return 1;
 }
@@ -172,7 +176,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 
 	pdo_dblib_stmt_cursor_closer(stmt);
 
-	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
+	if (FAIL == dbcmd(H->link, ZSTR_VAL(stmt->active_query_string))) {
 		return 0;
 	}
 
@@ -239,20 +243,103 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 			len = snprintf(buf, sizeof(buf), "computed%d", S->computed_column_name_count);
 			col->name = zend_string_init(buf, len, 0);
 		} else {
-			col->name = zend_string_init("computed", strlen("computed"), 0);
+			col->name = ZSTR_INIT_LITERAL("computed", 0);
 		}
 
 		S->computed_column_name_count++;
 	}
 
 	col->maxlen = dbcollen(H->link, colno+1);
-	col->param_type = PDO_PARAM_ZVAL;
 
 	return 1;
 }
 
-static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
-	 zend_ulong *len, int *caller_frees)
+static int pdo_dblib_stmt_should_stringify_col(pdo_stmt_t *stmt, int coltype)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+
+	switch (coltype) {
+		case SQLDECIMAL:
+		case SQLNUMERIC:
+		case SQLMONEY:
+		case SQLMONEY4:
+		case SQLMONEYN:
+		case SQLFLT4:
+		case SQLFLT8:
+		case SQLINT4:
+		case SQLINT2:
+		case SQLINT1:
+		case SQLBIT:
+			if (stmt->dbh->stringify) {
+				return 1;
+			}
+			break;
+
+		case SQLINT8:
+			if (stmt->dbh->stringify) {
+				return 1;
+			}
+
+			/* force stringify if DBBIGINT won't fit in zend_long */
+			/* this should only be an issue for 32-bit machines */
+			if (sizeof(zend_long) < sizeof(DBBIGINT)) {
+				return 1;
+			}
+			break;
+
+#ifdef SQLMSDATETIME2
+		case SQLMSDATETIME2:
+#endif
+		case SQLDATETIME:
+		case SQLDATETIM4:
+			if (H->datetime_convert) {
+				return 1;
+			}
+			break;
+	}
+
+	return 0;
+}
+
+static void pdo_dblib_stmt_stringify_col(int coltype, LPBYTE data, DBINT data_len, zval *zv)
+{
+	DBCHAR *tmp_data;
+
+	/* FIXME: We allocate more than we need here */
+	DBINT tmp_data_len = 32 + (2 * (data_len));
+
+	switch (coltype) {
+		case SQLDATETIME:
+		case SQLDATETIM4: {
+			if (tmp_data_len < DATETIME_MAX_LEN) {
+				tmp_data_len = DATETIME_MAX_LEN;
+			}
+			break;
+		}
+	}
+
+	tmp_data = emalloc(tmp_data_len);
+	data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, tmp_data_len);
+
+	if (data_len > 0) {
+		/* to prevent overflows, tmp_data_len is provided as a dest len for dbconvert()
+		 * this code previously passed a dest len of -1
+		 * the FreeTDS impl of dbconvert() does an rtrim with that value, so replicate that behavior
+		 */
+		while (data_len > 0 && tmp_data[data_len - 1] == ' ') {
+			data_len--;
+		}
+
+		ZVAL_STRINGL(zv, tmp_data, data_len);
+	} else {
+		ZVAL_EMPTY_STRING(zv);
+	}
+
+	efree(tmp_data);
+}
+
+static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *zv, enum pdo_param_type *type)
 {
 
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -262,50 +349,20 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	LPBYTE data;
 	DBCHAR *tmp_data;
 	DBINT data_len, tmp_data_len;
-	zval *zv = NULL;
 
 	coltype = dbcoltype(H->link, colno+1);
 	data = dbdata(H->link, colno+1);
 	data_len = dbdatlen(H->link, colno+1);
 
 	if (data_len != 0 || data != NULL) {
-		/* force stringify if DBBIGINT won't fit in zend_long */
-		/* this should only be an issue for 32-bit machines */
-		if (stmt->dbh->stringify || (coltype == SQLINT8 && sizeof(zend_long) < sizeof(DBBIGINT))) {
-			switch (coltype) {
-				case SQLDECIMAL:
-				case SQLNUMERIC:
-				case SQLMONEY:
-				case SQLMONEY4:
-				case SQLMONEYN:
-				case SQLFLT4:
-				case SQLFLT8:
-				case SQLINT8:
-				case SQLINT4:
-				case SQLINT2:
-				case SQLINT1:
-				case SQLBIT: {
-					if (dbwillconvert(coltype, SQLCHAR)) {
-						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
-						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
-
-						zv = emalloc(sizeof(zval));
-						ZVAL_STRING(zv, tmp_data);
-
-						efree(tmp_data);
-					}
-					break;
-				}
-			}
-		}
-
-		if (!zv) {
+		if (pdo_dblib_stmt_should_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
+			pdo_dblib_stmt_stringify_col(coltype, data, data_len, zv);
+		} else {
 			switch (coltype) {
 				case SQLCHAR:
 				case SQLVARCHAR:
 				case SQLTEXT: {
-#if ilia_0
+#ifdef ilia_0
 					while (data_len>0 && data[data_len-1] == ' ') { /* nuke trailing whitespace */
 						data_len--;
 					}
@@ -314,21 +371,23 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLVARBINARY:
 				case SQLBINARY:
 				case SQLIMAGE: {
-					zv = emalloc(sizeof(zval));
 					ZVAL_STRINGL(zv, (DBCHAR *) data, data_len);
 
 					break;
 				}
+#ifdef SQLMSDATETIME2
+				case SQLMSDATETIME2:
+#endif
 				case SQLDATETIME:
 				case SQLDATETIM4: {
-					int dl;
+					size_t dl;
 					DBDATEREC di;
 					DBDATEREC dt;
 
 					dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
 					dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
 
-					dl = spprintf(&tmp_data, 20, "%d-%02d-%02d %02d:%02d:%02d",
+					dl = spprintf(&tmp_data, 20, "%04d-%02d-%02d %02d:%02d:%02d",
 #if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
 							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
 #else
@@ -336,50 +395,31 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 #endif
 					);
 
-					zv = emalloc(sizeof(zval));
 					ZVAL_STRINGL(zv, tmp_data, dl);
 
 					efree(tmp_data);
 
 					break;
 				}
-				case SQLFLT4: {
-					zv = emalloc(sizeof(zval));
+				case SQLFLT4:
 					ZVAL_DOUBLE(zv, *(DBFLT4 *) data);
-
 					break;
-				}
-				case SQLFLT8: {
-					zv = emalloc(sizeof(zval));
+				case SQLFLT8:
 					ZVAL_DOUBLE(zv, *(DBFLT8 *) data);
-
 					break;
-				}
-				case SQLINT8: {
-					zv = emalloc(sizeof(zval));
+				case SQLINT8:
 					ZVAL_LONG(zv, *(DBBIGINT *) data);
-
 					break;
-				}
-				case SQLINT4: {
-					zv = emalloc(sizeof(zval));
+				case SQLINT4:
 					ZVAL_LONG(zv, *(DBINT *) data);
-
 					break;
-				}
-				case SQLINT2: {
-					zv = emalloc(sizeof(zval));
+				case SQLINT2:
 					ZVAL_LONG(zv, *(DBSMALLINT *) data);
-
 					break;
-				}
 				case SQLINT1:
-				case SQLBIT: {
-					zv = emalloc(sizeof(zval));
+				case SQLBIT:
 					ZVAL_LONG(zv, *(DBTINYINT *) data);
-
 					break;
-				}
 				case SQLDECIMAL:
 				case SQLNUMERIC:
 				case SQLMONEY:
@@ -387,10 +427,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				case SQLMONEYN: {
 					DBFLT8 float_value;
 					dbconvert(NULL, coltype, data, 8, SQLFLT8, (LPBYTE) &float_value, -1);
-
-					zv = emalloc(sizeof(zval));
 					ZVAL_DOUBLE(zv, float_value);
-
 					break;
 				}
 
@@ -400,14 +437,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
 						data_len = dbconvert(NULL, SQLUNIQUE, data, data_len, SQLCHAR, (LPBYTE) tmp_data, tmp_data_len);
-						php_strtoupper(tmp_data, data_len);
-						zv = emalloc(sizeof(zval));
+						zend_str_toupper(tmp_data, data_len);
 						ZVAL_STRINGL(zv, tmp_data, data_len);
 						efree(tmp_data);
-
 					} else {
 						/* 16-byte binary representation */
-						zv = emalloc(sizeof(zval));
 						ZVAL_STRINGL(zv, (DBCHAR *) data, 16);
 					}
 					break;
@@ -415,14 +449,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 				default: {
 					if (dbwillconvert(coltype, SQLCHAR)) {
-						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
-						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
-
-						zv = emalloc(sizeof(zval));
-						ZVAL_STRING(zv, tmp_data);
-
-						efree(tmp_data);
+						pdo_dblib_stmt_stringify_col(coltype, data, data_len, zv);
 					}
 
 					break;
@@ -430,16 +457,6 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			}
 		}
 	}
-
-	if (zv != NULL) {
-		*ptr = (char*)zv;
-		*len = sizeof(zval);
-	} else {
-		*ptr = NULL;
-		*len = 0;
-	}
-
-	*caller_frees = 1;
 
 	return 1;
 }
@@ -487,7 +504,7 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 }
 
 
-struct pdo_stmt_methods dblib_stmt_methods = {
+const struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
 	pdo_dblib_stmt_execute,
 	pdo_dblib_stmt_fetch,

@@ -1,19 +1,18 @@
 --TEST--
 mb_send_mail() test 5 (lang=Simplified Chinese)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip.. Not valid for Windows');
-}
 if (!function_exists("mb_send_mail") || !mb_language("Simplified Chinese")) {
-	die("skip mb_send_mail() not available");
+    die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('GB2312')) {
-	die("skip GB2312 encoding is not available on this platform");
+    die("skip GB2312 encoding is not available on this platform");
 }
 ?>
 --INI--
-sendmail_path=/bin/cat
+sendmail_path={MAIL:{PWD}/mb_send_mail05.eml}
 mail.add_x_header=off
 --FILE--
 <?php
@@ -21,12 +20,18 @@ $to = 'example@example.com';
 
 /* default setting */
 mb_send_mail($to, mb_language(), "test");
+readfile(__DIR__ . "/mb_send_mail05.eml");
 
 /* Simplified Chinese (HK-GB-2312) */
 if (mb_language("simplified chinese")) {
-	mb_internal_encoding('GB2312');
-	mb_send_mail($to, "测验 ".mb_language(), "测验");
+    mb_internal_encoding('GB2312');
+    mb_send_mail($to, "测验 ".mb_language(), "测验");
+    readfile(__DIR__ . "/mb_send_mail05.eml");
 }
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . "/mb_send_mail05.eml");
 ?>
 --EXPECTF--
 To: example@example.com

@@ -10,15 +10,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : proto bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file
- * Source code: ext/standard/filestat.c
- * Alias to functions:
- */
-
 echo "*** Testing touch() : basic functionality ***\n";
 
-$filename = dirname(__FILE__)."/touch.dat";
+$filename = __DIR__."/touch.dat";
 
 echo "\n--- testing touch creates a file ---\n";
 @unlink($filename);

@@ -2,11 +2,6 @@
 Test array_unique() function : usage variations - array with reference variables
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unique() by passing
  * array having reference variables as values.
@@ -33,7 +28,7 @@ var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : array with reference variables for $input argument ***
 array(2) {
   [0]=>

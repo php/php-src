@@ -8,14 +8,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/realpath_私はガラスを食べられますbasic/home/test/", 0777, true);
 
 $file_handle1 = fopen("$file_path/realpath_私はガラスを食べられますbasic/home/test/realpath_私はガラスを食べられますbasic.tmp", "w");
@@ -53,7 +49,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/realpath_私はガラスを食べられますbasic";
+$name_prefix = __DIR__."/realpath_私はガラスを食べられますbasic";
 unlink("$name_prefix/home/test/realpath_私はガラスを食べられますbasic.tmp");
 unlink("$name_prefix/home/realpath_私はガラスを食べられますbasic.tmp");
 unlink("$name_prefix/realpath_私はガラスを食べられますbasic.tmp");

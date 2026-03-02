@@ -1,5 +1,11 @@
 --TEST--
 Test detection of inline string manipulations on zval watch
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --INI--
 opcache.optimization_level=0
 --PHPDBG--

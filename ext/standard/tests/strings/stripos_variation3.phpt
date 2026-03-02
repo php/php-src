@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - multi line heredoc string for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
@@ -26,12 +21,12 @@ var_dump( stripos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(14)
 int(23)
 int(23)
-bool(false)
+int(0)
 int(7)
 *** Done ***

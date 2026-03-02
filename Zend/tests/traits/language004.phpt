@@ -19,7 +19,7 @@ trait World {
 class MyHelloWorld {
    use Hello, World {
      Hello::saySomething insteadof World;
-	 World::saySomething as sayWorld;
+     World::saySomething as sayWorld;
    }
 }
 
@@ -27,5 +27,5 @@ $o = new MyHelloWorld();
 $o->saySomething();
 $o->sayWorld();
 ?>
---EXPECTF--
+--EXPECT--
 Hello World

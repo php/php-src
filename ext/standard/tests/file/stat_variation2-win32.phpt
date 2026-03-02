@@ -9,15 +9,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects of writing to a file on the stats of the file */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -32,7 +27,7 @@ echo "*** Testing stat(): writing to a file ***\n";
 echo "-- Testing stat() on file after data is written in it --\n";
 $old_stat = stat($filename);
 clearstatcache();
-sleep(2);
+sleep(1);
 $file_handle = fopen($filename, "w");  // temp file
 fwrite($file_handle, "Hello World");
 fclose($file_handle);
@@ -50,10 +45,10 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation2.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): writing to a file ***
 -- Testing stat() on file after data is written in it --
 bool(true)

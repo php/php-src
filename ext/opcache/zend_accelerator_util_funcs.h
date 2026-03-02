@@ -2,20 +2,20 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -25,15 +25,18 @@
 #include "zend.h"
 #include "ZendAccelerator.h"
 
-void zend_accel_copy_internal_functions(void);
+BEGIN_EXTERN_C()
 
 zend_persistent_script* create_persistent_script(void);
-void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements);
+void free_persistent_script(zend_persistent_script *persistent_script, bool destroy_elements);
 
-void zend_accel_free_user_functions(HashTable *ht);
-void zend_accel_move_user_functions(HashTable *str, HashTable *dst);
+void zend_accel_move_user_functions(HashTable *str, uint32_t count, zend_script *script);
+void zend_accel_move_user_classes(HashTable *str, uint32_t count, zend_script *script);
+void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script);
+void zend_accel_finalize_delayed_early_binding_list(const zend_persistent_script *persistent_script);
+void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persistent_script);
 
-zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory);
+zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, bool from_shared_memory);
 
 #define ADLER32_INIT 1     /* initial Adler-32 value */
 
@@ -41,11 +44,6 @@ unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t le
 
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);
 
-#endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */
+END_EXTERN_C()
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+#endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */

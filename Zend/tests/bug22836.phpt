@@ -4,16 +4,16 @@ Bug #22836 (returning references to NULL)
 <?php
 function &f()
 {
-	$x = "foo";
-	var_dump($x);
-	print "'$x'\n";
-	return ($a);
+    $x = "foo";
+    var_dump($x);
+    print "'$x'\n";
+    return ($a);
 }
 for ($i = 0; $i < 8; $i++) {
-	$h =& f();
+    $h =& f();
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 'foo'
 string(3) "foo"

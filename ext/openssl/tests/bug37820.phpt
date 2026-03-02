@@ -1,12 +1,10 @@
 --TEST--
 openssl_sign/verify: accept different algos
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $file_pub = $dir . '/bug37820cert.pem';
 $file_key = $dir . '/bug37820key.pem';
 
@@ -30,5 +28,5 @@ if ($ok == 1) {
 
 
 ?>
---EXPECTF--
+--EXPECT--
 Ok

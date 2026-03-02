@@ -1,10 +1,11 @@
 --TEST--
 COOKIE multiple cookie test
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 filter.default=stripped
 filter.default_flags=0
+error_reporting=E_ALL&~E_DEPRECATED
 --COOKIE--
 abc=dir; def=true; abc=root; xyz="foo bar";
 --FILE--

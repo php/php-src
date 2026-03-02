@@ -1,31 +1,44 @@
 --TEST--
 Test deflate_init() error
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-var_dump(deflate_init(42));
-var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['level' => 42]));
-var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['level' => -2]));
-var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 0]));
-var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 10]));
+
+try {
+    var_dump(deflate_init(42));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['level' => 42]));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['level' => -2]));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 0]));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 10]));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Warning: deflate_init(): encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
-bool(false)
-
-Warning: deflate_init(): compression level (42) must be within -1..9 in %s on line %d
-bool(false)
-
-Warning: deflate_init(): compression level (-2) must be within -1..9 in %s on line %d
-bool(false)
-
-Warning: deflate_init(): compression memory level (0) must be within 1..9 in %s on line %d
-bool(false)
-
-Warning: deflate_init(): compression memory level (10) must be within 1..9 in %s on line %d
-bool(false)
+--EXPECT--
+deflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+deflate_init(): "level" option must be between -1 and 9
+deflate_init(): "level" option must be between -1 and 9
+deflate_init(): "memory" option must be between 1 and 9
+deflate_init(): "memory" option must be between 1 and 9

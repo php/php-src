@@ -1,23 +1,24 @@
 --TEST--
 xml_parse_into_struct/umlauts in tags
+--EXTENSIONS--
+xml
 --SKIPIF--
-<?php // vim600: syn=php
-include("skipif.inc");
+<?php
 if(strtoupper("äöüß") != "ÄÖÜß")
 {
-	die("skip strtoupper on non-ascii not supported on this platform");
+    die("skip strtoupper on non-ascii not supported on this platform");
 }
 ?>
 --FILE--
 <?php
 function startHandler($parser,$tag,$attr)
 {
-	var_dump($tag,$attr);
+    var_dump($tag,$attr);
 }
 
 function endHandler($parser,$tag)
 {
-	var_dump($tag);
+    var_dump($tag);
 }
 
 $xmldata = '<?xml version="1.0" encoding="ISO-8859-1"?><äöü üäß="Üäß">ÄÖÜ</äöü>';

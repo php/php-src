@@ -2,27 +2,23 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc"))
-	die("skip could not found cli server script");
-$res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
+if(!file_exists(__DIR__."/../../../../sapi/cli/tests/php_cli_server.inc"))
+    die("skip could not found cli server script");
+$res = @include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {
-	die("skip could not open cli server script");
-}
-
-if (CURL_WRAPPERS_ENABLED) {
-	die("skip curl wrappers used");
+    die("skip could not open cli server script");
 }
 ?>
 --FILE--
 <?php
-include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
-php_cli_server_start(file_get_contents(dirname(__FILE__).'/bug64433_srv.inc'));
+include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
+php_cli_server_start(file_get_contents(__DIR__.'/bug64433_srv.inc'));
 
 echo file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php");
 echo "default\n";
 $codes = array(200, 201, 204, 301, 302, 303, 304, 305, 307, 404, 500);
 foreach($codes as $code) {
-	echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1");
+    echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1");
 }
 echo "follow=0\n";
 $arr = array('http'=>
@@ -32,7 +28,7 @@ $arr = array('http'=>
                 );
 $context = stream_context_create($arr);
 foreach($codes as $code) {
-	echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
+    echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
 }
 echo "follow=1\n";
 $arr = array('http'=>
@@ -42,8 +38,9 @@ $arr = array('http'=>
                 );
 $context = stream_context_create($arr);
 foreach($codes as $code) {
-	echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
+    echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
 }
+?>
 --EXPECT--
 HELLO!
 default

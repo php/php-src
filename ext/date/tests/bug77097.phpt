@@ -17,7 +17,7 @@ var_dump($diff->invert, $diff->s, $diff->f);
 $diff = $ago->diff($now, true);
 var_dump($diff->invert, $diff->s, $diff->f);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(0)
 float(0.781751)

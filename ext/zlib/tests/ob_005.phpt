@@ -1,10 +1,8 @@
 --TEST--
 ob_gzhandler
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) die("skip need ext/zlib");
-if (false === stristr(PHP_SAPI, "cgi")) die("skip need sapi/cgi");
-?>
+--EXTENSIONS--
+zlib
+--CGI-
 --INI--
 zlib.output_compression=0
 --ENV--
@@ -17,6 +15,6 @@ ob_start("ob_gzhandler");
 ini_set("zlib.output_compression", 0);
 echo "hi\n";
 ?>
---EXPECTF--
+--EXPECT--
 hi
 --EXPECTHEADERS--

@@ -9,5 +9,6 @@ class Obj
 }
 
 const return = 'nope';
+?>
 --EXPECTF--
-Parse error: syntax error, unexpected 'return' (T_RETURN), expecting identifier (T_STRING) in %s on line 8
+Parse error: syntax error, unexpected token "return", expecting identifier in %s on line %d

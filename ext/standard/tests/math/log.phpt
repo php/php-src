@@ -1,7 +1,7 @@
 --TEST--
 log() tests
 --FILE--
-<?php // $Id$
+<?php
 echo "On failure, please mail result to php-dev@lists.php.net\n";
 for ($x = 0, $count= 0; $x < 200; $x++) {
     $x2 = (int) exp(log($x));

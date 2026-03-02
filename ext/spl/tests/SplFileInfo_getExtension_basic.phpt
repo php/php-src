@@ -1,5 +1,9 @@
 --TEST--
 SPL: SplFileInfo::getExtension() basic test
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === "Windows") die("skip not for Windows");
+?>
 --FILE--
 <?php
 $file = md5('SplFileInfo::getExtension');
@@ -15,10 +19,10 @@ foreach ($exts as $ext) {
 $file = md5('SplFileInfo::getExtension');
 $exts = array('.txt', '.extension', '..', '.', '');
 foreach ($exts as $ext) {
-    unlink($file . $ext);
+    @unlink($file . $ext);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "txt"
 string(3) "txt"
 string(9) "extension"

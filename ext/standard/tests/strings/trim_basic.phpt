@@ -3,11 +3,6 @@ Test trim() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string trim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the beginning and end of a string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing trim() : basic functionality ***\n";
 
 $text  = "  \t\r\n\0\x0B  ---These are a few words---  \t\r\n\0\x0B  ";
@@ -27,7 +22,6 @@ echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(trim($binary, "\x00..\x1F"));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing trim() : basic functionality ***
 
@@ -42,4 +36,3 @@ string(19) "!===Hello World===!"
 
 -- Trim the ASCII control characters at the beginning of a string --
 string(14) "Example string"
-===DONE===

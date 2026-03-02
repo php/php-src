@@ -4,44 +4,45 @@ ldap_search() test
 Davide Mendolia <idaf1er@gmail.com>
 Patrick Allaert <patrickallaert@php.net>
 Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 $dn = "$base";
 $filter = "(objectclass=person)";
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_SEARCHING),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_SEARCHING),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_FINDING),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_FINDING),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_ALWAYS),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 3, LDAP_DEREF_ALWAYS),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -62,7 +63,8 @@ array(2) {
 }
 
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -83,7 +85,8 @@ array(2) {
 }
 
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -102,4 +105,3 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-===DONE===

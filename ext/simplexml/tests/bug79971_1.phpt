@@ -1,0 +1,29 @@
+--TEST--
+Bug #79971 (special character is breaking the path in xml function)
+--EXTENSIONS--
+simplexml
+--SKIPIF--
+<?php
+if (str_contains(getcwd(), ' ')) die('skip simplexml already escapes the path with spaces so this test does not work');
+?>
+--FILE--
+<?php
+if (PHP_OS_FAMILY === 'Windows') {
+    $path = '/' . str_replace('\\', '/', __DIR__);
+} else {
+    $path = __DIR__;
+}
+$uri = "file://$path/bug79971_1.xml";
+var_dump(simplexml_load_file("$uri%00foo"));
+
+$sxe = simplexml_load_file($uri);
+var_dump($sxe->asXML("$uri.out%00foo"));
+?>
+--EXPECTF--
+Warning: simplexml_load_file(): URI must not contain percent-encoded NUL bytes in %s on line %d
+
+Warning: simplexml_load_file(): I/O warning : failed to load %s
+bool(false)
+
+Warning: SimpleXMLElement::asXML(): URI must not contain percent-encoded NUL bytes in %s on line %d
+bool(false)

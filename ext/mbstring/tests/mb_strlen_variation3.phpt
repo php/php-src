@@ -1,17 +1,9 @@
 --TEST--
 Test mb_strlen() function : usage variations - Pass list of encodings
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strlen') or die("skip mb_strlen() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass all encodings listed on php.net to mb_strlen to test that function recognises them
  * NB: The strings passed are *NOT* necessarily encoded in the encoding passed to the function.
@@ -84,22 +76,22 @@ $string_ascii = 'abc def';
 $string_mb = base64_decode('44K/44OT44Ol44Os44O844OG44Kj44Oz44Kw44O744Oe44K344O844Oz44O744Kr44Oz44OR44OL44O8');
 
 foreach($encoding as $enc) {
-	echo "\n-- Iteration $iterator: $enc --\n";
+    echo "\n-- Iteration $iterator: $enc --\n";
 
-	echo "-- ASCII String --\n";
-	if(mb_strlen($string_ascii, $enc)) {
-		echo "Encoding $enc recognised\n";
-	} else {
-		echo "Encoding $enc not recognised\n";
-	}
+    echo "-- ASCII String --\n";
+    if(mb_strlen($string_ascii, $enc)) {
+        echo "Encoding $enc recognised\n";
+    } else {
+        echo "Encoding $enc not recognised\n";
+    }
 
-	echo "-- Multibyte String --\n";
-	if(mb_strlen($string_mb, $enc)){
-		echo "Encoding $enc recognised\n";
-	} else {
-		echo "Encoding $enc not recognised\n";
-	}
-	$iterator++;
+    echo "-- Multibyte String --\n";
+    if(mb_strlen($string_mb, $enc)){
+        echo "Encoding $enc recognised\n";
+    } else {
+        echo "Encoding $enc not recognised\n";
+    }
+    $iterator++;
 }
 
 echo "Done";
@@ -343,12 +335,16 @@ Encoding byte4le recognised
 
 -- Iteration 40: BASE64 --
 -- ASCII String --
+
+Deprecated: mb_strlen(): Handling Base64 via mbstring is deprecated; use base64_encode/base64_decode instead in %s on line %d
 Encoding BASE64 recognised
 -- Multibyte String --
 Encoding BASE64 recognised
 
 -- Iteration 41: HTML-ENTITIES --
 -- ASCII String --
+
+Deprecated: mb_strlen(): Handling HTML entities via mbstring is deprecated; use htmlspecialchars, htmlentities, or mb_encode_numericentity/mb_decode_numericentity instead in %s on line %d
 Encoding HTML-ENTITIES recognised
 -- Multibyte String --
 Encoding HTML-ENTITIES recognised

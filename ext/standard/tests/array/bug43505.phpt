@@ -2,11 +2,10 @@
 Bug #43505 (Assign by reference bug)
 --INI--
 error_reporting=0
---SKIPIF--
-<?php if (!extension_loaded('spl')) die("skip SPL is not available"); ?>
 --FILE--
 <?php
 class Test implements Countable {
+    #[ReturnTypeWillChange]
     public function count() {
         return $some;
     }

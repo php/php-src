@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_LIST_H
 #define ZEND_LIST_H
@@ -47,17 +45,17 @@ void list_entry_destructor(zval *ptr);
 void plist_entry_destructor(zval *ptr);
 
 void zend_clean_module_rsrc_dtors(int module_number);
-int zend_init_rsrc_list(void);
-int zend_init_rsrc_plist(void);
+ZEND_API void zend_init_rsrc_list(void); /* Exported for phar hack */
+void zend_init_rsrc_plist(void);
 void zend_close_rsrc_list(HashTable *ht);
 void zend_destroy_rsrc_list(HashTable *ht);
-int zend_init_rsrc_list_dtors(void);
+void zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 
-ZEND_API zval *zend_list_insert(void *ptr, int type);
-ZEND_API int zend_list_free(zend_resource *res);
-ZEND_API int zend_list_delete(zend_resource *res);
-ZEND_API int zend_list_close(zend_resource *res);
+ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type);
+ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res);
+ZEND_API zend_result ZEND_FASTCALL zend_list_delete(zend_resource *res);
+ZEND_API void ZEND_FASTCALL zend_list_close(zend_resource *res);
 
 ZEND_API zend_resource *zend_register_resource(void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zend_resource *res, const char *resource_type_name, int resource_type);
@@ -68,18 +66,11 @@ ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name
 ZEND_API const char *zend_rsrc_list_get_rsrc_type(zend_resource *res);
 ZEND_API int zend_fetch_list_dtor_id(const char *type_name);
 
+ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_t key_len, void *rsrc_pointer, int rsrc_type);
+ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, void *rsrc_pointer, int rsrc_type);
+
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

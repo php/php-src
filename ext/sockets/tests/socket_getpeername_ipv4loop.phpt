@@ -1,35 +1,31 @@
 --TEST--
 ext/sockets - socket_getpeername_ipv4loop - basic test
 --CREDITS--
+Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
-# $Id: socket_getpeername_ipv4loop.phpt 494 2009-06-09 20:38:05Z tatjana.andersen@redpill-linpro.com $
---SKIPIF--
-<?php
-        if (!extension_loaded('sockets')) {
-                die('skip sockets extension not available.');
-        }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
-	/* Bind and connect sockets to localhost */
-	$localhost = '127.0.0.1';
+    /* Bind and connect sockets to localhost */
+    $localhost = '127.0.0.1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$server) {
                 die('Unable to create AF_INET socket [server]');
         }
 
-	$minport = 31337;
-	$maxport = 31356;
-	$bound = false;
-	for($port = $minport; $port <= $maxport; ++$port) {
-        	if (socket_bind($server, $localhost, $port)) {
-			$bound = true;
-			break;
-		}
-	}
-	if (!$bound) {
+    $minport = 31337;
+    $maxport = 31356;
+    $bound = false;
+    for($port = $minport; $port <= $maxport; ++$port) {
+        if (@socket_bind($server, $localhost, $port)) {
+            $bound = true;
+            break;
+        }
+    }
+    if (!$bound) {
                 die('Unable to bind to '.$localhost);
         }
         if (!socket_listen($server, 2)) {
@@ -37,7 +33,7 @@ ext/sockets - socket_getpeername_ipv4loop - basic test
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$client) {
                 die('Unable to create AF_INET socket [client]');
         }
@@ -51,9 +47,9 @@ ext/sockets - socket_getpeername_ipv4loop - basic test
                 die('Unable to accept connection');
         }
 
-	if (!socket_getpeername($client, $address, $peerport)) {
-	   	die('Unable to retrieve peer name');
-	}
+    if (!socket_getpeername($client, $address, $peerport)) {
+        die('Unable to retrieve peer name');
+    }
         var_dump($address, $port === $peerport);
 
         socket_close($client);

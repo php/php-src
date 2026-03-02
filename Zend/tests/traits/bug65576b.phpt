@@ -8,7 +8,7 @@ trait T
   public function __construct()
   {
     parent::__construct();
-    echo "Trait contructor\n";
+    echo "Trait constructor\n";
   }
 }
 
@@ -26,6 +26,7 @@ class B extends A
 }
 
 new B();
+?>
 --EXPECT--
 Parent constructor
-Trait contructor
+Trait constructor

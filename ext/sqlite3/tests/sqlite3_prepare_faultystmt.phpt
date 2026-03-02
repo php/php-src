@@ -3,8 +3,8 @@ SQLite3::prepare test, testing for faulty statement
 --CREDITS--
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 $db = new SQLite3(':memory:');
@@ -16,5 +16,5 @@ $stmt = $db->prepare('SELECT foo FROM bar');
 var_dump($stmt);
 ?>
 --EXPECTF--
-Warning: SQLite3::prepare(): Unable to prepare statement: 1, no such table: bar in %s on line %d
+Warning: SQLite3::prepare(): Unable to prepare statement: no such table: bar in %s on line %d
 bool(false)

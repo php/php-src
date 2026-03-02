@@ -20,8 +20,6 @@ function foo() {
 
 foo();
 ?>
-===DONE===
 --EXPECT--
 try
 finally
-===DONE===

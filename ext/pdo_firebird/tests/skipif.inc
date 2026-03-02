@@ -1,5 +1,4 @@
-<?php /* $Id$ */
-
-if (!extension_loaded("interbase") || !extension_loaded("pdo_firebird")) print "skip";
-
-?>
+<?php
+if (!getenv('PDO_FIREBIRD_TEST_DSN')) {
+    die('skip: PDO_FIREBIRD_TEST_DSN must be set');
+}

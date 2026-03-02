@@ -1,17 +1,13 @@
 --TEST--
 Test session_start() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : bool session_start(void)
- * Description : Initialize session data
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_start() : variation ***\n";
 
@@ -29,15 +25,15 @@ ob_end_flush();
 *** Testing session_start() : variation ***
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line 14
+Notice: session_start(): Ignoring session_start() because a session is already active (started from %s on line %d) in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line 15
+Notice: session_start(): Ignoring session_start() because a session is already active (started from %s on line %d) in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line 16
+Notice: session_start(): Ignoring session_start() because a session is already active (started from %s on line %d) in %s on line %d
 bool(true)
 
-Notice: session_start(): A session had already been started - ignoring in %s on line 17
+Notice: session_start(): Ignoring session_start() because a session is already active (started from %s on line %d) in %s on line %d
 bool(true)
 Done

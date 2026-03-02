@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - callback function with different return types
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing different callback function returning:
  *   int, string, bool, null values
@@ -54,7 +49,7 @@ var_dump( array_map('callback_without_ret', $array1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : callback with diff return value ***
 -- with integer return value --
 array(3) {

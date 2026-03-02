@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 #include "timelib_private.h"
@@ -88,7 +86,7 @@ typedef struct _Scanner {
 	int have_end_date;
 } Scanner;
 
-static void add_error(Scanner *s, char *error)
+static void add_error(Scanner *s, const char *error)
 {
 	s->errors->error_count++;
 	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
@@ -105,9 +103,10 @@ static char *timelib_string(Scanner *s)
 	return tmp;
 }
 
-static timelib_sll timelib_get_nr(char **ptr, int max_length)
+static timelib_sll timelib_get_nr(const char **ptr, int max_length)
 {
-	char *begin, *end, *str;
+	const char *begin, *end;
+	char *str;
 	timelib_sll tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
@@ -130,7 +129,7 @@ static timelib_sll timelib_get_nr(char **ptr, int max_length)
 	return tmp_nr;
 }
 
-static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
+static timelib_ull timelib_get_unsigned_nr(const char **ptr, int max_length)
 {
 	timelib_ull dir = 1;
 
@@ -169,7 +168,8 @@ static timelib_ull timelib_get_unsigned_nr(char **ptr, int max_length)
 static int scan(Scanner *s)
 {
 	uchar *cursor = s->cur;
-	char *str, *ptr = NULL;
+	char *str;
+	const char *ptr = NULL;
 
 std:
 	s->tok = cursor;
@@ -210,7 +210,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 		DEBUG_OUTPUT("recurrences");
 		TIMELIB_INIT;
 		ptr++;
-		s->recurrences = timelib_get_unsigned_nr((char **) &ptr, 9);
+		s->recurrences = timelib_get_unsigned_nr(&ptr, 9);
 		TIMELIB_DEINIT;
 		s->have_recurrences = 1;
 		return TIMELIB_PERIOD;
@@ -229,12 +229,12 @@ isoweek          = year4 "-"? "W" weekofyear;
 		}
 		DEBUG_OUTPUT("datetimebasic | datetimeextended");
 		TIMELIB_INIT;
-		current->y = timelib_get_nr((char **) &ptr, 4);
-		current->m = timelib_get_nr((char **) &ptr, 2);
-		current->d = timelib_get_nr((char **) &ptr, 2);
-		current->h = timelib_get_nr((char **) &ptr, 2);
-		current->i = timelib_get_nr((char **) &ptr, 2);
-		current->s = timelib_get_nr((char **) &ptr, 2);
+		current->y = timelib_get_nr(&ptr, 4);
+		current->m = timelib_get_nr(&ptr, 2);
+		current->d = timelib_get_nr(&ptr, 2);
+		current->h = timelib_get_nr(&ptr, 2);
+		current->i = timelib_get_nr(&ptr, 2);
+		current->s = timelib_get_nr(&ptr, 2);
 		s->have_date = 1;
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
@@ -257,11 +257,11 @@ isoweek          = year4 "-"? "W" weekofyear;
 				break;
 			}
 
-			nr = timelib_get_unsigned_nr((char **) &ptr, 12);
+			nr = timelib_get_unsigned_nr(&ptr, 12);
 			switch (*ptr) {
 				case 'Y': s->period->y = nr; break;
-				case 'W': s->period->d = nr * 7; break;
-				case 'D': s->period->d = nr; break;
+				case 'W': s->period->d += nr * 7; break;
+				case 'D': s->period->d += nr; break;
 				case 'H': s->period->h = nr; break;
 				case 'S': s->period->s = nr; break;
 				case 'M':
@@ -286,17 +286,17 @@ isoweek          = year4 "-"? "W" weekofyear;
 	{
 		DEBUG_OUTPUT("combinedrep");
 		TIMELIB_INIT;
-		s->period->y = timelib_get_unsigned_nr((char **) &ptr, 4);
+		s->period->y = timelib_get_unsigned_nr(&ptr, 4);
 		ptr++;
-		s->period->m = timelib_get_unsigned_nr((char **) &ptr, 2);
+		s->period->m = timelib_get_unsigned_nr(&ptr, 2);
 		ptr++;
-		s->period->d = timelib_get_unsigned_nr((char **) &ptr, 2);
+		s->period->d = timelib_get_unsigned_nr(&ptr, 2);
 		ptr++;
-		s->period->h = timelib_get_unsigned_nr((char **) &ptr, 2);
+		s->period->h = timelib_get_unsigned_nr(&ptr, 2);
 		ptr++;
-		s->period->i = timelib_get_unsigned_nr((char **) &ptr, 2);
+		s->period->i = timelib_get_unsigned_nr(&ptr, 2);
 		ptr++;
-		s->period->s = timelib_get_unsigned_nr((char **) &ptr, 2);
+		s->period->s = timelib_get_unsigned_nr(&ptr, 2);
 		s->have_period = 1;
 		TIMELIB_DEINIT;
 		return TIMELIB_PERIOD;
@@ -326,14 +326,14 @@ isoweek          = year4 "-"? "W" weekofyear;
 
 /*!max:re2c */
 
-void timelib_strtointerval(char *s, size_t len,
+void timelib_strtointerval(const char *s, size_t len,
                            timelib_time **begin, timelib_time **end,
 						   timelib_rel_time **period, int *recurrences,
 						   timelib_error_container **errors)
 {
 	Scanner in;
 	int t;
-	char *e = s + len - 1;
+	const char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
 	in.errors = timelib_malloc(sizeof(timelib_error_container));

@@ -1,36 +1,34 @@
 --TEST--
-hash_copy() basic tests
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() basic tests
 --FILE--
 <?php
 
 $algos = hash_algos();
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = hash_copy($orig);
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = hash_copy($orig);
+    var_dump(hash_final($orig));
 
-	var_dump(hash_final($copy));
+    var_dump(hash_final($copy));
 }
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = hash_copy($orig);
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = hash_copy($orig);
+    var_dump(hash_final($orig));
 
-	hash_update($copy, "Can’t tell if this is true or dream");
-	var_dump(hash_final($copy));
+    hash_update($copy, "Can’t tell if this is true or dream");
+    var_dump(hash_final($copy));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "md2"
 string(32) "d5ac4ffd08f6a57b9bd402b8068392ff"
 string(32) "d5ac4ffd08f6a57b9bd402b8068392ff"
@@ -127,6 +125,9 @@ string(8) "e5cfc160"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "69147a4e"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "5e405e93"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "98139504"
@@ -142,6 +143,27 @@ string(16) "bebc746a33b6ab62"
 string(5) "joaat"
 string(8) "aaebf370"
 string(8) "aaebf370"
+string(8) "murmur3a"
+string(8) "1b328135"
+string(8) "1b328135"
+string(8) "murmur3c"
+string(32) "2f041a2a310ba026921bc6ba34f17a2f"
+string(32) "2f041a2a310ba026921bc6ba34f17a2f"
+string(8) "murmur3f"
+string(32) "aa86566cc6bf3a0987b83aabee30411e"
+string(32) "aa86566cc6bf3a0987b83aabee30411e"
+string(5) "xxh32"
+string(8) "eee74423"
+string(8) "eee74423"
+string(5) "xxh64"
+string(16) "9d6ab4708056a619"
+string(16) "9d6ab4708056a619"
+string(4) "xxh3"
+string(16) "5766323c279a20f7"
+string(16) "5766323c279a20f7"
+string(6) "xxh128"
+string(32) "4c49537a833936440d853ed4173b4a81"
+string(32) "4c49537a833936440d853ed4173b4a81"
 string(10) "haval128,3"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
@@ -283,6 +305,9 @@ string(8) "59f8d3d2"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "3ee63999"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "516ad412"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "59ad036f"
@@ -297,7 +322,28 @@ string(16) "bebc746a33b6ab62"
 string(16) "893899e4415a920f"
 string(5) "joaat"
 string(8) "aaebf370"
-string(8) "513479b4"
+string(8) "836fb0e5"
+string(8) "murmur3a"
+string(8) "1b328135"
+string(8) "18578d03"
+string(8) "murmur3c"
+string(32) "2f041a2a310ba026921bc6ba34f17a2f"
+string(32) "2af4fdc002fda7b7491459e70377823f"
+string(8) "murmur3f"
+string(32) "aa86566cc6bf3a0987b83aabee30411e"
+string(32) "28249178bb182686ef793aa56abb6aea"
+string(5) "xxh32"
+string(8) "eee74423"
+string(8) "3b7a100b"
+string(5) "xxh64"
+string(16) "9d6ab4708056a619"
+string(16) "5a90002ef76d172f"
+string(4) "xxh3"
+string(16) "5766323c279a20f7"
+string(16) "f091393ec20f3d52"
+string(6) "xxh128"
+string(32) "4c49537a833936440d853ed4173b4a81"
+string(32) "d39635b874a0644d5f0f475611e3edb5"
 string(10) "haval128,3"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
 string(32) "ebeeeb05c18af1e53d2d127b561d5e0d"

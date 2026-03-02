@@ -1,10 +1,10 @@
 --TEST--
 Bug 77564 (Memory leak in exif_process_IFD_TAG)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
-var_dump(exif_read_data(dirname(__FILE__) . '/bug77564.jpg'));
+var_dump(exif_read_data(__DIR__ . '/bug77564.jpg'));
 ?>
 DONE
 --EXPECTF--

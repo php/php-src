@@ -1,5 +1,5 @@
 --TEST--
-assgin to object leaks with ref
+assign to object leaks with ref
 --FILE--
 <?php
 function &a($i) {
@@ -8,6 +8,7 @@ function &a($i) {
 }
 
 class A {
+    public $a;
     public function test() {
         $this->a = a(1);
         unset($this->a);

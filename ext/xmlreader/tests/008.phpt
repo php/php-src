@@ -1,10 +1,9 @@
 --TEST--
 XMLReader: libxml2 XML Reader, DTD
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
-/* $Id$ */
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE LIST SYSTEM "dtdexample.dtd">
@@ -22,8 +21,8 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd';
-$file = dirname(__FILE__) . '/_008.xml';
+$dtdfile = rawurlencode(__DIR__) . '/dtdexample.dtd';
+$file = __DIR__ . '/_008.xml';
 file_put_contents($file, $xmlstring);
 
 
@@ -33,7 +32,7 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "file DTD: ok\n";
+    echo "file DTD: ok\n";
 }
 $reader->close();
 unlink($file);
@@ -61,11 +60,9 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "string DTD: ok\n";
+    echo "string DTD: ok\n";
 }
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 file DTD: ok
 string DTD: ok
-===DONE===

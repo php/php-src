@@ -4,22 +4,21 @@ Next free element may overflow in array literals
 <?php
 
 $i = PHP_INT_MAX;
-$array = [$i => 42, new stdClass];
-var_dump($array);
+try {
+    $array = [$i => 42, new stdClass];
+    var_dump($array);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-const FOO = [PHP_INT_MAX => 42, "foo"];
-var_dump(FOO);
+function test($x = [PHP_INT_MAX => 42, "foo"]) {}
+try {
+    test();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-array(1) {
-  [%d]=>
-  int(42)
-}
-
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-array(1) {
-  [%d]=>
-  int(42)
-}
+--EXPECT--
+Cannot add element to the array as the next element is already occupied
+Cannot add element to the array as the next element is already occupied

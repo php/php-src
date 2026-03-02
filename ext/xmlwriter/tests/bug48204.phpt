@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_open_uri with PHP_MAXPATHLEN + 1
---SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 $path = str_repeat('a', PHP_MAXPATHLEN + 1);

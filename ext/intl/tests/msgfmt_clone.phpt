@@ -1,7 +1,7 @@
 --TEST--
 Cloning msgfmt
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 include_once( 'ut_common.inc' );
@@ -24,7 +24,7 @@ $res_str .= "Formatting clone result: " . ut_msgfmt_format( $fmt_clone, array(12
 echo $res_str;
 
 ?>
---EXPECTF--
+--EXPECT--
 Formatting result: 123 monkeys on 456 trees
 Formatting result: 123 trees hosting 456 monkeys
 Formatting clone result: 123 monkeys on 456 trees

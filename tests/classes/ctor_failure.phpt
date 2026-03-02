@@ -26,8 +26,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test::__construct(Hello)
 Caught Exception(Hello)
-===DONE===

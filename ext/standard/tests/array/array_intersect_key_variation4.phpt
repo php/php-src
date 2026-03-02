@@ -2,11 +2,6 @@
 Test array_intersect_key() function : usage variation - Passing integer indexed array
 --FILE--
 <?php
-/* Prototype  : array array_intersect_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are present in all the other arguments.
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -24,8 +19,7 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_intersect_key($value,$input_array ) );
 }
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
 --decimal indexed--
@@ -57,4 +51,3 @@ array(1) {
   [-7]=>
   string(4) "-0x7"
 }
-===DONE===

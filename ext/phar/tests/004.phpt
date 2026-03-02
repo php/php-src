@@ -1,7 +1,7 @@
 --TEST--
 Phar::mapPhar no __HALT_COMPILER();
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {
@@ -10,5 +10,5 @@ Phar::mapPhar('hio');
 echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 __HALT_COMPILER(); must be declared in a phar

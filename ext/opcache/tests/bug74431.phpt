@@ -3,9 +3,9 @@ Bug #74431 - foreach infinite loop
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.optimization_level=0xffffffff
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+opcache.optimization_level=0x7fffffff
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test(){

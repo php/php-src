@@ -1,11 +1,11 @@
 --TEST--
-Inlining throgh call_user_func()
+Inlining through call_user_func()
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function get_const() {
@@ -19,5 +19,5 @@ function test() {
 
 test();
 ?>
---EXPECTF--
+--EXPECT--
 int(42)

@@ -2,12 +2,6 @@
 Test array_change_key_case() function
 --FILE--
 <?php
-/* Prototype: array array_change_key_case ( array $input [, int $case] )
-   Description: Changes the keys in the input array to be all lowercase
-   or uppercase. The change depends on the last optional case parameter.
-   You can pass two constants there, CASE_UPPER and CASE_LOWER(default).
-   The function will leave number indices as is.
-*/
 $arrays = array (
   array (),
   array (0),
@@ -52,15 +46,15 @@ echo "*** Testing basic operations ***\n";
 $loop_counter = 1;
 foreach ($arrays as $item) {
         echo "** Iteration $loop_counter **\n"; $loop_counter++;
-	var_dump(array_change_key_case($item));
-	var_dump(array_change_key_case($item, CASE_UPPER));
-	var_dump(array_change_key_case($item, CASE_LOWER));
-	echo "\n";
+    var_dump(array_change_key_case($item));
+    var_dump(array_change_key_case($item, CASE_UPPER));
+    var_dump(array_change_key_case($item, CASE_LOWER));
+    echo "\n";
 }
 
 echo "end\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 ** Iteration 1 **
 array(0) {

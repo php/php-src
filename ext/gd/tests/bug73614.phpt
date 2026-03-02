@@ -1,9 +1,13 @@
 --TEST--
 Bug #73614 (gdImageFilledArc() doesn't properly draw pies)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream bugfix not yet released');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -21,7 +25,5 @@ imagefilledarc($image, 250, 250, 500, 250, 91, 360 , $red, IMG_ARC_PIE);
 
 test_image_equals_file(__DIR__ . '/bug73614.png', $image);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

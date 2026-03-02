@@ -1,7 +1,7 @@
 --TEST--
 Bug #41947 (addChild incorrectly registers empty strings as namespaces)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><root xmlns:myns="http://myns" />');
@@ -12,7 +12,5 @@ if (count($gchild) > 0) {
     echo $gchild[0]."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 hello
-===DONE===

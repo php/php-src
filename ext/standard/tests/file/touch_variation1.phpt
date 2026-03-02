@@ -11,8 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/touch.dat";
-
+$filename = __DIR__."/touch_variation1.dat";
 
 var_dump(touch($filename, 101));
 var_dump(filemtime($filename));
@@ -29,7 +28,7 @@ var_dump(fileatime($filename));
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 int(101)
 int(101)

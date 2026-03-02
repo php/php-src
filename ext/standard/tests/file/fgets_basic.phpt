@@ -2,12 +2,7 @@
 Test fgets() function : basic functionality
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
-// include the file.inc for common test funcitons
+// include the file.inc for common test functions
 include ("file.inc");
 
 $file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t");
@@ -20,8 +15,8 @@ foreach($file_modes as $file_mode) {
   foreach($file_content_types as $file_content_type) {
     echo "-- File content type : $file_content_type --\n";
     /* create files with $file_content_type */
-    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 50, "w", "fgets_basic", 1, "bytes"); //create a file
-    $filename = dirname(__FILE__)."/fgets_basic1.tmp"; // this is name of the file created by create_files()
+    create_files ( __DIR__, 1, $file_content_type, 0755, 50, "w", "fgets_basic", 1, "bytes"); //create a file
+    $filename = __DIR__."/fgets_basic1.tmp"; // this is name of the file created by create_files()
     $file_handle = fopen($filename, $file_mode);
     if ( !$file_handle ) {
       echo "Error: failed to open file $filename!";
@@ -31,13 +26,13 @@ foreach($file_modes as $file_mode) {
     echo "-- fgets() with default length, file pointer at 0 --\n";
     var_dump( fgets($file_handle) ); // with default length
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     echo "-- fgets() with length = 23, Expected: 22 chars, file pointer at 0 --\n";
     var_dump( rewind($file_handle) );
     var_dump( fgets($file_handle, 23) ); // expected: 22 chars
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     //close file
     fclose($file_handle);
@@ -49,7 +44,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : basic functionality ***
 
 -- Testing fgets() with file opened using mode r --

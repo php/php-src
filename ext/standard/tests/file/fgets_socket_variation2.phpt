@@ -12,7 +12,7 @@ $fd = fopen($filename, "w+");
 // populate the file with lines of data
 define("LINE_OF_DATA", "12345678\n");
 for ($i = 0; $i < 1000; $i++) {
-	fwrite($fd, LINE_OF_DATA);
+    fwrite($fd, LINE_OF_DATA);
 }
 fclose($fd);
 
@@ -29,7 +29,7 @@ for ($i=0; $i<100; $i++) {
 $client = fsockopen("tcp://127.0.0.1:$port");
 
 if (!$client) {
-	die("Unable to create socket");
+    die("Unable to create socket");
 }
 
 /* Accept that connection */
@@ -44,16 +44,16 @@ fclose($socket);
 
 echo "\nRead lines from the client\n";
 while ($line = fgets($client,256)) {
-	if (strcmp($line, LINE_OF_DATA) != 0) {
-		echo "Error - $line does not match " . LINE_OF_DATA;
-		break;
-	}
+    if (strcmp($line, LINE_OF_DATA) != 0) {
+        echo "Error - $line does not match " . LINE_OF_DATA;
+        break;
+    }
 }
 
 echo "\nClose the server side socket and read the remaining data from the client\n";
 fclose($server);
 while(!feof($client)) {
-	fread($client, 1);
+    fread($client, 1);
 }
 
 echo "done\n";

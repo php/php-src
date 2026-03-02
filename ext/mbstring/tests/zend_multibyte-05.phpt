@@ -1,10 +1,11 @@
 --TEST--
 zend multibyte (5)
---SKIPIF--
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=On
 zend.script_encoding=EUC-JP
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
 --FILE--
 <?php
 // forcefully interpret an UTF-8 encoded string as EUC-JP and then convert it

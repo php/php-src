@@ -1,21 +1,22 @@
 --TEST--
-ReflectionObject::export() - ensure dynamic property with same name as inherited private property is shown.
+ReflectionObject::__toString() - ensure dynamic property with same name as inherited private property is shown.
 --FILE--
 <?php
 class C {
-	private $p = 1;
+    private $p = 1;
 }
 
+#[AllowDynamicProperties]
 class D extends C{
 }
 
 $Obj = new D;
 $Obj->p = 'value';
-ReflectionObject::export($Obj)
+echo new ReflectionObject($Obj);
 ?>
 --EXPECTF--
 Object of class [ <user> class D extends C ] {
-  @@ %s 6-7
+  @@ %s
 
   - Constants [0] {
   }

@@ -12,11 +12,10 @@ var_dump($serialized);
 
 $date2 = unserialize($serialized);
 var_dump($date2);
-// Try to use unserialzied object
+// Try to use unserialized object
 var_dump( $date2->format( "F j, Y, g:i a") );
 
 ?>
-===DONE===
 --EXPECTF--
 object(DateTime)#%d (3) {
   ["date"]=>
@@ -36,4 +35,3 @@ object(DateTime)#%d (3) {
   string(13) "Europe/London"
 }
 string(23) "July 14, 2005, 10:30 pm"
-===DONE===

@@ -1,9 +1,9 @@
 --TEST--
 Bug #77058: Type inference in opcache causes side effects
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
-<?php 
+<?php
 
 function myfunc(){
   $Nr = 0;
@@ -18,5 +18,7 @@ myfunc();
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %s on line %d
 '2' is expected to be 2

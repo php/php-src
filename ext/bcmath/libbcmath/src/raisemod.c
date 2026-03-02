@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -29,85 +29,66 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
-/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
-   placed in RESULT.  If a EXPO is not an integer,
-   only the integer part is used.  */
-
-int
-bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
+/* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
+raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
 {
-  bc_num power, exponent, modulus, parity, temp;
-  int rscale;
+	bc_num power, exponent, modulus, parity, temp;
 
-  /* Check for correct numbers. */
-  if (bc_is_zero(mod)) return -1;
-  if (bc_is_neg(expo)) return -1;
-
-  /* Set initial values.  */
-  power = bc_copy_num (base);
-  exponent = bc_copy_num (expo);
-  modulus = bc_copy_num (mod);
-  temp = bc_copy_num (BCG(_one_));
-  bc_init_num(&parity);
-
-  /* Check the base for scale digits. */
-  if (power->n_scale != 0)
-    {
-      bc_rt_warn ("non-zero scale in base");
-      bc_divide (power, BCG(_one_), &power, 0); /*truncate */
-    }
-
-  /* Check the exponent for scale digits. */
-  if (exponent->n_scale != 0)
-    {
-      bc_rt_warn ("non-zero scale in exponent");
-      bc_divide (exponent, BCG(_one_), &exponent, 0); /*truncate */
-    }
-
-  /* Check the modulus for scale digits. */
-  if (modulus->n_scale != 0)
-    {
-      bc_rt_warn ("non-zero scale in modulus");
-      bc_divide (modulus, BCG(_one_), &modulus, 0); /*truncate */
-    }
-
-  /* Do the calculation. */
-  rscale = MAX(scale, power->n_scale);
-  if ( !bc_compare(modulus, BCG(_one_)) )
-    {
-      temp = bc_new_num (1, scale);
-    }
-  else
-    {
-      while ( !bc_is_zero(exponent) )
-	{
-	  (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
-	  if ( !bc_is_zero(parity) )
-	    {
-	      bc_multiply (temp, power, &temp, rscale);
-	      (void) bc_modulo (temp, modulus, &temp, scale);
-	    }
-
-	  bc_multiply (power, power, &power, rscale);
-	  (void) bc_modulo (power, modulus, &power, scale);
+	/* Check the base for scale digits. */
+	if (base->n_scale != 0) {
+		return BASE_HAS_FRACTIONAL;
 	}
-    }
+	/* Check the exponent for scale digits. */
+	if (expo->n_scale != 0) {
+		return EXPO_HAS_FRACTIONAL;
+	}
+	if (bc_is_neg(expo)) {
+		return EXPO_IS_NEGATIVE;
+	}
+	/* Check the modulus for scale digits. */
+	if (mod->n_scale != 0) {
+		return MOD_HAS_FRACTIONAL;
+	}
+	/* Modulus cannot be 0 */
+	if (bc_is_zero(mod)) {
+		return MOD_IS_ZERO;
+	}
 
-  /* Assign the value. */
-  bc_free_num (&power);
-  bc_free_num (&exponent);
-  bc_free_num (&modulus);
-  bc_free_num (result);
-  bc_free_num (&parity);
-  *result = temp;
-  return 0;	/* Everything is OK. */
+	/* Any integer number mod 1 (or -1) must be equal to 0 */
+	if (_bc_do_compare(mod, BCG(_one_), mod->n_scale, false) == BCMATH_EQUAL) {
+		bc_free_num (result);
+		*result = bc_new_num(1, scale);
+		return OK;
+	}
+
+	/* Set initial values. */
+	power = bc_copy_num(base);
+	exponent = bc_copy_num(expo);
+	modulus = bc_copy_num(mod);
+	temp = bc_copy_num(BCG(_one_));
+	bc_init_num(&parity);
+
+	/* Do the calculation. */
+	while (!bc_is_zero(exponent)) {
+		(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
+		if (!bc_is_zero(parity)) {
+			bc_multiply_ex(temp, power, &temp, scale);
+			(void) bc_modulo(temp, modulus, &temp, scale);
+		}
+		bc_multiply_ex(power, power, &power, scale);
+		(void) bc_modulo(power, modulus, &power, scale);
+	}
+
+	/* Assign the value. */
+	bc_free_num (&power);
+	bc_free_num (&exponent);
+	bc_free_num (&modulus);
+	bc_free_num (result);
+	bc_free_num (&parity);
+	*result = temp;
+	return OK;
 }

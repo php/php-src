@@ -1,4 +1,3 @@
-	/* $Id: fpm_php.h,v 1.10.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_PHP_H
@@ -14,7 +13,6 @@
 	{ \
 		"error_log", \
 		"extension_dir", \
-		"mime_magic.magicfile", \
 		"sendmail_path", \
 		"session.cookie_path", \
 		"session_pgsql.sem_file_name", \
@@ -39,10 +37,10 @@ char *fpm_php_request_method(void);
 char *fpm_php_query_string(void);
 char *fpm_php_auth_user(void);
 size_t fpm_php_content_length(void);
-void fpm_php_soft_quit();
-int fpm_php_init_main();
+void fpm_php_soft_quit(void);
+int fpm_php_init_main(void);
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
 int fpm_php_limit_extensions(char *path);
-char* fpm_php_get_string_from_table(zend_string *table, char *key);
+bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len);
 
 #endif

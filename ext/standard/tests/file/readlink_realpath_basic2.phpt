@@ -3,20 +3,13 @@ Test readlink() and realpath functions: basic functionality - diff. path notatio
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
-
-   Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 /* creating directories, symbolic links and files */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/readlink_realpath_basic2/home/test/", 0777, true);
 
 $file_handle1 = fopen("$file_path/readlink_realpath_basic2/home/test/readlink_realpath_basic2.tmp", "w");
@@ -52,7 +45,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/readlink_realpath_basic2";
+$name_prefix = __DIR__."/readlink_realpath_basic2";
 unlink("$name_prefix/home/test/readlink_realpath_basic2.tmp");
 unlink("$name_prefix/home/readlink_realpath_basic2.tmp");
 unlink("$name_prefix/readlink_realpath_basic2.tmp");

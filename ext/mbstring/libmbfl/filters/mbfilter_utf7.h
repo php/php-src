@@ -33,7 +33,6 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_utf7;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf7;
 extern const struct mbfl_convert_vtbl vtbl_utf7_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_utf7;
 

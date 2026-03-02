@@ -5,24 +5,24 @@ Bug #74478: null coalescing operator failing with SplFixedArray
 
 class MyFixedArray extends \SplFixedArray
 {
-    public function offsetExists($name) {
+    public function offsetExists($name): bool {
         echo "offsetExists($name)\n";
         return parent::offsetExists($name);
     }
-    public function offsetGet($name) {
+    public function offsetGet($name): mixed {
         echo "offsetGet($name)\n";
         return parent::offsetGet($name);
     }
-    public function offsetSet($name, $value) {
+    public function offsetSet($name, $value): void {
         echo "offsetSet($name)\n";
-        return parent::offsetSet($name, $value);
+        parent::offsetSet($name, $value);
     }
-    public function offsetUnset($name) {
+    public function offsetUnset($name): void {
         echo "offsetUnset($name)\n";
-        return parent::offsetUnset($name);
+        parent::offsetUnset($name);
     }
 
-};
+}
 
 $fixedData = new MyFixedArray(10);
 var_dump(isset($fixedData[0][1][2]));

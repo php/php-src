@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : obscure values within attributes
---INI--
-short_open_tag = on
 --FILE--
 <?php
 
@@ -28,7 +26,7 @@ foreach($string_array as $string)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : obscure functionality ***
 -- Iteration 1 --
 string(12) "hello  world"

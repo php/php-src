@@ -1,11 +1,7 @@
 --TEST--
-hash_update_file() function - basic test
+Hash: hash_update_file() test
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
---SKIPIF--
-<?php
-if (!extension_loaded('hash')) die('skip hash extension not available');
-?>
 --FILE--
 <?php
 $filePath = __DIR__ . DIRECTORY_SEPARATOR . 'hash_update_stream.txt';

@@ -12,5 +12,6 @@ class Foo
 }
 
 echo PHP_EOL, "Done", PHP_EOL;
---EXPECTF--
+?>
+--EXPECT--
 Done

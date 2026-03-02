@@ -13,12 +13,11 @@ class VariableStream {
 
 stream_wrapper_register("var", "VariableStream");
 
-error_reporting(E_ALL | E_STRICT);
-$file = dirname(__FILE__) . '/footest.txt';
+$file = __DIR__ . '/footest.txt';
 $x = str_repeat(1, 8192);
 $fp = fopen($file, 'w');
 for ($i = 0; $i < 5; $i++) {
-	fwrite($fp, $x);
+    fwrite($fp, $x);
 }
 fclose($fp);
 

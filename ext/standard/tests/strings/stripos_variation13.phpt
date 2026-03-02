@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - null terminated strings for 'needle' argument
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function with null terminated strings for 'needle' argument
  *  in order to check binary safe
 */
@@ -30,7 +25,7 @@ for($index = 0; $index < count($needles); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test stripos() function: binary safe ***
 int(1)
 int(1)

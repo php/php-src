@@ -3,8 +3,8 @@ Phar front controller PHP test [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list=frontcontroller2.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller2.php
 REQUEST_URI=/frontcontroller2.php/a.php

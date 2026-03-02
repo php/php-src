@@ -1,10 +1,10 @@
 --TEST--
 recvmsg(): basic test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 
 require 'ipv6_skipif.inc';
 
@@ -30,12 +30,12 @@ socket_set_nonblock($sends1) or die("Could not put in non-blocking mode");
 echo "creating receive socket\n";
 $s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP) or die("err");
 var_dump($s);
-$br = socket_bind($s, '::0', 3000) or die("err");
+$br = socket_bind($s, '::0', 3001) or die("err");
 var_dump($br);
 
 socket_set_option($s, IPPROTO_IPV6, IPV6_RECVPKTINFO, 1) or die("err");
 
-$r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $addr, 3000);
+$r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $addr, 3001);
 var_dump($r);
 if ($r < 12) die;
 checktimeout($s, 500);
@@ -47,12 +47,15 @@ $data = [
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
+?>
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(14)
 Array

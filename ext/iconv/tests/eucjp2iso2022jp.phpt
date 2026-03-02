@@ -1,20 +1,19 @@
 --TEST--
 EUC-JP to ISO-2022-JP
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=2039
 --FILE--
 <?php
-/* include('test.inc'); */
 /* charset=EUC-JP */
 
 function hexdump($str) {
-	$len = strlen($str);
-	for ($i = 0; $i < $len; ++$i) {
-		printf("%02x", ord($str{$i}));
-	}
-	print "\n";
+    $len = strlen($str);
+    for ($i = 0; $i < $len; ++$i) {
+        printf("%02x", ord($str[$i]));
+    }
+    print "\n";
 }
 
 $str = str_repeat("日本語テキストと English text", 30);

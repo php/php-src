@@ -1,8 +1,9 @@
 --TEST--
 Bug #67325 (imagetruecolortopalette: white is duplicated in palette)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) {
     die("skip test requires newer than GD 2.2.3");
 }
@@ -10,7 +11,7 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) {
 ?>
 --FILE--
 <?php
-$filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug67325.jpeg';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug67325.jpg';
 
 $im = imagecreatefromjpeg($filename);
 imagetruecolortopalette($im, 0, 256);
@@ -23,10 +24,6 @@ for ($i = 0; $i < 256; $i++) {
     }
 }
 var_dump($white);
-
-imagedestroy($im);
 ?>
-===DONE===
 --EXPECT--
 int(0)
-===DONE===

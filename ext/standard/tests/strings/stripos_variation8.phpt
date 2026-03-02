@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - repetitive chars for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function with strings containing repetitive chars for haystak
  *  and with various needles & offsets
 */
@@ -35,7 +30,7 @@ for($index = 0; $index < count($needles); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: strings repetitive chars ***
 
 -- Iteration 1 --

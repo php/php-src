@@ -2,13 +2,15 @@
 OO API
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_enum_print(false);
@@ -35,7 +37,7 @@ $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries)
 $orig = array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.5.0');
 $result = $session->get($orig, TRUE);
 foreach($orig as $oid){
-	var_dump($result[$oid]);
+    var_dump($result[$oid]);
 }
 var_dump($session->close());
 
@@ -230,12 +232,12 @@ bool(true)
 bool(true)
 Multiple OID with max_oids = 1
 
-Warning: SNMP::set(): Can not fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
+Warning: SNMP::set(): Cannot fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
 bool(true)
 bool(true)
 bool(true)
 
-Warning: SNMP::set(): Can not fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
+Warning: SNMP::set(): Cannot fit all OIDs for SET query into one packet, using multiple queries in %s on line %d
 bool(true)
 bool(true)
 bool(true)

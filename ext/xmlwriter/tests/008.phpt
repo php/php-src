@@ -1,12 +1,9 @@
 --TEST--
 XMLWriter: libxml2 XML Writer DTD Element & Attlist
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
-/* $Id$ */
 
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);

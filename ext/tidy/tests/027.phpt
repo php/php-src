@@ -1,7 +1,7 @@
 --TEST--
 Bug: tidy segfaults with markup=false
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 
@@ -11,7 +11,7 @@ abstract class BaseClass {
         private static $tidyconfig;
 
         public function __construct() {
-                $this->tidyconfig = array(
+                self::$tidyconfig = array(
                         'indent'                        => false,
                         'clean'                         => true,
                         'merge-divs'            => false,
@@ -29,7 +29,7 @@ abstract class BaseClass {
                 $data = "awerawer"; // in my code, $data is downloaded from a site
 
                 $tidy = new tidy;
-                $tidy->parseString($data, $this->tidyconfig, 'utf8');
+                $tidy->parseString($data, self::$tidyconfig, 'utf8');
                 $tidy->cleanRepair();
 
                 return $tidy;

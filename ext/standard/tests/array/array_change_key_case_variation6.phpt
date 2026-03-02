@@ -2,11 +2,6 @@
 Test array_change_key_case() function : usage variations - multidimensional arrays
 --FILE--
 <?php
-/* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased]
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_change_key_case() converts keys in multi-dimensional arrays
  */
@@ -20,12 +15,12 @@ $input = array('English' => array('one' => 1, 'two' => 2, 'three' => 3),
 echo "\n-- Pass a two-dimensional array as \$input argument --\n";
 var_dump(array_change_key_case($input, CASE_UPPER));
 
-echo "\n-- Pass a sub-arry as \$input argument --\n";
+echo "\n-- Pass a sub-array as \$input argument --\n";
 var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- Pass a two-dimensional array as $input argument --
@@ -59,7 +54,7 @@ array(3) {
   }
 }
 
--- Pass a sub-arry as $input argument --
+-- Pass a sub-array as $input argument --
 array(3) {
   ["ONE"]=>
   int(1)

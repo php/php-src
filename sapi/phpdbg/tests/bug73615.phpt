@@ -7,11 +7,11 @@ if (!getenv('TEST_PHPDBG_EXECUTABLE')) die("SKIP: No TEST_PHPDBG_EXECUTABLE spec
 --FILE--
 <?php
 
-$phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
+$phpdbg = getenv('TEST_PHPDBG_EXECUTABLE_ESCAPED');
 
 chdir(__DIR__."/bug73615");
 
-print `$phpdbg -qn`;
+print shell_exec("$phpdbg -qn");
 
 ?>
 --EXPECT--

@@ -14,5 +14,6 @@ $anonClass = new class {
 };
 
 var_dump($anonClass->someMethod());
+?>
 --EXPECT--
 string(3) "bar"

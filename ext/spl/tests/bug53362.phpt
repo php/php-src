@@ -4,9 +4,9 @@ Bug #53362 (Segmentation fault when extending SplFixedArray)
 <?php
 
 class obj extends SplFixedArray{
-	public function offsetSet($offset, $value) {
-		var_dump($offset);
-	}
+    public function offsetSet($offset, $value): void {
+        var_dump($offset);
+    }
 }
 
 $obj = new obj;
@@ -16,7 +16,7 @@ $obj[]=2;
 $obj[]=2;
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

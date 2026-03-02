@@ -1,7 +1,16 @@
-/* $Id: fpm_config.h,v 1.16 2008/05/25 00:30:43 anight Exp $ */
 /* (c) 2007,2008 Andrei Nigmatulin */
 
 #include <php_config.h>
+
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 
 /* Solaris does not have it */
 #ifndef INADDR_NONE
@@ -71,7 +80,7 @@
 # define HAVE_FPM_TRACE 0
 #endif
 
-#if defined(HAVE_LQ_TCP_INFO) || defined(HAVE_LQ_SO_LISTENQ)
+#if defined(HAVE_LQ_TCP_INFO) || defined(HAVE_LQ_TCP_CONNECTION_INFO) || defined(HAVE_LQ_SO_LISTENQ)
 # define HAVE_FPM_LQ 1
 #else
 # define HAVE_FPM_LQ 0

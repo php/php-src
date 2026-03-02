@@ -1,7 +1,5 @@
 --TEST--
 json_encode() & endless loop - 3
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -13,7 +11,7 @@ var_dump(json_encode($a));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(0) {

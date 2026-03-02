@@ -1,1 +1,0 @@
-Please specify basic, error or variation tests.

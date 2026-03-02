@@ -1,11 +1,11 @@
 --TEST--
 openssl_decrypt() with CCM cipher algorithm tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-	die("skip");
 if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
-	die("skip: aes-256-ccm not available");
+    die("skip: aes-256-ccm not available");
 ?>
 --FILE--
 <?php
@@ -24,13 +24,13 @@ foreach ($methods as $method) {
 
 // no IV
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	NULL, $test['tag'], $test['aad']));
+    '', $test['tag'], $test['aad']));
 // failed because no AAD
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], $test['tag']));
+    $test['iv'], $test['tag']));
 // failed because wrong tag
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], str_repeat('x', 10), $test['aad']));
+    $test['iv'], str_repeat('x', 10), $test['aad']));
 
 ?>
 --EXPECTF--

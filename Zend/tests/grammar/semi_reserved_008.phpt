@@ -61,7 +61,8 @@ Foo /**/
 attempt();
 
 echo PHP_EOL, "Done", PHP_EOL;
---EXPECTF--
+?>
+--EXPECT--
 TraitB::try
 
 Done

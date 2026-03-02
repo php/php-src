@@ -1,20 +1,22 @@
 --TEST--
 Bug #22544 (TrueColor transparency in PNG images).
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available\n");
-	}
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
-	$image = imageCreateTruecolor(640, 100);
-	$transparent = imageColorAllocate($image, 0, 0, 0);
-	$red = imageColorAllocate($image, 255, 50, 50);
-	imageColorTransparent($image, $transparent);
-	imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
-	include_once __DIR__ . '/func.inc';
-	test_image_equals_file(__DIR__ . '/bug22544.png', $image);
+    $image = imageCreateTruecolor(640, 100);
+    $transparent = imageColorAllocate($image, 0, 0, 0);
+    $red = imageColorAllocate($image, 255, 50, 50);
+    imageColorTransparent($image, $transparent);
+    imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
+    include_once __DIR__ . '/func.inc';
+    test_image_equals_file(__DIR__ . '/bug22544.png', $image);
 ?>
 --EXPECT--
 The images are equal.

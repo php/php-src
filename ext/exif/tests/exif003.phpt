@@ -1,10 +1,11 @@
 --TEST--
 Check for exif_read_data, Unicode user comment
+--EXTENSIONS--
+exif
+mbstring
 --SKIPIF--
 <?php
-	if (!extension_loaded('exif')) die('skip exif extension not available');
-	if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
-	if (!defined("EXIF_USE_MBSTRING") || !EXIF_USE_MBSTRING) die ('skip mbstring loaded by dl');
+    if (!defined("EXIF_USE_MBSTRING") || !EXIF_USE_MBSTRING) die ('skip mbstring loaded by dl');
 ?>
 --INI--
 output_handler=
@@ -19,7 +20,7 @@ exif.encode_unicode=ISO-8859-15
             copy of test1.jpg as a thumbnail.
   test3.jpg is the same as test2.jpg but with a UNICODE UserComment: &Auml;&Ouml;&&Uuml;&szlig;&auml;&ouml;&uuml;
 */
-var_dump(exif_read_data(dirname(__FILE__).'/test3.jpg','',true,false));
+var_dump(exif_read_data(__DIR__.'/test3.jpg','',true,false));
 ?>
 --EXPECTF--
 array(5) {

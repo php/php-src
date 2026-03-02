@@ -25,7 +25,6 @@ echo "\n-- clone it --\n";
 $d2_clone = clone $d1_clone;
 var_dump($d2_clone);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on DateTime objects ***
 
@@ -40,41 +39,43 @@ object(DateTime)#%d (3) {
 }
 
 -- Add some properties --
+
+Deprecated: Creation of dynamic property DateTime::$property1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTime::$property2 is deprecated in %s on line %d
 object(DateTime)#%d (5) {
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
   ["date"]=>
   string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
   string(3) "GMT"
-  ["property1"]=>
-  int(99)
-  ["property2"]=>
-  string(5) "Hello"
 }
 
 -- clone it --
 object(DateTime)#%d (5) {
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
   ["date"]=>
   string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
   string(3) "GMT"
-  ["property1"]=>
-  int(99)
-  ["property2"]=>
-  string(5) "Hello"
 }
 
 -- Add some more properties --
+
+Deprecated: Creation of dynamic property DateTime::$property3 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTime::$property4 is deprecated in %s on line %d
 object(DateTime)#%d (7) {
-  ["date"]=>
-  string(26) "2009-02-03 12:34:41.000000"
-  ["timezone_type"]=>
-  int(2)
-  ["timezone"]=>
-  string(3) "GMT"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -83,16 +84,16 @@ object(DateTime)#%d (7) {
   bool(true)
   ["property4"]=>
   float(10.5)
+  ["date"]=>
+  string(26) "2009-02-03 12:34:41.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
 }
 
 -- clone it --
 object(DateTime)#%d (7) {
-  ["date"]=>
-  string(26) "2009-02-03 12:34:41.000000"
-  ["timezone_type"]=>
-  int(2)
-  ["timezone"]=>
-  string(3) "GMT"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -101,5 +102,10 @@ object(DateTime)#%d (7) {
   bool(true)
   ["property4"]=>
   float(10.5)
+  ["date"]=>
+  string(26) "2009-02-03 12:34:41.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
 }
-===DONE===

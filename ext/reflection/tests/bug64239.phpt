@@ -3,11 +3,11 @@ Bug #64239 (ReflectionClass::getMethods() changed behavior)
 --FILE--
 <?php
 class A {
-	use T2 { t2method as Bmethod; }
+    use T2 { t2method as Bmethod; }
 }
 trait T2 {
-	public function t2method() {
-	}
+    public function t2method() {
+    }
 }
 
 class B extends A{

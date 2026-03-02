@@ -31,17 +31,19 @@ Content-Type: text/plain-file
 var_dump($_FILES);
 var_dump($_POST);
 if (is_uploaded_file($_FILES["file1"]["tmp_name"])) {
-	var_dump(file_get_contents($_FILES["file1"]["tmp_name"]));
+    var_dump(file_get_contents($_FILES["file1"]["tmp_name"]));
 }
 if (is_uploaded_file($_FILES["file4"]["tmp_name"])) {
-	var_dump(file_get_contents($_FILES["file4"]["tmp_name"]));
+    var_dump(file_get_contents($_FILES["file4"]["tmp_name"]));
 }
 ?>
 --EXPECTF--
 array(4) {
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(0) ""
+    ["full_path"]=>
     string(0) ""
     ["type"]=>
     string(0) ""
@@ -53,8 +55,10 @@ array(4) {
     int(0)
   }
   ["file3"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(0) ""
+    ["full_path"]=>
     string(0) ""
     ["type"]=>
     string(0) ""
@@ -66,8 +70,10 @@ array(4) {
     int(0)
   }
   ["file4"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file4.txt"
+    ["full_path"]=>
     string(9) "file4.txt"
     ["type"]=>
     string(15) "text/plain-file"
@@ -79,8 +85,10 @@ array(4) {
     int(0)
   }
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(15) "text/plain-file"

@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -35,6 +33,8 @@ static inline void php_json_encode_init(php_json_encoder *encoder)
 	memset(encoder, 0, sizeof(php_json_encoder));
 }
 
-int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);
+zend_result php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);
+
+zend_result php_json_escape_string(smart_str *buf, const char *s, size_t len, int options, php_json_encoder *encoder);
 
 #endif	/* PHP_JSON_ENCODER_H */

@@ -2,16 +2,16 @@
 DomDocument::schemaValidateSource() - Add missing attribute default values from schema
 --CREDITS--
 Chris Wright <info@daverandom.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book-attr.xml");
+$doc->load(__DIR__."/book-attr.xml");
 
-$xsd = file_get_contents(dirname(__FILE__)."/book.xsd");
+$xsd = file_get_contents(__DIR__."/book.xsd");
 
 $doc->schemaValidateSource($xsd, LIBXML_SCHEMA_CREATE);
 

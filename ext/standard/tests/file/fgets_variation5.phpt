@@ -2,12 +2,7 @@
 Test fgets() function : usage variations - read beyond filesize
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
-// include the file.inc for common test funcitons
+// include the file.inc for common test functions
 include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
@@ -18,7 +13,7 @@ $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumer
 
 echo "*** Testing fgets() : usage variations ***\n";
 
-$filename = dirname(__FILE__)."/fgets_variation5.tmp";
+$filename = __DIR__."/fgets_variation5.tmp";
 
 foreach($file_modes as $file_mode) {
   echo "\n-- Testing fgets() with file opened using mode $file_mode --\n";
@@ -35,14 +30,14 @@ foreach($file_modes as $file_mode) {
       exit();
     }
 
-    /* read with length beyong file size */
+    /* read with length beyond file size */
     echo "-- fgets() with length > filesize --\n";
     rewind($file_handle);
 
     var_dump( ftell($file_handle) );
     var_dump( fgets($file_handle, 50 + 23) ); // expected: 50
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     //close file
     fclose($file_handle);
@@ -54,7 +49,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --

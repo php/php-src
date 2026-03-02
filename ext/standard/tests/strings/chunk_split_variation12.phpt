@@ -2,12 +2,6 @@
 Test chunk_split() function : usage variations - different heredoc strings for 'ending' argument
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 /*
 * passing different heredoc strings as 'ending' argument to chunk_split()
 * 'chunklen' argument is set to 10
@@ -83,7 +77,7 @@ foreach($heredoc_arr as $value) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different heredoc strings for 'ending' argument ***
 -- Iteration 1 --
 string(102) "This is str to check with heredoc ending.This	contains,

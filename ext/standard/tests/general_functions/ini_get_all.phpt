@@ -5,12 +5,7 @@ pcre.jit=1
 pcre.backtrack_limit=1000000
 pcre.recursion_limit=100000
 --SKIPIF--
-<?php if (!extension_loaded("reflection")) die("skip"); ?>
-<?php
-if (ini_get("pcre.jit") === FALSE) {
-	die("skip no jit built");
-}
-?>
+<?php if (!PCRE_JIT_SUPPORT) die("skip no pcre jit support"); ?>
 --FILE--
 <?php
 
@@ -29,10 +24,10 @@ echo "Done\n";
 --EXPECTF--
 string(5) "array"
 
-Warning: ini_get_all(): Unable to find extension '' in %s on line %d
+Warning: ini_get_all(): Extension "" cannot be found in %s on line %d
 bool(false)
 
-Warning: ini_get_all(): Unable to find extension 'nosuchextension' in %s on line %d
+Warning: ini_get_all(): Extension "nosuchextension" cannot be found in %s on line %d
 bool(false)
 array(0) {
 }
@@ -76,6 +71,6 @@ array(3) {
 array(0) {
 }
 
-Warning: ini_get_all(): Unable to find extension '' in %sini_get_all.php on line %d
+Warning: ini_get_all(): Extension "" cannot be found in %s on line %d
 bool(false)
 Done

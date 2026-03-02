@@ -3,8 +3,8 @@ Reflection Bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key 
 --FILE--
 <?php
 class foo {
-	static protected $bar = 'baz';
-	static public $a = 'a';
+    static protected $bar = 'baz';
+    static public $a = 'a';
 }
 
 $class = new ReflectionClass('foo');

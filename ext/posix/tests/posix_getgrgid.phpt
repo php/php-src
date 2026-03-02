@@ -3,12 +3,8 @@ Test posix_getgrgid().
 --CREDITS--
 Till Klampaeckel, till@php.net
 TestFest Berlin 2009
---SKIPIF--
-<?php
-if (!extension_loaded('posix')) {
-    die('SKIP The posix extension is not loaded.');
-}
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
 $grp = posix_getgrgid(0);
@@ -39,7 +35,5 @@ if (!isset($grp['gid'])) {
 }
 var_dump($grp['gid']);
 ?>
-===DONE===
 --EXPECT--
 int(0)
-===DONE===

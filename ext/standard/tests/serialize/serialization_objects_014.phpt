@@ -1,33 +1,20 @@
 --TEST--
 Object serialization / unserialization: references to external values
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
-/* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized)
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-/* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 function check(&$obj) {
-	var_dump($obj);
-	$ser = serialize($obj);
-	var_dump($ser);
+    var_dump($obj);
+    $ser = serialize($obj);
+    var_dump($ser);
 
-	$uobj = unserialize($ser);
-	var_dump($uobj);
-	$uobj->a = "obj->a.changed";
-	var_dump($uobj);
-	$uobj->b = "obj->b.changed";
-	var_dump($uobj);
-	$uobj->c = "obj->c.changed";
-	var_dump($uobj);
+    $uobj = unserialize($ser);
+    var_dump($uobj);
+    $uobj->a = "obj->a.changed";
+    var_dump($uobj);
+    $uobj->b = "obj->b.changed";
+    var_dump($uobj);
+    $uobj->c = "obj->c.changed";
+    var_dump($uobj);
 }
 
 echo "\n\n--- a refs external:\n";

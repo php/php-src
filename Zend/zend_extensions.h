@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_EXTENSIONS_H
 #define ZEND_EXTENSIONS_H
@@ -46,11 +44,11 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	320170718
+#define ZEND_EXTENSION_API_NO	420250926
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
-	char *build_id;
+	const char *build_id;
 } zend_extension_version_info;
 
 #define ZEND_EXTENSION_BUILD_ID "API" ZEND_TOSTR(ZEND_EXTENSION_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
@@ -77,11 +75,11 @@ typedef size_t (*op_array_persist_calc_func_t)(zend_op_array *op_array);
 typedef size_t (*op_array_persist_func_t)(zend_op_array *op_array, void *mem);
 
 struct _zend_extension {
-	char *name;
-	char *version;
-	char *author;
-	char *URL;
-	char *copyright;
+	const char *name;
+	const char *version;
+	const char *author;
+	const char *URL;
+	const char *copyright;
 
 	startup_func_t startup;
 	shutdown_func_t shutdown;
@@ -113,7 +111,13 @@ struct _zend_extension {
 };
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_get_resource_handle(zend_extension *extension);
+extern ZEND_API int zend_op_array_extension_handles;
+
+ZEND_API int zend_get_resource_handle(const char *module_name);
+ZEND_API int zend_get_op_array_extension_handle(const char *module_name);
+ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int handles);
+ZEND_API int zend_get_internal_function_extension_handle(const char *module_name);
+ZEND_API int zend_get_internal_function_extension_handles(const char *module_name, int handles);
 ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 END_EXTERN_C()
 
@@ -139,27 +143,21 @@ ZEND_API extern uint32_t zend_extension_flags;
 
 void zend_extension_dtor(zend_extension *extension);
 ZEND_API void zend_append_version_info(const zend_extension *extension);
-int zend_startup_extensions_mechanism(void);
-int zend_startup_extensions(void);
+void zend_startup_extensions_mechanism(void);
+void zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
 
+ZEND_API size_t zend_internal_run_time_cache_reserved_size(void);
+ZEND_API void zend_init_internal_run_time_cache(void);
+ZEND_API void zend_reset_internal_run_time_cache(void);
+
 BEGIN_EXTERN_C()
-ZEND_API int zend_load_extension(const char *path);
-ZEND_API int zend_load_extension_handle(DL_HANDLE handle, const char *path);
-ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
+ZEND_API zend_result zend_load_extension(const char *path);
+ZEND_API zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path);
+ZEND_API void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
 ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array);
 ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *mem);
 END_EXTERN_C()
 
 #endif /* ZEND_EXTENSIONS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

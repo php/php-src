@@ -13,7 +13,7 @@ unset($dto);
 var_dump($tzold->getName());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "UTC"
 string(3) "UTC"
 string(10) "US/Eastern"

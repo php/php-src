@@ -9,14 +9,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects of creating & deleting of subdir/file  on the stats of dir/file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -30,7 +25,7 @@ echo "-- Testing stat() on dir after subdir and file is created in it --\n";
 $dirname = "$file_path/stat_variation3";
 $old_stat = stat($dirname);
 clearstatcache();
-sleep(2);
+sleep(1);
 mkdir("$dirname/stat_variation3_subdir");
 $file_handle = fopen("$dirname/stat_variation3a.tmp", "w");
 fclose($file_handle);
@@ -54,17 +49,17 @@ $new_stat1 = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($new_stat1) );
 // compare the stats
-var_dump(compare_stats($new_stat, $new_stat1, $all_stat_keys, "="));
+var_dump(compare_stats($new_stat, $new_stat1, $affected_members, "<"));
 clearstatcache();
 
 echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/stat_variation3");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): with creating & deleting subdir/file ***
 -- Testing stat() on dir after subdir and file is created in it --
 bool(true)

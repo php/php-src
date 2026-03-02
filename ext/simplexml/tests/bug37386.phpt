@@ -1,7 +1,7 @@
 --TEST--
 Bug #39760 (autocreating element doesn't assign value to first node)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip simplexml extension is not loaded"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ $node[0] = 'New Value';
 print $sx1->asXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root><node>node1</node><node>node2</node></root>
 

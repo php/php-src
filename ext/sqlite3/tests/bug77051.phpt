@@ -1,7 +1,7 @@
 --TEST--
 Bug #77051 SQLite3::bindParam memory bug when missing ::reset call
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -43,7 +43,7 @@ echo "Statement result\n";
 var_dump($res->fetchArray(SQLITE3_NUM));
 
 ?>
---EXPECTF--
+--EXPECT--
 Execute statement
 object(SQLite3Result)#3 (0) {
 }

@@ -13,33 +13,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
-#include <win32/php_stdint.h>
-
-#ifndef HAVE_INT8_T
-#define HAVE_INT8_T
-#endif
-#ifndef HAVE_UINT8_T
-#define HAVE_UINT8_T
-#endif
-#ifndef HAVE_INT16_T
-#define HAVE_INT16_T
-#endif
-#ifndef HAVE_UINT16_T
-#define HAVE_UINT16_T
-#endif
-#ifndef HAVE_INT32_T
-#define HAVE_INT32_T
-#endif
-#ifndef HAVE_UINT32_T
-#define HAVE_UINT32_T
-#endif
-#ifndef HAVE_INT64_T
-#define HAVE_INT64_T
-#endif
-#ifndef HAVE_UINT64_T
-#define HAVE_UINT64_T
-#endif
-
+#include <stdint.h>
 
 #ifndef _WIN64
 #ifndef _WIN32
@@ -55,7 +29,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Type information */
 
-#define SIZEOF_CHAR		1
 #define SIZEOF_LONG		4
 #define SIZEOF_LONG_LONG	8
 
@@ -104,12 +77,3 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif /* _WIN64 */
 
 #endif /* _MYSQLND_CONFIG_WIN_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

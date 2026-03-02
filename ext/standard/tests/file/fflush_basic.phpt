@@ -2,9 +2,6 @@
 Test fflush() function: basic functionality
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 echo "*** Testing fflush(): writing to a file and reading the contents ***\n";
 $data = <<<EOD
@@ -13,7 +10,7 @@ second line of string
 third line of string
 EOD;
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fflush_basic.tmp";
 
 // opening a file
@@ -22,7 +19,7 @@ if($file_handle == false)
   exit("Error:failed to open file $filename");
 
 if(substr(PHP_OS, 0, 3) == "WIN")  {
-	$data = str_replace("\r",'', $data);
+    $data = str_replace("\r",'', $data);
 }
 
 // writing data to the file
@@ -38,11 +35,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fflush_basic.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): writing to a file and reading the contents ***
 int(63)
 bool(true)

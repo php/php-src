@@ -1,15 +1,15 @@
 --TEST--
 Test all filters returned by filter_list()
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 precision=14
 default_charset=UTF-8
 --FILE--
 <?php
-include dirname(__FILE__) . '/033_run.inc';
+include __DIR__ . '/033_run.inc';
 ?>
---EXPECT--
+--EXPECTF--
 int                      1                                               123                                                         
 boolean                  1                                                                                                           
 float                    1                                               123                                                         
@@ -29,5 +29,5 @@ email               PHP  1  foo@bar.com    httpa.b.c           1.2.3.4   123  12
 url                 PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry                  aa:bb:cc:dd:ee:ff
 number_int               1                                     1234      123  123                                                    
 number_float             1                                     1234      123  123                                                    
-magic_quotes        PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
+add_slashes         PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
 callback            PHP  1  FOO@BAR.COM    HTTP://A.B.C        1.2.3.4   123  123ABC<>()          O'HENRY        하퍼    AA:BB:CC:DD:EE:FF

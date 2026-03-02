@@ -2,19 +2,13 @@
 Test array_diff_assoc() function : usage variations - compare integers, floats and strings
 --FILE--
 <?php
-/* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present
- * in any of the others arguments but do additional checks whether the keys are equal
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_diff_assoc compares integers, floats and string
  */
 
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 $arr_default_int = array(1, 2, 3, 'a');
-$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 'b');
+$arr_float = array(0 => 1.00, 1 => 2.00, 2 => 3.00, 'b');
 $arr_string = array('1', '2', '3', 'c');
 $arr_string_float = array('0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 'd');
 
@@ -47,7 +41,7 @@ var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 -- Result of comparing integers and floating point numbers: --
 array(1) {

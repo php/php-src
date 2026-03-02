@@ -2,12 +2,6 @@
 Test DateTimeZone::getTransitions() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array DateTimeZone::getTransitions  ()
- * Description: Returns all transitions for the timezone
- * Source code: ext/date/php_date.c
- * Alias to functions: timezone_transitions_get()
- */
-
 echo "*** Testing DateTimeZone::getTransitions() : basic functionality ***\n";
 
 //Set the default time zone
@@ -19,7 +13,7 @@ $tz = new DateTimeZone("Europe/London");
 $tran = $tz->getTransitions(-306972000, -37241999);
 
 if (!is_array($tran)) {
-	echo "TEST FAILED: Expected an array\n";
+    echo "TEST FAILED: Expected an array\n";
 }
 
 echo "\n-- Total number of transitions: " . count($tran). " --\n";
@@ -28,7 +22,6 @@ echo "\n-- Format a sample entry for Spring 1963 --\n";
 var_dump( $tran[6] );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing DateTimeZone::getTransitions() : basic functionality ***
 
@@ -39,7 +32,7 @@ array(5) {
   ["ts"]=>
   int(-213228000)
   ["time"]=>
-  string(24) "1963-03-31T02:00:00+0000"
+  string(25) "1963-03-31T02:00:00+00:00"
   ["offset"]=>
   int(3600)
   ["isdst"]=>
@@ -47,4 +40,3 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-===DONE===

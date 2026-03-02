@@ -2,13 +2,6 @@
 Test get_declared_interfaces() function : autoloading of interfaces
 --FILE--
 <?php
-/* Prototype  : proto array get_declared_interfaces()
- * Description: Returns an array of all declared interfaces.
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
-
 echo "*** Testing get_declared_interfaces() : autoloading of interfaces ***\n";
 
 spl_autoload_register(function ($class_name) {
@@ -25,7 +18,7 @@ var_dump(in_array('AutoInterface', get_declared_interfaces()));
 
 echo "\nDONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_declared_interfaces() : autoloading of interfaces ***
 
 -- before interface is used --

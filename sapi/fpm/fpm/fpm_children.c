@@ -1,4 +1,3 @@
-	/* $Id: fpm_children.c,v 1.32.2.2 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -39,7 +38,7 @@ static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_alloc() /* {{{ */
+static struct fpm_child_s *fpm_child_alloc(void)
 {
 	struct fpm_child_s *ret;
 
@@ -53,18 +52,38 @@ static struct fpm_child_s *fpm_child_alloc() /* {{{ */
 	ret->scoreboard_i = -1;
 	return ret;
 }
-/* }}} */
 
 static void fpm_child_free(struct fpm_child_s *child) /* {{{ */
 {
+	if (child->log_stream) {
+		zlog_stream_close(child->log_stream);
+		free(child->log_stream);
+	}
 	free(child);
 }
 /* }}} */
+
+static void fpm_postponed_child_free(struct fpm_event_s *ev, short which, void *arg)
+{
+	struct fpm_child_s *child = (struct fpm_child_s *) arg;
+
+	if (child->fd_stdout != -1) {
+		fpm_event_del(&child->ev_stdout);
+		close(child->fd_stdout);
+	}
+	if (child->fd_stderr != -1) {
+		fpm_event_del(&child->ev_stderr);
+		close(child->fd_stderr);
+	}
+
+	fpm_child_free((struct fpm_child_s *) child);
+}
 
 static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{ */
 {
 	if (child->fd_stdout != -1) {
 		if (in_event_loop) {
+			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stdout);
 		}
 		if (child->fd_stdout != -1) {
@@ -74,6 +93,7 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 
 	if (child->fd_stderr != -1) {
 		if (in_event_loop) {
+			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stderr);
 		}
 		if (child->fd_stderr != -1) {
@@ -81,7 +101,12 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 		}
 	}
 
-	fpm_child_free(child);
+	if (in_event_loop && child->postponed_free) {
+		fpm_event_set_timer(&child->ev_free, 0, &fpm_postponed_child_free, child);
+		fpm_event_add(&child->ev_free, 1000);
+	} else {
+		fpm_child_free(child);
+	}
 }
 /* }}} */
 
@@ -118,7 +143,7 @@ static void fpm_child_unlink(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
+struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	struct fpm_child_s *child = 0;
@@ -142,6 +167,24 @@ static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 }
 /* }}} */
 
+static int fpm_child_cloexec(void)
+{
+	/* get listening socket attributes so it can be extended */
+	int attrs = fcntl(fpm_globals.listening_socket, F_GETFD);
+	if (0 > attrs) {
+		zlog(ZLOG_WARNING, "failed to get attributes of listening socket, errno: %d", errno);
+		return -1;
+	}
+
+	/* set CLOEXEC to prevent the descriptor leaking to child processes */
+	if (0 > fcntl(fpm_globals.listening_socket, F_SETFD, attrs | FD_CLOEXEC)) {
+		zlog(ZLOG_WARNING, "failed to change attribute of listening socket");
+		return -1;
+	}
+
+	return 0;
+}
+
 static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
@@ -153,7 +196,8 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	    0 > fpm_unix_init_child(wp)   ||
 	    0 > fpm_signals_init_child()  ||
 	    0 > fpm_env_init_child(wp)    ||
-	    0 > fpm_php_init_child(wp)) {
+	    0 > fpm_php_init_child(wp)    ||
+	    0 > fpm_child_cloexec()) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(FPM_EXIT_SOFTWARE);
@@ -174,7 +218,7 @@ int fpm_children_free(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-void fpm_children_bury() /* {{{ */
+void fpm_children_bury(void)
 {
 	int status;
 	pid_t pid;
@@ -192,7 +236,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "with code %d", WEXITSTATUS(status));
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill) {
 				restart_child = 0;
@@ -217,7 +261,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill && WTERMSIG(status) == SIGQUIT) {
 				restart_child = 0;
@@ -243,7 +287,7 @@ void fpm_children_bury() /* {{{ */
 
 			fpm_child_unlink(child);
 
-			fpm_scoreboard_proc_free(wp->scoreboard, child->scoreboard_i);
+			fpm_scoreboard_proc_free(child);
 
 			fpm_clock_get(&tv1);
 
@@ -253,9 +297,9 @@ void fpm_children_bury() /* {{{ */
 				if (!fpm_pctl_can_spawn_children()) {
 					severity = ZLOG_DEBUG;
 				}
-				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", wp->config->name, (int) pid, buf, (long)tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", wp->config->name, (int) pid, (long)tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -295,12 +339,13 @@ void fpm_children_bury() /* {{{ */
 					break;
 				}
 			}
+		} else if (fpm_globals.parent_pid == 1) {
+			zlog(ZLOG_DEBUG, "unknown child (%d) exited %s - most likely an orphan process (master process is the init process)", pid, buf);
 		} else {
-			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s. Please open a bug report (https://bugs.php.net).", pid, buf);
+			zlog(ZLOG_WARNING, "unknown child (%d) exited %s - potentially a bug or pre exec child (e.g. s6-notifyoncheck)", pid, buf);
 		}
 	}
 }
-/* }}} */
 
 static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -321,7 +366,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 		return 0;
 	}
 
-	if (0 > fpm_scoreboard_proc_alloc(wp->scoreboard, &c->scoreboard_i)) {
+	if (0 > fpm_scoreboard_proc_alloc(c)) {
 		fpm_stdio_discard_pipes(c);
 		fpm_child_free(c);
 		return 0;
@@ -333,7 +378,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 
 static void fpm_resources_discard(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_scoreboard_proc_free(child->wp->scoreboard, child->scoreboard_i);
+	fpm_scoreboard_proc_free(child);
 	fpm_stdio_discard_pipes(child);
 	fpm_child_free(child);
 }
@@ -343,13 +388,13 @@ static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (wp == child->wp) {
+		if (wp == child->wp || wp == child->wp->shared) {
 			continue;
 		}
-		fpm_scoreboard_free(wp->scoreboard);
+		fpm_scoreboard_free(wp);
 	}
 
-	fpm_scoreboard_child_use(child->wp->scoreboard, child->scoreboard_i, getpid());
+	fpm_scoreboard_child_use(child, getpid());
 	fpm_stdio_child_use_pipes(child);
 	fpm_child_free(child);
 }
@@ -390,7 +435,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	 *   - fpm_pctl_can_spawn_children : FPM is running in a NORMAL state (aka not restart, stop or reload)
 	 *   - wp->running_children < max  : there is less than the max process for the current pool
 	 *   - (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max):
-	 *     if fpm_global_config.process_max is set, FPM has not fork this number of processes (globaly)
+	 *     if fpm_global_config.process_max is set, FPM has not fork this number of processes (globally)
 	 */
 	while (fpm_pctl_can_spawn_children() && wp->running_children < max && (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max)) {
 
@@ -399,6 +444,11 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 
 		if (!child) {
 			return 2;
+		}
+
+		zlog(ZLOG_DEBUG, "blocking signals before child birth");
+		if (0 > fpm_signals_child_block()) {
+			zlog(ZLOG_WARNING, "child may miss signals");
 		}
 
 		pid = fork();
@@ -412,12 +462,16 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				return 0;
 
 			case -1 :
+				zlog(ZLOG_DEBUG, "unblocking signals");
+				fpm_signals_unblock();
 				zlog(ZLOG_SYSERROR, "fork() failed");
 
 				fpm_resources_discard(child);
 				return 2;
 
 			default :
+				zlog(ZLOG_DEBUG, "unblocking signals, child born");
+				fpm_signals_unblock();
 				child->pid = pid;
 				fpm_clock_get(&child->started);
 				fpm_parent_resources_use(child);
@@ -428,10 +482,10 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	}
 
 	if (!warned && fpm_global_config.process_max > 0 && fpm_globals.running_children >= fpm_global_config.process_max) {
-               if (wp->running_children < max) {
-                       warned = 1;
-                       zlog(ZLOG_WARNING, "The maximum number of processes has been reached. Please review your configuration and consider raising 'process.max'");
-               }
+		if (wp->running_children < max) {
+			warned = 1;
+			zlog(ZLOG_WARNING, "The maximum number of processes has been reached. Please review your configuration and consider raising 'process.max'");
+		}
 	}
 
 	return 1; /* we are done */
@@ -460,7 +514,7 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_init_main() /* {{{ */
+int fpm_children_init_main(void)
 {
 	if (fpm_global_config.emergency_restart_threshold &&
 		fpm_global_config.emergency_restart_interval) {
@@ -480,4 +534,3 @@ int fpm_children_init_main() /* {{{ */
 
 	return 0;
 }
-/* }}} */

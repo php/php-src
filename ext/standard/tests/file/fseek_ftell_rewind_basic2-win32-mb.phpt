@@ -7,16 +7,6 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
 ?>
 --FILE--
 <?php
-/* Prototype: int fseek ( resource $handle, int $offset [, int $whence] );
-   Description: Seeks on a file pointer
-
-   Prototype: bool rewind ( resource $handle );
-   Description: Rewind the position of a file pointer
-
-   Prototype: int ftell ( resource $handle );
-   Description: Tells file pointer read/write position
-*/
-
 // include the file.inc for common functions for test
 include ("file.inc");
 
@@ -31,7 +21,7 @@ $file_content_types = array("text_with_new_line","alphanumeric");
 $whence_set = array(SEEK_SET,SEEK_CUR,SEEK_END);
 $whence_string = array("SEEK_SET", "SEEK_CUR", "SEEK_END");
 
-$filename = dirname(__FILE__)."/fseek_ftell_rewind_basic2私はガラスを食べられます.tmp"; // this is name of the file created by create_files()
+$filename = __DIR__."/fseek_ftell_rewind_basic2私はガラスを食べられます.tmp"; // this is name of the file created by create_files()
 
 foreach($file_content_types as $file_content_type){
   echo "\n-- File having data of type ". $file_content_type ." --\n";
@@ -70,7 +60,7 @@ foreach($file_content_types as $file_content_type){
 } //end of File content type loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : basic operations ***
 
 -- File having data of type text_with_new_line --

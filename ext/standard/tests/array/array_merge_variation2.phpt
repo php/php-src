@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - Pass different data types as $arr2 arg
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass different data types as $arr2 argument to array_merge() to test behaviour
  */
@@ -88,102 +83,72 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_merge()
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
-  var_dump( array_merge($arr1, $input) );
-  $iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump( array_merge($arr1, $input) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 2 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 3 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 4 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 5 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 6 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 7 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 8 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 9 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 10 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 11 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 12 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 13 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 14 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 15 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 16 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 17 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 18 --
 array(2) {
@@ -194,37 +159,23 @@ array(2) {
 }
 
 -- Iteration 19 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 20 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 21 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, classA given
 
 -- Iteration 23 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 24 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 25 --
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
-NULL
+array_merge(): Argument #2 must be of type array, resource given
 Done

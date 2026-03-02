@@ -1,11 +1,13 @@
 --TEST--
 imagecreatefrompng() and empty/missing file
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php if (!function_exists("imagecreatefrompng")) print "skip"; ?>
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/001私はガラスを食べられます.test";
+$file = __DIR__."/001私はガラスを食べられます.test";
 @unlink($file);
 
 var_dump(imagecreatefrompng($file));
@@ -17,9 +19,9 @@ var_dump(imagecreatefrompng($file));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: imagecreatefrompng(%s001私はガラスを食べられます.test): failed to open stream: No such file or directory in %s on line %d
+Warning: imagecreatefrompng(%s001私はガラスを食べられます.test): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: imagecreatefrompng(): '%s001私はガラスを食べられます.test' is not a valid PNG file in %s on line %d
+Warning: imagecreatefrompng(): "%s001私はガラスを食べられます.test" is not a valid PNG file in %s on line %d
 bool(false)
 Done

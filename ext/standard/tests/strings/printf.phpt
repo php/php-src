@@ -5,7 +5,7 @@ precision=14
 --SKIPIF--
 <?php
 if (PHP_INT_MAX > 2147483647) {
-        die("skip 32bit test only");
+    die("skip 32bit test only");
 }
 ?>
 --FILE--
@@ -28,24 +28,27 @@ $strings          = array( NULL, "abc", 'aaa' );
 
 /* Zero argument */
 echo "\n*** Output for zero argument ***\n";
-printf();
+try {
+    printf();
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 /* Number of arguments not matching as specified in format field */
 echo "\n*** Output for insufficient number of arguments ***\n";
 $string = "dingy%sflem%dwombat";
 $nbr = 5;
 $name = "voudras";
-printf("%d $string %s", $nbr, $name);
+try {
+    printf("%d $string %s", $nbr, $name);
+} catch (\ArgumentCountError $e) {
+    print('Error found: '.$e->getMessage());
+}
 
 
 /* Scalar argument */
 echo "\n*** Output for scalar argument ***\n";
 printf(3);
-
-/* NULL argument */
-echo "\n*** Output for NULL as argument ***\n";
-printf(NULL);
-
 
 /* Float type variations */
 
@@ -199,7 +202,11 @@ echo"\n\n*** Output for precision value more than maximum ***\n";
 printf("%.988f",1.23456789e10);
 
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
-printf("%030.-15s", $tempstring);
+try {
+    printf("%030.-15s", $tempstring);
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 
 echo"\n\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
@@ -226,17 +233,12 @@ printf("%d", $tempstring);
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-
-Warning: printf() expects at least %d parameter, %d given in %s on line %d
+printf() expects at least %d argument, %d given
 
 *** Output for insufficient number of arguments ***
-
-Warning: printf(): Too few arguments in %s on line %d
-
+Error found: 5 arguments are required, 3 given
 *** Output for scalar argument ***
 3
-*** Output for NULL as argument ***
-
 
 *** Output for float type ***
 
@@ -484,8 +486,8 @@ Array
     [4] => 99
 )
 
- 
- 
+%0
+%0
 C
 ½
 c
@@ -593,7 +595,7 @@ Array
 (
     [0] => %5s
     [1] => %-5s
-    [2] => %05s
+    [2] => %r%%r05s
     [3] => %'#5s
 )
 
@@ -674,7 +676,7 @@ Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum
 12345678900.00000000000000000000000000000000000000000000000000000
 
 *** Output for invalid width(-15) specifier ***
-15s
+Unknown format specifier "-"
 
 *** Output for '%F' as the format parameter ***
 12345678900.000000

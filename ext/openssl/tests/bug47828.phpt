@@ -1,7 +1,7 @@
 --TEST--
 Bug #47828 (segfaults when a UTF-8 conversion fails openssl_x509_parse())
---SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip"); ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $csr = "-----BEGIN CERTIFICATE-----

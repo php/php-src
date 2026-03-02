@@ -2,8 +2,6 @@
 Bug #70868, with PCRE JIT
 --INI--
 pcre.jit=1
---SKIPIF--
-<?php if (!extension_loaded("pcre")) die("skip"); ?>
 --FILE--
 <?php
 
@@ -24,7 +22,7 @@ foreach ($iterator as $foo) {
 echo "Done", PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "A.phpt"
 string(6) "B.phpt"
 string(6) "C.phpt"

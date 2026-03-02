@@ -1,9 +1,7 @@
 --TEST--
 Test for correct colors of imagecopyresampled() wrt. alpha
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -60,9 +58,6 @@ if (!($blue >= EXP_BLUE - 1 && $blue <= EXP_BLUE + 1)) {
 if (!($alpha >= EXP_ALPHA - 1 && $alpha <= EXP_ALPHA + 1)) {
     printf("alpha: expected roughly %d, got %d\n", EXP_ALPHA, $alpha);
 }
-
-imagedestroy($copy);
-imagedestroy($im);
 
 echo 'DONE';
 ?>

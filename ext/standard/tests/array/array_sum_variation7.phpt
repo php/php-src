@@ -2,22 +2,12 @@
 Test array_sum() function : usage variations - 'input' array with unexpected values as array element
 --FILE--
 <?php
-/* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing array_sum() with array having other than numeric entries
 *    strings, bool, null, subarrays & objects
 */
 
 echo "*** Testing array_sum() : array with unexpected entries ***\n";
-
-// empty array
-$input = array();
-echo "-- empty array --\n";
-var_dump( array_sum($input) );
 
 // string array
 $input = array('Apple', 'Banana', 'Carrot', 'Mango', 'Orange');
@@ -69,18 +59,46 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_sum() : array with unexpected entries ***
--- empty array --
-int(0)
 -- array with string values --
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
 int(0)
 -- array with bool values --
 int(3)
 -- array with null values --
 int(0)
 -- array with subarrays --
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
 int(0)
 -- array with object values --
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
 int(0)
 -- array with mixed values --
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
 float(14)
 Done

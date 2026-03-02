@@ -3,19 +3,14 @@ ldap_rename() - Testing ldap_rename() that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
-var_dump(ldap_rename($link));
+$link = ldap_connect($uri);
 var_dump(ldap_rename($link, "cn=userNotFound,$base", "cn=userZ", "$base", true));
 ?>
-===DONE===
---EXPECTF--
-Warning: ldap_rename() expects exactly 5 parameters, 1 given in %s on line %d
-NULL
+--EXPECT--
 bool(false)
-===DONE===

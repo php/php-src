@@ -4,26 +4,26 @@ strip comments and whitespace with -w
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-$filename = dirname(__FILE__).'/007.test.php';
+$filename = __DIR__.'/007.test.php';
 $code ='
 <?php
 /* some test script */
 
 class test { /* {{{ */
-	public $var = "test"; //test var
-#perl style comment 
-	private $pri; /* private attr */
+    public $var = "test"; //test var
+#perl style comment
+    private $pri; /* private attr */
 
-	function foo(/* void */) {
-	}
+    function foo(/* void */) {
+    }
 }
 /* }}} */
 
@@ -32,21 +32,27 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -w "$filename"`);
-var_dump(`$php -n -w "wrong"`);
-var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
+var_dump(shell_exec(<<<SHELL
+$php -n -w "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -w "wrong"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w
+SHELL));
 
 @unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(81) "
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>
 "
-string(33) "Could not open input file: wrong
-"
+Could not open input file: wrong
+NULL
 string(43) "<?php  class test { function foo() {} } ?>
 "
 Done

@@ -1,15 +1,7 @@
 --TEST--
 curl_multi_errno and curl_multi_strerror basic test
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-	    exit("skip curl extension not loaded");
-}
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x070f04) {
-	exit("skip: test works only with curl >= 7.15.4");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -18,13 +10,19 @@ $errno = curl_multi_errno($mh);
 echo $errno . PHP_EOL;
 echo curl_multi_strerror($errno) . PHP_EOL;
 
-@curl_multi_setopt($mh, -1, -1);
+try {
+    curl_multi_setopt($mh, -1, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 $errno = curl_multi_errno($mh);
 echo $errno . PHP_EOL;
 echo curl_multi_strerror($errno) . PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 0
 No error
+curl_multi_setopt(): Argument #2 ($option) is not a valid cURL multi option
 6
 Unknown option

@@ -2,12 +2,6 @@
 Test array_intersect_assoc() function : usage variations - different arrays for 'arr1' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of arrays to $arr1 argument and testing whether
 * array_intersect_assoc() behaves in an expected way with the other arguments passed to the function
@@ -31,13 +25,6 @@ the lazy dog
 This is a double quoted string
 EOT;
 
-// heredoc with different whitespaces
-$diff_whitespaces = <<<EOT
-hello\r world\t
-1111\t\t != 2222\v\v
-heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
-EOT;
-
 // heredoc with quoted strings and numeric values
 $numeric_string = <<<EOT
 11 < 12. 123 >22
@@ -55,7 +42,7 @@ $arrays = array (
 /*5*/  array(NULL), // with NULL
        array("a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
        array('a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
-       array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $numeric_string),  // with heredocs
+       array("h1" => $blank_line, "h2" => $multiline_string, $numeric_string),  // with heredocs
 
        // associative arrays
 /*9*/  array(1 => "one", 2 => "two", 3 => "three"),  // explicit numeric keys, string values
@@ -65,13 +52,12 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
+/*14*/ array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 
@@ -80,12 +66,12 @@ $arrays = array (
 $arr2 = array (
   1, 1.1, 2.2, "hello", "one", NULL, 2,
   'world', true,5 => false, 1 => 'aaaa\r', "aaaa\r",
-  'h3' => $diff_whitespaces, $numeric_string,
+  $numeric_string,
   "one" => "ten", 4 => "four", "two" => 2,
-  '', null => "null", '' => 'emptys', "emptyd" => "",
+  '', '' => 'emptys', "emptyd" => "",
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iteration $iterator --\n";
@@ -101,7 +87,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : Passing different types of arrays to $arr1 argument ***
 -- Iteration 1 --
 array(1) {
@@ -147,19 +133,9 @@ array(1) {
   string(6) "aaaa\r"
 }
 -- Iteration 8 --
-array(1) {
-  ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"
+array(0) {
 }
-array(1) {
-  ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
-heredoc
-double quoted string. withdifferentwhitespaces"
+array(0) {
 }
 -- Iteration 9 --
 array(0) {
@@ -204,38 +180,33 @@ array(0) {
 array(0) {
 }
 -- Iteration 15 --
-array(0) {
+array(2) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
-array(0) {
+array(2) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
 -- Iteration 16 --
-array(2) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
+array(1) {
+  [5]=>
+  bool(false)
 }
-array(2) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
+array(1) {
+  [5]=>
+  bool(false)
 }
 -- Iteration 17 --
-array(1) {
-  [5]=>
-  bool(false)
+array(0) {
 }
-array(1) {
-  [5]=>
-  bool(false)
+array(0) {
 }
 -- Iteration 18 --
-array(0) {
-}
-array(0) {
-}
--- Iteration 19 --
 array(0) {
 }
 array(0) {

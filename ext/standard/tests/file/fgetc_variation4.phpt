@@ -2,11 +2,6 @@
 Test fgetc() function : usage variations - different read modes
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
-
 /* read from fie using fgetc, file opened using different
    read read modes */
 
@@ -17,7 +12,7 @@ $file_modes = array( "a+", "a+b", "a+t",
                      "x+", "x+b", "x+t",
                      "w+", "w+b", "w+t" );
 
-$filename = dirname(__FILE__)."/fgetc_variation4.tmp";
+$filename = __DIR__."/fgetc_variation4.tmp";
 foreach ($file_modes as $file_mode ) {
   echo "-- File opened in mode : $file_mode --\n";
 
@@ -50,7 +45,7 @@ foreach ($file_modes as $file_mode ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
  *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with files opened with different read modes --
 -- File opened in mode : a+ --

@@ -1,5 +1,5 @@
 --TEST--
-Test gettype() & settype() functions : usage variatoins
+Test gettype() & settype() functions : usage variations
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -8,13 +8,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to null type.
    Set type of the data to "null" and verify using gettype
@@ -37,10 +30,6 @@ set_error_handler("foo");
 
 $var1 = "another string";
 $var2 = array(2,3,4);
-
-// a variable which is unset
-$unset_var = 10.5;
-unset( $unset_var );
 
 class point
 {
@@ -149,10 +138,6 @@ $var_values = array (
   new point(NULL, NULL),
   new point(2.5, 40.5),
   new point(0, 0),
-
-  /* undefined/unset vars */
-  $unset_var,
-  $undef_var
 );
 
 /* test conversion to null type */
@@ -179,10 +164,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-8: Undefined variable: unset_var
-8: Undefined variable: undef_var
-
+--EXPECT--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to null --
@@ -573,16 +555,6 @@ NULL
 string(4) "NULL"
 -- Iteration 78 --
 string(6) "object"
-bool(true)
-NULL
-string(4) "NULL"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-NULL
-string(4) "NULL"
--- Iteration 80 --
-string(4) "NULL"
 bool(true)
 NULL
 string(4) "NULL"

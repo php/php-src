@@ -14,12 +14,12 @@ function gen2() {
 }
 
 function gen3() {
-	return;
+    return;
     yield;
 }
 
 function gen4() {
-	return;
+    return;
     yield;
 }
 
@@ -33,11 +33,19 @@ var_dump(gen4());
 
 ?>
 --EXPECTF--
-object(Generator)#%d (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "gen"
 }
-object(Generator)#%d (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(4) "gen2"
 }
-object(Generator)#%d (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(4) "gen3"
 }
-object(Generator)#%d (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(4) "gen4"
 }

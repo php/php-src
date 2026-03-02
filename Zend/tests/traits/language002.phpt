@@ -28,5 +28,5 @@ $o->sayHello();
 $o->sayWorld();
 $o->sayExclamationMark();
 ?>
---EXPECTF--
+--EXPECT--
 Hello World!

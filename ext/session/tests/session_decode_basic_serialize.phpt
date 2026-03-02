@@ -1,17 +1,13 @@
 --TEST--
 Test session_decode() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_decode() : basic functionality ***\n";
 
@@ -97,7 +93,7 @@ fclose($fp);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_decode() : basic functionality ***
 bool(true)
 

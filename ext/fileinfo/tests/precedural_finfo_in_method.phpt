@@ -1,5 +1,7 @@
 --TEST--
 Using procedural finfo API in a method
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 

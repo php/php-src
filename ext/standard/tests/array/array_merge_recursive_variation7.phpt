@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - array with reference variables
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing
  * array having reference variables.
@@ -40,7 +35,7 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : array with reference variables for $arr1 argument ***
 -- With default argument --
 array(6) {

@@ -2,12 +2,6 @@
 Test array_chunk() function : usage variations - different arrays
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *            : Chunks an array into size large chunks
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_chunk() function with following conditions
  *   1. array without elements
@@ -47,7 +41,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying various arrays --

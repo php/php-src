@@ -4,12 +4,6 @@ Test file_put_contents() function : variation - test append flag
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : variation ***\n";
 
 $filename = "FilePutContentsVar1.tmp";
@@ -27,12 +21,15 @@ file_put_contents($filename, $data);
 echo filesize($filename)."\n";
 readfile($filename);
 echo "\n";
-unlink($filename);
 
 
 ?>
-===DONE===
---EXPECTF--
+--CLEAN--
+<?php
+$filename = "FilePutContentsVar1.tmp";
+unlink($filename);
+?>
+--EXPECT--
 *** Testing file_put_contents() : variation ***
 int(25)
 int(18)
@@ -40,4 +37,3 @@ int(18)
 The first string to write, followed by this
 25
 The first string to write
-===DONE===

@@ -10,8 +10,8 @@ $phar->setStub('<?php if(file_exists(dirname(__FILE__) . "/files/config.xml")) {
 Phar::webPhar("blog", "index.php");
 __HALT_COMPILER(); ?>');
 $phar['index.php'] = '<?php if (!file_exists("config.xml")) {
-	include "install.php";
-	exit;
+    include "install.php";
+    exit;
 }
 var_dump(file_get_contents("config.xml"));
 ?>';

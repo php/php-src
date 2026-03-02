@@ -1,23 +1,7 @@
 --TEST--
 Test is_callable() function : usage variations - undefined functions
---SKIPIF--
-<?php
-if (!extension_loaded('json')) die("skip requires ext/json");
-?>
---INI--
-precision=14
-error_reporting = E_ALL & ~E_NOTICE | E_STRICT
 --FILE--
 <?php
-/* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
-   Description: Verify that the contents of a variable can be called as a function
-                In case of objects, $var = array($SomeObject, 'MethodName')
-*/
-
-/* Prototype: void check_iscallable( $functions );
-   Description: use iscallable() on given string to check for valid function name
-                returns true if valid function name, false otherwise
-*/
 function check_iscallable( $functions ) {
   $counter = 1;
   foreach($functions as $func) {
@@ -62,8 +46,7 @@ $undef_functions = array (
 check_iscallable($undef_functions);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing is_callable() on undefined functions ***
 -- Iteration  1 --
 bool(false)
@@ -209,4 +192,3 @@ bool(true)
 bool(false)
 bool(false)
 "echo()"
-===DONE===

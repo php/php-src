@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -16,8 +14,6 @@
   |          Sara Golemon <pollita@php.net>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_hash.h"
 #include "php_hash_snefru.h"
@@ -43,7 +39,7 @@ void ph(uint32_t h[16])
 
 static inline void Snefru(uint32_t input[16])
 {
-	static int shifts[4] = {16, 8, 16, 24};
+	static const int shifts[4] = {16, 8, 16, 24};
 	int b, index, rshift, lshift;
 	const uint32_t *t0,*t1;
 	uint32_t SBE,B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15;
@@ -125,14 +121,14 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context, const unsigned char 
 	int i, j;
 
 	for (i = 0, j = 0; i < 32; i += 4, ++j) {
-		context->state[8+j] =	((input[i] & 0xff) << 24) | ((input[i+1] & 0xff) << 16) |
-								((input[i+2] & 0xff) << 8) | (input[i+3] & 0xff);
+		context->state[8+j] =	((unsigned)input[i] << 24) | ((unsigned)input[i+1] << 16) |
+								((unsigned)input[i+2] << 8) | (unsigned)input[i+3];
 	}
 	Snefru(context->state);
 	ZEND_SECURE_ZERO(&context->state[8], sizeof(uint32_t) * 8);
 }
 
-PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context)
+PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 }
@@ -144,14 +140,14 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 	if ((MAX32 - context->count[1]) < (len * 8)) {
 		context->count[0]++;
 		context->count[1] = MAX32 - context->count[1];
-		context->count[1] = (len * 8) - context->count[1];
+		context->count[1] = ((uint32_t) len * 8) - context->count[1];
 	} else {
-		context->count[1] += len * 8;
+		context->count[1] += (uint32_t) len * 8;
 	}
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length += len;
+		context->length += (unsigned char)len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
 
@@ -167,7 +163,7 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 
 		memcpy(context->buffer, input + i, r);
 		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
-		context->length = r;
+		context->length = (unsigned char)r;
 	}
 }
 
@@ -193,22 +189,30 @@ PHP_HASH_API void PHP_SNEFRUFinal(unsigned char digest[32], PHP_SNEFRU_CTX *cont
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static hash_spec_result php_snefru_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_SNEFRU_CTX *ctx = (PHP_SNEFRU_CTX *) hash->context;
+	hash_spec_result r = HASH_SPEC_FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_SNEFRU_SPEC)) == HASH_SPEC_SUCCESS
+		&& ctx->length < sizeof(ctx->buffer)) {
+		return HASH_SPEC_SUCCESS;
+	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
+}
+
 const php_hash_ops php_hash_snefru_ops = {
+	"snefru",
 	(php_hash_init_func_t) PHP_SNEFRUInit,
 	(php_hash_update_func_t) PHP_SNEFRUUpdate,
 	(php_hash_final_func_t) PHP_SNEFRUFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_snefru_unserialize,
+	PHP_SNEFRU_SPEC,
 	32,
 	32,
 	sizeof(PHP_SNEFRU_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

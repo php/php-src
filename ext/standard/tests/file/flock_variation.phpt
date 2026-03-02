@@ -2,18 +2,13 @@
 Test flock() function: Variations
 --FILE--
 <?php
-/*
-Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files
-  in an advisory way
-*/
+echo "*** Testing flock() fun with the various operation and
+    wouldblock values                                ***\n";
 
-echo "*** Testing flock() fun with the various operation and 
-            wouldblock values                                ***\n";
-$file = dirname(__FILE__)."/flock.tmp";
+$file = preg_replace("~\.phpt?$~", '', __FILE__);
 $fp = fopen($file, "w");
 
-/* array of operatons */
+/* array of operations */
 $operations = array(
   LOCK_SH,
   LOCK_EX,
@@ -23,7 +18,6 @@ $operations = array(
   LOCK_UN,
   1,
   2,
-  2.234,
   TRUE
 );
 
@@ -64,9 +58,9 @@ fclose($fp);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
-*** Testing flock() fun with the various operation and 
-            wouldblock values                                ***
+--EXPECT--
+*** Testing flock() fun with the various operation and
+    wouldblock values                                ***
 --- Outer iteration 0 ---
 bool(true)
 -- Inner iteration 0 in 0 --
@@ -336,36 +330,6 @@ bool(true)
 -- Inner iteration 12 in 8 --
 bool(true)
 -- Inner iteration 13 in 8 --
-bool(true)
---- Outer iteration 9 ---
-bool(true)
--- Inner iteration 0 in 9 --
-bool(true)
--- Inner iteration 1 in 9 --
-bool(true)
--- Inner iteration 2 in 9 --
-bool(true)
--- Inner iteration 3 in 9 --
-bool(true)
--- Inner iteration 4 in 9 --
-bool(true)
--- Inner iteration 5 in 9 --
-bool(true)
--- Inner iteration 6 in 9 --
-bool(true)
--- Inner iteration 7 in 9 --
-bool(true)
--- Inner iteration 8 in 9 --
-bool(true)
--- Inner iteration 9 in 9 --
-bool(true)
--- Inner iteration 10 in 9 --
-bool(true)
--- Inner iteration 11 in 9 --
-bool(true)
--- Inner iteration 12 in 9 --
-bool(true)
--- Inner iteration 13 in 9 --
 bool(true)
 
 *** Done ***

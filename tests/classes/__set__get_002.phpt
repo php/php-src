@@ -3,8 +3,8 @@ ZE2 __get() signature check
 --FILE--
 <?php
 class Test {
-	function __get($x,$y) {
-	}
+    function __get($x,$y) {
+    }
 }
 
 ?>

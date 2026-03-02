@@ -2,11 +2,6 @@
 Test array_reverse() function : basic functionality - simple array for 'array' argument
 --FILE--
 <?php
-/* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_reverse() by giving a simple array for $array argument
 */
@@ -25,7 +20,7 @@ var_dump( array_reverse($array, false) );  // expects the keys not to be preserv
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : basic functionality ***
 array(6) {
   [0]=>

@@ -5,9 +5,9 @@ SPL: DoublyLinkedList: insert operations
 $dll = new SplDoublyLinkedList();
 // errors
 try {
-	$dll->add(2,5);
+    $dll->add(2,5);
 } catch (OutOfRangeException $e) {
-	echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: ".$e->getMessage()."\n";
 }
 
 $dll->add(0,6);						//	6
@@ -29,11 +29,18 @@ echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
+
+// Test refcounted value
+$str = "foo";
+$str .= "bar";
+$dll->add(0, $str);
+$dll->add(0, $str);
+var_dump($dll->shift());
+var_dump($dll->shift());
+
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
-Exception: Offset invalid or out of range
+--EXPECT--
+Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
 7
 7
 6
@@ -42,4 +49,5 @@ Exception: Offset invalid or out of range
 3
 2
 1
-===DONE===
+string(6) "foobar"
+string(6) "foobar"

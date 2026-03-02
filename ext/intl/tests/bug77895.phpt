@@ -1,5 +1,7 @@
 --TEST--
 Bug #77895: IntlDateFormatter::create fails in strict mode if $locale = null 
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

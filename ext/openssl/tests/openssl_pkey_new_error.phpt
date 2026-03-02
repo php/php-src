@@ -1,23 +1,33 @@
 --TEST--
 openssl_pkey_new() error tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 /* openssl_pkey_get_details() segfaults when getting the information
-	from openssl_pkey_new() with an empty sub-array arg 		*/
+    from openssl_pkey_new() with an empty sub-array arg 		*/
 
 $rsa = array("rsa" => array());
 $dsa = array("dsa" => array());
 $dh = array("dh" => array());
 
-openssl_pkey_get_details(openssl_pkey_new($rsa));
-openssl_pkey_get_details(openssl_pkey_new($dsa));
-openssl_pkey_get_details(openssl_pkey_new($dh));
+try {
+    openssl_pkey_get_details(openssl_pkey_new($rsa));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    openssl_pkey_get_details(openssl_pkey_new($dsa));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    openssl_pkey_get_details(openssl_pkey_new($dh));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
+--EXPECT--
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given

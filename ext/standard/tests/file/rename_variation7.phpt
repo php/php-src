@@ -11,7 +11,7 @@ if (!function_exists("symlink")) die("skip symlinks are not supported");
 $tmp_link = __FILE__.".tmp.link";
 $tmp_link2 = __FILE__.".tmp.link2";
 
-symlink(dirname(__FILE__)."/there_is_no_such_file", $tmp_link);
+symlink(__DIR__."/there_is_no_such_file", $tmp_link);
 rename($tmp_link, $tmp_link2);
 
 clearstatcache();

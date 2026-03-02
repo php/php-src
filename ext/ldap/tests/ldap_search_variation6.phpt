@@ -4,51 +4,53 @@ ldap_search() test
 Davide Mendolia <idaf1er@gmail.com>
 Patrick Allaert <patrickallaert@php.net>
 Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 $dn = "$base";
 $filter = "(objectclass=person)";
 
 var_dump(
-	$result = ldap_search(array($link, $link), $dn, $filter),
-	$result0 = ldap_get_entries($link, $result[0]),
-	ldap_get_entries($link, $result[1]) === $result0
+    $result = ldap_search(array($link, $link), $dn, $filter),
+    $result0 = ldap_get_entries($link, $result[0]),
+    ldap_get_entries($link, $result[1]) === $result0
 );
 var_dump(
-	$result = ldap_search(array($link, $link), null, $filter),
-	ldap_get_entries($link, $result[0]),
-	ldap_get_entries($link, $result[1])
+    $result = ldap_search(array($link, $link), "", $filter),
+    ldap_get_entries($link, $result[0]),
+    ldap_get_entries($link, $result[1])
 );
 var_dump(
-	$result = ldap_search(array($link, $link), null, array($filter, $filter)),
-	ldap_get_entries($link, $result[0]),
-	ldap_get_entries($link, $result[1])
+    $result = ldap_search(array($link, $link), "", array($filter, $filter)),
+    ldap_get_entries($link, $result[0]),
+    ldap_get_entries($link, $result[1])
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(4) {
   ["count"]=>
@@ -87,7 +89,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(4) "oops"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -148,7 +150,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(15) "oopsIDitItAgain"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -200,7 +202,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(17) "0r1g1na1 passw0rd"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -213,9 +215,11 @@ array(4) {
 bool(true)
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(1) {
   ["count"]=>
@@ -227,9 +231,11 @@ array(1) {
 }
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(1) {
   ["count"]=>
@@ -239,4 +245,3 @@ array(1) {
   ["count"]=>
   int(0)
 }
-===DONE===

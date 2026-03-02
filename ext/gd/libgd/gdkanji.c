@@ -11,9 +11,7 @@
 #include <stdarg.h>
 #if defined(HAVE_ICONV_H) || defined(HAVE_ICONV)
 #include <iconv.h>
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
 #endif
 
 #if defined(HAVE_ICONV_H) && !defined(HAVE_ICONV)
@@ -145,7 +143,7 @@ DetectKanjiCode (unsigned char *str)
 	      else if (c >= 224 && c <= 239)
 		{
 		  whatcode = EUCORSJIS;
-		  while (c >= 64 && c != '\0' && whatcode == EUCORSJIS)
+		  while (c >= 64 && whatcode == EUCORSJIS)
 		    {
 		      if (c >= 129)
 			{
@@ -349,11 +347,9 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
   if ((cd = iconv_open (EUCSTR, code)) == (iconv_t) - 1)
     {
       error ("iconv_open() error");
-#ifdef HAVE_ERRNO_H
       if (errno == EINVAL)
 	error ("invalid code specification: \"%s\" or \"%s\"",
 	       EUCSTR, code);
-#endif
       strcpy ((char *) to, (const char *) from);
       return;
     }
@@ -363,7 +359,6 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
 
   if ((int) iconv(cd, (char **) &from, &from_len, (char **) &to, &to_len) == -1)
     {
-#ifdef HAVE_ERRNO_H
       if (errno == EINVAL)
 	error ("invalid end of input string");
       else if (errno == EILSEQ)
@@ -371,9 +366,10 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
       else if (errno == E2BIG)
 	error ("output buffer overflow at do_convert()");
       else
-#endif
 	error ("something happen");
       strcpy ((char *) to, (const char *) from);
+      if (iconv_close (cd) != 0)
+      	error ("iconv_close() error");
       return;
     }
 

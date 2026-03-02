@@ -1,19 +1,17 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
-  |          Johannes Schlüter <johannes@php.net>                        |
+  |          Johannes SchlÃ¼ter <johannes@php.net>                        |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
@@ -57,9 +55,9 @@ mysqlnd_reverse_api_get_api_list(void)
 
 /* {{{ mysqlnd_reverse_api_register_api */
 PHPAPI void
-mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext)
+mysqlnd_reverse_api_register_api(const MYSQLND_REVERSE_API * apiext)
 {
-	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), apiext);
+	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), (void*)apiext);
 }
 /* }}} */
 
@@ -68,12 +66,10 @@ mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext)
 PHPAPI MYSQLND *
 zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities)
 {
-	MYSQLND * retval;
-#ifdef OLD_CODE
-	MYSQLND_REVERSE_API * elem;
-	ZEND_HASH_FOREACH_PTR(&mysqlnd_api_ext_ht, elem) {
-		if (elem->conversion_cb) {
-			retval = elem->conversion_cb(zv);
+	MYSQLND_REVERSE_API *api;
+	ZEND_HASH_MAP_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
+		if (api->conversion_cb) {
+			MYSQLND *retval = api->conversion_cb(zv);
 			if (retval) {
 				if (retval->data) {
 					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities);
@@ -82,30 +78,6 @@ zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned 
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-#else
-	MYSQLND_REVERSE_API * api;
-	ZEND_HASH_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
-		if (api && api->conversion_cb) {
-			retval = api->conversion_cb(zv);
-			if (retval) {
-				if (retval->data) {
-					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities);
-				}
-				return retval;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-#endif
 	return NULL;
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

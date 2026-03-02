@@ -1,7 +1,7 @@
 --TEST--
 Switch where all targets, including default, coincide
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

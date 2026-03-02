@@ -14,19 +14,24 @@ register_shutdown_function(function(){
 
 //$undefined = null; // defined variable does not cause problems
 $undefined->foo();
+?>
 --EXPECTF--
-Error handler called (Undefined variable: undefined)
+Error handler called (Undefined variable $undefined)
 
-Fatal error: Uncaught ErrorException: Undefined variable: undefined in %sbug61767.php:%d
+Fatal error: Uncaught ErrorException: Undefined variable $undefined in %sbug61767.php:%d
 Stack trace:
-#0 %sbug61767.php(%d): {closure}(%s, 'Undefined varia...', '%s', %d, Array)
+#0 %s(%d): {closure:%s:%d}(2, 'Undefined varia...', '%s', 13)
 #1 {main}
   thrown in %sbug61767.php on line %d
 Shutting down
 Array
 (
     [type] => 1
-    [message] => %a
+    [message] => Uncaught ErrorException: Undefined variable $undefined in %s:%d
+Stack trace:
+#0 %s(%d): {closure:%s:%d}(2, 'Undefined varia...', '%s', 13)
+#1 {main}
+  thrown
     [file] => %sbug61767.php
     [line] => %d
 )

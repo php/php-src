@@ -1,47 +1,44 @@
 --TEST--
 strripos() offset integer overflow
---SKIPIF--
-<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 
-var_dump(strripos("t", "t", PHP_INT_MAX+1));
-var_dump(strripos("tttt", "tt", PHP_INT_MAX+1));
-var_dump(strripos(100, 101, PHP_INT_MAX+1));
-var_dump(strripos(1024, 1024, PHP_INT_MAX+1));
-var_dump(strripos(array(), array(), PHP_INT_MAX+1));
-var_dump(strripos(1024, 1024, -PHP_INT_MAX));
-var_dump(strripos(1024, "te", -PHP_INT_MAX));
-var_dump(strripos(1024, 1024, -PHP_INT_MAX-1));
-var_dump(strripos(1024, "te", -PHP_INT_MAX-1));
+try {
+    var_dump(strripos("t", "t", PHP_INT_MAX+1));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    strripos(1024, 1024, -PHP_INT_MAX);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, "te", -PHP_INT_MAX);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, 1024, -PHP_INT_MAX-1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    strripos(1024, "te", -PHP_INT_MAX-1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: strripos() expects parameter 3 to be integer, float given in %s on line %d
-bool(false)
-
-Warning: strripos() expects parameter 3 to be integer, float given in %s on line %d
-bool(false)
-
-Warning: strripos() expects parameter 3 to be integer, float given in %s on line %d
-bool(false)
-
-Warning: strripos() expects parameter 3 to be integer, float given in %s on line %d
-bool(false)
-
-Warning: strripos() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+--EXPECT--
+strripos(): Argument #3 ($offset) must be of type int, float given
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 Done

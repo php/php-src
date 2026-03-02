@@ -3,9 +3,10 @@ Bug #72506 (idn_to_ascii with INTL_IDNA_VARIANT_UTS46 fatals for long domain nam
 --DESCRIPTION--
 Actually, the $info array should be populated for these cases, but at least it's
 not clear yet with which values exactly.
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl')) die('skip this test requires ext/intl');
 if (!defined('INTL_IDNA_VARIANT_UTS46')) die('skip no UTS #46 API');
 ?>
 --FILE--

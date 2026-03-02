@@ -3,10 +3,10 @@ Bug #68976 Use After Free Vulnerability in unserialize()
 --FILE--
 <?php
 class evilClass {
-	public $name;
-	function __wakeup() {
-		unset($this->name);
-	}
+    public $name;
+    function __wakeup() {
+        unset($this->name);
+    }
 }
 
 $fakezval = pack(
@@ -25,8 +25,7 @@ for($i = 0; $i < 5; $i++) {
 
 var_dump($data);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   object(evilClass)#1 (0) {
@@ -34,4 +33,3 @@ array(2) {
   [1]=>
   int(1)
 }
-===DONE===

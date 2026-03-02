@@ -1,22 +1,19 @@
 --TEST--
 setCompressionName and setCompressionIndex methods
---SKIPIF--
-<?php
-/* $Id$ */
-if (!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
-$tmpfile = dirname(__FILE__) . '/__tmp_oo_set_compression.zip';
+$tmpfile = __DIR__ . '/oo_setcompression.zip';
 
 if (file_exists($tmpfile)) {
-	unlink($tmpfile);
+    unlink($tmpfile);
 }
 
 // generate the ZIP file
 $zip = new ZipArchive;
 if ($zip->open($tmpfile, ZipArchive::CREATE) !== TRUE) {
-	exit('failed');
+    exit('failed');
 }
 $txt = file_get_contents(__FILE__);
 $zip->addFromString('entry1.txt', $txt);
@@ -31,42 +28,104 @@ var_dump($zip->setCompressionName('entry2.txt', ZipArchive::CM_DEFAULT));
 var_dump($zip->setCompressionName('dir/entry3.txt', ZipArchive::CM_STORE));
 var_dump($zip->setCompressionName('entry4.txt', ZipArchive::CM_DEFLATE));
 
+try {
+	$zip->setCompressionName('entry5.txt', PHP_INT_MIN);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+	$zip->setCompressionIndex(4, PHP_INT_MIN);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
 var_dump($zip->setCompressionIndex(4, ZipArchive::CM_STORE));
 var_dump($zip->setCompressionIndex(5, ZipArchive::CM_DEFLATE));
 var_dump($zip->setCompressionIndex(6, ZipArchive::CM_DEFAULT));
 
 if (!$zip->close()) {
-	exit('failed');
+    exit('failed');
 }
 
 
 // check the ZIP file
 $zip = zip_open($tmpfile);
 if (!is_resource($zip)) {
-	exit('failed');
+    exit('failed');
 }
 
 while ($e = zip_read($zip)) {
-	echo zip_entry_name($e) . ': ' . zip_entry_compressionmethod($e) . "\n";
+    echo zip_entry_name($e) . ': ' . zip_entry_compressionmethod($e) . "\n";
 }
 zip_close($zip);
 ?>
 --CLEAN--
 <?php
-$tmpfile = dirname(__FILE__) . '/__tmp_oo_set_compression.zip';
+$tmpfile = __DIR__ . '/oo_setcompression.zip';
 unlink($tmpfile);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
+ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
+ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry1.txt: deflated
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry2.txt: deflated
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 dir/entry3.txt: stored
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry4.txt: deflated
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry5.txt: stored
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry6.txt: deflated
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry7.txt: deflated
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d

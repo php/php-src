@@ -1,7 +1,5 @@
 --TEST--
-tiger
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: tiger algorithm
 --FILE--
 <?php
 echo hash('tiger192,3', ''),"\n";

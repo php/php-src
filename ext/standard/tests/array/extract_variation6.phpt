@@ -16,7 +16,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 string(3) "aaa"
 int(1)

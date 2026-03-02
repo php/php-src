@@ -5,7 +5,7 @@ Rohan Abraham (rohanabrahams@gmail.com)
 TestFest London May 2009
 --FILE--
 <?php
-  $ar = array("one"=>1, "two"=>2, "three"=>array("four"=>4, "five"=>5, "six"=>array("seven"=>7)), "eight"=>8, -100 => 10, NULL => "null");
+  $ar = array("one"=>1, "two"=>2, "three"=>array("four"=>4, "five"=>5, "six"=>array("seven"=>7)), "eight"=>8, -100 => 10, '' => "null");
   $it = new RecursiveArrayIterator($ar);
   $it = new RecursiveIteratorIterator($it);
   foreach($it as $k=>$v)
@@ -14,7 +14,7 @@ TestFest London May 2009
     var_dump($k);
   }
 ?>
---EXPECTF--
+--EXPECT--
 one=>1
 string(3) "one"
 two=>2

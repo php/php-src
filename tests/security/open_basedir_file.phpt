@@ -31,42 +31,42 @@ bool(true)
 
 Warning: file(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(../bad): failed to open stream: %s in %s on line %d
+Warning: file(../bad): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(../bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file(../bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(..): failed to open stream: %s in %s on line %d
+Warning: file(..): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(../): failed to open stream: %s in %s on line %d
+Warning: file(../): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(/): failed to open stream: %s in %s on line %d
+Warning: file(/): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(../bad/.): failed to open stream: %s in %s on line %d
+Warning: file(../bad/.): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(%s/test/bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file(%s/test/bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file(%s/test/bad/../bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file(%s/test/bad/../bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 array(1) {
   [0]=>

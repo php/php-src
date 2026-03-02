@@ -5,12 +5,12 @@ passing the return value from a function by reference
 
 function foo(&$ref)
 {
-	var_dump($ref);
+    var_dump($ref);
 }
 
 function bar($value)
 {
-	return $value;
+    return $value;
 }
 
 foo(bar(5));

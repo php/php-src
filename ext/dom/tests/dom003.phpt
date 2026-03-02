@@ -1,22 +1,22 @@
 --TEST--
 Test 3: Exception Test
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $dom = new domdocument;
-$dom->load(dirname(__FILE__)."/book.xml");
+$dom->load(__DIR__."/book.xml");
 $rootNode = $dom->documentElement;
 print "--- Catch exception with try/catch\n";
 try {
     $rootNode->appendChild($rootNode);
 } catch (domexception $e) {
-	ob_start();
+    ob_start();
     var_dump($e);
-	$contents = ob_get_contents();
-	ob_end_clean();
-	echo preg_replace('/object\(DOMElement\).+\{.*?\}/s', 'DOMElement', $contents);
+    $contents = ob_get_contents();
+    ob_end_clean();
+    echo preg_replace('/object\(DOMElement\).+\{.*?\}/s', 'DOMElement', $contents);
 }
 print "--- Don't catch exception with try/catch\n";
 $rootNode->appendChild($rootNode);
@@ -30,6 +30,8 @@ object(DOMException)#%d (%d) {
   string(23) "Hierarchy Request Error"
   ["string":"Exception":private]=>
   string(0) ""
+  ["code"]=>
+  int(3)
   ["file":protected]=>
   string(%d) "%sdom003.php"
   ["line":protected]=>
@@ -57,8 +59,6 @@ object(DOMException)#%d (%d) {
   }
   ["previous":"Exception":private]=>
   NULL
-  ["code"]=>
-  int(3)
 }
 --- Don't catch exception with try/catch
 

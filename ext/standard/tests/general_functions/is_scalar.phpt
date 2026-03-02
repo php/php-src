@@ -2,10 +2,6 @@
 Test is_scalar() function
 --FILE--
 <?php
-/* Prototype: bool is_scalar ( mixed $var );
- * Description: Finds whether a variable is a scalar (i.e integer, float, string or boolean)
- */
-
 echo "*** Testing basic operations ***\n";
 $scalar_variables = array(
   0,  // integers
@@ -105,14 +101,6 @@ foreach( $variation_array as $value ) {
   var_dump( is_scalar($value) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-// Zero arguments
-var_dump( is_scalar() );
-
-// Arguments more than expected
-var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) );
-var_dump( is_scalar( new stdclass, new stdclass) );
-
 echo "Done\n";
 
 // close the resources used
@@ -120,7 +108,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 -- Iteration 1 --
 bool(true)
@@ -226,15 +214,4 @@ bool(false)
 bool(false)
 -- Iteration 18 --
 bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_scalar() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - float format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using float format ***\n";
 
 // Initialise all required variables
@@ -34,7 +29,7 @@ var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using float format ***
 string(9) "11.110000"
 string(9) "11.110000"

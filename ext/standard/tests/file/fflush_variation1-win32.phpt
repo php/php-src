@@ -7,13 +7,10 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
 ?>
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 /* test fflush() with handle to the files opened in different modes */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with various types of files ***\n";
@@ -62,7 +59,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with various types of files ***
 -- Iteration 1 with file containing empty Data--
 -- File opened in w mode --

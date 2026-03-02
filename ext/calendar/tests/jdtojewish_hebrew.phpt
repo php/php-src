@@ -1,9 +1,7 @@
 --TEST--
 Test all hebrew month names
---SKIPIF--
-<?php
-if (!extension_loaded('calendar')) die('skip calendar extension not available');
-?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 for ($year = 5000; $year <= 5001; $year++) {
@@ -18,7 +16,6 @@ for ($year = 5000; $year <= 5001; $year++) {
     echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 normal year 5000
 e020faf9f8e920e4
@@ -50,4 +47,3 @@ e020faeee5e620e4e0
 e020e0e120e4e0
 e020e0ece5ec20e4e0
 
-===DONE===

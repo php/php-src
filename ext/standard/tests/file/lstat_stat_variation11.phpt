@@ -3,20 +3,10 @@ Test lstat() and stat() functions: usage variations - effect of is_file()
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 /* test the effects of is_file() on stats of a file */
@@ -31,7 +21,7 @@ echo "*** Testing stat() on a file after using is_file() on it ***\n";
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_file($filename) );
 $new_stat = stat($filename);
 // compare self stats
@@ -46,10 +36,10 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation11.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on a file after using is_file() on it ***
 bool(true)
 bool(true)

@@ -1,13 +1,12 @@
 --TEST--
 ReflectionObject::__toString (filtering privates/protected dynamic properties)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class C1 {
-	private   $p1 = 1;
-	protected $p2 = 2;
-	public    $p3 = 3;
+    private   $p1 = 1;
+    protected $p2 = 2;
+    public    $p3 = 3;
 }
 
 $x = new C1();
@@ -19,7 +18,7 @@ echo $obj;
 ?>
 --EXPECTF--
 Object of class [ <user> class C1 ] {
-  @@ %s024.php 2-6
+  @@ %s
 
   - Constants [0] {
   }
@@ -31,9 +30,9 @@ Object of class [ <user> class C1 ] {
   }
 
   - Properties [3] {
-    Property [ <default> private $p1 ]
-    Property [ <default> protected $p2 ]
-    Property [ <default> public $p3 ]
+    Property [ private $p1 = 1 ]
+    Property [ protected $p2 = 2 ]
+    Property [ public $p3 = 3 ]
   }
 
   - Dynamic properties [1] {

@@ -6,4 +6,4 @@ function f() {}
 function f() {}
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare f() (previously declared in %s:%d) in %s on line %d
+Fatal error: Cannot redeclare function f() (previously declared in %s:%d) in %s on line %d

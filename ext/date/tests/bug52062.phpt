@@ -10,22 +10,33 @@ date.timezone=UTC
 <?php
 $d = new DateTime('@100000000000');
 var_dump($d->format('Y-m-d H:i:s U'));
-var_dump($d->getTimestamp());
+try {
+    var_dump($d->getTimestamp());
+} catch (\DateRangeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 var_dump($d->format('U'));
 
-$d->setTimestamp(100000000000);
+try {
+    $d->setTimestamp(100000000000);
+} catch (TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 var_dump($d->format('Y-m-d H:i:s U'));
-var_dump($d->getTimestamp());
+try {
+    var_dump($d->getTimestamp());
+} catch (\DateRangeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 $i = new DateInterval('PT100000000000S');
 var_dump($i->format('%s'));
 ?>
---EXPECTF--
+--EXPECT--
 string(32) "5138-11-16 09:46:40 100000000000"
-bool(false)
+DateRangeError: Epoch doesn't fit in a PHP integer
 string(12) "100000000000"
-
-Warning: DateTime::setTimestamp() expects parameter 1 to be integer, float given in %s on line %d
+TypeError: DateTime::setTimestamp(): Argument #1 ($timestamp) must be of type int, float given
 string(32) "5138-11-16 09:46:40 100000000000"
-bool(false)
+DateRangeError: Epoch doesn't fit in a PHP integer
 string(10) "1215752192"

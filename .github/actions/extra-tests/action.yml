@@ -1,0 +1,7 @@
+name: Extra tests
+runs:
+  using: composite
+  steps:
+    - shell: sh
+      run: |
+        sapi/cli/php run-extra-tests.php

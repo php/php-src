@@ -10,7 +10,7 @@ $c = new C;
 echo "\n--> Access non-visible static prop like instance prop:\n";
 echo $c->y;
 ?>
-==Done==
+===DONE===
 --EXPECTF--
 --> Access non-visible static prop like instance prop:
 

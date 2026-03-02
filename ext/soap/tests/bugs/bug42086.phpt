@@ -1,7 +1,7 @@
 --TEST--
 Bug #42086 (SoapServer return Procedure '' not present for WSIBasic compliant wsdl)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -12,17 +12,17 @@ $request = <<<EOF
 EOF;
 
 class firstFunctionWithoutParamResponse {
-	public $param;
+    public $param;
 }
 
 function firstFunctionWithoutParam() {
-	$ret = new firstFunctionWithoutParamResponse();
-	$ret->param	=	"firstFunctionWithoutParam";
-	return $ret;
+    $ret = new firstFunctionWithoutParamResponse();
+    $ret->param	=	"firstFunctionWithoutParam";
+    return $ret;
 }
 
-$server = new SoapServer(dirname(__FILE__).'/bug42086.wsdl',
-	array('features'=>SOAP_SINGLE_ELEMENT_ARRAYS));
+$server = new SoapServer(__DIR__.'/bug42086.wsdl',
+    array('features'=>SOAP_SINGLE_ELEMENT_ARRAYS));
 $server->addFunction('firstFunctionWithoutParam');
 $server->handle($request);
 ?>

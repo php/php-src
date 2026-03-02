@@ -1,9 +1,7 @@
 --TEST--
 Bug #70221 (persistent sqlite connection + custom function segfaults)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $dbfile = __DIR__ . '/test.sqlite';
@@ -18,5 +16,6 @@ unset($db);
 $dbfile = __DIR__ . '/test.sqlite';
 unlink($dbfile);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 Everything is fine, no exceptions here

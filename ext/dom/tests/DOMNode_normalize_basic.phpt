@@ -1,9 +1,7 @@
 --TEST--
 DOMNode::normalize()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -57,7 +55,7 @@ echo "Number of child nodes of title after normalizing title = ";
 var_dump($title->childNodes->length);
 
 ?>
---EXPECTF--
+--EXPECT--
 Number of child nodes of title = int(1)
 Number of child nodes of title after adding second title = int(2)
 Number of child nodes of title after normalizing author = int(2)

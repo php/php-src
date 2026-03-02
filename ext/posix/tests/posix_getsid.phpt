@@ -6,10 +6,8 @@ Source code: ext/posix/posix.c
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
---SKIPIF--
-<?php
-	if(!extension_loaded("posix")) print "SKIP - POSIX extension not loaded";
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
 echo "*** Testing posix_getsid() : function test ***\n";
@@ -19,10 +17,8 @@ echo "\n-- Testing posix_getsid() function with current process pid --\n";
 var_dump( is_long(posix_getsid($pid)) );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing posix_getsid() : function test ***
 
 -- Testing posix_getsid() function with current process pid --
 bool(true)
-===DONE===

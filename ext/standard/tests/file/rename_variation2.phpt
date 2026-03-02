@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $dest_dir = "$file_path/rename_variation2_dir";
 // create the $dest_dir
@@ -48,11 +48,11 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation2.tmp");
 rmdir($file_path."/rename_variation2_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on soft links ***
 bool(true)
 bool(true)

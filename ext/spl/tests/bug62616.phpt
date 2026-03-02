@@ -10,6 +10,6 @@ $ii = new IteratorIterator($ai);
 
 var_dump($ii->count());
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 int(2)

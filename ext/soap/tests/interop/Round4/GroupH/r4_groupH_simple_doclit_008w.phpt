@@ -1,13 +1,13 @@
 --TEST--
 SOAP Interop Round4 GroupH Simple Doc Lit 008 (php/wsdl): echoMultipleFaults2(1)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_simple_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupH_simple_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults2(array("whichFault" => 1,
                                    "param1" => "Hello world",
                                    "param2" => 12.345,

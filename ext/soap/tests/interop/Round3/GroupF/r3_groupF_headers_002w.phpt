@@ -1,13 +1,13 @@
 --TEST--
 SOAP Interop Round3 GroupF Headers 002 (php/wsdl): echoString
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $hdr = new SoapHeader("http://soapinterop.org/xsd","Header1", array("int"=>34,"string"=>"arg"));
-$client = new SoapClient(dirname(__FILE__)."/round3_groupF_headers.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round3_groupF_headers.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoString",array("Hello World"),null,$hdr);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

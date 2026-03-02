@@ -3,7 +3,6 @@ Test variations in usage of min()
 --FILE--
 <?php
 /*
- * proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
  * Function is implemented in ext/standard/array.c
 */
 

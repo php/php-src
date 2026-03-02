@@ -2,15 +2,14 @@
 getprotobyname function errors test
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die('skip msan missing interceptor for getprotobyname()');
+?>
 --FILE--
 <?php
-	// empty protocol name
-	var_dump(getprotobyname());
-
-	// invalid protocol name
-	var_dump(getprotobyname('abc'));
+// invalid protocol name
+var_dump(getprotobyname('abc'));
 ?>
---EXPECTF--
-Warning: getprotobyname() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+--EXPECT--
 bool(false)

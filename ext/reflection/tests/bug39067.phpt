@@ -4,15 +4,15 @@ Bug #39067 (getDeclaringClass() and private properties)
 <?php
 
 class A {
-	private $x;
+    private $x;
 }
 
 class B extends A {
-	private $x;
+    private $x;
 }
 
 class C extends B {
-	private $x;
+    private $x;
 }
 
 $rc = new ReflectionClass('C');
@@ -25,11 +25,11 @@ $rc = new ReflectionClass('A');
 var_dump($rc->getProperty('x')->getDeclaringClass()->getName());
 
 class Test {
-	private $x;
+    private $x;
 }
 
 class Test2 extends Test {
-	public $x;
+    public $x;
 }
 
 $rc = new ReflectionClass('Test2');
@@ -37,7 +37,7 @@ var_dump($rc->getProperty('x')->getDeclaringClass()->getName());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "C"
 string(1) "B"
 string(1) "A"

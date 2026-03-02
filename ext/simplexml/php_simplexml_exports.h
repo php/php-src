@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -17,8 +15,6 @@
   |         Rob Richards <rrichards@php.net>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_SIMPLEXML_EXPORTS_H
 #define PHP_SIMPLEXML_EXPORTS_H
@@ -35,7 +31,7 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
+		zend_throw_error(NULL, "SimpleXMLElement is not properly initialized"); \
 	} \
 }
 
@@ -53,14 +49,7 @@ typedef struct {
 	php_sxe_object        *sxe;
 } php_sxe_iterator;
 
-#endif /* PHP_SIMPLEXML_EXPORTS_H */
+PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe);
+PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe);
 
-/**
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */
+#endif /* PHP_SIMPLEXML_EXPORTS_H */

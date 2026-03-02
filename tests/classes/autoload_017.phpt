@@ -1,7 +1,5 @@
 --TEST--
 Ensure ReflectionClass::implementsInterface triggers autoload.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 spl_autoload_register(function ($name) {
@@ -17,6 +15,6 @@ try {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "UndefI"
-Interface UndefI does not exist
+Interface "UndefI" does not exist

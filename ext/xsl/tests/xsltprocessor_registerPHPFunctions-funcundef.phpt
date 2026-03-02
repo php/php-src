@@ -2,29 +2,28 @@
 Check xsltprocessor::registerPHPFunctions and a undefined php function
 --DESCRIPTION--
 The XSL script tries to call a php function that is not defined
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $phpfuncxsl = new domDocument();
-$phpfuncxsl->load(dirname(__FILE__)."/phpfunc-undef.xsl");
+$phpfuncxsl->load(__DIR__."/phpfunc-undef.xsl");
 if(!$phpfuncxsl) {
   echo "Error while parsing the xsl document\n";
   exit;
 }
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions());
-var_dump($proc->transformToXml($dom));
---EXPECTF--
+try {
+  var_dump($proc->transformToXml($dom));
+} catch (Throwable $e) {
+  echo $e->getMessage(), "\n";
+}
+?>
+--EXPECT--
 NULL
-
-Warning: XSLTProcessor::transformToXml(): Unable to call handler undefinedfunc() in %s on line %d
-NULL
+Invalid callback undefinedfunc, function "undefinedfunc" not found or invalid function name
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

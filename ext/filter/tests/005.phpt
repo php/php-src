@@ -1,9 +1,10 @@
 --TEST--
 GET/REQUEST Test with fifa example data
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 filter.default=stripped
+error_reporting=E_ALL&~E_DEPRECATED
 --GET--
 id=f03_photos&pgurl=http%3A//fifaworldcup.yahoo.com/03/en/photozone/index.html
 --FILE--

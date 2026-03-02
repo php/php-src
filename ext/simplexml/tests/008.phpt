@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: XPath
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -39,8 +39,9 @@ array(1) {
     }
   }
 }
-array(0) {
-}
 
-Warning: SimpleXMLElement::xpath(): Invalid expression in %s on line %d%A
+Warning: SimpleXMLElement::xpath(): XPath expression must return a node set, number returned in %s on line %d
+bool(false)
+
+Warning: SimpleXMLElement::xpath(): Invalid expression in %s on line %d
 bool(false)

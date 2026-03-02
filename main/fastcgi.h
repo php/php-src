@@ -1,22 +1,18 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* FastCGI protocol */
 
@@ -79,7 +75,7 @@ typedef enum _fcgi_protocol_status {
 
 /* FastCGI client API */
 
-typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
+typedef void (*fcgi_apply_func)(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
 #define FCGI_HASH_TABLE_SIZE 128
 #define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
@@ -95,12 +91,12 @@ void fcgi_close(fcgi_request *req, int force, int destroy);
 int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
-fcgi_request* fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)());
+fcgi_request* fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void));
 void fcgi_destroy_request(fcgi_request *req);
 void fcgi_set_allowed_clients(char *ip);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
-const char *fcgi_get_last_client_ip();
+const char *fcgi_get_last_client_ip(void);
 void fcgi_set_in_shutdown(int new_value);
 void fcgi_request_set_keep(fcgi_request *req, int new_value);
 
@@ -128,12 +124,3 @@ void fcgi_impersonate(void);
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
 void fcgi_free_mgmt_var_cb(zval *zv);
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

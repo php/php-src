@@ -8,8 +8,6 @@ foreach($a as $b[0]) {
   echo $b[0]."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 0
 1
-===DONE===

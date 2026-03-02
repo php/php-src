@@ -1,20 +1,21 @@
 --TEST--
-Test if socket_set_option() returns 'unable to set socket option' failure for invalid options
+Test if socket_set_option() returns 'Unable to set socket option' failure for invalid options
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+
 if (PHP_OS == 'Darwin') {
     die('skip Not for OSX');
 }
-$filename = dirname(__FILE__) . '/006_root_check.tmp';
+$filename = __FILE__ . '.root_check.tmp';
 $fp = fopen($filename, 'w');
 fclose($fp);
 if (fileowner($filename) == 0) {
-    unlink ($filename);
+    unlink($filename);
     die('SKIP Test cannot be run as root.');
 }
+unlink($filename);
 ?>
 --FILE--
 <?php
@@ -26,11 +27,8 @@ if (!$socket) {
 socket_set_option( $socket, SOL_SOCKET, 1, 1);
 socket_close($socket);
 ?>
---CLEAN--
-<?php
-unlink(dirname(__FILE__) . '/006_root_check.tmp');
 --EXPECTF--
-Warning: socket_set_option(): unable to set socket option [%d]: Permission denied in %s on line %d
+Warning: socket_set_option(): Unable to set socket option [%d]: Permission denied in %s on line %d
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10

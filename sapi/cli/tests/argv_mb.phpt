@@ -3,24 +3,21 @@ Test basic argv multibyte API integration
 --SKIPIF--
 <?php
 include "skipif.inc";
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-	die ("skip only for Windows");
-}
 ?>
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-$argv_fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "argv_test.php";
+$argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
+$argv_fl_escaped = escapeshellarg($argv_fl);
 file_put_contents($argv_fl, "<?php var_dump(\$argv); ?>");
 
-var_dump(`$php -n $argv_fl 多字节字符串 マルチバイト文字列 многобайтоваястрока flerbytesträng`);
+var_dump(shell_exec("$php -n $argv_fl_escaped 多字节字符串 マルチバイト文字列 многобайтоваястрока flerbytesträng"));
 
 @unlink($argv_fl);
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "array(%d) {
   [0]=>
@@ -35,4 +32,3 @@ string(%d) "array(%d) {
   string(15) "flerbytesträng"
 }
 "
-==DONE==

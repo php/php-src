@@ -1,18 +1,16 @@
 --TEST--
-ReflectionMethod::__toString() tests (overriden method)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
+ReflectionMethod::__toString() tests (overridden method)
 --FILE--
 <?php
 class Foo {
-	function func() {
-	}
+    function func() {
+    }
 }
 class Bar extends Foo {
-	function func() {
-	}
+    function func() {
+    }
 }
-$m = new ReflectionMethod("Bar::func");
+$m = ReflectionMethod::createFromMethodName("Bar::func");
 echo $m;
 ?>
 --EXPECTF--

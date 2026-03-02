@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller alternate index file
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller7.php
 REQUEST_URI=/frontcontroller7.php/

@@ -4,11 +4,11 @@ Bug #65035: yield / exit segfault
 <?php
 
 function gen() {
-    fn();
+    f();
     yield;
 }
 
-function fn() {
+function f() {
     exit('Done');
 }
 

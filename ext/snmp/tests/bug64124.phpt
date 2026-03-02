@@ -2,18 +2,20 @@
 Bug #64124 IPv6 malformed
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
-	die("skip no IPv6 support");
+    die("skip no IPv6 support");
 }
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 # hostname variable was modified inline in netsnmp_session_init()
 # Should be checked with IPv6 since IPv4 processing code do not alter pointer position

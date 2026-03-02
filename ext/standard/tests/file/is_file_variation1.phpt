@@ -2,20 +2,15 @@
 Test is_file() function: usage variations - diff. files
 --FILE--
 <?php
-/* Prototype: bool is_file ( string $filename );
-   Description: Tells whether the filename is a regular file
-     Returns TRUE if the filename exists and is a regular file
-*/
-
 /* Testing is_file() with file containing data, truncating its size
      and the file created by touch() */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "-- Testing is_file() with file containing data --\n";
 $filename = $file_path."/is_file_variation1.tmp";
 $file_handle = fopen($filename, "w" );
-fwrite( $file_handle, "Hello, world....." ); // exptected true
+fwrite( $file_handle, "Hello, world....." ); // expected true
 fclose($file_handle);
 var_dump( is_file($filename) );
 clearstatcache();
@@ -43,7 +38,7 @@ unlink($file_path."/is_file_variation1.tmp");
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing is_file() with file containing data --
 bool(true)
 

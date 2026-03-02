@@ -5,25 +5,25 @@ Bug #36011 (Strict errormsg wrong for call_user_func() and the likes)
 
 class TestClass
 {
-	static function test()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    static function test()
+    {
+        echo __METHOD__ . "()\n";
+    }
 
-	function whee()
-	{
-		array_map(array('TestClass', 'test'), array('array_value'));
-	}
+    function whee()
+    {
+        array_map(array('TestClass', 'test'), array('array_value'));
+    }
 
-	function whee4()
-	{
-		call_user_func(array('TestClass', 'test'));
-	}
+    function whee4()
+    {
+        call_user_func(array('TestClass', 'test'));
+    }
 
-	static function whee5()
-	{
-		call_user_func(array('TestClass', 'test'));
-	}
+    static function whee5()
+    {
+        call_user_func(array('TestClass', 'test'));
+    }
 }
 
 TestClass::test();
@@ -36,11 +36,9 @@ $a->whee5();
 TestClass::whee5();
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 TestClass::test()
 TestClass::test()
 TestClass::test()
 TestClass::test()
 TestClass::test()
-===DONE===

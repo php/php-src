@@ -7,7 +7,11 @@ $arrayLarge = array_fill(0, 113663, '*');
 
 $resourceFileTemp = fopen('php://temp', 'r+');
 stream_context_set_params($resourceFileTemp, array());
-preg_replace('', function() {}, $resourceFileTemp);
+try {
+    preg_replace('', function() {}, $resourceFileTemp);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Recoverable fatal error: Object of class Closure could not be converted to string in %s on line %d
+--EXPECT--
+preg_replace(): Argument #2 ($replacement) must be of type array|string, Closure given

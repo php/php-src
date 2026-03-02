@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::execute() with a resource bound for blob param
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -13,10 +13,11 @@ $insert_stmt = $db->prepare("INSERT INTO test (id, data) VALUES (1, ?)");
 
 
 class HelloWrapper {
-	public function stream_open() { return true; }
-	public function stream_eof() { return true; }
-	public function stream_read() { return NULL; }
-	public function stream_stat() { return array(); }
+    public $context;
+    public function stream_open() { return true; }
+    public function stream_eof() { return true; }
+    public function stream_read() { return NULL; }
+    public function stream_stat() { return array(); }
 }
 stream_wrapper_register("hello", "HelloWrapper");
 

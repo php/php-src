@@ -12,19 +12,10 @@ default_socket_timeout=2
 
 $dir = 'ftp://your:self@localhost/';
 
-var_dump(opendir($dir));
-var_dump(opendir($dir));
+var_dump(@opendir($dir));
+var_dump(@opendir($dir));
 
 ?>
 --EXPECTF--
-Warning: opendir(): connect() failed: %s
- in %s on line %d
-
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
 bool(false)
-
-Warning: opendir(): connect() failed: %s
- in %s on line %d
-
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
 bool(false)

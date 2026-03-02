@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,21 +16,20 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_DNS_H
 #define PHP_DNS_H
 
 #if defined(HAVE_DNS_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
-    	((int)dns_search(res, dname, class, type, answer, anslen, (struct sockaddr *)&from, &fromsize))
+    	((int)dns_search(res, dname, class, type, (char *) answer, anslen, (struct sockaddr *)&from, &fromsize))
 #define php_dns_free_handle(res) \
 		dns_free(res)
+#define php_dns_errno(handle) h_errno
 
 #elif defined(HAVE_RES_NSEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
 			res_nsearch(res, dname, class, type, answer, anslen);
-#if HAVE_RES_NDESTROY
+#ifdef HAVE_RES_NDESTROY
 #define php_dns_free_handle(res) \
 			res_ndestroy(res); \
 			php_dns_free_res(res)
@@ -41,11 +38,13 @@
 			res_nclose(res); \
 			php_dns_free_res(res)
 #endif
+#define php_dns_errno(handle) handle->res_h_errno
 
 #elif defined(HAVE_RES_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
 			res_search(dname, class, type, answer, anslen)
 #define php_dns_free_handle(res) /* noop */
+#define php_dns_errno(handle) h_errno
 
 #endif
 
@@ -53,28 +52,36 @@
 #define HAVE_DNS_SEARCH_FUNC 1
 #endif
 
-#if HAVE_DNS_SEARCH_FUNC && HAVE_DN_EXPAND && HAVE_DN_SKIPNAME
+#if defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_DN_EXPAND) && defined(HAVE_DN_SKIPNAME)
 #define HAVE_FULL_DNS_FUNCS 1
 #endif
 
-PHP_FUNCTION(gethostbyaddr);
-PHP_FUNCTION(gethostbyname);
-PHP_FUNCTION(gethostbynamel);
-
-#ifdef HAVE_GETHOSTNAME
-PHP_FUNCTION(gethostname);
+#if defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS))
+#define PHP_DNS_A      0x00000001
+#define PHP_DNS_NS     0x00000002
+#define PHP_DNS_CNAME  0x00000010
+#define PHP_DNS_SOA    0x00000020
+#define PHP_DNS_PTR    0x00000800
+#define PHP_DNS_HINFO  0x00001000
+#if !defined(PHP_WIN32)
+# define PHP_DNS_CAA    0x00002000
 #endif
+#define PHP_DNS_MX     0x00004000
+#define PHP_DNS_TXT    0x00008000
+#define PHP_DNS_A6     0x01000000
+#define PHP_DNS_SRV    0x02000000
+#define PHP_DNS_NAPTR  0x04000000
+#define PHP_DNS_AAAA   0x08000000
+#define PHP_DNS_ANY    0x10000000
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
-PHP_FUNCTION(dns_check_record);
-
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
-PHP_FUNCTION(dns_get_mx);
-PHP_FUNCTION(dns_get_record);
-PHP_MINIT_FUNCTION(dns);
-# endif
-
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#if defined(PHP_WIN32)
+# define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
+# define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
+#else
+# define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
+# define PHP_DNS_ALL   (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_CAA|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
+#endif
+#endif
 
 #ifndef INT16SZ
 #define INT16SZ		2

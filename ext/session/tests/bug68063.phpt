@@ -1,5 +1,7 @@
 --TEST--
 Bug #68063 (Empty session IDs do still start sessions)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -20,5 +22,6 @@ var_dump(session_start());
 var_dump(session_id());
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: session.sid_length INI setting is deprecated in Unknown on line 0
 bool(true)
 string(40) "%s"

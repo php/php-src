@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - exponential format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using exponential format ***\n";
 
 // Initialise all required variables
@@ -24,7 +19,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using exponential format ***
 string(11) "1.000000e+3"
 string(23) "1.000000e+3 2.000000e+3"

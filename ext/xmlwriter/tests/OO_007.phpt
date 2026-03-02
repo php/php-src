@@ -1,13 +1,9 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, Elements & Attributes
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-if (LIBXML_VERSION < 20629) die("skip: libxml2 2.6.29+ required");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
-/* $Id$ */
 
 $xw = new XMLWriter();
 $xw->openMemory();

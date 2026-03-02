@@ -1,8 +1,9 @@
+#include "php.h"
+
 #include <malloc.h>
 #include <string.h>
 #include <errno.h>
 
-#include "php.h"
 #include "readdir.h"
 #include "win32/ioutil.h"
 
@@ -20,10 +21,6 @@
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 DIR *opendir(const char *dir)
 {/*{{{*/
 	DIR *dp;
@@ -31,20 +28,14 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	char resolved_path_buff[MAXPATHLEN];
 	size_t resolvedw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
 	}
 
-	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
-	if (dp == NULL) {
-		return NULL;
-	}
-
 	resolvedw = php_win32_ioutil_conv_any_to_w(resolved_path_buff, PHP_WIN32_CP_IGNORE_LEN, &resolvedw_len);
 	if (!resolvedw) {
-		free(dp);
 		return NULL;
 	}
 
@@ -56,7 +47,6 @@ DIR *opendir(const char *dir)
 	}
 	filespecw = (wchar_t *)malloc((filespecw_len + 1)*sizeof(wchar_t));
 	if (filespecw == NULL) {
-		free(dp);
 		free(resolvedw);
 		return NULL;
 	}
@@ -69,9 +59,16 @@ DIR *opendir(const char *dir)
 		wcscpy(filespecw, resolvedw);
 		index = resolvedw_len - 1;
 	}
-	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
+	if ((index >= 0 && filespecw[index] == L'/') || (index == 0 && filespecw[index] == L'\\'))
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
+
+	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
+	if (dp == NULL) {
+		free(filespecw);
+		free(resolvedw);
+		return NULL;
+	}
 
 	if ((handle = FindFirstFileExW(filespecw, FindExInfoBasic, &(dp->fileinfo), FindExSearchNameMatch, NULL, FIND_FIRST_EX_LARGE_FETCH)) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
@@ -123,48 +120,15 @@ struct dirent *readdir(DIR *dp)
 
 	dp->dent.d_ino = 1;
 	dp->dent.d_off = dp->offset;
+	if (dp->fileinfo.dwFileAttributes & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DEVICE)) {
+		dp->dent.d_type = DT_UNKNOWN; /* conservative */
+	} else if (dp->fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		dp->dent.d_type = DT_DIR;
+	} else {
+		dp->dent.d_type = DT_REG;
+	}
 
 	return &(dp->dent);
-}/*}}}*/
-
-int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
-{/*{{{*/
-	char *_tmp;
-	size_t reclen;
-
-	if (!dp || dp->finished) {
-		*result = NULL;
-		return 0;
-	}
-
-	if (dp->offset != 0) {
-		if (FindNextFileW(dp->handle, &(dp->fileinfo)) == 0) {
-			dp->finished = 1;
-			*result = NULL;
-			return 0;
-		}
-	}
-
-	_tmp = php_win32_cp_conv_w_to_any(dp->fileinfo.cFileName, PHP_WIN32_CP_IGNORE_LEN, &reclen);
-	if (!_tmp) {
-		/* wide to utf8 failed, should never happen. */
-		result = NULL;
-		return 0;
-	}
-	memmove(dp->dent.d_name, _tmp, reclen + 1);
-	free(_tmp);
-	dp->dent.d_reclen = (unsigned short)reclen;
-
-	dp->offset++;
-
-	dp->dent.d_ino = 1;
-	dp->dent.d_off = dp->offset;
-
-	memcpy(entry, &dp->dent, sizeof(*entry));
-
-	*result = &dp->dent;
-
-	return 0;
 }/*}}}*/
 
 int closedir(DIR *dp)
@@ -190,7 +154,7 @@ int rewinddir(DIR *dp)
 	wchar_t *filespecw;
 	HANDLE handle;
 	size_t dirw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	FindClose(dp->handle);
 
@@ -235,16 +199,3 @@ int rewinddir(DIR *dp)
 
 	return 0;
 }/*}}}*/
-
-#ifdef __cplusplus
-}
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

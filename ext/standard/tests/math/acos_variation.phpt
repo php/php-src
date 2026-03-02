@@ -5,7 +5,6 @@ precision=10
 --FILE--
 <?php
 /*
- * proto float acos(float number)
  * Function is implemented in ext/standard/math.c
 */
 
@@ -13,28 +12,25 @@ precision=10
 //Test acos with a different input values
 
 $values = array(23,
-		-23,
-		2.345e1,
-		-2.345e1,
-		0x17,
-		027,
-		"23",
-		"23.45",
-		"2.345e1",
-		"nonsense",
-		"1000",
-		"1000ABC",
-		null,
-		true,
-		false);
+        -23,
+        2.345e1,
+        -2.345e1,
+        0x17,
+        027,
+        "23",
+        "23.45",
+        "2.345e1",
+        "1000",
+        true,
+        false);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = acos($values[$i]);
-	var_dump($res);
+    $res = acos($values[$i]);
+    var_dump($res);
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 float(NAN)
 float(NAN)
 float(NAN)
@@ -44,13 +40,6 @@ float(NAN)
 float(NAN)
 float(NAN)
 float(NAN)
-
-Warning: acos() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(NAN)
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(NAN)
-float(1.570796327)
 float(0)
-float(1.570796327)
+float(1.5707963267948966)

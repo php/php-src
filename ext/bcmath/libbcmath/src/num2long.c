@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -29,48 +29,37 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stddef.h>
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as
    a long, this function returns a zero.  This can be detected by checking
    the NUM for zero after having a zero returned. */
 
-long
-bc_num2long (num)
-     bc_num num;
+long bc_num2long(bc_num num)
 {
-  long val;
-  char *nptr;
-  int  index;
+	/* Extract the int value, ignore the fraction. */
+	long val = 0;
+	const char *nptr = num->n_value;
+	for (size_t index = num->n_len; index > 0; index--) {
+		char n = *nptr++;
 
-  /* Extract the int value, ignore the fraction. */
-  val = 0;
-  nptr = num->n_value;
-  for (index = num->n_len; index > 0; index--) {
-    char n = *nptr++;
+		if (val > LONG_MAX / BASE) {
+			return 0;
+		}
+		val *= BASE;
 
-    if (val > LONG_MAX/BASE) {
-      return 0;
-    }
-    val *= BASE;
+		if (val > LONG_MAX - n) {
+			return 0;
+		}
+		val += n;
+	}
 
-    if (val > LONG_MAX - n) {
-      return 0;
-    }
-    val += n;
-  }
-
-  /* Return the value. */
-  if (num->n_sign == PLUS)
-    return (val);
-  else
-    return (-val);
+	/* Return the value. */
+	if (num->n_sign == PLUS) {
+		return (val);
+	} else {
+		return (-val);
+	}
 }

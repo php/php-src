@@ -1,7 +1,7 @@
 --TEST--
 Test finfo extension : loading into phpinfo()
---SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
@@ -14,8 +14,6 @@ $output = ob_get_clean();
 var_dump(preg_match("/fileinfo support => enabled/", $output));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo extension : loading info phpinfo() ***
 int(1)
-===DONE===

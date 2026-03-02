@@ -1,8 +1,12 @@
 --TEST--
 Testing imagefilledellipse() of GD library
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded("gd")) die("skip GD not present");
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

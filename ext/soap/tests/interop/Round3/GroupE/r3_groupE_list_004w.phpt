@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round3 GroupE List 004 (php/wsdl): echoLinkedList
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -14,7 +14,7 @@ class SOAPList {
     }
 }
 $struct = NULL;
-$client = new SoapClient(dirname(__FILE__)."/round3_groupE_list.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round3_groupE_list.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoLinkedList($struct);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

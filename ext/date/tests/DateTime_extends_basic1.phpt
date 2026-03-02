@@ -11,12 +11,12 @@ echo "*** Testing basic DateTime inheritance() ***\n";
 
 class DateTimeExt extends DateTime
 {
-	public static $format = "F j, Y, g:i:s a";
+    public static $format = "F j, Y, g:i:s a";
 
-	public function __toString()
-	{
-		return parent::format(self::$format);
-	}
+    public function __toString()
+    {
+        return parent::format(self::$format);
+    }
 }
 
 echo "\n-- Create an instance of DateTimeExt --\n";
@@ -33,8 +33,7 @@ echo "\n-- Invoke __toString again --\n";
 echo $d . "\n";
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing basic DateTime inheritance() ***
 
 -- Create an instance of DateTimeExt --
@@ -46,4 +45,3 @@ May 1, 1967, 10:30:41 pm
 
 -- Invoke __toString again --
 July 2, 1963, 10:45:30 am
-===DONE===

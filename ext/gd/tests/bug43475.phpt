@@ -1,34 +1,38 @@
 --TEST--
 Bug #43475 (Thick styled lines have scrambled patterns)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-	if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
-		die("skip test requires GD 2.2.2 or higher");
-	}
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
+        die("skip test requires GD 2.2.2 or higher");
+    }
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/similarity.inc';
+require_once __DIR__ . '/func.inc';
 
 function setStyleAndThickness($im, $color, $thickness)
 {
-	$style = array();
-	$i = 0;
-	while ($i < 16 * $thickness) {
-		$style[$i++] = $color;
-	}
-	while ($i < 20 * $thickness) {
-		$style[$i++] = IMG_COLOR_TRANSPARENT;
-	}
-	while ($i < 28 * $thickness) {
-		$style[$i++] = $color;
-	}
-	while ($i < 32 * $thickness) {
-		$style[$i++] = IMG_COLOR_TRANSPARENT;
-	}
-	imagesetstyle($im, $style);
-	imagesetthickness($im, $thickness);
+    $style = array();
+    $i = 0;
+    while ($i < 16 * $thickness) {
+        $style[$i++] = $color;
+    }
+    while ($i < 20 * $thickness) {
+        $style[$i++] = IMG_COLOR_TRANSPARENT;
+    }
+    while ($i < 28 * $thickness) {
+        $style[$i++] = $color;
+    }
+    while ($i < 32 * $thickness) {
+        $style[$i++] = IMG_COLOR_TRANSPARENT;
+    }
+    imagesetstyle($im, $style);
+    imagesetthickness($im, $thickness);
 }
 
 $im = imagecreate(800, 800);
@@ -55,8 +59,8 @@ imageline($im, 200, 100, 700, 100, IMG_COLOR_STYLED);
 imageline($im, 700, 100, 700, 600, IMG_COLOR_STYLED);
 imageline($im, 700, 600, 200, 100, IMG_COLOR_STYLED);
 
-$ex = imagecreatefrompng(__DIR__ . '/bug43475.png');
-var_dump(calc_image_dissimilarity($ex, $im) < 1e-5);
+imagepalettetotruecolor($im);
+test_image_equals_file(__DIR__ . '/bug43475.png', $im);
 ?>
 --EXPECT--
-bool(true)
+The images are equal.

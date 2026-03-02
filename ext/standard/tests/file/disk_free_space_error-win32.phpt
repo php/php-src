@@ -7,21 +7,8 @@ if(substr(PHP_OS, 0, 3) != 'WIN' )
 ?>
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function will
- *               return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
-var_dump( disk_free_space() ); // Zero Arguments
-var_dump( diskfreespace() );
-
-var_dump( disk_free_space( $file_path, "extra argument") ); // More than valid number of arguments
-var_dump( diskfreespace( $file_path, "extra argument") );
-
+$file_path = __DIR__;
 
 var_dump( disk_free_space( $file_path."/dir1" )); // Invalid directory
 var_dump( diskfreespace( $file_path."/dir1" ));
@@ -36,39 +23,23 @@ echo"\n-- Done --";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/disk_free_space.tmp");
 
 ?>
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_free_space() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: disk_free_space() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: disk_free_space(): The system cannot find the path specified.
- in %s on line %d
+Warning: disk_free_space(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): The system cannot find the path specified.
- in %s on line %d
+Warning: diskfreespace(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: disk_free_space(): The directory name is invalid.
- in %s on line %d
+Warning: disk_free_space(): The directory name is invalid in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): The directory name is invalid.
- in %s on line %d
+Warning: diskfreespace(): The directory name is invalid in %s on line %d
 bool(false)
 
 -- Done --

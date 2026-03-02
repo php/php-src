@@ -8,7 +8,7 @@ Nathaniel McHugh nat@fishtrap.co.uk
 
 class MyHeap extends SplHeap{
 
-public function compare($a, $b){
+public function compare($a, $b): int {
 return $a < $b;
 }
 
@@ -21,11 +21,8 @@ $heap->insert(1);
 var_dump($heap->isEmpty());
 $heap->extract();
 var_dump($heap->isEmpty());
-$heap->isEmpty('var');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)
-
-Warning: SplHeap::isEmpty() expects exactly 0 parameters, 1 given in %s

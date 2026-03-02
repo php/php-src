@@ -13,7 +13,7 @@ ini_set('serialize_precision', -1);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -24,7 +24,7 @@ ini_set('serialize_precision', 0);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -34,7 +34,7 @@ ini_set('serialize_precision', 9);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -44,7 +44,7 @@ ini_set('serialize_precision', 14);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -54,7 +54,7 @@ ini_set('serialize_precision', 17);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -64,7 +64,7 @@ ini_set('serialize_precision', 25);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -74,9 +74,10 @@ ini_set('serialize_precision', 100);
 echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
-echo join($v, ' ').PHP_EOL;
+echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
+?>
 --EXPECT--
 INI
 -1
@@ -98,7 +99,7 @@ OUTPUTS
 string(60) "a:4:{i:0;d:1.0E+8;i:1;d:3.0E+0;i:2;d:1.0E+103;i:3;d:1.0E+1;}"
 array (
   0 => 1.0E+8,
-  1 => 3.0E+0,
+  1 => 3.0,
   2 => 1.0E+103,
   3 => 1.0E+1,
 )

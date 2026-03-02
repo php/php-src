@@ -1,5 +1,7 @@
 --TEST--
 Test session_status() function : disabled
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -12,6 +14,6 @@ echo "*** Testing session_status() : disabled\n";
 var_dump(session_status() == PHP_SESSION_DISABLED);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_status() : disabled
 bool(true)

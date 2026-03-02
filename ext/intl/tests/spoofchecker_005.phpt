@@ -1,8 +1,9 @@
 --TEST--
 spoofchecker with settings changed
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if(!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '55.1') < 0) die('skip for ICU >= 55.1'); ?>
+<?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -20,7 +21,7 @@ $x->setChecks(Spoofchecker::MIXED_SCRIPT_CONFUSABLE |
 var_dump($x->areConfusable("HELLO", "H\xD0\x95LLO"));
 var_dump($x->areConfusable("hello", "h\xD0\xB5llo"));
 ?>
---EXPECTF--
+--EXPECT--
 Check with default settings
 bool(true)
 bool(true)

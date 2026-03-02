@@ -1,18 +1,19 @@
 --TEST--
 SOAP XML Schema 81: SOAP 1.1 Array with SOAP_USE_XSI_ARRAY_TYPE
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<complexType name="testType">
-		<complexContent>
-			<restriction base="SOAP-ENC:Array">
-  	    <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="int[]"/>
-    	</restriction>
+    <complexType name="testType">
+        <complexContent>
+            <restriction base="SOAP-ENC:Array">
+        <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="int[]"/>
+        </restriction>
     </complexContent>
-	</complexType>
+    </complexType>
 EOF;
 test_schema($schema,'type="tns:testType"',array(123,123.5),"rpc","encoded",'',SOAP_USE_XSI_ARRAY_TYPE);
 echo "ok";

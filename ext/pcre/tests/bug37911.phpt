@@ -5,8 +5,8 @@ Bug #37911 (preg_replace_callback ignores named groups)
 
 function callback($match)
 {
-	var_dump($match);
-	return $match[1].'/'.strlen($match['name']);
+    var_dump($match);
+    return $match[1].'/'.strlen($match['name']);
 }
 
 var_dump(preg_replace_callback('|(?P<name>blub)|', 'callback', 'bla blub blah'));
@@ -37,5 +37,5 @@ array(3) {
   string(4) "blub"
 }
 
-Warning: preg_replace_callback(): Compilation failed: group name must start with a non-digit at offset %d in %sbug37911.php on line %d
+Warning: preg_replace_callback(): Compilation failed: %s name must start with a non-digit at offset %d in %sbug37911.php on line %d
 NULL

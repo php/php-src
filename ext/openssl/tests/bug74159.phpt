@@ -1,8 +1,9 @@
 --TEST--
 Bug #74159: Writing a large buffer to non-blocking encrypted streams fails
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
@@ -14,7 +15,7 @@ $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug74159-ca.pem.tmp';
 // not really reliable on more powerful machine but cover different
 // scenarios which might be useful. More reliable test is bug72333.phpt
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:10012";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -22,7 +23,7 @@ $serverCode = <<<'CODE'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     $client = stream_socket_accept($server, 1);
 
@@ -72,15 +73,13 @@ $clientCode = <<<'CODE'
         exit("$errstr\n");
     });
 
-    $serverUri = "tcp://127.0.0.1:10012";
+    $serverUri = "tcp://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => true,
         'cafile' => '%s',
         'peer_name' => '%s',
     ]]);
-
-    phpt_wait();
 
     $fp = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
 

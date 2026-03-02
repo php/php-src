@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_lower() function : usage variations - different strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_lower() to test
  * which are considered valid lowercase character only strings
@@ -56,8 +51,7 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_lower() : usage variations ***
 
 -- Iteration 1 --
@@ -137,4 +131,3 @@ bool(false)
 
 -- Iteration 26 --
 bool(false)
-===DONE===

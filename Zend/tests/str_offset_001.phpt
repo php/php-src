@@ -5,7 +5,7 @@ string offset 001
 // Test positive or null string offsets
 
 function foo($x) {
-	var_dump($x);
+    var_dump($x);
 }
 
 $str = "abc";
@@ -28,19 +28,19 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 
-Notice: Uninitialized string offset: 3 in %sstr_offset_001.php on line %d
+Warning: Uninitialized string offset 3 in %s on line %d
 string(0) ""
 string(1) "b"
 
-Notice: Uninitialized string offset: 1 in %sstr_offset_001.php on line %d
+Warning: Uninitialized string offset 1 in %s on line %d
 string(0) ""
 string(1) "a"
 string(1) "b"
 string(1) "c"
 
-Notice: Uninitialized string offset: 3 in %sstr_offset_001.php on line %d
+Warning: Uninitialized string offset 3 in %s on line %d
 string(0) ""
 string(1) "b"
 
-Notice: Uninitialized string offset: 1 in %sstr_offset_001.php on line %d
+Warning: Uninitialized string offset 1 in %s on line %d
 string(0) ""

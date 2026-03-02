@@ -18,7 +18,7 @@ trait Hello {
  }
 
 class MyHelloWorld extends Base {
-	use Hello;
+    use Hello;
 }
 
 $o = new MyHelloWorld();
@@ -26,5 +26,5 @@ $o->sayHello();
 $o->sayWorld();
 
 ?>
---EXPECTF--
+--EXPECT--
 Hello World!

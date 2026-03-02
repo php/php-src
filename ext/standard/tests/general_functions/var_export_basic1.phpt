@@ -8,14 +8,8 @@ if (PHP_INT_SIZE < 8) {
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues
+// different integer values
 $valid_ints = array(
                 '0' => '0',
                 '1' => '1',
@@ -40,16 +34,15 @@ $valid_ints = array(
 /* Loop to check for above integer values with var_export() */
 echo "\n*** Output for integer values ***\n";
 foreach($valid_ints as $key => $int_value) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $int_value );
-	echo "\n";
-	var_export( $int_value, FALSE);
-	echo "\n";
-	var_dump( var_export( $int_value, TRUE) );
+    echo "\n-- Iteration: $key --\n";
+    var_export( $int_value );
+    echo "\n";
+    var_export( $int_value, FALSE);
+    echo "\n";
+    var_dump( var_export( $int_value, TRUE) );
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with integer values ***
 
@@ -144,4 +137,3 @@ string(11) "-2147483648"
 2147483647
 2147483647
 string(10) "2147483647"
-===DONE===

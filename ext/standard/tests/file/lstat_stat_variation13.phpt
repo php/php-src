@@ -3,22 +3,12 @@ Test lstat() and stat() functions: usage variations - file opened using w and r 
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* use stat on file created using "w" and "r" mode of fopen */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -30,7 +20,7 @@ fclose($file_handle);
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 // opening file again in read mode
 $file_handle = fopen($filename, "r");  // read file
 fclose($file_handle);
@@ -45,10 +35,10 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation13.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking stat() on a file opened using read/write mode ***
 bool(true)
 bool(true)

@@ -32,27 +32,8 @@
 #define MAX_ERROR_INDEX					22 /* Always last error message + 1 */
 
 
-PHPAPI int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
-			  char *RPath, char *Subject, char *mailTo, char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath);
+PHPAPI int TSendMail(const char *host, int *error, char **error_message,
+			  const char *headers, const char *Subject, const char *mailTo, const char *data);
 PHPAPI void TSMClose(void);
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
-			 char *headers, char *headers_lc, char **error_message);
-PHPAPI char *GetSMErrorText(int index);
-
-static int MailConnect();
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders);
-static int Post(LPCSTR msg);
-static int Ack(char **server_response);
-static unsigned long GetAddr(LPSTR szHost);
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
+PHPAPI const char *GetSMErrorText(int index);
 #endif							/* sendmail_h */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

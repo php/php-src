@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_digit() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 echo "*** Testing ctype_digit() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -21,9 +16,7 @@ var_dump(ctype_digit($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_digit() : basic functionality ***
 bool(true)
 bool(false)
-===DONE===

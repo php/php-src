@@ -11,7 +11,7 @@
 //
 // For this reason we set the open_basedir to . (current directory) and then
 // move around to various directories for testing using chdir(). This is NOT
-// recommended for production use as . bypasses all semblence of security..!
+// recommended for production use as . bypasses all semblances of security..!
 //
 // Although safe mode has been removed in php 6.0, open_basedir is still valid.
 //      See http://www.php.net/features.safe-mode for more information
@@ -43,7 +43,7 @@ function recursive_delete_directory($directory) {
                 if (is_dir($path) == TRUE) {
                     recursive_delete_directory($path);
                 } else {
-					@chmod($path, 0777);
+                    @chmod($path, 0777);
                     unlink($path);
                 }
             }
@@ -51,7 +51,7 @@ function recursive_delete_directory($directory) {
     }
 
     closedir($handle);
-	@chmod($directory, 0777);
+    @chmod($directory, 0777);
     rmdir($directory);
 
     return TRUE;

@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: comparing instances
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF
@@ -37,9 +37,7 @@ var_dump($people2 == $people);
 var_dump($people2 == $people1);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
-===DONE===

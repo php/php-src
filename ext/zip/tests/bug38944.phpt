@@ -1,11 +1,11 @@
 --TEST--
 Bug #38944 (newly created ZipArchive segfaults when accessing comment property)
---SKIPIF--
-<?php if (!extension_loaded("zip")) print "skip"; ?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
-$arc_name = dirname(__FILE__)."/bug38944.zip";
+$arc_name = __DIR__."/bug38944.zip";
 $foo = new ZipArchive;
 $foo->open($arc_name, ZIPARCHIVE::CREATE);
 
@@ -25,7 +25,9 @@ int(0)
 int(0)
 string(%d) "%s"
 string(0) ""
-object(ZipArchive)#%d (5) {
+object(ZipArchive)#%d (6) {
+  ["lastId"]=>
+  int(-1)
   ["status"]=>
   int(0)
   ["statusSys"]=>

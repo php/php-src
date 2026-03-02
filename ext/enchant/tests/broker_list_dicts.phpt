@@ -2,15 +2,29 @@
 enchant_broker_list_dicts() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if(!extension_loaded('enchant')) die('skip, enchant not loader');
-if (!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
+$broker = enchant_broker_init();
+
+if (!$broker) {
+    echo "skip: Unable to init broker\n";
+    exit;
+}
+
+if (!enchant_broker_list_dicts($broker)) {
+    @enchant_broker_free($broker);
+
+    echo "skip: No broker dicts installed\n";
+}
+
+@enchant_broker_free($broker);
 ?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
-if (is_resource($broker)) {
+if (is_object($broker)) {
     echo("OK\n");
     $brokerListDicts = enchant_broker_list_dicts($broker);
 

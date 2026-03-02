@@ -10,5 +10,5 @@ spl_autoload_register(function ($name) {
 $a = new stdClass;
 var_dump($a instanceof UndefC);
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

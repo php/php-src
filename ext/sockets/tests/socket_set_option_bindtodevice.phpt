@@ -3,16 +3,16 @@ Test if socket_set_option() works, option:SO_BINDTODEVICE
 --DESCRIPTION--
 -Bind to loopback 'lo' device (should exist)
 -Bind to unexisting device
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
+
 if (!defined("SO_BINDTODEVICE")) {
-	die('SKIP SO_BINDTODEVICE not supported on this platform.');
+    die('SKIP SO_BINDTODEVICE not supported on this platform.');
 }
 if (!function_exists("posix_getuid") || posix_getuid() != 0) {
-	die('SKIP SO_BINDTODEVICE requires root permissions.');
+    die('SKIP SO_BINDTODEVICE requires root permissions.');
 }
 ?>
 --FILE--
@@ -33,7 +33,7 @@ socket_close($socket);
 --EXPECTF--
 bool(true)
 
-Warning: socket_set_option(): unable to set socket option [19]: No such device in %s on line %d
+Warning: socket_set_option(): Unable to set socket option [19]: No such device in %s on line %d
 bool(false)
 --CREDITS--
 Damjan Cvetko, foreach.org

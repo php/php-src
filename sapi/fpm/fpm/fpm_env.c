@@ -1,4 +1,3 @@
-	/* $Id: fpm_env.c,v 1.15 2008/09/18 23:19:59 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -12,9 +11,10 @@
 
 #include "fpm_env.h"
 #include "fpm.h"
+#include "fpm_cleanup.h"
 
 #ifndef HAVE_SETPROCTITLE
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 static char **fpm_env_argv = NULL;
 static size_t fpm_env_argv_len = 0;
 #endif
@@ -32,10 +32,11 @@ int setenv(char *name, char *value, int clobber) /* {{{ */
 		return 0;
 	}
 
-	if ((cp = malloc(strlen(name) + strlen(value) + 2)) == 0) {
+	size_t length = strlen(name) + strlen(value) + 2;
+	if ((cp = malloc(length)) == 0) {
 		return 1;
 	}
-	sprintf(cp, "%s=%s", name, value);
+	snprintf(cp, length, "%s=%s", name, value);
 	return putenv(cp);
 }
 /* }}} */
@@ -61,7 +62,7 @@ int setenv(char *name, char *value, int overwrite) /* {{{ */
 #endif
 
 #ifndef HAVE_CLEARENV
-void clearenv() /* {{{ */
+void clearenv(void)
 {
 	char **envp;
 	char *s;
@@ -80,7 +81,6 @@ void clearenv() /* {{{ */
 	}
 
 }
-/* }}} */
 #endif
 
 #ifndef HAVE_UNSETENV
@@ -119,17 +119,18 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 
 void fpm_env_setproctitle(char *title) /* {{{ */
 {
-#ifdef HAVE_SETPROCTITLE
+#if defined(HAVE_SETPROCTITLE_FAST)
+	setproctitle_fast("%s", title);
+#elif defined(HAVE_SETPROCTITLE)
 	setproctitle("%s", title);
-#else
-#ifdef __linux__
-	if (fpm_env_argv != NULL && fpm_env_argv_len > strlen(SETPROCTITLE_PREFIX) + 3) {
+#elif defined(__linux__) || defined(__APPLE__)
+	size_t prefixlen = strlen(SETPROCTITLE_PREFIX);
+	if (fpm_env_argv != NULL && fpm_env_argv_len > prefixlen + 3) {
 		memset(fpm_env_argv[0], 0, fpm_env_argv_len);
 		strncpy(fpm_env_argv[0], SETPROCTITLE_PREFIX, fpm_env_argv_len - 2);
-		strncpy(fpm_env_argv[0] + strlen(SETPROCTITLE_PREFIX), title, fpm_env_argv_len - strlen(SETPROCTITLE_PREFIX) - 2);
+		strncpy(fpm_env_argv[0] + prefixlen, title, fpm_env_argv_len - prefixlen - 2);
 		fpm_env_argv[1] = NULL;
 	}
-#endif
 #endif
 }
 /* }}} */
@@ -195,12 +196,29 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_env_init_main() /* {{{ */
+
+#ifndef HAVE_SETPROCTITLE
+#if defined(__linux__) || defined(__APPLE__)
+/* Frees our copied environment variables. */
+static void fpm_env_cleanup(int which, void *arg) /* {{{ */
+{
+	char** allocated_environ = environ;
+	if (allocated_environ) {
+		environ = NULL;
+		unsigned int i = 0;
+		while (allocated_environ[i]) {
+			free(allocated_environ[i]);
+			i++;
+		}
+		free(allocated_environ);
+	}
+}
+#endif
+#endif
+
+int fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
-	int i;
-	char *first = NULL;
-	char *last = NULL;
 	char *title;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
@@ -209,9 +227,12 @@ int fpm_env_init_main() /* {{{ */
 		}
 	}
 #ifndef HAVE_SETPROCTITLE
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
+	int i;
+	char *first = NULL;
+	char *last = NULL;
 	/*
-	 * This piece of code has been inspirated from nginx and pureftpd code, which
+	 * This piece of code has been inspired from nginx and pureftpd code, which
 	 * are under BSD licence.
 	 *
 	 * To change the process title in Linux we have to set argv[1] to NULL
@@ -255,6 +276,10 @@ int fpm_env_init_main() /* {{{ */
 			env_nb++;
 		}
 
+		if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT_EXIT_MAIN, fpm_env_cleanup, 0)) {
+			return -1;
+		}
+
 		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {
 			return -1;
 		}
@@ -273,4 +298,3 @@ int fpm_env_init_main() /* {{{ */
 	efree(title);
 	return 0;
 }
-/* }}} */

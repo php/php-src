@@ -1,8 +1,12 @@
 --TEST--
 Bug #72604 (imagearc() ignores thickness for full arcs)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip requires ext/gd');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

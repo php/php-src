@@ -3,20 +3,19 @@ ext/sockets - socket_bind - basic test
 --CREDITS--
 Florian Anderiasch
 fa@php.net
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
-        die('skip - sockets extension not available.');
-    }
+    
     if (getenv("SKIP_ONLINE_TESTS")) {
         die("skip test requiring internet connection");
     }
 ?>
 --FILE--
 <?php
-    $rand = rand(1,999);
     $s_c     = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-    $s_bind  = socket_bind($s_c, '0.0.0.0', 31330+$rand);
+    $s_bind  = socket_bind($s_c, '0.0.0.0');
     var_dump($s_bind);
 
     // Connect to destination address
@@ -32,7 +31,7 @@ fa@php.net
     $s_close = socket_close($s_c);
     var_dump($s_close);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 int(16)

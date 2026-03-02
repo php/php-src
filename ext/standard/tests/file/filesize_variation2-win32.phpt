@@ -5,15 +5,10 @@ Test filesize() function: usage variations - size of dir/subdir
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip only valid for Windows');
 }
+?>
 --FILE--
 <?php
-/*
- Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE
-   (and generates an error of level E_WARNING) in case of an error.
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 echo "*** Testing filesize(): usage variations ***\n";
@@ -59,12 +54,12 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/filesize_variation2/filesize_variation2_sub/filesize_variation2.tmp");
 rmdir($file_path."/filesize_variation2/filesize_variation2_sub");
 rmdir($file_path."/filesize_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 
 *** Testing size of a dir, sub-dir and file with filesize() ***

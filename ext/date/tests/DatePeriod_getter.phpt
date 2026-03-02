@@ -29,7 +29,7 @@ $periodWithRecurrencesWithoutStart = new DatePeriod($start, $interval, $recurren
 var_dump($periodWithRecurrences->getRecurrences());
 
 ?>
---EXPECTF--
+--EXPECT--
 string(19) "2000-01-01 00:00:00"
 string(13) "Europe/Berlin"
 string(19) "2000-01-31 00:00:00"

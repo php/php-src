@@ -2,11 +2,6 @@
 Test array_sum() function : usage variations - array with different integer value
 --FILE--
 <?php
-/* Prototype  : mixed array_sum(array &input)
- * Description: Returns the sum of the array entries
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing array_sum() with different types of integer arrays containing data of following type:
 *  integer, octal, hexadecimal, maximum and minimum integer values & mixed of all integers
@@ -36,7 +31,7 @@ var_dump( array_sum($mixed_int_value) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : different integer array ***
 -- Sum of Integer array --
 int(-573)

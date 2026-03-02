@@ -1,7 +1,7 @@
 --TEST--
 Bug #47566 (return value of pcntl_wexitstatus())
---SKIPIF--
-<?php if (!extension_loaded("pcntl")) print "skip"; ?>
+--EXTENSIONS--
+pcntl
 --FILE--
 <?php
 $pid = pcntl_fork();

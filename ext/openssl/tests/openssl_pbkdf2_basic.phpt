@@ -1,7 +1,9 @@
 --TEST--
 openssl_pbkdf2() tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl") || !function_exists("openssl_pbkdf2")) print "skip"; ?>
+<?php if (!function_exists("openssl_pbkdf2")) print "skip"; ?>
 --FILE--
 <?php
 // official test vectors
@@ -18,7 +20,7 @@ var_dump(bin2hex(openssl_pbkdf2('passwordPASSWORDpassword', 'saltSALTsaltSALTsal
 var_dump(bin2hex(openssl_pbkdf2("pass\0word", "sa\0lt", 16, 4096)));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(40) "0c60c80f961f0e71f3a9b524af6012062fe037a6"
 string(40) "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957"
 string(40) "4b007901b765489abead49d926f721d065a429c1"

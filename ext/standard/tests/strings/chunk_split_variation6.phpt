@@ -2,12 +2,6 @@
 Test chunk_split() function : usage variations - single quoted strings for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 /*
 * passing different single quoted strings as 'str' argument to the function
 * 'chunklen' is set to 7 and 'ending' is '):('
@@ -45,7 +39,7 @@ for($count = 0;$count < count($values);$count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : with different single quoted 'str' ***
 -- Iteration 0 --
 string(3) "):("

@@ -4,25 +4,26 @@ Bug #60367 (Reflection and Late Static Binding)
 <?php
 abstract class A {
 
-	const WHAT = 'A';
+    const WHAT = 'A';
 
-	public static function call() {
-		echo static::WHAT;
-	}
+    public static function call() {
+        echo static::WHAT;
+    }
 
 }
 
 class B extends A {
 
-	const WHAT = 'B';
+    const WHAT = 'B';
 
 }
 
-$method = new ReflectionMethod("b::call");
+$method = ReflectionMethod::createFromMethodName("b::call");
 $method->invoke(null);
 $method->invokeArgs(null, array());
-$method = new ReflectionMethod("A::call");
+$method = ReflectionMethod::createFromMethodName("A::call");
 $method->invoke(null);
 $method->invokeArgs(null, array());
---EXPECTF--
+?>
+--EXPECT--
 BBAA

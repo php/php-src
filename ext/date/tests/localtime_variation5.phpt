@@ -2,13 +2,6 @@
 Test localtime() function : usage variation - Passing hexa decimal values to timestamp.
 --FILE--
 <?php
-/* Prototype  : array localtime([int timestamp [, bool associative_array]])
- * Description: Returns the results of the C system call localtime as an associative array
- * if the associative_array argument is set to 1 other wise it is a regular array
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing localtime() : usage variation ***\n";
 
 date_default_timezone_set("UTC");
@@ -19,19 +12,18 @@ $is_associative = true;
 $inputs = array(
 
       'Hexa-decimal 0' => 0x0,
-	  'Hexa-decimal 10' => 0xA,
-	  'Hexa-decimal -10' => -0XA
+      'Hexa-decimal 10' => 0xA,
+      'Hexa-decimal -10' => -0XA
 );
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-	  var_dump( localtime($value) );
-	  var_dump( localtime($value, $is_associative) );
+      var_dump( localtime($value) );
+      var_dump( localtime($value, $is_associative) );
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing localtime() : usage variation ***
 
 --Hexa-decimal 0--
@@ -159,4 +151,3 @@ array(9) {
   ["tm_isdst"]=>
   int(0)
 }
-===DONE===

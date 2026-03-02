@@ -2,17 +2,11 @@
 Test array_filter() function : usage variations - 'input' argument with different false entries
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * With default callback function argument, array_filter() removes elements which are interpreted as false
 * Here Testing all the false array element possibilities
 */
 
-// callback function always_true
 function always_true($input)
 {
   return true;
@@ -65,7 +59,7 @@ var_dump( array_filter($input, 'always_false') );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - different false elements in 'input' ***
 array(0) {
 }

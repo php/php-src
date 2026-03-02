@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  targetNamespace="http://xoev.de/schemata/xzufi/2_2_0">
+  <wsdl:types>
+    <xs:schema xmlns:ns="http://php.net" targetNamespace="http://php.net">
+      <xs:attributeGroup name="c">
+        <xs:attribute name="c" type="string" />
+      </xs:attributeGroup>
+
+      <xs:attributeGroup name="b">
+        <xs:attribute name="b" type="string" />
+      </xs:attributeGroup>
+
+      <xs:attributeGroup name="a">
+        <xs:attribute name="a" type="string" />
+        <xs:attributeGroup ref="ns:b" />
+      </xs:attributeGroup>
+
+      <xs:complexType name="dummy">
+        <xs:sequence>
+          <xs:element name="foo" type="string" />
+        </xs:sequence>
+        <xs:attributeGroup ref="ns:a" />
+        <xs:attributeGroup ref="ns:c" />
+      </xs:complexType>
+    </xs:schema>
+  </wsdl:types>
+
+  <!-- Below is a shortened copy of the test.wsdl, doesn't matter, only the types matter -->
+
+  <message name="AddRequest">
+    <part name="x" type="xs:double" />
+  </message>
+
+  <portType name="TestServicePortType">
+    <operation name="Add">
+      <input message="tns:AddRequest" />
+    </operation>
+  </portType>
+
+  <binding name="TestServiceBinding" type="tns:TestServicePortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="Add">
+      <soap:operation soapAction="Add" style="rpc" />
+      <input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+    </operation>
+  </binding>
+
+  <service name="TestService">
+    <port name="TestServicePort" binding="tns:TestServiceBinding">
+      <soap:address location="http://linuxsrv.home/~dmitry/soap/soap_server.php" />
+    </port>
+  </service>
+
+</wsdl:definitions>

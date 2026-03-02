@@ -1,69 +1,57 @@
 --TEST--
 mysqli_fetch_fields()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require 'table.inc';
 
-	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	if (!is_null($tmp = @mysqli_fetch_fields()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    // Make sure that client, connection and result charsets are all the
+    // same. Not sure whether this is strictly necessary.
+    if (!mysqli_set_charset($link, 'utf8'))
+        printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
 
-	if (!is_null($tmp = @mysqli_fetch_fields($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $charsetInfo = mysqli_get_charset($link);
 
-	require('table.inc');
+    if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	// Make sure that client, connection and result charsets are all the
-	// same. Not sure whether this is strictly necessary.
-	if (!mysqli_set_charset($link, 'utf8'))
-		printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
+    $fields = mysqli_fetch_fields($res);
+    foreach ($fields as $k => $field) {
+        var_dump($field);
+        switch ($k) {
+            case 1:
+                /* label column, result set charset */
+                if ($field->charsetnr != $charsetInfo->number) {
+                    printf("[004] Expecting charset %s/%d got %d\n",
+                        $charsetInfo->charset,
+                        $charsetInfo->number, $field->charsetnr);
+                }
+                break;
+        }
+    }
 
-	$charsetInfo = mysqli_get_charset($link);
+    mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    try {
+        mysqli_fetch_fields($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	$fields = mysqli_fetch_fields($res);
-	foreach ($fields as $k => $field) {
-		var_dump($field);
-		switch ($k) {
-			case 1:
-				/* label column, result set charset */
-				if ($field->charsetnr != $charsetInfo->number) {
-					printf("[004] Expecting charset %s/%d got %d\n",
-						$charsetInfo->charset,
-						$charsetInfo->number, $field->charsetnr);
-				}
-				if ($field->length != $charsetInfo->max_length) {
-					printf("[005] Expecting length %d got %d\n",
-						$charsetInfo->max_length,
-						$field->max_length);
-				}
-				break;
-		}
-	}
-
-	mysqli_free_result($res);
-
-	if (NULL !== ($tmp = mysqli_fetch_fields($res)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	mysqli_close($link);
-	print "done!";
+    mysqli_close($link);
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
@@ -82,7 +70,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>
@@ -110,7 +98,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(%d)
   ["charsetnr"]=>
@@ -122,6 +110,5 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-
-Warning: mysqli_fetch_fields(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

@@ -1,9 +1,7 @@
 --TEST--
 Bug #73833: null character not allowed in openssl_pkey_get_private
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $passwords = ["abc\x00defghijkl", "abcdefghikjl"];

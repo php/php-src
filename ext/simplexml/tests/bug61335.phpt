@@ -1,9 +1,7 @@
 --TEST--
 Bug #61335 - Access to array node returns wrong truth value
---SKIPIF--
-<?php
-if (!extension_loaded("simplexml")) die("skip SimpleXML not available");
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $rec1 = simplexml_load_string("<foo><bar>aa</bar>\n</foo>");

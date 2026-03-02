@@ -69,11 +69,11 @@
  </xsd:complexType>
 
  <!-- Stock Keeping Unit, a code for identifying products -->
- <simpleType name="SKU">
-  <restriction base="xsd:string">
-   <pattern value="\d{3}-[A-Z]{2}"/>
-  </restriction>
- </simpleType>
+ <xsd:simpleType name="SKU">
+  <xsd:restriction base="xsd:string">
+   <xsd:pattern value="\d{3}-[A-Z]{2}"/>
+  </xsd:restriction>
+ </xsd:simpleType>
 
 </xsd:schema>
 </types>

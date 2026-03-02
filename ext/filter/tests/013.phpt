@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and flags
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var("  234", FILTER_VALIDATE_INT));
@@ -38,6 +38,11 @@ var_dump(filter_var(345, FILTER_VALIDATE_INT, array("options" => array("min_rang
 var_dump(filter_var("0ff", FILTER_VALIDATE_INT));
 var_dump(filter_var("010", FILTER_VALIDATE_INT));
 
+// Explicit octal prefix
+var_dump(filter_var("0o16", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_var("0O16", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+var_dump(filter_var("0o016", FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_OCTAL)));
+
 echo "Done\n";
 ?>
 --EXPECT--
@@ -71,4 +76,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+int(14)
+int(14)
+int(14)
 Done

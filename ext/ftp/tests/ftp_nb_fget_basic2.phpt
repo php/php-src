@@ -3,10 +3,9 @@ Testing ftp_nb_fget autoresume
 --CREDITS--
 Rodrigo Moyle <eu [at] rodrigorm [dot] com [dot] br>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';
@@ -15,7 +14,7 @@ $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
 if (!$ftp) die("Couldn't connect to the server");
 
-$local_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt";
+$local_file = __DIR__ . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt";
 file_put_contents($local_file, 'ASCIIFoo');
 $handle = fopen($local_file, 'a');
 
@@ -24,7 +23,7 @@ var_dump(file_get_contents($local_file));
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt");
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt");
 ?>
 --EXPECT--
 int(2)

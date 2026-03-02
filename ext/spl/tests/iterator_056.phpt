@@ -6,7 +6,7 @@ Sebastian Schürmann
 <?php
 
 class myFilterIterator extends FilterIterator {
-	function accept() { }
+    function accept(): bool { }
 }
 
 class myCachingIterator extends CachingIterator { }
@@ -20,45 +20,45 @@ class myLimitIterator extends LimitIterator { }
 class myNoRewindIterator extends NoRewindIterator  {}
 
 try {
-	$it = new myFilterIterator();
+    $it = new myFilterIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-	$it = new myCachingIterator();
+    $it = new myCachingIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-	$it = new myRecursiveCachingIterator();
+    $it = new myRecursiveCachingIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-	$it = new myParentIterator();
+    $it = new myParentIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-	$it = new myLimitIterator();
+    $it = new myLimitIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$it = new myNoRewindIterator();
+    $it = new myNoRewindIterator();
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-FilterIterator::__construct() expects exactly 1 parameter, 0 given
-CachingIterator::__construct() expects at least 1 parameter, 0 given
-RecursiveCachingIterator::__construct() expects at least 1 parameter, 0 given
-ParentIterator::__construct() expects exactly 1 parameter, 0 given
-LimitIterator::__construct() expects at least 1 parameter, 0 given
-NoRewindIterator::__construct() expects exactly 1 parameter, 0 given
+FilterIterator::__construct() expects exactly 1 argument, 0 given
+CachingIterator::__construct() expects at least 1 argument, 0 given
+RecursiveCachingIterator::__construct() expects at least 1 argument, 0 given
+ParentIterator::__construct() expects exactly 1 argument, 0 given
+LimitIterator::__construct() expects at least 1 argument, 0 given
+NoRewindIterator::__construct() expects exactly 1 argument, 0 given

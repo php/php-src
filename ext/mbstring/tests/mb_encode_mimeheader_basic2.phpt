@@ -1,18 +1,9 @@
 --TEST--
 Test mb_encode_mimeheader() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : string mb_encode_mimeheader(string $str [, string $charset
- * [, string $transfer-encoding [, string $linefeed [, int $indent]]]])
- * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?=
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test mb_encode_header() with different strings
  */
@@ -29,18 +20,18 @@ $inputs = array('SJIS' => $sjis_string,
                 'EUC_JP' => $euc_jp_string);
 
 foreach ($inputs as $lang => $input) {
-	echo "\nLanguage: $lang\n";
-	echo "-- Base 64: --\n";
-	mb_internal_encoding($lang);
-	$outEncoding = "UTF-8";
-	var_dump(mb_encode_mimeheader($input, $outEncoding, 'B'));
-	echo "-- Quoted-Printable --\n";
-	var_dump(mb_encode_mimeheader($input, $outEncoding, 'Q'));
+    echo "\nLanguage: $lang\n";
+    echo "-- Base 64: --\n";
+    mb_internal_encoding($lang);
+    $outEncoding = "UTF-8";
+    var_dump(mb_encode_mimeheader($input, $outEncoding, 'B'));
+    echo "-- Quoted-Printable --\n";
+    var_dump(mb_encode_mimeheader($input, $outEncoding, 'Q'));
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_encode_mimeheader() : basic2 ***
 
 Language: SJIS

@@ -1,24 +1,16 @@
 --TEST--
 Test mb_strrpos() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-/* Prototype  : int mb_strrpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of last occurrence of a string within another
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test basic functionality of mb_strrpos()
  */
 
 echo "*** Testing mb_strrpos() : basic ***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'This is an English string. 0123456789.';
 //Japanese string in UTF-8
@@ -30,6 +22,9 @@ var_dump(mb_strrpos($string_ascii, 'is', 4, 'ISO-8859-1'));
 echo "\n-- ASCII string 2 --\n";
 var_dump(mb_strrpos($string_ascii, 'hello, world'));
 
+echo "\n-- ASCII string with negative offset --\n";
+var_dump(mb_strrpos($string_ascii, 'hello', -1, 'ISO-8859-1'));
+
 echo "\n-- Multibyte string 1 --\n";
 $needle1 = base64_decode('44CC');
 var_dump(mb_strrpos($string_mb, $needle1));
@@ -40,13 +35,16 @@ var_dump(mb_strrpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : basic ***
 
 -- ASCII string 1 --
 int(15)
 
 -- ASCII string 2 --
+bool(false)
+
+-- ASCII string with negative offset --
 bool(false)
 
 -- Multibyte string 1 --

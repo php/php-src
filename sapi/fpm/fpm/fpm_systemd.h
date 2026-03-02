@@ -7,6 +7,6 @@
 #define FPM_SYSTEMD_DEFAULT_HEARTBEAT (10000)
 
 void fpm_systemd_heartbeat(struct fpm_event_s *ev, short which, void *arg);
-int fpm_systemd_conf();
+int fpm_systemd_conf(void);
 
 #endif

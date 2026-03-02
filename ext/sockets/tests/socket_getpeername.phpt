@@ -1,19 +1,14 @@
 --TEST--
-ext/sockets - socket_getsockname - basic test
+ext/sockets - socket_getpeername - basic test
 --CREDITS--
 Florian Anderiasch
 fa@php.net
---SKIPIF--
-<?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
-    $rand = rand(1,999);
     $s_c     = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-    $s_bind  = socket_bind($s_c, '0.0.0.0', 31330+$rand);
+    $s_bind  = socket_bind($s_c, '0.0.0.0');
     var_dump($s_bind);
 
     // Connect to destination address
@@ -26,7 +21,7 @@ fa@php.net
 --EXPECTF--
 bool(true)
 
-Warning: socket_getpeername(): unable to retrieve peer name [%i]: %a in %s on line %i
+Warning: socket_getpeername(): unable to retrieve peer name [%i]: %a in %s on line %d
 bool(false)
 NULL
 NULL

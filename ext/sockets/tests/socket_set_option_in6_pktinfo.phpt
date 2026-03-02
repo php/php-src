@@ -1,10 +1,10 @@
 --TEST--
 socket_set_option() with IPV6_PKTINFO
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 
 require 'ipv6_skipif.inc';
 
@@ -17,6 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (!defined('IPV6_PKTINFO')) {
     die('skip IPV6_PKTINFO not available.');
 }
+?>
 --FILE--
 <?php
 
@@ -31,6 +32,7 @@ var_dump(socket_set_option($s, IPPROTO_IPV6, IPV6_PKTINFO, [
 //A work-around with is sort-of possible (with IPV6_2292PKTOPTIONS),
 //but not worth it
 //var_dump(socket_get_option($s, IPPROTO_IPV6, IPV6_PKTINFO));
+?>
 --EXPECTF--
 Warning: socket_set_option(): error converting user data (path: in6_pktinfo): The key 'addr' is required in %s on line %d
 bool(false)

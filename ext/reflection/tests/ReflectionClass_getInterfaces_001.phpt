@@ -29,20 +29,20 @@ class C6 implements I1, I2, I3, I4, I5, I6, I7 {}
 
 
 $classes = array( 	'A0', 'A1', 'B0', 'B1',
-					'I0', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7',
-					'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6'	);
+                    'I0', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7',
+                    'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6'	);
 
 foreach ($classes as $class) {
-	echo "---( Interfaces implemented by $class )---\n ";
-	$rc = new ReflectionClass($class);
-	$interfaces = $rc->getInterfaces();
-	// Sort interfaces so that tests do not fail because of wrong order.
-	ksort($interfaces);
-	print_r($interfaces);
+    echo "---( Interfaces implemented by $class )---\n ";
+    $rc = new ReflectionClass($class);
+    $interfaces = $rc->getInterfaces();
+    // Sort interfaces so that tests do not fail because of wrong order.
+    ksort($interfaces);
+    print_r($interfaces);
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 ---( Interfaces implemented by A0 )---
  Array
 (

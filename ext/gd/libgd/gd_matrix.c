@@ -29,8 +29,6 @@ int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
 {
 	double x = src->x;
 	double y = src->y;
-	x = src->x;
-	y = src->y;
 	dst->x = x * affine[0] + y * affine[2] + affine[4];
 	dst->y = x * affine[1] + y * affine[3] + affine[5];
 	return GD_TRUE;
@@ -55,7 +53,7 @@ int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
  *  <gdAffineIdentity>
  *
  * Returns:
- *  GD_TRUE if the affine is rectilinear or GD_FALSE
+ *  GD_TRUE on success or GD_FALSE on failure
  */
 int gdAffineInvert (double dst[6], const double src[6])
 {
@@ -246,7 +244,7 @@ int gdAffineShearHorizontal(double dst[6], const double angle)
 int gdAffineShearVertical(double dst[6], const double angle)
 {
 	dst[0] = 1;
-	dst[1] = tan(angle * M_PI / 180.0);;
+	dst[1] = tan(angle * M_PI / 180.0);
 	dst[2] = 0;
 	dst[3] = 1;
 	dst[4] = 0;
@@ -331,4 +329,3 @@ int gdAffineEqual (const double m1[6], const double m2[6])
 	  fabs (m1[4] - m2[4]) < GD_EPSILON &&
 	  fabs (m1[5] - m2[5]) < GD_EPSILON);
 }
-

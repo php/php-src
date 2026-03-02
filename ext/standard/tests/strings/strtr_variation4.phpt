@@ -2,12 +2,6 @@
 Test strtr() function : usage variations - empty string & null for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
- * Source code: ext/standard/string.c
-*/
-
 /* Testing strtr() function by passing the
  *   empty string & null for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments
@@ -25,8 +19,6 @@ EOD;
 $str_arr = array(
   "",
   '',
-  NULL,
-  null,
   FALSE,
   false,
   $heredoc_str
@@ -53,7 +45,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() : empty string & null for 'str' arg ***
 -- Iteration 1 --
 string(0) ""
@@ -68,12 +60,6 @@ string(0) ""
 string(0) ""
 string(0) ""
 -- Iteration 5 --
-string(0) ""
-string(0) ""
--- Iteration 6 --
-string(0) ""
-string(0) ""
--- Iteration 7 --
 string(0) ""
 string(0) ""
 *** Done ***

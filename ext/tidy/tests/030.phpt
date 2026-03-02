@@ -2,10 +2,8 @@
 getConfig() method - basic test for getConfig()
 --CREDITS--
 Christian Wenz <wenz@php.net>
---SKIPIF--
-<?php
-  if (!extension_loaded('tidy')) die ('skip tidy not present');
-?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 $buffer = '<html></html>';
@@ -20,7 +18,7 @@ var_dump($c['indent']);
 var_dump($c['indent-attributes']);
 var_dump($c['indent-spaces']);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 bool(true)
 int(3)

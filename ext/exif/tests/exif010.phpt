@@ -1,13 +1,13 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD and EXIF data in Intel byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-var_dump(exif_read_data(dirname(__FILE__).'/image010.jpg'));
+var_dump(exif_read_data(__DIR__.'/image010.jpg'));
 ?>
 --EXPECTF--
 array(28) {
@@ -87,5 +87,5 @@ array(28) {
   ["ExifImageLength"]=>
   int(1)
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

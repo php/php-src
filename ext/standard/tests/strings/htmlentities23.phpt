@@ -19,76 +19,100 @@ $tests = array(
 );
 
 foreach ($tests as $test) {
-    error_reporting(~E_STRICT);
     $a = htmlentities($test, ENT_QUOTES | ENT_SUBSTITUTE, "EUC-JP");
-    error_reporting(-1);
-	var_dump($a, bin2hex($a));
+    var_dump($a, bin2hex($a));
     $a = htmlspecialchars($test, ENT_QUOTES | ENT_SUBSTITUTE, "EUC-JP");
-	var_dump($a, bin2hex($a));
+    var_dump($a, bin2hex($a));
     echo "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(16) "&#xFFFD;&#xFFFD;"
 string(32) "262378464646443b262378464646443b"
 string(16) "&#xFFFD;&#xFFFD;"
 string(32) "262378464646443b262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(16) "&#xFFFD;&#xFFFD;"
 string(32) "262378464646443b262378464646443b"
 string(16) "&#xFFFD;&#xFFFD;"
 string(32) "262378464646443b262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(17) "&#xFFFD;&#xFFFD;!"
 string(34) "262378464646443b262378464646443b21"
 string(17) "&#xFFFD;&#xFFFD;!"
 string(34) "262378464646443b262378464646443b21"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(2) "Ž®"
 string(4) "8eae"
 string(2) "Ž®"
 string(4) "8eae"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 string(9) "&#xFFFD;!"
 string(18) "262378464646443b21"
 
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(8) "&#xFFFD;"
 string(16) "262378464646443b"
 string(8) "&#xFFFD;"

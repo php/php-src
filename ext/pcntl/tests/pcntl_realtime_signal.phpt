@@ -1,9 +1,10 @@
 --TEST--
 pcntl_signal() context of realtime signal
+--EXTENSIONS--
+pcntl
+posix
 --SKIPIF--
 <?php if (!defined('SIGRTMIN')) die("skip realtime signal not supported"); ?>
-<?php if (!extension_loaded("pcntl")) print "skip"; ?>
-<?php if (!extension_loaded("posix")) die("skip posix extension not available"); ?>
 --FILE--
 <?php
 

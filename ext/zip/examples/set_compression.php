@@ -8,7 +8,7 @@ $zip = new ZipArchive();
 $filename = "a.zip";
 
 if (!$zip->open($filename, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE)) {
-	exit("cannot open <$filename>\n");
+    exit("cannot open <$filename>\n");
 }
 
 $zip->addFromString("testfilephp.txt", "#1 This is a test string added as testfilephp.txt.\n");

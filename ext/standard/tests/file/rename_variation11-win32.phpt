@@ -9,16 +9,10 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing rename() with absolute and relative paths ***\n";
 $mainDir = "renameVar11";
 $subDir = "renameVar11Sub";
-$absMainDir = dirname(__FILE__)."\\".$mainDir;
+$absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
@@ -27,7 +21,7 @@ $fromFile = "renameMe.tmp";
 $toFile = "IwasRenamed.tmp";
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 
@@ -92,12 +86,12 @@ bool(true)
 
 -- Iteration 5 --
 
-Warning: rename(%s\renameVar11\renameVar11Sub\..\\\renameVar11Sub\\..\\..\renameVar11Sub\renameMe.tmp,%s\renameVar11\renameVar11Sub\..\\\renameVar11Sub\\..\\..\renameVar11Sub\IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
+Warning: rename(%s\renameVar11\renameVar11Sub\..\\\renameVar11Sub\\..\\..\renameVar11Sub\renameMe.tmp,%s\renameVar11\renameVar11Sub\..\\\renameVar11Sub\\..\\..\renameVar11Sub\IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: rename(%s\renameVar11\renameVar11Sub\BADDIR\renameMe.tmp,%s\renameVar11\renameVar11Sub\BADDIR\IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
+Warning: rename(%s\renameVar11\renameVar11Sub\BADDIR\renameMe.tmp,%s\renameVar11\renameVar11Sub\BADDIR\IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -118,7 +112,7 @@ bool(true)
 
 -- Iteration 11 --
 
-Warning: rename(BADDIR\renameMe.tmp,BADDIR\IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
+Warning: rename(BADDIR\renameMe.tmp,BADDIR\IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 12 --

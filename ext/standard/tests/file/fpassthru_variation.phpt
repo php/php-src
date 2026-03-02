@@ -2,17 +2,11 @@
 Test fpassthru() function: Variations
 --FILE--
 <?php
-/*
-Prototype: int fpassthru ( resource $handle );
-Description: Reads to EOF on the given file pointer from the current position
-  and writes the results to the output buffer.
-*/
-
 echo "*** Testing fpassthru() function with files ***\n\n";
 
 echo "--- Testing with different offsets ---\n";
 
-$file_name = dirname(__FILE__)."/passthru_variation.tmp";
+$file_name = __DIR__."/passthru_variation.tmp";
 $file_write = fopen($file_name, "w");
 fwrite($file_write, "1234567890abcdefghijklmnopqrstuvwxyz");
 fclose($file_write);
@@ -71,7 +65,7 @@ unlink($file_name);
 echo "\n*** Done ***\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fpassthru() function with files ***
 
 --- Testing with different offsets ---

@@ -8,5 +8,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-SplTempFileObject::__construct() expects parameter 1 to be integer, string given
+--EXPECT--
+SplTempFileObject::__construct(): Argument #1 ($maxMemory) must be of type int, string given

@@ -3,15 +3,39 @@ Bug #52041 (Memory leak when writing on uninitialized variable returned from fun
 --FILE--
 <?php
 function foo() {
-	return $x;
+    return $x;
 }
 
-foo()->a = 1;
-foo()->a->b = 2;
-foo()->a++;
-foo()->a->b++;
-foo()->a += 2;
-foo()->a->b += 2;
+try {
+    foo()->a = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    foo()->a->b = 2;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    foo()->a++;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    foo()->a->b++;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    foo()->a += 2;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    foo()->a->b += 2;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 foo()[0] = 1;
 foo()[0][0] = 2;
@@ -23,65 +47,47 @@ foo()[0][0] += 2;
 var_dump(foo());
 ?>
 --EXPECTF--
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined variable $x in %s on line %d
+Attempt to assign property "a" on null
 
-Warning: Creating default object from empty value in %sbug52041.php on line 6
+Warning: Undefined variable $x in %s on line %d
+Attempt to modify property "a" on null
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined variable $x in %s on line %d
+Attempt to increment/decrement property "a" on null
 
-Warning: Creating default object from empty value in %sbug52041.php on line 7
+Warning: Undefined variable $x in %s on line %d
+Attempt to modify property "a" on null
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined variable $x in %s on line %d
+Attempt to assign property "a" on null
 
-Warning: Creating default object from empty value in %sbug52041.php on line 8
+Warning: Undefined variable $x in %s on line %d
+Attempt to modify property "a" on null
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 8
+Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 9
+Warning: Undefined variable $x in %s on line %d
 
-Warning: Creating default object from empty value in %sbug52041.php on line 9
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined property: stdClass::$b in %sbug52041.php on line 9
+Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined array key 0 in %s on line %d
 
-Warning: Creating default object from empty value in %sbug52041.php on line 10
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 10
+Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined property: stdClass::$a in %sbug52041.php on line 11
+Warning: Undefined variable $x in %s on line %d
 
-Warning: Creating default object from empty value in %sbug52041.php on line 11
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined property: stdClass::$b in %sbug52041.php on line 11
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 15
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 16
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 16
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 17
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 18
-
-Notice: Undefined offset: 0 in %sbug52041.php on line 18
-
-Notice: Undefined variable: x in %sbug52041.php on line 3
+Warning: Undefined variable $x in %s on line %d
 NULL

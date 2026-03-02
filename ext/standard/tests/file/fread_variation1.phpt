@@ -2,14 +2,6 @@
 Test fread() function : usage variations - read some/all chars, read/write modes
 --FILE--
 <?php
-/*
- Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle.
-   Reading stops when up to length bytes have been read, EOF (end of file) is
-   reached, (for network streams) when a packet becomes available, or (after
-   opening userspace stream) when 8192 bytes have been read whichever comes first.
-*/
-
 /* Read content less than file size &
    Read entire file
 */
@@ -63,10 +55,10 @@ foreach($file_content_types as $file_content_type) {
   foreach($file_modes as $file_mode) {
     if(!strstr($file_mode,"x")){
        /* create files with $file_content_type */
-       create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fread_variation");
+       create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "fread_variation");
     }
 
-    $filename = dirname(__FILE__)."/fread_variation1.tmp"; // this is name of the file created by create_files()
+    $filename = __DIR__."/fread_variation1.tmp"; // this is name of the file created by create_files()
     echo "-- File opened in mode ".$file_mode." --\n";
     $file_handle = fopen($filename, $file_mode);
     if (!$file_handle) {
@@ -79,7 +71,7 @@ foreach($file_content_types as $file_content_type) {
     }
 
     rewind($file_handle);
-    echo "-- Reading entire file content, expeceted : 1024 bytes --\n";
+    echo "-- Reading entire file content, expected : 1024 bytes --\n";
     // read from file, by giving the file actual size,
     $data_from_file = check_read($file_handle, 1024, (strstr($file_mode, "+") ? 1024 : 1024 ) );
     // calculate the hash and dump it, if data read, expecting here no data was read
@@ -87,7 +79,7 @@ foreach($file_content_types as $file_content_type) {
       var_dump( md5($data_from_file) );
 
     // reading file by giving less than its size
-    echo "-- Reading file content less than max. file size, expeceted : 1000 bytes --\n";
+    echo "-- Reading file content less than max. file size, expected : 1000 bytes --\n";
     rewind($file_handle);
     $data_from_file = check_read($file_handle, 1000, (strstr($file_mode, "+") ? 1000 : 1000 ) );
     // calculate the hash and dump it, if data read, expecting here no data was read
@@ -104,19 +96,19 @@ foreach($file_content_types as $file_content_type) {
 
 echo"Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fread() : usage variations ***
 
 -- Testing fread() with file having content of type numeric --
 -- File opened in mode a+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -124,14 +116,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode a+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -139,14 +131,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode a+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -154,14 +146,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -169,14 +161,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -184,14 +176,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -199,14 +191,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -214,14 +206,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -229,14 +221,14 @@ int(1000)
 bool(false)
 string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -246,14 +238,14 @@ string(32) "4501f99f2b79d0345f26f1394aca58a3"
 
 -- Testing fread() with file having content of type text --
 -- File opened in mode a+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -261,14 +253,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode a+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -276,14 +268,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode a+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -291,14 +283,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -306,14 +298,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -321,14 +313,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -336,14 +328,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -351,14 +343,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -366,14 +358,14 @@ int(1000)
 bool(false)
 string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "e486000c4c8452774f746a27658d87fa"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -383,14 +375,14 @@ string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 
 -- Testing fread() with file having content of type text_with_new_line --
 -- File opened in mode a+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -398,14 +390,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode a+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -413,14 +405,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode a+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -428,14 +420,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -443,14 +435,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -458,14 +450,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -473,14 +465,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -488,14 +480,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -503,14 +495,14 @@ int(1000)
 bool(false)
 string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -520,14 +512,14 @@ string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 
 -- Testing fread() with file having content of type alphanumeric --
 -- File opened in mode a+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -535,14 +527,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode a+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -550,14 +542,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode a+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -565,14 +557,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -580,14 +572,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -595,14 +587,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -610,14 +602,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+ --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -625,14 +617,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+b --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
@@ -640,14 +632,14 @@ int(1000)
 bool(false)
 string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+t --
--- Reading entire file content, expeceted : 1024 bytes --
+-- Reading entire file content, expected : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
--- Reading file content less than max. file size, expeceted : 1000 bytes --
+-- Reading file content less than max. file size, expected : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK

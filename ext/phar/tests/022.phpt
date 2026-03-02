@@ -1,12 +1,12 @@
 --TEST--
 Phar: stream stat
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -66,7 +66,7 @@ fclose($fp);
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 exit(0);
  ?>
 --EXPECT--
@@ -80,28 +80,28 @@ int(1)
 fseek($fp, -1, SEEK_END)int(0)
 int(6)
 fseek($fp, -8, SEEK_END)int(-1)
-bool(false)
+int(6)
 fseek($fp, -7, SEEK_END)int(0)
 int(0)
 fseek($fp, 0, SEEK_END)int(0)
 int(7)
 fseek($fp, 1, SEEK_END)int(-1)
-bool(false)
+int(7)
 fseek($fp, -8, SEEK_END)int(-1)
-bool(false)
+int(7)
 fseek($fp, 6)int(0)
 int(6)
 fseek($fp, 8)int(-1)
-bool(false)
+int(6)
 fseek($fp, -1)int(-1)
-bool(false)
+int(6)
 next
 int(4)
 fseek($fp, -5, SEEK_CUR)int(-1)
-bool(false)
+int(4)
 int(4)
 fseek($fp, 5, SEEK_CUR)int(-1)
-bool(false)
+int(4)
 int(4)
 fseek($fp, -4, SEEK_CUR)int(0)
 int(0)

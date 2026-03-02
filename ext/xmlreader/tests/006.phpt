@@ -1,10 +1,9 @@
 --TEST--
 XMLReader: libxml2 XML Reader, moveToElement
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
-/* $Id$ */
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"></book><test /></books>';
@@ -18,19 +17,17 @@ $reader->read();
 $reader->read();
 
 if ($reader->nodeType != XMLREADER::END_ELEMENT) {
-	if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
-		$attr = $reader->moveToFirstAttribute();
-		if ($reader->moveToElement()) {
-			if ($reader->name == 'book') {
-				echo "ok\n";
-			}
-		}
-	}
+    if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+        $attr = $reader->moveToFirstAttribute();
+        if ($reader->moveToElement()) {
+            if ($reader->name == 'book') {
+                echo "ok\n";
+            }
+        }
+    }
 }
 
 $reader->close();
 ?>
-===DONE===
 --EXPECT--
 ok
-===DONE===

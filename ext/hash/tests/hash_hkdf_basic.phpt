@@ -1,14 +1,7 @@
 --TEST--
-Test hash_hkdf() function: basic functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_hkdf() function: basic functionality
 --FILE--
 <?php
-
-/* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
- * Description: HMAC-based Key Derivation Function
- * Source code: ext/hash/hash.c
-*/
 
 echo "*** Testing hash_hkdf(): basic functionality ***\n";
 
@@ -53,7 +46,7 @@ echo 'snefru256: ', bin2hex(hash_hkdf('snefru256', $ikm)), "\n";
 echo 'gost: ', bin2hex(hash_hkdf('gost', $ikm)), "\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hash_hkdf(): basic functionality ***
 md2: 87779851d2377dab25da16fd7aadfdf5
 md4: 422c6bd8dd2a6baae8abadef618c3ede

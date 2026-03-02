@@ -1,5 +1,5 @@
 --TEST--
-Overwridden methods do not cause a conflict.
+Overwritten methods do not cause a conflict.
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -28,5 +28,5 @@ class TheWorldIsNotEnough {
 $o = new TheWorldIsNotEnough();
 $o->sayHello(); // echos Hello Universe!
 ?>
---EXPECTF--
+--EXPECT--
 Hello Universe!

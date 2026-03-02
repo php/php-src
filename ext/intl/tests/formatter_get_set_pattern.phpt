@@ -1,7 +1,8 @@
 --TEST--
 numfmt_get/set_pattern()
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '62.1') >=  0) die('skip for ICU < 62.1'); ?>
 --FILE--
 <?php
@@ -33,8 +34,8 @@ function ut_main()
     $res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 
-	ut_nfmt_set_pattern($fmt, str_repeat('@', 200));
-	$res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
+    ut_nfmt_set_pattern($fmt, str_repeat('@', 200));
+    $res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 
     return $res_str;

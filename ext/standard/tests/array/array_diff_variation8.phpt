@@ -1,13 +1,7 @@
 --TEST--
-Test array_diff() function : usage variations - associative arrays contianing different data types
+Test array_diff() function : usage variations - associative arrays containing different data types
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are
- * not present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_diff() with associative arrays containing different data types as values
  */
@@ -47,8 +41,8 @@ $inputs = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2),
 
        // arrays with string values
-/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'),
+/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'),
        array(1 => "hello", "heredoc" => $heredoc, $heredoc),
 
        // array with object, unset variable and resource variable
@@ -122,7 +116,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   float(1.2)
 }

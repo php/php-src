@@ -12,11 +12,10 @@ var_dump($serialized);
 
 $tz2 = unserialize($serialized);
 var_dump($tz2);
-// Try to use unserialzied object
+// Try to use unserialized object
 var_dump( $tz2->getName() );
 
 ?>
-===DONE===
 --EXPECTF--
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
@@ -32,4 +31,3 @@ object(DateTimeZone)#%d (2) {
   string(6) "+01:00"
 }
 string(6) "+01:00"
-===DONE===

@@ -9,32 +9,32 @@ class collection implements Iterator {
   public function __construct() {
   }
 
-  public function rewind() {
+  public function rewind(): void {
     reset($this->_elements);
   }
 
-  public function count() {
+  public function count(): int {
     return count($this->_elements);
   }
 
-  public function current() {
+  public function current(): mixed {
     $element = current($this->_elements);
     return $element;
   }
 
-  public function next() {
+  public function next(): void {
     $element = next($this->_elements);
-    return $element;
+    $element;
   }
 
-  public function key() {
+  public function key(): mixed {
     $this->_fillCollection();
     $element = key($this->_elements);
     return $element;
   }
 
-  public function valid() {
-    throw new Exception('shit happend');
+  public function valid(): bool {
+    throw new Exception('shit happened');
 
     return ($this->current() !== false);
   }
@@ -48,14 +48,14 @@ $obj = new class2();
 $col = new collection();
 
 try {
-	foreach($col as $co) {
-  	//irrelevant
-	}
-	echo 'shouldn`t get here';
-	//$dummy = 'this will not crash';
-	$obj->dummy = 'this will crash';
+    foreach($col as $co) {
+    //irrelevant
+    }
+    echo 'shouldn`t get here';
+    //$dummy = 'this will not crash';
+    $obj->dummy = 'this will crash';
 } catch (Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
 ?>
 --EXPECT--

@@ -1,5 +1,5 @@
 --TEST--
-Bug #25145 (SEGV on recpt of form input with name like "123[]")
+Bug #25145 (SEGV on receipt of form input with name like "123[]")
 --GET--
 123[]=SEGV
 --FILE--

@@ -1,7 +1,5 @@
 --TEST--
 json_encode() tests for U+2028, U+2029
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 var_dump(json_encode(array("a\xC3\xA1b")));

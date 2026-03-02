@@ -3,7 +3,6 @@ Test fgetcsv() : usage variations - with default arguments value
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
 
@@ -26,7 +25,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation7.tmp';
+$filename = __DIR__ . '/fgetcsv_variation7.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
@@ -73,7 +72,7 @@ foreach ($csv_lists as $csv_list) {
 
     // use only default arguments
     fseek($file_handle, 0, SEEK_SET);
-    var_dump( fgetcsv($file_handle) );
+    var_dump( fgetcsv($file_handle, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

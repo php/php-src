@@ -1,14 +1,14 @@
 --TEST--
 Phar: delete a file within a tar-based .phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -32,9 +32,8 @@ include $alias . '/b.php';
 include $alias . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 This is a
 This is b
@@ -46,4 +45,3 @@ This is a
 This is b
 This is b/c
 
-===DONE===

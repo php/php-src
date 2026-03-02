@@ -8,14 +8,16 @@ $strVals = array(
    "a5.9"
 );
 
-
 foreach ($strVals as $strVal) {
-   echo "--- testing: '$strVal' ---\n";
-   var_dump(-$strVal);
+    echo "--- testing: '$strVal' ---\n";
+    try {
+        var_dump(-$strVal);
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 
 ?>
-===DONE===
 --EXPECTF--
 --- testing: '0' ---
 int(0)
@@ -28,37 +30,32 @@ float(-1.2)
 --- testing: '-7.7' ---
 float(7.7)
 --- testing: 'abc' ---
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
+Unsupported operand types: string * int
 --- testing: '123abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 int(-123)
 --- testing: '123e5' ---
 float(-12300000)
 --- testing: '123e5xyz' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 float(-12300000)
 --- testing: ' 123abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 int(-123)
 --- testing: '123 abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 int(-123)
 --- testing: '123abc ' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 int(-123)
 --- testing: '3.4a' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 float(-3.4)
 --- testing: 'a5.9' ---
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-===DONE===
+Unsupported operand types: string * int

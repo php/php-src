@@ -2,11 +2,6 @@
 Test array_intersect_ukey() function : usage variation - Intersection of strings containing integer and float
 --FILE--
 <?php
-/* Prototype  : array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays using a callback function on the keys for comparison.
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialize variables
@@ -33,8 +28,7 @@ var_dump( array_intersect_ukey($arr1_string_float, $arr2_string_float, 'key_comp
 echo "\n-- Result of strings containing integers and strings containing floating points intersection --\n";
 var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_float, 'key_compare_func') );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_ukey() : usage variation ***
 
 -- Result of strings containing integers intersection --
@@ -60,4 +54,3 @@ array(2) {
   [1]=>
   string(1) "2"
 }
-===DONE===

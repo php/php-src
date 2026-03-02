@@ -2,8 +2,8 @@
 DOMNode::insertBefore() should fail if node belongs to another document
 --CREDITS--
 Knut Urdalen <knut@php.net>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -14,11 +14,11 @@ $node_in_doc1 = $doc1->createElement("foo");
 $node_in_doc2 = $doc2->createElement("bar");
 
 try {
-	$node_in_doc2->insertBefore($node_in_doc1);
+    $node_in_doc2->insertBefore($node_in_doc1);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Wrong Document Error

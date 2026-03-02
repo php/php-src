@@ -1,7 +1,7 @@
 --TEST--
 SOAP Classmap 3: encoding of inherited objects
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled",0);
@@ -26,6 +26,7 @@ function f(){
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -33,7 +34,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction("f");
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -42,13 +43,13 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/classmap003.wsdl",
+$client = new LocalSoapClient(__DIR__."/classmap003.wsdl",
     array('classmap'=>array('A'=>'A','B'=>'B')));
 print_r($client->f());
 ?>
 --EXPECT--
 B Object
 (
-    [y] => 6
     [x] => 5
+    [y] => 6
 )

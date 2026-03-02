@@ -1,22 +1,20 @@
 --TEST--
 Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindColumn()
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
+require 'testdb.inc';
 
-require("testdb.inc");
-
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$value = '2';
-@$dbh->exec('DROP TABLE testz');
-$dbh->exec('CREATE TABLE testz (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$dbh->exec('INSERT INTO testz VALUES(0, \'String0\')');
-$dbh->commit();
 
-$query = "SELECT idx, txt FROM testz ORDER by idx";
+$dbh->exec('CREATE TABLE test47415 (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
+$dbh->exec('INSERT INTO test47415 VALUES(0, \'String0\')');
+
+$query = "SELECT idx, txt FROM test47415 ORDER by idx";
 $idx = $txt = 0;
 $stmt = $dbh->prepare($query);
 $stmt->bindColumn('idx', $idx);
@@ -27,16 +25,18 @@ var_dump($stmt->fetch());
 var_dump($stmt->rowCount());
 
 
-$stmt = $dbh->prepare('DELETE FROM testz');
+$stmt = $dbh->prepare('DELETE FROM test47415');
 $stmt->execute();
-
-$dbh->commit();
-
-$dbh->exec('DROP TABLE testz');
 
 unset($stmt);
 unset($dbh);
-
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE test47415");
+unset($dbh);
 ?>
 --EXPECT--
 bool(false)

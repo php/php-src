@@ -2,11 +2,6 @@
 Test wordwrap() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
- * Description: Wraps buffer to selected number of characters using string break char
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing wordwrap() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -35,7 +30,7 @@ $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing wordwrap() : basic functionality ***
 string(96) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
 doooooooooooooooooooooog."

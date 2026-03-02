@@ -1,8 +1,10 @@
 --TEST--
 Verify php can handle filesizes >32bit
+--EXTENSIONS--
+ftp
+pcntl
 --SKIPIF--
 <?php
-require 'skipif.inc';
 if (2147483647 == PHP_INT_MAX) {
     die('skip 64-bit only');
 }

@@ -1,13 +1,13 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD0, EXIF, INTEROP data in Motorola byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-var_dump(exif_read_data(dirname(__FILE__).'/image027.tiff'));
+var_dump(exif_read_data(__DIR__.'/image027.tiff'));
 ?>
 --EXPECTF--
 array(31) {
@@ -1628,5 +1628,5 @@ array(31) {
   ["RelatedImageHeight"]=>
   int(1)
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

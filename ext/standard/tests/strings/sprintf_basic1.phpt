@@ -2,11 +2,6 @@
 Test sprintf() function : basic functionality - string format
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : basic functionality - using string format ***\n";
 
 // Initialise all required variables
@@ -32,7 +27,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using string format ***
 string(6) "format"
 string(13) "arg1 argument"

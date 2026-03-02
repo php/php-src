@@ -1,0 +1,30 @@
+$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c: ext\com_dotnet\tests\comtest\comtest.idl
+	-md $(BUILD_DIR)\ext\com_dotnet\tests\comtest
+	midl /nologo /h $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.h /iid $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c /tlb $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.tlb ext\com_dotnet\tests\comtest\comtest.idl
+
+$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj: ext\com_dotnet\tests\comtest\comtest.cpp $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c
+	$(PHP_CL) /nologo /c /Fo$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj /I $(BUILD_DIR)\ext\com_dotnet\tests\comtest ext\com_dotnet\tests\comtest\comtest.cpp
+	$(PHP_CL) /nologo /c /Fo$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.c
+
+$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll: $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj ext\com_dotnet\tests\comtest\comtest.def
+	"$(LINK)" /nologo /dll /out:$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.obj $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest_i.obj /def:ext\com_dotnet\tests\comtest\comtest.def OleAut32.lib
+
+comtest.dll: $(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll
+
+register_comtest:
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747} /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0 /d "PHP COM Test Library" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\0 /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\0\win32 /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.tlb" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\0\win64 /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.tlb" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\FLAGS /d 0 /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747}\1.0\HELPDIR /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878} /d "PHP COM Test Document" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878}\InprocServer32 /d "$(BUILD_DIR)\ext\com_dotnet\tests\comtest\comtest.dll" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\PHPTest.Document /d "PHP COM Test Document" /f > NUL
+	@reg add HKCU\SOFTWARE\Classes\PHPTest.Document\CLSID /d "{B13FE324-D595-44C7-97D7-82CE20EDF878}" /f > NUL
+
+unregister_comtest:
+	-@reg delete HKCU\SOFTWARE\Classes\PHPTest.Document /f > NUL
+	-@reg delete HKCU\SOFTWARE\Classes\CLSID\{B13FE324-D595-44C7-97D7-82CE20EDF878} /f > NUL
+	-@reg delete HKCU\SOFTWARE\Classes\TypeLib\{AE8685BE-3758-4BDA-91DB-1459EBA24747} /f > NUL

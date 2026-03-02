@@ -3,23 +3,23 @@ DomDocument::schemaValidate() - non-existent schema file
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
-$result = $doc->schemaValidate(dirname(__FILE__)."/non-existent-file");
+$result = $doc->schemaValidate(__DIR__."/non-existent-file");
 var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidate(): I/O warning : failed to load external entity "%snon-existent-file" in %s.php on line %d
+Warning: DOMDocument::schemaValidate(): I/O %s : failed to load %s
 
-Warning: DOMDocument::schemaValidate(): Failed to locate the main schema resource at '%s/non-existent-file'. in %s.php on line %d
+Warning: DOMDocument::schemaValidate(): Failed to locate the main schema resource at '%snon-existent-file'. in %s on line %d
 
-Warning: DOMDocument::schemaValidate(): Invalid Schema in %s.php on line %d
+Warning: DOMDocument::schemaValidate(): Invalid Schema in %s on line %d
 bool(false)

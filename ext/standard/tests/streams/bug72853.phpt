@@ -10,8 +10,8 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 <?php
 
 $descs = array(
-	0 => array('pipe', 'r'), // stdin
-	1 => array('pipe', 'w'), // stdout
+    0 => array('pipe', 'r'), // stdin
+    1 => array('pipe', 'w'), // stdout
 );
 
 $p = proc_open("ls", $descs, $pipes, '.', NULL, NULL);
@@ -24,7 +24,7 @@ while ($outs = fgets($pipes[1], 1024)) {
 var_dump(stream_get_meta_data($pipes[1]));
 proc_close($p);
 ?>
---EXPECTF--
+--EXPECT--
 array(7) {
   ["timed_out"]=>
   bool(false)

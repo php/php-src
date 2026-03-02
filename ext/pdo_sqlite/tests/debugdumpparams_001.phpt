@@ -1,13 +1,11 @@
 --TEST--
 Testing PDOStatement::debugDumpParams() with bound params
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $x= $db->prepare('select :a, :b, ?');
 $x->bindValue(':a', 1, PDO::PARAM_INT);

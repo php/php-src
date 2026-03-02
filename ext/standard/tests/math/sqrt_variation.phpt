@@ -5,7 +5,6 @@ precision = 14
 --FILE--
 <?php
 /*
- * proto float sqrt(float number)
  * Function is implemented in ext/standard/math.c
 */
 
@@ -14,47 +13,35 @@ precision = 14
 echo "*** Testing sqrt() : usage variations ***\n";
 
 $values = array(23,
-		-23,
-		2.345e1,
-		-2.345e1,
-		0x17,
-		027,
-		"23",
-		"23.45",
-		"2.345e1",
-		"nonsense",
-		"1000",
-		"1000ABC",
-		null,
-		true,
-		false);
+        -23,
+        2.345e1,
+        -2.345e1,
+        0x17,
+        027,
+        "23",
+        "23.45",
+        "2.345e1",
+        "1000",
+        true,
+        false);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = sqrt($values[$i]);
-	var_dump($res);
+    $res = sqrt($values[$i]);
+    var_dump($res);
 }
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing sqrt() : usage variations ***
-float(4.7958315233127)
+float(4.795831523312719)
 float(NAN)
 float(4.8425200051213)
 float(NAN)
-float(4.7958315233127)
-float(4.7958315233127)
-float(4.7958315233127)
+float(4.795831523312719)
+float(4.795831523312719)
+float(4.795831523312719)
 float(4.8425200051213)
 float(4.8425200051213)
-
-Warning: sqrt() expects parameter 1 to be float, string given in %s on line %d
-NULL
-float(31.622776601684)
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(31.622776601684)
-float(0)
+float(31.622776601683793)
 float(1)
 float(0)
-===Done===

@@ -2,12 +2,6 @@
 Test preg_match_all() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
- * Description: Perform a Perl-style global regular expression match
- * Source code: ext/pcre/php_pcre.c
- * Alias to functions:
-*/
-
 $string = 'Hello, world! This is a test. This is another test. \[4]. 34534 string.';
 
 var_dump(preg_match_all('/[0-35-9]/', $string, $match1, PREG_OFFSET_CAPTURE|PREG_PATTERN_ORDER, -10));               	//finds any digit that's not 4 10 digits from the end(1 match)
@@ -25,7 +19,7 @@ var_dump($match4);
 var_dump(preg_match_all('/(This is a ){2}(.*)\stest/', $string, $match5));							//tries to find "This is aThis is a [...] test" (0 matches)
 var_dump($match5);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(1) {
   [0]=>

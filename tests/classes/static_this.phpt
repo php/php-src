@@ -5,21 +5,21 @@ ZE2 $this can be an argument to a static function
 
 class TestClass
 {
-	function __construct()
-	{
-		self::Test1();
-		$this->Test1();
-	}
+    function __construct()
+    {
+        self::Test1();
+        $this->Test1();
+    }
 
-	static function Test1()
-	{
-		var_dump($this);
-	}
+    static function Test1()
+    {
+        var_dump($this);
+    }
 
-	static function Test2($this)
-	{
-		var_dump($this);
-	}
+    static function Test2($this)
+    {
+        var_dump($this);
+    }
 }
 
 $obj = new TestClass;

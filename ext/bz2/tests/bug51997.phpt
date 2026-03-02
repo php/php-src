@@ -1,7 +1,7 @@
 --TEST--
 Bug #51997 (SEEK_CUR with 0 value, returns a warning)
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 
@@ -19,5 +19,6 @@ print bzread($bz, 10);
 print bzread($bz);
 bzclose($bz);
 unlink($filename);
+?>
 --EXPECT--
 This is a test string.

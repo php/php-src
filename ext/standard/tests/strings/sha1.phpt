@@ -3,20 +3,20 @@ sha1() with ASCII output
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/sha1.dat";
+$filename = __DIR__."/sha1.dat";
 $a = array(
-	"abc",
-	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-	"a",
-	"0123456701234567012345670123456701234567012345670123456701234567",
-	""
+    "abc",
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "a",
+    "0123456701234567012345670123456701234567012345670123456701234567",
+    ""
 );
 
 foreach ($a as $str) {
-	var_dump($val1 = sha1($str));
-	file_put_contents($filename, $str);
-	var_dump($val2 = sha1_file($filename));
-	var_dump($val1 === $val2);
+    var_dump($val1 = sha1($str));
+    file_put_contents($filename, $str);
+    var_dump($val2 = sha1_file($filename));
+    var_dump($val1 === $val2);
 }
 
 var_dump(sha1($str, true));
@@ -47,5 +47,5 @@ bool(true)
 string(20) "%a"
 string(20) "%a"
 
-Warning: sha1_file(%ssha1.dat): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(%ssha1.dat): Failed to open stream: No such file or directory in %s on line %d
 Done

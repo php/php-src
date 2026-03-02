@@ -1,17 +1,9 @@
 --TEST--
 Test mb_strlen() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strlen') or die("skip mb_strlen() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test basic functionality of mb_strlen()
  */
@@ -30,7 +22,7 @@ var_dump(mb_strlen($string_mb, 'UTF-8'));
 
 echo "\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strlen() : basic functionality***
 
 -- ASCII String --

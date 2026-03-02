@@ -1,11 +1,11 @@
 --TEST--
 XMLReader: Schema validation
+--EXTENSIONS--
+xmlreader
 --SKIPIF--
-<?php if (!extension_loaded('xmlreader')) die('skip');?>
 <?php if (!method_exists('XMLReader','setSchema')) die('skip XMLReader::setSchema() not supported');?>
 --FILE--
 <?php
-/* $Id$ */
 
 $xml =<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -17,12 +17,12 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read()) {
-	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
-		$reader->read();
-		var_dump($reader->value);
-	}
+    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
+        $reader->read();
+        var_dump($reader->value);
+    }
 }
 $reader->close();
 
@@ -37,16 +37,14 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "123"
 string(3) "456"
 ===FAIL===
 
 Warning: XMLReader::read(): Element 'foo': %s
-===DONE===

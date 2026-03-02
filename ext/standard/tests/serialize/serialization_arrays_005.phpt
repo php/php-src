@@ -2,36 +2,25 @@
 serialization: arrays with references, nested
 --FILE--
 <?php
-/* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized)
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-/* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 function check(&$a) {
-	var_dump($a);
-	$ser = serialize($a);
-	var_dump($ser);
+    var_dump($a);
+    $ser = serialize($a);
+    var_dump($ser);
 
-	$b = unserialize($ser);
+    $b = unserialize($ser);
 
-	// Change each element and dump result.
-	foreach($b as $k=>$v) {
-		if (is_array($v)){
-			foreach($b[$k] as $sk=>$sv) {
-				$b[$k][$sk] = "b$k.$sk.changed";
-				var_dump($b);
-			}
-		} else {
-			$b[$k] = "b$k.changed";
-			var_dump($b);
-		}
-	}
+    // Change each element and dump result.
+    foreach($b as $k=>$v) {
+        if (is_array($v)){
+            foreach($b[$k] as $sk=>$sv) {
+                $b[$k][$sk] = "b$k.$sk.changed";
+                var_dump($b);
+            }
+        } else {
+            $b[$k] = "b$k.changed";
+            var_dump($b);
+        }
+    }
 }
 
 echo "\n\n--- Nested array references 1 element in containing array:\n";
@@ -78,7 +67,7 @@ $a[1] = &$c;
 check($c);
 
 ?>
---EXPECTF--
+--EXPECT--
 --- Nested array references 1 element in containing array:
 array(3) {
   [0]=>
@@ -435,14 +424,7 @@ array(3) {
     [0]=>
     int(1)
     [1]=>
-    &array(3) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(1)
-      [2]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 string(74) "a:3:{i:0;i:1;i:1;i:1;i:2;a:2:{i:0;i:1;i:1;a:3:{i:0;i:1;i:1;i:1;i:2;R:4;}}}"

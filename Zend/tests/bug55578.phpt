@@ -11,7 +11,7 @@ class Foo {
 }
 
 function test($options, $queryPart) {
-	return ''. (0 ? 1 : $queryPart);
+    return ''. (0 ? 1 : $queryPart);
 }
 
 var_dump(test($options, new Foo()));

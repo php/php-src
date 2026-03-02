@@ -2,11 +2,6 @@
 Test strtok() function : usage variations - invalid escape sequences as tokens
 --FILE--
 <?php
-/* Prototype  : string strtok ( str $str, str $token )
- * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing strtok() : with invalid escape sequences in token
 */
@@ -15,18 +10,18 @@ echo "*** Testing strtok() : with invalid escape sequences in token ***\n";
 
 // defining arrays for input strings and tokens
 $string_array = array(
- 		       "khellok worldk",
- 		       "\khello\k world\k",
- 		       "/khello\k world/k",
- 		       "/hellok/ world"
- 		     );
+               "khellok worldk",
+               "\khello\k world\k",
+               "/khello\k world/k",
+               "/hellok/ world"
+             );
 $token_array = array(
-		       "k",
-		       "/ ",
-		       "/k",
-		       "\k",
-		       "\\\\\\\k\h\\e\l\o\w\r\l\d"
- 		    );
+               "k",
+               "/ ",
+               "/k",
+               "\k",
+               "\\\\\\\k\h\\e\l\o\w\r\l\d"
+            );
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string and token values
@@ -74,6 +69,8 @@ bool(false)
 string(1) " "
 string(1) "r"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 
@@ -96,11 +93,15 @@ bool(false)
 string(5) "hello"
 string(6) " world"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 string(1) " "
 string(1) "r"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 
@@ -118,6 +119,8 @@ bool(false)
 string(6) "hello\"
 string(6) " world"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 string(1) "/"

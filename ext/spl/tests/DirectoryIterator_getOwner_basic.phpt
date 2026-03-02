@@ -1,8 +1,12 @@
 --TEST--
 SPL: DirectoryIterator test getOwner
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY === 'Windows') { die('SKIP Testing file ownership, not available for Windows'); }
 if (posix_geteuid() == 0) die('SKIP Cannot run test as root.');
+?>
 --CREDITS--
 Cesare D'Amico <cesare.damico@gruppovolta.it>
 Andrea Giorgini <agiorg@gmail.com>
@@ -25,5 +29,5 @@ var_dump($expected == $actual);
 $dirname = 'DirectoryIterator_getOwner_basic';
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

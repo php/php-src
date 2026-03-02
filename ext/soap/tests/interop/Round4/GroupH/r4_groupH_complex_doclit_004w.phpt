@@ -1,28 +1,21 @@
 --TEST--
 SOAP Interop Round4 GroupH Complex Doc Lit 004 (php/wsdl): echoMultipleFaults1(1)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 class BaseStruct {
-    function __construct($f, $s) {
-        $this->structMessage = $f;
-        $this->shortMessage = $s;
-    }
+    function __construct(public $structMessage, public $shortMessage) {}
 }
 $s1 = new SOAPStruct('arg1',34,325.325);
 $s2 = new BaseStruct(new SOAPStruct('arg2',34,325.325),12);
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults1(array("whichFault" => 1,
                                    "param1"     => $s1,
                                    "param2"     => $s2));

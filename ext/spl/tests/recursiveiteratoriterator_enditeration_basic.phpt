@@ -14,7 +14,7 @@ foreach ($iterator as $element) {
 }
 
 class EndIterationRecursiveIteratorIterator extends RecursiveIteratorIterator {
-  public function endIteration() {
+  public function endIteration(): void {
     echo "::endIteration() was invoked\n";
   }
 }

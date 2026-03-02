@@ -1,11 +1,12 @@
 --TEST--
 PDO_Firebird: Bug #76488 Memory leak when fetching a BLOB field
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
-<?php if (!extension_loaded('interbase') || !extension_loaded('pdo_firebird')) die('skip'); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 require 'testdb.inc';
-$dbh = new PDO('firebird:dbname='.$test_base, $user, $password) or die;
 
 $sql = '
 with recursive r(n) as (
@@ -15,18 +16,20 @@ with recursive r(n) as (
 )
 select n,
        cast(lpad(\'A\', 8000, \'A\') as BLOB sub_type TEXT) as SRC
-from r 
+from r
 ';
 
-    for ($i = 0; $i < 10; $i++) {
-        $sth = $dbh->prepare($sql);
-        $sth->execute();
-        $rows = $sth->fetchAll();
-	    unset($rows);
-	    unset($sth);
-    }
-    unset($dbh);
-    echo "OK";
+$dbh = getDbConnection();
+
+for ($i = 0; $i < 10; $i++) {
+    $sth = $dbh->prepare($sql);
+    $sth->execute();
+    $rows = $sth->fetchAll();
+    unset($rows);
+    unset($sth);
+}
+unset($dbh);
+echo "OK";
 ?>
 --EXPECT--
 OK

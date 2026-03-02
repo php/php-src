@@ -1,16 +1,15 @@
 --TEST--
 Bug #34704 (Infinite recursion due to corrupt JPEG)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-$infile = dirname(__FILE__).'/bug34704私はガラスを食べられます.jpg';
+$infile = __DIR__.'/bug34704私はガラスを食べられます.jpg';
 var_dump(exif_read_data($infile));
 ?>
-===DONE===
 --EXPECTF--
 array(7) {
   ["FileName"]=>
@@ -39,4 +38,3 @@ array(7) {
     int(0)
   }
 }
-===DONE===

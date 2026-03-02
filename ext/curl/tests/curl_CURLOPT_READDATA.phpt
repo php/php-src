@@ -3,15 +3,15 @@ Test CURLOPT_READDATA without a callback function
 --CREDITS--
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
 include 'server.inc';
 $host = curl_cli_server_start();
 // The URL to POST to
-$url = $host . '/get.php?test=post';
+$url = $host . '/get.inc?test=post';
 
 // Create a temporary file to read the data from
 $tempname = tempnam(sys_get_temp_dir(), 'CURL_DATA');
@@ -32,10 +32,9 @@ if (false === $response = curl_exec($ch)) {
     echo $response;
 }
 
-curl_close($ch);
-
 // Clean the temporary file
 @unlink($tempname);
+?>
 --EXPECT--
 array(2) {
   ["hello"]=>

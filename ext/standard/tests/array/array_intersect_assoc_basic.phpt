@@ -2,12 +2,6 @@
 Test array_intersect_assoc() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing the behavior of array_intersect_assoc() by passing different arrays for the arguments.
 * Function is tested by passing associative array as well as array with default keys.
@@ -40,7 +34,7 @@ var_dump( array_intersect_assoc($arr_associative, $arr_default_keys, $arr3, $arr
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : basic functionality ***
 array(4) {
   [0]=>

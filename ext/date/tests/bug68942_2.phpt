@@ -8,7 +8,7 @@ var_dump($data);
 --EXPECTF--
 Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug68942_2.php:%d
 Stack trace:
-#0 [internal function]: DateTime->__wakeup()
+#0 [internal function]: DateTime->__unserialize(Array)
 #1 %sbug68942_2.php(%d): unserialize('a:2:{i:0;O:8:"D...')
 #2 {main}
   thrown in %sbug68942_2.php on line %d

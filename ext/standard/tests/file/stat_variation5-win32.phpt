@@ -9,14 +9,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the stats of file opened in write mode and then same in read mode */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -32,7 +27,7 @@ fclose($file_handle);
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 // opening file again in read mode
 $file_handle = fopen($filename, "r");  // read file
 fclose($file_handle);
@@ -42,7 +37,7 @@ var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
 $affected_members = array(10, 'ctime');
-var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 // clear the stat
 clearstatcache();
 
@@ -51,10 +46,10 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation5.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): on a file with read/write permission ***
 bool(true)
 bool(true)

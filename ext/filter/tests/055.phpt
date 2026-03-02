@@ -1,32 +1,36 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_MAC
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $values = Array(
-	array("01-23-45-67-89-ab", null),
-	array("01-23-45-67-89-ab", array("options" => array("separator" => "-"))),
-	array("01-23-45-67-89-ab", array("options" => array("separator" => "."))),
-	array("01-23-45-67-89-ab", array("options" => array("separator" => ":"))),
-	array("01-23-45-67-89-AB", null),
-	array("01-23-45-67-89-aB", null),
-	array("01:23:45:67:89:ab", null),
-	array("01:23:45:67:89:AB", null),
-	array("01:23:45:67:89:aB", null),
-	array("01:23:45-67:89:aB", null),
-	array("xx:23:45:67:89:aB", null),
-	array("0123.4567.89ab", null),
-	array("01-23-45-67-89-ab", array("options" => array("separator" => "--"))),
-	array("01-23-45-67-89-ab", array("options" => array("separator" => ""))),
+    array("01-23-45-67-89-ab", 0),
+    array("01-23-45-67-89-ab", array("options" => array("separator" => "-"))),
+    array("01-23-45-67-89-ab", array("options" => array("separator" => "."))),
+    array("01-23-45-67-89-ab", array("options" => array("separator" => ":"))),
+    array("01-23-45-67-89-AB", 0),
+    array("01-23-45-67-89-aB", 0),
+    array("01:23:45:67:89:ab", 0),
+    array("01:23:45:67:89:AB", 0),
+    array("01:23:45:67:89:aB", 0),
+    array("01:23:45-67:89:aB", 0),
+    array("xx:23:45:67:89:aB", 0),
+    array("0123.4567.89ab", 0),
+    array("01-23-45-67-89-ab", array("options" => array("separator" => "--"))),
+    array("01-23-45-67-89-ab", array("options" => array("separator" => ""))),
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value[0], FILTER_VALIDATE_MAC, $value[1]));
+    try {
+        var_dump(filter_var($value[0], FILTER_VALIDATE_MAC, $value[1]));
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(17) "01-23-45-67-89-ab"
 string(17) "01-23-45-67-89-ab"
 bool(false)
@@ -39,10 +43,6 @@ string(17) "01:23:45:67:89:aB"
 bool(false)
 bool(false)
 string(14) "0123.4567.89ab"
-
-Warning: filter_var(): Separator must be exactly one character long in %s055.php on line %d
-bool(false)
-
-Warning: filter_var(): Separator must be exactly one character long in %s055.php on line %d
-bool(false)
+filter_var(): "separator" option must be one character long
+filter_var(): "separator" option must be one character long
 Done

@@ -1,17 +1,17 @@
 --TEST--
 iconv() test 2 (UCS4BE to ASCII)
+--EXTENSIONS--
+iconv
 --SKIPIF--
 <?php
-include('skipif.inc');
 if (@iconv("ascii","UCS-4LE", "abcd") == '') {
-	die("skip conversion to UCS-4LE not supported");
+    die("skip conversion to UCS-4LE not supported");
 }
 ?>
 --INI--
 error_reporting=2039
 --FILE--
 <?php
-/* include('test.inc'); */
 /*
 Expected output:
 &#97;&#98;&#99;&#100;

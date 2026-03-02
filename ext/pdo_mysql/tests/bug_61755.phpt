@@ -1,16 +1,16 @@
 --TEST--
 Bug #61755 (A parsing bug in the prepared statements can lead to access violations)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -31,7 +31,7 @@ try {
 
 echo "\ndone!\n";
 ?>
---EXPECTF--
+--EXPECT--
 NULL-Byte before first placeholder:
 Length of item 0: 3, Value of item 1: c
 

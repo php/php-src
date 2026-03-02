@@ -6,17 +6,17 @@ Sebastian Schürmann
 <?php
 class myIterator implements Iterator {
 
-	function current() {}
-	function next() {}
-	function key() {}
-	function valid() {}
-	function rewind() {}
+    function current(): mixed {}
+    function next(): void {}
+    function key(): mixed {}
+    function valid(): bool {}
+    function rewind(): void {}
 
 }
 try {
-	$it = new myIterator();
+    $it = new myIterator();
 } catch (InvalidArgumentException $e) {
-	echo 'InvalidArgumentException thrown';
+    echo 'InvalidArgumentException thrown';
 }
 echo 'no Exception thrown';
 ?>

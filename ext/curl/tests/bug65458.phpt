@@ -1,9 +1,7 @@
 --TEST--
 Bug #65458 (curl memory leak)
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $ch = curl_init();
@@ -13,7 +11,7 @@ for ($i = 0; $i < 10000; $i++) {
 }
 
 $preclose = memory_get_usage();
-curl_close($ch);
+$ch = null;
 
 // This is a slightly tricky heuristic, but basically, we want to ensure
 // $preclose - $init has a delta in the order of bytes, not megabytes. Given

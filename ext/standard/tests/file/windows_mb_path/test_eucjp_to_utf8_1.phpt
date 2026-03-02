@@ -1,14 +1,14 @@
 --TEST--
 Test mkdir/rmdir eucjp to UTF-8 path
+--EXTENSIONS--
+iconv
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
 ?>
+--CONFLICTS--
+dir_eucjp
 --FILE--
 <?php
 /*
@@ -16,13 +16,13 @@ skip_if_no_required_exts();
 #vim: set encoding=eucjp
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('eucjp', 'utf-8', "�ƥ��ȥޥ���Х��ȡ��ѥ�"); // EUCJP string
-$prefix = create_data("dir_eucjp", "${item}42");
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_eucjp", "{$item}42");
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -36,7 +36,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_eucjp");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +47,3 @@ bool(true)
 string(%d) "%s\テストマルチバイト・パス42\テストマルチバイト・パス4"
 Active code page: %d
 bool(true)
-===DONE===

@@ -14,13 +14,8 @@ if (PHP_INT_SIZE < 8) {
 --FILE--
 <?php
 setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8");
-/* Prototype: mixed var_export( mixed expression [, bool return]);
- * Description: Returns the variable representation when the return parameter is used and evaluates to TRUE. Otherwise, this function will return NULL.
-
-*/
-
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues
+// different integer values
 $valid_ints = array(
                 '0',
                 '1',
@@ -56,14 +51,14 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid boolean values ***\n";
-// different valid  boolean vlaues
+// different valid  boolean values
 $valid_bool = array(
-		    1,
-		    TRUE,
+            1,
+            TRUE,
                 true,
                 0,
-		    FALSE,
-		    false
+            FALSE,
+            false
                );
 $counter = 1;
 /* Loop to check for above boolean values with var_export() */
@@ -80,7 +75,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float vlaues
+// different valid  float values
 $valid_floats = array(
   (float)-2147483649, // float value
   (float)2147483648,  // float value
@@ -241,7 +236,7 @@ class myClass
     $this->public_var = 10;
     $this->public_var1 = new foo();
     $this->private_var = new foo();
-    $this->proected_var = new foo();
+    $this->protected_var = new foo();
   }
 }
 
@@ -279,7 +274,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid null values ***\n";
-// different valid  null vlaues
+// different valid  null values
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;
@@ -303,18 +298,11 @@ echo "\n";
 $counter++;
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_export( var_export() );
-
-//arguments more than expected
-var_export( var_export(TRUE, FALSE, TRUE) );
-
-echo "\n\nDone";
+echo "\nDone";
 
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing var_export() with integer values ***
 
 *** Output for integer values ***
@@ -917,44 +905,44 @@ string(41) "array (
 *** Output for objects ***
 
 Iteration 1
-stdClass::__set_state(array(
-))
-stdClass::__set_state(array(
-))
-string(31) "stdClass::__set_state(array(
-))"
+(object) array(
+)
+(object) array(
+)
+string(17) "(object) array(
+)"
 
 
 Iteration 2
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 3
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"
 
 
 Iteration 4
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -962,146 +950,140 @@ string(57) "Value::__set_state(array(
 
 
 Iteration 5
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))"
 
 
 Iteration 6
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))"
 
 
 Iteration 7
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 8
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 9
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 10
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -1109,11 +1091,11 @@ string(57) "Value::__set_state(array(
 
 
 Iteration 11
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"
 
 *** Testing var_export() with valid null values ***
@@ -1137,12 +1119,5 @@ NULL
 NULL
 string(4) "NULL"
 
-
-*** Testing error conditions ***
-
-Warning: var_export() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-Warning: var_export() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 Done

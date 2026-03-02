@@ -5,8 +5,8 @@ Bug #41884 (ReflectionClass::getDefaultProperties() does not handle static attri
 
 class Foo
 {
-	protected static $fooStatic = 'foo';
-	protected $foo = 'foo';
+    protected static $fooStatic = 'foo';
+    protected $foo = 'foo';
 }
 
 $class = new ReflectionClass('Foo');
@@ -15,7 +15,7 @@ var_dump($class->getDefaultProperties());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["fooStatic"]=>
   string(3) "foo"

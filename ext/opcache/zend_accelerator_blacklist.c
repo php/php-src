@@ -2,20 +2,20 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -30,20 +30,14 @@
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #include "ext/pcre/php_pcre.h"
 
 #define ZEND_BLACKLIST_BLOCK_SIZE	32
 
 struct _zend_regexp_list {
-	pcre             *re;
+	pcre2_code       *re;
 	zend_regexp_list *next;
 };
 
@@ -58,9 +52,9 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 		zend_accel_blacklist_shutdown(blacklist);
 	}
 
-	blacklist->entries = (zend_blacklist_entry *) calloc(sizeof(zend_blacklist_entry), blacklist->size);
+	blacklist->entries = (zend_blacklist_entry *) calloc(blacklist->size, sizeof(zend_blacklist_entry));
 	if (!blacklist->entries) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Blacklist initialization: no memory\n");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Blacklist initialization: no memory\n");
 		return;
 	}
 	blacklist->regexp_list = NULL;
@@ -68,15 +62,17 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 
 static void blacklist_report_regexp_error(const char *pcre_error, int pcre_error_offset)
 {
-	zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation failed (offset: %d), %s\n", pcre_error_offset, pcre_error);
+	zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Blacklist compilation failed (offset: %d), %s\n", pcre_error_offset, pcre_error);
 }
 
 static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
-	const char *pcre_error;
-	int i, pcre_error_offset;
+	PCRE2_UCHAR pcre_error[128];
+	int i, errnumber;
+	PCRE2_SIZE pcre_error_offset;
 	zend_regexp_list **regexp_list_it, *it;
 	char regexp[12*1024], *p, *end, *c, *backtrack = NULL;
+	pcre2_compile_context *cctx = php_pcre_cctx();
 
 	if (blacklist->pos == 0) {
 		/* we have no blacklist to talk about */
@@ -151,7 +147,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 					case '}':
 					case '\\':
 						*p++ = '\\';
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					default:
 						*p++ = *c++;
 				}
@@ -161,27 +157,36 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 		if (*c || i == blacklist->pos - 1) {
 			if (*c) {
 				if (!backtrack) {
-					zend_accel_error(ACCEL_LOG_ERROR, "Too long blacklist entry\n");
+					zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Too long blacklist entry\n");
 				}
 				p = backtrack;
 			} else {
 				i++;
 			}
 			*p++ = ')';
-			*p++ = '\0';
 
 			it = (zend_regexp_list*)malloc(sizeof(zend_regexp_list));
 			if (!it) {
-				zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+				zend_accel_error_noreturn(ACCEL_LOG_ERROR, "malloc() failed\n");
 				return;
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre_compile(regexp, PCRE_NO_AUTO_CAPTURE, &pcre_error, &pcre_error_offset, 0)) == NULL) {
+			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, p - regexp, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
 				free(it);
-				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
+				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
+				blacklist_report_regexp_error((char *)pcre_error, pcre_error_offset);
 				return;
 			}
+#ifdef HAVE_PCRE_JIT_SUPPORT
+			if (PCRE_G(jit)) {
+				if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
+					/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
+					pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
+					zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+				}
+			}
+#endif
 			/* prepare for the next iteration */
 			p = regexp + 2;
 			*regexp_list_it = it;
@@ -196,8 +201,11 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 
 void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 {
-	zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
+	if (!blacklist->entries) {
+		return;
+	}
 
+	const zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
 	while (p<end) {
 		free(p->path);
 		p++;
@@ -207,7 +215,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 	if (blacklist->regexp_list) {
 		zend_regexp_list *temp, *it = blacklist->regexp_list;
 		while (it) {
-			pcre_free(it->re);
+			pcre2_code_free(it->re);
 			temp = it;
 			it = it->next;
 			free(temp);
@@ -223,15 +231,11 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 	}
 }
 
-#ifdef HAVE_GLOB
 static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filename)
-#else
-void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
-#endif
 {
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1], *blacklist_path = NULL;
 	FILE *fp;
-	int path_length, blacklist_path_length;
+	int path_length, blacklist_path_length = 0;
 
 	if ((fp = fopen(filename, "r")) == NULL) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Cannot load blacklist file: %s\n", filename);
@@ -266,12 +270,12 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		}
 
 		/* strip \" */
-		if (pbuf[0] == '\"' && pbuf[path_length - 1]== '\"') {
+		if (path_length > 0 && pbuf[0] == '\"' && pbuf[path_length - 1]== '\"') {
 			*pbuf++ = 0;
 			path_length -= 2;
 		}
 
-		if (path_length == 0) {
+		if (path_length <= 0) {
 			continue;
 		}
 
@@ -294,7 +298,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		blacklist->entries[blacklist->pos].path_length = path_length;
 		blacklist->entries[blacklist->pos].path = (char *)malloc(path_length + 1);
 		if (!blacklist->entries[blacklist->pos].path) {
-			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "malloc() failed\n");
 			fclose(fp);
 			return;
 		}
@@ -306,21 +310,19 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	if (blacklist_path) {
 		free(blacklist_path);
 	}
-	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-#ifdef HAVE_GLOB
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
-	glob_t globbuf;
+	php_glob_t globbuf;
 	int    ret;
 	unsigned int i;
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 
-	ret = glob(filename, 0, NULL, &globbuf);
-#ifdef GLOB_NOMATCH
-	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+	ret = php_glob(filename, 0, NULL, &globbuf);
+#ifdef PHP_GLOB_NOMATCH
+	if (ret == PHP_GLOB_NOMATCH || !globbuf.gl_pathc) {
 #else
 	if (!globbuf.gl_pathc) {
 #endif
@@ -329,30 +331,39 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		for(i=0 ; i<globbuf.gl_pathc; i++) {
 			zend_accel_blacklist_loadone(blacklist, globbuf.gl_pathv[i]);
 		}
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 	}
+	zend_accel_blacklist_update_regexp(blacklist);
 }
-#endif
 
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path)
+bool zend_accel_blacklist_is_blacklisted(const zend_blacklist *blacklist, const char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
-	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
+	const zend_regexp_list *regexp_list_it = blacklist->regexp_list;
+	pcre2_match_context *mctx = php_pcre_mctx();
 
 	if (regexp_list_it == NULL) {
-		return 0;
+		return false;
 	}
 	while (regexp_list_it != NULL) {
-		if (pcre_exec(regexp_list_it->re, NULL, verify_path, strlen(verify_path), 0, 0, NULL, 0) >= 0) {
+		pcre2_match_data *match_data = php_pcre_create_match_data(0, regexp_list_it->re);
+		if (!match_data) {
+			/* Alloc failed, but next one could still come through and match. */
+			continue;
+		}
+		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, verify_path_len, 0, 0, match_data, mctx);
+		if (rc >= 0) {
 			ret = 1;
+			php_pcre_free_match_data(match_data);
 			break;
 		}
+		php_pcre_free_match_data(match_data);
 		regexp_list_it = regexp_list_it->next;
 	}
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
+void zend_accel_blacklist_apply(const zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
 {
 	int i;
 

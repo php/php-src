@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: foreach
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $sxe = simplexml_load_string(<<<EOF
@@ -18,8 +18,6 @@ EOF
 );
 var_dump($sxe->children());
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
@@ -32,4 +30,3 @@ object(SimpleXMLElement)#%d (3) {
   ["elem11"]=>
   string(10) "Bla bla 2."
 }
-===DONE===

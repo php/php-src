@@ -1,19 +1,19 @@
 --TEST--
-ReflectionClass::export() - array constants
+ReflectionClass::__toString() - array constants
 --FILE--
 <?php
 Class A {
-	const A = 8;
-	const B = ["a", "b"];
+    const A = 8;
+    const B = ["a", "b"];
 }
-ReflectionClass::export("A");
+echo new ReflectionClass("A"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class A ] {
   @@ %s 2-5
 
   - Constants [2] {
-    Constant [ public integer A ] { 8 }
+    Constant [ public int A ] { 8 }
     Constant [ public array B ] { Array }
   }
 

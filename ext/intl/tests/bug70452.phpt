@@ -1,7 +1,7 @@
 --TEST--
 Bug #70452 string IntlChar::charName() can sometimes return bool(false)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 // Rely on the default value for the second parameter

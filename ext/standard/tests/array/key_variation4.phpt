@@ -2,11 +2,6 @@
 Test key() function : usage variations
 --FILE--
 <?php
-/* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how key() behaves with muti-dimensional and recursive arrays
  */
@@ -44,8 +39,7 @@ var_dump(key($multi_array[3][3][3]));
 // see if internal pointer is in the same position from when accessing this inner array
 var_dump(key($multi_array[3][3][3][1]));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Two Dimensional Array --
@@ -60,4 +54,3 @@ Initial Position: int(0)
 Current Position: int(2)
 int(2)
 int(0)
-===DONE===

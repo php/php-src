@@ -24,20 +24,19 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal | $otherVal ---\n";
+       echo "--- testing: $longVal | $otherVal ---\n";
       var_dump($longVal|$otherVal);
    }
 }
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	   echo "--- testing: $otherVal | $longVal ---\n";
+       echo "--- testing: $otherVal | $longVal ---\n";
       var_dump($otherVal|$longVal);
    }
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 | 0 ---
 int(9223372036854775807)
@@ -579,5 +578,3 @@ int(-1)
 int(-1)
 --- testing: 9223372036854775807 | -9.2233720368548E+18 ---
 int(-1)
-===DONE===
-	

@@ -1,22 +1,19 @@
 --TEST--
 Bug #49072 (feof never returns true for damaged file in zip)
---SKIPIF--
-<?php
-/* $Id$ */
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
-$f = dirname(__FILE__)  . '/bug49072.zip';
+$f = __DIR__  . '/bug49072.zip';
 $o = new ZipArchive();
 if (! $o->open($f, ZipArchive::CHECKCONS)) {
-	exit ('error can\'t open');
+    exit ('error can\'t open');
 }
 $r = $o->getStream('file1'); // this file has a wrong crc
 if (!$r)die('failed to open a stream for file1');
 $s = '';
 while (! feof($r)) {
-	$s .= fread($r,1024);
+    $s .= fread($r,1024);
 }
 ?>
 --EXPECTF--

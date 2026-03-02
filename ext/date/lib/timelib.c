@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,14 +35,17 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-const char *timelib_error_messages[8] = {
+const char *timelib_error_messages[10] = {
 	"No error",
-	"Can not allocate buffer for parsing",
+	"Cannot allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
 	"Corrupt tzfile: The expected 64-bit preamble is missing",
 	"Corrupt tzfile: No abbreviation could be found for a transition",
 	"The version used in this timezone identifier is unsupported",
 	"No timezone with this name could be found",
+	"A 'slim' timezone file has been detected",
+	"The embedded POSIX string is not valid",
+	"The embedded POSIX string is empty"
 };
 
 const char *timelib_get_error_message(int error_code)
@@ -115,7 +118,7 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 	return tmp;
 }
 
-void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
+void timelib_time_tz_abbr_update(timelib_time* tm, const char* tz_abbr)
 {
 	unsigned int i;
 	size_t tz_abbr_len = strlen(tz_abbr);
@@ -184,24 +187,46 @@ timelib_long timelib_date_to_int(timelib_time *d, int *error)
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
 {
-	if (h > 0) {
-		*hour = floor(h);
-		*min = floor((h - *hour) * 60);
-		*sec = (h - *hour - ((float) *min / 60)) * 3600;
-	} else {
-		*hour = ceil(h);
-		*min = 0 - ceil((h - *hour) * 60);
-		*sec = 0 - (h - *hour - ((float) *min / -60)) * 3600;
+	bool swap = false;
+	int seconds;
+
+	if (h < 0) {
+		swap = true;
+		h = fabs(h);
+	}
+
+	*hour = floor(h);
+	seconds = floor((h - *hour) * 3600);
+
+	*min = seconds / 60;
+	*sec = seconds % 60;
+
+	if (swap) {
+		*hour = 0 - *hour;
 	}
 }
 
 void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h)
 {
-	if (hour > 0) {
+	if (hour >= 0) {
 		*h = ((double)hour + (double)min / 60 + (double)sec / 3600);
 	} else {
 		*h = ((double)hour - (double)min / 60 - (double)sec / 3600);
 	}
+}
+
+void timelib_hmsf_to_decimal_hour(int hour, int min, int sec, int us, double *h)
+{
+	if (hour >= 0) {
+		*h = ((double)hour + (double)min / MINS_PER_HOUR + (double)sec / SECS_PER_HOUR) + (double)us / USECS_PER_HOUR;
+	} else {
+		*h = ((double)hour - (double)min / MINS_PER_HOUR - (double)sec / SECS_PER_HOUR) - (double)us / USECS_PER_HOUR;
+	}
+}
+
+timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s)
+{
+	return (h * SECS_PER_HOUR) + (m * 60) + s;
 }
 
 static const unsigned char timelib_tolower_map[256] = {

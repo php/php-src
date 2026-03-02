@@ -13,14 +13,14 @@ $reflect = new ReflectionObject($obj);
 $array = array();
 foreach($reflect->getProperties() as $prop)
 {
-	$array[$prop->getName()] = $prop->getValue($obj);
+    $array[$prop->getName()] = $prop->getValue($obj);
 }
 
 var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   ["prop1"]=>
   string(1) "1"

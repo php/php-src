@@ -9,19 +9,13 @@ display_errors=1
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('require("syntax_error.php");');
-$dir = realpath(dirname(__FILE__));
+$doc_root = php_cli_server_start('require("syntax_error.php");')->docRoot;
 
-file_put_contents($dir . "/syntax_error.php", "<?php non_exists_function(); ?>");
+file_put_contents($doc_root . "/syntax_error.php", "<?php non_exists_function(); ?>");
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
 $output = '';
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 GET /index.php HTTP/1.1
@@ -30,12 +24,12 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 echo $output;
-@unlink($dir . "/syntax_error.php");
+@unlink($doc_root . "/syntax_error.php");
 fclose($fp);
 ?>
 --EXPECTF--

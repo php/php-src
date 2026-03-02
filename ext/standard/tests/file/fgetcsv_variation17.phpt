@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - with default enclosure & length less than line size
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read a file when provided with default enclosure character
    and length value less than the size of line being read
  */
@@ -24,7 +19,7 @@ $csv_lists = array (
   array('\\', '"water"\\"fruit"\\"""'),
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation17.tmp';
+$filename = __DIR__ . '/fgetcsv_variation17.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
@@ -70,13 +65,13 @@ foreach ($csv_lists as $csv_list) {
 
     // use length as less than the actual size of the line
     fseek($file_handle, 0, SEEK_SET);
-    var_dump( fgetcsv($file_handle, 9, $delimiter) );
+    var_dump( fgetcsv($file_handle, 9, $delimiter, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
 
     // read rest of the line
-    var_dump( fgetcsv($file_handle, 1024, $delimiter) );
+    var_dump( fgetcsv($file_handle, 1024, $delimiter, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

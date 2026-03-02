@@ -5,15 +5,15 @@ ZE2 __toString() in __destruct
 
 class Test
 {
-	function __toString()
-	{
-		return "Hello\n";
-	}
+    function __toString()
+    {
+        return "Hello\n";
+    }
 
-	function __destruct()
-	{
-		echo $this;
-	}
+    function __destruct()
+    {
+        echo $this;
+    }
 }
 
 $o = new Test;
@@ -23,7 +23,7 @@ $o = new Test;
 
 ?>
 ====DONE====
---EXPECTF--
+--EXPECT--
 Hello
 ====DONE====
 Hello

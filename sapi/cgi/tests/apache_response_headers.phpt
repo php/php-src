@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$test_file = dirname(__FILE__) . DIRECTORY_SEPARATOR ."apache_response_headers.test.php";
+$test_file = __DIR__ . DIRECTORY_SEPARATOR ."apache_response_headers.test.php";
 
 $code  = '<?php';
 $code .= '
@@ -31,10 +31,9 @@ file_put_contents( $test_file, $code );
 passthru( "$php -n -q " . escapeshellarg( $test_file ) );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink( dirname(__FILE__) . DIRECTORY_SEPARATOR ."apache_response_headers.test.php" );
+@unlink( __DIR__ . DIRECTORY_SEPARATOR ."apache_response_headers.test.php" );
 ?>
 --EXPECTF--
 array(3) {
@@ -45,4 +44,3 @@ array(3) {
   ["Content-type"]=>
   string(24) "text/html; charset=UTF-8"
 }
-===DONE===

@@ -2,12 +2,6 @@
 Test preg_replace() function : basic
 --FILE--
 <?php
-/* Prototype  : proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
- * Description: Perform Perl-style regular expression replacement.
- * Source code: ext/pcre/php_pcre.c
- * Alias to functions:
-*/
-
 $string = '123456789 - Hello, world -           This is a string.';
 var_dump($string);
 
@@ -16,7 +10,7 @@ var_dump(preg_replace('<- This is a string$>',
 
 var_dump(preg_replace('<[0-35-9]>',
                       '4', $string,               					//finds any number that's not 4 and replaces it with a 4
-			    '5', $count));							//limits to 5 replacements returns 444444789
+                '5', $count));							//limits to 5 replacements returns 444444789
 var_dump($count);											//counts the number of replacements made (5)
 
 
@@ -29,7 +23,7 @@ var_dump(preg_replace('<(\w)\s*-\s*(\w)>',
 var_dump(preg_replace('<(^[a-z]\w+)@(\w+)\.(\w+)\.([a-z]{2,}$)>',
                       '\\1 at \\2 dot \\3 dot \\4', 'josmessa@uk.ibm.com'));	//finds the e-mail address and replaces the @ and . with "at" and "dot" (uses backreferences) ('josmessa at uk dot ibm dot com')
 ?>
---EXPECTF--
+--EXPECT--
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "444444789 - Hello, world -           This is a string."

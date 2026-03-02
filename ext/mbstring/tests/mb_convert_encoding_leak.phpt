@@ -1,5 +1,7 @@
 --TEST--
 mb_convert_encoding() shouldn't leak keys
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

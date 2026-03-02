@@ -1,9 +1,8 @@
 --TEST--
 ftp_mlsd() return parsed lines
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

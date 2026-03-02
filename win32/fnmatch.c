@@ -34,7 +34,6 @@
  * SUCH DAMAGE.
  *
  * From FreeBSD fnmatch.c 1.11
- * $Id$
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
@@ -138,8 +137,8 @@ PHPAPI int fnmatch(const char *pattern, const char *string, int flags)
 				  tolower((unsigned char)*string)))
 				;
 			else if ((flags & FNM_PREFIX_DIRS) && *string == EOS &&
-			     (c == '/' && string != stringstart ||
-			     string == stringstart+1 && *stringstart == '/') )
+			     ((c == '/' && string != stringstart) ||
+			     (string == stringstart+1 && *stringstart == '/')))
 				return (0);
 			else
 				return (FNM_NOMATCH);
@@ -196,12 +195,3 @@ rangematch(const char *pattern, char test, int flags)
 	}
 	return (ok == negate ? NULL : pattern);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

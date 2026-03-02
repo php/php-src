@@ -21,8 +21,10 @@ var_dump(stream_context_set_option($context, $options));
 
 var_dump(stream_context_get_options($context));
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Deprecated: Calling stream_context_set_option() with 2 arguments is deprecated, use stream_context_set_options() instead in %s on line %d
 bool(true)
 array(1) {
   ["http"]=>

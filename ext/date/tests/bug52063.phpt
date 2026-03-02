@@ -10,6 +10,6 @@ $a = date_create("2009-01-01", null);
 echo $a->format(DateTime::COOKIE);
 echo "\n";
 ?>
---EXPECTF--
+--EXPECT--
 Thursday, 01-Jan-2009 00:00:00 WET
 Thursday, 01-Jan-2009 00:00:00 WET

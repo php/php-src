@@ -4,27 +4,27 @@ ZE2 ArrayAccess and ASSIGN_OP operators (+=)
 <?php
 
 class OverloadedArray implements ArrayAccess {
-	public $realArray;
+    public $realArray;
 
-	function __construct() {
-		$this->realArray = array(1,2,3);
-	}
+    function __construct() {
+        $this->realArray = array(1,2,3);
+    }
 
-	function offsetExists($index) {
-		return array_key_exists($this->realArray, $index);
-	}
+    function offsetExists($index): bool {
+        return array_key_exists($this->realArray, $index);
+    }
 
-	function offsetGet($index) {
-		return $this->realArray[$index];
-	}
+    function offsetGet($index): mixed {
+        return $this->realArray[$index];
+    }
 
-	function offsetSet($index, $value) {
-		$this->realArray[$index] = $value;
-	}
+    function offsetSet($index, $value): void {
+        $this->realArray[$index] = $value;
+    }
 
-	function offsetUnset($index) {
-		unset($this->realArray[$index]);
-	}
+    function offsetUnset($index): void {
+        unset($this->realArray[$index]);
+    }
 }
 
 $a = new OverloadedArray;

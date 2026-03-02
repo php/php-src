@@ -2,12 +2,6 @@
 Test timezone_identifiers_list() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array timezone_identifiers_list  ( void )
- * Description: Returns numerically index array with all timezone identifiers
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing timezone_identifiers_list() : basic functionality ***\n";
 
 //Set the default time zone
@@ -23,8 +17,7 @@ var_dump(in_array("America/New_York", $zones));
 var_dump(in_array("UTC", $zones));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_identifiers_list() : basic functionality ***
 Check return tpe is ARRAY
 bool(true)
@@ -32,5 +25,4 @@ Check array contains some common timezones
 bool(true)
 bool(true)
 bool(true)
-===DONE===
 	

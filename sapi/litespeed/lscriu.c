@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -51,12 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "lsapilib.h"
 
 #include <stdio.h>
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -65,10 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/stat.h>
 
-#if HAVE_SYS_TYPES_H
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
 #endif
 
 #include <sys/types.h>
@@ -80,7 +73,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <dlfcn.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
@@ -91,6 +83,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include "lscriu.h"
 
+#include <Zend/zend_portability.h>
+#include "main/php_main.h"
+
 #define  LSCRIU_PATH    256
 
 // Begin CRIU inclusion
@@ -98,11 +93,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int s_initial_start_reqs = 0;
 static int s_requests_count = 0;
 static int s_restored = 0;
-static int (*s_lscapi_dump_me)() = NULL;
-static int (*s_lscapi_prepare_me)() = NULL;
+static int (*s_lscapi_dump_me)(void) = NULL;
+static int (*s_lscapi_prepare_me)(void) = NULL;
 static int s_native = 0;
 static int s_tried_checkpoint = 0;
+#ifdef LSAPILIB_DEBUG_CRIU
 static int s_criu_debug = 0;
+#endif
 static int s_fd_native = -1;
 static char *s_criu_image_path = NULL;
 static int s_pid = 0;
@@ -121,7 +118,7 @@ typedef void (*sighandler_t)(int);
 
 void lsapi_perror( const char * pMessage, int err_no );
 void LSAPI_reset_server_state( void );
-int LSAPI_Get_ppid();
+int LSAPI_Get_ppid(void);
 
 #ifdef LSAPILIB_DEBUG_CRIU
 #define lscriu_dbg(...) \
@@ -142,12 +139,6 @@ typedef struct
     char  m_chSocketDir[SUN_PATH_MAX];
     char  m_chServiceAddress[SUN_PATH_MAX];
 } criu_native_dump_t;
-
-typedef struct
-{
-    int   m_iDumpResult;
-    char  m_chDumpResponseMessage[1024];
-} criu_native_dump_response_t;
 
 typedef sem_t * (*psem_open_t) (const char *__name, int __oflag, ...);
 typedef int (*psem_post_t) (sem_t *__sem);
@@ -258,7 +249,6 @@ static int LSCRIU_load_liblscapi(void)
 {
     void *lib_handle = NULL;
     void *pthread_lib_handle = NULL;
-    char ch;
 
     if (s_native)
         return 0;
@@ -266,8 +256,8 @@ static int LSCRIU_load_liblscapi(void)
     int error = 1;
     char *last;
 
-    if (!(lib_handle = dlopen(last = "liblscapi.so", RTLD_LAZY)) /*||
-        !(pthread_lib_handle = dlopen(last = "libpthread.so", RTLD_LAZY))*/)
+    if (!(lib_handle = DL_LOAD(last = "liblscapi.so")) /*||
+        !(pthread_lib_handle = DL_LOAD(last = "libpthread.so"))*/)
         fprintf(stderr, "LSCRIU (%d): failed to dlopen %s: %s - ignore CRIU\n",
                 s_pid, last, dlerror());
     else if (!(s_lscapi_dump_me = dlsym(lib_handle, last = "lscapi_dump_me")) ||
@@ -319,6 +309,7 @@ static void LSCRIU_Wink_Server_is_Ready(void)
 }
 
 
+#ifdef LSAPILIB_DEBUG_CRIU
 static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 {
     const char *pchDefaultSocketPath = "/tmp/";
@@ -329,7 +320,6 @@ static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 }
 
 
-#ifdef LSAPILIB_DEBUG_CRIU
 static void LSCRIU_Debugging(void) {
     char *pchCRIUDebug;
     pchCRIUDebug = getenv("LSAPI_CRIU_DEBUG");
@@ -413,8 +403,8 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
     }
 }
 #else // no debugging
-static void inline LSCRIU_Debugging(void) {}
-static void inline LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
+static inline void LSCRIU_Debugging(void) {}
+static inline void LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
 #endif
 
 
@@ -423,12 +413,13 @@ static int LSCRIU_Native_Dump(pid_t iPid,
                               int   iFdNative) {
     criu_native_dump_t criu_native_dump;
     char *pchLastSlash;
-    criu_native_dump_response_t criu_native_dump_response;
 
     memset(&criu_native_dump, 0, sizeof(criu_native_dump));
     criu_native_dump.m_iPidToDump = iPid;
     strncpy(criu_native_dump.m_chImageDirectory, pchImagePath,
-            sizeof(criu_native_dump.m_chImageDirectory));
+            sizeof(criu_native_dump.m_chImageDirectory) - 1);
+    criu_native_dump.m_chImageDirectory[
+        sizeof(criu_native_dump.m_chImageDirectory) - 1] = '\0';
     pchLastSlash = strrchr(criu_native_dump.m_chSocketDir,'/');
     if (pchLastSlash) {
         pchLastSlash++;
@@ -443,18 +434,6 @@ static int LSCRIU_Native_Dump(pid_t iPid,
         return(-1);
     }
     return 0;
-    /* do not wait response.
-    //while (sleep(7200));
-    if (read(iFdNative,
-             &criu_native_dump_response,
-             sizeof(criu_native_dump_response)) == -1) {
-        // The test will actually fail it!
-        //LSCRIU_Restored_Error(1, "Error reading dump socket #%d from parent: %s",
-        //                      iFdNative, strerror(errno));
-        //return(-1);
-    }
-    return(-1);
-    */
 }
 
 
@@ -470,7 +449,6 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
 
     iRet = s_lscapi_dump_me();
     if (iRet < 0) {
-        char *pchError;
         lscriu_err("LSCRIU: CloudLinux dump of PID: %d, error: %s\n",
                    s_pid, strerror(errno));
     }
@@ -481,6 +459,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
     else {
         s_restored = 1;
         LSAPI_reset_server_state();
+        php_child_init();
         /*
          Here we have restored the php process, so we should to tell (via
          semaphore) mod_lsapi that we are started and ready to receive data.
@@ -493,7 +472,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
 }
 
 
-static void LSCRIU_Wait_Dump_Finsh_Or_Restored(int pid_parent)
+static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 {
     // Now get restored.  We know if we're restored if the ppid changes!
     // If we're dumped, we're killed (no use worrying about that!).
@@ -520,44 +499,41 @@ static void LSCRIU_Wait_Dump_Finsh_Or_Restored(int pid_parent)
 
 static void LSCRIU_try_checkpoint(int *forked_pid)
 {
-    int iRet;
     pid_t iPid;
     pid_t iPidDump = getpid();
 
     if (s_tried_checkpoint) {
         lscriu_dbg("LSCRIU (%d): Already tried checkpoint - one time per customer\n",
-                   getpid());
+                   iPidDump);
         return;
     }
-    lscriu_dbg("LSCRIU (%d): Trying checkpoint\n", getpid());
+    lscriu_dbg("LSCRIU (%d): Trying checkpoint\n", iPidDump);
     s_tried_checkpoint = 1;
     if (!s_native) {
         LSCRIU_CloudLinux_Checkpoint();
         return;
     }
 
-    lscriu_dbg("LSCRIU (%d): fork!\n", getpid());
+    lscriu_dbg("LSCRIU (%d): fork!\n", iPidDump);
     iPid = fork();
     if (iPid < 0) {
         lscriu_err("LSCRIU (%d): Can't checkpoint due to a fork error: %s\n",
-                   getpid(), strerror(errno));
+                   iPidDump, strerror(errno));
         return;
     }
     if (iPid == 0) {
-        int     iResult;
-        pid_t   iPidSender;
         pid_t   iPidParent = getppid();
 
-        s_pid = getpid();
         setsid();
-        iRet = LSCRIU_Native_Dump(s_pid,
+        (void)LSCRIU_Native_Dump(iPidDump,
                                   s_criu_image_path,
                                   s_fd_native);
         close(s_fd_native);
 
-        LSCRIU_Wait_Dump_Finsh_Or_Restored(iPidParent);
+        LSCRIU_Wait_Dump_Finish_Or_Restored(iPidParent);
         LSCRIU_Restored_Error(0, "Restored!");
         LSAPI_reset_server_state();
+        php_child_init();
         s_restored = 1;
     }
     else {
@@ -568,7 +544,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
 }
 
 
-static int init_native_env()
+static int init_native_env(void)
 {
     char *pchFd;
     pchFd = getenv("LSAPI_CRIU_SYNC_FD");
@@ -653,15 +629,16 @@ static int LSCRIU_Init_Env_Parameters(void)
                        gc_type == CRIU_GCOUNTER_SIG ? "signals" : "pipe");
             lsapi_criu_signal(SIGUSR2, lsapi_siguser2);
         }
-        else
+        else {
             lscriu_dbg("LSCRIU (%d): Use shared memory\n", getpid());
-        LSCRIU_Set_Global_Counter_Type(gc_type);
+	}
+    	LSCRIU_Set_Global_Counter_Type(gc_type);
     }
-    else
+    else {
         lscriu_dbg("LSCRIU (%d): NOT Listening\n", getpid());
+    }
 
     char *criu_mode = NULL;
-    char ch;
     criu_mode = getenv("LSAPI_CRIU");
     // 0 disabled
     // 1 cloudlinux
@@ -685,7 +662,7 @@ static int LSCRIU_Init_Env_Parameters(void)
 }
 
 
-void LSCRIU_inc_req_procssed()
+void LSCRIU_inc_req_processed(void)
 {
     if (!LSCRIU_Get_Global_Counter_Type()) {
         ++s_requests_count;

@@ -2,11 +2,6 @@
 Test stripos() function : basic functionality - with default arguments
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing stripos() function: basic functionality ***\n";
 $heredoc_str = <<<Identifier
 Hello, World
@@ -32,7 +27,7 @@ var_dump( stripos($heredoc_str, $heredoc_str) );
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: basic functionality ***
 -- With default arguments --
 int(0)

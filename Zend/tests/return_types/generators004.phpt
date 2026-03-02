@@ -11,5 +11,6 @@ $a = function(): \Iterator {
 foreach($a() as $value) {
     echo $value;
 }
+?>
 --EXPECT--
 1

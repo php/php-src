@@ -12,11 +12,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef MYSQLND_PORTABILITY_H
 #define MYSQLND_PORTABILITY_H
 
-
-
-/* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
-#define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
-
 #ifndef __attribute
 #if !defined(__GNUC__)
 #define __attribute(A)
@@ -43,91 +38,20 @@ This file is public domain and comes with NO WARRANTY of any kind */
   #define atoll atol
 #endif
 
-#include "php_stdint.h"
+#include <stdint.h>
 
 #if SIZEOF_LONG_LONG > 4 && !defined(_LONG_LONG)
 #define _LONG_LONG 1        /* For AIX string library */
 #endif
 
-
 /* Go around some bugs in different OS and compilers */
-#if defined(_HPUX_SOURCE) && defined(HAVE_SYS_STREAM_H)
-#include <sys/stream.h>        /* HPUX 10.20 defines ulong here. UGLY !!! */
-#define HAVE_ULONG
-#endif
-
-
-#if SIZEOF_LONG_LONG > 4
-#define HAVE_LONG_LONG 1
-#endif
 
 #ifdef PHP_WIN32
-#define MYSQLND_LLU_SPEC "%I64u"
-#define MYSQLND_LL_SPEC "%I64d"
-#define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
 
-#if __i386__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __ia64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __powerpc64__ || __ppc64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if (__powerpc__ || __ppc__ ) && !(__powerpc64__ || __ppc64__)
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __x86_64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390x__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390__ && !__s390x__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifdef _AIX
-#define MYSQLND_LL_SPEC "%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifndef MYSQLND_LL_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LL_SPEC "%li"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LL_SPEC "%lli"
-  #endif
-#endif
-
-#ifndef MYSQLND_LLU_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LLU_SPEC "%lu"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LLU_SPEC "%llu"
-   #endif
-#endif /* MYSQLND_LLU_SPEC*/
-
-
-#define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL
 #endif
@@ -219,15 +143,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
               *(((zend_uchar *)(T))+3)=(zend_uchar) (((A) >> 24)); \
               *(((zend_uchar *)(T))+4)=(zend_uchar) (((A) >> 32)); }
 
-/* From Andrey Hristov, based on int5store() */
-#define int6store(T,A)    { \
-              *(((zend_uchar *)(T)))= (zend_uchar)((A));\
-              *(((zend_uchar *)(T))+1))=(zend_uchar) (((A) >> 8));\
-              *(((zend_uchar *)(T))+2))=(zend_uchar) (((A) >> 16));\
-              *(((zend_uchar *)(T))+3))=(zend_uchar) (((A) >> 24)); \
-              *(((zend_uchar *)(T))+4))=(zend_uchar) (((A) >> 32)); \
-              *(((zend_uchar *)(T))+5))=(zend_uchar) (((A) >> 40)); }
-
 #define int8store(T,A)    *((uint64_t *) (T))= (uint64_t) (A)
 
 typedef union {
@@ -256,10 +171,10 @@ typedef union {
                   (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
                   (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
                   ((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)  (int32_t) (((int32_t) ((zend_uchar) (A)[0])) +\
-                              (((int32_t) ((zend_uchar) (A)[1]) << 8)) +\
-                              (((int32_t) ((zend_uchar) (A)[2]) << 16)) +\
-                              (((int32_t) ((int16_t) (A)[3]) << 24)))
+#define sint4korr(A)  (int32_t) (((uint32_t) ((A)[0])) +\
+                              (((uint32_t) ((A)[1]) << 8)) +\
+                              (((uint32_t) ((A)[2]) << 16)) +\
+                              (((uint32_t) ((A)[3]) << 24)))
 
 #define sint8korr(A)  (int64_t) uint8korr(A)
 #define uint2korr(A)  (uint16_t) (((uint16_t) ((zend_uchar) (A)[0])) +\
@@ -300,16 +215,8 @@ typedef union {
                   *(((char *)(T))+1) = (char)(((A) >> 8));\
                   *(((char *)(T))+2) = (char)(((A) >> 16));\
                   *(((char *)(T))+3) = (char)(((A) >> 24)); \
-                  *(((char *)(T))+4) = (char)(((A) >> 32)); } while (0)
-/* Based on int5store() from Andrey Hristov */
-#define int6store(T,A)  do { \
-                  *(((char *)(T)))   = (char)((A));\
-                  *(((char *)(T))+1) = (char)(((A) >> 8));\
-                  *(((char *)(T))+2) = (char)(((A) >> 16));\
-                  *(((char *)(T))+3) = (char)(((A) >> 24)); \
-                  *(((char *)(T))+4) = (char)(((A) >> 32)); \
-                  *(((char *)(T))+5) = (char)(((A) >> 40)); } while (0)
-#define int8store(T,A)        { uint32_t def_temp= (uint32_t) (A), def_temp2= (uint32_t) ((A) >> 32); \
+                  *(((char *)(T))+4) = sizeof(A) == 4 ? 0 : (char)(((A) >> 32)); } while (0)
+#define int8store(T,A)        { uint32_t def_temp= (uint32_t) (A), def_temp2= sizeof(A) == 4 ? 0 : (uint32_t) ((A) >> 32); \
                   int4store((T),def_temp); \
                   int4store((T+4),def_temp2); \
                 }
@@ -377,25 +284,8 @@ typedef union {
    register) variable, M is a pointer to byte */
 
 #ifndef float8get
-
-#ifdef WORDS_BIGENDIAN
-#define float8get(V,M)		memcpy((char*) &(V),(char*)  (M), sizeof(double))
-#define float8store(T,V)	memcpy((char*)  (T),(char*) &(V), sizeof(double))
-#else
-#define float8get(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(double))
-#define float8store(T,V)  memcpy((char*) (T),(char*) &(V),sizeof(double))
-#endif /* WORDS_BIGENDIAN */
-
-#endif /* float8get */
+# define float8get(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(double))
+# define float8store(T,V)  memcpy((char*) (T),(char*) &(V),sizeof(double))
+#endif
 
 #endif /* MYSQLND_PORTABILITY_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

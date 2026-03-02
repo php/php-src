@@ -7,7 +7,7 @@ register_argc_argv=On
 variables_order=GPS
 --FILE--
 <?php
-	var_dump(getopt("d:m:j:vht"));
+    var_dump(getopt("d:m:j:vht"));
 ?>
 --EXPECT--
 array(5) {

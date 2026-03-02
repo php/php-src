@@ -25,5 +25,5 @@ function traverse($a) {
 $arr = array(1 => 'foo', 'b' => 'bar', 'baz');
 var_dump(traverse($arr));
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "baz"

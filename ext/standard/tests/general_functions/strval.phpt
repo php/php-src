@@ -4,10 +4,6 @@ Test strval() function
 precision=14
 --FILE--
 <?php
-/* Prototype: string strval ( mixed $var );
- * Description: Returns the string value of var
- */
-
 echo "*** Testing str_val() with scalar values***\n";
 $heredoc_string = <<<EOD
 This is a multiline heredoc
@@ -26,7 +22,7 @@ $heredoc_NULL_string = <<<EOD
 NULL
 EOD;
 
-// different valid  scalar vlaues
+// different valid  scalar values
 $scalars = array(
   /* integers */
   0,
@@ -96,7 +92,7 @@ $scalars = array(
   $heredoc_empty_string
 );
 /* loop to check that strval() recognizes different
-   scalar values and retuns the string conversion of same */
+   scalar values and returns the string conversion of same */
 $loop_counter = 1;
 foreach ($scalars as $scalar ) {
    echo "-- Iteration $loop_counter --\n"; $loop_counter++;
@@ -106,7 +102,7 @@ foreach ($scalars as $scalar ) {
 echo "\n*** Testing strval() with non_scalar values ***\n";
 // get a resource type variable
 $fp = fopen(__FILE__, "r");
-$dfp = opendir( dirname(__FILE__) );
+$dfp = opendir( __DIR__ );
 
 // unset variable
 $unset_var = 10;
@@ -140,13 +136,6 @@ foreach ($not_scalars as $value ) {
    echo "-- Iteration $loop_counter --\n"; $loop_counter++;
    var_dump( strval($value) );
 }
-
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( strval() );
-
-//arguments more than expected
-var_dump( strval( $scalars[0], $scalars[1]) );
 
 echo "Done\n";
 
@@ -284,19 +273,19 @@ string(14) "Resource id #%d"
 string(14) "Resource id #%d"
 -- Iteration 4 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 5 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 6 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""
@@ -306,12 +295,4 @@ string(0) ""
 string(0) ""
 -- Iteration 11 --
 string(0) ""
-
-*** Testing error conditions ***
-
-Warning: strval() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: strval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

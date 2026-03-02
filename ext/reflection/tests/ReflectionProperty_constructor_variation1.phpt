@@ -4,27 +4,27 @@ ReflectionProperty::__construct(): ensure inherited private props can't be acces
 <?php
 
 class C {
-	private $p = 1;
+    private $p = 1;
 
-	static function testFromC() {
-		try {
-		  $rp = new ReflectionProperty("D", "p");
-		  var_dump($rp);
-		} catch (Exception $e) {
-			echo $e->getMessage();
-		}
-	}
+    static function testFromC() {
+        try {
+          $rp = new ReflectionProperty("D", "p");
+          var_dump($rp);
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 }
 
 class D extends C{
-	static function testFromD() {
-		try {
-		  $rp = new ReflectionProperty("D", "p");
-		  var_dump($rp);
-		} catch (Exception $e) {
-			echo $e->getMessage();
-		}
-	}
+    static function testFromD() {
+        try {
+          $rp = new ReflectionProperty("D", "p");
+          var_dump($rp);
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 }
 
 echo "--> Reflect inherited private from global scope:\n";
@@ -32,7 +32,7 @@ try {
   $rp = new ReflectionProperty("D", "p");
   var_dump($rp);
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 echo "\n\n--> Reflect inherited private from declaring scope:\n";
@@ -44,7 +44,7 @@ D::testFromC();
 echo "\n\n--> Reflect inherited private from subclass:\n";
 D::testFromD();
 ?>
---EXPECTF--
+--EXPECT--
 --> Reflect inherited private from global scope:
 Property D::$p does not exist
 

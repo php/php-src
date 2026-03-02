@@ -4,45 +4,46 @@ CallbackFilterIterator 002
 <?php
 
 set_error_handler(function($errno, $errstr){
-	echo $errstr . "\n";
-	return true;
+    echo $errstr . "\n";
+    return true;
 });
 
 try {
-	new CallbackFilterIterator();
+    new CallbackFilterIterator();
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(null);
+    new CallbackFilterIterator(null);
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(new ArrayIterator(array()), null);
+    new CallbackFilterIterator(new ArrayIterator(array()), null);
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(new ArrayIterator(array()), array());
+    new CallbackFilterIterator(new ArrayIterator(array()), array());
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 $it = new CallbackFilterIterator(new ArrayIterator(array(1)), function() {
-	throw new Exception("some message");
+    throw new Exception("some message");
 });
 try {
-	foreach($it as $e);
+    foreach($it as $e);
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+?>
 --EXPECT--
-CallbackFilterIterator::__construct() expects exactly 2 parameters, 0 given
-Argument 1 passed to CallbackFilterIterator::__construct() must implement interface Iterator, null given
-CallbackFilterIterator::__construct() expects parameter 2 to be a valid callback, no array or string given
-CallbackFilterIterator::__construct() expects parameter 2 to be a valid callback, array must have exactly two members
+CallbackFilterIterator::__construct() expects exactly 2 arguments, 0 given
+CallbackFilterIterator::__construct() expects exactly 2 arguments, 1 given
+CallbackFilterIterator::__construct(): Argument #2 ($callback) must be a valid callback, no array or string given
+CallbackFilterIterator::__construct(): Argument #2 ($callback) must be a valid callback, array callback must have exactly two members
 some message

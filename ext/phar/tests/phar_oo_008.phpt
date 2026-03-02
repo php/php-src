@@ -1,8 +1,7 @@
 --TEST--
 Phar object: iterating via SplFileObject
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -19,7 +18,7 @@ $f = $phar['a.csv'];
 echo "===1===\n";
 foreach($f as $k => $v)
 {
-	echo "$k=>$v\n";
+    echo "$k=>$v\n";
 }
 
 $f->setFlags(SplFileObject::DROP_NEW_LINE);
@@ -27,66 +26,67 @@ $f->setFlags(SplFileObject::DROP_NEW_LINE);
 echo "===2===\n";
 foreach($f as $k => $v)
 {
-	echo "$k=>$v\n";
+    echo "$k=>$v\n";
 }
 
 class MyCSVFile extends SplFileObject
 {
-	function current()
-	{
-		return parent::fgetcsv(',', '"');
-	}
+    function current(): array|false
+    {
+        return parent::fgetcsv(',', '"', escape: '');
+    }
 }
 
 $phar->setInfoClass('MyCSVFile');
+/** @var MyCSVFile $v */
 $v = $phar['a.csv'];
 
 echo "===3===\n";
 while(!$v->eof())
 {
-	echo $v->key() . "=>" . join('|',$v->fgetcsv()) . "\n";
+    echo $v->key() . "=>" . join('|', $v->fgetcsv(escape: '')) . "\n";
 }
 
 echo "===4===\n";
 $v->rewind();
 while(!$v->eof())
 {
-	$l = $v->fgetcsv();
-	echo $v->key() . "=>" . join('|',$l) . "\n";
+    $l = $v->fgetcsv(escape: '');
+    echo $v->key() . "=>" . join('|', $l) . "\n";
 }
 
 echo "===5===\n";
 foreach($v as $k => $d)
 {
-	echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . join('|', $d) . "\n";
 }
 
 class MyCSVFile2 extends SplFileObject
 {
-	function getCurrentLine()
-	{
-		echo __METHOD__ . "\n";
-		return parent::fgetcsv(',', '"');
-	}
+    function getCurrentLine(): string
+    {
+        echo __METHOD__ . "\n";
+        return implode('|', parent::fgetcsv(',', '"', escape: ''));
+    }
 }
 
 $phar->setInfoClass('MyCSVFile2');
+/** @var MyCSVFile2 $v */
 $v = $phar['a.csv'];
 
 echo "===6===\n";
 foreach($v as $k => $d)
 {
-	echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . $d . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/phar_oo_008.phar.php');
+unlink(__DIR__ . '/files/phar_oo_008.phar.php');
 __halt_compiler();
 ?>
---EXPECTF--
+--EXPECT--
 ===1===
 0=>1,2,3
 
@@ -116,4 +116,3 @@ MyCSVFile2::getCurrentLine
 3=>2|a|b
 MyCSVFile2::getCurrentLine
 5=>3|c|'e'
-===DONE===

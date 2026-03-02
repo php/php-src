@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,50 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_FILESTAT_H
 #define PHP_FILESTAT_H
 
 PHP_RINIT_FUNCTION(filestat);
 PHP_RSHUTDOWN_FUNCTION(filestat);
-
-PHP_FUNCTION(realpath_cache_size);
-PHP_FUNCTION(realpath_cache_get);
-PHP_FUNCTION(clearstatcache);
-PHP_FUNCTION(fileatime);
-PHP_FUNCTION(filectime);
-PHP_FUNCTION(filegroup);
-PHP_FUNCTION(fileinode);
-PHP_FUNCTION(filemtime);
-PHP_FUNCTION(fileowner);
-PHP_FUNCTION(fileperms);
-PHP_FUNCTION(filesize);
-PHP_FUNCTION(filetype);
-PHP_FUNCTION(is_writable);
-PHP_FUNCTION(is_readable);
-PHP_FUNCTION(is_executable);
-PHP_FUNCTION(is_file);
-PHP_FUNCTION(is_dir);
-PHP_FUNCTION(is_link);
-PHP_FUNCTION(file_exists);
-PHP_NAMED_FUNCTION(php_if_stat);
-PHP_NAMED_FUNCTION(php_if_lstat);
-PHP_FUNCTION(disk_total_space);
-PHP_FUNCTION(disk_free_space);
-PHP_FUNCTION(chown);
-PHP_FUNCTION(chgrp);
-#if HAVE_LCHOWN
-PHP_FUNCTION(lchown);
-#endif
-#if HAVE_LCHOWN
-PHP_FUNCTION(lchgrp);
-#endif
-PHP_FUNCTION(chmod);
-#if HAVE_UTIME
-PHP_FUNCTION(touch);
-#endif
-PHP_FUNCTION(clearstatcache);
 
 #ifdef PHP_WIN32
 #define S_IRUSR S_IREAD
@@ -81,8 +40,8 @@ PHP_FUNCTION(clearstatcache);
 /* Compatibility. */
 typedef size_t php_stat_len;
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
-PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
+PHPAPI void php_clear_stat_cache(bool clear_realpath_cache, const char *filename, size_t filename_len);
+PHPAPI void php_stat(zend_string *filename, int type, zval *return_value);
 
 /* Switches for various filestat functions: */
 #define FS_PERMS    0
@@ -103,5 +62,6 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 #define FS_EXISTS  15
 #define FS_LSTAT   16
 #define FS_STAT    17
+#define FS_LPERMS  18
 
 #endif /* PHP_FILESTAT_H */

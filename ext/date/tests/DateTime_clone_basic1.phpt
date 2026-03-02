@@ -21,9 +21,7 @@ echo "Original: " . $orig->format("H:i:s") . "\n";
 echo "Clone: " . $clone->format("H:i:s") . "\n";
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing clone on DateTime objects ***
 Original: 22:41:50
 Clone: 14:25:41
-===DONE===

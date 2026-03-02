@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_thumbnail
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
@@ -12,9 +12,9 @@ zlib.output_compression=0
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-$infile = dirname(__FILE__).'/test1.jpg';
+$infile = __DIR__.'/test1.jpg';
 echo md5_file($infile).'_'.filesize($infile);
-$thumb = exif_thumbnail(dirname(__FILE__).'/test2.jpg');
+$thumb = exif_thumbnail(__DIR__.'/test2.jpg');
 echo " == ";
 echo md5($thumb).'_'.strlen($thumb);
 echo "\n";

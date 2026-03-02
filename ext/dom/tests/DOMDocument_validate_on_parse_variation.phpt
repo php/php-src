@@ -3,17 +3,15 @@ DOMDocument::$validateOnParse - effectual determination (dom_document_validate_o
 --CREDITS--
 Hans Zaunere
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 require_once('dom_test.inc');
 
 chdir(__DIR__);
-$XMLStringGood = file_get_contents(dirname(__FILE__).'/note.xml');
+$XMLStringGood = file_get_contents(__DIR__.'/note.xml');
 
 $dom = new DOMDocument;
 $dom->resolveExternals = TRUE;

@@ -3,13 +3,13 @@ File type functions
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 @unlink('test.file');
 @unlink('test.link');
 if (file_exists('test.file')) {
@@ -50,14 +50,14 @@ $s = stat ('test.file');
 $ls = lstat ('test.file');
 for ($i = 0; $i <= 12; $i++) {
     if ($ls[$i] != $s[$i]) {
-	echo "test.file lstat and stat differ at element $i\n";
+    echo "test.file lstat and stat differ at element $i\n";
     }
 }
 $s = stat ('test.link');
 $ls = lstat ('test.link');
 for ($i = 0; $i <= 11; $i++) {
     if ($ls[$i] != $s[$i]) {
-	if ($i != 6 && $i != 10 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
+    if ($i != 6 && $i != 10 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";

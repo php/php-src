@@ -6,31 +6,31 @@ Directly modifying a REFERENCED array when foreach'ing over it while using &$val
 define('MAX_LOOPS',5);
 
 function withRefValue($elements, $transform) {
-	echo "\n---( Array with $elements element(s): )---\n";
-	//Build array:
-	for ($i=0; $i<$elements; $i++) {
-		$a[] = "v.$i";
-	}
-	$counter=0;
+    echo "\n---( Array with $elements element(s): )---\n";
+    //Build array:
+    for ($i=0; $i<$elements; $i++) {
+        $a[] = "v.$i";
+    }
+    $counter=0;
 
-	$ref = &$a;
+    $ref = &$a;
 
-	echo "--> State of referenced array before loop:\n";
-	var_dump($a);
+    echo "--> State of referenced array before loop:\n";
+    var_dump($a);
 
-	echo "--> Do loop:\n";
-	foreach ($a as $k=>&$v) {
-		echo "     iteration $counter:  \$k=$k; \$v=$v\n";
-		eval($transform);
-		$counter++;
-		if ($counter>MAX_LOOPS) {
-			echo "  ** Stuck in a loop! **\n";
-			break;
-		}
-	}
+    echo "--> Do loop:\n";
+    foreach ($a as $k=>&$v) {
+        echo "     iteration $counter:  \$k=$k; \$v=$v\n";
+        eval($transform);
+        $counter++;
+        if ($counter>MAX_LOOPS) {
+            echo "  ** Stuck in a loop! **\n";
+            break;
+        }
+    }
 
-	echo "--> State of array after loop:\n";
-	var_dump($a);
+    echo "--> State of array after loop:\n";
+    var_dump($a);
 }
 
 
@@ -489,18 +489,21 @@ array(3) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=3; $v=v.2
+     iteration 1:  $k=2; $v=v.1
+     iteration 2:  $k=4; $v=v.2
 --> State of array after loop:
-array(5) {
+array(6) {
   [0]=>
-  string(5) "new.1"
+  string(5) "new.2"
   [1]=>
-  string(5) "new.0"
+  string(5) "new.1"
   [2]=>
-  string(3) "v.0"
+  string(5) "new.0"
   [3]=>
-  string(3) "v.1"
+  string(3) "v.0"
   [4]=>
+  string(3) "v.1"
+  [5]=>
   &string(3) "v.2"
 }
 
@@ -518,19 +521,25 @@ array(4) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=4; $v=v.3
+     iteration 1:  $k=2; $v=v.1
+     iteration 2:  $k=4; $v=v.2
+     iteration 3:  $k=6; $v=v.3
 --> State of array after loop:
-array(6) {
+array(8) {
   [0]=>
-  string(5) "new.1"
+  string(5) "new.3"
   [1]=>
-  string(5) "new.0"
+  string(5) "new.2"
   [2]=>
-  string(3) "v.0"
+  string(5) "new.1"
   [3]=>
-  string(3) "v.1"
+  string(5) "new.0"
   [4]=>
-  string(3) "v.2"
+  string(3) "v.0"
   [5]=>
+  string(3) "v.1"
+  [6]=>
+  string(3) "v.2"
+  [7]=>
   &string(3) "v.3"
 }

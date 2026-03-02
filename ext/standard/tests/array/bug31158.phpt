@@ -14,5 +14,8 @@ __();
 echo "ok\n";
 ?>
 --EXPECTF--
-Notice: Undefined variable: GLOBALS in %sbug31158.php on line 6
-ok
+Fatal error: Uncaught Error: array_splice(): Argument #1 ($array) could not be passed by reference in %s:%d
+Stack trace:
+#0 %s(%d): __()
+#1 {main}
+  thrown in %s on line %d

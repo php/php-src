@@ -1,0 +1,25 @@
+--TEST--
+JIT CONST: defined
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.file_update_protection=0
+opcache.protect_memory=1
+--EXTENSIONS--
+opcache
+--FILE--
+<?php
+function define_const() {
+    define("CUSTOM_CONSTANT", 1);
+}
+function test_defined() {
+    var_dump(defined("CUSTOM_CONSTANT"));
+    define_const();
+    var_dump(defined("CUSTOM_CONSTANT"));
+}
+
+test_defined();
+?>
+--EXPECT--
+bool(false)
+bool(true)

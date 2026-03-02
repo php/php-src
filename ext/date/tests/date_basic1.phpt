@@ -2,11 +2,6 @@
 Test date() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string date  ( string $format  [, int $timestamp  ] )
- * Description: Format a local time/date.
- * Source code: ext/date/php_date.c
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
@@ -25,7 +20,6 @@ var_dump( date('H:m:s \m \i\s\ \m\o\n\t\h', $timestamp) );
 var_dump( date("H:i:s", $timestamp) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date() : basic functionality ***
 string(27) "February 27, 2009, 10:44 am"
@@ -37,4 +31,3 @@ string(19) "it is the 27th day."
 string(28) "Fri Feb 27 10:44:30 GMT 2009"
 string(19) "10:02:30 m is month"
 string(8) "10:44:30"
-===DONE===

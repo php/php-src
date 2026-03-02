@@ -1,24 +1,16 @@
 --TEST--
 Test mb_strpos() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-/* Prototype  : int mb_strpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test basic functionality of mb_strpos with ASCII and multibyte characters
  */
 
 echo "*** Testing mb_strpos() : basic functionality***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'abc def';
 //Japanese string in UTF-8

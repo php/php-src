@@ -5,29 +5,16 @@ Test is_executable() function: usage variations - file/dir with diff. perms
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
-// Skip if being run by root
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_executable ( string $filename );
-   Description: Tells whether the filename is executable
-*/
-
 /* test is_executable() with file/dir having different permissions */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 echo "*** Testing is_executable(): usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/is_executable_variation2");
 
 echo "\n*** Testing is_executable() on directory without execute permission ***\n";
@@ -35,18 +22,18 @@ chmod("$file_path/is_executable_variation2", 0444);
 var_dump( is_executable("$file_path/is_executable_variation2") );  // exp: bool(false)
 chmod("$file_path/is_executable_variation2", 0777);  // chmod to enable deletion of directory
 
-echo "\n*** Testing miscelleneous input for is_executable() function ***\n";
+echo "\n*** Testing miscellaneous input for is_executable() function ***\n";
 $name_prefix = "is_executable_variation2";
-create_files(dirname(__FILE__), 1, "numeric", 0755, 1, "w", $name_prefix, 1);
-create_files(dirname(__FILE__), 1, "text", 0755, 1, "w", $name_prefix, 2);
-create_files(dirname(__FILE__), 1, "empty", 0755, 1, "w", $name_prefix, 3);
-create_files(dirname(__FILE__), 1, "numeric", 0755, 1, "w", $name_prefix, 4);
-create_files(dirname(__FILE__), 1, "text", 0222, 1, "w", $name_prefix, 5);
-create_files(dirname(__FILE__), 1, "numeric", 0711, 1, "w", $name_prefix, 6);
-create_files(dirname(__FILE__), 1, "text", 0714, 1, "w", $name_prefix, 7);
-create_files(dirname(__FILE__), 1, "numeric", 0744, 1, "w", $name_prefix, 8);
-create_files(dirname(__FILE__), 1, "text", 0421, 1, "w", $name_prefix, 9);
-create_files(dirname(__FILE__), 1, "text", 0712, 1, "w", $name_prefix, 10);
+create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
+create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
+create_files(__DIR__, 1, "empty", 0755, 1, "w", $name_prefix, 3);
+create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 4);
+create_files(__DIR__, 1, "text", 0222, 1, "w", $name_prefix, 5);
+create_files(__DIR__, 1, "numeric", 0711, 1, "w", $name_prefix, 6);
+create_files(__DIR__, 1, "text", 0714, 1, "w", $name_prefix, 7);
+create_files(__DIR__, 1, "numeric", 0744, 1, "w", $name_prefix, 8);
+create_files(__DIR__, 1, "text", 0421, 1, "w", $name_prefix, 9);
+create_files(__DIR__, 1, "text", 0712, 1, "w", $name_prefix, 10);
 
 $files = array (
   "$file_path/is_executable_variation21.tmp",
@@ -78,15 +65,15 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__)."/is_executable_variation2/");
+rmdir(__DIR__."/is_executable_variation2/");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on directory without execute permission ***
 bool(false)
 
-*** Testing miscelleneous input for is_executable() function ***
+*** Testing miscellaneous input for is_executable() function ***
 -- Iteration 1 --
 bool(true)
 -- Iteration 2 --

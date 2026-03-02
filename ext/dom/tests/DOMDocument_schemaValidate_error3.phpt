@@ -3,19 +3,21 @@ DomDocument::schemaValidate() - empty string for schema file name
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
-$result = $doc->schemaValidate('');
-var_dump($result);
+try {
+    $doc->schemaValidate('');
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: DOMDocument::schemaValidate(): Invalid Schema source in %s.php on line %d
-bool(false)
+--EXPECT--
+DOMDocument::schemaValidate(): Argument #1 ($filename) must not be empty

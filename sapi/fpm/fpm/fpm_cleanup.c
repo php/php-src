@@ -1,4 +1,3 @@
-	/* $Id: fpm_cleanup.c,v 1.8 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"

@@ -2,13 +2,10 @@
 Test fflush() function: usage variations - file opened in read-only mode
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 /* test fflush() with handle to a file opened in read-only mode as resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with file handles of files opened in various read modes ***\n";
@@ -40,7 +37,7 @@ foreach( $file_modes as $mode ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with file handles of files opened in various read modes ***
 -- Iteration 1 with file opened in r mode --
 bool(true)

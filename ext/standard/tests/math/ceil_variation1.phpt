@@ -4,11 +4,6 @@ Test ceil() function : usage variations - different data types as $value arg
 precision=14
 --FILE--
 <?php
-/* Prototype  : float ceil  ( float $value  )
- * Description: Round fractions up.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing ceil() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -66,20 +61,27 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of ceil()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(ceil($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(ceil($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing ceil() : usage variations ***
 
 -- Iteration 1 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 2 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 3 --
@@ -95,34 +97,35 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-float(0)
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-float(0)
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-bool(false)
+ceil(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-float(0)
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-float(0)
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-float(0)
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-
-Notice: Object of class classA could not be converted to int in %s on line %d
-float(1)
+ceil(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 15 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 16 --
-float(%d)
-===Done===
+ceil(): Argument #1 ($num) must be of type int|float, resource given

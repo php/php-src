@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --INI--
-open_basedir={TMP}
+open_basedir="{TMP}"
 --FILE--
 <?php
 $a=glob("./*.jpeg");

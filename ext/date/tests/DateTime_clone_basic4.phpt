@@ -9,9 +9,9 @@ date_default_timezone_set("Europe/London");
 date_default_timezone_set("Europe/London");
 
 class DateTimeExt1 extends DateTime {
-	public function __clone() {
-		echo "-- DateTimeExt1 __clone magic method called --\n";
-	}
+    public function __clone() {
+        echo "-- DateTimeExt1 __clone magic method called --\n";
+    }
 }
 
 echo "*** Testing clone of objects derived from DateTime class with __clone magic method***\n";
@@ -23,9 +23,7 @@ $d1_clone = clone $d1;
 var_dump( $d1_clone->format( "m.d.y") );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing clone of objects derived from DateTime class with __clone magic method***
 -- DateTimeExt1 __clone magic method called --
 string(8) "02.03.09"
-===DONE===

@@ -1,13 +1,11 @@
 --TEST--
 IntlBreakIterator::createCodePointInstance(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $text = 'ตัวอย่างข้อความ';
 
@@ -18,7 +16,6 @@ $codepoint_it->setText($text);
 print_r(iterator_to_array($codepoint_it));
 
 ?>
-==DONE==
 --EXPECT--
 string(26) "IntlCodePointBreakIterator"
 Array
@@ -40,4 +37,3 @@ Array
     [14] => 42
     [15] => 45
 )
-==DONE==

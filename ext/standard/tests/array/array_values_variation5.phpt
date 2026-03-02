@@ -2,11 +2,6 @@
 Test array_values() function : usage variations - internal array pointer
 --FILE--
 <?php
-/* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test the position of the internal array pointer after a call to array_values
  */
@@ -25,7 +20,7 @@ echo key($input) . " => " . current ($input) . "\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_values() : usage variations ***
 
 -- Call array_values() --

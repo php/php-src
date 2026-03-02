@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - array having subarrays
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing array having different subarrays
  */
@@ -30,7 +25,7 @@ $arr1 = array(
 var_dump( array_map('callback', $arr1));
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : array having subarrays ***
 array(5) {
   [0]=>

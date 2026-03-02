@@ -1,9 +1,7 @@
 --TEST--
 Overloaded function 002
---SKIPIF--
-<?php
-if (!class_exists('_ZendTestClass')) die("skip needs class with overloaded function");
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 $a = new _ZendTestClass();

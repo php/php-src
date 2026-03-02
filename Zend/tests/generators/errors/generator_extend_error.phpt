@@ -7,4 +7,4 @@ class ExtendedGenerator extends Generator { }
 
 ?>
 --EXPECTF--
-Fatal error: Class ExtendedGenerator may not inherit from final class (Generator) in %s on line %d
+Fatal error: Class ExtendedGenerator cannot extend final class Generator in %s on line %d

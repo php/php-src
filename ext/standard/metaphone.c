@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,19 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
 	Based on CPANs "Text-Metaphone-1.96" by Michael G Schwern <schwern@pobox.com>
 */
 
 #include "php.h"
-#include "php_metaphone.h"
 
-static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
+static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
-/* {{{ proto string metaphone(string text[, int phones])
-   Break english phrases down into their phonemes */
+/* {{{ Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
 	zend_string *str;
@@ -41,14 +35,13 @@ PHP_FUNCTION(metaphone)
 		Z_PARAM_LONG(phones)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1) == 0) {
-		RETVAL_STR(result);
-	} else {
-		if (result) {
-			zend_string_free(result);
-		}
-		RETURN_FALSE;
+	if (phones < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
+
+	metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1);
+	RETVAL_STR(result);
 }
 /* }}} */
 
@@ -78,28 +71,36 @@ PHP_FUNCTION(metaphone)
 /* Metachar.h ... little bits about characters for metaphone */
 /*-- Character encoding array & accessing macros --*/
 /* Stolen directly out of the book... */
-char _codes[26] =
+static const char _codes[26] =
 {
 	1, 16, 4, 16, 9, 2, 4, 16, 9, 2, 0, 2, 2, 2, 1, 4, 0, 2, 4, 4, 1, 0, 0, 0, 8, 0
 /*  a  b c  d e f g  h i j k l m n o p q r s t u v w x y z */
 };
 
 
-#define ENCODE(c) (isalpha(c) ? _codes[((toupper(c)) - 'A')] : 0)
+/* Note: these functions require an uppercase letter input! */
+static zend_always_inline char encode(char c) {
+	if (isalpha(c)) {
+		ZEND_ASSERT(c >= 'A' && c <= 'Z');
+		return _codes[(c - 'A')];
+	} else {
+		return 0;
+	}
+}
 
-#define isvowel(c)  (ENCODE(c) & 1)		/* AEIOU */
+#define isvowel(c)  (encode(c) & 1)		/* AEIOU */
 
 /* These letters are passed through unchanged */
-#define NOCHANGE(c) (ENCODE(c) & 2)		/* FJMNR */
+#define NOCHANGE(c) (encode(c) & 2)		/* FJMNR */
 
 /* These form diphthongs when preceding H */
-#define AFFECTH(c)  (ENCODE(c) & 4)		/* CGPST */
+#define AFFECTH(c)  (encode(c) & 4)		/* CGPST */
 
 /* These make C and G soft */
-#define MAKESOFT(c) (ENCODE(c) & 8)		/* EIY */
+#define MAKESOFT(c) (encode(c) & 8)		/* EIY */
 
 /* These prevent GH from becoming F */
-#define NOGHTOF(c)  (ENCODE(c) & 16)	/* BDH */
+#define NOGHTOF(c)  (encode(c) & 16)	/* BDH */
 
 /*----------------------------- */
 /* end of "metachar.h"          */
@@ -108,16 +109,19 @@ char _codes[26] =
 /* I suppose I could have been using a character pointer instead of
  * accesssing the array directly... */
 
+#define Convert_Raw(c) toupper(c)
 /* Look at the next letter in the word */
-#define Next_Letter (toupper(word[w_idx+1]))
+#define Read_Raw_Next_Letter (word[w_idx+1])
+#define Read_Next_Letter (Convert_Raw(Read_Raw_Next_Letter))
 /* Look at the current letter in the word */
-#define Curr_Letter (toupper(word[w_idx]))
+#define Read_Raw_Curr_Letter (word[w_idx])
+#define Read_Curr_Letter (Convert_Raw(Read_Raw_Curr_Letter))
 /* Go N letters back. */
-#define Look_Back_Letter(n)	(w_idx >= n ? toupper(word[w_idx-n]) : '\0')
+#define Look_Back_Letter(n)	(w_idx >= n ? Convert_Raw(word[w_idx-n]) : '\0')
 /* Previous letter.  I dunno, should this return null on failure? */
-#define Prev_Letter (Look_Back_Letter(1))
+#define Read_Prev_Letter (Look_Back_Letter(1))
 /* Look two letters down.  It makes sure you don't walk off the string. */
-#define After_Next_Letter	(Next_Letter != '\0' ? toupper(word[w_idx+2]) \
+#define Read_After_Next_Letter	(Read_Raw_Next_Letter != '\0' ? Convert_Raw(word[w_idx+2]) \
 											     : '\0')
 #define Look_Ahead_Letter(n) (toupper(Lookahead((char *) word+w_idx, n)))
 
@@ -126,15 +130,13 @@ char _codes[26] =
 /* I probably could have just used strlen... */
 static char Lookahead(char *word, int how_far)
 {
-	char letter_ahead = '\0';	/* null by default */
 	int idx;
 	for (idx = 0; word[idx] != '\0' && idx < how_far; idx++);
 	/* Edge forward in the string... */
 
-	letter_ahead = word[idx];	/* idx will be either == to how_far or
-								 * at the end of the string
+	return  word[idx];			/* idx will be either == to how_far or
+								 * at the end of the string where it will be null
 								 */
-	return letter_ahead;
 }
 
 
@@ -151,7 +153,7 @@ static char Lookahead(char *word, int how_far)
 						ZSTR_LEN(*phoned_word) = p_idx; \
 					}
 /* Slap a null character on the end of the phoned word */
-#define End_Phoned_Word	{ \
+#define End_Phoned_Word()	{ \
 							if (p_idx == max_buffer_len) { \
 								*phoned_word = zend_string_extend(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
@@ -165,26 +167,15 @@ static char Lookahead(char *word, int how_far)
 /* Note is a letter is a 'break' in the word */
 #define Isbreak(c)  (!isalpha(c))
 
-/* {{{ metaphone
- */
-static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
+/* {{{ metaphone */
+static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	size_t p_idx = 0;				/* end of the phoned phrase */
 	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
-
-/*-- Parameter checks --*/
-	/* Negative phoneme length is meaningless */
-
-	if (max_phonemes < 0)
-		return -1;
-
-	/* Empty/null string is meaningless */
-	/* Overly paranoid */
-	/* assert(word != NULL && word[0] != '\0'); */
-
-	if (word == NULL)
-		return -1;
+	char curr_letter;
+	ZEND_ASSERT(word != NULL);
+	ZEND_ASSERT(max_phonemes >= 0);
 
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
@@ -198,18 +189,20 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 
 /*-- The first phoneme has to be processed specially. --*/
 	/* Find our first letter */
-	for (; !isalpha(Curr_Letter); w_idx++) {
+	for (; !isalpha(curr_letter = Read_Raw_Curr_Letter); w_idx++) {
 		/* On the off chance we were given nothing but crap... */
-		if (Curr_Letter == '\0') {
-			End_Phoned_Word
-				return SUCCESS;	/* For testing */
+		if (curr_letter == '\0') {
+			End_Phoned_Word();
+			return;
 		}
 	}
 
-	switch (Curr_Letter) {
+	curr_letter = Convert_Raw(curr_letter);
+
+	switch (curr_letter) {
 		/* AE becomes E */
 	case 'A':
-		if (Next_Letter == 'E') {
+		if (Read_Next_Letter == 'E') {
 			Phonize('E');
 			w_idx += 2;
 		}
@@ -223,7 +216,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	case 'G':
 	case 'K':
 	case 'P':
-		if (Next_Letter == 'N') {
+		if (Read_Next_Letter == 'N') {
 			Phonize('N');
 			w_idx += 2;
 		}
@@ -231,16 +224,18 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 		/* WH becomes W,
 		   WR becomes R
 		   W if followed by a vowel */
-	case 'W':
-		if (Next_Letter == 'R') {
-			Phonize(Next_Letter);
+	case 'W': {
+		char next_letter = Read_Next_Letter;
+		if (next_letter == 'R') {
+			Phonize('R');
 			w_idx += 2;
-		} else if (Next_Letter == 'H' || isvowel(Next_Letter)) {
+		} else if (next_letter == 'H' || isvowel(next_letter)) {
 			Phonize('W');
 			w_idx += 2;
 		}
 		/* else ignore */
 		break;
+	}
 		/* X becomes S */
 	case 'X':
 		Phonize('S');
@@ -255,7 +250,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	case 'I':
 	case 'O':
 	case 'U':
-		Phonize(Curr_Letter);
+		Phonize(curr_letter);
 		w_idx++;
 		break;
 	default:
@@ -266,7 +261,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 
 
 	/* On to the metaphoning */
-	for (; Curr_Letter != '\0' &&
+	for (; (curr_letter = Read_Raw_Curr_Letter) != '\0' &&
 		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
 		/* How many letters to skip because an eariler encoding handled
@@ -282,18 +277,23 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 		 */
 
 		/* Ignore non-alphas */
-		if (!isalpha(Curr_Letter))
+		if (!isalpha(curr_letter))
 			continue;
+
+		curr_letter = Convert_Raw(curr_letter);
+		/* Note: we can't cache curr_letter from the previous loop
+		 * because of the skip_letter variable. */
+		char prev_letter = Read_Prev_Letter;
 
 		/* Drop duplicates, except CC */
-		if (Curr_Letter == Prev_Letter &&
-			Curr_Letter != 'C')
+		if (curr_letter == prev_letter &&
+			curr_letter != 'C')
 			continue;
 
-		switch (Curr_Letter) {
+		switch (curr_letter) {
 			/* B -> B unless in MB */
 		case 'B':
-			if (Prev_Letter != 'M')
+			if (prev_letter != 'M')
 				Phonize('B');
 			break;
 			/* 'sh' if -CIA- or -CH, but not SCH, except SCHW.
@@ -302,20 +302,20 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 			 *  dropped if -SCI-, SCE-, -SCY- (handed in S)
 			 *  else K
 			 */
-		case 'C':
-			if (MAKESOFT(Next_Letter)) {	/* C[IEY] */
-				if (After_Next_Letter == 'A' &&
-					Next_Letter == 'I') {	/* CIA */
+		case 'C': {
+			char next_letter = Read_Next_Letter;
+			if (MAKESOFT(next_letter)) {	/* C[IEY] */
+				if (next_letter == 'I' && Read_After_Next_Letter == 'A') {	/* CIA */
 					Phonize(SH);
 				}
 				/* SC[IEY] */
-				else if (Prev_Letter == 'S') {
+				else if (prev_letter == 'S') {
 					/* Dropped */
 				} else {
 					Phonize('S');
 				}
-			} else if (Next_Letter == 'H') {
-				if ((!traditional) && (After_Next_Letter == 'R' || Prev_Letter == 'S')) {	/* Christ, School */
+			} else if (next_letter == 'H') {
+				if ((!traditional) && (prev_letter == 'S' || Read_After_Next_Letter == 'R')) {	/* Christ, School */
 					Phonize('K');
 				} else {
 					Phonize(SH);
@@ -325,12 +325,13 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 				Phonize('K');
 			}
 			break;
+		}
 			/* J if in -DGE-, -DGI- or -DGY-
 			 * else T
 			 */
 		case 'D':
-			if (Next_Letter == 'G' &&
-				MAKESOFT(After_Next_Letter)) {
+			if (Read_Next_Letter == 'G' &&
+				MAKESOFT(Read_After_Next_Letter)) {
 				Phonize('J');
 				skip_letter++;
 			} else
@@ -342,8 +343,9 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 			 * else J if in -GE-, -GI, -GY and not GG
 			 * else K
 			 */
-		case 'G':
-			if (Next_Letter == 'H') {
+		case 'G': {
+			char next_letter = Read_Next_Letter;
+			if (next_letter == 'H') {
 				if (!(NOGHTOF(Look_Back_Letter(3)) ||
 					  Look_Back_Letter(4) == 'H')) {
 					Phonize('F');
@@ -351,38 +353,40 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 				} else {
 					/* silent */
 				}
-			} else if (Next_Letter == 'N') {
-				if (Isbreak(After_Next_Letter) ||
-					(After_Next_Letter == 'E' &&
+			} else if (next_letter == 'N') {
+				char after_next_letter = Read_After_Next_Letter;
+				if (Isbreak(after_next_letter) ||
+					(after_next_letter == 'E' &&
 					 Look_Ahead_Letter(3) == 'D')) {
 					/* dropped */
 				} else
 					Phonize('K');
-			} else if (MAKESOFT(Next_Letter) &&
-					   Prev_Letter != 'G') {
+			} else if (MAKESOFT(next_letter) &&
+					   prev_letter != 'G') {
 				Phonize('J');
 			} else {
 				Phonize('K');
 			}
 			break;
+		}
 			/* H if before a vowel and not after C,G,P,S,T */
 		case 'H':
-			if (isvowel(Next_Letter) &&
-				!AFFECTH(Prev_Letter))
+			if (isvowel(Read_Next_Letter) &&
+				!AFFECTH(prev_letter))
 				Phonize('H');
 			break;
 			/* dropped if after C
 			 * else K
 			 */
 		case 'K':
-			if (Prev_Letter != 'C')
+			if (prev_letter != 'C')
 				Phonize('K');
 			break;
 			/* F if before H
 			 * else P
 			 */
 		case 'P':
-			if (Next_Letter == 'H') {
+			if (Read_Next_Letter == 'H') {
 				Phonize('F');
 			} else {
 				Phonize('P');
@@ -396,44 +400,50 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 			/* 'sh' in -SH-, -SIO- or -SIA- or -SCHW-
 			 * else S
 			 */
-		case 'S':
-			if (Next_Letter == 'I' &&
-				(After_Next_Letter == 'O' ||
-				 After_Next_Letter == 'A')) {
+		case 'S': {
+			char next_letter = Read_Next_Letter;
+			char after_next_letter;
+			if (next_letter == 'I' &&
+				((after_next_letter = Read_After_Next_Letter) == 'O' ||
+				 after_next_letter == 'A')) {
 				Phonize(SH);
-			} else if (Next_Letter == 'H') {
+			} else if (next_letter == 'H') {
 				Phonize(SH);
 				skip_letter++;
-			} else if ((!traditional) && (Next_Letter == 'C' && Look_Ahead_Letter(2) == 'H' && Look_Ahead_Letter(3) == 'W')) {
+			} else if ((!traditional) && (next_letter == 'C' && Look_Ahead_Letter(2) == 'H' && Look_Ahead_Letter(3) == 'W')) {
 				Phonize(SH);
 				skip_letter += 2;
 			} else {
 				Phonize('S');
 			}
 			break;
+		}
 			/* 'sh' in -TIA- or -TIO-
 			 * else 'th' before H
 			 * else T
 			 */
-		case 'T':
-			if (Next_Letter == 'I' &&
-				(After_Next_Letter == 'O' ||
-				 After_Next_Letter == 'A')) {
+		case 'T': {
+			char next_letter = Read_Next_Letter;
+			char after_next_letter;
+			if (next_letter == 'I' &&
+				((after_next_letter = Read_After_Next_Letter) == 'O' ||
+				 after_next_letter == 'A')) {
 				Phonize(SH);
-			} else if (Next_Letter == 'H') {
+			} else if (next_letter == 'H') {
 				Phonize(TH);
 				skip_letter++;
-			} else if (!(Next_Letter == 'C' && After_Next_Letter == 'H')) {
+			} else if (!(next_letter == 'C' && Read_After_Next_Letter == 'H')) {
 				Phonize('T');
 			}
 			break;
+		}
 			/* F */
 		case 'V':
 			Phonize('F');
 			break;
 			/* W before a vowel, else dropped */
 		case 'W':
-			if (isvowel(Next_Letter))
+			if (isvowel(Read_Next_Letter))
 				Phonize('W');
 			break;
 			/* KS */
@@ -443,7 +453,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 			break;
 			/* Y if followed by a vowel */
 		case 'Y':
-			if (isvowel(Next_Letter))
+			if (isvowel(Read_Next_Letter))
 				Phonize('Y');
 			break;
 			/* S */
@@ -457,7 +467,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 		case 'M':
 		case 'N':
 		case 'R':
-			Phonize(Curr_Letter);
+			Phonize(curr_letter);
 			break;
 		default:
 			/* nothing */
@@ -467,17 +477,6 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 		w_idx += skip_letter;
 	}							/* END FOR */
 
-	End_Phoned_Word;
-
-	return 0;
+	End_Phoned_Word();
 }								/* END metaphone */
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,9 +1,5 @@
 --TEST--
 Return type and Reflection::export()
---SKIPIF--
-<?php
-if (!extension_loaded('reflection')) print 'skip';
-?>
 --FILE--
 <?php
 
@@ -13,7 +9,8 @@ class A {
     }
 }
 
-ReflectionClass::export("A");
+echo new ReflectionClass("A");
+?>
 --EXPECTF--
 Class [ <user> class A ] {
   @@ %sreflection001.php 3-7

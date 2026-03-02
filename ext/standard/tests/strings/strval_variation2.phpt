@@ -2,11 +2,6 @@
 Test strval() function : usage variations  - Pass all valid char codes
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : usage variations  - Pass all valid char codes ***\n";
 
 $s0 = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f";
@@ -60,8 +55,7 @@ echo bin2hex(strval($sf));
 echo "\n";
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strval() : usage variations  - Pass all valid char codes ***
 000102030405060708090a0b0c0d0e0f
 101112131415161718191a1b1c1d1e1f
@@ -79,4 +73,3 @@ c0c1c2c3c4c5c6c7c8c9cacbcccdcecf
 d0d1d2d3d4d5d6d7d8d9dadbdcdddedf
 e0e1e2e3e4e5e6e7e8e9eaebecedeeef
 f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
-===DONE===

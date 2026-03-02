@@ -1,5 +1,6 @@
 --TEST--
 This test illustrates the impact of invoking destructors when refcount is decremented to 0 on foreach.
+--DESCRIPTION--
 It will pass only if the 'contentious code' in PHPValue.decReferences() is enabled.
 --FILE--
 <?php
@@ -24,17 +25,17 @@ $container = null;
 
 $i=0;
 foreach ($a as $v) {
-	array_push($a, 'new');
-	var_dump($v);
+    array_push($a, 'new');
+    var_dump($v);
 
-	if (++$i>10) {
-		echo "Infinite loop detected\n";
-		break;
-	}
+    if (++$i>10) {
+        echo "Infinite loop detected\n";
+        break;
+    }
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

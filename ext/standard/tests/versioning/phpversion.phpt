@@ -6,6 +6,7 @@ phpversion test
 print phpversion();
 print "\n";
 print phpversion('standard');
+?>
 --EXPECTF--
 %s
 %s

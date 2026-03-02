@@ -1,28 +1,21 @@
 --TEST--
 Phar::buildFromIterator() iterator, SplFileInfo as current tar-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
 <?php
-try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.tar');
-	$a = $phar->buildFromIterator(new RegexIterator(new DirectoryIterator('.'), '/^frontcontroller\d{0,2}\.phar\.phpt\\z|^\.\\z|^\.\.\\z/'), dirname(__FILE__) . DIRECTORY_SEPARATOR);
-	asort($a);
-	var_dump($a);
-	var_dump($phar->isFileFormat(Phar::TAR));
-} catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
-}
+chdir(__DIR__);
+$phar = new Phar(__DIR__ . '/buildfromiterator8.phar.tar');
+$a = $phar->buildFromIterator(new RegexIterator(new DirectoryIterator('.'), '/^frontcontroller\d{0,2}\.phar\.phpt\\z|^\.\\z|^\.\.\\z/'), __DIR__ . DIRECTORY_SEPARATOR);
+asort($a);
+var_dump($a);
+var_dump($phar->isFileFormat(Phar::TAR));
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromiterator.phar.tar');
-__HALT_COMPILER();
+unlink(__DIR__ . '/buildfromiterator8.phar.tar');
 ?>
 --EXPECTF--
 array(21) {
@@ -70,4 +63,3 @@ array(21) {
   string(%d) "%sfrontcontroller9.phar.phpt"
 }
 bool(true)
-===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-Traits are flattened recurivly.
+Traits are flattened recursively.
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -28,5 +28,5 @@ $o = new MyHelloWorld();
 $o->sayHello();
 $o->sayWorld();
 ?>
---EXPECTF--
+--EXPECT--
 Hello World!

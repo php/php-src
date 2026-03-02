@@ -3,8 +3,8 @@ Tests DOMDocument::standalone get, set, and functionality
 --CREDITS--
 Chris Snyder <chsnyder@gmail.com>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 // create dom document

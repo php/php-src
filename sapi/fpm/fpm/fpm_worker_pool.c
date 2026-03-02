@@ -1,4 +1,3 @@
-	/* $Id: fpm_worker_pool.c,v 1.15.2.1 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -18,6 +17,15 @@
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
 
+void fpm_worker_pool_free_limit_extensions(char **limit_extensions) {
+	char **ext = limit_extensions;
+	while (*ext) {
+		free(*ext);
+		ext++;
+	}
+	free(limit_extensions);
+}
+
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->config) {
@@ -26,10 +34,16 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->user) {
 		free(wp->user);
 	}
+	if (wp->set_user) {
+		free(wp->set_user);
+	}
 	if (wp->home) {
 		free(wp->home);
 	}
-	fpm_unix_free_socket_premissions(wp);
+	if (wp->limit_extensions) {
+		fpm_worker_pool_free_limit_extensions(wp->limit_extensions);
+	}
+	fpm_unix_free_socket_permissions(wp);
 	free(wp);
 }
 /* }}} */
@@ -43,7 +57,7 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		fpm_worker_pool_config_free(wp->config);
 		fpm_children_free(wp->children);
 		if ((which & FPM_CLEANUP_CHILD) == 0 && fpm_globals.parent_pid == getpid()) {
-			fpm_scoreboard_free(wp->scoreboard);
+			fpm_scoreboard_free(wp);
 		}
 		fpm_worker_pool_free(wp);
 	}
@@ -51,7 +65,7 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
+struct fpm_worker_pool_s *fpm_worker_pool_alloc(void)
 {
 	struct fpm_worker_pool_s *ret;
 
@@ -66,13 +80,11 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
 	ret->log_fd = -1;
 	return ret;
 }
-/* }}} */
 
-int fpm_worker_pool_init_main() /* {{{ */
+int fpm_worker_pool_init_main(void)
 {
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_worker_pool_cleanup, 0)) {
 		return -1;
 	}
 	return 0;
 }
-/* }}} */

@@ -1,7 +1,7 @@
 --TEST--
 Bug #40836 (Segfault in insertBefore)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument("1.0", "UTF-8");

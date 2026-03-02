@@ -9,12 +9,12 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-$script_directory = dirname(__FILE__);
+$script_directory = __DIR__;
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "私はガラスを食べられますtestdir";
 mkdir($test_dirname);
 
-$filepath = __FILE__ . ".tmp";
+$filepath = __DIR__ . '/file_variation_5_mb.tmp';
 $filename = basename($filepath);
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\nLine 2\nLine 3");
@@ -31,10 +31,13 @@ chdir($test_dirname);
 var_dump(file("../$filename"));
 chdir($script_directory);
 
-chdir($script_directory);
-unlink($filepath);
+?>
+--CLEAN--
+<?php
+$test_dirname = __DIR__ . '/' . basename(__FILE__, ".clean.php") . "私はガラスを食べられますtestdir";
+$filepath = __DIR__ . '/file_variation_5_mb.tmp';
+@unlink($filepath);
 rmdir($test_dirname);
-
 ?>
 --EXPECT--
 file() on a path containing .. and .

@@ -1,21 +1,18 @@
 --TEST--
 ziparchive::properties isset()/empty() checks
---SKIPIF--
-<?php
-/* $Id$ */
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . '__property_test.zip';
 
 copy($dirname . 'test_with_comment.zip', $file);
 
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 
 printf("zip->status (%d):\n\tempty(): %d\n\tisset(): %d\n", $zip->status, empty($zip->status), isset($zip->status));
@@ -41,7 +38,7 @@ zip->numFiles (4):
 	empty(): 0
 	isset(): 1
 
-Notice: Undefined property: ZipArchive::$bogus in %s on line %d
+Warning: Undefined property: ZipArchive::$bogus in %s on line %d
 zip->bogus (0):
 	empty(): 1
 	isset(): 0

@@ -2,7 +2,7 @@
 Bug #41638 (pcre 7.0 regression)
 --FILE--
 <?php
-$str = "repeater id='loopt' dataSrc=subject colums=2";
+$str = "repeater id='loopt' dataSrc=subject columns=2";
 
 preg_match_all("/(['\"])((.*(\\\\\\1)*)*)\\1/sU",$str,$str_instead);
 print_r($str_instead);

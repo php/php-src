@@ -1,4 +1,3 @@
-	/* $Id: fpm_events.h,v 1.9 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_EVENTS_H
@@ -40,12 +39,12 @@ struct fpm_event_module_s {
 
 void fpm_event_loop(int err);
 void fpm_event_fire(struct fpm_event_s *ev);
-int fpm_event_init_main();
+int fpm_event_init_main(void);
 int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
 int fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
 int fpm_event_del(struct fpm_event_s *ev);
-int fpm_event_pre_init(char *machanism);
-const char *fpm_event_machanism_name();
-int fpm_event_support_edge_trigger();
+int fpm_event_pre_init(char *mechanism);
+const char *fpm_event_mechanism_name(void);
+int fpm_event_support_edge_trigger(void);
 
 #endif

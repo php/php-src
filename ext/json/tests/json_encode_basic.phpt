@@ -1,7 +1,5 @@
 --TEST--
 Test json_encode() function : basic functionality
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "*** Testing json_encode() : basic functionality ***\n";
@@ -14,10 +12,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 // get an object
-class sample  {
-}
-
-$obj = new sample();
+$obj = new stdClass();
 $obj->MyInt = 99;
 $obj->MyFloat = 123.45;
 $obj->MyBool = true;
@@ -26,68 +21,67 @@ $obj->MyString = "Hello World";
 
 // array with different values for $string
 $inputs =  array (
-	// integers
-	0,
-	123,
-	-123,
-	 2147483647,
-	-2147483648,
+    // integers
+    0,
+    123,
+    -123,
+     2147483647,
+    -2147483648,
 
-	// floats
-	123.456,
-	1.23E3,
-	-1.23E3,
+    // floats
+    123.456,
+    1.23E3,
+    -1.23E3,
 
-	// boolean
-	TRUE,
-	true,
-	FALSE,
-	false,
+    // boolean
+    TRUE,
+    true,
+    FALSE,
+    false,
 
-	// NULL
-	NULL,
-	null,
+    // NULL
+    NULL,
+    null,
 
-	// strings
-	"abc",
-	'abc',
-	"Hello\t\tWorld\n",
+    // strings
+    "abc",
+    'abc',
+    "Hello\t\tWorld\n",
 
-	// arrays
-	array(),
-	array(1,2,3,4,5),
-	array(1 => "Sun", 2 => "Mon", 3 => "Tue", 4 => "Wed", 5 => "Thur", 6 => "Fri", 7 => "Sat"),
-	array("Jan" => 31, "Feb" => 29, "Mar" => 31, "April" => 30, "May" => 31, "June" => 30),
+    // arrays
+    array(),
+    array(1,2,3,4,5),
+    array(1 => "Sun", 2 => "Mon", 3 => "Tue", 4 => "Wed", 5 => "Thur", 6 => "Fri", 7 => "Sat"),
+    array("Jan" => 31, "Feb" => 29, "Mar" => 31, "April" => 30, "May" => 31, "June" => 30),
 
-	// empty data
-	"",
-	'',
+    // empty data
+    "",
+    '',
 
-	// undefined data
-	@$undefined_var,
+    // undefined data
+    @$undefined_var,
 
-	// unset data
-	@$unset_var,
+    // unset data
+    @$unset_var,
 
-	// resource variable
-	$fp,
+    // resource variable
+    $fp,
 
-	// object variable
-	$obj
+    // object variable
+    $obj
 
 );
 
 // loop through with each element of the $inputs array to test json_encode() function
 $count = 1;
 foreach($inputs as $input) {
-	echo "-- Iteration $count --\n";
-	var_dump(json_encode($input));
-	$count ++;
+    echo "-- Iteration $count --\n";
+    var_dump(json_encode($input));
+    $count ++;
 }
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing json_encode() : basic functionality ***
 -- Iteration 1 --
 string(1) "0"
@@ -143,4 +137,3 @@ string(4) "null"
 bool(false)
 -- Iteration 27 --
 string(82) "{"MyInt":99,"MyFloat":123.45,"MyBool":true,"MyNull":null,"MyString":"Hello World"}"
-===Done===

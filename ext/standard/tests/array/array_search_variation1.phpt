@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - different needle values
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* Test array_search() with different possible needle values */
 
 echo "*** Testing array_search() with different needle values ***\n";
@@ -15,7 +9,7 @@ $arrays = array (
   array(0),
   array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL, "b", "ab", "abcd"),
   array(4, array(1, 2 => 3), "one" => 1, "5" => 5 ),
-  array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2.0 => "float2", "-.9" => -.9),
+  array(-1, -2, -3, -4, -2.989888, "-0.005" => "neg0.005", 2 => "float2", "-.9" => -.9),
   array(TRUE, FALSE),
   array("", array()),
   array("abcd\x00abcd\x00abcd"),
@@ -60,7 +54,7 @@ foreach($arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_search() with different needle values ***
 -- Iteration 1 --
 bool(false)
@@ -75,9 +69,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 4 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
@@ -99,13 +93,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 10 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 11 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 12 --
 bool(false)
 bool(false)
@@ -115,13 +109,13 @@ int(0)
 bool(false)
 int(0)
 -- Iteration 14 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 15 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 16 --
 int(0)
 bool(false)
@@ -131,9 +125,9 @@ int(0)
 int(0)
 int(0)
 -- Iteration 18 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 19 --
 int(4)
 int(4)
@@ -195,13 +189,13 @@ int(7)
 int(7)
 int(7)
 -- Iteration 34 --
-string(1) "a"
+string(0) ""
 bool(false)
-string(1) "a"
+string(0) ""
 -- Iteration 35 --
-string(1) "a"
+string(0) ""
 bool(false)
-string(1) "a"
+string(0) ""
 -- Iteration 36 --
 bool(false)
 bool(false)
@@ -339,13 +333,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 70 --
-int(2)
 bool(false)
-int(2)
+bool(false)
+bool(false)
 -- Iteration 71 --
-int(2)
 bool(false)
-int(2)
+bool(false)
+bool(false)
 -- Iteration 72 --
 bool(false)
 bool(false)
@@ -483,13 +477,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 106 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 107 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 108 --
 bool(false)
 bool(false)
@@ -555,13 +549,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 124 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 125 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 126 --
 int(0)
 int(0)
@@ -627,13 +621,13 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 142 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 143 --
-int(0)
 bool(false)
-int(0)
+bool(false)
+bool(false)
 -- Iteration 144 --
 bool(false)
 bool(false)

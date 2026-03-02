@@ -1,12 +1,16 @@
 --TEST--
-bcsqrt() incorrect argument count
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
---INI--
-bcmath.scale=0
+bcsqrt() requires a well-formed value
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
-echo bcsqrt();
+
+try {
+    bcsqrt('a');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Warning: bcsqrt() expects at least 1 parameter, 0 given in %s on line %d
+--EXPECT--
+bcsqrt(): Argument #1 ($num) is not well-formed

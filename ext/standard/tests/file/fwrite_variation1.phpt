@@ -1,22 +1,7 @@
 --TEST--
 Test fwrite() function : usage variations - r, rb & rt modes
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == 'WIN' ) {
-   die('skip...Not valid for Windows');
-}
-?>
 --FILE--
 <?php
-/*
- Prototype: int fwrite ( resource $handle,string string, [, int $length] );
- Description: fwrite() writes the contents of string to the file stream pointed to by handle.
-              If the length arquement is given,writing will stop after length bytes have been
-              written or the end of string reached, whichever comes first.
-              fwrite() returns the number of bytes written or FALSE on error
-*/
-
-
 echo "*** Testing fwrite() various  operations ***\n";
 
 // include the file.inc for Function: function delete_file($filename)
@@ -38,8 +23,8 @@ foreach($file_content_types as $file_content_type) {
     echo "-- Opening file in $file_mode --\n";
 
     // create the temp file with content of type $file_content_type
-    $filename = dirname(__FILE__)."/fwrite_variation1.tmp"; // this is name of the file
-    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fwrite_variation");
+    $filename = __DIR__."/fwrite_variation1.tmp"; // this is name of the file
+    create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "fwrite_variation");
 
     $file_handle = fopen($filename, $file_mode);
     if(!$file_handle) {
@@ -82,11 +67,15 @@ echo "Done\n";
 -- Testing fwrite() with file having content of type numeric --
 -- Opening file in r --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -94,11 +83,15 @@ int(1024)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in rb --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -106,11 +99,15 @@ int(1024)
 string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Opening file in rt --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -120,11 +117,15 @@ string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Testing fwrite() with file having content of type text --
 -- Opening file in r --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -132,11 +133,15 @@ int(1024)
 string(32) "e486000c4c8452774f746a27658d87fa"
 -- Opening file in rb --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -144,11 +149,15 @@ int(1024)
 string(32) "e486000c4c8452774f746a27658d87fa"
 -- Opening file in rt --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -158,11 +167,15 @@ string(32) "e486000c4c8452774f746a27658d87fa"
 -- Testing fwrite() with file having content of type text_with_new_line --
 -- Opening file in r --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -170,11 +183,15 @@ int(1024)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Opening file in rb --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -182,11 +199,15 @@ int(1024)
 string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Opening file in rt --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -196,11 +217,15 @@ string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Testing fwrite() with file having content of type alphanumeric --
 -- Opening file in r --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -208,11 +233,15 @@ int(1024)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Opening file in rb --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)
@@ -220,11 +249,15 @@ int(1024)
 string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Opening file in rt --
 int(0)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(false)
 int(2)
-int(0)
+
+Notice: fwrite(): Write of 1024 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(2)
 bool(false)
 bool(true)

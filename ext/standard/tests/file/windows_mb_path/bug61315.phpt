@@ -2,21 +2,17 @@
 Bug #61315 stat() fails with specific DBCS characters
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
 ?>
 --FILE--
 <?php
 
 /* This file is in UTF-8. */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
-$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "testBug61315" . DIRECTORY_SEPARATOR;
+$prefix = __DIR__ . DIRECTORY_SEPARATOR . "testBug61315" . DIRECTORY_SEPARATOR;
 
 $d0 = $prefix . "ソフト";
 $d1 = $prefix . "フォルダ";
@@ -44,7 +40,6 @@ rmdir($d1);
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 getting basename of %s\ソフト
@@ -60,4 +55,3 @@ string(%d) "%s\フォルダ"
 Active code page: %d
 bool(true)
 bool(true)
-===DONE===

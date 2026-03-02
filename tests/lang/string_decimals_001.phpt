@@ -15,8 +15,7 @@ test("9..");
 test("9.9.");
 test("9.9.9");
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 --> Testing ..9:
 int(0)
 float(0)
@@ -25,7 +24,7 @@ bool(false)
 --> Testing .9.:
 int(0)
 float(0.9)
-bool(true)
+bool(false)
 
 --> Testing 9..:
 int(9)
@@ -41,4 +40,3 @@ bool(true)
 int(9)
 float(9.9)
 bool(true)
-===DONE===

@@ -7,8 +7,12 @@ time_nanosleep — Delay for a number of seconds and nanoseconds
 --FILE--
 <?php
 
-$nano = time_nanosleep(0, 1000000000);
+time_nanosleep(0, 1000000000);
 
 ?>
 --EXPECTF--
-Warning: time_nanosleep(): nanoseconds was not in the range 0 to 999 999 999 or seconds was negative in %s.php on line %d
+Fatal error: Uncaught ValueError: Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative in %s:%d
+Stack trace:
+#0 %s(%d): time_nanosleep(0, 1000000000)
+#1 {main}
+  thrown in %s on line %d

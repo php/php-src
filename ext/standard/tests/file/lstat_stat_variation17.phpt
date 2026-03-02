@@ -9,16 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects on stats by changing permissions of a dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 // checking stat() on directory
@@ -27,7 +20,7 @@ $dirname = "$file_path/lstat_stat_variation17";
 mkdir($dirname);
 
 $old_stat = stat($dirname);
-sleep(2);
+sleep(1);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
 clearstatcache();
@@ -43,10 +36,10 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation17");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lstat() on a dir after changing its access permission ***
 bool(true)
 bool(true)

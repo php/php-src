@@ -4,10 +4,10 @@ ZE2 type hinting
 <?php
 class P { }
 class T {
-	function f(P $p = NULL) {
-		var_dump($p);
-		echo "-\n";
-	}
+    function f(P $p = NULL) {
+        var_dump($p);
+        echo "-\n";
+    }
 }
 
 $o=new T();
@@ -15,7 +15,8 @@ $o->f(new P);
 $o->f();
 $o->f(NULL);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: T::f(): Implicitly marking parameter $p as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 object(P)#2 (0) {
 }
 -

@@ -1,9 +1,7 @@
 --TEST--
 Bug #68113 (Heap corruption in exif_thumbnail())
---SKIPIF--
-<?php
-extension_loaded("exif") or die("skip need exif");
-?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 var_dump(exif_thumbnail(__DIR__."/bug68113.jpg"));

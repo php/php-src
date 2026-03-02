@@ -1,8 +1,10 @@
 --TEST--
 shm_get_var() tests
+--EXTENSIONS--
+sysvshm
 --SKIPIF--
 <?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
+
 if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
@@ -17,14 +19,9 @@ shm_put_var($s, 1, array(1,2,3));
 shm_put_var($s, 2, false);
 shm_put_var($s, 3, null);
 
-var_dump(shm_get_var());
-
-var_dump(shm_get_var(-1, -1));
-
 var_dump(shm_get_var($s, 1000));
 var_dump(shm_get_var($s, -10000));
 
-var_dump(shm_get_var($s, array()));
 var_dump(shm_get_var($s, -1));
 var_dump(shm_get_var($s, 0));
 var_dump(shm_get_var($s, 1));
@@ -41,20 +38,11 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: shm_get_var() expects exactly 2 parameters, 0 given in %s005.php on line %d
-NULL
-
-Warning: shm_get_var() expects parameter 1 to be resource, integer given in %s005.php on line %d
-NULL
-
-Warning: shm_get_var(): variable key 1000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key 1000 doesn't exist in %s005.php on line %d
 bool(false)
 
-Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
-
-Warning: shm_get_var() expects parameter 2 to be integer, array given in %s005.php on line %d
-NULL
 string(11) "test string"
 object(stdClass)#%d (0) {
 }

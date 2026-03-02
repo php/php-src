@@ -112,7 +112,7 @@ class corrupt_tarmaker
         $checksum = 256; // 8 * ord(' ');
         $checksum += array_reduce($checkheader, '_pear2tarchecksum');
 
-	if ($corrupt === 'checksum') $checksum++;
+    if ($corrupt === 'checksum') $checksum++;
         $checksum = pack('a8', sprintf('%6s ', decoct($checksum)));
 
         fwrite($this->tmp, $block . $checksum . $blockend, 512);

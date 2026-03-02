@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data default behaviour
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
@@ -12,7 +12,7 @@ zlib.output_compression=0
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-print_r(exif_read_data(dirname(__FILE__).'/test2.jpg'));
+print_r(exif_read_data(__DIR__.'/test2.jpg'));
 ?>
 --EXPECTF--
 Array

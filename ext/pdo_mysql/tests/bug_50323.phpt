@@ -1,16 +1,16 @@
 --TEST--
 Bug #50323 (No ability to connect to database named 't;', no chance to escape semicolon)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+    $db = MySQLPDOTest::factory();
 
     function changeDSN($original, $new_options) {
         $old_options = array();
@@ -18,7 +18,7 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
                 strpos($original, ':') + 1,
                 strlen($original));
 
-        // no real parser - any excotic setting can fool us
+        // no real parser - any exotic setting can fool us
         $parts = explode(';', $dsn);
         foreach ($parts as $k => $v) {
             $tmp = explode('=', $v);
@@ -40,21 +40,21 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
     }
 
 
-if (1 === @$db->exec('CREATE DATABASE `crazy;dbname`')) {
-    $dsn = changeDSN(getenv('PDOTEST_DSN'), array('dbname' => 'crazy;;dbname'));
-    $user = getenv('PDOTEST_USER');
-    $pass = getenv('PDOTEST_PASS');
+    if (1 === @$db->exec('CREATE DATABASE `crazy;dbname`')) {
+        $dsn = changeDSN(PDO_MYSQL_TEST_DSN, array('dbname' => 'crazy;;dbname'));
+        $user = PDO_MYSQL_TEST_USER;
+        $pass = PDO_MYSQL_TEST_PASS;
 
-    new PDO($dsn, $user, $pass);
-}
-echo 'done!';
+        new PDO($dsn, $user, $pass);
+    }
+    echo 'done!';
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
 
-@$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
+$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
 ?>
---EXPECTF--
+--EXPECT--
 done!

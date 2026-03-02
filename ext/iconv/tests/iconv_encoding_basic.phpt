@@ -1,24 +1,14 @@
 --TEST--
 Test iconv_get_encoding()/iconv_set_encoding() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
-iconv.input_encoding=ISO-8859-1
+input_encoding=ISO-8859-1
 iconv.internal_encoding=ISO-8859-1
 iconv.output_encoding=ISO-8859-1
 --FILE--
 <?php
-/* Prototype  : mixed iconv_get_encoding([string type])
- * Description: Get internal encoding and output encoding for ob_iconv_handler()
- * Prototype  : bool iconv_set_encoding(string type, string charset)
- * Description: Sets internal encoding and output encoding for ob_iconv_handler()
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test Basic functionality of iconv_get_encoding/iconv_set_encoding
  */
@@ -48,7 +38,7 @@ var_dump(iconv_get_encoding("all"));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***
 --- Default get_encoding ---
 array(3) {

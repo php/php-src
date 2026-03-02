@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - bool format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using bool format ***\n";
 
 // Initialise all required variables
@@ -24,7 +19,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using bool format ***
 string(1) "1"
 string(3) "1 0"

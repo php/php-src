@@ -1,82 +1,146 @@
-PHP 7.2 INTERNALS UPGRADE NOTES
+PHP 8.6 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. Path related functions
-  b. php_win32_get_random_bytes()
-  c. nice() Windows implementation
-  d. ZEND_ACC_CLONE removed
-  e. IS_TYPE_IMMUTABLE removed
-  f. zend_arg_info.class_name removed
-  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
-  h. valid_symbol_table removed
 
 2. Build system changes
-  a. Unix build system changes
-  b. Windows build system changes
-
 
 3. Module changes
+
+4. OpCode changes
+
+5. SAPI changes
 
 ========================
 1. Internal API changes
 ========================
 
-  a. Path related functions
-    - CWD_API void realpath_cache_del(const char *path, size_t path_len);
-    - CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
-    - PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
-    - PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
-
-  b. php_win32_get_random_bytes()
-    The internal randomness source on Windows switched to use CNG API.
-
-  c. nice() now have a Windows alternative that is implemented in win32/nice.c, using
-	   SetPriorityClass(). See the implementation for more in-depth details. This also
-	   defines HAVE_NICE.
-
-  d. ZEND_ACC_CLONE is removed, but was not used in previous versions
-
-  e. IS_TYPE_IMMUTABLE is removed, IS_TYPE_COPYABLE can be used instead
-     Z_IMMUTABLE() check function is still available
-
-  f. zend_arg_info class_name member is removed, use ZEND_TYPE_NAME instead
-
-  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX classname option is removed
-     use ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX for simple type
-     use ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX for object
-
-  h. valid_symbol_table is removed from executor_globals.
-     Use EG(active) instead of removed EG(valid_symbol_table)
+  . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
+    zend_string_starts_with_literal_ci() now support strings containing NUL
+    bytes. Passing non-literal char* is no longer supported.
+  . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
+  . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
+    added, given the primary flags were running out of bits.
+  . The zval_is_true() alias of zend_is_true() has been removed. Call
+    zend_is_true() directly instead.
+  . The _zval_get_*() compatibility macros for PHP 7.2 have been removed
+    call the variant without the leading underscore instead.
+    Affected: _zval_get_long, _zval_get_double, _zval_get_string,
+    _zval_get_long_func, _zval_get_double_func, _zval_get_string_func
+  . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
+    zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
+    respectively.
+  . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
+    unsafe. Directly use ZEND_LONG_FMT with a function from the
+    printf family.
+  . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
+    Call zval_ptr_dtor_nogc() directly instead.
+  . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The zend_make_callable() function has been removed, if a callable zval
+    needs to be obtained use the zend_get_callable_zval_from_fcc() function
+    instead. If this was used to store a callable, then an FCC should be
+    stored instead.
+  . The zend_active_function{_ex}() functions now return a const zend_function
+    pointer.
+  . The zend_get_call_trampoline_func() API now takes the __call or
+    __callStatic zend_function* instead of a CE and a boolean argument.
+  . The zend_set_hash_symbol() API has been removed.
+  . Added zend_hash_str_lookup().
+  . The WRONG_PARAM_COUNT and ZEND_WRONG_PARAM_COUNT() macros have been
+    removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
+    instead.
+  . PHP_HAVE_STREAMS macro removed from <php.h>.
+  . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
+    zend_internal_arg_info on internal functions, unless the
+    ZEND_ACC_USER_ARG_INFO flag was set.
+  . Added zend_ast_call_get_args() to fetch the argument node from any call
+    node.
+  . The zend_exception_save() and zend_exception_restore() functions were
+    removed.
+  . Internal functions that return by reference are now expected to
+    automatically unwrap references when the result of the call is stored in an
+    IS_TMP_VAR variable. This may be achieved by calling the
+    zend_return_unwrap_ref() function.
+  . The php_math_round_mode_from_enum() function now takes a
+    zend_enum_RoundingMode parameter.
+  . Added Z_PARAM_ENUM().
+  . Added zend_enum_fetch_case_id().
+  . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
+    more correctly represents the generic nature of the returned pointer and
+    allows to remove explicit casts, but possibly breaks pointer arithmetic
+    performed on the result.
+  . The zend_dval_to_lval_cap() function no longer takes a second
+    zend_string* parameter.
+  . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
+    longer is a pointer, but a directly embedded HashTable struct.
+  . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
+    enums.
 
 ========================
 2. Build system changes
 ========================
 
-  a. Unix build system changes
+- Abstract:
+  . Minimum required PHP version found on the host system for running scripts
+    like build/gen_stub.php during development has been updated from 7.4 to 8.1.
+  . build/gen_stub.php may now generate a _decl.h file in addition to
+    the _arginfo.h file, if the stub declares enums and is annotated with
+    @generate-c-enums. For each enum the file will contain a C enum. Enum
+    values can be compared to the result of
+    zend_enum_fetch_case_id(zend_object*).
 
-  b. Windows build system changes
-
-    .  Minimum supported Windows versions are Windows 7/Server 2008 R2.
-    . --enable-one-shot configure option is removed, --with-mp is usable.
-    . The new binary tools SDK is required for Windows builds, the
-      documentation is available under https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2
-    . Visual Studio 2017 is utilized for the Windows builds
-    . Clang build with ASAN is supported with clang 5+
+- Unix build system changes:
+  . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
+    HAVE_STRUCT_STAT_ST_BLOCKS).
 
 ========================
 3. Module changes
 ========================
 
-- Pcre:
-  . php_pcre_replace and php_pcre_replace_impl expect a zend_string instead of a zval and
-    is_callable_replace options is removed:
-    - PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
-    - PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
+- ext/mbstring:
+  . Added GB18030-2022 to default encoding list for zh-CN.
 
-- Session:
-  . php_session_start()/session_reset_id() return value is changed from void to int.
-    It returns SUCCESS/FAILURE.
-  . Session module manages session status correctly.
+- ext/mysqlnd:
+  . Dropped session_options parameter from all methods in mysqlnd_auth.
+    The same information is present in conn->options and should be used
+    instead.
 
-- OpenSSL:
-  . Windows builds ship with OpenSSL 1.1 by default, lower versions are still supported with custom deps.
+- ext/session:
+  . php_session_flush() now returns a bool rather than a zend_result.
+  . The mod_user_names global has been removed.
+  . The mod_user_uses_object_methods_as_handlers global has been added,
+    it indicates whether the session handlers are methods of an object or not.
+  . Removed session_adapt_url().
+  . PS_OPEN_ARGS is now defined as
+    `void **mod_data, zend_string *save_path, zend_string *session_name`
+    rather than
+    `void **mod_data, const char *save_path, const char *session_name`
+  . PS_FUNCS() now includes the PS_VALIDATE_SID_FUNC()
+  . PS_MOD() now requires that the PS_CREATE_SID_FUNC() and
+    PS_VALIDATE_SID_FUNC() functions are defined.
+  . PS_FUNCS_SID() and PS_MOD_SID() have been removed.
+    Either use PS_FUNCS()/PS_MOD() or PS_FUNCS_UPDATE_TIMESTAMP()/
+    PS_MOD_UPDATE_TIMESTAMP() if timestamp support exists.
+
+- ext/standard:
+  . _php_error_log() now has a formal return type of zend_result.
+  . _php_error_log() now accepts zend_string* values instead of char*.
+  . _php_error_log_ex() has been removed.
+  . php_mail()'s extra_cmd parameter is now a zend_string*.
+
+- ext/xml:
+  . Removed the XML_ExpatVersion() libxml compatibility wrapper,
+    as it was unused.
+  . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
+    as it was unused and could return the wrong result.
+
+========================
+4. OpCode changes
+========================
+
+- Added ZEND_TYPE_ASSERT to check a value's type against the parameter
+  type of a function, throwing a TypeError on failure as if the function
+  was called. Used in optimizations that elide function calls.
+
+========================
+5. SAPI changes
+========================

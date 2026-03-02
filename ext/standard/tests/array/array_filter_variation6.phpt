@@ -2,24 +2,12 @@
 Test array_filter() function : usage variations - 'input' array containing references
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing 'input' array which contains elements as reference to other data
 */
 
 echo "*** Testing array_filter() : usage variations - 'input' containing references ***\n";
 
-// Callback function
-/* Prototype : bool callback(array $input)
- * Parameter : $input - array of which each element need to be checked in function
- * Return Type : returns true or false
- * Description : This function checks each element of an input array if element > 5 then
- * returns true else returns false
- */
 function callback($input)
 {
   if($input > 5) {
@@ -43,9 +31,9 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - 'input' containing references ***
-array(3) {
+array(4) {
   [0]=>
   &array(3) {
     [0]=>
@@ -66,6 +54,8 @@ array(3) {
     [2]=>
     int(4)
   }
+  [3]=>
+  string(5) "value"
 }
 array(4) {
   [0]=>

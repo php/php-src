@@ -2,12 +2,6 @@
 Test array_intersect_assoc() function : usage variations - assoc array with diff keys for 'arr1' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_intersect_assoc() by passing different
  * associative arrays having different possible keys to $arr1 argument.
@@ -15,10 +9,6 @@ Test array_intersect_assoc() function : usage variations - assoc array with diff
 */
 
 echo "*** Testing array_intersect_assoc() : assoc array with diff keys to \$arr1 argument ***\n";
-
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -36,12 +26,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
-
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
@@ -49,21 +33,18 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with object, unset variable and resource variable
-/*10*/ array(@$unset_var => "hello"),
-
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-              133 => "int", 444.432 => "float",
-             @$unset_var => "unset", $heredoc => "heredoc")
+              133 => "int",
+              $heredoc => "heredoc")
 );
 
-// array to be passsed to $arr2 argument
+// array to be passed to $arr2 argument
 $arr2 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
               "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
               "pen\n" => 33,  133 => "int");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iteration $iterator --\n";
@@ -79,7 +60,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr1 argument ***
 -- Iteration 1 --
 array(0) {
@@ -106,62 +87,35 @@ array(0) {
 array(0) {
 }
 -- Iteration 5 --
-array(1) {
-  [2]=>
-  string(5) "float"
+array(0) {
 }
-array(1) {
-  [2]=>
-  string(5) "float"
+array(0) {
 }
 -- Iteration 6 --
 array(2) {
-  [4]=>
-  string(2) "f3"
-  [33333333]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
 }
 array(2) {
-  [4]=>
-  string(2) "f3"
-  [33333333]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
 }
 -- Iteration 7 --
-array(0) {
+array(1) {
+  ["Hello world"]=>
+  string(6) "string"
 }
-array(0) {
+array(1) {
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 8 --
-array(2) {
-  ["	Hello"]=>
-  int(111)
-  ["pen
-"]=>
-  int(33)
-}
-array(2) {
-  ["	Hello"]=>
-  int(111)
-  ["pen
-"]=>
-  int(33)
-}
--- Iteration 9 --
-array(1) {
-  ["Hello world"]=>
-  string(6) "string"
-}
-array(1) {
-  ["Hello world"]=>
-  string(6) "string"
-}
--- Iteration 10 --
-array(0) {
-}
-array(0) {
-}
--- Iteration 11 --
 array(1) {
   [133]=>
   string(3) "int"

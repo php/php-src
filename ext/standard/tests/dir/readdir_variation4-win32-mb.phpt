@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass a directory handle pointing to a directory that contains
  * files with different file names to test how readdir() reads them
@@ -20,7 +15,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation4/";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation4/";
 mkdir($dir_path);
 
 // heredoc string
@@ -55,24 +50,24 @@ $inputs = array(
 
 $iterator = 1;
 foreach($inputs as $key => $input) {
-	echo "\n-- Iteration $iterator --\n";
-	$handle = "fp{$iterator}";
-	var_dump( $$handle = @fopen($dir_path . "私はガラスを食べられます$input.tmp", 'w') );
-	var_dump( fwrite($$handle, $key));
-	fclose($$handle);
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    $handle = "fp{$iterator}";
+    var_dump( $$handle = @fopen($dir_path . "私はガラスを食べられます$input.tmp", 'w') );
+    var_dump( fwrite($$handle, $key));
+    fclose($$handle);
+    $iterator++;
 };
 
 echo "\n-- Call to readdir() --\n";
 $dir_handle = opendir($dir_path);
 while(FALSE !== ($file = readdir($dir_handle))){
 
-	// different OS order files differently so will
-	// store file names into an array so can use sorted in expected output
-	$contents[] = $file;
+    // different OS order files differently so will
+    // store file names into an array so can use sorted in expected output
+    $contents[] = $file;
 
-	// remove files while going through directory
-	@unlink($dir_path . $file);
+    // remove files while going through directory
+    @unlink($dir_path . $file);
 }
 
 // more important to check that all contents are present than order they are returned in
@@ -81,10 +76,9 @@ var_dump($contents);
 
 closedir($dir_handle);
 ?>
-===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation4/";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation4/";
 rmdir($dir_path);
 ?>
 --EXPECTF--
@@ -181,4 +175,3 @@ array(16) {
   [15]=>
   string(51) "私はガラスを食べられますsingle_file.tmp"
 }
-===DONE===

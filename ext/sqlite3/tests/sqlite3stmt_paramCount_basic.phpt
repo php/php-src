@@ -1,7 +1,7 @@
 --TEST--
 SQLite3Stmt::paramCount basic test
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -16,21 +16,21 @@ var_dump($db->exec("INSERT INTO foobar (id, name, city) VALUES (2, 'doe', 'SF')"
 
 
 $queryArray = array(
-	"SELECT * FROM foobar WHERE id = ? ORDER BY id ASC",
-	"SELECT * FROM foobar WHERE id = 2 ORDER BY id ASC",
-	"SELECT * FROM foobar WHERE id = :id AND name = :name ORDER BY id ASC",
-	"SELECT * FROM foobar WHERE id = 1 AND name = :name ORDER BY id ASC",
+    "SELECT * FROM foobar WHERE id = ? ORDER BY id ASC",
+    "SELECT * FROM foobar WHERE id = 2 ORDER BY id ASC",
+    "SELECT * FROM foobar WHERE id = :id AND name = :name ORDER BY id ASC",
+    "SELECT * FROM foobar WHERE id = 1 AND name = :name ORDER BY id ASC",
 );
 
 echo "SELECTING results\n";
 
 foreach($queryArray as $key => $query) {
-	$stmt = $db->prepare($query);
+    $stmt = $db->prepare($query);
 
-	echo 'Param count for query ' . ($key + 1) . ":\n";
-	var_dump($stmt->paramCount());
+    echo 'Param count for query ' . ($key + 1) . ":\n";
+    var_dump($stmt->paramCount());
 
-	$result = $stmt->execute();
+    $result = $stmt->execute();
 }
 
 echo "Closing database\n";
@@ -39,7 +39,7 @@ $result = null;
 var_dump($db->close());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Creating Table
 bool(true)
 INSERT into table

@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,11 +14,15 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "php_ini.h"
 #include "php_apache.h"
 
@@ -35,7 +37,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 
 #ifdef PHP_AP_DEBUG
 #define phpapdebug(a) fprintf a
@@ -117,7 +118,7 @@ static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const ch
 	return NULL;
 }
 
-static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
+static bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
 {
 	php_dir_entry *new_per_dir_entry = Z_PTR_P(zv);
 	php_dir_entry *orig_per_dir_entry;
@@ -155,7 +156,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
 #ifdef ZTS
-	ZEND_HASH_FOREACH_STR_KEY_VAL(&d->config, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&d->config, str, data) {
 		zend_string *key;
 		zval *new_entry;
 
@@ -193,7 +194,7 @@ void apply_config(void *dummy)
 	zend_string *str;
 	php_dir_entry *data;
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&d->config, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&d->config, str, data) {
 		phpapdebug((stderr, "APPLYING (%s)(%s)\n", ZSTR_VAL(str), data->value));
 		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
@@ -235,12 +236,3 @@ void *create_php_config(apr_pool_t *p, char *dummy)
 	apr_pool_cleanup_register(p, newx, destroy_php_config, apr_pool_cleanup_null);
 	return (void *) newx;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

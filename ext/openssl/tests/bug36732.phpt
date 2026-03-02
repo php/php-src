@@ -1,9 +1,7 @@
 --TEST--
 Bug #36732 (add support for req_extensions in openss_csr_new and sign)
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $configargs = array(
@@ -35,6 +33,6 @@ if (strpos($str, 'X509v3 extensions:')) {
     echo "Ok\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Ok
 Ok

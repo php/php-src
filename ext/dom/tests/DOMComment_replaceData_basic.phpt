@@ -3,8 +3,8 @@ Test replacing data into a DOMComment basic test
 --CREDITS--
 Andrew Larssen <al@larssen.org>
 London TestFest 2008
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ $dom->appendChild($comment);
 echo $dom->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <!--testreplacedcomment-->
 <?xml version="1.0"?>

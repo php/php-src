@@ -9,15 +9,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects on the stats of dir/file for changing permissions of dir/file */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -31,36 +26,37 @@ fclose($file_handle);
 
 
 // checking stat() on file
-echo "\n*** Testing stat() on file with miscelleneous file permission and content ***\n";
+echo "\n*** Testing stat() on file with miscellaneous file permission and content ***\n";
+clearstatcache();
 $old_stat = stat($filename);
+sleep(1);
 var_dump( chmod($filename, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($filename);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
 $affected_members = array( 10, 'ctime');
-var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 // clear the stat
 clearstatcache();  // clear statement cache
 
 // checking stat() on directory
-echo "\n*** Testing stat() on directory with miscelleneous file permission ***\n";
+echo "\n*** Testing stat() on directory with miscellaneous file permission ***\n";
 $old_stat = stat($dirname);
+sleep(1);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
 $affected_members = array( 10, 'ctime');
-var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 // clear the stat
 clearstatcache();  // clear statement cache
 
@@ -69,18 +65,18 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation6.tmp");
 rmdir("$file_path/stat_variation6");
 ?>
---EXPECTF--
-*** Testing stat() on file with miscelleneous file permission and content ***
+--EXPECT--
+*** Testing stat() on file with miscellaneous file permission and content ***
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 
-*** Testing stat() on directory with miscelleneous file permission ***
+*** Testing stat() on directory with miscellaneous file permission ***
 bool(true)
 bool(true)
 bool(true)

@@ -9,16 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of truncate() on stats of a file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -33,7 +26,7 @@ echo "*** Testing stat() on file by truncating it to given size ***\n";
 $old_stat = stat($filename);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 // opening file in r/w mode
 $file_handle = fopen($filename, "r+");
 var_dump( ftruncate($file_handle, 512) );  // truncate it
@@ -51,10 +44,10 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation21.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on file by truncating it to given size ***
 bool(true)
 bool(true)

@@ -1,21 +1,13 @@
 --TEST--
 Test iconv_substr() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_substr') or die("skip iconv_substr() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
-iconv.input_encoding=ISO-8859-1
-iconv.internal_encoding=ISO-8859-1
-iconv.output_encoding=ISO-8859-1
+input_encoding=ISO-8859-1
+internal_encoding=ISO-8859-1
+output_encoding=ISO-8859-1
 --FILE--
 <?php
-/* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string
- * Source code: ext/iconv/iconv.c
- */
-
 /*
  * Test Basic Functionality of iconv_substr with ASCII characters and multibyte strings.
  */

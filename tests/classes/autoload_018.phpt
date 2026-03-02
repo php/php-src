@@ -18,7 +18,7 @@ spl_autoload_register(function ($name) {
 
 var_dump(class_exists('UndefinedClass0'));
 ?>
---EXPECTF--
+--EXPECT--
 IN:  autoload(UndefinedClass0)
 IN:  autoload(UndefinedClass1)
 IN:  autoload(UndefinedClass2)

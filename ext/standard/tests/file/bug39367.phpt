@@ -3,7 +3,7 @@ Bug #39367 (clearstatcache() doesn't clear realpath cache)
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--

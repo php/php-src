@@ -1,88 +1,222 @@
 --TEST--
-SPL: FixedArray: Iterators
+SPL: SplFixedArray: Non integer offset handling
 --FILE--
 <?php
-class A extends SplFixedArray {
-	public $prop1 = "dummy";
-	public $prop2 = "dummy";
+$o = new SplFixedArray(10);
+$r = fopen('php://memory', 'r+');
 
-    public function current() {
-        echo "A::current\n";
-        return parent::current();
-    }
-    public function key() {
-        echo "A::key\n";
-        return parent::key();
-    }
-    public function rewind() {
-        echo "A::rewind\n";
-        return parent::rewind();
-    }
-    public function valid() {
-        echo "A::valid\n";
-        return parent::valid();
-    }
-    public function next() {
-        echo "A::next\n";
-        return parent::next();
-    }
+
+echo 'Write context', \PHP_EOL;
+$o[false] = 'a';
+$o[true] = 'b';
+$o[2.5] = 'c';
+
+try {
+    $o[[]] = 'd';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $o[new stdClass()] = 'e';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $o[$r] = 'f';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
 
-echo "==Direct instance==\n";
-$a = new SplFixedArray(5);
-$a[0] = "a";
-$a[1] = "c";
-$a[2] = "d";
-$a[3] = "e";
-$a[4] = "f";
-foreach ($a as $k => $v) {
-    echo "$k => $v\n";
+$o['3'] = 'g';
+
+try {
+    $o['3.5'] = 'h';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
-echo "==Child instance==\n";
-$a = new A(5);
-$a[0] = "a";
-$a[1] = "c";
-$a[2] = "d";
-$a[3] = "e";
-$a[4] = "f";
-foreach ($a as $k => $v) {
-    echo "$k => $v\n";
+try {
+    $o['03'] = 'i';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $o[' 3'] = 'j';
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+
+echo 'Read context', \PHP_EOL;
+var_dump($o[false]);
+var_dump($o[true]);
+var_dump($o[2.5]);
+
+try {
+    var_dump($o[[]]);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($o[new stdClass()]);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($o[$r]);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+var_dump($o['3']);
+
+try {
+    var_dump($o['3.5']);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($o['03']);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($o[' 3']);
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+
+echo 'isset()', \PHP_EOL;
+var_dump(isset($o[false]));
+var_dump(isset($o[true]));
+var_dump(isset($o[2.5]));
+
+try {
+    var_dump(isset($o[[]]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(isset($o[new stdClass()]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(isset($o[$r]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+var_dump(isset($o['3']));
+
+try {
+    var_dump(isset($o['3.5']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(isset($o['03']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(isset($o[' 3']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+echo 'empty()', \PHP_EOL;
+var_dump(empty($o[false]));
+var_dump(empty($o[true]));
+var_dump(empty($o[2.5]));
+
+try {
+    var_dump(empty($o[[]]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(empty($o[new stdClass()]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(empty($o[$r]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+var_dump(empty($o['3']));
+
+try {
+    var_dump(empty($o['3.5']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(empty($o['03']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(empty($o[' 3']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
-==Direct instance==
-0 => a
-1 => c
-2 => d
-3 => e
-4 => f
-==Child instance==
-A::rewind
-A::valid
-A::current
-A::key
-0 => a
-A::next
-A::valid
-A::current
-A::key
-1 => c
-A::next
-A::valid
-A::current
-A::key
-2 => d
-A::next
-A::valid
-A::current
-A::key
-3 => e
-A::next
-A::valid
-A::current
-A::key
-4 => f
-A::next
-A::valid
-===DONE===
+Write context
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+Cannot access offset of type array on SplFixedArray
+Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+Read context
+string(1) "a"
+string(1) "b"
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+string(1) "c"
+Cannot access offset of type array on SplFixedArray
+Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+string(1) "f"
+string(1) "g"
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+isset()
+bool(true)
+bool(true)
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+bool(true)
+Cannot access offset of type array on SplFixedArray
+Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+bool(true)
+bool(true)
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+empty()
+bool(false)
+bool(false)
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+bool(false)
+Cannot access offset of type array on SplFixedArray
+Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+bool(false)
+bool(false)
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray
+Cannot access offset of type string on SplFixedArray

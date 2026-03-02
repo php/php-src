@@ -2,26 +2,28 @@
 Function snmpset
 --CREDITS--
 Olivier Doucet Olivier Doucet Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 echo "Check error handing\n";
-echo "4args (5 needed)\n";
-$z = snmpset($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0');
-var_dump($z);
-
 echo "No type & no value (timeout & retries instead)\n";
-$z = snmpset($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0', $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0', $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "No value (timeout instead), retries instead of timeout\n";
 $z = snmpset($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0', 'q', $timeout, $retries);
@@ -80,26 +82,42 @@ var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $ol
 
 echo "More error handing\n";
 echo "Single OID, single type in array, single value\n";
-$z = snmpset($hostname, $communityWrite, $oid1, array('s'), $newvalue1, $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, $oid1, array('s'), $newvalue1, $timeout, $retries);
+    var_dump($z);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Single OID, single type, single value in array\n";
-$z = snmpset($hostname, $communityWrite, $oid1, 's', array($newvalue1), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, $oid1, 's', array($newvalue1), $timeout, $retries);
+    var_dump($z);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID, 1st wrong type\n";
-$z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('sw','s'), array($newvalue1, $newvalue2), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('sw','s'), array($newvalue1, $newvalue2), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID, 2nd wrong type\n";
-$z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s','sb'), array($newvalue1, $newvalue2), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s','sb'), array($newvalue1, $newvalue2), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
@@ -109,7 +127,7 @@ var_dump($z);
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
-echo "Multiple OID & type, singe value in array\n";
+echo "Multiple OID & type, single value in array\n";
 $z = snmpset($hostname, $communityWrite, array($oid1, $oid2), array('s', 's'), array($newvalue1), $timeout, $retries);
 var_dump($z);
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
@@ -142,14 +160,8 @@ var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $ol
 ?>
 --EXPECTF--
 Check error handing
-4args (5 needed)
-
-Warning: snmpset() expects at least 5 parameters, 3 given in %s on line %d
-bool(false)
 No type & no value (timeout & retries instead)
-
-Warning: snmpset(): Bogus type '-1', should be single char, got 2 in %s on line %d
-bool(false)
+Type must be a single character
 No value (timeout instead), retries instead of timeout
 
 Warning: snmpset(): Could not add variable: OID='%s' type='q' value='%i': Bad variable type ("q") in %s on line %d
@@ -187,27 +199,19 @@ bool(true)
 bool(true)
 More error handing
 Single OID, single type in array, single value
-
-Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %s
-bool(false)
+Type must be of type string when object ID is a string
 bool(true)
 bool(true)
 Single OID, single type, single value in array
-
-Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %s
-bool(false)
+Value must be of type string when object ID is a string
 bool(true)
 bool(true)
 Multiple OID, 1st wrong type
-
-Warning: snmpset(): '%s': bogus type 'sw', should be single char, got 2 in %s on line %s
-bool(false)
+Type must be a single character
 bool(true)
 bool(true)
 Multiple OID, 2nd wrong type
-
-Warning: snmpset(): '%s': bogus type 'sb', should be single char, got 2 in %s on line %s
-bool(false)
+Type must be a single character
 bool(true)
 bool(true)
 Multiple OID, single type in array, multiple value
@@ -216,7 +220,7 @@ Warning: snmpset(): '%s': no type set in %s on line %d
 bool(false)
 bool(true)
 bool(true)
-Multiple OID & type, singe value in array
+Multiple OID & type, single value in array
 
 Warning: snmpset(): '%s': no value set in %s on line %d
 bool(false)

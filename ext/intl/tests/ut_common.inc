@@ -142,7 +142,7 @@ function ut_nfmt_create( $locale, $style, $pattern = null )
         return numfmt_create( $locale, $style, $pattern );
     }
 }
-function ut_nfmt_format( $fmt, $number, $type = null )
+function ut_nfmt_format( $fmt, $number, $type = NumberFormatter::TYPE_DEFAULT )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format( $number, $type ) : numfmt_format( $fmt, $number, $type );
 }
@@ -219,6 +219,10 @@ function ut_norm_is_normalized( $str, $form )
 {
     return $GLOBALS['oo-mode'] ? Normalizer::isNormalized( $str, $form ) : normalizer_is_normalized( $str, $form );
 }
+function ut_norm_get_raw_decomposition( $str, $form )
+{
+    return $GLOBALS['oo-mode'] ? Normalizer::getRawDecomposition( $str, $form ) : normalizer_get_raw_decomposition( $str, $form );
+}
 
 /*
  * Wrappers around Collator methods to run them in either OO- or procedural mode.
@@ -230,7 +234,7 @@ function ut_loc_get_default( )
 }
 function ut_loc_set_default( $locale  )
 {
-   	return $GLOBALS['oo-mode'] ? Locale::setDefault( $locale  ) : locale_set_default( $locale );
+    return $GLOBALS['oo-mode'] ? Locale::setDefault( $locale  ) : locale_set_default( $locale );
 }
 function ut_loc_get_primary_language( $locale )
 {
@@ -293,7 +297,7 @@ function ut_loc_locale_lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_lo
     return $GLOBALS['oo-mode'] ? Locale::lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_loc ) : locale_lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_loc );
 }
 function ut_loc_accept_http($http) {
-	return $GLOBALS['oo-mode'] ? Locale::acceptFromHttp($http):locale_accept_from_http($http);
+    return $GLOBALS['oo-mode'] ? Locale::acceptFromHttp($http):locale_accept_from_http($http);
 }
 /* MessageFormatter functions */
 function ut_msgfmt_create( $locale, $pattern)

@@ -3,7 +3,7 @@ Bug #44564 (escapeshellarg removes UTF-8 multi-byte characters)
 --SKIPIF--
 <?php
 if (false == setlocale(LC_CTYPE, "UTF8", "en_US.UTF-8")) {
-	die("skip setlocale() failed\n");
+    die("skip setlocale() failed\n");
 }
 ?>
 --FILE--

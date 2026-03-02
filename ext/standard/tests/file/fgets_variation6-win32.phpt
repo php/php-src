@@ -8,12 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
-// include the file.inc for common test funcitons
+// include the file.inc for common test functions
 include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
@@ -24,7 +19,7 @@ $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumer
 
 echo "*** Testing fgets() : usage variations ***\n";
 
-$filename = dirname(__FILE__)."/fgets_variation4.tmp";
+$filename = __DIR__."/fgets_variation6.tmp";
 
 foreach($file_modes as $file_mode) {
   echo "\n-- Testing fgets() with file opened using mode $file_mode --\n";
@@ -61,7 +56,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --

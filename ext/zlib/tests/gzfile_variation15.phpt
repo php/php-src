@@ -1,19 +1,15 @@
 --TEST--
 Test gzfile() function : variation: use include path (relative directories in path)
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
+$testName = 'gzfile_variation15';
 require_once('reading_include_path.inc');
 
 //define the files to go into these directories, create one in dir2
 set_include_path($newIncludePath);
 test_gzfile();
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);
@@ -78,8 +74,7 @@ function test_gzfile() {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(22) "This is a file in dir2"
@@ -105,4 +100,3 @@ array(1) {
   string(28) "This is a file in script dir"
 }
 
-===DONE===

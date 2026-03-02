@@ -1,7 +1,7 @@
 --TEST--
 Literal compaction should take method calls on literals into account
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-Call to a member function foo() on integer
+Call to a member function foo() on int

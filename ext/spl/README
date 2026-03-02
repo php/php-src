@@ -1,7 +1,0 @@
-This is an extension that aims to implement some efficient data access
-interfaces and classes. You'll find the classes documented using php
-code in the file spl.php or in the corresponding .inc file in the examples
-subdirectory. Based on the internal implementations or the files in the
-examples subdirectory there are also some .php files to experiment with.
-
-For more information look at: http://php.net/manual/en/book.spl.php

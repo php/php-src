@@ -7,13 +7,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Passing an existing file as $prefix for tempnam() fn */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
 $dir_name = $file_path."/tempnam_variation5";

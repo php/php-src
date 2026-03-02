@@ -3,8 +3,8 @@ Tests DOMDocument::config read
 --CREDITS--
 Chris Snyder <chsnyder@gmail.com>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 // create dom document
@@ -19,8 +19,10 @@ var_dump( $test );
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 DOMDocument created
+
+Deprecated: Property DOMDocument::$config is deprecated in %s on line %d
 Read config:
 NULL
 Done

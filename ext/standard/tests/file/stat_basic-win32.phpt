@@ -8,12 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/*
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require("$file_path/file.inc");
 
 echo "*** Testing stat() : basic functionality ***\n";
@@ -34,7 +29,7 @@ $file_handle = fopen($filename, "w");
 fclose($file_handle);
 // stat of the file created
 $file_stat = stat($filename);
-sleep(2);
+sleep(1);
 
 // now new stat of the dir after file is created
 $new_dir_stat = stat($dirname);
@@ -64,7 +59,7 @@ echo "\n---Done---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_basic/stat_basic.tmp");
 rmdir("$file_path/stat_basic");
 ?>
@@ -78,9 +73,9 @@ bool(true)
 -- comparing difference in dir stats before and after creating file in it --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(0)
+  int(%d)
   [2]=>
   int(%d)
   [3]=>
@@ -104,9 +99,9 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
-  int(0)
+  int(%d)
   ["mode"]=>
   int(%d)
   ["nlink"]=>
@@ -132,7 +127,7 @@ array(26) {
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -158,7 +153,7 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>

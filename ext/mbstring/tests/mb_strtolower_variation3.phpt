@@ -1,17 +1,9 @@
 --TEST--
 Test mb_strtolower() function : usage variations - pass mixed ASCII and non-ASCII strings
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strtolower') or die("skip mb_strtolower() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : string mb_strtolower(string $sourcestring [, string $encoding])
- * Description: Returns a lowercased version of $sourcestring
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass a Japanese string and a mixed Japanese and ASCII string to mb_strtolower
  * to check correct conversion is occurring (Japanese characters should not be converted).
@@ -27,23 +19,23 @@ echo "\n-- Mixed string (mulitbyte and ASCII characters) --\n";
 $a = mb_strtolower($string_mixed, 'UTF-8');
 var_dump(base64_encode($a));
 if ($a == $string_mixed_lower) {
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "\n-- Multibyte Only String--\n";
 $b = mb_strtolower($string_all_mb, 'UTF-8');
 var_dump(base64_encode($b));
 if ($b == $string_all_mb) { // Japanese characters only - should not be any conversion
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strtolower() : usage variations ***
 
 -- Mixed string (mulitbyte and ASCII characters) --

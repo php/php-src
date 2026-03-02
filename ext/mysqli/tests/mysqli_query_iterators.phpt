@@ -1,71 +1,72 @@
 --TEST--
 mysqli iterators
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require 'table.inc';
 
-	$tmp    = NULL;
-	$link   = NULL;
+    echo "--- Testing default ---\n";
+    if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id")))
+        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    else {
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        echo "======\n";
 
-	require('table.inc');
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        mysqli_free_result($res);
+        try {
+            foreach ($res as $row) {
+                echo "Iterating over a closed result set should not work\n";
+                var_dump($row);
+            }
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+    }
+    echo "--- Testing USE_RESULT ---\n";
+    if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id", MYSQLI_USE_RESULT)))
+        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    else {
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        echo "======\n";
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        mysqli_free_result($res);
+    }
 
-	echo "--- Testing default ---\n";
-	if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id")))
-		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	else {
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		echo "======\n";
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		mysqli_free_result($res);
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-	}
-	echo "--- Testing USE_RESULT ---\n";
-	if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id", MYSQLI_USE_RESULT)))
-		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	else {
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		echo "======\n";
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		mysqli_free_result($res);
-	}
+    echo "--- Testing STORE_RESULT ---\n";
+    if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id", MYSQLI_STORE_RESULT)))
+        printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    else {
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        echo "======\n";
+        foreach ($res as $row) {
+            var_dump($row);
+        }
+        mysqli_free_result($res);
+    }
 
-	echo "--- Testing STORE_RESULT ---\n";
-	if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id", MYSQLI_STORE_RESULT)))
-		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	else {
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		echo "======\n";
-		foreach ($res as $row) {
-			var_dump($row);
-		}
-		mysqli_free_result($res);
-	}
+    mysqli_close($link);
 
-	mysqli_close($link);
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 --- Testing default ---
@@ -118,8 +119,7 @@ array(1) {
   ["id"]=>
   string(1) "6"
 }
-
-Warning: main(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 --- Testing USE_RESULT ---
 array(1) {
   ["id"]=>
@@ -147,7 +147,7 @@ array(1) {
 }
 ======
 
-Warning: main(): Data fetched with MYSQLI_USE_RESULT can be iterated only once in %s on line %d
+Warning: Data fetched with MYSQLI_USE_RESULT can be iterated only once in %s on line %d
 --- Testing STORE_RESULT ---
 array(1) {
   ["id"]=>

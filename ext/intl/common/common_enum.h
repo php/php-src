@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -40,11 +38,11 @@ extern "C" {
 #define INTLITERATOR_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(IntlIterator, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_ITERATOR, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT\
-	object = getThis(); \
+	object = ZEND_THIS; \
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (ii->iterator == NULL) { \
-		intl_errors_set(&ii->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlIterator", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlIterator"); \
+		RETURN_THROWS(); \
 	}
 
 typedef struct {
@@ -70,14 +68,16 @@ extern zend_class_entry *IntlIterator_ce_ptr;
 extern zend_object_handlers IntlIterator_handlers;
 
 U_CFUNC void zoi_with_current_dtor(zend_object_iterator *iter);
-U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter);
+U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter);
 U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
 U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter);
+U_CFUNC HashTable *zoi_with_current_get_gc(zend_object_iterator *iter, zval **table, int *n);
 
 #ifdef __cplusplus
+using icu::StringEnumeration;
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
 #endif
 
-U_CFUNC void intl_register_IntlIterator_class(void);
+U_CFUNC void intl_register_common_symbols(int module_number);
 
 #endif // INTL_COMMON_ENUM_H

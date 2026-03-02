@@ -7,7 +7,7 @@ date.timezone=UTC
 $date = DateTime::createFromFormat(DateTime::COOKIE, "Mon, 21-Jan-2041 15:24:52 GMT");
 print_r($date);
 ?>
---EXPECTF--
+--EXPECT--
 DateTime Object
 (
     [date] => 2041-01-21 15:24:52.000000

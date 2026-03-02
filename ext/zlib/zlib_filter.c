@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,8 +13,6 @@
    | Authors: Sara Golemon (pollita@php.net)                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_zlib.h"
@@ -31,7 +27,7 @@ typedef struct _php_zlib_filter_data {
 	unsigned char *outbuf;
 	size_t outbuf_len;
 	int persistent;
-	zend_bool finished;
+	bool finished; /* for zlib.deflate: signals that no flush is pending */
 } php_zlib_filter_data;
 
 /* }}} */
@@ -92,8 +88,9 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				inflateEnd(&(data->strm));
 				data->finished = '\1';
 				exit_status = PSFS_PASS_ON;
-			} else if (status != Z_OK) {
+			} else if (status != Z_OK && status != Z_BUF_ERROR) {
 				/* Something bad happened */
+				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;
@@ -159,7 +156,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_inflate_ops = {
+static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
@@ -198,6 +195,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 		bucket = php_stream_bucket_make_writeable(bucket);
 
 		while (bin < (unsigned int) bucket->buflen) {
+			int flush_mode;
+
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -205,7 +204,9 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			memcpy(data->strm.next_in, bucket->buf + bin, desired);
 			data->strm.avail_in = desired;
 
-			status = deflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH));
+			flush_mode = flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH);
+			data->finished = flush_mode != Z_NO_FLUSH;
+			status = deflate(&(data->strm), flush_mode);
 			if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket);
@@ -232,11 +233,12 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 		php_stream_bucket_delref(bucket);
 	}
 
-	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+	if (flags & PSFS_FLAG_FLUSH_CLOSE || ((flags & PSFS_FLAG_FLUSH_INC) && !data->finished)) {
 		/* Spit it out! */
 		status = Z_OK;
 		while (status == Z_OK) {
-			status = deflate(&(data->strm), Z_FINISH);
+			status = deflate(&(data->strm), (flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH));
+			data->finished = true;
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
@@ -268,7 +270,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_deflate_ops = {
+static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
@@ -280,7 +282,7 @@ static php_stream_filter_ops php_zlib_deflate_ops = {
 
 static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
 	int status;
 
@@ -321,11 +323,11 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 			zval *tmpzval;
 
 			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
-				(tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+				(tmpzval = zend_hash_str_find_ind(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
-					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
+					php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 				} else {
 					windowBits = tmp;
 				}
@@ -333,7 +335,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 		}
 
 		/* RFC 1951 Inflate */
-		data->finished = '\0';
+		data->finished = false;
 		status = inflateInit2(&(data->strm), windowBits);
 		fops = &php_zlib_inflate_ops;
 	} else if (strcasecmp(filtername, "zlib.deflate") == 0) {
@@ -352,34 +354,37 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 			switch (Z_TYPE_P(filterparams)) {
 				case IS_ARRAY:
-				case IS_OBJECT:
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "memory", sizeof("memory") -1))) {
+				case IS_OBJECT: {
+					HashTable *ht = HASH_OF(filterparams);
+
+					if ((tmpzval = zend_hash_str_find_ind(ht, "memory", sizeof("memory") -1))) {
 						/* Memory Level (1 - 9) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (" ZEND_LONG_FMT ")", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter given for memory level (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							memLevel = tmp;
 						}
 					}
 
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+					if ((tmpzval = zend_hash_str_find_ind(ht, "window", sizeof("window") - 1))) {
 						/* log-2 base of history window (9 - 15) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							windowBits = tmp;
 						}
 					}
 
-					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "level", sizeof("level") - 1))) {
+					if ((tmpzval = zend_hash_str_find_ind(ht, "level", sizeof("level") - 1))) {
 						tmp = zval_get_long(tmpzval);
 
 						/* Pseudo pass through to catch level validating code */
 						goto factory_setlevel;
 					}
 					break;
+				}
 				case IS_STRING:
 				case IS_DOUBLE:
 				case IS_LONG:
@@ -397,6 +402,7 @@ factory_setlevel:
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
+		data->finished = true;
 		fops = &php_zlib_deflate_ops;
 	} else {
 		status = Z_DATA_ERROR;
@@ -413,16 +419,7 @@ factory_setlevel:
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory php_zlib_filter_factory = {
+const php_stream_filter_factory php_zlib_filter_factory = {
 	php_zlib_filter_create
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

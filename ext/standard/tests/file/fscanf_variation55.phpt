@@ -3,23 +3,18 @@ Test fscanf() function: usage variations - tracking file pointer while reading
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	die("skip this test is for 32bit platform only");
+    die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--
 <?php
 
 /*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
-/*
   Test fscanf() to scan data using different format types and also
   tracking the file pointer movement along with reading
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): tracking file pointer along with reading data from file ***\n";
 
@@ -90,11 +85,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation55.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): tracking file pointer along with reading data from file ***
 
 *** File opened in r mode ***

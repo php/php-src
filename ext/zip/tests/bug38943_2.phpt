@@ -1,10 +1,7 @@
 --TEST--
 #38943, properties in extended class cannot be set (5.3)
---SKIPIF--
-<?php
-/* $Id: bug38943_2.phpt 271800 2008-12-24 11:28:25Z pajoye $ */
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 include 'bug38943.inc';
@@ -15,15 +12,8 @@ array(1) {
   int(1)
 }
 object(myZip)#1 (%d) {
-  ["test":"myZip":private]=>
-  int(0)
-  ["testp"]=>
-  string(6) "foobar"
-  ["testarray":"myZip":private]=>
-  array(1) {
-    [0]=>
-    int(1)
-  }
+  ["lastId"]=>
+  int(-1)
   ["status"]=>
   int(0)
   ["statusSys"]=>
@@ -34,4 +24,13 @@ object(myZip)#1 (%d) {
   string(0) ""
   ["comment"]=>
   string(0) ""
+  ["test":"myZip":private]=>
+  int(0)
+  ["testp"]=>
+  string(6) "foobar"
+  ["testarray":"myZip":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
 }

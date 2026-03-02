@@ -11,15 +11,17 @@ $strVals = array(
 error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
-   foreach($strVals as $otherVal) {
-	   echo "--- testing: '$strVal' - '$otherVal' ---\n";
-      var_dump($strVal-$otherVal);
-   }
+    foreach($strVals as $otherVal) {
+        echo "--- testing: '$strVal' - '$otherVal' ---\n";
+        try {
+            var_dump($strVal-$otherVal);
+        } catch (\TypeError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
+    }
 }
 
-
 ?>
-===DONE===
 --EXPECT--
 --- testing: '0' - '0' ---
 int(0)
@@ -32,7 +34,7 @@ float(-1.2)
 --- testing: '0' - '-7.7' ---
 float(7.7)
 --- testing: '0' - 'abc' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: '0' - '123abc' ---
 int(-123)
 --- testing: '0' - '123e5' ---
@@ -48,7 +50,7 @@ int(-123)
 --- testing: '0' - '3.4a' ---
 float(-3.4)
 --- testing: '0' - 'a5.9' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: '65' - '0' ---
 int(65)
 --- testing: '65' - '65' ---
@@ -60,7 +62,7 @@ float(63.8)
 --- testing: '65' - '-7.7' ---
 float(72.7)
 --- testing: '65' - 'abc' ---
-int(65)
+Unsupported operand types: string - string
 --- testing: '65' - '123abc' ---
 int(-58)
 --- testing: '65' - '123e5' ---
@@ -76,7 +78,7 @@ int(-58)
 --- testing: '65' - '3.4a' ---
 float(61.6)
 --- testing: '65' - 'a5.9' ---
-int(65)
+Unsupported operand types: string - string
 --- testing: '-44' - '0' ---
 int(-44)
 --- testing: '-44' - '65' ---
@@ -88,7 +90,7 @@ float(-45.2)
 --- testing: '-44' - '-7.7' ---
 float(-36.3)
 --- testing: '-44' - 'abc' ---
-int(-44)
+Unsupported operand types: string - string
 --- testing: '-44' - '123abc' ---
 int(-167)
 --- testing: '-44' - '123e5' ---
@@ -104,7 +106,7 @@ int(-167)
 --- testing: '-44' - '3.4a' ---
 float(-47.4)
 --- testing: '-44' - 'a5.9' ---
-int(-44)
+Unsupported operand types: string - string
 --- testing: '1.2' - '0' ---
 float(1.2)
 --- testing: '1.2' - '65' ---
@@ -116,7 +118,7 @@ float(0)
 --- testing: '1.2' - '-7.7' ---
 float(8.9)
 --- testing: '1.2' - 'abc' ---
-float(1.2)
+Unsupported operand types: string - string
 --- testing: '1.2' - '123abc' ---
 float(-121.8)
 --- testing: '1.2' - '123e5' ---
@@ -132,7 +134,7 @@ float(-121.8)
 --- testing: '1.2' - '3.4a' ---
 float(-2.2)
 --- testing: '1.2' - 'a5.9' ---
-float(1.2)
+Unsupported operand types: string - string
 --- testing: '-7.7' - '0' ---
 float(-7.7)
 --- testing: '-7.7' - '65' ---
@@ -144,7 +146,7 @@ float(-8.9)
 --- testing: '-7.7' - '-7.7' ---
 float(0)
 --- testing: '-7.7' - 'abc' ---
-float(-7.7)
+Unsupported operand types: string - string
 --- testing: '-7.7' - '123abc' ---
 float(-130.7)
 --- testing: '-7.7' - '123e5' ---
@@ -160,35 +162,35 @@ float(-130.7)
 --- testing: '-7.7' - '3.4a' ---
 float(-11.1)
 --- testing: '-7.7' - 'a5.9' ---
-float(-7.7)
+Unsupported operand types: string - string
 --- testing: 'abc' - '0' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: 'abc' - '65' ---
-int(-65)
+Unsupported operand types: string - string
 --- testing: 'abc' - '-44' ---
-int(44)
+Unsupported operand types: string - string
 --- testing: 'abc' - '1.2' ---
-float(-1.2)
+Unsupported operand types: string - string
 --- testing: 'abc' - '-7.7' ---
-float(7.7)
+Unsupported operand types: string - string
 --- testing: 'abc' - 'abc' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: 'abc' - '123abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'abc' - '123e5' ---
-float(-12300000)
+Unsupported operand types: string - string
 --- testing: 'abc' - '123e5xyz' ---
-float(-12300000)
+Unsupported operand types: string - string
 --- testing: 'abc' - ' 123abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'abc' - '123 abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'abc' - '123abc ' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'abc' - '3.4a' ---
-float(-3.4)
+Unsupported operand types: string - string
 --- testing: 'abc' - 'a5.9' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: '123abc' - '0' ---
 int(123)
 --- testing: '123abc' - '65' ---
@@ -200,7 +202,7 @@ float(121.8)
 --- testing: '123abc' - '-7.7' ---
 float(130.7)
 --- testing: '123abc' - 'abc' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123abc' - '123abc' ---
 int(0)
 --- testing: '123abc' - '123e5' ---
@@ -216,7 +218,7 @@ int(0)
 --- testing: '123abc' - '3.4a' ---
 float(119.6)
 --- testing: '123abc' - 'a5.9' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123e5' - '0' ---
 float(12300000)
 --- testing: '123e5' - '65' ---
@@ -228,7 +230,7 @@ float(12299998.8)
 --- testing: '123e5' - '-7.7' ---
 float(12300007.7)
 --- testing: '123e5' - 'abc' ---
-float(12300000)
+Unsupported operand types: string - string
 --- testing: '123e5' - '123abc' ---
 float(12299877)
 --- testing: '123e5' - '123e5' ---
@@ -244,7 +246,7 @@ float(12299877)
 --- testing: '123e5' - '3.4a' ---
 float(12299996.6)
 --- testing: '123e5' - 'a5.9' ---
-float(12300000)
+Unsupported operand types: string - string
 --- testing: '123e5xyz' - '0' ---
 float(12300000)
 --- testing: '123e5xyz' - '65' ---
@@ -256,7 +258,7 @@ float(12299998.8)
 --- testing: '123e5xyz' - '-7.7' ---
 float(12300007.7)
 --- testing: '123e5xyz' - 'abc' ---
-float(12300000)
+Unsupported operand types: string - string
 --- testing: '123e5xyz' - '123abc' ---
 float(12299877)
 --- testing: '123e5xyz' - '123e5' ---
@@ -272,7 +274,7 @@ float(12299877)
 --- testing: '123e5xyz' - '3.4a' ---
 float(12299996.6)
 --- testing: '123e5xyz' - 'a5.9' ---
-float(12300000)
+Unsupported operand types: string - string
 --- testing: ' 123abc' - '0' ---
 int(123)
 --- testing: ' 123abc' - '65' ---
@@ -284,7 +286,7 @@ float(121.8)
 --- testing: ' 123abc' - '-7.7' ---
 float(130.7)
 --- testing: ' 123abc' - 'abc' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: ' 123abc' - '123abc' ---
 int(0)
 --- testing: ' 123abc' - '123e5' ---
@@ -300,7 +302,7 @@ int(0)
 --- testing: ' 123abc' - '3.4a' ---
 float(119.6)
 --- testing: ' 123abc' - 'a5.9' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123 abc' - '0' ---
 int(123)
 --- testing: '123 abc' - '65' ---
@@ -312,7 +314,7 @@ float(121.8)
 --- testing: '123 abc' - '-7.7' ---
 float(130.7)
 --- testing: '123 abc' - 'abc' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123 abc' - '123abc' ---
 int(0)
 --- testing: '123 abc' - '123e5' ---
@@ -328,7 +330,7 @@ int(0)
 --- testing: '123 abc' - '3.4a' ---
 float(119.6)
 --- testing: '123 abc' - 'a5.9' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123abc ' - '0' ---
 int(123)
 --- testing: '123abc ' - '65' ---
@@ -340,7 +342,7 @@ float(121.8)
 --- testing: '123abc ' - '-7.7' ---
 float(130.7)
 --- testing: '123abc ' - 'abc' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '123abc ' - '123abc' ---
 int(0)
 --- testing: '123abc ' - '123e5' ---
@@ -356,7 +358,7 @@ int(0)
 --- testing: '123abc ' - '3.4a' ---
 float(119.6)
 --- testing: '123abc ' - 'a5.9' ---
-int(123)
+Unsupported operand types: string - string
 --- testing: '3.4a' - '0' ---
 float(3.4)
 --- testing: '3.4a' - '65' ---
@@ -368,7 +370,7 @@ float(2.2)
 --- testing: '3.4a' - '-7.7' ---
 float(11.1)
 --- testing: '3.4a' - 'abc' ---
-float(3.4)
+Unsupported operand types: string - string
 --- testing: '3.4a' - '123abc' ---
 float(-119.6)
 --- testing: '3.4a' - '123e5' ---
@@ -384,33 +386,32 @@ float(-119.6)
 --- testing: '3.4a' - '3.4a' ---
 float(0)
 --- testing: '3.4a' - 'a5.9' ---
-float(3.4)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '0' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '65' ---
-int(-65)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '-44' ---
-int(44)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '1.2' ---
-float(-1.2)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '-7.7' ---
-float(7.7)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - 'abc' ---
-int(0)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '123abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '123e5' ---
-float(-12300000)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '123e5xyz' ---
-float(-12300000)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - ' 123abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '123 abc' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '123abc ' ---
-int(-123)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - '3.4a' ---
-float(-3.4)
+Unsupported operand types: string - string
 --- testing: 'a5.9' - 'a5.9' ---
-int(0)
-===DONE===
+Unsupported operand types: string - string

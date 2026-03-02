@@ -1,25 +1,30 @@
 --TEST--
 PDO SQLite Bug #33841 (rowCount() does not work on prepared statements)
---SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-$db->exec('CREATE TABLE test (text)');
+$db->exec('CREATE TABLE test_33841 (text)');
 
-$stmt = $db->prepare("INSERT INTO test VALUES ( :text )");
+$stmt = $db->prepare("INSERT INTO test_33841 VALUES ( :text )");
 $stmt->bindParam(':text', $name);
 $name = 'test1';
 var_dump($stmt->execute(), $stmt->rowCount());
 
-$stmt = $db->prepare("UPDATE test SET text = :text ");
+$stmt = $db->prepare("UPDATE test_33841 SET text = :text ");
 $stmt->bindParam(':text', $name);
 $name = 'test2';
 var_dump($stmt->execute(), $stmt->rowCount());
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE IF EXISTS test_33841');
+?>
 --EXPECT--
 bool(true)
 int(1)

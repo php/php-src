@@ -1,18 +1,17 @@
 --TEST--
 PDO Common: Bug #77849 (inconsistent state of cloned statament object)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo')) die('skip');
-?>
+--EXTENSIONS--
+pdo
 --FILE--
 <?php
-$stmt = new PDOStatement();
 
-clone $stmt;
+try {
+    $stmt = new PDOStatement();
+    clone $stmt;
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class PDOStatement in %s:4
-Stack trace:
-#0 {main}
-  thrown in %s on line 4
-
+--EXPECT--
+Error: Trying to clone an uncloneable object of class PDOStatement

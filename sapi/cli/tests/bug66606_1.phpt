@@ -9,9 +9,9 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('var_dump($_SERVER["CONTENT_TYPE"], $_SERVER["CONTENT_LENGTH"])');
+php_cli_server_start('var_dump(isset($_SERVER["CONTENT_TYPE"]), isset($_SERVER["CONTENT_LENGTH"]))');
 echo file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS);
 ?>
---EXPECTF--
-NULL
-NULL
+--EXPECT--
+bool(false)
+bool(false)

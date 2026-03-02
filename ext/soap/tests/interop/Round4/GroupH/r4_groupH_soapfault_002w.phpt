@@ -1,12 +1,12 @@
 --TEST--
 SOAP Interop Round4 GroupH SoapFault 002 (php/wsdl): echoVersionMismatchFault(SOAP 1.2)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_soapfault.wsdl",array("trace"=>1,"exceptions"=>0,"soap_version"=>SOAP_1_2));
+$client = new SoapClient(__DIR__."/round4_groupH_soapfault.wsdl",array("trace"=>1,"exceptions"=>0,"soap_version"=>SOAP_1_2));
 $client->echoVersionMismatchFault();
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

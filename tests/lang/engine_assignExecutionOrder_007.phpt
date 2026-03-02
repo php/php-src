@@ -11,7 +11,7 @@ $o->a = new $a[$i=2][++$i];
 $o->a->b = new $a[$i=2][++$i];
 print_r($o);
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [2] => Array

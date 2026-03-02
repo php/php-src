@@ -5,30 +5,30 @@ forward_static_call() calling outside of the inheritance chain.
 
 class A
 {
-	const NAME = 'A';
-	public static function test() {
-		echo static::NAME, "\n";
-	}
+    const NAME = 'A';
+    public static function test() {
+        echo static::NAME, "\n";
+    }
 }
 
 class B extends A
 {
-	const NAME = 'B';
+    const NAME = 'B';
 
-	public static function test() {
-		echo self::NAME, "\n";
-		forward_static_call(array('parent', 'test'));
-	}
+    public static function test() {
+        echo self::NAME, "\n";
+        forward_static_call(array('parent', 'test'));
+    }
 }
 
 class C
 {
-	const NAME = 'C';
+    const NAME = 'C';
 
-	public static function test() {
-		echo self::NAME, "\n";
-		forward_static_call(array('B', 'test'));
-	}
+    public static function test() {
+        echo self::NAME, "\n";
+        forward_static_call(array('B', 'test'));
+    }
 }
 
 A::test();
@@ -38,14 +38,16 @@ echo "-\n";
 C::test();
 
 ?>
-===DONE===
 --EXPECTF--
 A
 -
 B
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 B
 -
 C
 B
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 B
-===DONE===

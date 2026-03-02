@@ -1,25 +1,23 @@
 --TEST--
 Returning a reference from a static method via another static method
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 class C {
-	static function returnConstantByValue() {
-		return 100;
-	}
+    static function returnConstantByValue() {
+        return 100;
+    }
 
-	static function &returnConstantByRef() {
-		return 100;
-	}
+    static function &returnConstantByRef() {
+        return 100;
+    }
 
-	static function &returnVariableByRef() {
-		return $GLOBALS['a'];
-	}
+    static function &returnVariableByRef() {
+        return $GLOBALS['a'];
+    }
 
-	static function &returnFunctionCallByRef($functionToCall) {
-		return C::$functionToCall();
-	}
+    static function &returnFunctionCallByRef($functionToCall) {
+        return C::$functionToCall();
+    }
 }
 
 echo "\n---> 1. Via a return by ref function call, assign by reference the return value of a function that returns by value:\n";

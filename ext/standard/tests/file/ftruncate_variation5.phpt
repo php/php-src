@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/*
- Prototype: bool ftruncate ( resource $handle, int $size );
- Description: Truncates a file to a given length
-*/
-
 // include common file related test functions
 include ("file.inc");
 
@@ -33,13 +28,13 @@ foreach($file_content_types as $file_content_type) {
    echo "-- Testing ftruncate() with file opening using $file_modes[$mode_counter] mode --\n";
 
    // create 1 file with some contents
-   $filename = dirname(__FILE__)."/ftruncate_variation5.tmp";
+   $filename = __DIR__."/ftruncate_variation5.tmp";
    if( strstr($file_modes[$mode_counter], "x") || strstr($file_modes[$mode_counter], "w") ) {
      // fopen the file using the $file_modes
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
      fill_file($file_handle, $file_content_type, 1024);
    } else {
-     create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "ftruncate_variation", 5);
+     create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "ftruncate_variation", 5);
      // fopen the file using the $file_modes
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
    }
@@ -70,7 +65,7 @@ foreach($file_content_types as $file_content_type) {
 }//end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ftruncate() : usage variations ***
 
 -- Testing ftruncate() with file having data of type numeric --

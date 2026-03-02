@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,8 +13,6 @@
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* This is the spprintf implementation.
  * It has emerged from apache snprintf. See original header:
@@ -76,7 +72,9 @@
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include "php.h"
 
 #include <stddef.h>
@@ -87,11 +85,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
@@ -99,14 +94,9 @@
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #endif
-#else
-#define LCONV_DECIMAL_POINT '.'
-#endif
 
 #include "snprintf.h"
 
-#define FALSE           0
-#define TRUE            1
 #define NUL             '\0'
 #define INT_NULL        ((int *)0)
 
@@ -153,7 +143,7 @@
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
  * which can be at most max length of double
  */
-#define NUM_BUF_SIZE PHP_DOUBLE_MAX_LENGTH
+#define NUM_BUF_SIZE ZEND_DOUBLE_MAX_LENGTH
 
 #define NUM(c) (c - '0')
 
@@ -185,22 +175,13 @@
 
 /* }}} */
 
-#if !HAVE_STRNLEN
-static size_t strnlen(const char *s, size_t maxlen) {
-	char *r = memchr(s, '\0', maxlen);
-	return r ? r-s : maxlen;
-}
-#endif
-
 /*
  * Do format conversion placing the output in buffer
  */
-static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
+static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
 	size_t s_len;
-	int free_zcopy;
-	zval *zvp, zcopy;
 
 	int min_width = 0;
 	int precision = 0;
@@ -211,30 +192,28 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 	char prefix_char;
 
 	double fp_num;
-	wide_int i_num = (wide_int) 0;
-	u_wide_int ui_num = (u_wide_int) 0;
+	int64_t i_num = (int64_t) 0;
+	uint64_t ui_num = (uint64_t) 0;
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 	struct lconv lconv;
 #else
 	struct lconv *lconv = NULL;
-#endif
 #endif
 
 	/*
 	 * Flag variables
 	 */
 	length_modifier_e modifier;
-	boolean_e alternate_form;
-	boolean_e print_sign;
-	boolean_e print_blank;
-	boolean_e adjust_precision;
-	boolean_e adjust_width;
-	bool_int is_negative;
+	bool alternate_form;
+	bool print_sign;
+	bool print_blank;
+	bool adjust_precision;
+	bool adjust_width;
+	bool is_negative;
 
 	while (*fmt) {
 		if (*fmt != '%') {
@@ -243,11 +222,11 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 			/*
 			 * Default variable settings
 			 */
+			zend_string *tmp_str = NULL;
 			adjust = RIGHT;
-			alternate_form = print_sign = print_blank = NO;
+			alternate_form = print_sign = print_blank = false;
 			pad_char = ' ';
 			prefix_char = NUL;
-			free_zcopy = 0;
 
 			fmt++;
 
@@ -262,11 +241,11 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					if (*fmt == '-')
 						adjust = LEFT;
 					else if (*fmt == '+')
-						print_sign = YES;
+						print_sign = true;
 					else if (*fmt == '#')
-						alternate_form = YES;
+						alternate_form = true;
 					else if (*fmt == ' ')
-						print_blank = YES;
+						print_blank = true;
 					else if (*fmt == '0')
 						pad_char = '0';
 					else
@@ -278,23 +257,23 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				 */
 				if (isdigit((int)*fmt)) {
 					STR_TO_DEC(fmt, min_width);
-					adjust_width = YES;
+					adjust_width = true;
 				} else if (*fmt == '*') {
 					min_width = va_arg(ap, int);
 					fmt++;
-					adjust_width = YES;
+					adjust_width = true;
 					if (min_width < 0) {
 						adjust = LEFT;
 						min_width = -min_width;
 					}
 				} else
-					adjust_width = NO;
+					adjust_width = false;
 
 				/*
 				 * Check if a precision was specified
 				 */
 				if (*fmt == '.') {
-					adjust_precision = YES;
+					adjust_precision = true;
 					fmt++;
 					if (isdigit((int)*fmt)) {
 						STR_TO_DEC(fmt, precision);
@@ -305,14 +284,10 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							precision = -1;
 					} else
 						precision = 0;
-
-					if (precision > FORMAT_CONV_MAX_PRECISION) {
-						precision = FORMAT_CONV_MAX_PRECISION;
-					}
 				} else
-					adjust_precision = NO;
+					adjust_precision = false;
 			} else
-				adjust_precision = adjust_width = NO;
+				adjust_precision = adjust_width = false;
 
 			/*
 			 * Modifier check
@@ -321,25 +296,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'L':
 					fmt++;
 					modifier = LM_LONG_DOUBLE;
-					break;
-				case 'I':
-					fmt++;
-#if SIZEOF_LONG_LONG
-					if (*fmt == '6' && *(fmt+1) == '4') {
-						fmt += 2;
-						modifier = LM_LONG_LONG;
-					} else
-#endif
-						if (*fmt == '3' && *(fmt+1) == '2') {
-							fmt += 2;
-							modifier = LM_LONG;
-						} else {
-#ifdef _WIN64
-							modifier = LM_LONG_LONG;
-#else
-							modifier = LM_LONG;
-#endif
-						}
 					break;
 				case 'l':
 					fmt++;
@@ -357,36 +313,29 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					break;
 				case 'j':
 					fmt++;
-#if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 't':
 					fmt++;
-#if SIZEOF_PTRDIFF_T
 					modifier = LM_PTRDIFF_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
-				case 'p': {
-						char __next = *(fmt+1);
-						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
-							fmt++;
-							modifier = LM_PHP_INT_T;
-						} else {
-							modifier = LM_STD;
-						}
+				case 'p':
+				{
+					char __next = *(fmt+1);
+					if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"printf \"p\" modifier is no longer supported, use ZEND_LONG_FMT");
 					}
+					modifier = LM_STD;
 					break;
+				}
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
+					ZEND_FALLTHROUGH;
 				default:
 					modifier = LM_STD;
 					break;
@@ -405,13 +354,19 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 			 */
 			switch (*fmt) {
 				case 'Z': {
-									zvp = (zval*) va_arg(ap, zval*);
-					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
-					if (free_zcopy) {
-						zvp = &zcopy;
+					zval *zvp = va_arg(ap, zval*);
+					zend_string *str = zval_get_tmp_string(zvp, &tmp_str);
+					s_len = ZSTR_LEN(str);
+					s = ZSTR_VAL(str);
+					if (adjust_precision && (size_t)precision < s_len) {
+						s_len = precision;
 					}
-					s_len = Z_STRLEN_P(zvp);
-					s = Z_STRVAL_P(zvp);
+					break;
+				}
+				case 'S': {
+					zend_string *str = va_arg(ap, zend_string*);
+					s_len = ZSTR_LEN(str);
+					s = ZSTR_VAL(str);
 					if (adjust_precision && (size_t)precision < s_len) {
 						s_len = precision;
 					}
@@ -420,39 +375,33 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'u':
 					switch(modifier) {
 						default:
-							i_num = (wide_int) va_arg(ap, unsigned int);
+							i_num = (int64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							i_num = (wide_int) va_arg(ap, unsigned long int);
+							i_num = (int64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							i_num = (wide_int) va_arg(ap, size_t);
+							i_num = (int64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							i_num = (wide_int) va_arg(ap, u_wide_int);
+							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							i_num = (wide_int) va_arg(ap, uintmax_t);
+							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							i_num = (wide_int) va_arg(ap, ptrdiff_t);
-							break;
-#endif
-						case LM_PHP_INT_T:
-							i_num = (wide_int) va_arg(ap, zend_ulong);
+							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
 					 */
+					ZEND_FALLTHROUGH;
 				case 'd':
 				case 'i':
 					/*
@@ -461,37 +410,26 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					if ((*fmt) != 'u') {
 						switch(modifier) {
 							default:
-								i_num = (wide_int) va_arg(ap, int);
+								i_num = (int64_t) va_arg(ap, int);
 								break;
 							case LM_LONG_DOUBLE:
 								goto fmt_error;
 							case LM_LONG:
-								i_num = (wide_int) va_arg(ap, long int);
+								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
-#if SIZEOF_SSIZE_T
-								i_num = (wide_int) va_arg(ap, ssize_t);
-#else
-								i_num = (wide_int) va_arg(ap, size_t);
-#endif
+								i_num = (int64_t) va_arg(ap, ssize_t);
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:
-								i_num = (wide_int) va_arg(ap, wide_int);
+								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
-#if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
-								i_num = (wide_int) va_arg(ap, intmax_t);
+								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
-#endif
-#if SIZEOF_PTRDIFF_T
 							case LM_PTRDIFF_T:
-								i_num = (wide_int) va_arg(ap, ptrdiff_t);
-								break;
-#endif
-							case LM_PHP_INT_T:
-								i_num = (wide_int) va_arg(ap, zend_long);
+								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
 						}
 					}
@@ -513,33 +451,26 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'o':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
-							break;
-#endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
@@ -556,33 +487,26 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'X':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
-							break;
-#endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
@@ -597,13 +521,12 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						if (!adjust_precision) {
 							s_len = strlen(s);
 						} else {
-							s_len = strnlen(s, precision);
+							s_len = zend_strnlen(s, precision);
 						}
 					} else {
 						s = S_NULL;
@@ -635,7 +558,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 						s = "inf";
 						s_len = 3;
 					} else {
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 						localeconv_r(&lconv);
 #else
@@ -643,9 +565,8 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							lconv = localeconv();
 						}
 #endif
-#endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
-						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (adjust_precision == false) ? FLOAT_DIGITS : precision,
 						 (*fmt == 'f')?LCONV_DECIMAL_POINT:'.',
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
@@ -688,14 +609,13 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
  						break;
  					}
 
-					if (adjust_precision == NO)
+					if (adjust_precision == false)
 						precision = FLOAT_DIGITS;
 					else if (precision == 0)
 						precision = 1;
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 					localeconv_r(&lconv);
 #else
@@ -703,8 +623,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 						lconv = localeconv();
 					}
 #endif
-#endif
-					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
+					s = zend_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -748,8 +667,8 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					if (sizeof(char *) <= sizeof(u_wide_int)) {
-						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
+					if (sizeof(char *) <= sizeof(uint64_t)) {
+						ui_num = (uint64_t)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x',
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (ui_num != 0) {
@@ -785,6 +704,7 @@ fmt_error:
 					 * Note that we can't point s inside fmt because the
 					 * unknown <char> could be preceded by width etc.
 					 */
+					ZEND_FALLTHROUGH;
 				default:
 					char_buf[0] = '%';
 					char_buf[1] = *fmt;
@@ -816,9 +736,7 @@ fmt_error:
 				PAD_CHAR(xbuf, pad_char, min_width - s_len, is_char);
 			}
 
-			if (free_zcopy) {
-				zval_dtor(&zcopy);
-			}
+			zend_tmp_string_release(tmp_str);
 		}
 skip_output:
 		fmt++;
@@ -838,12 +756,3 @@ PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list 
 	xbuf_format_converter(buf, 0, format, ap);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

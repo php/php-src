@@ -2,12 +2,8 @@
 Test is_bool() function
 --FILE--
 <?php
-/* Prototype: bool is_bool ( mixed $var );
- * Description: Finds whether the given variable is a boolean
- */
-
 echo "*** Testing is_bool() with valid boolean values ***\n";
-// different valid  boolean vlaues
+// different valid  boolean values
 $valid_bools = array(
   TRUE,
   FALSE,
@@ -26,7 +22,7 @@ echo "\n*** Testing is_bool() on non boolean values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variable
 $unset_bool1 = true;
@@ -127,13 +123,6 @@ foreach ($not_bool_types as $type ) {
   var_dump( is_bool($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_bool() );
-
-//arguments more than expected
-var_dump( is_bool(TRUE, FALSE) );
-
 echo "Done\n";
 
 // close resources
@@ -141,7 +130,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_bool() with valid boolean values ***
 -- Iteration 1 --
 bool(true)
@@ -282,13 +271,5 @@ bool(false)
 -- Iteration 64 --
 bool(false)
 -- Iteration 65 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_bool() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_bool() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

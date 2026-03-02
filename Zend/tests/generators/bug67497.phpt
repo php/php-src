@@ -9,7 +9,7 @@ function gen() {
 }
 
 try {
-	eval('abc');
+    eval('abc');
 } catch (ParseError $ex) {
 }
 

@@ -21,4 +21,4 @@ serialize($obj);
 
 ?>
 --EXPECTF--
-Notice: serialize(): "parents" returned as member variable from __sleep() but does not exist in %sbug35895.php on line %d
+Warning: serialize(): "parents" returned as member variable from __sleep() but does not exist in %s on line %d

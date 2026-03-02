@@ -1,7 +1,13 @@
 --TEST--
 SOAP Server 11: bind
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY === "Windows") {
+    die("skip currently unsupported on Windows");
+}
+?>
+--EXTENSIONS--
+soap
 --GET--
 wsdl
 --INI--
@@ -12,15 +18,15 @@ function Add($x,$y) {
   return $x+$y;
 }
 
-$server = new soapserver(dirname(__FILE__)."/test.wsdl");
+$server = new soapserver(__DIR__."/test.wsdl");
 ob_start();
 $server->handle();
 $wsdl = ob_get_contents();
 ob_end_clean();
-if ($wsdl == file_get_contents(dirname(__FILE__)."/test.wsdl")) {
+if ($wsdl == file_get_contents(__DIR__."/test.wsdl")) {
   echo "ok\n";
 } else {
-	echo "fail\n";
+    echo "fail\n";
 }
 ?>
 --EXPECT--

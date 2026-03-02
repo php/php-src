@@ -1,0 +1,12 @@
+name: Install
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        sudo make install
+        sudo mkdir -p /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini

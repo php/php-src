@@ -6,15 +6,13 @@ DOM_NOT_FOUND is raised if refnode is not a child
 This test checks the error message is raised when the refnode is the parent
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument();
 
-$doc = $dom->load(dirname(__FILE__) . "/book.xml", LIBXML_NOBLANKS);
+$doc = $dom->load(__DIR__ . "/book.xml", LIBXML_NOBLANKS);
 assert($doc === true);
 
 $parent_node = $dom->getElementsByTagName("book")->item(0);
@@ -27,7 +25,7 @@ assert($new_node !== false);
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>

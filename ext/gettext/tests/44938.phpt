@@ -1,10 +1,7 @@
 --TEST--
 #44938: gettext functions crash with overlong strings
---SKIPIF--
-<?php
-if (!extension_loaded("gettext")) {
-	die("skip\n");
-}
+--EXTENSIONS--
+gettext
 --FILE--
 <?php
 $overflown = str_repeat('C', 8476509);
@@ -12,73 +9,110 @@ $msgid     = "msgid";
 $domain    = "domain";
 $category  = "cat";
 
-var_dump(bindtextdomain($overflown, 'path'));
+try {
+    bindtextdomain($overflown, 'path');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(dngettext($overflown, $msgid, $msgid, 1));
-var_dump(dngettext($domain, $overflown, $msgid, 1));
-var_dump(dngettext($domain, $msgid, $overflown, 1));
+try {
+    dngettext($overflown, $msgid, $msgid, 1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(gettext($overflown));
+try {
+    dngettext($domain, $overflown, $msgid, 1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(ngettext($overflown, $msgid, -1));
-var_dump(ngettext($msgid, $overflown, -1));
+try {
+    dngettext($domain, $msgid, $overflown, 1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(dcgettext($overflown, $msgid, -1));
-var_dump(dcgettext($domain, $overflown, -1));
+try {
+    gettext($overflown);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(dcngettext($overflown, $msgid, $msgid, -1, -1));
-var_dump(dcngettext($domain, $overflown, $msgid, -1, -1));
-var_dump(dcngettext($domain, $msgid, $overflown, -1, -1));
+try {
+    ngettext($overflown, $msgid, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(dgettext($overflown, $msgid));
-var_dump(dgettext($domain, $overflown));
+try {
+    ngettext($msgid, $overflown, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(textdomain($overflown));
+try {
+    dcgettext($overflown, $msgid, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dcgettext($domain, $overflown, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dcngettext($overflown, $msgid, $msgid, -1, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dcngettext($domain, $overflown, $msgid, -1, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dcngettext($domain, $msgid, $overflown, -1, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dgettext($overflown, $msgid);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    dgettext($domain, $overflown);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    textdomain($overflown);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
-==DONE==
---EXPECTF--
-Warning: bindtextdomain(): domain passed too long in %s on line %d
-bool(false)
-
-Warning: dngettext(): domain passed too long in %s on line %d
-bool(false)
-
-Warning: dngettext(): msgid1 passed too long in %s on line %d
-bool(false)
-
-Warning: dngettext(): msgid2 passed too long in %s on line %d
-bool(false)
-
-Warning: gettext(): msgid passed too long in %s on line %d
-bool(false)
-
-Warning: ngettext(): msgid1 passed too long in %s on line %d
-bool(false)
-
-Warning: ngettext(): msgid2 passed too long in %s on line %d
-bool(false)
-
-Warning: dcgettext(): domain passed too long in %s on line %d
-bool(false)
-
-Warning: dcgettext(): msgid passed too long in %s on line %d
-bool(false)
-
-Warning: dcngettext(): domain passed too long in %s on line %d
-bool(false)
-
-Warning: dcngettext(): msgid1 passed too long in %s on line %d
-bool(false)
-
-Warning: dcngettext(): msgid2 passed too long in %s on line %d
-bool(false)
-
-Warning: dgettext(): domain passed too long in %s on line %d
-bool(false)
-
-Warning: dgettext(): msgid passed too long in %s on line %d
-bool(false)
-
-Warning: textdomain(): domain passed too long in %s on line %d
-bool(false)
-==DONE==
+--EXPECT--
+bindtextdomain(): Argument #1 ($domain) is too long
+dngettext(): Argument #1 ($domain) is too long
+dngettext(): Argument #2 ($singular) is too long
+dngettext(): Argument #3 ($plural) is too long
+gettext(): Argument #1 ($message) is too long
+ngettext(): Argument #1 ($singular) is too long
+ngettext(): Argument #2 ($plural) is too long
+dcgettext(): Argument #1 ($domain) is too long
+dcgettext(): Argument #2 ($message) is too long
+dcngettext(): Argument #1 ($domain) is too long
+dcngettext(): Argument #2 ($singular) is too long
+dcngettext(): Argument #3 ($plural) is too long
+dgettext(): Argument #1 ($domain) is too long
+dgettext(): Argument #2 ($message) is too long
+textdomain(): Argument #1 ($domain) is too long

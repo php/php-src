@@ -1,7 +1,7 @@
 --TEST--
-input_get_args() and references
---SKIPIF--
-<?php if (!extension_loaded("filter")) print "skip"; ?>
+filter_var_array() and references
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ var_dump($var); //should be still string(1) "1"
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["test1"]=>
   int(1)

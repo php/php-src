@@ -3,7 +3,7 @@ shadowing a global core function with a local version
 --FILE--
 <?php
 
-require 'includes/foo_strlen.php';
+require 'includes/foo_strlen.inc';
 
 use function foo\strlen;
 

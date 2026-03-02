@@ -7,12 +7,6 @@ if (PHP_INT_SIZE != 4)
 ?>
 --FILE--
 <?php
-/* Prototype  : string crc32(string $str)
- * Description: Calculate the crc32 polynomial of a string
- * Source code: ext/standard/crc32.c
- * Alias to functions: none
-*/
-
 /*
  * Testing crc32() : with different heredoc strings passed to the str argument
 */
@@ -74,7 +68,7 @@ $heredoc_strings = array(
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls,
                    $heredoc_with_hexa_octal,
-  		   $heredoc_with_long_string
+           $heredoc_with_long_string
                    );
 
 // loop to test the function with each heredoc string in the array
@@ -88,7 +82,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing crc32() : with different heredoc strings ***
 
 -- Iteration 1 --

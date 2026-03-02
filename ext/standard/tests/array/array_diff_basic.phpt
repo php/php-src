@@ -2,12 +2,6 @@
 Test array_diff() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not present
- * in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of array_diff
  */
@@ -52,7 +46,7 @@ var_dump(array_diff($array_int1, $array_int2, $array_string1, $array_string2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : basic functionality ***
 -- Test indexed array with integers as elements --
 array(2) {

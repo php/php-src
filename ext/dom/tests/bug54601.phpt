@@ -1,7 +1,7 @@
 --TEST--
 Segfault when removing the Doctype node
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<< XML
@@ -20,10 +20,7 @@ $doc->removeChild($n);
 echo get_class($n), "\n";
 print $doc->saveXML();
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 DOMDocumentType
 <?xml version="1.0" encoding="utf-8"?>
 <set><foo>footext</foo><bar>bartext</bar></set>
-===DONE===

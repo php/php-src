@@ -1,5 +1,7 @@
 --TEST--
 Unserialize GMP instance with internal reference to itself
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 $s = 'C:3:"GMP":23:{s:1:"2";a:1:{i:46;R:1;}}';

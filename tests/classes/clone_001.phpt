@@ -3,9 +3,9 @@ ZE2 object cloning, 1
 --FILE--
 <?php
 class test {
-	public $p1 = 1;
-	public $p2 = 2;
-	public $p3;
+    public $p1 = 1;
+    public $p2 = 2;
+    public $p3;
 };
 
 $obj = new test;

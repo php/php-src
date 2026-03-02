@@ -1,24 +1,21 @@
 --TEST--
 Bug #62024 Cannot insert second row with null using parametrized query (Firebird PDO)
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$value = '2';
-@$dbh->exec('DROP TABLE test_insert');
-$dbh->exec("CREATE TABLE test_insert (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
-
-$dbh->commit();
+$dbh->exec("CREATE TABLE test62024 (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
 
 //start actual test
 
-$sql = "insert into test_insert (id, text) values (?, ?)";
+$sql = "insert into test62024 (id, text) values (?, ?)";
 $sttmt = $dbh->prepare($sql);
 
 $args_ok = array(1, "test1");
@@ -30,20 +27,21 @@ var_dump($res);
 $res = $sttmt->execute($args_err);
 var_dump($res);
 
-$dbh->commit();
-
 
 //teardown test data
-$sttmt = $dbh->prepare('DELETE FROM test_insert');
+$sttmt = $dbh->prepare('DELETE FROM test62024');
 $sttmt->execute();
-
-$dbh->commit();
-
-$dbh->exec('DROP TABLE test_insert');
 
 unset($sttmt);
 unset($dbh);
 
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec("DROP TABLE test62024");
+unset($dbh);
 ?>
 --EXPECT--
 bool(true)

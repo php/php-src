@@ -18,6 +18,6 @@ Class C {
   const foo=1;
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

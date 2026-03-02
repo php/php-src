@@ -1,7 +1,7 @@
 #ifndef PHP_NDBM_H
 #define PHP_NDBM_H
 
-#if DBA_NDBM
+#ifdef DBA_NDBM
 
 #include "php_dba.h"
 

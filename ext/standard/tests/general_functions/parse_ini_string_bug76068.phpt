@@ -16,13 +16,12 @@ $s = parse_ini_string("[foo]\nbar=42|>baz",true, \INI_SCANNER_TYPED);
 var_dump($s);
 
 ?>
-==DONE==
 --EXPECT--
 array(1) {
   ["foo"]=>
   array(1) {
     ["bar"]=>
-    string(1) "1"
+    int(1)
   }
 }
 array(1) {
@@ -43,7 +42,6 @@ array(1) {
   ["foo"]=>
   array(1) {
     ["bar"]=>
-    string(2) "42"
+    int(42)
   }
 }
-==DONE==

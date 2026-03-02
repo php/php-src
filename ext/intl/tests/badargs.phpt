@@ -1,7 +1,7 @@
 --TEST--
 Check that bad arguments return the same
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $funcs = get_extension_funcs("intl");
@@ -14,13 +14,13 @@ foreach($funcs as $func) {
                 continue;
         }
 
-		try {
-			$res = $func($arg);
-		} catch (Exception $e) {
-			continue;
-		} catch (Error $e) {
-			continue;
-		}
+        try {
+            $res = $func($arg);
+        } catch (Exception $e) {
+            continue;
+        } catch (Error $e) {
+            continue;
+        }
         if($res != false) {
                 echo "$func: ";
                 var_dump($res);

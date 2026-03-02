@@ -1,13 +1,7 @@
 --TEST--
 Bug #63000: Multicast on OSX
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
-if (PHP_OS !== 'Darwin') {
-    die('skip Is not OSX.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -18,5 +12,6 @@ $so = socket_set_option($socket, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "interface" => 0,
 ));
 var_dump($so);
---EXPECTF--
+?>
+--EXPECT--
 bool(true)

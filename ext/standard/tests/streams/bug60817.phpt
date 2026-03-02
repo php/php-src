@@ -3,6 +3,7 @@ Bug #60817: stream_get_line() reads from stream even when there is already suffi
 --FILE--
 <?php
 class TestStream { //data, empty data, empty data + eof
+    public $context;
     private $s = 0;
     function stream_open($path, $mode, $options, &$opened_path) {
             return true;
@@ -27,6 +28,7 @@ while (!feof($f)) {
     $line = stream_get_line($f, 99, "\n");
     var_dump($line);
 }
+?>
 --EXPECT--
 Read done
 string(1) "a"

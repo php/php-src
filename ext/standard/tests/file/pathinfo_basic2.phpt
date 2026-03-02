@@ -9,28 +9,24 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: mixed pathinfo ( string $path [, int $options] );
-   Description: Returns information about a file path
-*/
-
 echo "*** Testing basic functions of pathinfo() ***\n";
 
 $paths = array (
-			'c:\..\dir1',
-			'c:\test\..\test2\.\adir\afile.txt',
-			'/usr/include/../arpa/./inet.h',
-			'c:\test\adir\afile..txt',
-			'/usr/include/arpa/inet..h',
-			'c:\test\adir\afile.',
-			'/usr/include/arpa/inet.',
-			'/usr/include/arpa/inet,h',
-			'c:afile.txt',
-			'..\.\..\test\afile.txt',
-			'.././../test/afile',
-			'.',
-			'..',
-			'...',
-			'/usr/lib/.../afile'
+            'c:\..\dir1',
+            'c:\test\..\test2\.\adir\afile.txt',
+            '/usr/include/../arpa/./inet.h',
+            'c:\test\adir\afile..txt',
+            '/usr/include/arpa/inet..h',
+            'c:\test\adir\afile.',
+            '/usr/include/arpa/inet.',
+            '/usr/include/arpa/inet,h',
+            'c:afile.txt',
+            '..\.\..\test\afile.txt',
+            '.././../test/afile',
+            '.',
+            '..',
+            '...',
+            '/usr/lib/.../afile'
 
 );
 
@@ -48,7 +44,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
 string(1) "."

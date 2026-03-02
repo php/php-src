@@ -3,15 +3,15 @@ Return value separation
 --FILE--
 <?php
 function test1(&$abc) : string {
-	return $abc;
+    return $abc;
 }
 
 function &test2(int $abc) : string {
-	return $abc;
+    return $abc;
 }
 
 function &test3(int &$abc) : string {
-	return $abc;
+    return $abc;
 }
 
 $a = 123;
@@ -24,7 +24,7 @@ var_dump(test3($a));
 var_dump($a);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "123"
 int(123)
 string(3) "123"

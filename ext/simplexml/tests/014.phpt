@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: adding/removing attributes (direct)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF
@@ -29,7 +29,6 @@ var_dump($people->person['age']);
 $people->person['age'] += 5;
 var_dump($people->person['age']);
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
@@ -57,4 +56,3 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "35"
 }
-===DONE===

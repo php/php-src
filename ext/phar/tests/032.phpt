@@ -1,7 +1,7 @@
 --TEST--
 Phar: require hash
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=1
 --FILE--
@@ -21,7 +21,7 @@ echo $e->getMessage();
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/032.phar.php');
+unlink(__DIR__ . '/files/032.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--

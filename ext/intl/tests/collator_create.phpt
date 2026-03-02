@@ -1,8 +1,7 @@
 --TEST--
-create() icu <= 4.2
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+Collator creation tests
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -18,11 +17,9 @@ function ut_main()
     $locales = array(
         'EN-US-ODESSA',
         'UK_UA_ODESSA',
-        'uk-ua_CALIFORNIA@currency=;currency=GRN',
         '',
         'root',
         'uk@currency=EURO',
-	'12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799'
     );
 
     foreach( $locales as $locale )
@@ -58,14 +55,10 @@ ut_run();
 Locale: 'EN-US-ODESSA'
   ULOC_REQUESTED_LOCALE = 'EN-US-ODESSA'
   ULOC_VALID_LOCALE     = 'en_US'
-  ULOC_ACTUAL_LOCALE    = 'en'
+  ULOC_ACTUAL_LOCALE    = 'root'
 Locale: 'UK_UA_ODESSA'
   ULOC_REQUESTED_LOCALE = 'UK_UA_ODESSA'
-  ULOC_VALID_LOCALE     = 'uk_UA'
-  ULOC_ACTUAL_LOCALE    = 'uk'
-Locale: 'uk-ua_CALIFORNIA@currency=;currency=GRN'
-  ULOC_REQUESTED_LOCALE = 'uk-ua_CALIFORNIA@currency=;currency=GRN'
-  ULOC_VALID_LOCALE     = 'uk_UA'
+  ULOC_VALID_LOCALE     = 'uk'
   ULOC_ACTUAL_LOCALE    = 'uk'
 Locale: ''
   ULOC_REQUESTED_LOCALE = ''
@@ -79,4 +72,3 @@ Locale: 'uk@currency=EURO'
   ULOC_REQUESTED_LOCALE = 'uk@currency=EURO'
   ULOC_VALID_LOCALE     = 'uk'
   ULOC_ACTUAL_LOCALE    = 'uk'
-Error creating collator with '12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799' locale: Locale string too long, should be no longer than %d characters: U_ILLEGAL_ARGUMENT_ERROR

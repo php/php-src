@@ -3,11 +3,11 @@ ZE2 object cloning, 2
 --FILE--
 <?php
 class test {
-	public $p1 = 1;
-	public $p2 = 2;
-	public $p3;
-	public function __clone() {
-	}
+    public $p1 = 1;
+    public $p2 = 2;
+    public $p3;
+    public function __clone() {
+    }
 };
 
 $obj = new test;

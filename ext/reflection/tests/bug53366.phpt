@@ -1,8 +1,9 @@
 --TEST--
-Bug #53366 (Reflection doesnt get dynamic property value from getProperty())
+Bug #53366 (Reflection doesn't get dynamic property value from getProperty())
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class UserClass {
 }
 

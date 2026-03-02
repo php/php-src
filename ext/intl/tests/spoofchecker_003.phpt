@@ -1,7 +1,9 @@
 --TEST--
 spoofchecker with locale settings
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if(!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip'; ?>
+<?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -18,7 +20,7 @@ echo "Is suspcious, ko_KR\n";
 $x->setAllowedLocales('en_US, ko_KR');
 var_dump($x->isSuspicious($korean));
 ?>
---EXPECTF--
+--EXPECT--
 Is suspcious, en_US
 bool(true)
 Is suspcious, ko_KR

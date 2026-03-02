@@ -1,4 +1,3 @@
-	/* $Id: fpm_env.h,v 1.9 2008/09/18 23:19:59 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ENV_H
@@ -9,7 +8,7 @@
 #define SETPROCTITLE_PREFIX "php-fpm: "
 
 int fpm_env_init_child(struct fpm_worker_pool_s *wp);
-int fpm_env_init_main();
+int fpm_env_init_main(void);
 void fpm_env_setproctitle(char *title);
 
 extern char **environ;
@@ -19,7 +18,7 @@ int setenv(char *name, char *value, int overwrite);
 #endif
 
 #ifndef HAVE_CLEARENV
-void clearenv();
+void clearenv(void);
 #endif
 
 #endif

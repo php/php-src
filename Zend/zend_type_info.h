@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_TYPE_INFO_H
 #define ZEND_TYPE_INFO_H
@@ -27,6 +25,7 @@
 #define MAY_BE_NULL		            (1 << IS_NULL)
 #define MAY_BE_FALSE	            (1 << IS_FALSE)
 #define MAY_BE_TRUE		            (1 << IS_TRUE)
+#define MAY_BE_BOOL                 (MAY_BE_FALSE|MAY_BE_TRUE)
 #define MAY_BE_LONG		            (1 << IS_LONG)
 #define MAY_BE_DOUBLE	            (1 << IS_DOUBLE)
 #define MAY_BE_STRING	            (1 << IS_STRING)
@@ -35,6 +34,13 @@
 #define MAY_BE_RESOURCE	            (1 << IS_RESOURCE)
 #define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
 #define MAY_BE_REF                  (1 << IS_REFERENCE) /* may be reference */
+
+/* These are used in zend_type, but not for type inference.
+ * They are allowed to overlap with types used during inference. */
+#define MAY_BE_CALLABLE             (1 << IS_CALLABLE)
+#define MAY_BE_VOID                 (1 << IS_VOID)
+#define MAY_BE_NEVER                (1 << IS_NEVER)
+#define MAY_BE_STATIC               (1 << IS_STATIC)
 
 #define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
 
@@ -50,21 +56,29 @@
 #define MAY_BE_ARRAY_OF_ANY			(MAY_BE_ANY      << MAY_BE_ARRAY_SHIFT)
 #define MAY_BE_ARRAY_OF_REF			(MAY_BE_REF      << MAY_BE_ARRAY_SHIFT)
 
-#define MAY_BE_ARRAY_KEY_LONG       (1<<21)
-#define MAY_BE_ARRAY_KEY_STRING     (1<<22)
-#define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
+#define MAY_BE_ARRAY_PACKED         (1<<21)
+#define MAY_BE_ARRAY_NUMERIC_HASH   (1<<22) /* hash with numeric keys */
+#define MAY_BE_ARRAY_STRING_HASH    (1<<23) /* hash with string keys */
+#define MAY_BE_ARRAY_EMPTY          (1<<29)
 
-#define MAY_BE_ERROR                (1<<23)
+#define MAY_BE_ARRAY_KEY_LONG       (MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_NUMERIC_HASH)
+#define MAY_BE_ARRAY_KEY_STRING     MAY_BE_ARRAY_STRING_HASH
+#define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_EMPTY)
+
+#define MAY_BE_PACKED(t)            ((t) & MAY_BE_ARRAY_PACKED)
+#define MAY_BE_HASH(t)              ((t) & (MAY_BE_ARRAY_NUMERIC_HASH | MAY_BE_ARRAY_KEY_STRING))
+#define MAY_BE_PACKED_ONLY(t)       (((t) & MAY_BE_ARRAY_KEY_ANY) == MAY_BE_ARRAY_PACKED)
+#define MAY_BE_HASH_ONLY(t)         (MAY_BE_HASH(t) && !((t) & (MAY_BE_ARRAY_PACKED|MAY_BE_ARRAY_EMPTY)))
+#define MAY_BE_EMPTY_ONLY(t)        (((t) & MAY_BE_ARRAY_KEY_ANY) == MAY_BE_ARRAY_EMPTY)
+
 #define MAY_BE_CLASS                (1<<24)
+#define MAY_BE_INDIRECT             (1<<25)
+
+#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
+
+
+#define MAY_BE_ANY_ARRAY \
+	(MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)
 
 #endif /* ZEND_TYPE_INFO_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

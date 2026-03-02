@@ -1,8 +1,9 @@
 --TEST--
 Bug #71540 (NULL pointer dereference in xsl_ext_function_php())
+--EXTENSIONS--
+xsl
 --SKIPIF--
 <?php
-if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 if (LIBXML_VERSION >= 20903) die('skip this test is for PHP linked with libxml2 < 2.9.3 only')
 ?>
 --FILE--
@@ -16,7 +17,7 @@ $xml = <<<EOB
 EOB;
 $xsl = <<<EOB
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="1.0" 
+<xsl:stylesheet version="1.0"
      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
      xmlns:php="http://php.net/xsl">
 <xsl:output method="html" encoding="utf-8" indent="yes"/>
@@ -52,9 +53,9 @@ Warning: XSLTProcessor::transformToXml(): xmlXPathCompOpEval: function test not 
 
 Warning: XSLTProcessor::transformToXml(): Unregistered function in %sbug71540.php on line %d
 
-Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php on line %d
+Warning: XSLTProcessor::transformToXml(): Stack usage error in %sbug71540.php on line %d
 
-Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php on line %d
+Warning: XSLTProcessor::transformToXml(): Stack usage error in %sbug71540.php on line %d
 
 Warning: XSLTProcessor::transformToXml(): Handler name must be a string in %sbug71540.php on line %d
 

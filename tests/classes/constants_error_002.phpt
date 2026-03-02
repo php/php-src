@@ -8,5 +8,5 @@ Error case: class constant as an array
   }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

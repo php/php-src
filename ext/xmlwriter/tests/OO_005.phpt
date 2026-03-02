@@ -1,15 +1,11 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, comments
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ required");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
-/* $Id$ */
 
-$doc_dest = '001.xml';
+$doc_dest = 'OO_005.xml';
 $xw = new XMLWriter();
 $xw->openUri($doc_dest);
 $xw->startDocument('1.0', 'UTF-8');
@@ -24,10 +20,8 @@ $xw->endDocument();
 $output_bytes = $xw->flush(true);
 echo file_get_contents($doc_dest);
 unset($xw);
-unlink('001.xml');
+unlink($doc_dest);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1><!--comment--><!--comment #2--></tag1>
-===DONE===

@@ -3,7 +3,7 @@ Bug #69737 (Segfault when SplMinHeap::compare produces fatal error)
 --FILE--
 <?php
 class SplMinHeap1 extends SplMinHeap {
-  public function compare($a, $b) {
+  public function compare($a, $b): int {
     return -parent::notexist($a, $b);
   }
 }

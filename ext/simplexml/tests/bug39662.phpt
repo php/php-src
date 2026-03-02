@@ -1,7 +1,7 @@
 --TEST--
 Bug #39662 (Segfault when calling asXML() of a cloned SimpleXMLElement)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip simplexml extension is not loaded"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -19,19 +19,13 @@ var_dump($clone->asXML());
 echo "Done\n";
 ?>
 --EXPECTF--
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "
-
-"
+object(SimpleXMLElement)#%d (0) {
 }
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "
-
-"
+object(SimpleXMLElement)#%d (0) {
 }
-string(15) "<test>
+string(%d) "<?xml version="1.0" encoding="utf-8"?>
+<test>
 
-</test>"
+</test>
+"
 Done

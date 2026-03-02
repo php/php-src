@@ -1,9 +1,7 @@
 --TEST--
 Bug #69579 (Internal trait double-free)
---SKIPIF--
-<?php
-if (!trait_exists('_ZendTestTrait')) die("skip requires internal trait");
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

@@ -1,16 +1,17 @@
 --TEST--
 imagecreatefromwbmp with invalid wbmp
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagecreatefromwbmp')) die("skip gd extension not available\n");
-	if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+    if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
-$filename = dirname(__FILE__) . '/_tmp.wbmp';
+$filename = __DIR__ . '/_tmp.wbmp';
 $fp = fopen($filename,"wb");
 if (!$fp) {
-	exit("Failed to create <$filename>");
+    exit("Failed to create <$filename>");
 }
 
 //write header
@@ -34,7 +35,7 @@ fputs($fp, chr($c), 1);
 
 /*write some data to cause overflow*/
 for ($i=0; $i<10000; $i++) {
-	fwrite($fp, chr($c), 1);
+    fwrite($fp, chr($c), 1);
 }
 
 fclose($fp);
@@ -42,7 +43,7 @@ $im = imagecreatefromwbmp($filename);
 unlink($filename);
 ?>
 --EXPECTF--
-Warning: imagecreatefromwbmp(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecreatefromwbmp(): Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
 
-Warning: imagecreatefromwbmp(): '%s' is not a valid WBMP file in %s on line %d
+Warning: imagecreatefromwbmp(): "%s" is not a valid WBMP file in %s on line %d

@@ -1,30 +1,20 @@
 --TEST--
 Bug #70417 (PharData::compress() doesn't close temp file)
---SKIPIF--
-<?php
-if (!extension_loaded('phar') || !extension_loaded('zlib')) {
-    die("skip ext/phar or ext/zlib not available");
-}
-exec('lsof -p ' . getmypid(), $out, $status);
-if ($status !== 0) {
-    die("skip lsof(8) not available");
-}
-?>
+--EXTENSIONS--
+phar
+zlib
 --FILE--
 <?php
-function countOpenFiles() {
-    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);
-    return count($out);
-}
 $filename = __DIR__ . '/bug70417.tar';
 @unlink("$filename.gz");
-$openFiles1 = countOpenFiles();
+$resBefore = count(get_resources());
 $arch = new PharData($filename);
 $arch->addFromString('foo', 'bar');
+$arch->addFromString('foo2', 'baz');
 $arch->compress(Phar::GZ);
 unset($arch);
-$openFiles2 = countOpenFiles();
-var_dump($openFiles1 === $openFiles2);
+$resAfter = count(get_resources());
+var_dump($resAfter - $resBefore);
 ?>
 --CLEAN--
 <?php
@@ -33,4 +23,4 @@ $filename = __DIR__ . '/bug70417.tar';
 @unlink("$filename.gz");
 ?>
 --EXPECT--
-bool(true)
+int(0)

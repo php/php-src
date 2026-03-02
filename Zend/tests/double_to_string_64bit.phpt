@@ -35,7 +35,7 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "2.9E+37"
 string(18) "290000000000000000"
 string(15) "290000000000000"

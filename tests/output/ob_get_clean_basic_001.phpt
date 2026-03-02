@@ -3,7 +3,6 @@ Test return type and value, as well as basic behaviour, of ob_get_clean()
 --FILE--
 <?php
 /*
- * proto bool ob_get_clean(void)
  * Function is implemented in main/output.c
 */
 
@@ -13,6 +12,6 @@ ob_start();
 echo "Hello World";
 var_dump(ob_get_clean());
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(11) "Hello World"

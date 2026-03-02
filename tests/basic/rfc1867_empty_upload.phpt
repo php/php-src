@@ -31,48 +31,54 @@ Content-Type: text/plain-file3
 var_dump($_FILES);
 var_dump($_POST);
 if (is_uploaded_file($_FILES["file1"]["tmp_name"])) {
-	var_dump(file_get_contents($_FILES["file1"]["tmp_name"]));
+    var_dump(file_get_contents($_FILES["file1"]["tmp_name"]));
 }
 if (is_uploaded_file($_FILES["file3"]["tmp_name"])) {
-	var_dump(file_get_contents($_FILES["file3"]["tmp_name"]));
+    var_dump(file_get_contents($_FILES["file3"]["tmp_name"]));
 }
 ?>
 --EXPECTF--
 array(3) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
-    %string|unicode%(9) "file1.txt"
+    string(9) "file1.txt"
+    ["full_path"]=>
+    string(9) "file1.txt"
     ["type"]=>
-    %string|unicode%(16) "text/plain-file1"
+    string(16) "text/plain-file1"
     ["tmp_name"]=>
-    %string|unicode%(%d) "%s"
+    string(%d) "%s"
     ["error"]=>
     int(0)
     ["size"]=>
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
-    %string|unicode%(0) ""
+    string(0) ""
+    ["full_path"]=>
+    string(0) ""
     ["type"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["tmp_name"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["error"]=>
     int(4)
     ["size"]=>
     int(0)
   }
   ["file3"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
-    %string|unicode%(9) "file3.txt"
+    string(9) "file3.txt"
+    ["full_path"]=>
+    string(9) "file3.txt"
     ["type"]=>
-    %string|unicode%(16) "text/plain-file3"
+    string(16) "text/plain-file3"
     ["tmp_name"]=>
-    %string|unicode%(%d) "%s"
+    string(%d) "%s"
     ["error"]=>
     int(0)
     ["size"]=>

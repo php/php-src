@@ -2,11 +2,6 @@
 Test strrev() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string strrev(string $str);
- * Description: Reverse a string
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing strrev() : basic functionality ***\n";
 $heredoc = <<<EOD
 Hello, world
@@ -32,7 +27,7 @@ var_dump( strrev('Hello, World\n') );
 var_dump( strrev($heredoc) );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrev() : basic functionality ***
 string(12) "dlroW ,olleH"
 string(12) "dlroW ,olleH"

@@ -6,12 +6,8 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_int ( mixed $var );
- * Description: Finds whether the given variable is an integer
- */
-
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
-// different valid  integer vlaues
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
@@ -46,7 +42,7 @@ echo "\n*** Testing is_int(), is_integer() & is_long() with  non integer values 
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 // unset variable
 
 $unset_var = 10;
@@ -132,17 +128,6 @@ foreach ($not_int_types as $type ) {
    var_dump( is_long($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_int() );
-var_dump( is_integer() );
-var_dump( is_long() );
-
-//arguments more than expected
-var_dump( is_int(TRUE, FALSE) );
-var_dump( is_integer(TRUE, FALSE) );
-var_dump( is_long(TRUE, FALSE) );
-
 echo "Done\n";
 
 // close the resources
@@ -150,7 +135,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--
 bool(true)
@@ -441,25 +426,5 @@ bool(false)
 --Iteration 54--
 bool(false)
 bool(false)
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_int() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_integer() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_long() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_int() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
-
-Warning: is_integer() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
-
-Warning: is_long() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

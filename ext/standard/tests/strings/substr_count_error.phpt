@@ -6,52 +6,42 @@ Test substr_count() function (error conditions)
 echo "\n*** Testing error conditions ***\n";
 $str = 'abcdefghik';
 
-/* Zero argument */
-var_dump( substr_count() );
-
-/* more than expected no. of args */
-var_dump( substr_count($str, "t", 0, 15, 30) );
-
 /* offset before start */
-var_dump(substr_count($str, "t", -20));
+try {
+    substr_count($str, "t", -20);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* offset > size of the string */
-var_dump(substr_count($str, "t", 25));
+try {
+    substr_count($str, "t", 25);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* Using offset and length to go beyond the size of the string:
-   Warning message expected, as length+offset > length of string */
-var_dump( substr_count($str, "i", 5, 7) );
-
-/* Invalid offset argument */
-var_dump( substr_count($str, "t", "") );
+   Exception is expected, as length+offset > length of string */
+try {
+    substr_count($str, "i", 5, 7);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* length too small */
-var_dump( substr_count($str, "t", 2, -20) );
+try {
+    substr_count($str, "t", 2, -20);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing error conditions ***
-
-Warning: substr_count() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: substr_count() expects at most 4 parameters, 5 given in %s on line %d
-NULL
-
-Warning: substr_count(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: substr_count(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: substr_count(): Invalid length value in %s on line %d
-bool(false)
-
-Warning: substr_count() expects parameter 3 to be integer, string given in %s on line %d
-NULL
-
-Warning: substr_count(): Invalid length value in %s on line %d
-bool(false)
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
 Done

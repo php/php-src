@@ -1,18 +1,18 @@
 --TEST--
 Phar::convertToTar() bz2 compressed
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip"); ?>
+--EXTENSIONS--
+phar
+bz2
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.tar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.bz2';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.tar';
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
@@ -33,7 +33,7 @@ var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
-copy($fname2 . '.bz2', $fname3);
+copy($fname2, $fname3);
 
 $phar = new Phar($fname3);
 var_dump($phar->isFileFormat(Phar::TAR));
@@ -41,14 +41,11 @@ var_dump($phar->isCompressed() == Phar::BZ2);
 var_dump($phar->getStub());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.bz2');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-__HALT_COMPILER();
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.bz2');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
 bool(false)
@@ -62,4 +59,3 @@ bool(true)
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-===DONE===

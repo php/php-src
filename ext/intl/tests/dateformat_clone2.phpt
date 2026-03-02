@@ -1,8 +1,7 @@
 --TEST--
 Cloning datefmt icu >= 4.8
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 include_once( 'ut_common.inc' );
@@ -28,7 +27,7 @@ $res_str .= "\nResult of clone formatting timestamp=0 is :  \n$formatted";
 echo $res_str;
 
 ?>
---EXPECTF--
+--EXPECT--
 Result of formatting timestamp=0 is :  
 31-12-70
 Result of formatting timestamp=0 is :  

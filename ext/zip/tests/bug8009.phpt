@@ -1,13 +1,10 @@
 --TEST--
 Bug #8009 (cannot add again same entry to an archive)
---SKIPIF--
-<?php
-/* $Id$ */
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
-$thisdir = dirname(__FILE__);
+$thisdir = __DIR__;
 $src = $thisdir . "/bug8009.zip";
 $filename = $thisdir . "/tmp8009.zip";
 copy($src, $filename);
@@ -22,5 +19,6 @@ $zip->close();
 unlink($filename);
 echo "status: " . $zip->status . "\n";
 echo "\n";
+?>
 --EXPECT--
 status: 0

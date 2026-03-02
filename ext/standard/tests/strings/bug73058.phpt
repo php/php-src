@@ -1,11 +1,5 @@
 --TEST--
 Bug #73058 crypt broken when salt is 'too' long
---SKIPIF--
-<?php
-if (!function_exists('crypt'))) {
-	die("SKIP crypt() is not available");
-}
-?>
 --FILE--
 <?php
 $pass = 'secret';

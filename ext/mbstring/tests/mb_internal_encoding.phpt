@@ -1,12 +1,11 @@
 --TEST--
 mb_internal_encoding()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 // TODO:
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // EUC-JP
@@ -31,18 +30,13 @@ print "$enc\n";
 print "== INVALID PARAMETER ==\n";
 
 // Note: Other than string type, PHP raises Warning
-$r = mb_internal_encoding('BAD');
-($r === false) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
+try {
+    $r = mb_internal_encoding('BAD_NAME');
+    print 'NG_BAD_SET' . \PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$r = mb_internal_encoding($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
-
-$r = mb_internal_encoding($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
 $enc = mb_internal_encoding();
 print "$enc\n";
 
@@ -55,12 +49,5 @@ UTF-8
 OK_ASCII_SET
 ASCII
 == INVALID PARAMETER ==
-ERR: Warning
-OK_BAD_SET
-ASCII
-ERR: Warning
-OK_BAD_ARY_SET
-ASCII
-ERR: Warning
-OK_BAD_OBJ_SET
+mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 ASCII

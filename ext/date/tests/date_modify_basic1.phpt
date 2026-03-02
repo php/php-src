@@ -2,12 +2,6 @@
 Test date_modify() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime date_modify  ( DateTime $object  , string $modify  )
- * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
- * Source code: ext/date/php_date.c
- * Alias to functions: public DateTime DateTime::modify()
- */
-
  //Set the default time zone
 date_default_timezone_set("Europe/London");
 
@@ -29,11 +23,9 @@ date_modify($datetime, "last Sunday");
 echo "After modification 4: " . date_format($datetime, "D, d M Y") . "\n";
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_modify() : basic functionality ***
 After modification 1: Sun, 01 Feb 2009
 After modification 2: Tue, 10 Feb 2009 18:28:43
 After modification 3: Thu, 12 Feb 2009
 After modification 4: Sun, 08 Feb 2009
-===DONE===

@@ -3,7 +3,7 @@ get_meta_tags() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/get_meta_tags.html";
+$filename = __DIR__."/get_meta_tags.html";
 
 $data = <<<DATA
 <meta name="author" content="name">
@@ -47,15 +47,15 @@ DATA;
 $array = array($data, $data1, $data2, $data3, $data4, "", "<>", "<meta<<<<<");
 
 foreach ($array as $html) {
-	file_put_contents($filename, $html);
-	var_dump(get_meta_tags($filename));
+    file_put_contents($filename, $html);
+    var_dump(get_meta_tags($filename));
 }
 
 @unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   ["author"]=>
   string(4) "name"

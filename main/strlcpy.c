@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -15,8 +13,6 @@
   | Author:                                                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 
@@ -52,7 +48,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $";
+static const char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>
@@ -63,10 +59,7 @@ static char *rcsid = "$OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-PHPAPI size_t php_strlcpy(dst, src, siz)
-	char *dst;
-	const char *src;
-	size_t siz;
+PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz)
 {
 	const char *s = src;
 	size_t n = siz;
@@ -87,21 +80,7 @@ PHPAPI size_t php_strlcpy(dst, src, siz)
 			;
 	}
 
-	/*
-	 * Cast pointers to unsigned type before calculation, to avoid signed
-	 * overflow when the string ends where the MSB has changed.
-	 * Return value does not include NUL.
-	 */
-	return((uintptr_t)src - (uintptr_t)s - 1);
+	return(src - s - 1);
 }
 
 #endif /* !HAVE_STRLCPY */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

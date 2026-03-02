@@ -3,7 +3,7 @@ Bug #71028 (Undefined index with ArrayIterator)
 --FILE--
 <?php
 function cast(&$a) {
-		$a = (int)$a;
+        $a = (int)$a;
 }
 
 $a = new ArrayIterator;

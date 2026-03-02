@@ -3,7 +3,6 @@ Test preg_match_all() function : basic functionality
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, [array subpatterns [, int flags [, int offset]]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $string = 'Hello, world! This is a test. This is another test. \[4]. 34534 string.';
@@ -24,7 +23,7 @@ var_dump(preg_match_all('/this isn\'t in the string/', $string));
 var_dump(preg_match_all('/world/', $string));
 var_dump(preg_match_all('/[0-9]/', $string));
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(1) {
   [0]=>

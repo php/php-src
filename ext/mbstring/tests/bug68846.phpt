@@ -1,7 +1,7 @@
 --TEST--
 Bug #68846	False detection of CJK Unified Ideographs Extension E
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(

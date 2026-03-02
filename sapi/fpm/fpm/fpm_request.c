@@ -1,4 +1,3 @@
-	/* $Id: fpm_request.c,v 1.9.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 #ifdef HAVE_TIMES
 #include <sys/times.h>
@@ -23,9 +22,10 @@
 #include "zlog.h"
 
 static const char *requests_stages[] = {
+	[FPM_REQUEST_CREATING]        = "Creating",
 	[FPM_REQUEST_ACCEPTING]       = "Idle",
 	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
-	[FPM_REQUEST_INFO]            = "Getting request informations",
+	[FPM_REQUEST_INFO]            = "Getting request information",
 	[FPM_REQUEST_EXECUTING]       = "Running",
 	[FPM_REQUEST_END]             = "Ending",
 	[FPM_REQUEST_FINISHED]        = "Finishing",
@@ -35,12 +35,14 @@ const char *fpm_request_get_stage_name(int stage) {
 	return requests_stages[stage];
 }
 
-void fpm_request_accepting() /* {{{ */
+void fpm_request_accepting(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
 
 	fpm_clock_get(&now);
+
+	fpm_scoreboard_update_begin(NULL);
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -53,11 +55,10 @@ void fpm_request_accepting() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
-	fpm_scoreboard_update(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
-/* }}} */
 
-void fpm_request_reading_headers() /* {{{ */
+void fpm_request_reading_headers(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 
@@ -72,6 +73,8 @@ void fpm_request_reading_headers() /* {{{ */
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
+
+	fpm_scoreboard_update_begin(NULL);
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -96,11 +99,10 @@ void fpm_request_reading_headers() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle--, active++, request++ */
-	fpm_scoreboard_update(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
-/* }}} */
 
-void fpm_request_info() /* {{{ */
+void fpm_request_info(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	char *request_uri = fpm_php_request_uri();
@@ -148,9 +150,8 @@ void fpm_request_info() /* {{{ */
 
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_executing() /* {{{ */
+void fpm_request_executing(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -167,9 +168,8 @@ void fpm_request_executing() /* {{{ */
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_end(void) /* {{{ */
+void fpm_request_end(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -200,10 +200,12 @@ void fpm_request_end(void) /* {{{ */
 #endif
 	proc->memory = memory;
 	fpm_scoreboard_proc_release(proc);
-}
-/* }}} */
 
-void fpm_request_finished() /* {{{ */
+	/* memory_peak */
+	fpm_scoreboard_update_commit(-1, -1, -1, -1, -1, -1, -1, proc->memory, FPM_SCOREBOARD_ACTION_SET, NULL);
+}
+
+void fpm_request_finished(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -220,15 +222,14 @@ void fpm_request_finished() /* {{{ */
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout) /* {{{ */
+void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s proc, *proc_p;
 
 	proc_p = fpm_scoreboard_proc_acquire(child->wp->scoreboard, child->scoreboard_i, 1);
 	if (!proc_p) {
-		zlog(ZLOG_WARNING, "failed to acquire scoreboard");
+		zlog(ZLOG_NOTICE, "failed to acquire scoreboard");
 		return;
 	}
 
@@ -244,7 +245,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 	}
 #endif
 
-	if (proc.request_stage > FPM_REQUEST_ACCEPTING && proc.request_stage < FPM_REQUEST_END) {
+	if (proc.request_stage > FPM_REQUEST_ACCEPTING && ((proc.request_stage < FPM_REQUEST_END) || track_finished)) {
 		char purified_script_filename[sizeof(proc.script_filename)];
 		struct timeval tv;
 
@@ -286,7 +287,7 @@ int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 	struct fpm_scoreboard_proc_s *proc;
 
 	/* no need in atomicity here */
-	proc = fpm_scoreboard_proc_get(child->wp->scoreboard, child->scoreboard_i);
+	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
 		return 0;
 	}
@@ -301,7 +302,7 @@ int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv) /* 
 
 	if (!tv) return -1;
 
-	proc = fpm_scoreboard_proc_get(child->wp->scoreboard, child->scoreboard_i);
+	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
 		return -1;
 	}

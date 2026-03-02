@@ -15,8 +15,7 @@ $result = unpack('V1a/X4/V1b/V1c/X4/V1d', $data);
 var_dump($result);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   ["a"]=>
   int(1)
@@ -35,4 +34,3 @@ array(4) {
   ["d"]=>
   int(2)
 }
-===DONE===

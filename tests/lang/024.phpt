@@ -6,7 +6,7 @@ for ($jdk=0; $jdk<50; $jdk++) {
 ?><html>
 <head>
 <?php /* the point of this file is to intensively test various aspects of the parser.
-    * right now, each test focuses in one aspect only (e.g. variable aliasing, arithemtic operator,
+    * right now, each test focuses in one aspect only (e.g. variable aliasing, arithmetic operator,
     * various control structures), while trying to combine code from other parts of the parser as well.
     */
 ?>
@@ -76,31 +76,31 @@ Correct result - 3:  <?php echo $j%$i; ?>
 /* sick if/elseif/else test by Andi :) */
 $a = 5;
 if ($a == "4") {
-	echo "This "." does "."  not "." work\n";
+    echo "This "." does "."  not "." work\n";
 } elseif ($a == "5") {
-	echo "This "." works\n";
-	$a = 6;
-	if ("andi" == ($test = "andi")) {
-		echo "this_still_works\n";
-	} elseif (1) {
-		echo "should_not_print\n";
-	} else {
-    		echo "should_not_print\n";
-  	}
+    echo "This "." works\n";
+    $a = 6;
+    if ("andi" == ($test = "andi")) {
+        echo "this_still_works\n";
+    } elseif (1) {
+        echo "should_not_print\n";
+    } else {
+            echo "should_not_print\n";
+    }
         if (44 == 43) {
-		echo "should_not_print\n";
-	} else {
-		echo "should_print\n";
-	}
+        echo "should_not_print\n";
+    } else {
+        echo "should_print\n";
+    }
 } elseif ($a == 6) {
-  	echo "this "."broken\n";
-  	if (0) {
-		echo "this_should_not_print\n";
-  	} else {
-		echo "TestingDanglingElse_This_Should_not_print\n";
-  	}
+    echo "this "."broken\n";
+    if (0) {
+        echo "this_should_not_print\n";
+    } else {
+        echo "TestingDanglingElse_This_Should_not_print\n";
+    }
 } else {
-	echo "This "."does "." not"." work\n";
+    echo "This "."does "." not"." work\n";
 }
 ?>
 
@@ -292,18 +292,18 @@ echo "commented out...";
 $i = 10;
 $a = "b";
 while ($i > 0) {
-	$a = $a . "a";
-	echo "$a\n";
-	$resize[$a] = $i;
-	$i--;
+    $a = $a . "a";
+    echo "$a\n";
+    $resize[$a] = $i;
+    $i--;
 }
 $i = 10;
 $a = "b";
 while ($i > 0) {
-	$a = $a . "a";
-	echo "$a\n";
-	echo $resize[$a]."\n";
-	$i--;
+    $a = $a . "a";
+    echo "$a\n";
+    echo $resize[$a]."\n";
+    $i--;
 }
 ?>
 **************************

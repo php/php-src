@@ -2,12 +2,6 @@
 Test array_diff() function : usage variations - binary safe checking
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are
- * not present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test behaviour of array_diff() function with binary input
  */
@@ -31,7 +25,7 @@ var_dump(array_diff($array2, $array1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 array(1) {
   [0]=>

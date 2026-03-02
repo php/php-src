@@ -1,13 +1,18 @@
 --TEST--
 readline_read_history(): Basic test
+--EXTENSIONS--
+readline
 --SKIPIF--
-<?php if (!extension_loaded("readline") || !function_exists('readline_list_history')) die("skip"); ?>
+<?php
+if (!function_exists('readline_list_history')) die("skip");
+if (getenv('SKIP_REPEAT')) die("skip readline has global state");
+?>
 --FILE--
 <?php
 
-$name = tempnam('/tmp', 'readline.tmp');
+$name = tempnam(sys_get_temp_dir(), 'readline.tmp');
 
-readline_add_history("foo\n");
+readline_add_history("foo");
 
 var_dump(readline_write_history($name));
 

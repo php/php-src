@@ -1,8 +1,8 @@
 --TEST--
-Bug #68335: rmdir doesnt work with file:// stream wrapper
+Bug #68335: rmdir doesn't work with file:// stream wrapper
 --FILE--
 <?php
-$dir = 'file://' . dirname(__FILE__) . '/testDir';
+$dir = 'file://' . __DIR__ . '/testDir';
 mkdir($dir);
 var_dump(is_dir($dir));
 rmdir($dir);

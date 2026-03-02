@@ -27,7 +27,7 @@ class test {
   }
 
   protected function __destruct() {
-  	test::$cnt--;
+    test::$cnt--;
   }
 
   public function get() {

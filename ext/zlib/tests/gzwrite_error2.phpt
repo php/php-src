@@ -1,11 +1,7 @@
 --TEST--
 Test function gzwrite() by calling it invalid lengths
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -22,9 +18,7 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(0)
 
-===DONE===

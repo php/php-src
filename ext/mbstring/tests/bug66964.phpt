@@ -1,7 +1,7 @@
 --TEST--
 Bug #66964 (mb_convert_variables() cannot detect recursion)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $a[] = &$a;

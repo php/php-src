@@ -2,11 +2,6 @@
 Test array_sum() function : usage variations - array with duplicate values
 --FILE--
 <?php
-/* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Checking array_sum() with integer and float array containing duplicate values
 */
@@ -25,7 +20,7 @@ var_dump( array_sum($float_input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with duplicate values ***
 -- With integer array --
 int(117)

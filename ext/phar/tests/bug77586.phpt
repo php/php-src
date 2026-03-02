@@ -1,7 +1,9 @@
 --TEST--
 Bug #77586 Symbolic link names in tar-formatted phar must be less than 100 bytes.
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar") || true /* blocked by bug 65332 */) die("skip"); ?>
+<?php if (true /* blocked by bug 65332 */) die("skip"); ?>
 --FILE--
 <?php
 $dir = __DIR__."/bug77586";

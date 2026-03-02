@@ -1,27 +1,28 @@
 --TEST--
 Bug #76705: unusable ssl => peer_fingerprint in stream_context_create()
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64323";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => __DIR__ . '/bug76705.pem'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     @stream_socket_accept($server, 1);
 CODE;
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64323";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer'       => true,
@@ -32,7 +33,6 @@ $clientCode = <<<'CODE'
         ]
     ]]);
 
-    phpt_wait();
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 CODE;
 

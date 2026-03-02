@@ -3,22 +3,16 @@ Test lstat() and stat() functions: usage variations - effects changing permissio
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects on stats by changing permissions of link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -43,17 +37,17 @@ $new_stat = lstat($linkname);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
-var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "==") );
 
 echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation15_link.tmp");
 unlink("$file_path/lstat_stat_variation15.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lstat() on a link after changing its access permission ***
 bool(true)
 bool(true)

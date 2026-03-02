@@ -8,8 +8,8 @@ Bug #44667 (proc_open() does not handle pipes with the mode 'wb' correctly)
 $pipes = array();
 
 $descriptor_spec = array(
-	0 => array('pipe', 'rb'),
-	1 => array('pipe', 'wb'),
+    0 => array('pipe', 'rb'),
+    1 => array('pipe', 'wb'),
 );
 
 $proc = proc_open('cat', $descriptor_spec, $pipes);
@@ -28,6 +28,6 @@ echo "Result is: ", $result, "\n";
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Result is: Hello
 Done

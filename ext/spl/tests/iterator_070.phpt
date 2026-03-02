@@ -1,5 +1,5 @@
 --TEST--
-SPL: RecursiveIteratorIterator - Ensure that non-overriden methods execute problem free.
+SPL: RecursiveIteratorIterator - Ensure that non-overridden methods execute problem free.
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ var_dump($recItIt->endIteration());
 var_dump($recItIt->nextElement());
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

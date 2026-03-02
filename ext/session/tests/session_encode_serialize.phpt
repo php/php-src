@@ -1,5 +1,7 @@
 --TEST--
 Test session_encode() function : Numeric key raise error. bug65359
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -17,7 +19,7 @@ session_write_close();
 // Should finish without errors
 echo 'Done'.PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(51) "a:3:{i:-3;s:3:"foo";i:3;s:3:"bar";s:3:"var";i:123;}"
 Done

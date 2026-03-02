@@ -1,5 +1,5 @@
 --TEST--
-Assignement as argument
+Assignment as argument
 --FILE--
 <?php
     function foo(&$x, &$y) { $x = 1; echo $y ; }
@@ -20,5 +20,5 @@ Assignement as argument
     foo2($x, $x, $x = 1);
     echo $x; // 2
 ?>
---EXPECTF--
+--EXPECT--
 1012

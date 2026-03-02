@@ -4,18 +4,18 @@ Bug #74157 (Segfault with nested generators)
 <?php
 
 function a() {
-	$a = $b = $c = 2;
-	foreach(range(1, 5) as $v) {
-		yield $v;
-	}
-	return;
+    $a = $b = $c = 2;
+    foreach(range(1, 5) as $v) {
+        yield $v;
+    }
+    return;
 }
 
 foreach (a(range(1, 3)) as $a) {
-	var_dump($a);
+    var_dump($a);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

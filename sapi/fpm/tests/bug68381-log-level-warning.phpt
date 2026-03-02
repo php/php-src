@@ -3,6 +3,7 @@ FPM: bug68381 - Log messages with warning level only
 --SKIPIF--
 <?php
 include "skipif.inc";
+if (getenv("SKIP_ASAN")) die("skip Often fails on azure with asan for unknown reason");
 ?>
 --FILE--
 <?php

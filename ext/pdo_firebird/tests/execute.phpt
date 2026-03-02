@@ -1,50 +1,53 @@
 --TEST--
 PDO_Firebird: prepare/execute/binding
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
-<?php include("skipif.inc"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
---INI--
-ibase.timestampformat=%Y-%m-%d %H:%M:%S
+<?php require('skipif.inc'); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
+require("testdb.inc");
 
-	require("testdb.inc");
+$dbh = getDbConnection();
+var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
-	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
-	var_dump($db->getAttribute(PDO::ATTR_CONNECTION_STATUS));
+$dbh->exec("CREATE TABLE test_execute (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
+    datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
+$dbh->exec("INSERT INTO test_execute (id,text) VALUES (1,'bla')");
 
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$s = $dbh->prepare("SELECT * FROM test_execute WHERE id=? FOR UPDATE");
 
-	$db->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
-		datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
-	$db->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
+$id = 0;
+$s->bindParam(1,$id);
+$var = null;
+$s->bindColumn("TEXT",$var);
+$id = 1;
+$s->execute();
+$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
 
-	$s = $db->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
+var_dump($id);
 
-	$id = 0;
-	$s->bindParam(1,$id);
-	$var = null;
-	$s->bindColumn("TEXT",$var);
-	$id = 1;
-	$s->execute();
-	$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
+var_dump($s->fetch());
 
-	var_dump($id);
+var_dump($var);
 
-	var_dump($s->fetch());
+var_dump($dbh->exec("UPDATE test_execute SET id=2 WHERE CURRENT OF c"));
 
-	var_dump($var);
+var_dump($s->fetch());
 
-	var_dump($db->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
-
-	var_dump($s->fetch());
-
-	unset($s);
-	unset($db);
-	echo "done\n";
-
+unset($s);
+unset($dbh);
+echo "done\n";
 ?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec('DROP TABLE test_execute');
+unset($dbh);
 --EXPECT--
 bool(true)
 int(1)

@@ -1,14 +1,15 @@
 --TEST--
 Bug #48801 (Problem with imagettfbbox)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-	if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
-	if (substr(PHP_OS, 0, 3) == 'WIN') die('skip UTF-8 font file names not yet supported on Windows');
+    if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
+    if (substr(PHP_OS, 0, 3) == 'WIN') die('skip UTF-8 font file names not yet supported on Windows');
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy私はガラスを食べられます.ttf";
 $bbox = imageftbbox(50, 0, $font, "image");
 echo '(' . $bbox[0] . ', ' . $bbox[1] . ")\n";

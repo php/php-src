@@ -3,7 +3,7 @@ Generic pack()/unpack() tests
 --SKIPIF--
 <?php
 if (PHP_INT_MAX > 2147483647) {
-	die("skip 32bit test only");
+    die("skip 32bit test only");
 }
 ?>
 --FILE--
@@ -143,10 +143,14 @@ Array
 (
     [1] => -64434
 )
+
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
 )
+
+Warning: The float -4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -159,10 +163,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: The float 4294967295 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -1
@@ -179,10 +187,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -227,10 +239,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -299,10 +315,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0

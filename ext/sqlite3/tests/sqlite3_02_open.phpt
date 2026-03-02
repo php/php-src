@@ -3,8 +3,8 @@ SQLite3::open test, testing for function parameters
 --CREDITS--
 Felix De Vliegher
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -15,5 +15,5 @@ try {
 }
 
 ?>
---EXPECTF--
-%string|unicode%(60) "SQLite3::__construct() expects at least 1 parameter, 0 given"
+--EXPECT--
+string(59) "SQLite3::__construct() expects at least 1 argument, 0 given"

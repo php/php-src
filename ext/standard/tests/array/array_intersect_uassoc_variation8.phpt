@@ -2,11 +2,6 @@
 Test array_intersect_uassoc() function : usage variation - arrays containing referenced variables
 --FILE--
 <?php
-/* Prototype  : array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays with additional index check, compares indexes by a callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables
@@ -27,8 +22,7 @@ $array2 = &$array1;
 echo "\n-- Testing array_intersect_uassoc() function when \$array2 is referencd to \$array1 --\n";
 var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
 -- Testing array_intersect_uassoc() function with referenced variable $ref_var has value 'a' --
@@ -48,4 +42,3 @@ array(2) {
   [1]=>
   string(1) "a"
 }
-===DONE===

@@ -1,31 +1,31 @@
 --TEST--
-Reflection Bug #36434 (Properties from parent class fail to indetify their true origin)
+Reflection Bug #36434 (Properties from parent class fail to identify their true origin)
 --FILE--
 <?php
-class ancester
+class ancestor
 {
-    public $ancester = 0;
-	function __construct()
-	{
-		return $this->ancester;
-	}
+    public $ancestor = 0;
+    function __construct()
+    {
+        return $this->ancestor;
+    }
 }
-class foo extends ancester
+class foo extends ancestor
 {
     public $bar = "1";
-	function __construct()
-	{
-		return $this->bar;
-	}
+    function __construct()
+    {
+        return $this->bar;
+    }
 }
 
 $r = new ReflectionClass('foo');
 foreach ($r->GetProperties() as $p)
 {
-	echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
+    echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
 }
 
 ?>
 --EXPECT--
 bar foo
-ancester ancester
+ancestor ancestor

@@ -2,11 +2,6 @@
 Test strrpos() function : usage variations - multi line heredoc string for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of 'needle' in 'haystack'.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrpos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
@@ -26,12 +21,12 @@ var_dump( strrpos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(44)
 int(44)
 int(44)
-bool(false)
+int(63)
 int(55)
 *** Done ***

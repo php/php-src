@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
   die("skip Valid only on Windows");
 }
 if (!sapi_windows_cp_set(936)) {
-	die("skip Required CP 936 or compatible");
+    die("skip Required CP 936 or compatible");
 }
 
 ?>
@@ -34,8 +34,7 @@ var_dump(putenv('FOO=가a가가가'), getenv("FOO"));
 var_dump(putenv('FOO=가a가가가가'), getenv("FOO"));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 string(2) "가"
 bool(true)
@@ -58,4 +57,3 @@ bool(true)
 string(9) "가a가가가"
 bool(true)
 string(11) "가a가가가가"
-===DONE===

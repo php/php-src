@@ -1,7 +1,7 @@
 --TEST--
 Bug #35785 (SimpleXML memory read error)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -16,9 +16,7 @@ $xml = simplexml_load_string("<root></root>");
 $xml->bla->posts[]->name = "FooBar";
 echo $xml->asXML();
 ?>
-===DONE===
-<?php exit(0); __halt_compiler(); ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root><bla><posts><name>FooBar</name></posts></bla></root>
 bool(false)
@@ -26,4 +24,3 @@ bool(false)
 <root><bla><posts><name>FooBar</name></posts></bla></root>
 <?xml version="1.0"?>
 <root><bla><posts><name>FooBar</name></posts></bla></root>
-===DONE===

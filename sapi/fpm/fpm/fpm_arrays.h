@@ -1,4 +1,3 @@
-	/* $Id: fpm_arrays.h,v 1.2 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ARRAYS_H
@@ -6,6 +5,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "php.h"
 
 struct fpm_array_s {
 	void *data;
@@ -85,7 +86,7 @@ static inline void *fpm_array_push(struct fpm_array_s *a) /* {{{ */
 
 	if (a->used == a->allocated) {
 		size_t new_allocated = a->allocated ? a->allocated * 2 : 20;
-		void *new_ptr = realloc(a->data, a->sz * new_allocated);
+		void *new_ptr = safe_perealloc(a->data, a->sz, new_allocated, 0, true);
 
 		if (!new_ptr) {
 			return 0;

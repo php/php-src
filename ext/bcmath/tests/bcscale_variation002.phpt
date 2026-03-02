@@ -1,12 +1,12 @@
 --TEST--
 bcadd() incorrect argument count
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --INI--
 bcmath.scale=-2
 --FILE--
 <?php
 echo bcadd("-4.27", "7.3");
 ?>
---EXPECTF--
+--EXPECT--
 3

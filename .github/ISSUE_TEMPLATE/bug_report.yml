@@ -1,0 +1,44 @@
+name: Bug report
+description: Create a bug report
+labels: ["Bug", "Status: Needs Triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Please provide a minimal way to reproduce the problem and describe what the expected vs actual behavior is. Provide a [3v4l.org](https://3v4l.org/) link if possible."
+      value: |
+        The following code:
+
+        ```php
+        <?php
+        ```
+
+        Resulted in this output:
+        ```
+        ```
+
+        But I expected this output instead:
+        ```
+        ```
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: PHP Version
+      description: |
+        Please run PHP with the `-v` flag (e.g. `php -v`, `php8.3 -v`, `php-fpm -v` or similar) and provide the full output of that command. If executing that command is not possible, please provide the full version number as given in PHPInfo.
+
+        Please make sure that the used PHP version [is a supported version](https://www.php.net/supported-versions.php).
+      placeholder: |
+        PHP 8.3.19 (cli) (built: Mar 13 2025 17:44:40) (NTS)
+        Copyright (c) The PHP Group
+        Zend Engine v4.3.19, Copyright (c) Zend Technologies
+            with Zend OPcache v8.3.19, Copyright (c), by Zend Technologies
+      render: plain
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Operating System
+      description: "The used operating system, if relevant."
+      placeholder: "Ubuntu 24.04"

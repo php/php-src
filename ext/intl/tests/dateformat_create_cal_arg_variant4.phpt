@@ -1,15 +1,14 @@
 --TEST--
 IntlDateFormatter: several forms of the calendar arg
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
+date.timezone=Atlantic/Azores
 --SKIPIF--
-<?php
-if (!extension_loaded('intl'))	die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') >= 0) die('skip for ICU <= 57.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '58.1') >= 0) die('skip for ICU < 58.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", 'Atlantic/Azores');
 
 $ts = strtotime('2012-01-01 00:00:00 UTC');
 
@@ -42,7 +41,6 @@ $df = new IntlDateFormatter('es_ES', 0, 0, 'UTC', 0);
 echo $df->format($ts), "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 domingo%S 1 de enero de 2012, 0:00:00 (GMT)
 domingo%S 8 de Safar de 1433, 0:00:00 (GMT)
@@ -51,4 +49,3 @@ sábado, 31 de diciembre de 2011 d. C., 23:00:00 (hora estándar de las Azores)
 sábado, 7 de Safar de 1433 AH, 23:00:00 (hora estándar de las Azores)
 domingo%S 8 de Safar de 1433 AH, 0:00:00 (GMT)
 domingo%S 1 de enero de 2012, 0:00:00 (GMT)
-==DONE==

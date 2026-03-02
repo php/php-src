@@ -10,6 +10,4 @@ eval("
 
 ?>
 --EXPECTF--
-Warning: Unexpected character in input:  '%s' (ASCII=127) state=0 in %s(%d) : eval()'d code on line %d
-
-Parse error: syntax error, unexpected 'b' (T_STRING) in %s(%d) : eval()'d code on line %d
+Parse error: syntax error, unexpected character 0x7F in %s on line %d

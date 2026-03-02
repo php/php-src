@@ -1,7 +1,7 @@
 --TEST--
 Bug #77691: Opcache passes wrong value for inline array push assignments
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

@@ -33,17 +33,10 @@
 int DayOfWeek(
 				 zend_long sdn)
 {
-	int dow;
-
-	dow = (sdn + 1) % 7;
-	if (dow >= 0) {
-		return (dow);
-	} else {
-		return (dow + 7);
-	}
+	return (int)(sdn % 7 + 8) % 7;
 }
 
-char *DayNameShort[7] =
+const char * const DayNameShort[7] =
 {
 	"Sun",
 	"Mon",
@@ -54,7 +47,7 @@ char *DayNameShort[7] =
 	"Sat"
 };
 
-char *DayNameLong[7] =
+const char * const DayNameLong[7] =
 {
 	"Sunday",
 	"Monday",
@@ -64,12 +57,3 @@ char *DayNameLong[7] =
 	"Friday",
 	"Saturday"
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

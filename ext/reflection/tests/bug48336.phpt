@@ -23,8 +23,8 @@ class F extends E {
   static protected $prop;
 }
 
-$class = 'A';
-for($class = 'A'; $class <= 'F'; $class ++) {
+$classes  = ['A', 'B', 'C', 'D', 'E', 'F'];
+foreach ($classes as $class) {
   print($class.' => ');
   try {
     $rp = new ReflectionProperty($class, 'prop');

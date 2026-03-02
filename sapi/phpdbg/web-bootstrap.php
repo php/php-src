@@ -30,7 +30,7 @@ $_SERVER = array
   'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
   'HTTP_COOKIE' => 'tz=Europe%2FLondon; __utma=1.347100075.1384196523.1384196523.1384196523.1; __utmc=1; __utmz=1.1384196523.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)',
   'PATH' => '/usr/local/bin:/usr/bin:/bin',
-  'SERVER_SIGNATURE' => '<address>Apache/2.4.6 (Ubuntu) Server at phpdbg.com Port 80</address>',
+  'SERVER_SIGNATURE' => '<address>Apache/2.4.6 (Ubuntu) Server at localhost Port 80</address>',
   'SERVER_SOFTWARE' => 'Apache/2.4.6 (Ubuntu)',
   'SERVER_NAME' => 'localhost',
   'SERVER_ADDR' => '127.0.0.1',

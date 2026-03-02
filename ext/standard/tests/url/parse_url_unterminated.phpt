@@ -1,9 +1,7 @@
 --TEST--
 Test parse_url() function: Parse unterminated string
---SKIPIF--
-<?php
-if (!function_exists('zend_create_unterminated_string')) die('skip ext/test required');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -11,18 +9,18 @@ if (!function_exists('zend_create_unterminated_string')) die('skip ext/test requ
  * This is the same as the basic001 test, but with unterminated strings.
  */
 
-include_once(dirname(__FILE__) . '/urls.inc');
+include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "\n--> $url: ";
-	$str = zend_create_unterminated_string($url);
-	var_dump(parse_url($str));
+    echo "\n--> $url: ";
+    $str = zend_create_unterminated_string($url);
+    var_dump(parse_url($str));
     zend_terminate_string($str);
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --> 64.246.30.37: array(1) {
   ["path"]=>
   string(12) "64.246.30.37"
@@ -146,30 +144,36 @@ echo "Done";
   string(10) "/index.php"
 }
 
---> www.php.net/?: array(1) {
+--> www.php.net/?: array(2) {
   ["path"]=>
   string(12) "www.php.net/"
+  ["query"]=>
+  string(0) ""
 }
 
---> www.php.net:80/?: array(3) {
+--> www.php.net:80/?: array(4) {
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://www.php.net/?: array(3) {
+--> http://www.php.net/?: array(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://www.php.net:80/?: array(4) {
+--> http://www.php.net:80/?: array(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -178,6 +182,8 @@ echo "Done";
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/index.php: array(4) {
@@ -292,7 +298,7 @@ echo "Done";
   string(10) "/index.php"
 }
 
---> http://www.php.net:80/index.php?: array(4) {
+--> http://www.php.net:80/index.php?: array(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -301,6 +307,8 @@ echo "Done";
   int(80)
   ["path"]=>
   string(10) "/index.php"
+  ["query"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/#foo: array(5) {
@@ -316,7 +324,7 @@ echo "Done";
   string(3) "foo"
 }
 
---> http://www.php.net:80/?#: array(4) {
+--> http://www.php.net:80/?#: array(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -325,6 +333,10 @@ echo "Done";
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
+  ["fragment"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/?test=1: array(5) {
@@ -508,13 +520,15 @@ echo "Done";
   string(16) "some_page_ref123"
 }
 
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(6) {
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
-  string(26) "secret@hideout@www.php.net"
+  string(11) "www.php.net"
   ["port"]=>
   int(80)
+  ["user"]=>
+  string(14) "secret@hideout"
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
@@ -731,11 +745,13 @@ echo "Done";
   string(4) "/:80"
 }
 
---> http://x:?: array(2) {
+--> http://x:?: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) "x"
+  ["query"]=>
+  string(0) ""
 }
 
 --> x:blah.com: array(2) {
@@ -754,18 +770,22 @@ echo "Done";
 
 --> x://::abc/?: bool(false)
 
---> http://::?: array(2) {
+--> http://::?: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) ":"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://::#: array(2) {
+--> http://::#: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) ":"
+  ["fragment"]=>
+  string(0) ""
 }
 
 --> x://::6.5: array(3) {
@@ -852,6 +872,22 @@ echo "Done";
   string(11) "/rest/Users"
   ["query"]=>
   string(19) "filter={"id":"123"}"
+}
+
+--> %:x: array(1) {
+  ["path"]=>
+  string(3) "%:x"
+}
+
+--> https://example.com:0/: array(4) {
+  ["scheme"]=>
+  string(5) "https"
+  ["host"]=>
+  string(11) "example.com"
+  ["port"]=>
+  int(0)
+  ["path"]=>
+  string(1) "/"
 }
 
 --> http:///blah.com: bool(false)

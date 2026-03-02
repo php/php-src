@@ -1,6 +1,7 @@
 --TEST--
 Bug #66827: Session raises E_NOTICE when session name variable is array.
---INI--
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -8,5 +9,6 @@ Bug #66827: Session raises E_NOTICE when session name variable is array.
 $_COOKIE[session_name()] = array();
 session_start();
 echo 'OK';
---EXPECTF--
+?>
+--EXPECT--
 OK

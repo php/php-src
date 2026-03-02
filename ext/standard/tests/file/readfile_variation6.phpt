@@ -4,12 +4,6 @@ Test readfile() function : variation - test include path
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 require_once('fopen_include_path.inc');
 
 echo "*** Testing readfile() : variation ***\n";
@@ -27,7 +21,6 @@ $newpath = create_include_path();
 set_include_path($newpath);
 runtest();
 teardown_include_path();
-restore_include_path();
 chdir("..");
 rmdir($thisTestDir);
 
@@ -43,8 +36,6 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing readfile() : variation ***
 File in include path
-===DONE===

@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_upper() function : usage variations - different integers
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different integers to ctype_upper() to test which character codes are considered
  * valid uppercase characters
@@ -18,15 +13,14 @@ echo "*** Testing ctype_upper() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_upper($i)) {
-		echo "character code $i is a uppercase character\n";
-	}
+    if (ctype_upper(chr($i))) {
+        echo "character code $i is a uppercase character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_upper() : usage variations ***
 character code 65 is a uppercase character
 character code 66 is a uppercase character
@@ -54,4 +48,3 @@ character code 87 is a uppercase character
 character code 88 is a uppercase character
 character code 89 is a uppercase character
 character code 90 is a uppercase character
-===DONE===

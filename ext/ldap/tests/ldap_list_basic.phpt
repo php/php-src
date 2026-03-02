@@ -4,32 +4,33 @@ ldap_list() test
 Davide Mendolia <idaf1er@gmail.com>
 Patrick Allaert <patrickallaert@php.net>
 Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 var_dump(
-	$result = ldap_list($link, "$base", "(objectClass=person)"),
-	ldap_get_entries($link, $result)
+    $result = ldap_list($link, "$base", "(objectClass=person)"),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)
@@ -67,7 +68,7 @@ array(3) {
       ["count"]=>
       int(1)
       [0]=>
-      string(4) "oops"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -128,7 +129,7 @@ array(3) {
       ["count"]=>
       int(1)
       [0]=>
-      string(15) "oopsIDitItAgain"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -147,4 +148,3 @@ array(3) {
     string(%d) "cn=userB,%s"
   }
 }
-===DONE===

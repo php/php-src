@@ -2,13 +2,6 @@
 Test sizeof() function : object functionality - objects without Countable interface
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode] )
- * Description: Counts an elements in an array. If Standard PHP library is installed,
- * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
- */
-
 echo "*** Testing sizeof() : object functionality ***\n";
 
 echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";
@@ -81,88 +74,52 @@ for($i = 0; $i < count($objects); $i++)
   $var = $objects[$i];
 
   echo "Default Mode: ";
-  var_dump( sizeof($var) );
-  echo "\n";
+  try {
+    var_dump( sizeof($var) );
+  } catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+  }
 
   echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
-  echo "\n";
+  try {
+    var_dump( sizeof($var, COUNT_NORMAL) );
+  } catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+  }
 
   echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
-  echo "\n";
+  try {
+    var_dump( sizeof($var, COUNT_RECURSIVE) );
+  } catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+  }
 
   $counter++;
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : object functionality ***
 --- Testing sizeof() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
+Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
+COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
+COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
 -- Iteration 2 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
+Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
+COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
+COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
 -- Iteration 3 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
+Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
+COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
+COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
 -- Iteration 4 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
+Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
+COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
+COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
 -- Iteration 5 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-
+Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
+COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
+COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
 Done

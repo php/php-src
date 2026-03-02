@@ -1,5 +1,5 @@
 --TEST--
-U (PCRE_UNGREEDY) modififer
+U (PCRE_UNGREEDY) modifier
 --FILE--
 <?php
 

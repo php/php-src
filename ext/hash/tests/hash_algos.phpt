@@ -1,24 +1,15 @@
 --TEST--
-Test hash_algos() function : basic functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_algos() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : array hash_algos (void)
- * Description: Return a list of registered hashing algorithms
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
 
 echo "*** Testing hash_algos() : basic functionality ***\n";
 var_dump(hash_algos());
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
-array(52) {
+array(60) {
   [%d]=>
   string(3) "md2"
   [%d]=>
@@ -84,6 +75,8 @@ array(52) {
   [%d]=>
   string(6) "crc32b"
   [%d]=>
+  string(6) "crc32c"
+  [%d]=>
   string(6) "fnv132"
   [%d]=>
   string(7) "fnv1a32"
@@ -93,6 +86,20 @@ array(52) {
   string(7) "fnv1a64"
   [%d]=>
   string(5) "joaat"
+  [%d]=>
+  string(8) "murmur3a"
+  [%d]=>
+  string(8) "murmur3c"
+  [%d]=>
+  string(8) "murmur3f"
+  [%d]=>
+  string(5) "xxh32"
+  [%d]=>
+  string(5) "xxh64"
+  [%d]=>
+  string(4) "xxh3"
+  [%d]=>
+  string(6) "xxh128"
   [%d]=>
   string(10) "haval128,3"
   [%d]=>
@@ -124,4 +131,3 @@ array(52) {
   [%d]=>
   string(10) "haval256,5"
 }
-===Done===

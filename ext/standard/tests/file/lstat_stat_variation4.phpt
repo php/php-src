@@ -3,22 +3,12 @@ Test lstat() and stat() functions: usage variations - effects of touch() on file
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of touch() on stats of file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -33,7 +23,7 @@ echo "*** Testing stat() for file after using touch() on the file ***\n";
 $old_stat = stat($file_name);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( touch($file_name) );
 $new_stat = stat($file_name);
 
@@ -51,10 +41,10 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation4.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() for file after using touch() on the file ***
 bool(true)
 bool(true)

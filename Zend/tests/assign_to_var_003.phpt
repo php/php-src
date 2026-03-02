@@ -13,6 +13,7 @@ var_dump($var1);
 echo "Done\n";
 ?>
 --EXPECTF--
+Warning: Trying to access array offset on float in %s on line %d
 NULL
 NULL
 Done

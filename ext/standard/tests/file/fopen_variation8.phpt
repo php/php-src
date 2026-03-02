@@ -4,14 +4,6 @@ Test fopen() function : variation: use include path and stream context (relative
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
-
-
 $thisTestDir =  basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
@@ -19,7 +11,7 @@ chdir($thisTestDir);
 //create the include directory structure
 $workingDir = "workdir";
 $filename =  basename(__FILE__, ".php") . ".tmp";
-$scriptDir = dirname(__FILE__);
+$scriptDir = __DIR__;
 $baseDir = getcwd();
 $secondFile = $baseDir."/dir2/".$filename;
 $firstFile = "../dir1/".$filename;
@@ -45,7 +37,6 @@ $modes = array("r", "r+", "rt");
 foreach($modes as $mode) {
     test_fopen($mode);
 }
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);
@@ -121,8 +112,7 @@ function test_fopen($mode) {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 --- testing include path ---
 
 ** testing with mode=r **
@@ -145,4 +135,3 @@ in dir1
 in dir1
 in working dir
 in script dir
-===DONE===

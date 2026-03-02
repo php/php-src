@@ -5,5 +5,6 @@ Bug #35382 (Comment in end of file produces fatal error)
 eval("echo 'Hello'; // comment");
 echo " World";
 //last line comment
---EXPECTF--
+?>
+--EXPECT--
 Hello World

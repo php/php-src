@@ -16,16 +16,16 @@ class B {
 }
 
 function test($value, $key, $inner) {
-	if ($inner->hasChildren()) {
-		return true;
-	}
-	printf("%s / %s / %d / %d\n"
-		, print_r($value, true)
-		, $key
-		, $value == $inner->current()
-		, $key == $inner->key()
-	);
-	return $value === 1 || $value === 4;
+    if ($inner->hasChildren()) {
+        return true;
+    }
+    printf("%s / %s / %d / %d\n"
+        , print_r($value, true)
+        , $key
+        , $value == $inner->current()
+        , $key == $inner->key()
+    );
+    return $value === 1 || $value === 4;
 }
 
 $tests = array(
@@ -41,7 +41,7 @@ foreach($tests as $name => $test) {
     $callback = $test();
     $it = new RecursiveArrayIterator(array(1, array(2, 3), array(4, 5)));
     $it = new RecursiveCallbackFilterIterator($it, $callback);
-	$it = new RecursiveIteratorIterator($it);
+    $it = new RecursiveIteratorIterator($it);
 
     echo " = $name =\n";
 
@@ -49,17 +49,18 @@ foreach($tests as $name => $test) {
         echo "=> $value\n";
     }
 
-	// same test, with no reference to callback
+    // same test, with no reference to callback
 
     $it = new RecursiveArrayIterator(array(1, array(2, 3), array(4, 5)));
     $it = new RecursiveCallbackFilterIterator($it, $test());
-	$it = new RecursiveIteratorIterator($it);
+    $it = new RecursiveIteratorIterator($it);
     unset($callback);
 
     foreach($it as $value) {
         echo "=> $value\n";
     }
 }
+?>
 --EXPECT--
 = instance method =
 1 / 0 / 1 / 1

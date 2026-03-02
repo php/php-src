@@ -1,19 +1,25 @@
 --TEST--
 Phar: test stat function interceptions
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=1
 phar.readonly=0
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 umask(0);
 Phar::interceptFileFuncs();
 var_dump(stat(""));
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $a = new Phar($fname);
 $a['my/index.php'] = '<?php
 echo "stat\n";
@@ -68,9 +74,8 @@ include "my/index.php";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 bool(false)
 stat
@@ -223,4 +228,3 @@ not found 2
 
 Warning: fileperms(): stat failed for not/found in phar://%sstat.phar.php/my/index.php on line %d
 bool(false)
-===DONE===

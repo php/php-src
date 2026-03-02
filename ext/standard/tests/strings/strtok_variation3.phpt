@@ -2,11 +2,6 @@
 Test strtok() function : usage variations - with heredoc strings
 --FILE--
 <?php
-/* Prototype  : string strtok ( str $str, str $token )
- * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing strtok() : with heredoc strings
 */
@@ -85,15 +80,35 @@ bool(false)
 
 --- Iteration 2 ---
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 3 ---
@@ -142,9 +157,19 @@ string(3) "rld"
 string(4) "hell"
 string(4) "hell"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 Done

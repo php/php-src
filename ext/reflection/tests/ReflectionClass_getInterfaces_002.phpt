@@ -17,22 +17,12 @@ $rc = new ReflectionClass('I7');
 $interfaces = $rc->getInterfaces();
 print_r($interfaces);
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [I6] => ReflectionClass Object
         (
             [name] => I6
-        )
-
-    [I2] => ReflectionClass Object
-        (
-            [name] => I2
-        )
-
-    [I1] => ReflectionClass Object
-        (
-            [name] => I1
         )
 
     [I4] => ReflectionClass Object
@@ -43,6 +33,16 @@ Array
     [I3] => ReflectionClass Object
         (
             [name] => I3
+        )
+
+    [I2] => ReflectionClass Object
+        (
+            [name] => I2
+        )
+
+    [I1] => ReflectionClass Object
+        (
+            [name] => I1
         )
 
     [I5] => ReflectionClass Object

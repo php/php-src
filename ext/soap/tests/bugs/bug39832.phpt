@@ -1,7 +1,7 @@
 --TEST--
 Bug #39832 (SOAP Server: parameter not matching the WSDL specified type are set to 0)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -20,7 +20,7 @@ function Test($x) {
   return $x->priority;
 }
 
-$x = new SoapServer(dirname(__FILE__)."/bug39832.wsdl");
+$x = new SoapServer(__DIR__."/bug39832.wsdl");
 $x->addFunction("Test");
 $x->handle($HTTP_RAW_POST_DATA);
 ?>

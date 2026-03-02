@@ -2,7 +2,6 @@
 Handling of private fields with traits needs to have same semantics as with normal inheritance.
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class BaseWithPropA {
   private $hello = 0;
@@ -41,22 +40,22 @@ $b = new SubclassB;
 var_dump($b);
 
 ?>
---EXPECTF--
+--EXPECT--
 object(SubclassClassicInheritance)#1 (2) {
-  ["hello":"SubclassClassicInheritance":private]=>
-  int(0)
   ["hello":"BaseWithPropA":private]=>
+  int(0)
+  ["hello":"SubclassClassicInheritance":private]=>
   int(0)
 }
 object(SubclassA)#2 (2) {
-  ["hello":"SubclassA":private]=>
-  int(0)
   ["hello":"BaseWithPropA":private]=>
+  int(0)
+  ["hello":"SubclassA":private]=>
   int(0)
 }
 object(SubclassB)#3 (2) {
-  ["hello":"SubclassB":private]=>
-  int(0)
   ["hello":"BaseWithTPropB":private]=>
+  int(0)
+  ["hello":"SubclassB":private]=>
   int(0)
 }

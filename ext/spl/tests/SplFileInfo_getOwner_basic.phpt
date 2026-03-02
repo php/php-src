@@ -22,5 +22,5 @@ var_dump($expected == $actual);
 $filename = __DIR__ . "/SplFileInfo_getOwner_basic";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

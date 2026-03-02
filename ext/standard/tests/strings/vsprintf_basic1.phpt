@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - string format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using string format ***\n";
 
 // Initialise all required variables
@@ -25,7 +20,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using string format ***
 string(3) "one"
 string(7) "one two"

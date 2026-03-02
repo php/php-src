@@ -1,28 +1,27 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions with array and a not allowed function
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $phpfuncxsl = new domDocument();
-$phpfuncxsl->load(dirname(__FILE__)."/phpfunc.xsl");
+$phpfuncxsl->load(__DIR__."/phpfunc.xsl");
 if(!$phpfuncxsl) {
   echo "Error while parsing the xsl document\n";
   exit;
 }
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions(array()));
-var_dump($proc->transformToXml($dom));
---EXPECTF--
+try {
+  var_dump($proc->transformToXml($dom));
+} catch (Throwable $e) {
+  echo $e->getMessage(), "\n";
+}
+?>
+--EXPECT--
 NULL
-
-Warning: XSLTProcessor::transformToXml(): Not allowed to call handler 'ucwords()' in %s on line %d
-NULL
+No callback handler "ucwords" registered
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

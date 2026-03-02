@@ -3,10 +3,14 @@ parse_ini_file() tests
 --ENV--
 basicval=FUBAR_VARIABLE
 basicqval=FUBAR_QUOTES_VARIABLE
+falsyval=false
+emptyval=
+--INI--
+INI:WITH:COLON=ini_with_colon
 --FILE--
 <?php
 
-$ini_file = dirname(__FILE__)."/parse_ini_basic.data";
+$ini_file = __DIR__."/parse_ini_basic.data";
 
 define('TEST_CONSTANT', 'this_is_test_constant');
 
@@ -14,8 +18,8 @@ var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 ?>
---EXPECTF--
-array(26) {
+--EXPECT--
+array(29) {
   ["basic"]=>
   array(15) {
     ["basicval"]=>
@@ -179,6 +183,9 @@ array(26) {
   ["FUBAR_VARIABLE"]=>
   array(0) {
   }
+  ["foo"]=>
+  array(0) {
+  }
   ["FUBAR_VARIABLE/foo"]=>
   array(0) {
   }
@@ -278,6 +285,63 @@ array(26) {
     string(69) "c:\some windows\path\test\new\r\quote " here\single ' quote\some more"
     ["winpath2"]=>
     string(13) "special case\"
+  }
+  ["characters escaping"]=>
+  array(6) {
+    ["single_quoted"]=>
+    string(28) "She said \Exactly my point\."
+    ["double_quoted"]=>
+    string(28) "She said "Exactly my point"."
+    ["double_quoted_2"]=>
+    string(29) "Use \" to escape double quote"
+    ["double_quoted_multiline"]=>
+    string(20) "Lorem "ipsum"
+ dolor"
+    ["dollar_test"]=>
+    string(7) "${test}"
+    ["unescaped"]=>
+    string(6) "\n\r\t"
+  }
+  ["variable-fallback"]=>
+  array(19) {
+    ["defined1"]=>
+    string(22) "Hello, FUBAR_VARIABLE!"
+    ["defined2"]=>
+    string(14) "FUBAR_VARIABLE"
+    ["falsy"]=>
+    string(5) "false"
+    ["undefined"]=>
+    string(13) "Hello, world!"
+    ["empty"]=>
+    string(3) "foo"
+    ["spaces"]=>
+    string(8) "hi there"
+    ["exclamation"]=>
+    string(21) "no, this is fallback!"
+    ["nested"]=>
+    string(5) "hello"
+    ["hostname"]=>
+    string(14) "localhost:8080"
+    ["outer_quotes"]=>
+    string(7) "foo:bar"
+    ["number_value"]=>
+    string(5) "12345"
+    ["true_value"]=>
+    string(1) "1"
+    ["false_value"]=>
+    string(0) ""
+    ["null_value"]=>
+    string(0) ""
+    ["empty1"]=>
+    string(0) ""
+    ["empty2"]=>
+    string(0) ""
+    ["constant"]=>
+    string(21) "this_is_test_constant"
+    ["INI:WITH:COLON"]=>
+    string(14) "ini_with_colon"
+    ["NONEXISTENT:INI:WITH:COLON"]=>
+    string(8) "fallback"
   }
 }
 Done.

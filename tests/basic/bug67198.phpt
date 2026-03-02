@@ -33,10 +33,13 @@ $opts = array('http' =>
 
 $context  = stream_context_create($opts);
 
-php_cli_server_start("exit(file_get_contents('php://input'));", false, "-d enable_post_data_reading=Off");
+php_cli_server_start(
+    "exit(file_get_contents('php://input'));", null,
+    ["-d", "enable_post_data_reading=Off"]);
 
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS, false, $context));
+?>
 --EXPECT--
 string(4) "PASS"
 string(4) "PASS"

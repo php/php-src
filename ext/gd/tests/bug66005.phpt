@@ -1,8 +1,12 @@
 --TEST--
 Bug #66005 (imagecopy does not support 1bit transparency on truecolor images)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -28,7 +32,5 @@ imagecopy($dest, $png_full, 100, 0, 0, 0, 50, 50);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/bug66005.png', $dest);
 ?>
-==DONE==
 --EXPECT--
 The images are equal.
-==DONE==

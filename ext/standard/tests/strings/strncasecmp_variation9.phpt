@@ -2,11 +2,6 @@
 Test strncasecmp() function: usage variations - heredoc strings
 --FILE--
 <?php
-/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-insensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncasecmp() function with here-doc strings for 'str1', 'str2' */
 
 echo "*** Test strncasecmp() function: with here-doc strings ***\n";
@@ -22,7 +17,7 @@ EOD;
 $identifier_str1 = <<<identifier_str1
 Example of heredoc
 string, whose identifier
-having underscore("_") 
+having underscore("_")
 & numeric value.
 identifier_str1;
 
@@ -73,12 +68,12 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncasecmp() function: with here-doc strings ***
 int(0)
-int(63)
+int(1)
 int(0)
-int(84)
+int(1)
 int(0)
 int(-1)
 int(0)

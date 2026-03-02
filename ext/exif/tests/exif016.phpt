@@ -1,13 +1,13 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD data in Intel byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-var_dump(exif_read_data(dirname(__FILE__).'/image016.tiff'));
+var_dump(exif_read_data(__DIR__.'/image016.tiff'));
 ?>
 --EXPECTF--
 array(26) {
@@ -1618,5 +1618,5 @@ array(26) {
   ["Copyright"]=>
   string(12) "Eric Stewart"
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

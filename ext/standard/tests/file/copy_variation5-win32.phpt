@@ -7,17 +7,12 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy() function: Checking case sensitivity in creation of destination file names
      and the existence and size of destination files
 */
 
 echo "*** Test copy() function: checking case sensitivity in creation of destination file names ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $src_file_name = $file_path."/copy_variation5.tmp";
 $file_handle = fopen($src_file_name, "w");
 fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
@@ -27,9 +22,9 @@ fclose($file_handle);
 $dest_files = array(
 
   /* Checking case sensitiveness */
-  "COPY.tmp",
-  "COPY.TMP",
-  "CopY.TMP"
+  "COPY5.tmp",
+  "COPY5.TMP",
+  "CopY5.TMP"
 );
 
 echo "Size of the source file before copy operation => ";
@@ -75,7 +70,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation5.tmp");
+unlink(__DIR__."/copy_variation5.tmp");
 ?>
 --EXPECTF--
 *** Test copy() function: checking case sensitivity in creation of destination file names ***
@@ -85,25 +80,25 @@ Size of the source file before copy operation => int(1500)
 -- Iteration 1 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/COPY.tmp
+Destination file name => %s/COPY5.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 2 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/COPY.TMP
+Destination file name => %s/COPY5.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 3 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/CopY.TMP
+Destination file name => %s/CopY5.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
-Warning: unlink(%s/COPY.TMP): No such file or directory in %s on line %d
+Warning: unlink(%s/COPY5.TMP): No such file or directory in %s on line %d
 
-Warning: unlink(%s/CopY.TMP): No such file or directory in %s on line %d
+Warning: unlink(%s/CopY5.TMP): No such file or directory in %s on line %d
 *** Done ***

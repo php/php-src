@@ -1,10 +1,11 @@
 --TEST--
 Phar: phpinfo display 1
+--EXTENSIONS--
+phar
+zlib
+bz2
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("zlib")) die("skip zlib not loaded");
-if (!extension_loaded("bz2")) die("skip bz2 not loaded");
 $arr = Phar::getSupportedSignatures();
 if (in_array("OpenSSL", $arr)) die("skip openssl support enabled");
 ?>
@@ -19,14 +20,11 @@ ini_set('phar.readonly',1);
 ini_set('phar.require_hash',1);
 phpinfo(INFO_MODULES);
 ?>
-===DONE===
 --EXPECTF--
 %aPhar
 
 Phar: PHP Archive support => enabled
-Phar EXT version => %s
 Phar API version => 1.1.1
-SVN revision => %sId: %s $
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
@@ -46,9 +44,7 @@ phar.require_hash => Off => Off
 Phar
 
 Phar: PHP Archive support => enabled
-Phar EXT version => %s
 Phar API version => 1.1.1
-SVN revision => %sId: %s $
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
@@ -65,4 +61,3 @@ phar.cache_list => no value => no value
 phar.readonly => On => Off
 phar.require_hash => On => Off
 %a
-===DONE===

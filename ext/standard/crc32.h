@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,16 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
  * This code implements the AUTODIN II polynomial
  * The variable corresponding to the macro argument "crc" should
  * be an unsigned long.
- * Oroginal code  by Spencer Garrett <srg@quick.com>
+ * Original code by Spencer Garrett <srg@quick.com>
  */
 
 #define CRC32(crc, ch)	 (crc = (crc >> 8) ^ crc32tab[(crc ^ (ch)) & 0xff])
+
+#define php_crc32_bulk_init() (0 ^ 0xffffffff)
+#define php_crc32_bulk_end(c) ((c) ^ 0xffffffff)
+
+PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
+
+/* Return FAILURE if stream reading fail */
+PHPAPI zend_result php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
 
 /* generated using the AUTODIN II polynomial
  *	x^32 + x^26 + x^23 + x^22 + x^16 +
@@ -98,12 +102,3 @@ static const unsigned int crc32tab[256] = {
 	0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

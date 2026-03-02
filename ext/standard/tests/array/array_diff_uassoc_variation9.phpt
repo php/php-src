@@ -2,12 +2,6 @@
 Test array_diff_uassoc() function : usage variation - Passing integer indexed array
 --FILE--
 <?php
-/* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a
- * 				user supplied callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -26,8 +20,7 @@ foreach($input_arrays as $key =>$value) {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 --decimal indexed--
@@ -59,4 +52,3 @@ array(1) {
   [-7]=>
   int(-7)
 }
-===DONE===

@@ -26,11 +26,10 @@ $d->close();
 echo "\ntest DirectoryIterator\n";
 $dir = new DirectoryIterator($base);
 foreach ($dir as $finfo) {
-	var_dump($finfo->getFilename());
+    var_dump($finfo->getFilename());
 }
 
 ?>
-==DONE==
 --CLEAN--
 <?php
 $base = __DIR__ . DIRECTORY_SEPARATOR . "bug73971";
@@ -39,7 +38,7 @@ $filename =  $base . DIRECTORY_SEPARATOR . str_repeat('テスト', 48);
 rmdir($filename);
 rmdir($base);
 ?>
---EXPECTF--
+--EXPECT--
 string(432) "テストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテスト"
 
 test dir()
@@ -51,4 +50,3 @@ test DirectoryIterator
 string(1) "."
 string(2) ".."
 string(432) "テストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテスト"
-==DONE==

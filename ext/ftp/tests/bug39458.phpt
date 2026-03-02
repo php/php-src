@@ -1,9 +1,8 @@
 --TEST--
 Bug #39458 (ftp_nlist() returns false on empty directories)
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

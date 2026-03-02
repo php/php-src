@@ -3,8 +3,8 @@ Test curl_copy_handle() with simple get
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Testing curl copy handle with simple GET ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
+  $url = "{$host}/get.inc?test=getpost&get_param=Hello%20World";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -21,15 +21,13 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
+  $ch = null;
 
   $curl_content = curl_exec($copy);
-  curl_close($copy);
 
   var_dump( $curl_content );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl copy handle with simple GET ***
 string(106) "array(2) {
   ["test"]=>
@@ -40,4 +38,3 @@ string(106) "array(2) {
 array(0) {
 }
 "
-===DONE=== 

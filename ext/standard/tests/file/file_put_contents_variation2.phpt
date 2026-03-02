@@ -4,20 +4,14 @@ Test file_put_contents() function : usage variation - different data types to wr
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -34,9 +28,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -106,11 +100,14 @@ foreach($inputs as $key =>$value) {
       file_put_contents($filename, $value);
       readfile($filename);
 };
-unlink($filename);
 
 ?>
-===DONE===
---EXPECTF--
+--CLEAN--
+<?php
+$filename = __DIR__ . '/fwriteVar5.tmp';
+unlink($filename);
+?>
+--EXPECT--
 *** Testing file_put_contents() : usage variation ***
 
 --int 0--
@@ -138,8 +135,8 @@ unlink($filename);
 --associative array--
 12
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - Array to string conversion
+Error: 2 - Array to string conversion
 fooArrayArray
 --uppercase NULL--
 
@@ -164,4 +161,3 @@ Class A object
 --undefined var--
 
 --unset var--
-===DONE===

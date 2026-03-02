@@ -1,26 +1,22 @@
 --TEST--
 Reflection::getClosureThis()
---SKIPIF--
-<?php
-if (!extension_loaded('reflection')) print 'skip';
-?>
 --FILE--
 <?php
 class StaticExample
 {
-	static function foo()
-	{
-		var_dump( "Static Example class, Hello World!" );
-	}
+    static function foo()
+    {
+        var_dump( "Static Example class, Hello World!" );
+    }
 }
 
 class Example
 {
-	public $bar = 42;
-	public function foo()
-	{
-		var_dump( "Example class, bar: " . $this->bar );
-	}
+    public $bar = 42;
+    public function foo()
+    {
+        var_dump( "Example class, bar: " . $this->bar );
+    }
 }
 
 // Initialize classes
@@ -42,6 +38,7 @@ $rf = new ReflectionFunction($closure);
 var_dump($rf->getClosureThis());
 
 echo "Done!\n";
+?>
 --EXPECTF--
 NULL
 object(Example)#%d (1) {

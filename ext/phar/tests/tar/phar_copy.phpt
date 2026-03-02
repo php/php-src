@@ -1,17 +1,16 @@
 --TEST--
 Phar: copy() tar-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.phar.php';
 
 $pname = 'phar://'.$fname;
 $iname = '/file.txt';
@@ -21,20 +20,20 @@ $p = new Phar($fname);
 
 try
 {
-	$p['a'] = 'hi';
-	$p->startBuffering();
-	$p->copy('a', 'b');
-	echo file_get_contents($p['b']->getPathName());
-	$p->copy('b', 'c');
-	$p->stopBuffering();
-	echo file_get_contents($p['c']->getPathName());
-	copy($fname, $fname2);
-	var_dump($p->isFileFormat(Phar::TAR));
-	$p->copy('a', $ename);
+    $p['a'] = 'hi';
+    $p->startBuffering();
+    $p->copy('a', 'b');
+    echo file_get_contents($p['b']->getPathName());
+    $p->copy('b', 'c');
+    $p->stopBuffering();
+    echo file_get_contents($p['c']->getPathName());
+    copy($fname, $fname2);
+    var_dump($p->isFileFormat(Phar::TAR));
+    $p->copy('a', $ename);
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);
@@ -46,8 +45,8 @@ echo 'c: ' ,file_get_contents($p2['c']->getPathName());
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.php'); ?>
 --EXPECTF--
 hihibool(true)
 file "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s

@@ -1,0 +1,23 @@
+name: Windows builds
+run-name: Windows builds for ${{ inputs.tag || github.ref_name }}
+on:
+  push:
+    tags:
+      - 'php-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag version'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.WINDOWS_BUILDS_TOKEN }}
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          gh workflow run php.yml -R php/php-windows-builder -f php-version="${TAG#php-}"

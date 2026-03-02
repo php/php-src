@@ -21,5 +21,5 @@ string(7) "cCdEfGh"
 string(2) "Ab"
 string(5) "eEfGh"
 string(4) "AbCd"
-string(11) "azAbCdeEfGh"
-string(1) "w"
+bool(false)
+bool(false)

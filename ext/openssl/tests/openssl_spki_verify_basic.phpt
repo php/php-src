@@ -2,10 +2,8 @@
 openssl_spki_verify() tests for valid signature
 --INI--
 error_reporting=0
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 
@@ -13,19 +11,16 @@ if (!extension_loaded("openssl")) die("skip");
 $key_sizes = array(1024, 2048, 4096);
 $pkeys = array();
 foreach ($key_sizes as $key_size) {
-    $key_file = "file://" . dirname(__FILE__) . "/private_rsa_" . $key_size . ".key";
+    $key_file = "file://" . __DIR__ . "/private_rsa_" . $key_size . ".key";
     $pkeys[] = openssl_pkey_get_private($key_file);
 }
 
 
 /* array of available hashings to test */
 $algo = array(
-    OPENSSL_ALGO_SHA1,
-    OPENSSL_ALGO_SHA224,
     OPENSSL_ALGO_SHA256,
     OPENSSL_ALGO_SHA384,
     OPENSSL_ALGO_SHA512,
-    OPENSSL_ALGO_RMD160
 );
 
 /* loop over key sizes for test */
@@ -50,24 +45,6 @@ function _uuid() {
 
 ?>
 --EXPECT--
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
 bool(true)
 bool(false)
 bool(true)

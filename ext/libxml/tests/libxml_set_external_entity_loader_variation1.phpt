@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_external_entity_loader() variation: resolve externals and entities
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 chdir(__DIR__);
@@ -23,17 +23,17 @@ $entity = <<<ENT
 ENT;
 
 libxml_set_external_entity_loader(
-	function ($public, $system, $context) use($dtd,$entity){
-		static $first = true;
-		var_dump($public);
-		var_dump($system);
-		var_dump($context);
-		$f = fopen("php://temp", "r+");
-		fwrite($f, $first ? $dtd : $entity);
-		$first = false;
-		rewind($f);
-		return $f;
-	}
+    function ($public, $system, $context) use($dtd,$entity){
+        static $first = true;
+        var_dump($public);
+        var_dump($system);
+        var_dump($context);
+        $f = fopen("php://temp", "r+");
+        fwrite($f, $first ? $dtd : $entity);
+        $first = false;
+        rewind($f);
+        return $f;
+    }
 );
 
 $dd = new DOMDocument;
@@ -43,6 +43,7 @@ $r = $dd->loadXML($xml);
 var_dump($dd->validate());
 
 echo "Done.\n";
+?>
 --EXPECTF--
 string(10) "-//FOO/BAR"
 string(25) "http://example.com/foobar"
@@ -60,7 +61,7 @@ string(13) "-//FOO/ENTITY"
 string(32) "http://example.com/fooentity.ent"
 array(4) {
   ["directory"]=>
-  string(%d) "%s"
+  %r(NULL|string\(%d\) "%s")%r
   ["intSubName"]=>
   string(3) "foo"
   ["extSubURI"]=>
