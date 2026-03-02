@@ -842,6 +842,9 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	struct sockaddr **res;
 	// TODO: Do not strip and re-add the port in peername?
 	unsigned remote_port = SNMP_PORT;
+#if defined(HAVE_GETADDRINFO)
+	char name[INET6_ADDRSTRLEN];
+#endif
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -883,23 +886,33 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		return false;
 	}
 
+	/* Save hostname before clearing peername, since host_ptr may point into the same buffer */
+	char saved_hostname[MAX_NAME_LEN];
+	strlcpy(saved_hostname, host_ptr, MAX_NAME_LEN);
+
 	/* we have everything we need in psal, flush peername and fill it properly */
 	*(session->peername) = '\0';
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
+#if defined(HAVE_GETADDRINFO)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
 		}
+		/* When IPv6 is not explicitly requested, prefer IPv4 results to avoid
+		   issues on systems where getaddrinfo() returns AF_INET6 mapped addresses
+		   but IPv6 networking is not actually available */
+		if (!force_ipv6 && (*res)->sa_family == AF_INET6) {
+			res++;
+			continue;
+		}
 		if ((*res)->sa_family == AF_INET6) {
-			strcpy(session->peername, "udp6:[");
-			pptr = session->peername + strlen(session->peername);
-			inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), pptr, MAX_NAME_LEN);
-			strcat(pptr, "]");
+			if (inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), name, sizeof(name))) {
+				snprintf(pptr, MAX_NAME_LEN, "udp6:[%s]", name);
+			}
 		} else if ((*res)->sa_family == AF_INET) {
-			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, MAX_NAME_LEN);
+			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, INET_ADDRSTRLEN);
 		} else {
 			res++;
 			continue;
@@ -908,13 +921,11 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		break;
 	}
 
-	if (strlen(session->peername) == 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown failure while resolving '%s'", ZSTR_VAL(hostname));
-		return false;
+	/* If no suitable address was found, fall back to the original hostname
+	   and let Net-SNMP resolve it (matches behavior of snmprealwalk et al.) */
+	if (session->peername[0] == '\0') {
+		strlcpy(session->peername, saved_hostname, MAX_NAME_LEN);
 	}
-	/* XXX FIXME
-		There should be check for non-empty session->peername!
-	*/
 
 	/* put back non-standard SNMP port */
 	if (remote_port != SNMP_PORT) {
