@@ -5,7 +5,7 @@ ARG_WITH("dom", "DOM support", "yes");
 if (PHP_DOM == "yes") {
 	if (PHP_LIBXML == "yes" &&
 		ADD_EXTENSION_DEP('dom', 'libxml') &&
-		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
+		CHECK_HEADER("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c infra.c \
 			xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c private_data.c \

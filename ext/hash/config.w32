@@ -22,7 +22,7 @@ if(X64) {
 	ADD_SOURCES(hash_sha3_dir, 'KeccakHash.c KeccakSponge.c KeccakP-1600-inplace32BI.c', 'hash');
 }
 
-if (!CHECK_HEADER_ADD_INCLUDE('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
+if (!CHECK_HEADER('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
 	// Should NEVER happen
 	ERROR('Unable to locate SHA3 headers');
 }
