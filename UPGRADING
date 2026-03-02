@@ -137,6 +137,10 @@ PHP 8.6 UPGRADE NOTES
   . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
     RFC: https://wiki.php.net/rfc/isreadable-iswriteable
 
+- Intl:
+  . `grapheme_strrev()` returns strrev for grapheme cluster unit.
+    RFC: https://wiki.php.net/rfc/grapheme_strrev
+
 - Standard:
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
