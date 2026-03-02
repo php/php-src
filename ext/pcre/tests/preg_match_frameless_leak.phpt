@@ -5,7 +5,7 @@ Memory leak in preg_match() frameless function with invalid regex and object arg
 class Str {
     private $val;
     public function __construct($val) {
-        $this->val = $val;
+        $this->val = str_repeat($val, random_int(1, 1));
     }
     public function __toString() {
         return $this->val;
@@ -15,10 +15,7 @@ class Str {
 $regex = new Str("invalid regex");
 $subject = new Str("some subject");
 
-// Running in a loop to ensure leak detection if run with memory tools
-for ($i = 0; $i < 100; $i++) {
-    @preg_match($regex, $subject);
-}
+@preg_match($regex, $subject);
 
 echo "Done";
 ?>
