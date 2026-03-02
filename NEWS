@@ -316,6 +316,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
     (nielsdos)
 
+- SPL:
+  . Fixed bug GH-19942 (iterator_count() on an SplFileObject looping
+    infinitely). (alexandre-daubois)
+
 - Soap:
   . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
   . Fixed bug GH-20011 (Array of SoapVar of unknown type causes crash).
