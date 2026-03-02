@@ -116,9 +116,8 @@ retry:
 
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
-			php_error_docref(NULL, E_NOTICE,
-				"Send of %zu bytes failed with errno=%d %s",
-				count, err, estr);
+			php_stream_warn(stream, STREAM_ERROR_CODE_NETWORK_SEND_FAILED,
+					"Send of %zu bytes failed with errno=%d %s", count, err, estr);
 			efree(estr);
 		}
 	}
@@ -454,8 +453,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.addrlen);
 					if (xparam->outputs.returncode == -1) {
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
-						php_error_docref(NULL, E_WARNING,
-						   	"%s\n", err);
+						php_stream_warn(stream, STREAM_ERROR_CODE_NETWORK_SEND_FAILED, "%s", err);
 						efree(err);
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
@@ -595,7 +593,8 @@ static const php_stream_ops php_stream_unixdg_socket_ops = {
 /* network socket operations */
 
 #ifdef AF_UNIX
-static inline int parse_unix_address(php_stream_xport_param *xparam, struct sockaddr_un *unix_addr)
+static inline int parse_unix_address(php_stream *stream, php_stream_xport_param *xparam,
+		struct sockaddr_un *unix_addr)
 {
 	memset(unix_addr, 0, sizeof(*unix_addr));
 	unix_addr->sun_family = AF_UNIX;
@@ -614,9 +613,9 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
 		xparam->inputs.namelen = max_length;
-		php_error_docref(NULL, E_NOTICE,
-			"socket path exceeded the maximum allowed length of %lu bytes "
-			"and was truncated", max_length);
+		php_stream_notice(stream, STREAM_ERROR_CODE_INVALID_PATH,
+				"socket path exceeded the maximum allowed length of %lu bytes and was truncated",
+				max_length);
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
@@ -697,7 +696,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 			return -1;
 		}
 
-		parse_unix_address(xparam, &unix_addr);
+		parse_unix_address(stream, xparam, &unix_addr);
 
 		return bind(sock->socket, (const struct sockaddr *)&unix_addr,
 			(socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen);
@@ -828,7 +827,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			return -1;
 		}
 
-		parse_unix_address(xparam, &unix_addr);
+		parse_unix_address(stream, xparam, &unix_addr);
 
 		ret = php_network_connect_socket(sock->socket,
 				(const struct sockaddr *)&unix_addr, (socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen,

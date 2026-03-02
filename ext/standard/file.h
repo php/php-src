@@ -34,6 +34,7 @@ PHPAPI PHP_FUNCTION(ftell);
 PHPAPI PHP_FUNCTION(fseek);
 PHPAPI PHP_FUNCTION(fpassthru);
 
+PHP_MINIT_FUNCTION(stream_errors);
 PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI zend_result php_copy_file(const char *src, const char *dest);
@@ -100,7 +101,8 @@ typedef struct {
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
-	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
+	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
+	php_stream_error_state stream_error_state;
 	int pclose_wait;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;
