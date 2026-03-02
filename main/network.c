@@ -599,7 +599,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 
 PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr, size_t addrlen, struct sockaddr *sa, socklen_t *sl)
 {
-	char *colon;
+	const char *colon;
 	char *tmp;
 	zend_result ret = FAILURE;
 	short port;
