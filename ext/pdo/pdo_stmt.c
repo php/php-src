@@ -2022,9 +2022,7 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 
 PHP_METHOD(PDOStatement, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
