@@ -638,11 +638,9 @@ ZEND_API zend_string *zend_trace_current_function_args_string(void) {
 		return NULL; /* don't need to free */
 	}
 	first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);
-	if (!first_frame) {
-		goto free_backtrace;
+	if (first_frame) {
+		dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
 	}
-	dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
-free_backtrace:
 	zval_ptr_dtor(&backtrace);
 	/* free the string after we use it */
 	return dynamic_params;
