@@ -73,7 +73,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         && ($all_jobs || !$no_jobs || $test_benchmarking)
         // push trigger is restricted to official repository.
         && ($repository === 'php/php-src' || $trigger === 'pull_request')) {
-        $jobs['BENCHMARKING'] = true;
+        $jobs['BENCHMARKING']['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
     }
     if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
