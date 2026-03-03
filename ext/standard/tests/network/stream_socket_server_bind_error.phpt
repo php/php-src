@@ -1,5 +1,11 @@
 --TEST--
 stream_socket_server() bind error
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for Windows');
+}
+?>
 --FILE--
 <?php
 
@@ -10,4 +16,4 @@ fclose($server1);
 
 ?>
 --EXPECTF--
-Warning: stream_socket_server(): Unable to connect to tcp://0.0.0.0:%d (Address already in use) in %s on line %d
+Warning: stream_socket_server(): Unable to connect to tcp://0.0.0.0:%d (Address %r(already )?%rin use) in %s on line %d
