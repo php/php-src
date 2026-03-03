@@ -856,9 +856,7 @@ PHP_FUNCTION(mysqli_free_result)
 PHP_FUNCTION(mysqli_get_client_info)
 {
 	if (hasThis()) {
-		if (zend_parse_parameters_none() == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_NONE();
 	} else {
 		zval *mysql_link;
 
@@ -878,9 +876,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 /* {{{ Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG((zend_long)mysql_get_client_version());
 }
@@ -1946,9 +1942,7 @@ PHP_FUNCTION(mysqli_thread_id)
 /* {{{ Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(mysql_thread_safe());
 }

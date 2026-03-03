@@ -1477,9 +1477,7 @@ PHP_METHOD(DOMElement, remove)
 {
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_INTERN(intern);
 

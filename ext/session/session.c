@@ -1923,9 +1923,7 @@ cleanup:
 
 PHP_FUNCTION(session_get_cookie_params)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -2509,9 +2507,7 @@ PHP_FUNCTION(session_encode)
 {
 	zend_string *enc;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	enc = php_session_encode();
 	if (enc == NULL) {
@@ -2638,18 +2634,14 @@ PHP_FUNCTION(session_start)
 
 PHP_FUNCTION(session_destroy)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_session_destroy() == SUCCESS);
 }
 
 PHP_FUNCTION(session_unset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		RETURN_FALSE;
@@ -2669,9 +2661,7 @@ PHP_FUNCTION(session_gc)
 {
 	zend_long num;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session cannot be garbage collected when there is no active session");
@@ -2689,9 +2679,7 @@ PHP_FUNCTION(session_gc)
 
 PHP_FUNCTION(session_write_close)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_session_flush(true));
 }
@@ -2699,9 +2687,7 @@ PHP_FUNCTION(session_write_close)
 /* Abort session and end session. Session data will not be written */
 PHP_FUNCTION(session_abort)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_session_abort());
 }
@@ -2709,18 +2695,14 @@ PHP_FUNCTION(session_abort)
 /* Reset session data from saved session data */
 PHP_FUNCTION(session_reset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_session_reset());
 }
 
 PHP_FUNCTION(session_status)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(PS(session_status));
 }
