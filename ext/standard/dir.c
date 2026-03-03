@@ -467,28 +467,28 @@ PHP_FUNCTION(glob)
 		 * to prepending the current working directory to the passed path.
 		 * However, that comes with limitations regarding meta characters
 		 * that is not solvable in general (GH-13204). */
-#ifdef PHP_GLOB_ALTDIRFUNC
+# ifdef PHP_GLOB_ALTDIRFUNC
 		globbuf.gl_opendir = php_glob_opendir_wrapper;
 		globbuf.gl_readdir = (struct dirent *(*)(void *)) readdir;
 		globbuf.gl_closedir = php_glob_closedir_wrapper;
 		globbuf.gl_lstat = php_glob_lstat_wrapper;
 		globbuf.gl_stat = php_glob_stat_wrapper;
 		passed_glob_flags |= PHP_GLOB_ALTDIRFUNC;
-#else
+# else
 		char *result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';
 		}
-#ifdef PHP_WIN32
+#  ifdef PHP_WIN32
 		if (IS_SLASH(*pattern)) {
 			cwd[2] = '\0';
 		}
-#endif
+#  endif
 		cwd_skip = strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
-#endif
+# endif
 	}
 #endif
 
