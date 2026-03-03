@@ -400,6 +400,11 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 }
 /* }}} */
 
+static inline bool phar_entry_can_remove(phar_entry_info *entry)
+{
+	return entry->fp_refcount == 0 && entry->fileinfo_lock_count == 0;
+}
+
 void phar_request_initialize(void);
 
 void phar_object_init(void);
