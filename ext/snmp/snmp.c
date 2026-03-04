@@ -961,6 +961,10 @@ static bool netsnmp_session_set_sec_level(struct snmp_session *s, zend_string *l
 /* {{{ Set the authentication protocol in the snmpv3 session */
 static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
 {
+	if (!prot) {
+		zend_value_error("Authentication protocol can't be NULL");
+		return false;
+	}
 #ifndef DISABLE_MD5
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
@@ -1013,6 +1017,10 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 /* {{{ Set the security protocol in the snmpv3 session */
 static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
+	if (!prot) {
+		zend_value_error("Security protocol can't be NULL");
+		return false;
+	}
 #ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
@@ -1051,6 +1059,12 @@ static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string
 static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
+
+	if (!pass) {
+		zend_value_error("Authentication key can't be NULL");
+		return false;
+	}
+
 	s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
 			(uint8_t *) ZSTR_VAL(pass), ZSTR_LEN(pass),
@@ -1066,6 +1080,11 @@ static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pa
 static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
+
+	if (!pass) {
+		zend_value_error("Security key can't be NULL");
+		return false;
+	}
 
 	s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
