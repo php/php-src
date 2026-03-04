@@ -16,7 +16,7 @@ $attribute = $rm->getAttributes()[0];
 $rm = new ReflectionMethod($attribute, "__construct");
 
 try {
-    var_dump($rm->invoke($attribute, 0, 1, 2));
+    var_dump($rm->invoke($attribute));
 } catch (ReflectionException $exception) {
     echo $exception->getMessage();
 }
