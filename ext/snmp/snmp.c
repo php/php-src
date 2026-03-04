@@ -243,6 +243,15 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 
 	/* use emalloc() for large values, use static array otherwise */
 
+	/* Ensure val_len is at least sizeof(sbuf) so doubling will grow beyond
+	 * the initial stack buffer. Without this, a zero val_len would cause
+	 * val_len *= 2 to remain zero indefinitely, never reaching the 512k
+	 * break condition.
+	 */
+	if (val_len < (int)sizeof(sbuf)) {
+		val_len = sizeof(sbuf);
+	}
+
 	/* There is no way to know the size of buffer snprint_value() needs in order to print a value there.
 	 * So we are forced to probe it
 	 */
