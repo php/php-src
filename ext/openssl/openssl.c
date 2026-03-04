@@ -522,9 +522,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 /* {{{ Retrieve an array mapping available certificate locations */
 PHP_FUNCTION(openssl_get_cert_locations)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	php_openssl_set_cert_locations(return_value);
@@ -4024,9 +4022,7 @@ PHP_FUNCTION(openssl_error_string)
 	char buf[256];
 	unsigned long val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_openssl_store_errors();
 
@@ -4444,9 +4440,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 	size_t i;
 	size_t len = EC_get_builtin_curves(NULL, 0);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	curves = emalloc(sizeof(EC_builtin_curve) * len);
 	if (!EC_get_builtin_curves(curves, len)) {

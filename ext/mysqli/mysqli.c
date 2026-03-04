@@ -723,9 +723,7 @@ PHP_METHOD(mysqli_result, __construct)
 
 PHP_METHOD(mysqli_result, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

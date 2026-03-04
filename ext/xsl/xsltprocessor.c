@@ -814,9 +814,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_XSL_P(id);
 
@@ -827,9 +825,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 /* {{{ */
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_XSL_EXSLT
 	RETURN_TRUE;
