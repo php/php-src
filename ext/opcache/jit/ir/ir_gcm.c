@@ -842,6 +842,7 @@ fix:
 	xlat = ir_mem_malloc(count * sizeof(uint32_t));
 	ir_worklist_init(&worklist, count);
 	ir_worklist_push(&worklist, 1);
+	/* Schedule blocks bottom-up. Place block only after all its successurs (except back-edges) are placed. */
 	while (ir_worklist_len(&worklist) != 0) {
 next:
 		b = ir_worklist_peek(&worklist);
@@ -849,7 +850,14 @@ next:
 		n = bb->successors_count;
 		if (n == 1) {
 			succ = ctx->cfg_edges[bb->successors];
-			if (ir_worklist_push(&worklist, succ)) {
+			if (ir_bitset_in(worklist.visited, succ)) {
+				/* already processed */
+			} else if ((ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_LOOP)
+					&& ((ctx->cfg_blocks[b].flags & IR_BB_LOOP_HEADER) ?
+						(ctx->cfg_blocks[succ].loop_header != b) :
+						(ctx->cfg_blocks[succ].loop_header != ctx->cfg_blocks[b].loop_header))) {
+				/* "side" entry of irreducible loop (ignore) */
+			} else if (ir_worklist_push(&worklist, succ)) {
 				goto next;
 			}
 		} else if (n > 1) {
@@ -862,12 +870,11 @@ next:
 				succ = *q;
 				if (ir_bitset_in(worklist.visited, succ)) {
 					/* already processed */
-				} else if ((ctx->cfg_blocks[succ].flags & IR_BB_LOOP_HEADER)
-				  && (succ == b || ctx->cfg_blocks[b].loop_header == succ)) {
-					/* back-edge of reducible loop */
 				} else if ((ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_LOOP)
-				  && (ctx->cfg_blocks[succ].loop_header == ctx->cfg_blocks[b].loop_header)) {
-					/* closing edge of irreducible loop */
+						&& ((ctx->cfg_blocks[b].flags & IR_BB_LOOP_HEADER) ?
+							(ctx->cfg_blocks[succ].loop_header != b) :
+							(ctx->cfg_blocks[succ].loop_header != ctx->cfg_blocks[b].loop_header))) {
+					/* "side" entry of irreducible loop (ignore) */
 				} else if (!best) {
 					best = succ;
 					best_loop_depth = ctx->cfg_blocks[best].loop_depth;
@@ -883,6 +890,8 @@ next:
 				goto next;
 			}
 		}
+
+		/* All successors of "b" are placed. Now we can place "b" itself. */
 		ir_worklist_pop(&worklist);
 		count--;
 		new_blocks[count] = *bb;

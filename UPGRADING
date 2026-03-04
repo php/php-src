@@ -19,6 +19,11 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- PCRE:
+  . preg_grep() now returns false instead of a partial array when a PCRE
+    execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
+    This is consistent with other preg_* functions.
+
 - Phar:
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored.
@@ -100,6 +105,10 @@ PHP 8.6 UPGRADE NOTES
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
 
+- PCNTL:
+  . pcntl_alarm() now throws a ValueError if the seconds argument is
+    lower than zero or greater than platform's UINT_MAX.
+
 - Phar:
   . Phar::mungServer() now supports reference values.
 
@@ -125,6 +134,12 @@ PHP 8.6 UPGRADE NOTES
 
 - Reflection:
   . ReflectionConstant::inNamespace()
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    RFC: https://wiki.php.net/rfc/isreadable-iswriteable
+
+- Intl:
+  . `grapheme_strrev()` returns strrev for grapheme cluster unit.
+    RFC: https://wiki.php.net/rfc/grapheme_strrev
 
 - Standard:
   . `clamp()` returns the given value if in range, else return the nearest

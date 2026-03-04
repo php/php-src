@@ -996,6 +996,55 @@ function GREP_HEADER(header_name, regex, path_to_check)
 	return false;
 }
 
+/**
+ * Checks if specified header exists and adds its include path to C flags.
+ */
+function CHECK_HEADER(header_name, flag_name, path_to_check, use_env, add_dir_part)
+{
+	var dir_part_to_add = "";
+
+	if (use_env == null) {
+		use_env = true;
+	}
+
+	// if true, add the dir part of the header_name to the include path
+	if (add_dir_part == null) {
+		add_dir_part = false;
+	} else if (add_dir_part) {
+		var basename = FSO.GetFileName(header_name);
+		dir_part_to_add = "\\" + header_name.substr(0, header_name.length - basename.length - 1);
+	}
+
+	if (path_to_check == null) {
+		path_to_check = php_usual_include_suspects;
+	} else {
+		path_to_check += ";" + php_usual_include_suspects;
+	}
+
+	var p = search_paths(header_name, path_to_check, use_env ? "INCLUDE" : null);
+
+	if (typeof(p) == "string") {
+		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
+	} else if (p == false) {
+		/* Not found in the defaults or the explicit paths,
+		 * so check the general extra includes; if we find
+		 * it here, no need to add another /I for it as we
+		 * already have it covered, unless we are adding
+		 * the dir part.... */
+		p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
+		if (typeof(p) == "string" && add_dir_part) {
+			ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
+		}
+	}
+
+	return p;
+}
+
+/**
+ * Obsolete. Checks if specified header exists, adds its include path to C flags
+ * and defines the 'HAVE_<HEADER_NAME_H>' C preprocessor macro. In new code, use
+ * CHECK_HEADER() instead, and define the 'HAVE_' macro manually as needed.
+ */
 function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part, add_to_flag_only)
 {
 	var dir_part_to_add = "";
@@ -3657,7 +3706,7 @@ function SETUP_ZLIB_LIB(target, path_to_check)
 	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
 }
 
-function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
+function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part)
 {
 	var ret = 0;
 	var cflags_var = "CFLAGS_" + target.toUpperCase();
@@ -3665,7 +3714,7 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+			CHECK_HEADER("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part)) {
 		/* Openssl 1.1.x or later */
 		return 2;
 	}
@@ -3678,8 +3727,8 @@ function SETUP_SQLITE3(target, path_to_check, shared) {
 	var libs = (shared ? "libsqlite3.lib;libsqlite3_a.lib" : "libsqlite3_a.lib;libsqlite3.lib");
 
 	return CHECK_LIB(libs, target, path_to_check) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3.h", cflags_var) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3ext.h", cflags_var);
+		CHECK_HEADER("sqlite3.h", cflags_var) &&
+		CHECK_HEADER("sqlite3ext.h", cflags_var);
 }
 
 function check_binary_tools_sdk()

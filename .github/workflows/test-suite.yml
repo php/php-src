@@ -76,14 +76,14 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang-20
+          cxx: clang++-20
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
-            CC=clang-20
-            CXX=clang++-20
             --enable-debug
             --enable-zts
           skipSlow: true # FIXME: This should likely include slow extensions
@@ -187,6 +187,7 @@ jobs:
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
+        if: ${{ inputs.all_variations || matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -208,7 +209,7 @@ jobs:
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
-        if: ${{ inputs.all_variations && !matrix.asan }}
+        if: ${{ !matrix.asan }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -396,10 +397,6 @@ jobs:
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
         run: sudo -H pip install gcovr
-      - name: ccache
-        uses: ./.github/actions/ccache
-        with:
-          name: "${{ github.job }}"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -712,10 +709,10 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          cc: clang
+          cxx: clang++
       - name: ./configure
         run: |
-          export CC=clang
-          export CXX=clang++
           export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
           ./buildconf --force
           # msan requires all used libraries to be instrumented,
@@ -880,6 +877,7 @@ jobs:
         uses: ./.github/actions/ccache
         with:
           name: "${{ github.job }}"
+          php_directory: php
       - name: build PHP
         run: |
           cd php
@@ -1038,6 +1036,7 @@ jobs:
           sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
+          ${{ !fromJson(inputs.branch).jobs.BENCHMARKING.config.integrated_opcache && 'echo zend_extension=opcache.so >> /etc/php.d/opcache.ini' || '' }}
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup
@@ -1078,7 +1077,7 @@ jobs:
           set -x
           php benchmark/generate_diff.php \
             ${{ github.sha }} \
-            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
+            ${{ github.event.pull_request.base.sha }} \
             > $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v6
         with:

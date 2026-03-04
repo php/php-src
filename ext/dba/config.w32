@@ -15,7 +15,7 @@ if (PHP_DBA != "no") {
 
 	if (PHP_DB != "no") {
 		if (CHECK_LIB("libdb31s.lib;libdb61.lib", "dba", PHP_DBA) &&
-			CHECK_HEADER_ADD_INCLUDE("db.h", "CFLAGS_DBA")) {
+			CHECK_HEADER("db.h", "CFLAGS_DBA")) {
 			ADD_FLAG("CFLAGS_DBA", "/D DB1_VERSION=\"\\\"Berkeley DB 1.85 emulation in DB3\\\"\" /D DB1_INCLUDE_FILE=\"\\\"db_185.h\\\"\" /D DBA_DB3=1 /D DB3_INCLUDE_FILE=\"\\\"db.h\\\"\"");
 		} else {
 			WARNING("dba: db handlers not enabled; libraries and headers not found");
@@ -24,7 +24,7 @@ if (PHP_DBA != "no") {
 
 	if (PHP_QDBM != "no") {
 		if (CHECK_LIB("qdbm_a.lib;qdbm.lib", "dba", PHP_DBA) &&
-			CHECK_HEADER_ADD_INCLUDE("depot.h", "CFLAGS_DBA", PHP_DBA + ";" + PHP_PHP_BUILD + "\\include\\qdbm")) {
+			CHECK_HEADER("depot.h", "CFLAGS_DBA", PHP_DBA + ";" + PHP_PHP_BUILD + "\\include\\qdbm")) {
 			ADD_SOURCES("ext/dba", "dba_qdbm.c", "dba");
 			AC_DEFINE("QDBM_INCLUDE_FILE", "<depot.h>", "The QDBM handler header file.", false);
 			AC_DEFINE("DBA_QDBM", 1, "Define to 1 if the dba extension uses the QDBM handler.");
@@ -35,7 +35,7 @@ if (PHP_DBA != "no") {
 
 	if (PHP_LMDB != "no") {
 		if (CHECK_LIB("liblmdb_a.lib", "dba", PHP_DBA) &&
-			CHECK_HEADER_ADD_INCLUDE("lmdb.h", "CFLAGS_DBA") &&
+			CHECK_HEADER("lmdb.h", "CFLAGS_DBA") &&
 			CHECK_LIB("ntdll.lib", "dba", PHP_DBA)) {
 			ADD_SOURCES("ext/dba", "dba_lmdb.c", "dba");
 			AC_DEFINE("LMDB_INCLUDE_FILE", "<lmdb.h>", "The LMDB handler header file.", false);

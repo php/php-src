@@ -1420,13 +1420,21 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 		if (old_size < new_size) {
 			/* Reallocate the whole edges buffer (this is inefficient) */
 			ctx->use_edges = ir_mem_realloc(ctx->use_edges, new_size);
+			if (n == ctx->use_edges_count) {
+				ctx->use_edges[n] = ref;
+				use_list->count++;
+				ctx->use_edges_count++;
+				return 1;
+			}
 		} else if (n == ctx->use_edges_count) {
 			ctx->use_edges[n] = ref;
 			use_list->count++;
 			ctx->use_edges_count++;
 			return 0;
 		}
-		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
+		if (use_list->count) {
+			memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
+		}
 		use_list->refs = ctx->use_edges_count;
 		ctx->use_edges[use_list->refs + use_list->count] = ref;
 		use_list->count++;

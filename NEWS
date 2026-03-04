@@ -37,6 +37,7 @@ PHP                                                                        NEWS
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
+  . Added grapheme_strrev (Yuya Hamada)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
@@ -87,6 +88,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    (ilutov)
 
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
@@ -104,6 +107,9 @@ PHP                                                                        NEWS
   . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
     optional parameter). (David Carlier)
 
+- Sodium:
+  . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
@@ -118,6 +124,8 @@ PHP                                                                        NEWS
     defaulted to 0. (Jorg Sowa)
   . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
     null destination). (David Carlier)
+  . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
+    (ndossche)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

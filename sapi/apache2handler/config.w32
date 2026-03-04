@@ -10,7 +10,7 @@ if(PHP_APACHE2_4HANDLER != "no" && PHP_APACHE2HANDLER == "no") {
 if (PHP_APACHE2HANDLER != "no") {
 	if (PHP_ZTS == "no") {
 		WARNING("Apache module requires an --enable-zts build of PHP on windows");
-	} else if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2HANDLER", PHP_PHP_BUILD + "\\include\\apache2_4") &&
+	} else if (CHECK_HEADER("httpd.h", "CFLAGS_APACHE2HANDLER", PHP_PHP_BUILD + "\\include\\apache2_4") &&
 			CHECK_LIB("libhttpd.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2_4") &&
 			CHECK_LIB("libapr-1.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2_4") &&
 			CHECK_LIB("libaprutil-1.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2_4")

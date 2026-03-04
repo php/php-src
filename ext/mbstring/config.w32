@@ -5,7 +5,7 @@ ARG_ENABLE("mbregex", "multibyte regex support", "no");
 
 if (PHP_MBSTRING != "no") {
 
-	if (CHECK_HEADER_ADD_INCLUDE("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
+	if (CHECK_HEADER("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
 		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
 		ADD_EXTENSION_DEP('mbstring', 'pcre');
 
@@ -42,7 +42,7 @@ if (PHP_MBSTRING != "no") {
 		AC_DEFINE('HAVE_MBSTRING', 1, "Define to 1 if the PHP extension 'mbstring' is available.");
 
 		if (PHP_MBREGEX != "no") {
-			if (CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_MBSTRING", PHP_MBREGEX) &&
+			if (CHECK_HEADER("oniguruma.h", "CFLAGS_MBSTRING", PHP_MBREGEX) &&
 				CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING)) {
 				AC_DEFINE('HAVE_MBREGEX', 1, 'Define to 1 if mbstring has multibyte regex support enabled.');
 

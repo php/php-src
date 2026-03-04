@@ -1778,7 +1778,7 @@ not_relative_path:
 	ptr = pathbuf;
 
 	while (ptr && *ptr) {
-		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		end = (char *) strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
 			*end = '\0';
 			end++;

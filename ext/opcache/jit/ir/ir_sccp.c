@@ -880,7 +880,7 @@ static void ir_sccp_remove_insn(ir_ctx *ctx, const ir_sccp_val *_values, ir_ref 
 		*p = IR_UNUSED;
 		/* we may skip nodes that are going to be removed by SCCP (TOP, CONST and COPY) */
 		if (input > 0 && _values[input].op > IR_COPY) {
-			ir_use_list_remove_all(ctx, input, ref);
+			ir_use_list_remove_one(ctx, input, ref);
 			if (ir_is_dead(ctx, input)) {
 				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
@@ -918,7 +918,7 @@ static void ir_sccp_replace_insn(ir_ctx *ctx, const ir_sccp_val *_values, ir_ref
 		*p = IR_UNUSED;
 		/* we may skip nodes that are going to be removed by SCCP (TOP, CONST and COPY) */
 		if (input > 0 && _values[input].op > IR_COPY) {
-			ir_use_list_remove_all(ctx, input, ref);
+			ir_use_list_remove_one(ctx, input, ref);
 			if (ir_is_dead(ctx, input)) {
 				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
@@ -1233,7 +1233,7 @@ static void ir_iter_remove_insn(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist)
 		ir_ref input = *p;
 		*p = IR_UNUSED;
 		if (input > 0) {
-			ir_use_list_remove_all(ctx, input, ref);
+			ir_use_list_remove_one(ctx, input, ref);
 			if (ir_is_dead(ctx, input)) {
 				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
@@ -1301,7 +1301,7 @@ static void ir_iter_replace_insn(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bit
 		ir_ref input = *p;
 		*p = IR_UNUSED;
 		if (input > 0) {
-			ir_use_list_remove_all(ctx, input, ref);
+			ir_use_list_remove_one(ctx, input, ref);
 			if (ir_is_dead(ctx, input)) {
 				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
@@ -2427,7 +2427,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, 
 		next->op1 = root->op1;
 		ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 		if (!IR_IS_CONST_REF(root->op2)) {
-			ir_use_list_remove_all(ctx, root->op2, root_ref);
+			ir_use_list_remove_one(ctx, root->op2, root_ref);
 			if (ir_is_dead(ctx, root->op2)) {
 				ir_bitqueue_add(worklist, root->op2);
 			}
@@ -2485,7 +2485,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, 
 		ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 
 		if (!IR_IS_CONST_REF(root->op2)) {
-			ir_use_list_remove_all(ctx, root->op2, root_ref);
+			ir_use_list_remove_one(ctx, root->op2, root_ref);
 			if (ir_is_dead(ctx, root->op2)) {
 				ir_bitqueue_add(worklist, root->op2);
 			}
@@ -2612,10 +2612,10 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					next->op1 = root->op1;
 					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 					if (!IR_IS_CONST_REF(insn->op1)) {
-						ir_use_list_remove_all(ctx, insn->op1, cond_ref);
+						ir_use_list_remove_one(ctx, insn->op1, cond_ref);
 					}
 					if (!IR_IS_CONST_REF(insn->op2)) {
-						ir_use_list_remove_all(ctx, insn->op2, cond_ref);
+						ir_use_list_remove_one(ctx, insn->op2, cond_ref);
 					}
 
 					if (ctx->use_lists[cond_ref].count == 1) {
@@ -2705,7 +2705,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 					ir_use_list_remove_one(ctx, insn->op1, neg_ref);
 					if (!IR_IS_CONST_REF(insn->op1)) {
-						ir_use_list_remove_all(ctx, insn->op1, cond_ref);
+						ir_use_list_remove_one(ctx, insn->op1, cond_ref);
 					}
 
 					if (ctx->use_lists[cond_ref].count == 1) {
@@ -2771,7 +2771,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					next->op1 = root->op1;
 					ir_use_list_replace_one(ctx, cond_ref, root_ref, ref);
 					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
-					ir_use_list_remove_all(ctx, root->op2, root_ref);
+					ir_use_list_remove_one(ctx, root->op2, root_ref);
 
 					MAKE_NOP(root);   CLEAR_USES(root_ref);
 					MAKE_NOP(start1); CLEAR_USES(start1_ref);
@@ -3035,8 +3035,8 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 				 *    IF_FALSE  |              MERGE
 				 *    |                        |
 				 */
-				ir_use_list_remove_all(ctx, merge_ref, cond_ref);
-				ir_use_list_remove_all(ctx, ref, if_true_ref);
+				ir_use_list_remove_one(ctx, merge_ref, cond_ref);
+				ir_use_list_remove_one(ctx, ref, if_true_ref);
 				if (!IR_IS_CONST_REF(cond->op3)) {
 					ir_use_list_replace_one(ctx, cond->op3, cond_ref, end2_ref);
 				}
@@ -3230,8 +3230,8 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 						 *    |                        |
 						 */
 
-						ir_use_list_remove_all(ctx, merge_ref, phi_ref);
-						ir_use_list_remove_all(ctx, ref, if_true_ref);
+						ir_use_list_remove_one(ctx, merge_ref, phi_ref);
+						ir_use_list_remove_one(ctx, ref, if_true_ref);
 						if (!IR_IS_CONST_REF(phi->op3)) {
 							ir_use_list_replace_one(ctx, phi->op3, phi_ref, insn->op2);
 						}

@@ -1303,11 +1303,7 @@ PHP_FUNCTION(mb_ereg_match)
 	/* match */
 	err = onig_match_with_param(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), (OnigUChar *)string, NULL, 0, mp);
 	onig_free_match_param(mp);
-	if (err >= 0) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETURN_BOOL(err >= 0);
 }
 /* }}} */
 

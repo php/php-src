@@ -5,6 +5,10 @@
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #include "ir.h"
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
