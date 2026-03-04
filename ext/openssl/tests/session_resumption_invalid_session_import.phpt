@@ -1,0 +1,23 @@
+--TEST--
+TLS session resumption - server with cache disabled
+--EXTENSIONS--
+openssl
+--SKIPIF--
+<?php
+if (!function_exists("proc_open")) die("skip no proc_open");
+?>
+--FILE--
+<?php
+
+try {
+    OpenSSLSession::import('invalid');
+} catch (OpenSSLException $e) {
+    echo $e->getMessage() . "\n";
+}
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_cache_disabled.pem.tmp');
+?>
+--EXPECT--
+Failed to import session data

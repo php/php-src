@@ -409,6 +409,9 @@ const OPENSSL_ENCODING_SMIME = UNKNOWN;
  */
 const OPENSSL_ENCODING_PEM = UNKNOWN;
 
+class OpenSSLException extends Exception
+{
+}
 
 /**
  * @strict-properties

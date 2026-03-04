@@ -58,6 +58,10 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
 
+/* OpenSSLException class */
+
+zend_class_entry *php_openssl_exception_ce;
+
 /* OpenSSLCertificate class */
 
 zend_class_entry *php_openssl_certificate_ce;
@@ -229,7 +233,7 @@ static void php_openssl_session_free_obj(zend_object *object)
 #define PHP_OPENSSL_SESSION_CHECK() \
 	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS); \
 	if (!obj->session) { \
-		zend_throw_exception(zend_ce_exception, "Session is not valid", 0); \
+		zend_throw_exception(php_openssl_exception_ce, "Session is not valid", 0); \
 		RETURN_THROWS(); \
 	}
 
@@ -247,7 +251,7 @@ PHP_METHOD(OpenSSLSession, export)
 	if (format == ENCODING_DER) {
 		int len = i2d_SSL_SESSION(obj->session, NULL);
 		if (len <= 0) {
-			zend_throw_exception(zend_ce_exception, "Failed to export session", 0);
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session", 0);
 			RETURN_THROWS();
 		}
 
@@ -262,13 +266,13 @@ PHP_METHOD(OpenSSLSession, export)
 	if (format == ENCODING_PEM) {
 		BIO *bio = BIO_new(BIO_s_mem());
 		if (!bio) {
-			zend_throw_exception(zend_ce_exception, "Failed to create BIO", 0);
+			zend_throw_exception(php_openssl_exception_ce, "Failed to create BIO", 0);
 			RETURN_THROWS();
 		}
 
 		if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
 			BIO_free(bio);
-			zend_throw_exception(zend_ce_exception, "Failed to export session as PEM", 0);
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session as PEM", 0);
 			RETURN_THROWS();
 		}
 
@@ -312,7 +316,7 @@ PHP_METHOD(OpenSSLSession, import)
 	}
 
 	if (!session) {
-		zend_throw_exception(zend_ce_exception, "Failed to import session data", 0);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to import session data", 0);
 		RETURN_THROWS();
 	}
 
@@ -407,7 +411,7 @@ PHP_METHOD(OpenSSLSession, __serialize)
 
 	int len = i2d_SSL_SESSION(obj->session, NULL);
 	if (len <= 0) {
-		zend_throw_exception(zend_ce_exception, "Failed to serialize session", 0);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
 		RETURN_THROWS();
 	}
 
@@ -430,7 +434,7 @@ PHP_METHOD(OpenSSLSession, __unserialize)
 
 	zval *der_zv = zend_hash_str_find(data, ZEND_STRL("der"));
 	if (!der_zv || Z_TYPE_P(der_zv) != IS_STRING) {
-		zend_throw_exception(zend_ce_exception, "Invalid serialization data", 0);
+		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
 		RETURN_THROWS();
 	}
 
@@ -438,7 +442,7 @@ PHP_METHOD(OpenSSLSession, __unserialize)
 	SSL_SESSION *session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN_P(der_zv));
 
 	if (!session) {
-		zend_throw_exception(zend_ce_exception, "Failed to unserialize session", 0);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
 		RETURN_THROWS();
 	}
 
@@ -668,6 +672,8 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(openssl)
 {
+	php_openssl_exception_ce = register_class_OpenSSLException(zend_ce_exception);
+
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
 	php_openssl_certificate_ce->default_object_handlers = &php_openssl_certificate_object_handlers;
