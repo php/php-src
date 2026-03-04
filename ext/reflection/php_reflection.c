@@ -6676,7 +6676,7 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 
 	zend_class_entry *ce = obj ? obj->ce : intern->ce;
 	if (!prop) {
-		if (obj && obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
+		if (obj && obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
 			RETURN_TRUE;
 		}
 handle_magic_get:
@@ -6701,7 +6701,7 @@ handle_magic_get:
 			if (!obj) {
 				RETURN_THROWS();
 			}
-			if (obj->properties && zend_hash_find_ptr(obj->properties, ref->unmangled_name)) {
+			if (obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
 				RETURN_TRUE;
 			}
 		}
