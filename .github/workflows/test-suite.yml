@@ -979,6 +979,21 @@ jobs:
           configurationParameters: >-
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           runExtraTests: true
+  SOLARIS:
+    if: ${{ fromJson(inputs.branch).jobs.SOLARIS }}
+    name: "SOLARIS"
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ fromJson(inputs.branch).ref }}
+      - name: Solaris
+        uses: ./.github/actions/solaris
+        with:
+          configurationParameters: --disable-zts
+          runExtraTests: true
   BENCHMARKING:
     name: BENCHMARKING
     if: ${{ fromJson(inputs.branch).jobs.BENCHMARKING }}
