@@ -239,7 +239,7 @@ static void php_openssl_session_free_obj(zend_object *object)
 
 PHP_METHOD(OpenSSLSession, export)
 {
-	zend_long format = ENCODING_DER;
+	zend_long format = ENCODING_PEM;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -291,7 +291,7 @@ PHP_METHOD(OpenSSLSession, export)
 PHP_METHOD(OpenSSLSession, import)
 {
 	zend_string *data;
-	zend_long format = ENCODING_DER;
+	zend_long format = ENCODING_PEM;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(data)
@@ -311,7 +311,7 @@ PHP_METHOD(OpenSSLSession, import)
 			BIO_free(bio);
 		}
 	} else {
-		zend_argument_value_error(2, "must be OPENSSL_ENCODING_DER or  OPENSSL_ENCODING_PEM");
+		zend_argument_value_error(2, "must be OPENSSL_ENCODING_DER or OPENSSL_ENCODING_PEM");
 		RETURN_THROWS();
 	}
 
@@ -402,26 +402,31 @@ PHP_METHOD(OpenSSLSession, getTicketLifetimeHint)
 
 	RETURN_LONG((zend_long)SSL_SESSION_get_ticket_lifetime_hint(obj->session));
 }
-
 PHP_METHOD(OpenSSLSession, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_OPENSSL_SESSION_CHECK();
 
-	int len = i2d_SSL_SESSION(obj->session, NULL);
-	if (len <= 0) {
+	BIO *bio = BIO_new(BIO_s_mem());
+	if (!bio) {
 		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
 		RETURN_THROWS();
 	}
 
-	zend_string *der = zend_string_alloc(len, 0);
-	unsigned char *p = (unsigned char *)ZSTR_VAL(der);
-	i2d_SSL_SESSION(obj->session, &p);
-	ZSTR_VAL(der)[len] = '\0';
+	if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
+		BIO_free(bio);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
+		RETURN_THROWS();
+	}
+
+	char *data;
+	long len = BIO_get_mem_data(bio, &data);
+	zend_string *pem = zend_string_init(data, len, 0);
+	BIO_free(bio);
 
 	array_init(return_value);
-	add_assoc_str(return_value, "der", der);
+	add_assoc_str(return_value, "pem", pem);
 }
 
 PHP_METHOD(OpenSSLSession, __unserialize)
@@ -432,14 +437,20 @@ PHP_METHOD(OpenSSLSession, __unserialize)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval *der_zv = zend_hash_str_find(data, ZEND_STRL("der"));
-	if (!der_zv || Z_TYPE_P(der_zv) != IS_STRING) {
+	zval *pem_zv = zend_hash_str_find(data, ZEND_STRL("pem"));
+	if (!pem_zv || Z_TYPE_P(pem_zv) != IS_STRING) {
 		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
 		RETURN_THROWS();
 	}
 
-	const unsigned char *p = (const unsigned char *)Z_STRVAL_P(der_zv);
-	SSL_SESSION *session = d2i_SSL_SESSION(NULL, &p, Z_STRLEN_P(der_zv));
+	BIO *bio = BIO_new_mem_buf(Z_STRVAL_P(pem_zv), Z_STRLEN_P(pem_zv));
+	if (!bio) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
+		RETURN_THROWS();
+	}
+
+	SSL_SESSION *session = PEM_read_bio_SSL_SESSION(bio, NULL, NULL, NULL);
+	BIO_free(bio);
 
 	if (!session) {
 		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);

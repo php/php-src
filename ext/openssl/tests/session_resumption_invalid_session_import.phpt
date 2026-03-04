@@ -1,5 +1,5 @@
 --TEST--
-TLS session resumption - server with cache disabled
+TLS session resumption - invalid session import
 --EXTENSIONS--
 openssl
 --SKIPIF--
