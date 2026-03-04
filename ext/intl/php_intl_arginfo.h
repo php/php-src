@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_intl.stub.php instead.
- * Stub hash: d9e331c3a1ae46f8eae07ef0d39cb9990e74a0d1 */
+ * Stub hash: 947017de0d17a87d9f1d325df76edaa7e2ed614b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
@@ -501,6 +501,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_grapheme_limit_codepoints, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "GRAPHEME_LIMIT_CODEPOINTS")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -922,6 +927,7 @@ ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
 ZEND_FUNCTION(grapheme_levenshtein);
+ZEND_FUNCTION(grapheme_limit_codepoints);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -1113,6 +1119,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
 	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
+	ZEND_FE(grapheme_limit_codepoints, arginfo_grapheme_limit_codepoints)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
@@ -1224,6 +1231,7 @@ static void register_php_intl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GRAPHEME_LIMIT_CODEPOINTS", GRAPHEME_LIMIT_CODEPOINTS, CONST_PERSISTENT);
 
 
 	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
