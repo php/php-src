@@ -2134,6 +2134,8 @@ PHP_METHOD(SQLite3Result, finalize)
 /* {{{ __constructor for SQLite3Result. */
 PHP_METHOD(SQLite3Result, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_exception(zend_ce_exception, "SQLite3Result cannot be directly instantiated", 0);
 }
 /* }}} */

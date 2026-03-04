@@ -1132,6 +1132,8 @@ PHP_FUNCTION(hash_equals)
 
 /* {{{ */
 PHP_METHOD(HashContext, __construct) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
 }

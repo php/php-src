@@ -2741,6 +2741,8 @@ PHP_METHOD(Dom_Node, compareDocumentPosition)
 
 PHP_METHOD(Dom_Node, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(NULL, "Cannot directly construct %s, use document methods instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 }
 

@@ -1588,6 +1588,8 @@ PHP_METHOD(tidyNode, getNextSibling)
 /* {{{ __constructor for tidyNode. */
 PHP_METHOD(tidyNode, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
 /* }}} */

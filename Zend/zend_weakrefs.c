@@ -312,6 +312,8 @@ static HashTable *zend_weakref_get_debug_info(zend_object *object, int *is_temp)
 
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(NULL, "Direct instantiation of WeakReference is not allowed, use WeakReference::create instead");
 }
 

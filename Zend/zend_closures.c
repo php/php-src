@@ -724,6 +724,8 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 /* {{{ Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
 }
 /* }}} */

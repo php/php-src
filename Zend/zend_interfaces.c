@@ -550,6 +550,8 @@ static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator 
 
 
 ZEND_METHOD(InternalIterator, __construct) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(NULL, "Cannot manually construct InternalIterator");
 }
 

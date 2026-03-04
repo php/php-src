@@ -1099,6 +1099,8 @@ ZEND_METHOD(Fiber, getCurrent)
 
 ZEND_METHOD(FiberError, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_error(
 		NULL,
 		"The \"%s\" class is reserved for internal use and cannot be manually instantiated",

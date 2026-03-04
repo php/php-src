@@ -65,6 +65,8 @@ using icu::Locale;
 
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_exception( NULL,
 		"An object of this type cannot be created with the new operator",
 		0 );

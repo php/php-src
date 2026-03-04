@@ -7274,6 +7274,8 @@ ZEND_METHOD(ReflectionZendExtension, getCopyright)
 /* {{{     Dummy constructor -- always throws ReflectionExceptions. */
 ZEND_METHOD(ReflectionReference, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	_DO_THROW(
 		"Cannot directly instantiate ReflectionReference. "
 		"Use ReflectionReference::fromArrayElement() instead"
@@ -7363,12 +7365,16 @@ ZEND_METHOD(ReflectionReference, getId)
 
 ZEND_METHOD(ReflectionAttribute, __construct)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	_DO_THROW("Cannot directly instantiate ReflectionAttribute");
 }
 
 ZEND_METHOD(ReflectionAttribute, __clone)
 {
 	/* __clone() is private but this is reachable with reflection */
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	_DO_THROW("Cannot clone object using __clone()");
 }
 
