@@ -1434,9 +1434,7 @@ PHP_FUNCTION(snmpset)
 /* {{{ Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT));
 }
@@ -1587,9 +1585,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 /* {{{ Return the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_get_valueretrieval)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(SNMP_G(valueretrieval));
 }
@@ -1666,9 +1662,7 @@ PHP_METHOD(SNMP, close)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	snmp_session_free(&(snmp_object->session));
 
@@ -1737,9 +1731,7 @@ PHP_METHOD(SNMP, getErrno)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(snmp_object->snmp_errno);
 }
@@ -1753,9 +1745,7 @@ PHP_METHOD(SNMP, getError)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STRING(snmp_object->snmp_errstr);
 }
