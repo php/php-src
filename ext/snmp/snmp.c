@@ -1105,7 +1105,8 @@ static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_str
 /* {{{ Set all snmpv3-related security options */
 static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
-	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID)
+	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID,
+	uint32_t auth_protocol_argnum)
 {
 
 	/* Setting the security level. */
@@ -1117,7 +1118,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 	if (session->securityLevel == SNMP_SEC_LEVEL_AUTHNOPRIV || session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
 		if (!auth_protocol) {
-			zend_value_error("Authentication protocol is required for security level \"authNoPriv\" or \"authPriv\"");
+			zend_argument_value_error(auth_protocol_argnum, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
@@ -1128,7 +1129,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 		}
 
 		if (!auth_passphrase) {
-			zend_value_error("Authentication passphrase is required for security level \"authNoPriv\" or \"authPriv\"");
+			zend_argument_value_error(auth_protocol_argnum + 1, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
@@ -1141,7 +1142,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 		if (session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
 			if (!priv_protocol) {
-				zend_value_error("Privacy protocol is required for security level \"authPriv\"");
+				zend_argument_value_error(auth_protocol_argnum + 2, "cannot be null when security level is \"authPriv\"");
 				return false;
 			}
 
@@ -1152,7 +1153,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 			}
 
 			if (!priv_passphrase) {
-				zend_value_error("Privacy passphrase is required for security level \"authPriv\"");
+				zend_argument_value_error(auth_protocol_argnum + 3, "cannot be null when security level is \"authPriv\"");
 				return false;
 			}
 
@@ -1316,7 +1317,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			netsnmp_session_free(&session);
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && !netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL)) {
+		if (version == SNMP_VERSION_3 && !netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			netsnmp_session_free(&session);
 			/* Warning message sent already, just bail out */
@@ -1691,7 +1692,7 @@ PHP_METHOD(SNMP, setSecurity)
 		RETURN_THROWS();
 	}
 
-	if (!netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7)) {
+	if (!netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2)) {
 		/* Warning message sent already, just bail out */
 		RETURN_FALSE;
 	}

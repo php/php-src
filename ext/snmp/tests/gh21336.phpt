@@ -35,7 +35,7 @@ try {
 }
 ?>
 --EXPECT--
-Authentication protocol is required for security level "authNoPriv" or "authPriv"
-Authentication passphrase is required for security level "authNoPriv" or "authPriv"
-Privacy protocol is required for security level "authPriv"
-Privacy passphrase is required for security level "authPriv"
+SNMP::setSecurity(): Argument #2 ($authProtocol) cannot be null when security level is "authNoPriv" or "authPriv"
+SNMP::setSecurity(): Argument #3 ($authPassphrase) cannot be null when security level is "authNoPriv" or "authPriv"
+SNMP::setSecurity(): Argument #4 ($privacyProtocol) cannot be null when security level is "authPriv"
+SNMP::setSecurity(): Argument #5 ($privacyPassphrase) cannot be null when security level is "authPriv"
