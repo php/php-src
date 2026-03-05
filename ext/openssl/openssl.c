@@ -1567,22 +1567,16 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out) {
-		if (!notext && !X509_print(bio_out, cert)) {
+		if ((notext || X509_print(bio_out, cert)) && PEM_write_bio_X509(bio_out, cert)) {
+			RETVAL_TRUE;
+		} else {
 			php_openssl_store_errors();
-			goto exit_cleanup_bio;
 		}
-		if (!PEM_write_bio_X509(bio_out, cert)) {
-			php_openssl_store_errors();
-			goto exit_cleanup_bio;
-		}
-
-		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
-exit_cleanup_bio:
 	if (!BIO_free(bio_out)) {
 		php_openssl_store_errors();
 	}
