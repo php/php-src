@@ -1569,9 +1569,11 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	if (bio_out) {
 		if (!notext && !X509_print(bio_out, cert)) {
 			php_openssl_store_errors();
+			goto exit_cleanup_bio;
 		}
 		if (!PEM_write_bio_X509(bio_out, cert)) {
 			php_openssl_store_errors();
+			goto exit_cleanup_bio;
 		}
 
 		RETVAL_TRUE;
@@ -1580,6 +1582,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
 	}
 
+exit_cleanup_bio:
 	if (!BIO_free(bio_out)) {
 		php_openssl_store_errors();
 	}
