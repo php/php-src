@@ -1181,6 +1181,9 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	current = ZSTR_LEN(string);
 	for (end = pstr; pos != UBRK_DONE; ) {
 		pos = ubrk_previous(bi);
+		if (pos == UBRK_DONE) {
+			break;
+		}
 		end_len = current - pos;
 		for (int32_t j = 0; j < end_len; j++) {
 			*p++ = *(pstr + pos + j);
@@ -1188,6 +1191,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 		current = pos;
 	}
 ubrk_end:
+	*p = '\0';
 	RETVAL_NEW_STR(ret);
 	ubrk_close(bi);
 close:
