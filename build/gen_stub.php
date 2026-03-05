@@ -2550,15 +2550,17 @@ abstract class VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getFieldSynopsisElement(DOMDocument $doc, array $allConstInfos): DOMElement
+    public function getFieldSynopsisElement(DOMDocument $doc, array $allConstInfos, int $indentationLevel): DOMElement
     {
+        $indentation = str_repeat(" ", $indentationLevel);
+
         $fieldsynopsisElement = $doc->createElement("fieldsynopsis");
 
-        $this->addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
+        $this->addModifiersToFieldSynopsis($doc, $fieldsynopsisElement, $indentationLevel + 1);
 
         $type = $this->phpDocType ?? $this->type;
         if ($type) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation "));
             $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
         }
 
@@ -2569,31 +2571,33 @@ abstract class VariableLike
             $varnameElement->setAttribute("linkend", $this->getFieldSynopsisDefaultLinkend());
         }
 
-        $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+        $fieldsynopsisElement->appendChild(new DOMText("\n$indentation "));
         $fieldsynopsisElement->appendChild($varnameElement);
 
         $valueString = $this->getFieldSynopsisValueString($allConstInfos);
         if ($valueString) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation "));
             $initializerElement = $doc->createElement("initializer",  $valueString);
             $fieldsynopsisElement->appendChild($initializerElement);
         }
 
-        $fieldsynopsisElement->appendChild(new DOMText("\n    "));
+        $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
 
         return $fieldsynopsisElement;
     }
 
-    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
+    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement, int $indentationLevel): void
     {
+        $indentation = str_repeat(" ", $indentationLevel);
+
         if ($this->flags & Modifiers::PUBLIC) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public"));
         } elseif ($this->flags & Modifiers::PROTECTED) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected"));
         } elseif ($this->flags & Modifiers::PRIVATE) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
         }
     }
@@ -2937,16 +2941,18 @@ class ConstInfo extends VariableLike
         return $flags;
     }
 
-    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
+    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement, int $indentationLevel): void
     {
-        parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
+        parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement, $indentationLevel);
+
+        $indentation = str_repeat(" ", $indentationLevel);
 
         if ($this->flags & Modifiers::FINAL) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "final"));
         }
 
-        $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+        $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
         $fieldsynopsisElement->appendChild($doc->createElement("modifier", "const"));
     }
 }
@@ -3281,22 +3287,24 @@ class PropertyInfo extends VariableLike
         return $flags;
     }
 
-    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
+    protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement, int $indentationLevel): void
     {
-        parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
+        parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement, $indentationLevel);
+
+        $indentation = str_repeat(" ", $indentationLevel);
 
         if ($this->flags & Modifiers::STATIC) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
         }
 
         if ($this->flags & Modifiers::FINAL) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "final"));
         }
 
         if ($this->flags & Modifiers::READONLY || $this->isDocReadonly) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
         }
     }
@@ -3800,12 +3808,30 @@ class ClassInfo {
         $classSynopsis = $doc->createElement("classsynopsis");
         $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
 
+        $namespace = $this->getNamespace();
+        if ($namespace) {
+            $classSynopsisIndentationLevel = 4;
+            $classSynopsisIndentation = str_repeat(" ", $classSynopsisIndentationLevel);
+            $packageSynopsis = $doc->createElement("packagesynopsis");
+            $packageSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation"));
+            $package = $doc->createElement("package", $namespace);
+            $packageSynopsis->appendChild($package);
+            $packageSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation"));
+            $packageSynopsis->appendChild($classSynopsis);
+            $packageSynopsis->appendChild(new DOMText("\n   "));
+            $root = $packageSynopsis;
+        } else {
+            $root = $classSynopsis;
+            $classSynopsisIndentationLevel = 3;
+            $classSynopsisIndentation = str_repeat(" ", $classSynopsisIndentationLevel);
+        }
+
         $exceptionOverride = $this->type === "class" && $this->isException($classMap) ? "exception" : null;
-        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, 4);
+        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, $classSynopsisIndentationLevel + 1);
         if (!$ooElement) {
             return null;
         }
-        $classSynopsis->appendChild(new DOMText("\n    "));
+        $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
         $classSynopsis->appendChild($ooElement);
 
         foreach ($this->extends as $k => $parent) {
@@ -3820,13 +3846,13 @@ class ClassInfo {
                 null,
                 false,
                 $k === 0 ? "extends" : null,
-                4
+                $classSynopsisIndentationLevel + 1
             );
             if (!$ooElement) {
                 return null;
             }
 
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsis->appendChild($ooElement);
         }
 
@@ -3836,11 +3862,11 @@ class ClassInfo {
                 throw new Exception("Missing implemented interface " . $interface->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $interfaceInfo, null, false, $k === 0 ? "implements" : null, 4);
+            $ooElement = self::createOoElement($doc, $interfaceInfo, null, false, $k === 0 ? "implements" : null, $classSynopsisIndentationLevel + 1);
             if (!$ooElement) {
                 return null;
             }
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsis->appendChild($ooElement);
         }
 
@@ -3864,31 +3890,32 @@ class ClassInfo {
             $classSynopsis,
             $parentsWithInheritedConstants,
             "&Constants;",
-            "&InheritedConstants;"
+            "&InheritedConstants;",
+            $classSynopsisIndentationLevel + 1
         );
 
         if (!empty($this->constInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Constants;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
             foreach ($this->constInfos as $constInfo) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $fieldSynopsisElement = $constInfo->getFieldSynopsisElement($doc, $allConstInfos);
+                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
+                $fieldSynopsisElement = $constInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
                 $classSynopsis->appendChild($fieldSynopsisElement);
             }
         }
 
         if (!empty($this->propertyInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
             foreach ($this->propertyInfos as $propertyInfo) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc, $allConstInfos);
+                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
+                $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
                 $classSynopsis->appendChild($fieldSynopsisElement);
             }
         }
@@ -3898,11 +3925,12 @@ class ClassInfo {
             $classSynopsis,
             $parentsWithInheritedProperties,
             "&Properties;",
-            "&InheritedProperties;"
+            "&InheritedProperties;",
+            $classSynopsisIndentationLevel + 1
         );
 
         if (!empty($this->funcInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
@@ -3911,35 +3939,38 @@ class ClassInfo {
             $escapedName = addslashes($this->name->__toString());
 
             if ($this->hasConstructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
+                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])",
+                    $classSynopsisIndentationLevel + 1
                 );
                 $classSynopsis->appendChild($includeElement);
             }
 
             if ($this->hasMethods()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
+                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])",
+                    $classSynopsisIndentationLevel + 1
                 );
                 $classSynopsis->appendChild($includeElement);
             }
 
             if ($this->hasDestructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
+                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])",
+                    $classSynopsisIndentationLevel + 1
                 );
                 $classSynopsis->appendChild($includeElement);
             }
         }
 
         if (!empty($parentsWithInheritedMethods)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedMethods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
@@ -3952,10 +3983,11 @@ class ClassInfo {
                 $escapedParentName = addslashes($parentName->__toString());
 
                 foreach ($parentMethodsynopsisTypes as $parentMethodsynopsisType) {
-                    $classSynopsis->appendChild(new DOMText("\n    "));
+                    $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                     $includeElement = $this->createIncludeElement(
                         $doc,
-                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])"
+                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])",
+                        $classSynopsisIndentationLevel + 1
                     );
 
                     $classSynopsis->appendChild($includeElement);
@@ -3963,16 +3995,16 @@ class ClassInfo {
             }
         }
 
-        $classSynopsis->appendChild(new DOMText("\n   "));
+        $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation"));
 
-        return $classSynopsis;
+        return $root;
     }
 
     private static function createOoElement(
         DOMDocument $doc,
         ClassInfo $classInfo,
         ?string $typeOverride,
-        bool $withModifiers,
+        bool $isMainClass,
         ?string $modifierOverride,
         int $indentationLevel
     ): ?DOMElement {
@@ -3990,7 +4022,7 @@ class ClassInfo {
         if ($modifierOverride !== null) {
             $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
-        } elseif ($withModifiers) {
+        } elseif ($isMainClass) {
             foreach ($classInfo->attributes as $attribute) {
                 $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
                 $modifier->setAttribute("role", "attribute");
@@ -4012,7 +4044,7 @@ class ClassInfo {
             }
         }
 
-        $nameElement = $doc->createElement("{$type}name", $classInfo->name->toString());
+        $nameElement = $doc->createElement("{$type}name", $isMainClass ? $classInfo->getClassName() : $classInfo->name->toString());
         $ooElement->appendChild($nameElement);
         $ooElement->appendChild(new DOMText("\n$indentation"));
 
@@ -4181,16 +4213,30 @@ class ClassInfo {
         return false;
     }
 
-    private function createIncludeElement(DOMDocument $doc, string $query): DOMElement
+    public function getNamespace(): ?string {
+        if ($this->name->isQualified()) {
+            return $this->name->slice(0, -1)->toString();
+        }
+
+        return null;
+    }
+
+    public function getClassName(): string {
+        return $this->name->getLast();
+    }
+
+    private function createIncludeElement(DOMDocument $doc, string $query, int $indentationLevel): DOMElement
     {
+        $indentation = str_repeat(" ", $indentationLevel);
+
         $includeElement = $doc->createElement("xi:include");
         $attr = $doc->createAttribute("xpointer");
         $attr->value = $query;
         $includeElement->appendChild($attr);
         $fallbackElement = $doc->createElement("xi:fallback");
-        $includeElement->appendChild(new DOMText("\n     "));
+        $includeElement->appendChild(new DOMText("\n$indentation "));
         $includeElement->appendChild($fallbackElement);
-        $includeElement->appendChild(new DOMText("\n    "));
+        $includeElement->appendChild(new DOMText("\n$indentation"));
 
         return $includeElement;
     }
@@ -4213,24 +4259,27 @@ class ClassInfo {
     /**
      * @param Name[] $parents
      */
-    private function appendInheritedMemberSectionToClassSynopsis(DOMDocument $doc, DOMElement $classSynopsis, array $parents, string $label, string $inheritedLabel): void
+    private function appendInheritedMemberSectionToClassSynopsis(DOMDocument $doc, DOMElement $classSynopsis, array $parents, string $label, string $inheritedLabel, int $indentationLevel): void
     {
         if (empty($parents)) {
             return;
         }
 
-        $classSynopsis->appendChild(new DOMText("\n\n    "));
+        $indentation = str_repeat(" ", $indentationLevel);
+
+        $classSynopsis->appendChild(new DOMText("\n\n$indentation"));
         $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "$inheritedLabel");
         $classSynopsisInfo->setAttribute("role", "comment");
         $classSynopsis->appendChild($classSynopsisInfo);
 
         foreach ($parents as $parent) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
+            $classSynopsis->appendChild(new DOMText("\n$indentation"));
             $parentReference = self::getClassSynopsisReference($parent);
 
             $includeElement = $this->createIncludeElement(
                 $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))"
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))",
+                $indentationLevel
             );
             $classSynopsis->appendChild($includeElement);
         }
