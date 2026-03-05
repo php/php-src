@@ -35,7 +35,7 @@ try {
 }
 ?>
 --EXPECT--
-Authentication protocol can't be NULL
-Authentication key can't be NULL
-Security protocol can't be NULL
-Security key can't be NULL
+Authentication protocol is required for security level "authNoPriv" or "authPriv"
+Authentication passphrase is required for security level "authNoPriv" or "authPriv"
+Privacy protocol is required for security level "authPriv"
+Privacy passphrase is required for security level "authPriv"

@@ -959,12 +959,8 @@ static bool netsnmp_session_set_sec_level(struct snmp_session *s, zend_string *l
 /* }}} */
 
 /* {{{ Set the authentication protocol in the snmpv3 session */
-static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
 {
-	if (!prot) {
-		zend_value_error("Authentication protocol can't be NULL");
-		return false;
-	}
 #ifndef DISABLE_MD5
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
@@ -1015,12 +1011,8 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 /* }}} */
 
 /* {{{ Set the security protocol in the snmpv3 session */
-static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
-	if (!prot) {
-		zend_value_error("Security protocol can't be NULL");
-		return false;
-	}
 #ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
@@ -1056,14 +1048,9 @@ static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
-
-	if (!pass) {
-		zend_value_error("Authentication key can't be NULL");
-		return false;
-	}
 
 	s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
@@ -1077,14 +1064,9 @@ static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pa
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
-
-	if (!pass) {
-		zend_value_error("Security key can't be NULL");
-		return false;
-	}
 
 	s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
@@ -1121,7 +1103,7 @@ static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_str
 /* }}} */
 
 /* {{{ Set all snmpv3-related security options */
-static bool netsnmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
+static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
 	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID)
 {
@@ -1134,9 +1116,19 @@ static bool netsnmp_session_set_security(struct snmp_session *session, zend_stri
 
 	if (session->securityLevel == SNMP_SEC_LEVEL_AUTHNOPRIV || session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
+		if (!auth_protocol) {
+			zend_value_error("Authentication protocol is required for security level \"authNoPriv\" or \"authPriv\"");
+			return false;
+		}
+
 		/* Setting the authentication protocol. */
 		if (!netsnmp_session_set_auth_protocol(session, auth_protocol)) {
 			/* ValueError already generated, just bail out */
+			return false;
+		}
+
+		if (!auth_passphrase) {
+			zend_value_error("Authentication passphrase is required for security level \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
@@ -1147,9 +1139,20 @@ static bool netsnmp_session_set_security(struct snmp_session *session, zend_stri
 		}
 
 		if (session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+
+			if (!priv_protocol) {
+				zend_value_error("Privacy protocol is required for security level \"authPriv\"");
+				return false;
+			}
+
 			/* Setting the security protocol. */
 			if (!netsnmp_session_set_sec_protocol(session, priv_protocol)) {
 				/* ValueError already generated, just bail out */
+				return false;
+			}
+
+			if (!priv_passphrase) {
+				zend_value_error("Privacy passphrase is required for security level \"authPriv\"");
 				return false;
 			}
 
