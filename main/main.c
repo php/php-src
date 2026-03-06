@@ -51,6 +51,7 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/date/php_date.h"
+#include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 #include "ext/random/php_random_zend_utils.h"
 #include "ext/opcache/ZendAccelerator.h"
@@ -1870,6 +1871,12 @@ PHPAPI void php_child_init(void)
 {
 	refresh_memory_manager();
 	zend_max_execution_timer_init();
+
+	/* Force re-seeding of random engines in child process after fork(),
+	 * otherwise the child inherits the parent's MT state and produces
+	 * identical sequences. See GH-21351. */
+	RANDOM_G(mt19937_seeded) = false;
+	RANDOM_G(combined_lcg_seeded) = false;
 }
 
 /* {{{ php_request_startup */
