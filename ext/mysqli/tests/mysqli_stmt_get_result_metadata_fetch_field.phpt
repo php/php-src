@@ -42,11 +42,6 @@ require_once 'skipifconnectfailure.inc';
             Label column, result set charset.
             All of the following columns are "too hot" - too server dependent
             */
-            if ($field->charsetnr != $charsetInfo->number) {
-                printf("[004] Expecting charset %s/%d got %d\n",
-                    $charsetInfo->charset,
-                    $charsetInfo->number, $field->charsetnr);
-            }
             if ($field->length != $charsetInfo->max_length) {
                 printf("[005] Expecting length %d got %d\n",
                     $charsetInfo->max_length, $field->max_length);

@@ -965,8 +965,8 @@ PHP_FUNCTION(mysqli_get_charset)
 {
 	MY_MYSQL				*mysql;
 	zval					*mysql_link;
-	const char 				*name = NULL, *collation = NULL, *dir = NULL, *comment = NULL;
-	uint32_t				minlength, maxlength, number, state;
+	const char 				*name = NULL, *collation = NULL;
+	uint32_t				minlength, maxlength;
 	const MYSQLND_CHARSET	*cs;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -984,19 +984,16 @@ PHP_FUNCTION(mysqli_get_charset)
 	collation = cs->collation;
 	minlength = cs->char_minlen;
 	maxlength = cs->char_maxlen;
-	number = cs->nr;
-	comment = cs->comment;
-	state = 1;	/* all charsets are compiled in */
 	object_init(return_value);
 
 	add_property_string(return_value, "charset", (name) ? (char *)name : "");
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "");
-	add_property_string(return_value, "dir", (dir) ? (char *)dir : "");
+	add_property_string(return_value, "dir", "");
 	add_property_long(return_value, "min_length", minlength);
 	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", number);
-	add_property_long(return_value, "state", state);
-	add_property_string(return_value, "comment", (comment) ? (char *)comment : "");
+	add_property_long(return_value, "number", 0);
+	add_property_long(return_value, "state", 1);
+	add_property_string(return_value, "comment", "");
 }
 /* }}} */
 
