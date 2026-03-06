@@ -571,7 +571,6 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
@@ -621,8 +620,6 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in6_addr *addr = (const struct in6_addr *)data;
 	socklen_t size = INET6_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
