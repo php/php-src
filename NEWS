@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.5
 
+- Core:
+  . Fixed bug GH-20672 (Incorrect property_info sizing for locally shadowed
+    trait properties). (ilutov)
+
 - Bz2:
   . Fix truncation of total output size causing erroneous errors. (ndossche)
 
