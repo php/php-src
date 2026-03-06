@@ -3306,7 +3306,9 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
-		/* do nothing, mptr already set */
+		/* Store the original closure object so we can validate it in invoke/invokeArgs.
+		 * Each closure has a unique __invoke signature, so we must reject different closures. */
+		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3440,6 +3442,23 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			}
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			RETURN_THROWS();
+		}
+
+		/* For Closure::__invoke(), closures from different source locations have
+		 * different signatures, so we must reject those. However, closures created
+		 * from the same source (e.g. in a loop) share the same op_array and should
+		 * be allowed. Compare the underlying function pointer via op_array. */
+		if (obj_ce == zend_ce_closure && !Z_ISUNDEF(intern->obj)
+				&& Z_OBJ_P(object) != Z_OBJ(intern->obj)) {
+			const zend_function *orig_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+			const zend_function *given_func = zend_get_closure_method_def(Z_OBJ_P(object));
+			if (orig_func->op_array.opcodes != given_func->op_array.opcodes) {
+				if (!variadic) {
+					efree(params);
+				}
+				_DO_THROW("Given object is not an instance of the class this method was declared in");
+				RETURN_THROWS();
+			}
 		}
 	}
 	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
