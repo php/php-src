@@ -26,6 +26,8 @@
 #endif
 
 
+extern PHP_CLI_API int do_php_cli(int argc, char *argv[]);
+
 extern PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length);
 
 typedef struct  {

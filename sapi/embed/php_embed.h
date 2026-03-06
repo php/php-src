@@ -49,6 +49,9 @@ BEGIN_EXTERN_C()
 EMBED_SAPI_API int php_embed_init(int argc, char **argv);
 EMBED_SAPI_API void php_embed_shutdown(void);
 extern EMBED_SAPI_API sapi_module_struct php_embed_module;
+
+#define HAVE_EMBED_CLI 1
+EMBED_SAPI_API int do_php_cli(int argc, char *argv[]);
 END_EXTERN_C()
 
 
