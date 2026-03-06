@@ -53,13 +53,15 @@ $so_linger = PHP_OS_FAMILY === 'Darwin' ? SO_LINGER_SEC : SO_LINGER;
 $server_sock = socket_import_stream($accepted);
 $server_linger = socket_get_option($server_sock, SOL_SOCKET, $so_linger);
 echo "Server SO_LINGER\n";
-var_dump($server_linger);
+var_dump($server_linger['l_onoff'] > 0);
+var_dump($server_linger['l_linger']);
 
 // Verify client side
 $client_sock = socket_import_stream($client);
 $client_linger = socket_get_option($client_sock, SOL_SOCKET, $so_linger);
 echo "Client SO_LINGER\n";
-var_dump($client_linger);
+var_dump($client_linger['l_onoff'] > 0);
+var_dump($client_linger['l_linger']);
 
 fclose($accepted);
 fclose($client);
@@ -68,16 +70,8 @@ fclose($server);
 ?>
 --EXPECT--
 Server SO_LINGER
-array(2) {
-  ["l_onoff"]=>
-  int(1)
-  ["l_linger"]=>
-  int(10)
-}
+bool(true)
+int(10)
 Client SO_LINGER
-array(2) {
-  ["l_onoff"]=>
-  int(1)
-  ["l_linger"]=>
-  int(8)
-}
+bool(true)
+int(8)
