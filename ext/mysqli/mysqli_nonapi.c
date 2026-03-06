@@ -993,7 +993,6 @@ PHP_FUNCTION(mysqli_get_charset)
 	add_property_long(return_value, "max_length", maxlength);
 	add_property_long(return_value, "number", 0);
 	add_property_long(return_value, "state", 1);
-	add_property_string(return_value, "comment", "");
 }
 /* }}} */
 
