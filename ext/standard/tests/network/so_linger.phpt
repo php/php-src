@@ -47,15 +47,17 @@ if (!$accepted) {
     die('Unable to accept connection');
 }
 
+$so_linger = PHP_OS_FAMILY === 'Darwin' ? SO_LINGER_SEC : SO_LINGER;
+
 // Verify server side (accepted connection)
 $server_sock = socket_import_stream($accepted);
-$server_linger = socket_get_option($server_sock, SOL_SOCKET, SO_LINGER);
+$server_linger = socket_get_option($server_sock, SOL_SOCKET, $so_linger);
 echo "Server SO_LINGER\n";
 var_dump($server_linger);
 
 // Verify client side
 $client_sock = socket_import_stream($client);
-$client_linger = socket_get_option($client_sock, SOL_SOCKET, SO_LINGER);
+$client_linger = socket_get_option($client_sock, SOL_SOCKET, $so_linger);
 echo "Client SO_LINGER\n";
 var_dump($client_linger);
 

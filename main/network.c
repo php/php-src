@@ -547,7 +547,11 @@ php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned
 					.l_onoff = (sockvals->linger > 0),
 					.l_linger = (unsigned short)sockvals->linger
 				};
+#ifdef SO_LINGER_SEC
+				setsockopt(sock, SOL_SOCKET, SO_LINGER_SEC, (char*)&linger_val, sizeof(linger_val));
+#else
 				setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&linger_val, sizeof(linger_val));
+#endif
 			}
 #endif
 #if defined(TCP_KEEPIDLE)
@@ -1042,7 +1046,11 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 					.l_onoff = (sockvals->linger > 0),
 					.l_linger = (unsigned short)sockvals->linger
 				};
+#ifdef SO_LINGER_SEC
+				setsockopt(sock, SOL_SOCKET, SO_LINGER_SEC, (char*)&linger_val, sizeof(linger_val));
+#else
 				setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&linger_val, sizeof(linger_val));
+#endif
 			}
 #endif
 #if defined(TCP_KEEPIDLE)
