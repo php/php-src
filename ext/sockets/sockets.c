@@ -1249,8 +1249,6 @@ PHP_FUNCTION(socket_connect)
 				RETURN_THROWS();
 			}
 
-			memset(&sin6, 0, sizeof(struct sockaddr_in6));
-
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
 
@@ -1629,7 +1627,6 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			memset(addrbuf, 0, INET6_ADDRSTRLEN);
 			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
@@ -1732,7 +1729,7 @@ PHP_FUNCTION(socket_sendto)
 			}
 
 			s_un.sun_family = AF_UNIX;
-			snprintf(s_un.sun_path, sizeof(s_un.sun_path), "%s", ZSTR_VAL(addr));
+			memcpy(s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr) + 1);
 
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 			break;
