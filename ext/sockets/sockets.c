@@ -244,18 +244,9 @@ ZEND_GET_MODULE(sockets)
 static bool php_open_listen_sock(php_socket *sock, unsigned short port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la = {0};
-	struct hostent	    *hp;
 
-#ifndef PHP_WIN32
-	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
-#else
-	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
-#endif
-		return false;
-	}
-
-	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
-	la.sin_family = hp->h_addrtype;
+	la.sin_addr.s_addr = htonl(INADDR_ANY);
+	la.sin_family = AF_INET;
 	la.sin_port = htons(port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
