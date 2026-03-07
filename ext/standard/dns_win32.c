@@ -116,11 +116,7 @@ PHP_FUNCTION(dns_check_record)
 
 	status = DnsQuery_A(hostname, type, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
 
-	if (status) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(!status);
 }
 /* }}} */
 
@@ -341,7 +337,7 @@ PHP_FUNCTION(dns_get_record)
 	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
-	bool raw = 0;
+	bool raw = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {

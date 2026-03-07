@@ -83,7 +83,7 @@ zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 
 	if (php_dom_follow_spec_intern(obj)) {
 		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
-		ZVAL_NEW_STR(retval, str);
+		ZVAL_STR(retval, str);
 	} else {
 		ZVAL_STRING(retval, (char *) attrp->name);
 	}

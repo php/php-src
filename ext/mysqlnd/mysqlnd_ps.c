@@ -58,7 +58,7 @@ static bool mysqlnd_stmt_check_state(const MYSQLND_STMT_DATA *stmt)
 {
 	const MYSQLND_CONN_DATA *conn = stmt->conn;
 	if (stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
-		return 0;
+		return false;
 	}
 	if (stmt->cursor_exists) {
 		return GET_CONNECTION_STATE(&conn->state) == CONN_READY;

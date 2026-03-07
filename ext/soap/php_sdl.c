@@ -3157,8 +3157,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
-	bool has_proxy_authorization = 0;
-	bool has_authorization = 0;
+	bool has_proxy_authorization = false;
+	bool has_authorization = false;
 
 	ZVAL_UNDEF(&orig_context);
 	ZVAL_UNDEF(&new_context);
@@ -3312,7 +3312,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 	sdl = load_wsdl(this_ptr, uri);
 	if (sdl) {
-		sdl->is_persistent = 0;
+		sdl->is_persistent = false;
 	}
 
 	SOAP_GLOBAL(error_code) = old_error_code;
@@ -3359,7 +3359,7 @@ cache_in_memory:
 			}
 
 			psdl = make_persistent_sdl(sdl);
-			psdl->is_persistent = 1;
+			psdl->is_persistent = true;
 			p.time = t;
 			p.sdl = psdl;
 

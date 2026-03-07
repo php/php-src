@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit php_xsl.stub.php instead.
  * Stub hash: cb1005b601e72e8d36d0f6aa5d08872f5c7ea2e6 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
@@ -119,27 +119,27 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 
 	zval property_doXInclude_default_value;
 	ZVAL_FALSE(&property_doXInclude_default_value);
-	zend_string *property_doXInclude_name = zend_string_init("doXInclude", sizeof("doXInclude") - 1, 1);
+	zend_string *property_doXInclude_name = zend_string_init("doXInclude", sizeof("doXInclude") - 1, true);
 	zend_declare_typed_property(class_entry, property_doXInclude_name, &property_doXInclude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_doXInclude_name);
+	zend_string_release_ex(property_doXInclude_name, true);
 
 	zval property_cloneDocument_default_value;
 	ZVAL_FALSE(&property_cloneDocument_default_value);
-	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, 1);
+	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, true);
 	zend_declare_typed_property(class_entry, property_cloneDocument_name, &property_cloneDocument_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_cloneDocument_name);
+	zend_string_release_ex(property_cloneDocument_name, true);
 
 	zval property_maxTemplateDepth_default_value;
 	ZVAL_UNDEF(&property_maxTemplateDepth_default_value);
-	zend_string *property_maxTemplateDepth_name = zend_string_init("maxTemplateDepth", sizeof("maxTemplateDepth") - 1, 1);
+	zend_string *property_maxTemplateDepth_name = zend_string_init("maxTemplateDepth", sizeof("maxTemplateDepth") - 1, true);
 	zend_declare_typed_property(class_entry, property_maxTemplateDepth_name, &property_maxTemplateDepth_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_maxTemplateDepth_name);
+	zend_string_release_ex(property_maxTemplateDepth_name, true);
 
 	zval property_maxTemplateVars_default_value;
 	ZVAL_UNDEF(&property_maxTemplateVars_default_value);
-	zend_string *property_maxTemplateVars_name = zend_string_init("maxTemplateVars", sizeof("maxTemplateVars") - 1, 1);
+	zend_string *property_maxTemplateVars_name = zend_string_init("maxTemplateVars", sizeof("maxTemplateVars") - 1, true);
 	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_maxTemplateVars_name);
+	zend_string_release_ex(property_maxTemplateVars_name, true);
 
 	return class_entry;
 }

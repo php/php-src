@@ -329,7 +329,7 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 		if (ZSTR_LEN(host) > ZSTR_LEN(domain)) {
 			return strcmp(ZSTR_VAL(host)+ZSTR_LEN(host)-ZSTR_LEN(domain), ZSTR_VAL(domain)) == 0;
 		} else {
-			return 0;
+			return false;
 		}
 	} else {
 		return zend_string_equals(host,domain);
@@ -363,9 +363,9 @@ int make_http_soap_request(
 	char *http_msg = NULL;
 	bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
-	bool has_authorization = 0;
-	bool has_proxy_authorization = 0;
-	bool has_cookies = 0;
+	bool has_authorization = false;
+	bool has_proxy_authorization = false;
+	bool has_cookies = false;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -680,7 +680,7 @@ try_again:
 		if (Z_TYPE_P(login) == IS_STRING) {
 			zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
 
-			has_authorization = 1;
+			has_authorization = true;
 			if (Z_TYPE_P(digest) == IS_ARRAY) {
 				char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
 				unsigned char nonce[16];
@@ -858,7 +858,7 @@ try_again:
 		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0 && !HT_IS_PACKED(Z_ARRVAL_P(cookies))) {
 			zval *data;
 			zend_string *key;
-			has_cookies = 1;
+			has_cookies = true;
 			bool first_cookie = true;
 			smart_str_append_const(&soap_headers, "Cookie: ");
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
@@ -1014,8 +1014,7 @@ try_again:
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-			smart_str name = {0};
-			int cookie_len;
+			size_t cookie_len;
 			zval zcookie;
 
 			if (sempos != NULL) {
@@ -1024,8 +1023,7 @@ try_again:
 				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
-			smart_str_appendl(&name, cookie, eqpos - cookie);
-			smart_str_0(&name);
+			zend_string *name = zend_string_init(cookie, eqpos - cookie, false);
 
 			array_init(&zcookie);
 			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
@@ -1063,8 +1061,8 @@ try_again:
 				GC_ADDREF(uri->host);
 			}
 
-			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);
-			smart_str_free(&name);
+			zend_symtable_update(Z_ARRVAL_P(cookies), name, &zcookie);
+			zend_string_release_ex(name, false);
 		}
 
 		cookie_itt = cookie_itt + cookie_len;

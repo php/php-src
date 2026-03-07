@@ -615,12 +615,14 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 		do {
 			const char *attr_name = tidyAttrName(tempattr);
 			if (attr_name) {
+				zval value;
 				const char *val = tidyAttrValue(tempattr);
 				if (val) {
-					add_assoc_string(&attribute, attr_name, val);
+					ZVAL_STRING_FAST(&value, val);
 				} else {
-					add_assoc_str(&attribute, attr_name, zend_empty_string);
+					ZVAL_EMPTY_STRING(&value);
 				}
+				zend_hash_str_add_new(Z_ARRVAL(attribute), attr_name, strlen(attr_name), &value);
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
 	} else {
@@ -755,7 +757,7 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 			}
 			uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, true);
 			if (type == IS_DOUBLE) {
-				lval = zend_dval_to_lval_cap(dval, str);
+				lval = zend_dval_to_lval_cap(dval);
 				type = IS_LONG;
 			}
 			if (type == IS_LONG) {

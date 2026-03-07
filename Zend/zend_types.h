@@ -62,19 +62,8 @@ typedef enum {
 
 typedef ZEND_RESULT_CODE zend_result;
 
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-# ifdef ZEND_WIN32
-#  define ZEND_SIZE_MAX  _UI64_MAX
-# else
-#  define ZEND_SIZE_MAX  SIZE_MAX
-# endif
-#else
-# if defined(ZEND_WIN32)
-#  define ZEND_SIZE_MAX  _UI32_MAX
-# else
-#  define ZEND_SIZE_MAX SIZE_MAX
-# endif
-#endif
+/* This constant is deprecated, use SIZE_MAX instead */
+#define ZEND_SIZE_MAX SIZE_MAX
 
 #ifdef ZTS
 #define ZEND_TLS static TSRM_TLS
@@ -648,6 +637,9 @@ struct _zend_ast_ref {
 /* used for casts */
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
+
+/* used for PFAs/FCCs */
+#define _IS_PLACEHOLDER             20
 
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)

@@ -539,8 +539,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	char *lock_name;
 #ifdef PHP_WIN32
-	bool restarted = 0;
-	bool need_creation = 0;
+	bool restarted = false;
+	bool need_creation = false;
 #endif
 
 	zend_string *path;
@@ -923,7 +923,7 @@ restart:
 
 				lock_file_mode = "r+b";
 
-				restarted = 1;
+				restarted = true;
 				goto restart;
 #endif
 			}
@@ -969,14 +969,14 @@ fail:
 /* {{{ Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	bool full_info = 0;
+	bool full_info = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_THROWS();
@@ -1301,9 +1301,7 @@ PHP_FUNCTION(dba_handlers)
 /* {{{ List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

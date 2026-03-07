@@ -11,6 +11,7 @@ PHP_ARG_WITH([external-uriparser],
 PHP_INSTALL_HEADERS([ext/uri], m4_normalize([
   php_uri.h
   php_uri_common.h
+  php_uri_decl.h
   uri_parser_rfc3986.h
   uri_parser_whatwg.h
   uri_parser_php_parse_url.h

@@ -7,7 +7,8 @@ mbstring
 
 $a = [];
 $b = [];
-$a[] = $b[] = &$a;
+$b[] = &$a;
+$a[] = &$b;
 var_dump(mb_convert_variables('utf-8', 'utf-8', $a));
 
 $c = [];

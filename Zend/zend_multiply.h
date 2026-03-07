@@ -342,7 +342,6 @@ static zend_always_inline size_t zend_safe_address_guarded(size_t nmemb, size_t 
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }
@@ -355,7 +354,6 @@ static zend_always_inline size_t zend_safe_addmult(size_t nmemb, size_t size, si
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in %s (%zu * %zu + %zu)", message, nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }

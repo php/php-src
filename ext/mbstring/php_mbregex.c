@@ -1303,11 +1303,7 @@ PHP_FUNCTION(mb_ereg_match)
 	/* match */
 	err = onig_match_with_param(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), (OnigUChar *)string, NULL, 0, mp);
 	onig_free_match_param(mp);
-	if (err >= 0) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETURN_BOOL(err >= 0);
 }
 /* }}} */
 
@@ -1510,9 +1506,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 	int beg, end;
 	OnigUChar *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (MBREX(search_regs) != NULL && Z_TYPE(MBREX(search_str)) == IS_STRING) {
 		array_init(return_value);
@@ -1548,9 +1542,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 /* {{{ Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETVAL_LONG(MBREX(search_pos));
 }

@@ -88,23 +88,23 @@ static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
 	OPENSSL_PKEY_SET_BN(data, e);
 	OPENSSL_PKEY_SET_BN(data, d);
 	if (!n || !d || !RSA_set0_key(rsa, n, e, d)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	if ((p || q) && !RSA_set0_factors(rsa, p, q)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, dmp1);
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
 	if ((dmp1 || dmq1 || iqmp) && !RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
@@ -141,7 +141,7 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
 	if (!p || !q || !g || !DSA_set0_pqg(dsa, p, q, g)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
@@ -154,18 +154,18 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 	/* generate key */
 	if (!DSA_generate_key(dsa)) {
 		php_openssl_store_errors();
-		return 0;
+		return false;
 	}
 
 	/* if BN_mod_exp return -1, then DSA_generate_key succeed for failed key
 	 * so we need to double check that public key is created */
 	DSA_get0_key(dsa, &pub_key_const, &priv_key_const);
 	if (!pub_key_const || BN_is_zero(pub_key_const)) {
-		return 0;
+		return false;
 	}
 	/* all good */
 	*is_private = true;
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
@@ -202,7 +202,7 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
 	if (!p || !g || !DH_set0_pqg(dh, p, q, g)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
@@ -214,7 +214,7 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	if (priv_key) {
 		pub_key = php_openssl_dh_pub_from_priv(priv_key, g, p);
 		if (pub_key == NULL) {
-			return 0;
+			return false;
 		}
 		return DH_set0_key(dh, pub_key, priv_key);
 	}
@@ -222,11 +222,11 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	/* generate key */
 	if (!DH_generate_key(dh)) {
 		php_openssl_store_errors();
-		return 0;
+		return false;
 	}
 	/* all good */
 	*is_private = true;
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)

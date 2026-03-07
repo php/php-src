@@ -1017,7 +1017,7 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 	}
 
 	if (all) {
-		charset = determine_charset(hint_charset, /* quiet */ 0);
+		charset = determine_charset(hint_charset, /* quiet */ false);
 	} else {
 		charset = cs_8859_1; /* charset shouldn't matter, use ISO-8859-1 for performance */
 	}
@@ -1043,7 +1043,7 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 
 PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset)
 {
-	return php_escape_html_entities_ex(old, oldlen, all, flags, hint_charset, 1, /* quiet */ 0);
+	return php_escape_html_entities_ex(old, oldlen, all, flags, hint_charset, true, /* quiet */ false);
 }
 
 /* {{{ find_entity_for_char */

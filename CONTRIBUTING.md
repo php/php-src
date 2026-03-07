@@ -100,6 +100,7 @@ scattered across different websites, and often outdated. Nonetheless, they can
 provide a good starting point for learning about the fundamentals of the code
 base.
 
+* https://php.github.io/php-src/
 * https://www.phpinternalsbook.com/
 * https://www.npopov.com/
   * [Internal value representation](https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html), [part 2](https://www.npopov.com/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html)
@@ -357,7 +358,8 @@ Currently, we have the following branches in use:
 
 | Branch    |           |
 | --------- | --------- |
-| master    | Active development branch for PHP 8.5, which is open for backwards incompatible changes and major internal API changes. |
+| master    | Active development branch for PHP 8.6, which is open for backwards incompatible changes and major internal API changes. |
+| PHP-8.5   | Is used to release the PHP 8.5.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-8.4   | Is used to release the PHP 8.4.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-8.3   | Is used to release the PHP 8.3.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-8.2   | Is used to release the PHP 8.2.x series. This is an old stable version and is open for security fixes only. |

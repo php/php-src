@@ -940,7 +940,7 @@ static int php_var_serialize_get_sleep_props(
 
 		priv_name = zend_mangle_property_name(
 			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(priv_name);
@@ -955,7 +955,7 @@ static int php_var_serialize_get_sleep_props(
 		}
 
 		prot_name = zend_mangle_property_name(
-			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(prot_name);
@@ -990,7 +990,7 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, index, key, data) {
 			if (incomplete_class && zend_string_equals_literal(key, MAGIC_MEMBER)) {
-				incomplete_class = 0;
+				incomplete_class = false;
 				continue;
 			}
 
@@ -1029,7 +1029,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, 
 	if (php_var_serialize_get_sleep_props(&props, struc, ht) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
-			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash, GC_REFCOUNT(&props) > 1);
+			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ false, var_hash,
+			GC_REFCOUNT(&props) > 1);
 	}
 	zend_hash_destroy(&props);
 }
@@ -1305,8 +1306,8 @@ again:
 			smart_str_appendl(buf, "a:", 2);
 			myht = Z_ARRVAL_P(struc);
 			php_var_serialize_nested_data(
-				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash,
-					!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
+				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ false, var_hash,
+				!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
 			return;
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);

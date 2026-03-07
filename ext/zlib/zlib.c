@@ -588,9 +588,7 @@ PHP_FUNCTION(ob_gzhandler)
 /* {{{ Returns the coding type used for output compression */
 PHP_FUNCTION(zlib_get_coding_type)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	switch (ZLIBG(compression_coding)) {
 		case PHP_ZLIB_ENCODING_GZIP:
 			RETURN_STRINGL("gzip", sizeof("gzip") - 1);
@@ -800,12 +798,12 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
 
-				return 1;
+				return true;
 			}
 
 			case IS_ARRAY: {
 				HashTable *dictionary = Z_ARR_P(option_buffer);
-				bool result = 1;
+				bool result = true;
 
 				if (zend_hash_num_elements(dictionary) > 0) {
 					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
@@ -815,18 +813,18 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
 						zend_string *string = zval_try_get_string(cur);
 						if (string == NULL) {
-							result = 0;
+							result = false;
 							break;
 						}
 						*dictlen += ZSTR_LEN(string) + 1;
 						strings[total++] = string;
 						if (ZSTR_LEN(string) == 0) {
-							result = 0;
+							result = false;
 							zend_argument_value_error(2, "must not contain empty strings");
 							break;
 						}
 						if (zend_str_has_nul_byte(string)) {
-							result = 0;
+							result = false;
 							zend_argument_value_error(2, "must not contain strings with null bytes");
 							break;
 						}
@@ -852,10 +850,10 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 
 			default:
 				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
-				return 0;
+				return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 /* {{{ Initialize an incremental inflate context with the specified encoding */
@@ -887,7 +885,7 @@ PHP_FUNCTION(inflate_init)
 		case PHP_ZLIB_ENCODING_DEFLATE:
 			break;
 		default:
-			zend_value_error("Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
+			zend_argument_value_error(1, "must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
 	}
 
@@ -1293,7 +1291,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		}
 	}
 
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = int_value;
 
 	ZLIBG(output_compression) = ZLIBG(output_compression_default);

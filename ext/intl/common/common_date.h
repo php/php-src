@@ -24,6 +24,9 @@ U_CDECL_END
 
 #ifdef __cplusplus
 
+// TODO once C++ migration done we can drop this workaround
+#undef U_SHOW_CPLUSPLUS_API
+#define U_SHOW_CPLUSPLUS_API 1
 #include <unicode/timezone.h>
 
 using icu::TimeZone;

@@ -116,7 +116,8 @@ static const enum mbfl_no_encoding php_mb_default_identify_list_cn[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_cn,
-	mbfl_no_encoding_cp936
+	mbfl_no_encoding_cp936,
+	mbfl_no_encoding_gb18030_2022
 };
 
 static const enum mbfl_no_encoding php_mb_default_identify_list_tw_hk[] = {
@@ -313,7 +314,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
 		entry = list;
 		n = 0;
-		included_auto = 0;
+		included_auto = false;
 		p1 = tmpstr;
 		while (1) {
 			const char *comma = memchr(p1, ',', endp - p1);
@@ -333,7 +334,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 					size_t i;
-					included_auto = 1;
+					included_auto = true;
 					for (i = 0; i < identify_list_size; i++) {
 						*entry++ = mbfl_no2encoding(*src++);
 						n++;
@@ -379,7 +380,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
 	const mbfl_encoding **list = ecalloc(size, sizeof(mbfl_encoding*));
 	const mbfl_encoding **entry = list;
-	bool included_auto = 0;
+	bool included_auto = false;
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
@@ -396,7 +397,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 				size_t j;
 
-				included_auto = 1;
+				included_auto = true;
 				for (j = 0; j < identify_list_size; j++) {
 					*entry++ = mbfl_no2encoding(*src++);
 					n++;
@@ -718,6 +719,11 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 	}
 	MBSTRG(detect_order_list) = list;
 	MBSTRG(detect_order_list_size) = size;
+
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		php_mb_populate_current_detect_order_list();
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -729,7 +735,7 @@ static zend_result _php_mb_ini_mbstring_http_input_set(const char *new_value, si
 		list = (const mbfl_encoding**)pecalloc(1, sizeof(mbfl_encoding*), 1);
 		*list = &mbfl_encoding_pass;
 		size = 1;
-	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ 1, /* arg_num */ 0) || size == 0) {
+	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ true, /* arg_num */ 0) || size == 0) {
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {
@@ -2101,8 +2107,34 @@ static zend_string* mb_get_substr_slow(unsigned char *in, size_t in_len, size_t 
 	uint32_t wchar_buf[128];
 	unsigned int state = 0;
 
+	/* For the below call to mb_convert_buf_init, we need to estimate how many bytes the output of this operation will need.
+	 * If possible, we want to initialize the output buffer with enough space, so it is not necessary to grow it dynamically;
+	 * At the same time, we don't want to make it huge and waste a lot of memory.
+	 *
+	 * `len` is the requested number of codepoints; we optimistically guess that each codepoint can be encoded in one byte.
+	 * However, the caller may have requested a huge number of codepoints, more than are actually present in the input string;
+	 * so we also use a 2nd estimate to avoid unnecessary, huge allocations:
+	 *
+	 * `in_len` is the number of input bytes, `from` is the number of codepoints to skip; again, if each leading codepoint is
+	 * encoded in one byte, then there may be as many as `in_len - from` bytes remaining after skipping leading codepoints;
+	 * that gives our 2nd estimate of the needed output buffer size.
+	 *
+	 * If `len == MBFL_SUBSTR_UNTIL_END`, then `len` will be the largest possible `size_t` value, and the `in_len - from`
+	 * estimate will certainly be used instead. */
+
+	size_t initial_buf_size;
+	if (from > in_len) {
+		/* Normally, if `from > in_len`, then the output will definitely be empty, and in fact, `mb_get_substr` uses
+		 * this fact to (usually) just return an empty string in such situations.
+		 * But for SJIS-Mac, one byte can decode to more than one codepoint, so we can't assume the output will
+		 * definitely be empty. If it's not... then our output buffer will be dynamically resized. */
+		initial_buf_size = 0;
+	} else {
+		initial_buf_size = MIN(len, in_len - from);
+	}
+
 	mb_convert_buf buf;
-	mb_convert_buf_init(&buf, MIN(len, in_len - from), MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+	mb_convert_buf_init(&buf, initial_buf_size, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
 	while (in_len && len) {
 		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
@@ -2442,7 +2474,7 @@ PHP_FUNCTION(mb_strcut)
 		if (len > string.len - from) {
 			len = string.len - from;
 		}
-		RETURN_STR(zend_string_init_fast((const char*)(string.val + from), len & -char_len));
+		RETURN_STRINGL_FAST((const char*)(string.val + from), len & -char_len);
 	}
 
 	if (enc->mblen_table) {
@@ -2465,7 +2497,7 @@ PHP_FUNCTION(mb_strcut)
 			}
 			end = p;
 		}
-		RETURN_STR(zend_string_init_fast((const char*)start, end - start));
+		RETURN_STRINGL_FAST((const char*)start, end - start);
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
@@ -2788,7 +2820,7 @@ try_again:
 			case IS_FALSE:
 			case IS_LONG:
 			case IS_DOUBLE:
-				ZVAL_COPY(&entry_tmp, entry);
+				ZVAL_COPY_VALUE(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(
@@ -4743,7 +4775,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));
+	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd));
 
 	if (extra_cmd) {
 		zend_string_release_ex(extra_cmd, 0);
@@ -5624,19 +5656,16 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 
 static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
-	zend_long idx;
 	zend_string *key;
 	zval *entry;
 	bool valid = true;
-
-	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return false;
 	}
 	GC_TRY_PROTECT_RECURSION(vars);
-	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(vars, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
 			if (!mb_check_str_encoding(key, encoding)) {
@@ -6035,6 +6064,11 @@ static void php_mb_populate_current_detect_order_list(void)
 			entry[i] = mbfl_no2encoding(src[i]);
 		}
 	}
+
+	if (MBSTRG(current_detect_order_list) != NULL) {
+		efree(ZEND_VOIDP(MBSTRG(current_detect_order_list)));
+	}
+
 	MBSTRG(current_detect_order_list) = entry;
 	MBSTRG(current_detect_order_list_size) = nentries;
 }

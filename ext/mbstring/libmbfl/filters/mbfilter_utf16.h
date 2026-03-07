@@ -34,19 +34,6 @@ extern const mbfl_encoding mbfl_encoding_utf16;
 extern const mbfl_encoding mbfl_encoding_utf16be;
 extern const mbfl_encoding mbfl_encoding_utf16le;
 
-extern const struct mbfl_convert_vtbl vtbl_utf16_wchar;
-extern const struct mbfl_convert_vtbl vtbl_wchar_utf16;
-extern const struct mbfl_convert_vtbl vtbl_utf16be_wchar;
-extern const struct mbfl_convert_vtbl vtbl_wchar_utf16be;
-extern const struct mbfl_convert_vtbl vtbl_utf16le_wchar;
-extern const struct mbfl_convert_vtbl vtbl_wchar_utf16le;
-
-int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter);
-
 #ifdef ZEND_INTRIN_AVX2_FUNC_PTR
 void init_convert_utf16(void);
 #endif

@@ -230,7 +230,7 @@ void shutdown_ini_scanner(void)
 /* }}} */
 
 /* {{{ zend_ini_scanner_get_lineno() */
-ZEND_COLD int zend_ini_scanner_get_lineno(void)
+ZEND_COLD uint32_t zend_ini_scanner_get_lineno(void)
 {
 	return SCNG(lineno);
 }

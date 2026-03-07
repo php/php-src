@@ -37,7 +37,7 @@ YACC=${YACC:-bison}
 YACC="$YACC -l"
 YFLAGS="-Wall"
 RE2C=${RE2C:-re2c}
-RE2C_FLAGS="--no-generation-date -i"
+RE2C_FLAGS="--no-generation-date -i -W"
 SED=${SED:-sed}
 MAKE=${MAKE:-make}
 

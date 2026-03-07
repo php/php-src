@@ -369,19 +369,22 @@ PS_OPEN_FUNC(files)
 	int argc = 0;
 	size_t dirdepth = 0;
 	int filemode = 0600;
+	const char *used_save_path;
 
-	if (*save_path == '\0') {
+	if (ZSTR_LEN(save_path) == 0) {
 		/* if save path is an empty string, determine the temporary dir */
-		save_path = php_get_temporary_directory();
+		used_save_path = php_get_temporary_directory();
 
-		if (php_check_open_basedir(save_path)) {
+		if (php_check_open_basedir(used_save_path)) {
 			return FAILURE;
 		}
+	} else {
+		used_save_path = ZSTR_VAL(save_path);
 	}
 
 	/* split up input parameter */
-	last = save_path;
-	p = strchr(save_path, ';');
+	last = used_save_path;
+	p = strchr(used_save_path, ';');
 	while (p) {
 		argv[argc++] = last;
 		last = ++p;
@@ -407,14 +410,14 @@ PS_OPEN_FUNC(files)
 			return FAILURE;
 		}
 	}
-	save_path = argv[argc - 1];
+	used_save_path = argv[argc - 1];
 
 	data = ecalloc(1, sizeof(*data));
 
 	data->fd = -1;
 	data->dirdepth = dirdepth;
 	data->filemode = filemode;
-	data->basedir = zend_string_init(save_path, strlen(save_path), /* persistent */ false);
+	data->basedir = zend_string_init(used_save_path, strlen(used_save_path), /* persistent */ false);
 
 	if (PS_GET_MOD_DATA()) {
 		ps_close_files(mod_data);
@@ -486,7 +489,7 @@ PS_READ_FUNC(files)
 		return SUCCESS;
 	}
 
-	*val = zend_string_alloc(sbuf.st_size, 0);
+	*val = zend_string_alloc(sbuf.st_size, false);
 
 #ifdef HAVE_PREAD
 	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
@@ -519,7 +522,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL, E_WARNING, "Read returned less bytes than requested");
 		}
-		zend_string_release_ex(*val, 0);
+		zend_string_release_ex(*val, false);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
@@ -675,7 +678,7 @@ PS_CREATE_SID_FUNC(files)
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
-			zend_string_release_ex(sid, 0);
+			zend_string_release_ex(sid, false);
 			sid = NULL;
 			if (--maxfail < 0) {
 				return NULL;

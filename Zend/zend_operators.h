@@ -146,7 +146,7 @@ static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
 }
 
 /* Used to convert a string float to integer during an (int) cast */
-static zend_always_inline zend_long zend_dval_to_lval_cap(double d, const zend_string *s)
+static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
 	if (UNEXPECTED(!zend_finite(d))) {
 		return 0;
@@ -388,22 +388,11 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 	return _try_convert_to_string(op);
 }
 
-/* Compatibility macros for 7.2 and below */
-#define _zval_get_long(op) zval_get_long(op)
-#define _zval_get_double(op) zval_get_double(op)
-#define _zval_get_string(op) zval_get_string(op)
-#define _zval_get_long_func(op) zval_get_long_func(op)
-#define _zval_get_double_func(op) zval_get_double_func(op)
-#define _zval_get_string_func(op) zval_get_string_func(op)
-
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
 ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op);
 ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op);
-
-#define zval_is_true(op) \
-	zend_is_true(op)
 
 static zend_always_inline bool i_zend_is_true(const zval *op)
 {

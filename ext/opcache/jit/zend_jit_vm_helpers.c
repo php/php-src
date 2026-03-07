@@ -255,9 +255,9 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 		}
 
 		zend_vm_stack_free_call_frame(call);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
@@ -283,9 +283,9 @@ bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
 		}
 
 		zend_vm_stack_free_call_frame(call);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
@@ -295,17 +295,17 @@ bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
 
 	if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 		if (zend_jit_deprecated_helper(OPLINE_C) == 0) {
-			return 0;
+			return false;
 		}
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_NODISCARD) {
 		if (zend_jit_nodiscard_helper(OPLINE_C) == 0) {
-			return 0;
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)

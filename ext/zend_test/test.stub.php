@@ -2,6 +2,7 @@
 
 /**
  * @generate-class-entries static
+ * @generate-c-enums
  * @generate-legacy-arginfo 80000
  * @undocumentable
  */
@@ -306,6 +307,7 @@ namespace {
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
     function zend_test_zend_ini_str(): string {}
+    function zend_test_zstr_init_literal(): string {}
 
 #ifdef ZEND_CHECK_STACK_LIMIT
     function zend_test_zend_call_stack_get(): ?array {}

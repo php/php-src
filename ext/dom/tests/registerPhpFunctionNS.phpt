@@ -62,14 +62,14 @@ $xpath->registerPhpFunctionNS('urn:bar', 'test', 'strtolower');
 var_dump($xpath->query('//a[bar:test(string(@href)) = "https://php.net"]'));
 
 ?>
---EXPECT--
+--EXPECTF--
 --- Legit cases: global function callable ---
 object(DOMNodeList)#5 (1) {
   ["length"]=>
   int(1)
 }
 --- Legit cases: string callable ---
-object(DOMNodeList)#5 (1) {
+object(DOMNodeList)#%d (1) {
   ["length"]=>
   int(1)
 }
@@ -79,12 +79,12 @@ array(1) {
   [0]=>
   string(15) "https://PHP.net"
 }
-object(DOMNodeList)#3 (1) {
+object(DOMNodeList)#%d (1) {
   ["length"]=>
   int(0)
 }
 --- Legit cases: instance class method callable ---
-object(DOMNodeList)#6 (1) {
+object(DOMNodeList)#%d (1) {
   ["length"]=>
   int(1)
 }
@@ -100,7 +100,7 @@ array(1) {
 --- Legit cases: global function callable that returns nothing ---
 string(15) "https://PHP.net"
 --- Legit cases: multiple namespaces ---
-object(DOMNodeList)#5 (1) {
+object(DOMNodeList)#%d (1) {
   ["length"]=>
   int(1)
 }

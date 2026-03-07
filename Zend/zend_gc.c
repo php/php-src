@@ -513,10 +513,10 @@ static void root_buffer_dtor(zend_gc_globals *gc_globals)
 
 static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 {
-	gc_globals->gc_enabled = 0;
-	gc_globals->gc_active = 0;
-	gc_globals->gc_protected = 1;
-	gc_globals->gc_full = 0;
+	gc_globals->gc_enabled = false;
+	gc_globals->gc_active = false;
+	gc_globals->gc_protected = true;
+	gc_globals->gc_full = false;
 
 	gc_globals->buf = NULL;
 	gc_globals->unused = GC_INVALID;
@@ -1944,7 +1944,7 @@ static void remember_prev_exception(zend_object **prev_exception)
 	}
 }
 
-static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
+static zend_never_inline void gc_call_destructors_in_fiber(void)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
@@ -1993,8 +1993,8 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int total_count = 0;
-	bool should_rerun_gc = 0;
-	bool did_rerun_gc = 0;
+	bool should_rerun_gc = false;
+	bool did_rerun_gc = false;
 
 	zend_hrtime_t start_time = zend_hrtime();
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
@@ -2048,7 +2048,7 @@ rerun_gc:
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
 			 * destructors at this point and automatically re-run GC afterwards. */
-			should_rerun_gc = 1;
+			should_rerun_gc = true;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -2093,7 +2093,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
 			} else {
-				gc_call_destructors_in_fiber(end);
+				gc_call_destructors_in_fiber();
 			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 
@@ -2174,7 +2174,7 @@ rerun_gc:
 	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
 	 * run GC another time. */
 	if (should_rerun_gc && !did_rerun_gc) {
-		did_rerun_gc = 1;
+		did_rerun_gc = true;
 		goto rerun_gc;
 	}
 

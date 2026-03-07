@@ -479,11 +479,7 @@ PHP_FUNCTION(filter_has_var)
 		RETURN_THROWS();
 	}
 
-	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var));
 }
 /* }}} */
 
@@ -829,9 +825,7 @@ PHP_FUNCTION(filter_list)
 {
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	for (int i = 0; i < size; ++i) {

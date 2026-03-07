@@ -42,6 +42,7 @@
 #include "locale/locale_class.h"
 
 #include "listformatter/listformatter_class.h"
+#include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -114,7 +115,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 static PHP_INI_MH(OnUpdateErrorLevel)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (*p) {
 		php_error_docref("session.configuration", E_DEPRECATED,
@@ -189,6 +190,10 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'ListFormatter' PHP class */
 	listformatter_register_class(  );
 
+#if U_ICU_VERSION_MAJOR_NUM >= 63
+	/* Register 'NumberRangeFormatter' PHP class */
+	rangeformatter_register_class( );
+#endif
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
 

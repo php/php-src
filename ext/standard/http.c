@@ -124,14 +124,14 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */
@@ -374,9 +374,7 @@ exit:
 
 PHP_FUNCTION(http_get_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!Z_ISUNDEF(BG(last_http_headers))) {
 		RETURN_COPY(&BG(last_http_headers));
@@ -387,9 +385,7 @@ PHP_FUNCTION(http_get_last_response_headers)
 
 PHP_FUNCTION(http_clear_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zval_ptr_dtor(&BG(last_http_headers));
 	ZVAL_UNDEF(&BG(last_http_headers));

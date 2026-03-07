@@ -4720,116 +4720,6 @@ const mbfl_encoding mbfl_encoding_2022kr = {
  * SJIS variants
  */
 
-static int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter)
-{
-	int s1, s2, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* ASCII */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
-			CK((*filter->output_function)(0xFEC0 + c, filter->data));
-		} else if (c > 0x80 && c < 0xF0 && c != 0xA0) { /* Kanji, first byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* Kanji, second byte */
-		filter->status = 0;
-		int c1 = filter->cache;
-		if (c >= 0x40 && c <= 0xFC && c != 0x7F) {
-			SJIS_DECODE(c1, c, s1, s2);
-			w = (s1 - 0x21)*94 + s2 - 0x21;
-			if (w >= 0 && w < jisx0208_ucs_table_size) {
-				w = jisx0208_ucs_table[w];
-				if (!w)
-					w = MBFL_BAD_INPUT;
-			} else {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status && filter->status != 4) {
-		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
-	}
-	filter->status = 0;
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, s1 = 0, s2;
-
-	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	}
-	if (s1 <= 0) {
-		if (c == 0xA5) { /* YEN SIGN */
-			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0xAF || c == 0x203E) { /* U+00AF is MACRON, U+203E is OVERLINE */
-			s1 = 0x2131; /* FULLWIDTH MACRON */
-		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
-			s1 = 0x2140;
-		} else if (c == 0x2225) { /* PARALLEL TO */
-			s1 = 0x2142;
-		} else if (c == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
-			s1 = 0x215D;
-		} else if (c == 0xFFE0) { /* FULLWIDTH CENT SIGN */
-			s1 = 0x2171;
-		} else if (c == 0xFFE1) { /* FULLWIDTH POUND SIGN */
-			s1 = 0x2172;
-		} else if (c == 0xFFE2) { /* FULLWIDTH NOT SIGN */
-			s1 = 0x224C;
-		} else if (c == 0) {
-			s1 = 0;
-		} else {
-			s1 = -1;
-		}
-	} else if (s1 >= 0x8080) { /* JIS X 0212; not supported */
-		s1 = -1;
-	}
-
-	if (s1 >= 0) {
-		if (s1 < 0x100) { /* Latin/Kana */
-			CK((*filter->output_function)(s1, filter->data));
-		} else { /* Kanji */
-			c1 = (s1 >> 8) & 0xFF;
-			c2 = s1 & 0xFF;
-			SJIS_ENCODE(c1, c2, s1, s2);
-			CK((*filter->output_function)(s1, filter->data));
-			CK((*filter->output_function)(s2, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
 static const unsigned short sjis_decode_tbl1[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 0xFFFF, -6016, -5828, -5640, -5452, -5264, -5076, -4888, -4700, -4512, -4324, -4136, -3948, -3760, -3572, -3384, -3196, -3008, -2820, -2632, -2444, -2256, -2068, -1880, -1692, -1504, -1316, -1128, -940, -752, -564, -376, -188, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 5828, 6016, 6204, 6392, 6580, 6768, 6956, 7144, 7332, 7520, 7708, 7896, 8084, 8272, 8460, 8648, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
 };
@@ -4953,536 +4843,6 @@ static void mb_wchar_to_sjis(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
-{
-	int i, j, n;
-	int c1, s, s1, s2, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80 && c != 0x5c) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xe0) {	/* kana */
-			CK((*filter->output_function)(0xfec0 + c, filter->data));
-		} else if (c > 0x80 && c <= 0xed && c != 0xa0) {	/* kanji first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x5c) {
-			CK((*filter->output_function)(0x00a5, filter->data));
-		} else if (c == 0x80) {
-			CK((*filter->output_function)(0x005c, filter->data));
-		} else if (c == 0xa0) {
-			CK((*filter->output_function)(0x00a0, filter->data));
-		} else if (c == 0xfd) {
-			CK((*filter->output_function)(0x00a9, filter->data));
-		} else if (c == 0xfe) {
-			CK((*filter->output_function)(0x2122, filter->data));
-		} else if (c == 0xff) {
-			CK((*filter->output_function)(0x2026, filter->data));
-			CK((*filter->output_function)(0xf87f, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1:		/* kanji second char */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c >= 0x40 && c <= 0xfc && c != 0x7f) {
-			w = 0;
-			SJIS_DECODE(c1, c, s1, s2);
-			s = (s1 - 0x21)*94 + s2 - 0x21;
-			if (s <= 0x89) {
-				if (s == 0x1c) {
-					w = 0x2014;		    /* EM DASH */
-				} else if (s == 0x1f) {
-					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 0x20) {
-					w = 0x301c;			/* FULLWIDTH TILDE */
-				} else if (s == 0x21) {
-					w = 0x2016;			/* PARALLEL TO */
-				} else if (s == 0x3c) {
-					w = 0x2212;			/* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 0x50) {
-					w = 0x00a2;			/* FULLWIDTH CENT SIGN */
-				} else if (s == 0x51) {
-					w = 0x00a3;			/* FULLWIDTH POUND SIGN */
-				} else if (s == 0x89) {
-					w = 0x00ac;			/* FULLWIDTH NOT SIGN */
-				}
-			}
-
-			/* apple gaiji area 0x8540 - 0x886d */
-			if (w == 0) {
-				for (i=0; i<7; i++) {
-					if (s >= code_tbl[i][0] && s <= code_tbl[i][1]) {
-						w = s - code_tbl[i][0] + code_tbl[i][2];
-						break;
-					}
-				}
-			}
-
-			if (w == 0) {
-
-				for (i=0; i<code_tbl_m_len; i++) {
-					if (s == code_tbl_m[i][0]) {
-						if (code_tbl_m[i][1] == 0xf860) {
-							n = 4;
-						} else if (code_tbl_m[i][1] == 0xf861) {
-							n = 5;
-						} else {
-							n = 6;
-						}
-						for (j=1; j<n-1; j++) {
-							CK((*filter->output_function)(code_tbl_m[i][j], filter->data));
-						}
-						w = code_tbl_m[i][n-1];
-						break;
-					}
-				}
-			}
-
-			if (w == 0) {
-				for (i=0; i<8; i++) {
-					if (s >= code_ofst_tbl[i][0] && s <= code_ofst_tbl[i][1]) {
-						w = code_map[i][s - code_ofst_tbl[i][0]];
-						if (w == 0) {
-							CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-							return 0;
-						}
-						s2 = 0;
-						if (s >= 0x043e && s <= 0x0441) {
-							s2 = 0xf87a;
-						} else if (s == 0x03b1 || s == 0x03b7) {
-							s2 = 0xf87f;
-						} else if (s == 0x04b8 || s == 0x04b9 || s == 0x04c4) {
-							s2 = 0x20dd;
-						} else if (s == 0x1ed9 || s == 0x1eda || s == 0x1ee8 || s == 0x1ef3 ||
-								   (s >= 0x1ef5 && s <= 0x1efb) || s == 0x1f05 || s == 0x1f06 ||
-								   s == 0x1f18 || (s >= 0x1ff2 && s <= 0x20a5)) {
-							s2 = 0xf87e;
-						}
-						if (s2 > 0) {
-							CK((*filter->output_function)(w, filter->data));
-							w = s2;
-						}
-						break;
-					}
-				}
-			}
-
-			if (w == 0 && s >= 0 && s < jisx0208_ucs_table_size) {	/* X 0208 */
-				w = jisx0208_ucs_table[s];
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
-{
-	int i, c1, c2, s1 = 0, s2 = 0, mode;
-
-	// a1: U+0000 -> U+046F
-	// a2: U+2000 -> U+30FF
-	//  i: U+4E00 -> U+9FFF
-	//  r: U+FF00 -> U+FFFF
-
-	switch (filter->status) {
-	case 1:
-		c1 = filter->cache;
-		filter->cache = filter->status = 0;
-
-		if (c == 0xf87a) {
-			for (i = 0; i < 4; i++) {
-				if (c1 == s_form_tbl[i+34+3+3]) {
-					s1 = s_form_sjis_tbl[i+34+3+3];
-					break;
-				}
-			}
-			if (s1 <= 0) {
-				s2 = c1;
-			}
-		} else if (c == 0x20dd) {
-			for (i = 0; i < 3; i++) {
-				if (c1 == s_form_tbl[i+34+3]) {
-					s1 = s_form_sjis_tbl[i+34+3];
-					break;
-				}
-			}
-			if (s1 <= 0) {
-				s2 = c1;
-			}
-		} else if (c == 0xf87f) {
-			for (i = 0; i < 3; i++) {
-				if (c1 == s_form_tbl[i+34]) {
-					s1 = s_form_sjis_tbl[i+34];
-					break;
-				}
-			}
-			if (s1 <= 0) {
-				s2 = c1;
-				s1 = -1;
-			}
-		} else if (c == 0xf87e) {
-			for (i = 0; i < 34; i++) {
-				if (c1 == s_form_tbl[i]) {
-					s1 = s_form_sjis_tbl[i];
-					break;
-				}
-			}
-			if (s1 <= 0) {
-				s2 = c1;
-				s1 = -1;
-			}
-		} else {
-			s2 = c1;
-			s1 = c;
-		}
-
-		if (s2 > 0) {
-			for (i = 0; i < s_form_tbl_len; i++) {
-				if (c1 == s_form_tbl[i]) {
-					s1 = s_form_sjis_fallback_tbl[i];
-					break;
-				}
-			}
-		}
-
-		if (s1 >= 0) {
-			if (s1 < 0x100) {
-				CK((*filter->output_function)(s1, filter->data));
-			} else {
-				CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
-				CK((*filter->output_function)(s1 & 0xff, filter->data));
-			}
-		} else {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
-
-		if (s2 <= 0 || s1 == -1) {
-			break;
-		}
-		s1 = s2 = 0;
-		ZEND_FALLTHROUGH;
-
-	case 0:
-		if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-			s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-			if (c == 0x5c) {
-				s1 = 0x80;
-			} else if (c == 0xa9) {
-				s1 = 0xfd;
-			}
-		} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-			s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-			if (c == 0x2122) {
-				s1 = 0xfe;
-			} else if (c == 0x2014) {
-				s1 = 0x213d;
-			} else if (c == 0x2116) {
-				s1 = 0x2c1d;
-			}
-		} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-			s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-		} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-			s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-		}
-
-		if (c >= 0x2000) {
-			for (i = 0; i < s_form_tbl_len; i++) {
-				if (c == s_form_tbl[i]) {
-					filter->status = 1;
-					filter->cache = c;
-					return 0;
-				}
-			}
-
-			if (c == 0xf860 || c == 0xf861 || c == 0xf862) {
-				/* Apple 'transcoding hint' codepoints (from private use area) */
-				filter->status = 2;
-				filter->cache = c;
-				return 0;
-			}
-		}
-
-		if (s1 <= 0) {
-			if (c == 0xa0) {
-				s1 = 0x00a0;
-			} else if (c == 0xa5) { /* YEN SIGN */
-				/* Unicode has codepoint 0xFFE5 for a fullwidth Yen sign;
-				 * convert codepoint 0xA5 to halfwidth Yen sign */
-				s1 = 0x5c; /* HALFWIDTH YEN SIGN */
-			} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-				s1 = 0x2140;
-			}
-		}
-
-		if (s1 <= 0) {
-			for (i=0; i<wchar2sjis_mac_r_tbl_len; i++) {
-				if (c >= wchar2sjis_mac_r_tbl[i][0] && c <= wchar2sjis_mac_r_tbl[i][1]) {
-					s1 = c - wchar2sjis_mac_r_tbl[i][0] + wchar2sjis_mac_r_tbl[i][2];
-					break;
-				}
-			}
-
-			if (s1 <= 0) {
-				for (i=0; i<wchar2sjis_mac_r_map_len; i++) {
-					if (c >= wchar2sjis_mac_r_map[i][0] && c <= wchar2sjis_mac_r_map[i][1]) {
-						s1 = wchar2sjis_mac_code_map[i][c-wchar2sjis_mac_r_map[i][0]];
-						break;
-					}
-				}
-			}
-
-			if (s1 <= 0) {
-				for (i=0; i<wchar2sjis_mac_wchar_tbl_len ; i++) {
-					if ( c == wchar2sjis_mac_wchar_tbl[i][0]) {
-						s1 = wchar2sjis_mac_wchar_tbl[i][1] & 0xffff;
-						break;
-					}
-				}
-			}
-
-			if (s1 > 0) {
-				c1 = s1/94+0x21;
-				c2 = s1-94*(c1-0x21)+0x21;
-				s1 = (c1 << 8) | c2;
-				s2 = 1;
-			}
-		}
-
-		if ((s1 <= 0) || (s1 >= 0x8080 && s2 == 0)) {	/* not found or X 0212 */
-			s1 = -1;
-			c1 = 0;
-
-			if (c == 0) {
-				s1 = 0;
-			} else if (s1 <= 0) {
-				s1 = -1;
-			}
-		}
-
-		if (s1 >= 0) {
-			if (s1 < 0x100) { /* latin or kana */
-				CK((*filter->output_function)(s1, filter->data));
-			} else { /* kanji */
-				c1 = (s1 >> 8) & 0xff;
-				c2 = s1 & 0xff;
-				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
-			}
-		} else {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
-		break;
-
-	case 2:
-		c1 = filter->cache;
-		filter->cache = 0;
-		filter->status = 0;
-		if (c1 == 0xf860) {
-			for (i = 0; i < 5; i++) {
-				if (c == code_tbl_m[i][2]) {
-					filter->cache = c | 0x10000;
-					filter->status = 3;
-					break;
-				}
-			}
-		} else if (c1 == 0xf861) {
-			for (i = 0; i < 3; i++) {
-				if (c == code_tbl_m[i+5][2]) {
-					filter->cache = c | 0x20000;
-					filter->status = 3;
-					break;
-				}
-			}
-		} else if (c1 == 0xf862) {
-			for (i = 0; i < 4; i++) {
-				if (c == code_tbl_m[i+5+3][2]) {
-					filter->cache = c | 0x40000;
-					filter->status = 3;
-					break;
-				}
-			}
-		}
-
-		if (filter->status == 0) {
-			/* Didn't find any of expected codepoints after Apple transcoding hint */
-			CK(mbfl_filt_conv_illegal_output(c1, filter));
-			return mbfl_filt_conv_wchar_sjis_mac(c, filter);
-		}
-		break;
-
-	case 3:
-		s1 = 0;
-		c1 = filter->cache & 0xffff;
-		mode = (filter->cache & 0xf0000) >> 16;
-
-		filter->cache = filter->status = 0;
-
-		if (mode == 0x1) {
-			for (i = 0; i < 5; i++) {
-				if (c1 == code_tbl_m[i][2] && c == code_tbl_m[i][3]) {
-					s1 = code_tbl_m[i][0];
-					break;
-				}
-			}
-
-			if (s1 > 0) {
-				c1 = s1/94+0x21;
-				c2 = s1-94*(c1-0x21)+0x21;
-				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
-			} else {
-				CK(mbfl_filt_conv_illegal_output(0xf860, filter));
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
-		} else if (mode == 0x2) {
-			for (i = 0; i < 3; i++) {
-				if (c1 == code_tbl_m[i+5][2] && c == code_tbl_m[i+5][3]) {
-					filter->cache = c | 0x20000;
-					filter->status = 4;
-					break;
-				}
-			}
-		} else if (mode == 0x4) {
-			for (i = 0; i < 4; i++) {
-				if (c1 == code_tbl_m[i+8][2] && c == code_tbl_m[i+8][3]) {
-					filter->cache = c | 0x40000;
-					filter->status = 4;
-					break;
-				}
-			}
-		}
-		break;
-
-	case 4:
-		s1 = 0;
-		c1 = filter->cache & 0xffff;
-		mode = (filter->cache & 0xf0000) >> 16;
-
-		filter->cache = 0;
-		filter->status = 0;
-
-		if (mode == 0x2) {
-			for (i = 0; i < 3; i++) {
-				if (c1 == code_tbl_m[i+5][3] && c == code_tbl_m[i+5][4]) {
-					s1 = code_tbl_m[i+5][0];
-					break;
-				}
-			}
-
-			if (s1 > 0) {
-				c1 = s1/94+0x21;
-				c2 = s1-94*(c1-0x21)+0x21;
-				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
-			} else {
-				CK(mbfl_filt_conv_illegal_output(0xf861, filter));
-				for (i = 0; i < 3; i++) {
-					if (c1 == code_tbl_m[i+5][3]) {
-						CK(mbfl_filt_conv_illegal_output(code_tbl_m[i+5][2], filter));
-						break;
-					}
-				}
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
-		} else if (mode == 0x4) {
-			for (i = 0; i < 4; i++) {
-				if (c1 == code_tbl_m[i+8][3] && c == code_tbl_m[i+8][4]) {
-					filter->cache = c | 0x40000;
-					filter->status = 5;
-					break;
-				}
-			}
-		}
-		break;
-
-	case 5:
-		s1 = 0;
-		c1 = filter->cache & 0xffff;
-		mode = (filter->cache & 0xf0000) >> 16;
-
-		filter->cache = filter->status = 0;
-
-		if (mode == 0x4) {
-			for (i = 0; i < 4; i++) {
-				if (c1 == code_tbl_m[i+8][4] && c == code_tbl_m[i+8][5]) {
-					s1 = code_tbl_m[i+8][0];
-					break;
-				}
-			}
-
-			if (s1 > 0) {
-				c1 = s1/94+0x21;
-				c2 = s1-94*(c1-0x21)+0x21;
-				SJIS_ENCODE(c1, c2, s1, s2);
-				CK((*filter->output_function)(s1, filter->data));
-				CK((*filter->output_function)(s2, filter->data));
-			} else {
-				CK(mbfl_filt_conv_illegal_output(0xf862, filter));
-				for (i = 0; i < 4; i++) {
-					if (c1 == code_tbl_m[i+8][4]) {
-						CK(mbfl_filt_conv_illegal_output( code_tbl_m[i+8][2], filter));
-						CK(mbfl_filt_conv_illegal_output( code_tbl_m[i+8][3], filter));
-						break;
-					}
-				}
-				CK(mbfl_filt_conv_illegal_output(c1, filter));
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)
-{
-	int i, c1, s1 = 0;
-	if (filter->status == 1 && filter->cache > 0) {
-		c1 = filter->cache;
-		for (i=0;i<s_form_tbl_len;i++) {
-			if (c1 == s_form_tbl[i]) {
-				s1 = s_form_sjis_fallback_tbl[i];
-				break;
-			}
-		}
-		if (s1 > 0) {
-			CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s1 & 0xff, filter->data));
-		}
-	}
-	filter->cache = 0;
-	filter->status = 0;
-
-	if (filter->flush_function != NULL) {
-		return (*filter->flush_function)(filter->data);
-	}
-
-	return 0;
 }
 
 static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -5928,479 +5288,6 @@ int mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			return convert_emoji_cp(mb_tbl_code2uni_sb3[s - mb_tbl_code2uni_sb3_min]);
 		}
 	}
-	return 0;
-}
-
-int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
-{
-	/* When converting SJIS-Mobile to Unicode, we convert keypad symbol emoji
-	 * to a sequence of 2 codepoints, one of which is a combining character which
-	 * adds the 'key' image around the other
-	 *
-	 * In the other direction, look for such sequences and convert them to a
-	 * single emoji */
-	if (filter->status == 1) {
-		int c1 = filter->cache;
-		filter->cache = filter->status = 0;
-		if (c == 0x20E3) {
-			if (c1 == '#') {
-				*s1 = 0x2964;
-			} else if (c1 == '0') {
-				*s1 = 0x296F;
-			} else { /* Previous character was '1'-'9' */
-				*s1 = 0x2966 + (c1 - '1');
-			}
-			return 1;
-		} else {
-			/* This character wasn't combining character to make keypad symbol,
-			 * so pass the previous character through... and proceed to process the
-			 * current character as usual
-			 * (Single-byte ASCII characters are valid in Shift-JIS...) */
-			CK((*filter->output_function)(c1, filter->data));
-		}
-	}
-
-	if (c == '#' || (c >= '0' && c <= '9')) {
-		filter->status = 1;
-		filter->cache = c;
-		return 0;
-	}
-
-	if (c == 0xA9) { /* Copyright sign */
-		*s1 = 0x29B5;
-		return 1;
-	} else if (c == 0x00AE) { /* Registered sign */
-		*s1 = 0x29BA;
-		return 1;
-	} else if (c >= mb_tbl_uni_docomo2code2_min && c <= mb_tbl_uni_docomo2code2_max) {
-		int i = mbfl_bisec_srch2(c, mb_tbl_uni_docomo2code2_key, mb_tbl_uni_docomo2code2_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_docomo2code2_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_docomo2code3_min && c <= mb_tbl_uni_docomo2code3_max) {
-		int i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_docomo2code3_key, mb_tbl_uni_docomo2code3_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_docomo2code3_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_docomo2code5_min && c <= mb_tbl_uni_docomo2code5_max) {
-		int i = mbfl_bisec_srch2(c - 0xF0000, mb_tbl_uni_docomo2code5_key, mb_tbl_uni_docomo2code5_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_docomo2code5_val[i];
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int mbfilter_unicode2sjis_emoji_kddi_sjis(int c, int *s1, mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		int c1 = filter->cache;
-		filter->cache = filter->status = 0;
-		if (c == 0x20E3) {
-			if (c1 == '#') {
-				*s1 = 0x25BC;
-			} else if (c1 == '0') {
-				*s1 = 0x2830;
-			} else { /* Previous character was '1'-'9' */
-				*s1 = 0x27a6 + (c1 - '1');
-			}
-			return 1;
-		} else {
-			CK((*filter->output_function)(c1, filter->data));
-		}
-	} else if (filter->status == 2) {
-		int c1 = filter->cache;
-		filter->cache = filter->status = 0;
-		if (c >= NFLAGS('B') && c <= NFLAGS('U')) { /* B for GB, U for RU */
-			for (int i = 0; i < 10; i++) {
-				if (c1 == NFLAGS(nflags_s[i][0]) && c == NFLAGS(nflags_s[i][1])) {
-					*s1 = nflags_code_kddi[i];
-					return 1;
-				}
-			}
-		}
-
-		/* If none of the KDDI national flag emoji matched, then we have no way
-		 * to convert the previous codepoint... */
-		mbfl_filt_conv_illegal_output(c1, filter);
-	}
-
-	if (c == '#' || (c >= '0' && c <= '9')) {
-		filter->status = 1;
-		filter->cache = c;
-		return 0;
-	} else if (c >= NFLAGS('C') && c <= NFLAGS('U')) { /* C for CN, U for US */
-		filter->status = 2;
-		filter->cache = c;
-		return 0;
-	}
-
-	if (c == 0xA9) { /* Copyright sign */
-		*s1 = 0x27DC;
-		return 1;
-	} else if (c == 0xAE) { /* Registered sign */
-		*s1 = 0x27DD;
-		return 1;
-	} else if (c >= mb_tbl_uni_kddi2code2_min && c <= mb_tbl_uni_kddi2code2_max) {
-		int i = mbfl_bisec_srch2(c, mb_tbl_uni_kddi2code2_key, mb_tbl_uni_kddi2code2_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_kddi2code2_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_kddi2code3_min && c <= mb_tbl_uni_kddi2code3_max) {
-		int i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_kddi2code3_key, mb_tbl_uni_kddi2code3_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_kddi2code3_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_kddi2code5_min && c <= mb_tbl_uni_kddi2code5_max) {
-		int i = mbfl_bisec_srch2(c - 0xF0000, mb_tbl_uni_kddi2code5_key, mb_tbl_uni_kddi2code5_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_kddi2code5_val[i];
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		int c1 = filter->cache;
-		filter->cache = filter->status = 0;
-		if (c == 0x20E3) {
-			if (c1 == '#') {
-				*s1 = 0x2817;
-			} else if (c1 == '0') {
-				*s1 = 0x282c;
-			} else { /* Previous character was '1'-'9' */
-				*s1 = 0x2823 + (c1 - '1');
-			}
-			return 1;
-		} else {
-			(*filter->output_function)(c1, filter->data);
-		}
-	} else if (filter->status == 2) {
-		int c1 = filter->cache;
-		filter->cache = filter->status = 0;
-		if (c >= NFLAGS('B') && c <= NFLAGS('U')) { /* B for GB, U for RU */
-			for (int i = 0; i < 10; i++) {
-				if (c1 == NFLAGS(nflags_s[i][0]) && c == NFLAGS(nflags_s[i][1])) {
-					*s1 = nflags_code_sb[i];
-					return 1;
-				}
-			}
-		}
-
-		/* If none of the SoftBank national flag emoji matched, then we have no way
-		 * to convert the previous codepoint... */
-		mbfl_filt_conv_illegal_output(c1, filter);
-	}
-
-	if (c == '#' || (c >= '0' && c <= '9')) {
-		filter->status = 1;
-		filter->cache = c;
-		return 0;
-	} else if (c >= NFLAGS('C') && c <= NFLAGS('U')) { /* C for CN, U for US */
-		filter->status = 2;
-		filter->cache = c;
-		return 0;
-	}
-
-	if (c == 0xA9) { /* Copyright sign */
-		*s1 = 0x2855;
-		return 1;
-	} else if (c == 0xAE) { /* Registered sign */
-		*s1 = 0x2856;
-		return 1;
-	} else if (c >= mb_tbl_uni_sb2code2_min && c <= mb_tbl_uni_sb2code2_max) {
-		int i = mbfl_bisec_srch2(c, mb_tbl_uni_sb2code2_key, mb_tbl_uni_sb2code2_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_sb2code2_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_sb2code3_min && c <= mb_tbl_uni_sb2code3_max) {
-		int i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_sb2code3_key, mb_tbl_uni_sb2code3_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_sb2code3_value[i];
-			return 1;
-		}
-	} else if (c >= mb_tbl_uni_sb2code5_min && c <= mb_tbl_uni_sb2code5_max) {
-		int i = mbfl_bisec_srch2(c - 0xF0000, mb_tbl_uni_sb2code5_key, mb_tbl_uni_sb2code5_len);
-		if (i >= 0) {
-			*s1 = mb_tbl_uni_sb2code5_val[i];
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, s1, s2, w, snd = 0;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* ASCII */
-			if (filter->from == &mbfl_encoding_sjis_sb && c == 0x1B) {
-				/* ESC; escape sequences were used on older SoftBank phones for emoji */
-				filter->cache = c;
-				filter->status = 2;
-			} else {
-				CK((*filter->output_function)(c, filter->data));
-			}
-		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
-			CK((*filter->output_function)(0xFEC0 + c, filter->data));
-		} else if (c > 0x80 && c < 0xFD && c != 0xA0) { /* Kanji, first byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* Kanji, second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c >= 0x40 && c <= 0xFC && c != 0x7F) {
-			w = 0;
-			SJIS_DECODE(c1, c, s1, s2);
-			s = ((s1 - 0x21) * 94) + s2 - 0x21;
-			if (s <= 137) {
-				if (s == 31) {
-					w = 0xFF3C; /* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 32) {
-					w = 0xFF5E; /* FULLWIDTH TILDE */
-				} else if (s == 33) {
-					w = 0x2225; /* PARALLEL TO */
-				} else if (s == 60) {
-					w = 0xFF0D; /* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 80) {
-					w = 0xFFE0; /* FULLWIDTH CENT SIGN */
-				} else if (s == 81) {
-					w = 0xFFE1; /* FULLWIDTH POUND SIGN */
-				} else if (s == 137) {
-					w = 0xFFE2; /* FULLWIDTH NOT SIGN */
-				}
-			}
-			if (w == 0) {
-				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
-					w = jisx0208_ucs_table[s];
-				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {		/* vendor ext2 (89ku - 92ku) */
-					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
-				}
-
-				/* Emoji */
-				if (filter->from == &mbfl_encoding_sjis_docomo && s >= mb_tbl_code2uni_docomo1_min && s <= mb_tbl_code2uni_docomo1_max) {
-					w = mbfilter_sjis_emoji_docomo2unicode(s, &snd);
-					if (snd > 0) {
-						CK((*filter->output_function)(snd, filter->data));
-					}
-				} else if (filter->from == &mbfl_encoding_sjis_kddi && s >= mb_tbl_code2uni_kddi1_min && s <= mb_tbl_code2uni_kddi2_max) {
-					w = mbfilter_sjis_emoji_kddi2unicode(s, &snd);
-					if (snd > 0) {
-						CK((*filter->output_function)(snd, filter->data));
-					}
-				} else if (filter->from == &mbfl_encoding_sjis_sb && s >= mb_tbl_code2uni_sb1_min && s <= mb_tbl_code2uni_sb3_max) {
-					w = mbfilter_sjis_emoji_sb2unicode(s, &snd);
-					if (snd > 0) {
-						CK((*filter->output_function)(snd, filter->data));
-					}
-				}
-
-				if (w == 0) {
-					if (s >= cp932ext3_ucs_table_min && s < cp932ext3_ucs_table_max) { /* vendor ext3 (115ku - 119ku) */
-						w = cp932ext3_ucs_table[s - cp932ext3_ucs_table_min];
-					} else if (s >= (94*94) && s < (114*94)) { /* user (95ku - 114ku) */
-						w = s - (94*94) + 0xe000;
-					}
-				}
-			}
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	/* ESC: Softbank Emoji */
-	case 2:
-		if (c == '$') {
-			filter->cache = c;
-			filter->status++;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = filter->cache = 0;
-		}
-		break;
-
-	/* ESC $: Softbank Emoji */
-	case 3:
-		if ((c >= 'E' && c <= 'G') || (c >= 'O' && c <= 'Q')) {
-			filter->cache = c;
-			filter->status++;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = filter->cache = 0;
-		}
-		break;
-
-	/* ESC $ [GEFOPQ]: Softbank Emoji */
-	case 4:
-		c1 = filter->cache;
-		if (c == 0xF) { /* Terminate sequence of emoji */
-			filter->status = filter->cache = 0;
-			return 0;
-		} else {
-			if (c1 == 'G' && c >= 0x21 && c <= 0x7a) {
-				s1 = (0x91 - 0x21) * 94;
-			} else if (c1 == 'E' && c >= 0x21 && c <= 0x7A) {
-				s1 = (0x8D - 0x21) * 94;
-			} else if (c1 == 'F' && c >= 0x21 && c <= 0x7A) {
-				s1 = (0x8E - 0x21) * 94;
-			} else if (c1 == 'O' && c >= 0x21 && c <= 0x6D) {
-				s1 = (0x92 - 0x21) * 94;
-			} else if (c1 == 'P' && c >= 0x21 && c <= 0x6C) {
-				s1 = (0x95 - 0x21) * 94;
-			} else if (c1 == 'Q' && c >= 0x21 && c <= 0x5E) {
-				s1 = (0x96 - 0x21) * 94;
-			} else {
-				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-				filter->status = filter->cache = 0;
-				return 0;
-			}
-
-			w = mbfilter_sjis_emoji_sb2unicode(s1 + c - 0x21, &snd);
-			if (w > 0) {
-				if (snd > 0) {
-					CK((*filter->output_function)(snd, filter->data));
-				}
-				CK((*filter->output_function)(w, filter->data));
-			} else {
-				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-				filter->status = filter->cache = 0;
-			}
-		}
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, s1 = 0, s2 = 0;
-
-	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xE000 && c < (0xE000 + 20*94)) {
-		/* Private User Area (95ku - 114ku) */
-		s1 = c - 0xE000;
-		c1 = (s1 / 94) + 0x7F;
-		c2 = (s1 % 94) + 0x21;
-		s1 = (c1 << 8) | c2;
-		s2 = 1;
-	}
-
-	if (s1 <= 0) {
-		if (c == 0xA5) { /* YEN SIGN */
-			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0xFF3c) { /* FULLWIDTH REVERSE SOLIDUS */
-			s1 = 0x2140;
-		} else if (c == 0x2225) { /* PARALLEL TO */
-			s1 = 0x2142;
-		} else if (c == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
-			s1 = 0x215D;
-		} else if (c == 0xFFE0) { /* FULLWIDTH CENT SIGN */
-			s1 = 0x2171;
-		} else if (c == 0xFFE1) { /* FULLWIDTH POUND SIGN */
-			s1 = 0x2172;
-		} else if (c == 0xFFE2) { /* FULLWIDTH NOT SIGN */
-			s1 = 0x224C;
-		}
-	}
-
-	if ((s1 <= 0) || (s1 >= 0x8080 && s2 == 0)) {	/* not found or X 0212 */
-		s1 = -1;
-
-		/* CP932 vendor ext1 (13ku) */
-		for (c1 = 0; c1 < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; c1++) {
-			if (c == cp932ext1_ucs_table[c1]) {
-				s1 = (((c1 / 94) + 0x2D) << 8) + (c1 % 94) + 0x21;
-				break;
-			}
-		}
-
-		if (s1 <= 0) {
-			/* CP932 vendor ext2 (115ku - 119ku) */
-			for (c1 = 0; c1 < cp932ext2_ucs_table_max - cp932ext2_ucs_table_min; c1++) {
-				if (c == cp932ext2_ucs_table[c1]) {
-					s1 = (((c1 / 94) + 0x79) << 8) + (c1 % 94) + 0x21;
-					break;
-				}
-			}
-		}
-
-		if (c == 0) {
-			s1 = 0;
-		}
-	}
-
-	if ((filter->to == &mbfl_encoding_sjis_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter)) ||
-		  (filter->to == &mbfl_encoding_sjis_kddi   && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter)) ||
-		  (filter->to == &mbfl_encoding_sjis_sb     && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter))) {
-		s1 = (((s1 / 94) + 0x21) << 8) | ((s1 % 94) + 0x21);
-	}
-
-	if (filter->status) {
-		return 0;
-	}
-
-	if (s1 >= 0) {
-		if (s1 < 0x100) { /* Latin/Kana */
-			CK((*filter->output_function)(s1, filter->data));
-		} else { /* Kanji */
-			c1 = (s1 >> 8) & 0xff;
-			c2 = s1 & 0xff;
-			SJIS_ENCODE(c1, c2, s1, s2);
-			CK((*filter->output_function)(s1, filter->data));
-			CK((*filter->output_function)(s2, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
-{
-	int c1 = filter->cache;
-	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
-		filter->cache = filter->status = 0;
-		CK((*filter->output_function)(c1, filter->data));
-	} else if (filter->status == 2) {
-		/* First of a pair of Regional Indicator codepoints came at the end of a string */
-		filter->cache = filter->status = 0;
-		mbfl_filt_conv_illegal_output(c1, filter);
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
 	return 0;
 }
 
@@ -7354,191 +6241,6 @@ process_codepoint: ;
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
-static int mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, s1, s2, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xe0) {	/* kana */
-			CK((*filter->output_function)(0xfec0 + c, filter->data));
-		} else if (c > 0x80 && c < 0xfd && c != 0xa0) {	/* kanji first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1:		/* kanji second char */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c >= 0x40 && c <= 0xfc && c != 0x7f) {
-			w = 0;
-			SJIS_DECODE(c1, c, s1, s2);
-			s = (s1 - 0x21)*94 + s2 - 0x21;
-			if (s <= 137) {
-				if (s == 31) {
-					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 32) {
-					w = 0xff5e;			/* FULLWIDTH TILDE */
-				} else if (s == 33) {
-					w = 0x2225;			/* PARALLEL TO */
-				} else if (s == 60) {
-					w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 80) {
-					w = 0xffe0;			/* FULLWIDTH CENT SIGN */
-				} else if (s == 81) {
-					w = 0xffe1;			/* FULLWIDTH POUND SIGN */
-				} else if (s == 137) {
-					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
-				}
-			}
-			if (w == 0) {
-				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
-					w = jisx0208_ucs_table[s];
-				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {		/* vendor ext2 (89ku - 92ku) */
-					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
-				} else if (s >= cp932ext3_ucs_table_min && s < cp932ext3_ucs_table_max) {		/* vendor ext3 (115ku - 119ku) */
-					w = cp932ext3_ucs_table[s - cp932ext3_ucs_table_min];
-				} else if (s >= (94*94) && s < (114*94)) {		/* user (95ku - 114ku) */
-					w = s - (94*94) + 0xe000;
-				}
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
-		filter->status = 0;
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, s1, s2;
-
-	s1 = 0;
-	s2 = 0;
-	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c == 0x203E) {
-		s1 = 0x7E;
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xe000 && c < (0xe000 + 20*94)) {	/* user  (95ku - 114ku) */
-		s1 = c - 0xe000;
-		c1 = s1/94 + 0x7f;
-		c2 = s1%94 + 0x21;
-		s1 = (c1 << 8) | c2;
-		s2 = 1;
-	}
-	if (s1 <= 0) {
-		if (c == 0xa5) { /* YEN SIGN */
-			s1 = 0x5C;
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s1 = 0x2140;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
-			s1 = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
-			s1 = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
-			s1 = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
-			s1 = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
-			s1 = 0x224c;
-		}
-	}
-	if ((s1 <= 0) || (s1 >= 0x8080 && s2 == 0)) {	/* not found or X 0212 */
-		s1 = -1;
-		c1 = 0;
-		c2 = cp932ext1_ucs_table_max - cp932ext1_ucs_table_min;
-		while (c1 < c2) {		/* CP932 vendor ext1 (13ku) */
-			if (c == cp932ext1_ucs_table[c1]) {
-				s1 = ((c1/94 + 0x2d) << 8) + (c1%94 + 0x21);
-				break;
-			}
-			c1++;
-		}
-		if (s1 <= 0) {
-			c1 = 0;
-			c2 = cp932ext3_ucs_table_max - cp932ext3_ucs_table_min;
-			while (c1 < c2) {		/* CP932 vendor ext3 (115ku - 119ku) */
-				if (c == cp932ext3_ucs_table[c1]) {
-					s1 = ((c1/94 + 0x93) << 8) + (c1%94 + 0x21);
-					break;
-				}
-				c1++;
-			}
-		}
-		if (c == 0) {
-			s1 = 0;
-		} else if (s1 <= 0) {
-			s1 = -1;
-		}
-	}
-	if (s1 >= 0) {
-		if (s1 < 0x100) { /* latin or kana */
-			CK((*filter->output_function)(s1, filter->data));
-		} else { /* kanji */
-			c1 = (s1 >> 8) & 0xff;
-			c2 = s1 & 0xff;
-			SJIS_ENCODE(c1, c2, s1, s2);
-			CK((*filter->output_function)(s1, filter->data));
-			CK((*filter->output_function)(s2, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_sjiswin(int c, mbfl_convert_filter *filter)
-{
-	if (c == 0xA5) {
-		CK((*filter->output_function)(0x81, filter->data));
-		CK((*filter->output_function)(0x8F, filter->data));
-	} else if (c == 0x203E) {
-		CK((*filter->output_function)(0x81, filter->data));
-		CK((*filter->output_function)(0x50, filter->data));
-	} else {
-		return mbfl_filt_conv_wchar_cp932(c, filter);
-	}
-	return 0;
-}
-
 static size_t mb_cp932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -7823,26 +6525,6 @@ static const unsigned char mblen_table_sjis_mobile[] = { /* 0x81-0x9F,0xE0-0xFC 
 
 static const char *mbfl_encoding_sjis_aliases[] = {"x-sjis", "SHIFT-JIS", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_sjis_wchar = {
-	mbfl_no_encoding_sjis,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_sjis_wchar,
-	mbfl_filt_conv_sjis_wchar_flush,
-	NULL
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjis,
-	mbfl_filt_conv_common_flush,
-	NULL
-};
-
 const mbfl_encoding mbfl_encoding_sjis = {
 	mbfl_no_encoding_sjis,
 	"SJIS",
@@ -7850,8 +6532,8 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	mbfl_encoding_sjis_aliases,
 	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis_wchar,
-	&vtbl_wchar_sjis,
+	NULL,
+	NULL,
 	mb_sjis_to_wchar,
 	mb_wchar_to_sjis,
 	NULL,
@@ -7860,26 +6542,6 @@ const mbfl_encoding mbfl_encoding_sjis = {
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
-	mbfl_no_encoding_sjis_mac,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_sjis_mac_wchar,
-	mbfl_filt_conv_sjis_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis_mac,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjis_mac,
-	mbfl_filt_conv_wchar_sjis_mac_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	"SJIS-mac",
@@ -7887,8 +6549,8 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjismac,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis_mac_wchar,
-	&vtbl_wchar_sjis_mac,
+	NULL,
+	NULL,
 	mb_sjismac_to_wchar,
 	mb_wchar_to_sjismac,
 	NULL,
@@ -7899,26 +6561,6 @@ static const char *mbfl_encoding_sjis_docomo_aliases[] = {"SJIS-DOCOMO", "shift_
 static const char *mbfl_encoding_sjis_kddi_aliases[] = {"SJIS-KDDI", "shift_jis-kddi", "x-sjis-emoji-kddi", NULL};
 static const char *mbfl_encoding_sjis_sb_aliases[] = {"SJIS-SOFTBANK", "shift_jis-softbank", "x-sjis-emoji-softbank", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {
-	mbfl_no_encoding_sjis_docomo,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_sjis_mobile_wchar,
-	mbfl_filt_conv_sjis_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis_docomo,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_sjis_docomo = {
 	mbfl_no_encoding_sjis_docomo,
 	"SJIS-Mobile#DOCOMO",
@@ -7926,31 +6568,11 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
 	mbfl_encoding_sjis_docomo_aliases,
 	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis_docomo_wchar,
-	&vtbl_wchar_sjis_docomo,
+	NULL,
+	NULL,
 	mb_sjis_docomo_to_wchar,
 	mb_wchar_to_sjis_docomo,
 	NULL,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
-	mbfl_no_encoding_sjis_kddi,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_sjis_mobile_wchar,
-	mbfl_filt_conv_sjis_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis_kddi,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
@@ -7961,31 +6583,11 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
 	mbfl_encoding_sjis_kddi_aliases,
 	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis_kddi_wchar,
-	&vtbl_wchar_sjis_kddi,
+	NULL,
+	NULL,
 	mb_sjis_kddi_to_wchar,
 	mb_wchar_to_sjis_kddi,
 	NULL,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
-	mbfl_no_encoding_sjis_sb,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_sjis_mobile_wchar,
-	mbfl_filt_conv_sjis_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis_sb,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
@@ -7996,8 +6598,8 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 	mbfl_encoding_sjis_sb_aliases,
 	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis_sb_wchar,
-	&vtbl_wchar_sjis_sb,
+	NULL,
+	NULL,
 	mb_sjis_sb_to_wchar,
 	mb_wchar_to_sjis_sb,
 	NULL,
@@ -8013,26 +6615,6 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 
 static const char *mbfl_encoding_sjis2004_aliases[] = {"SJIS2004","Shift_JIS-2004", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
-	mbfl_no_encoding_sjis2004,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_jis2004_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjis2004,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_wchar_jis2004_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_sjis2004 = {
 	mbfl_no_encoding_sjis2004,
 	"SJIS-2004",
@@ -8040,8 +6622,8 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	mbfl_encoding_sjis2004_aliases,
 	mblen_table_sjis_mobile, /* Leading byte values used for SJIS-2004 are the same as mobile SJIS variants */
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjis2004_wchar,
-	&vtbl_wchar_sjis2004,
+	NULL,
+	NULL,
 	mb_sjis2004_to_wchar,
 	mb_wchar_to_sjis2004,
 	NULL,
@@ -8100,26 +6682,6 @@ static const unsigned char mblen_table_sjiswin[] = { /* 0x81-0x9F,0xE0-0xFF */
 static const char *mbfl_encoding_cp932_aliases[] = {"MS932", "Windows-31J", "MS_Kanji", NULL};
 static const char *mbfl_encoding_sjiswin_aliases[] = {"SJIS-ms", "SJIS-open", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_cp932_wchar = {
-	mbfl_no_encoding_cp932,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_cp932_wchar,
-	mbfl_filt_conv_cp932_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_cp932 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp932,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_cp932,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_cp932 = {
 	mbfl_no_encoding_cp932,
 	"CP932",
@@ -8127,31 +6689,11 @@ const mbfl_encoding mbfl_encoding_cp932 = {
 	mbfl_encoding_cp932_aliases,
 	mblen_table_sjiswin,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_cp932_wchar,
-	&vtbl_wchar_cp932,
+	NULL,
+	NULL,
 	mb_cp932_to_wchar,
 	mb_wchar_to_cp932,
 	NULL,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {
-	mbfl_no_encoding_sjiswin,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_cp932_wchar,
-	mbfl_filt_conv_cp932_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_sjiswin,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_sjiswin,
-	mbfl_filt_conv_common_flush,
 	NULL,
 };
 
@@ -8162,8 +6704,8 @@ const mbfl_encoding mbfl_encoding_sjiswin = {
 	mbfl_encoding_sjiswin_aliases,
 	mblen_table_sjiswin,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_sjiswin_wchar,
-	&vtbl_wchar_sjiswin,
+	NULL,
+	NULL,
 	mb_cp932_to_wchar,
 	mb_wchar_to_sjiswin,
 	NULL,
@@ -8173,154 +6715,6 @@ const mbfl_encoding mbfl_encoding_sjiswin = {
 /*
  * EUC variants
  */
-
-static int mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, w = 0;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff) {	/* X 0208 first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8e) {	/* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) {	/* X 0212 first char */
-			filter->status = 3;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1:	/* got first half */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s >= 0 && s < jisx0208_ucs_table_size) {
-				w = jisx0208_ucs_table[s];
-				if (!w)
-					w = MBFL_BAD_INPUT;
-			} else {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 2:	/* got 0x8e */
-		filter->status = 0;
-		if (c > 0xa0 && c < 0xe0) {
-			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 3: /* got 0x8f, JIS X 0212 first byte */
-		filter->status++;
-		filter->cache = c;
-		break;
-
-	case 4: /* got 0x8f, JIS X 0212 second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xA0 && c < 0xFF && c1 > 0xA0 && c1 < 0xFF) {
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s >= 0 && s < jisx0212_ucs_table_size) {
-				w = jisx0212_ucs_table[s];
-				if (!w)
-					w = MBFL_BAD_INPUT;
-			} else {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_eucjp_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
-		filter->status = 0;
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c == 0xAF) { /* U+00AF is MACRON */
-		s = 0xA2B4; /* Use JIS X 0212 overline */
-	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	}
-	if (s <= 0) {
-		if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x2140;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
-			s = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
-			s = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
-			s = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
-			s = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
-			s = 0x224c;
-		} else if (c == 0) {
-			s = 0;
-		} else {
-			s = -1;
-		}
-	}
-	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x100) {	/* kana */
-			CK((*filter->output_function)(0x8e, filter->data));
-			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x8080)  {	/* X 0208 */
-			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
-		} else {	/* X 0212 */
-			CK((*filter->output_function)(0x8f, filter->data));
-			CK((*filter->output_function)(((s >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s & 0xff) | 0x80, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
 
 static size_t mb_eucjp_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
@@ -8442,253 +6836,6 @@ static void mb_wchar_to_eucjp(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, w, n;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c >= 0xa1 && c <= 0xfe) { /* CP932 first char */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8e) { /* kana first char */
-			filter->status = 2;
-		} else if (c == 0x8f) { /* X 0212 first char */
-			filter->status = 3;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1:	/* got first half */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			w = 0;
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s <= 137) {
-				if (s == 31) {
-					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 32) {
-					w = 0xff5e;			/* FULLWIDTH TILDE */
-				} else if (s == 33) {
-					w = 0x2225;			/* PARALLEL TO */
-				} else if (s == 60) {
-					w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 80) {
-					w = 0xffe0;			/* FULLWIDTH CENT SIGN */
-				} else if (s == 81) {
-					w = 0xffe1;			/* FULLWIDTH POUND SIGN */
-				} else if (s == 137) {
-					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
-				}
-			}
-
-			if (w == 0) {
-				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
-					w = jisx0208_ucs_table[s];
-				} else if (s >= (84 * 94)) {		/* user (85ku - 94ku) */
-					w = s - (84 * 94) + 0xe000;
-				}
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 2:	/* got 0x8e, X0201 kana */
-		filter->status = 0;
-		if (c > 0xa0 && c < 0xe0) {
-			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 3:	/* got 0x8f,  X 0212 first char */
-		filter->status++;
-		filter->cache = c;
-		break;
-
-	case 4:	/* got 0x8f,  X 0212 second char */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c1 > 0xa0 && c1 < 0xff && c > 0xa0 && c < 0xff) {
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-
-			if (s >= 0 && s < jisx0212_ucs_table_size) {
-				w = jisx0212_ucs_table[s];
-
-				if (w == 0x007e) {
-					w = 0xff5e;		/* FULLWIDTH TILDE */
-				}
-			} else if (s >= (82*94) && s < (84*94)) {	/* vender ext3 (83ku - 84ku) <-> CP932 (115ku -120ku) */
-				s = (c1 << 8) | c;
-				w = 0;
-				n = 0;
-				while (n < cp932ext3_eucjp_table_size) {
-					if (s == cp932ext3_eucjp_table[n]) {
-						if (n < (cp932ext3_ucs_table_max - cp932ext3_ucs_table_min)) {
-							w = cp932ext3_ucs_table[n];
-						}
-						break;
-					}
-					n++;
-				}
-			} else if (s >= (84*94)) {		/* user (85ku - 94ku) */
-				w = s - (84*94) + (0xe000 + (94*10));
-			} else {
-				w = 0;
-			}
-
-			if (w == 0x00A6) {
-				w = 0xFFE4;		/* FULLWIDTH BROKEN BAR */
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_eucjpwin_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
-		filter->status = 0;
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, s1 = 0;
-
-	if (c == 0xAF) { /* U+00AF is MACRON */
-		s1 = 0xA2B4; /* Use JIS X 0212 overline */
-	} else if (c == 0x203E) {
-		s1 = 0x7E;
-	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xe000 && c < (0xe000 + 10*94)) { /* user (X0208 85ku - 94ku) */
-		s1 = c - 0xe000;
-		c1 = s1/94 + 0x75;
-		c2 = s1%94 + 0x21;
-		s1 = (c1 << 8) | c2;
-	} else if (c >= (0xe000 + 10*94) && c < (0xe000 + 20*94)) { /* user (X0212 85ku - 94ku) */
-		s1 = c - (0xe000 + 10*94);
-		c1 = s1/94 + 0xf5;
-		c2 = s1%94 + 0xa1;
-		s1 = (c1 << 8) | c2;
-	}
-
-	if (s1 == 0xa2f1) {
-		s1 = 0x2d62;		/* NUMERO SIGN */
-	}
-
-	if (s1 <= 0) {
-		if (c == 0xa5) {		/* YEN SIGN */
-			s1 = 0x5C;
-		} else if (c == 0x2014) {
-			s1 = 0x213D;
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s1 = 0x2140;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
-			s1 = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
-			s1 = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
-			s1 = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
-			s1 = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
-			s1 = 0x224c;
-		} else {
-			s1 = -1;
-			c1 = 0;
-			c2 = cp932ext1_ucs_table_max - cp932ext1_ucs_table_min;
-			while (c1 < c2) {		/* CP932 vendor ext1 (13ku) */
-				const int oh = cp932ext1_ucs_table_min / 94;
-
-				if (c == cp932ext1_ucs_table[c1]) {
-					s1 = ((c1 / 94 + oh + 0x21) << 8) + (c1 % 94 + 0x21);
-					break;
-				}
-				c1++;
-			}
-			if (s1 < 0) {
-				c1 = 0;
-				c2 = cp932ext3_ucs_table_max - cp932ext3_ucs_table_min;
-				while (c1 < c2) {		/* CP932 vendor ext3 (115ku - 119ku) */
-					if (c == cp932ext3_ucs_table[c1]) {
-						if (c1 < cp932ext3_eucjp_table_size) {
-							s1 = cp932ext3_eucjp_table[c1];
-						}
-						break;
-					}
-					c1++;
-				}
-			}
-		}
-
-		if (c == 0) {
-			s1 = 0;
-		} else if (s1 <= 0) {
-			s1 = -1;
-		}
-	}
-
-	if (s1 >= 0) {
-		if (s1 < 0x80) {	/* latin */
-			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x100) {	/* kana */
-			CK((*filter->output_function)(0x8e, filter->data));
-			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x8080)  {	/* X 0208 */
-			CK((*filter->output_function)(((s1 >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
-		} else {	/* X 0212 */
-			CK((*filter->output_function)(0x8f, filter->data));
-			CK((*filter->output_function)(((s1 >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
 }
 
 static size_t mb_eucjpwin_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -8882,175 +7029,6 @@ static void mb_wchar_to_eucjpwin(uint32_t *in, size_t len, mb_convert_buf *buf, 
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c >= 0xA1 && c <= 0xFE) { /* CP932, first byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8e) { /* kana first char */
-			filter->status = 2;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1:	/* got first half */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			w = 0;
-			s = (c1 - 0xa1)*94 + c - 0xa1;
-			if (s <= 137) {
-				if (s == 31) {
-					w = 0xff3c;			/* FULLWIDTH REVERSE SOLIDUS */
-				} else if (s == 32) {
-					w = 0xff5e;			/* FULLWIDTH TILDE */
-				} else if (s == 33) {
-					w = 0x2225;			/* PARALLEL TO */
-				} else if (s == 60) {
-					w = 0xff0d;			/* FULLWIDTH HYPHEN-MINUS */
-				} else if (s == 80) {
-					w = 0xffe0;			/* FULLWIDTH CENT SIGN */
-				} else if (s == 81) {
-					w = 0xffe1;			/* FULLWIDTH POUND SIGN */
-				} else if (s == 137) {
-					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
-				}
-			}
-			if (w == 0) {
-				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
-					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
-				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
-					w = jisx0208_ucs_table[s];
-				} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {		/* vendor ext2 (89ku - 92ku) */
-					w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
-				}
-			}
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 2:	/* got 0x8e, X0201 kana */
-		filter->status = 0;
-		if (c > 0xa0 && c < 0xe0) {
-			w = 0xfec0 + c;
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* Input string was truncated */
-		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
-		filter->status = 0;
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, s1;
-
-	s1 = 0;
-	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
-		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
-	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
-		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
-	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
-		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
-	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
-		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	}
-	if (s1 >= 0x8080) s1 = -1; /* we don't support JIS X0213 */
-	if (s1 <= 0) {
-		if (c == 0xa5) { /* YEN SIGN */
-			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s1 = 0x2140;
-		} else if (c == 0x2225) {	/* PARALLEL TO */
-			s1 = 0x2142;
-		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
-			s1 = 0x215d;
-		} else if (c == 0xffe0) {	/* FULLWIDTH CENT SIGN */
-			s1 = 0x2171;
-		} else if (c == 0xffe1) {	/* FULLWIDTH POUND SIGN */
-			s1 = 0x2172;
-		} else if (c == 0xffe2) {	/* FULLWIDTH NOT SIGN */
-			s1 = 0x224c;
-		} else {
-			s1 = -1;
-			c1 = 0;
-			c2 = cp932ext1_ucs_table_max - cp932ext1_ucs_table_min;
-			while (c1 < c2) {		/* CP932 vendor ext1 (13ku) */
-				if (c == cp932ext1_ucs_table[c1]) {
-					s1 = ((c1/94 + 0x2d) << 8) + (c1%94 + 0x21);
-					break;
-				}
-				c1++;
-			}
-			if (s1 < 0) {
-				c1 = 0;
-				c2 = cp932ext2_ucs_table_max - cp932ext2_ucs_table_min;
-				while (c1 < c2) {		/* CP932 vendor ext3 (115ku - 119ku) */
-					if (c == cp932ext2_ucs_table[c1]) {
-						s1 = ((c1/94 + 0x79) << 8) +(c1%94 + 0x21);
-						break;
-					}
-					c1++;
-				}
-			}
-		}
-		if (c == 0) {
-			s1 = 0;
-		} else if (s1 <= 0) {
-			s1 = -1;
-		}
-	}
-
-	if (s1 >= 0) {
-		if (s1 < 0x80) {	/* latin */
-			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x100) {	/* kana */
-			CK((*filter->output_function)(0x8e, filter->data));
-			CK((*filter->output_function)(s1, filter->data));
-		} else if (s1 < 0x8080)  {	/* X 0208 */
-			CK((*filter->output_function)(((s1 >> 8) & 0xff) | 0x80, filter->data));
-			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
-		} else {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
 }
 
 static size_t mb_cp51932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -9413,134 +7391,6 @@ process_codepoint: ;
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
-static int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if ((c >= 0xA1 && c <= 0xA9) || (c >= 0xB0 && c <= 0xF7)) { /* dbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* dbcs second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xA0 && c < 0xFF) {
-			w = (c1 - 0x81)*192 + c - 0x40;
-			ZEND_ASSERT(w < cp936_ucs_table_size);
-			if (w == 0x1864) {
-				w = 0x30FB;
-			} else if (w == 0x186A) {
-				w = 0x2015;
-			} else if ((w >= 0x1921 && w <= 0x192A) || w == 0x1963 || (w >= 0x1C59 && w <= 0x1C7E) || (w >= 0x1DBB && w <= 0x1DC4)) {
-				w = 0;
-			} else {
-				w = cp936_ucs_table[w];
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {
-		if (c == 0xB7 || c == 0x144 || c == 0x148 || c == 0x251 || c == 0x261) {
-			s = 0;
-		} else {
-			s = ucs_a1_cp936_table[c - ucs_a1_cp936_table_min];
-		}
-	} else if (c >= ucs_a2_cp936_table_min && c < ucs_a2_cp936_table_max) {
-		if (c == 0x2015) {
-			s = 0xA1AA;
-		} else if (c == 0x2014 || (c >= 0x2170 && c <= 0x2179)) {
-			s = 0;
-		} else {
-			s = ucs_a2_cp936_table[c - ucs_a2_cp936_table_min];
-		}
-	} else if (c >= ucs_a3_cp936_table_min && c < ucs_a3_cp936_table_max) {
-		if (c == 0x30FB) {
-			s = 0xA1A4;
-		} else {
-			s = ucs_a3_cp936_table[c - ucs_a3_cp936_table_min];
-		}
-	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
-		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
-	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		if (c == 0xFF04) {
-			s = 0xA1E7;
-		} else if (c == 0xFF5E) {
-			s = 0xA1AB;
-		} else if (c >= 0xFF01 && c <= 0xFF5D) {
-			s = c - 0xFF01 + 0xA3A1;
-		} else if (c >= 0xFFE0 && c <= 0xFFE5) {
-			s = ucs_hff_s_cp936_table[c - 0xFFE0];
-		}
-	}
-
-	/* exclude CP936 extensions */
-	if (((s >> 8) & 0xFF) < 0xA1 || (s & 0xFF) < 0xA1) {
-		s = 0;
-	}
-
-	if (s <= 0) {
-		if (c < 0x80) {
-			s = c;
-		} else if (s <= 0) {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		if (s < 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xFF, filter->data));
-			CK((*filter->output_function)(s & 0xFF, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_euccn_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		/* 2-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
 static size_t mb_euccn_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -9643,169 +7493,6 @@ static void mb_wchar_to_euccn(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, s, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (((c >= 0xA1 && c <= 0xA6) || (c >= 0xC2 && c <= 0xFD)) && c != 0xC3) { /* 2-byte character, first byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else if (c == 0x8E) { /* 4-byte character, first byte */
-			filter->status = 2;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* 2-byte character, second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c > 0xA0 && c < 0xFF) {
-			w = (c1 - 0xA1)*94 + (c - 0xA1);
-			if (w >= 0 && w < cns11643_1_ucs_table_size) {
-				w = cns11643_1_ucs_table[w];
-			} else {
-				w = 0;
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			filter->status = filter->cache = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 2: /* got 0x8e, second byte */
-		if (c == 0xA1 || c == 0xA2 || c == 0xAE) {
-			filter->status = 3;
-			filter->cache = c - 0xA1;
-		} else {
-			filter->status = filter->cache = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 3: /* got 0x8e, third byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c >= 0xA1 && ((c1 == 0 && ((c >= 0xA1 && c <= 0xA6) || (c >= 0xC2 && c <= 0xFD)) && c != 0xC3) ||
-				(c1 == 1 && c <= 0xF2) || (c1 == 13 && c <= 0xE7))) {
-			filter->status = 4;
-			filter->cache = (c1 << 8) + c - 0xA1;
-		} else {
-			filter->status = filter->cache = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 4:	/* multi-byte character, fourth byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if (c1 <= 0xDFF && c > 0xA0 && c < 0xFF) {
-			int plane = (c1 & 0xF00) >> 8; /* This is actually the CNS-11643 plane minus one */
-			s = (c1 & 0xFF)*94 + c - 0xA1;
-			w = 0;
-			if (s >= 0) {
-				/* A later version of CNS-11643 moved all the characters in "plane 14" to "plane 3",
-				 * and added tens of thousands more characters in planes 4, 5, 6, and 7
-				 * We only support the older version of CNS-11643
-				 * This is the same as iconv from glibc 2.2 */
-				if (plane == 0 && s < cns11643_1_ucs_table_size) {
-					w = cns11643_1_ucs_table[s];
-				} else if (plane == 1 && s < cns11643_2_ucs_table_size) {
-					w = cns11643_2_ucs_table[s];
-				} else if (plane == 13 && s < cns11643_14_ucs_table_size) {
-					w = cns11643_14_ucs_table[s];
-				}
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			filter->status = filter->cache = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c >= ucs_a1_cns11643_table_min && c < ucs_a1_cns11643_table_max) {
-		s = ucs_a1_cns11643_table[c - ucs_a1_cns11643_table_min];
-	} else if (c >= ucs_a2_cns11643_table_min && c < ucs_a2_cns11643_table_max) {
-		s = ucs_a2_cns11643_table[c - ucs_a2_cns11643_table_min];
-	} else if (c >= ucs_a3_cns11643_table_min && c < ucs_a3_cns11643_table_max) {
-		s = ucs_a3_cns11643_table[c - ucs_a3_cns11643_table_min];
-	} else if (c >= ucs_i_cns11643_table_min && c < ucs_i_cns11643_table_max) {
-		s = ucs_i_cns11643_table[c - ucs_i_cns11643_table_min];
-	} else if (c >= ucs_r_cns11643_table_min && c < ucs_r_cns11643_table_max) {
-		s = ucs_r_cns11643_table[c - ucs_r_cns11643_table_min];
-	}
-
-	if (s <= 0) {
-		if (c == 0) {
-			s = 0;
-		} else if (s <= 0) {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		int plane = (s & 0x1F0000) >> 16;
-		if (plane <= 1) {
-			if (s < 0x80) { /* latin */
-				CK((*filter->output_function)(s, filter->data));
-			} else {
-				s = (s & 0xFFFF) | 0x8080;
-				CK((*filter->output_function)((s >> 8) & 0xFF, filter->data));
-				CK((*filter->output_function)(s & 0xFF, filter->data));
-			}
-		} else {
-			s = (0x8EA00000 + (plane << 16)) | ((s & 0xFFFF) | 0x8080);
-			CK((*filter->output_function)(0x8e , filter->data));
-			CK((*filter->output_function)((s >> 16) & 0xFF, filter->data));
-			CK((*filter->output_function)((s >> 8) & 0xFF, filter->data));
-			CK((*filter->output_function)(s & 0xFF, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-	return 0;
-}
-
-static int mbfl_filt_conv_euctw_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* 2-byte or 4-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
 }
 
 static size_t mb_euctw_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -9925,119 +7612,6 @@ static void mb_wchar_to_euctw(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
-static int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, w, flag;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (((c >= 0xA1 && c <= 0xAC) || (c >= 0xB0 && c <= 0xFD)) && c != 0xC9) { /* dbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* dbcs second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		flag = 0;
-		if (c1 >= 0xa1 && c1 <= 0xc6) {
-			flag = 1;
-		} else if (c1 >= 0xc7 && c1 <= 0xfe && c1 != 0xc9) {
-			flag = 2;
-		}
-		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
-			if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
-				w = (c1 - 0x81)*190 + c - 0x41;
-				ZEND_ASSERT(w < uhc1_ucs_table_size);
-				w = uhc1_ucs_table[w];
-			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
-				w = (c1 - 0xc7)*94 + c - 0xa1;
-				ZEND_ASSERT(w < uhc3_ucs_table_size);
-				w = uhc3_ucs_table[w];
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
-		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
-	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
-		s = ucs_a2_uhc_table[c - ucs_a2_uhc_table_min];
-	} else if (c >= ucs_a3_uhc_table_min && c < ucs_a3_uhc_table_max) {
-		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
-	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
-		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
-	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
-		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
-	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
-		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
-	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
-		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
-	}
-
-	/* exclude UHC extension area (although we are using the UHC conversion tables) */
-	if (((s >> 8) & 0xFF) < 0xA1 || (s & 0xFF) < 0xA1) {
-		s = 0;
-	}
-
-	if (s <= 0) {
-		if (c < 0x80) {
-			s = c;
-		} else {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		if (s < 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_euckr_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		/* 2-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
 static size_t mb_euckr_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -10127,101 +7701,6 @@ static void mb_wchar_to_euckr(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
-{
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0x80 && c < 0xfe && c != 0xc9) { /* dbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* dbcs second byte */
-		filter->status = 0;
-		int c1 = filter->cache, w = 0;
-
-		if (c1 >= 0x81 && c1 <= 0xc6 && c >= 0x41 && c <= 0xfe) {
-			w = (c1 - 0x81)*190 + (c - 0x41);
-			if (w >= 0 && w < uhc1_ucs_table_size) {
-				w = uhc1_ucs_table[w];
-			}
-		} else if (c1 >= 0xc7 && c1 < 0xfe && c >= 0xa1 && c <= 0xfe) {
-			w = (c1 - 0xc7)*94 + (c - 0xa1);
-			if (w >= 0 && w < uhc3_ucs_table_size) {
-				w = uhc3_ucs_table[w];
-			}
-		}
-
-		if (w == 0) {
-			w = MBFL_BAD_INPUT;
-		}
-		CK((*filter->output_function)(w, filter->data));
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_uhc_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		/* 2-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
-		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
-	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
-		s = ucs_a2_uhc_table[c - ucs_a2_uhc_table_min];
-	} else if (c >= ucs_a3_uhc_table_min && c < ucs_a3_uhc_table_max) {
-		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
-	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
-		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
-	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
-		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
-	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
-		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
-	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
-		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
-	}
-
-	if (s == 0 && c != 0) {
-		s = -1;
-	}
-
-	if (s >= 0) {
-		if (s < 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
 }
 
 static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -10345,26 +7824,6 @@ static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
 
 static const char *mbfl_encoding_euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
-	mbfl_no_encoding_euc_jp,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_eucjp_wchar,
-	mbfl_filt_conv_eucjp_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_euc_jp,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_eucjp,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_euc_jp = {
 	mbfl_no_encoding_euc_jp,
 	"EUC-JP",
@@ -10372,8 +7831,8 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	mbfl_encoding_euc_jp_aliases,
 	mblen_table_eucjp,
 	0,
-	&vtbl_eucjp_wchar,
-	&vtbl_wchar_eucjp,
+	NULL,
+	NULL,
 	mb_eucjp_to_wchar,
 	mb_wchar_to_eucjp,
 	NULL,
@@ -10382,26 +7841,6 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 
 static const char *mbfl_encoding_eucjp2004_aliases[] = {"EUC_JP-2004", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_eucjp2004_wchar = {
-	mbfl_no_encoding_eucjp2004,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_jis2004_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_eucjp2004 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_eucjp2004,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_wchar_jis2004_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	mbfl_no_encoding_eucjp2004,
 	"EUC-JP-2004",
@@ -10409,8 +7848,8 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	mbfl_encoding_eucjp2004_aliases,
 	mblen_table_eucjp,
 	0,
-	&vtbl_eucjp2004_wchar,
-	&vtbl_wchar_eucjp2004,
+	NULL,
+	NULL,
 	mb_eucjp2004_to_wchar,
 	mb_wchar_to_eucjp2004,
 	NULL,
@@ -10419,26 +7858,6 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 
 static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", "eucJP-ms", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {
-	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_eucjpwin_wchar,
-	mbfl_filt_conv_eucjpwin_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_eucjpwin = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_eucjp_win,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_eucjpwin,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_no_encoding_eucjp_win,
 	"eucJP-win",
@@ -10446,8 +7865,8 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_encoding_eucjp_win_aliases,
 	mblen_table_eucjp,
 	0,
-	&vtbl_eucjpwin_wchar,
-	&vtbl_wchar_eucjpwin,
+	NULL,
+	NULL,
 	mb_eucjpwin_to_wchar,
 	mb_wchar_to_eucjpwin,
 	NULL,
@@ -10456,26 +7875,6 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 
 static const char *mbfl_encoding_cp51932_aliases[] = {"cp51932", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
-	mbfl_no_encoding_cp51932,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_cp51932_wchar,
-	mbfl_filt_conv_cp51932_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_cp51932 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp51932,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_cp51932,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	"CP51932",
@@ -10483,8 +7882,8 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	mbfl_encoding_cp51932_aliases,
 	mblen_table_eucjp,
 	0,
-	&vtbl_cp51932_wchar,
-	&vtbl_wchar_cp51932,
+	NULL,
+	NULL,
 	mb_cp51932_to_wchar,
 	mb_wchar_to_cp51932,
 	NULL,
@@ -10512,26 +7911,6 @@ static const unsigned char mblen_table_euccn[] = { /* 0xA1-0xFE */
 
 static const char *mbfl_encoding_euc_cn_aliases[] = {"CN-GB", "EUC_CN", "eucCN", "x-euc-cn", "gb2312", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_euccn_wchar = {
-	mbfl_no_encoding_euc_cn,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_euccn_wchar,
-	mbfl_filt_conv_euccn_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_euccn = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_euc_cn,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_euccn,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_euc_cn = {
 	mbfl_no_encoding_euc_cn,
 	"EUC-CN",
@@ -10539,8 +7918,8 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 	mbfl_encoding_euc_cn_aliases,
 	mblen_table_euccn,
 	0,
-	&vtbl_euccn_wchar,
-	&vtbl_wchar_euccn,
+	NULL,
+	NULL,
 	mb_euccn_to_wchar,
 	mb_wchar_to_euccn,
 	NULL,
@@ -10549,26 +7928,6 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 
 static const char *mbfl_encoding_euc_tw_aliases[] = {"EUC_TW", "eucTW", "x-euc-tw", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_euctw_wchar = {
-	mbfl_no_encoding_euc_tw,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_euctw_wchar,
-	mbfl_filt_conv_euctw_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_euctw = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_euc_tw,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_euctw,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_euc_tw = {
 	mbfl_no_encoding_euc_tw,
 	"EUC-TW",
@@ -10576,8 +7935,8 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	mbfl_encoding_euc_tw_aliases,
 	mblen_table_euccn,
 	0,
-	&vtbl_euctw_wchar,
-	&vtbl_wchar_euctw,
+	NULL,
+	NULL,
 	mb_euctw_to_wchar,
 	mb_wchar_to_euctw,
 	NULL,
@@ -10586,26 +7945,6 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 
 static const char *mbfl_encoding_euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
-	mbfl_no_encoding_euc_kr,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_euckr_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_euc_kr,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_no_encoding_euc_kr,
 	"EUC-KR",
@@ -10613,8 +7952,8 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_encoding_euc_kr_aliases,
 	mblen_table_euccn,
 	0,
-	&vtbl_euckr_wchar,
-	&vtbl_wchar_euckr,
+	NULL,
+	NULL,
 	mb_euckr_to_wchar,
 	mb_wchar_to_euckr,
 	NULL,
@@ -10646,26 +7985,6 @@ static const unsigned char mblen_table_81_to_fe[] = { /* 0x81-0xFE */
 
 static const char *mbfl_encoding_uhc_aliases[] = {"CP949", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_uhc_wchar = {
-	mbfl_no_encoding_uhc,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_uhc_wchar,
-	mbfl_filt_conv_uhc_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_uhc,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_uhc,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_uhc = {
 	mbfl_no_encoding_uhc,
 	"UHC",
@@ -10673,8 +7992,8 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	mbfl_encoding_uhc_aliases,
 	mblen_table_81_to_fe,
 	0,
-	&vtbl_uhc_wchar,
-	&vtbl_wchar_uhc,
+	NULL,
+	NULL,
 	mb_uhc_to_wchar,
 	mb_wchar_to_uhc,
 	NULL,
@@ -10684,284 +8003,6 @@ const mbfl_encoding mbfl_encoding_uhc = {
 /*
  * GB18030/CP936
  */
-
-static int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, c3, w = -1;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0x80 && c < 0xff) { /* dbcs/qbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* dbcs/qbcs second byte */
-		c1 = filter->cache;
-		filter->status = 0;
-
-		if (c1 >= 0x81 && c1 <= 0x84 && c >= 0x30 && c <= 0x39) {
-			/* 4 byte range: Unicode BMP */
-			filter->status = 2;
-			filter->cache = (c1 << 8) | c;
-			return 0;
-		} else if (c1 >= 0x90 && c1 <= 0xe3 && c >= 0x30 && c <= 0x39) {
-			/* 4 byte range: Unicode 16 planes */
-			filter->status = 2;
-			filter->cache = (c1 << 8) | c;
-			return 0;
-		} else if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) && (c >= 0xa1 && c <= 0xfe)) {
-			/* UDA part 1,2: U+E000-U+E4C5 */
-			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
-			CK((*filter->output_function)(w, filter->data));
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
-			/* UDA part3 : U+E4C6-U+E765*/
-			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
-			CK((*filter->output_function)(w, filter->data));
-		}
-
-		c2 = (c1 << 8) | c;
-
-		if (w <= 0 && (
-			(c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
-			(c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
-			(c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844))
-		)) {
-			for (size_t offset = 0; offset < mbfl_gb18030_pua_tbl_max; offset++) {
-				if (c2 >= mbfl_gb18030_pua_tbl[offset][2] && c2 <= mbfl_gb18030_pua_tbl[offset][2] + mbfl_gb18030_pua_tbl[offset][1] - mbfl_gb18030_pua_tbl[offset][0]) {
-					w = c2 - mbfl_gb18030_pua_tbl[offset][2] + mbfl_gb18030_pua_tbl[offset][0];
-					CK((*filter->output_function)(w, filter->data));
-					break;
-				}
-			}
-		}
-
-		if (w <= 0) {
-			if ((c1 >= 0xa1 && c1 <= 0xa9 && c >= 0xa1 && c <= 0xfe) ||
-				(c1 >= 0xb0 && c1 <= 0xf7 && c >= 0xa1 && c <= 0xfe) ||
-				(c1 >= 0x81 && c1 <= 0xa0 && c >= 0x40 && c <= 0xfe && c != 0x7f) ||
-				(c1 >= 0xaa && c1 <= 0xfe && c >= 0x40 && c <= 0xa0 && c != 0x7f) ||
-				(c1 >= 0xa8 && c1 <= 0xa9 && c >= 0x40 && c <= 0xa0 && c != 0x7f)) {
-				w = (c1 - 0x81)*192 + c - 0x40;
-				ZEND_ASSERT(w < cp936_ucs_table_size);
-				CK((*filter->output_function)(cp936_ucs_table[w], filter->data));
-			} else {
-				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			}
-		}
-		break;
-
-	case 2: /* qbcs third byte */
-		c1 = (filter->cache >> 8) & 0xff;
-		c2 = filter->cache & 0xff;
-		filter->status = filter->cache = 0;
-		if (((c1 >= 0x81 && c1 <= 0x84) || (c1 >= 0x90 && c1 <= 0xe3)) && c2 >= 0x30 && c2 <= 0x39 && c >= 0x81 && c <= 0xfe) {
-			filter->cache = (c1 << 16) | (c2 << 8) | c;
-			filter->status = 3;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 3: /* qbcs fourth byte */
-		c1 = (filter->cache >> 16) & 0xff;
-		c2 = (filter->cache >> 8) & 0xff;
-		c3 = filter->cache & 0xff;
-		filter->status = filter->cache = 0;
-		if (((c1 >= 0x81 && c1 <= 0x84) || (c1 >= 0x90 && c1 <= 0xe3)) && c2 >= 0x30 && c2 <= 0x39 && c3 >= 0x81 && c3 <= 0xfe && c >= 0x30 && c <= 0x39) {
-			if (c1 >= 0x90 && c1 <= 0xe3) {
-				w = ((((c1 - 0x90)*10 + (c2 - 0x30))*126 + (c3 - 0x81)))*10 + (c - 0x30) + 0x10000;
-				if (w > 0x10FFFF) {
-					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-					return 0;
-				}
-			} else { /* Unicode BMP */
-				w = (((c1 - 0x81)*10 + (c2 - 0x30))*126 + (c3 - 0x81))*10 + (c - 0x30);
-				if (w >= 0 && w <= 39419) {
-					int k = mbfl_bisec_srch(w, mbfl_gb2uni_tbl, mbfl_gb_uni_max);
-					w += mbfl_gb_uni_ofst[k];
-				} else {
-					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-					return 0;
-				}
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_gb18030_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* multi-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
-{
-	int k, k1, k2;
-	int c1, s = 0, s1 = 0;
-
-	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {
-		if (c == 0x01f9) {
-			s = 0xa8bf;
-		} else {
-			s = ucs_a1_cp936_table[c - ucs_a1_cp936_table_min];
-		}
-	} else if (c >= ucs_a2_cp936_table_min && c < ucs_a2_cp936_table_max) {
-		if (c == 0x20ac) { /* euro-sign */
-			s = 0xa2e3;
-		} else {
-			s = ucs_a2_cp936_table[c - ucs_a2_cp936_table_min];
-		}
-	} else if (c >= ucs_a3_cp936_table_min && c < ucs_a3_cp936_table_max) {
-		s = ucs_a3_cp936_table[c - ucs_a3_cp936_table_min];
-	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
-		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
-	} else if (c >= ucs_ci_cp936_table_min && c < ucs_ci_cp936_table_max) {
-		/* U+F900-FA2F CJK Compatibility Ideographs */
-		if (c == 0xf92c) {
-			s = 0xfd9c;
-		} else if (c == 0xf979) {
-			s = 0xfd9d;
-		} else if (c == 0xf995) {
-			s = 0xfd9e;
-		} else if (c == 0xf9e7) {
-			s = 0xfd9f;
-		} else if (c == 0xf9f1) {
-			s = 0xfda0;
-		} else if (c >= 0xfa0c && c <= 0xfa29) {
-			s = ucs_ci_s_cp936_table[c - 0xfa0c];
-		}
-	} else if (c >= ucs_cf_cp936_table_min && c < ucs_cf_cp936_table_max) {
-		/* FE30h CJK Compatibility Forms  */
-		s = ucs_cf_cp936_table[c - ucs_cf_cp936_table_min];
-	} else if (c >= ucs_sfv_cp936_table_min && c < ucs_sfv_cp936_table_max) {
-		/* U+FE50-FE6F Small Form Variants */
-		s = ucs_sfv_cp936_table[c - ucs_sfv_cp936_table_min];
-	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		/* U+FF00-FFFF HW/FW Forms */
-		if (c == 0xff04) {
-			s = 0xa1e7;
-		} else if (c == 0xff5e) {
-			s = 0xa1ab;
-		} else if (c >= 0xff01 && c <= 0xff5d) {
-			s = c - 0xff01 + 0xa3a1;
-		} else if (c >= 0xffe0 && c <= 0xffe5) {
-			s = ucs_hff_s_cp936_table[c-0xffe0];
-		}
-	}
-
-	/* While GB18030 and CP936 are very similar, some mappings are different between these encodings;
-	 * do a binary search in a table of differing codepoints to see if we have one */
-	if (s <= 0 && c >= mbfl_gb18030_c_tbl_key[0] && c <= mbfl_gb18030_c_tbl_key[mbfl_gb18030_c_tbl_max-1]) {
-		k1 = mbfl_bisec_srch2(c, mbfl_gb18030_c_tbl_key, mbfl_gb18030_c_tbl_max);
-		if (k1 >= 0) {
-			s = mbfl_gb18030_c_tbl_val[k1];
-		}
-	}
-
-	if (c >= 0xe000 && c <= 0xe864) { /* PUA */
-		if (c < 0xe766) {
-			if (c < 0xe4c6) {
-				c1 = c - 0xe000;
-				s = (c1 % 94) + 0xa1;
-				c1 /= 94;
-				s |= (c1 < 0x06 ? c1 + 0xaa : c1 + 0xf2) << 8;
-			} else {
-				c1 = c - 0xe4c6;
-				s = ((c1 / 96) + 0xa1) << 8;
-				c1 %= 96;
-				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);
-			}
-		} else {
-			/* U+E766..U+E864 */
-			k1 = 0;
-			k2 = mbfl_gb18030_pua_tbl_max;
-			while (k1 < k2) {
-				k = (k1 + k2) >> 1;
-				if (c < mbfl_gb18030_pua_tbl[k][0]) {
-					k2 = k;
-				} else if (c > mbfl_gb18030_pua_tbl[k][1]) {
-					k1 = k + 1;
-				} else {
-					s = c - mbfl_gb18030_pua_tbl[k][0] + mbfl_gb18030_pua_tbl[k][2];
-					break;
-				}
-			}
-		}
-	}
-
-	/* If we have not yet found a suitable mapping for this codepoint, it requires a 4-byte code */
-	if (s <= 0 && c >= 0x0080 && c <= 0xffff) {
-		/* BMP */
-		s = mbfl_bisec_srch(c, mbfl_uni2gb_tbl, mbfl_gb_uni_max);
-		if (s >= 0) {
-			c1 = c - mbfl_gb_uni_ofst[s];
-			s = (c1 % 10) + 0x30;
-			c1 /= 10;
-			s |= ((c1 % 126) + 0x81) << 8;
-			c1 /= 126;
-			s |= ((c1 % 10) + 0x30) << 16;
-			c1 /= 10;
-			s1 = c1 + 0x81;
-		}
-	} else if (c >= 0x10000 && c <= 0x10ffff) {
-		/* Code set 3: Unicode U+10000..U+10FFFF */
-		c1 = c - 0x10000;
-		s = (c1 % 10) + 0x30;
-		c1 /= 10;
-		s |= ((c1 % 126) + 0x81) << 8;
-		c1 /= 126;
-		s |= ((c1 % 10) + 0x30) << 16;
-		c1 /= 10;
-		s1 = c1 + 0x90;
-	}
-
-	if (c == 0) {
-		s = 0;
-	} else if (s == 0) {
-		s = -1;
-	}
-
-	if (s >= 0) {
-		if (s <= 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else if (s1 > 0) { /* qbcs */
-			CK((*filter->output_function)(s1 & 0xff, filter->data));
-			CK((*filter->output_function)((s >> 16) & 0xff, filter->data));
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		} else { /* dbcs */
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
 
 static const unsigned short gb18030_pua_tbl3[] = {
 	/* 0xFE50 */
@@ -11215,185 +8256,6 @@ static void mb_wchar_to_gb18030(uint32_t *in, size_t len, mb_convert_buf *buf, b
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
-}
-
-static int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, c2, w = -1;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (c == 0x80) {	/* euro sign */
-			CK((*filter->output_function)(0x20ac, filter->data));
-		} else if (c < 0xff) {	/* dbcs lead byte */
-			filter->status = 1;
-			filter->cache = c;
-		} else { /* 0xff */
-			CK((*filter->output_function)(0xf8f5, filter->data));
-		}
-		break;
-
-	case 1:		/* dbcs second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-
-		if (((c1 >= 0xaa && c1 <= 0xaf) || (c1 >= 0xf8 && c1 <= 0xfe)) &&
-			(c >= 0xa1 && c <= 0xfe)) {
-			/* UDA part1,2: U+E000-U+E4C5 */
-			w = 94*(c1 >= 0xf8 ? c1 - 0xf2 : c1 - 0xaa) + (c - 0xa1) + 0xe000;
-			CK((*filter->output_function)(w, filter->data));
-		} else if (c1 >= 0xa1 && c1 <= 0xa7 && c >= 0x40 && c < 0xa1 && c != 0x7f) {
-			/* UDA part3 : U+E4C6-U+E765*/
-			w = 96*(c1 - 0xa1) + c - (c >= 0x80 ? 0x41 : 0x40) + 0xe4c6;
-			CK((*filter->output_function)(w, filter->data));
-		}
-
-		c2 = (c1 << 8) | c;
-
-		if (w <= 0 && (
-			(c2 >= 0xa2ab && c2 <= 0xa9f0 + (0xe80f-0xe801)) ||
-			(c2 >= 0xd7fa && c2 <= 0xd7fa + (0xe814-0xe810)) ||
-			(c2 >= 0xfe50 && c2 <= 0xfe80 + (0xe864-0xe844))
-		)) {
-			size_t k;
-			for (k = 0; k < mbfl_cp936_pua_tbl_max; k++) {
-				if (c2 >= mbfl_cp936_pua_tbl[k][2] &&
-					c2 <= mbfl_cp936_pua_tbl[k][2] +
-					mbfl_cp936_pua_tbl[k][1] -  mbfl_cp936_pua_tbl[k][0]) {
-					w = c2 -  mbfl_cp936_pua_tbl[k][2] + mbfl_cp936_pua_tbl[k][0];
-					CK((*filter->output_function)(w, filter->data));
-					break;
-				}
-			}
-		}
-
-		if (w <= 0) {
-			if (c1 < 0xff && c1 > 0x80 && c >= 0x40 && c < 0xff && c != 0x7f) {
-				w = (c1 - 0x81)*192 + c - 0x40;
-				ZEND_ASSERT(w < cp936_ucs_table_size);
-				CK((*filter->output_function)(cp936_ucs_table[w], filter->data));
-			} else {
-				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			}
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_cp936_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* 2-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
-{
-	int k, k1, k2;
-	int c1, s = 0;
-
-	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {
-		/* U+0000 - U+0451 */
-		s = ucs_a1_cp936_table[c - ucs_a1_cp936_table_min];
-	} else if (c >= ucs_a2_cp936_table_min && c < ucs_a2_cp936_table_max) {
-		/* U+2000 - U+26FF */
-		if (c == 0x203e) {
-			s = 0xa3fe;
-		} else if (c == 0x2218) {
-			s = 0xa1e3;
-		} else if (c == 0x223c) {
-			s = 0xa1ab;
-		} else {
-			s = ucs_a2_cp936_table[c - ucs_a2_cp936_table_min];
-		}
-	} else if (c >= ucs_a3_cp936_table_min && c < ucs_a3_cp936_table_max) {
-		/* U+2F00 - U+33FF */
-		s = ucs_a3_cp936_table[c - ucs_a3_cp936_table_min];
-	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
-		/* U+4D00-9FFF CJK Unified Ideographs (+ Extension A) */
-		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
-	} else if (c >= 0xe000 && c <= 0xe864) { /* PUA */
-		if (c < 0xe766) {
-			if (c < 0xe4c6) {
-				c1 = c - 0xe000;
-				s = (c1 % 94) + 0xa1; c1 /= 94;
-				s |= (c1 < 0x06 ? c1 + 0xaa : c1 + 0xf2) << 8;
-			} else {
-				c1 = c - 0xe4c6;
-				s = ((c1 / 96) + 0xa1) << 8; c1 %= 96;
-				s |= c1 + (c1 >= 0x3f ? 0x41 : 0x40);
-			}
-		} else {
-			/* U+E766..U+E864 */
-			k1 = 0; k2 = mbfl_cp936_pua_tbl_max;
-			while (k1 < k2) {
-				k = (k1 + k2) >> 1;
-				if (c < mbfl_cp936_pua_tbl[k][0]) {
-					k2 = k;
-				} else if (c > mbfl_cp936_pua_tbl[k][1]) {
-					k1 = k + 1;
-				} else {
-					s = c - mbfl_cp936_pua_tbl[k][0] + mbfl_cp936_pua_tbl[k][2];
-					break;
-				}
-			}
-		}
-	} else if (c == 0xf8f5) {
-		s = 0xff;
-	} else if (c >= ucs_ci_cp936_table_min && c < ucs_ci_cp936_table_max) {
-		/* U+F900-FA2F CJK Compatibility Ideographs */
-		s = ucs_ci_cp936_table[c - ucs_ci_cp936_table_min];
-	} else if (c >= ucs_cf_cp936_table_min && c < ucs_cf_cp936_table_max) {
-		s = ucs_cf_cp936_table[c - ucs_cf_cp936_table_min];
-	} else if (c >= ucs_sfv_cp936_table_min && c < ucs_sfv_cp936_table_max) {
-		s = ucs_sfv_cp936_table[c - ucs_sfv_cp936_table_min]; /* U+FE50-FE6F Small Form Variants */
-	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		/* U+FF00-FFFF HW/FW Forms */
-		if (c == 0xff04) {
-			s = 0xa1e7;
-		} else if (c == 0xff5e) {
-			s = 0xa1ab;
-		} else if (c >= 0xff01 && c <= 0xff5d) {
-			s = c - 0xff01 + 0xa3a1;
-		} else if (c >= 0xffe0 && c <= 0xffe5) {
-			s = ucs_hff_s_cp936_table[c-0xffe0];
-		}
-	}
-
-	if (s <= 0) {
-		if (c == 0) {
-			s = 0;
-		} else if (s <= 0) {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		if (s <= 0x80 || s == 0xff) {	/* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
 }
 
 static size_t mb_cp936_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
@@ -11915,26 +8777,6 @@ static zend_string* mb_cut_gb18030(unsigned char *str, size_t from, size_t len, 
 
 static const char *mbfl_encoding_gb18030_aliases[] = {"gb-18030", "gb-18030-2000", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {
-	mbfl_no_encoding_gb18030,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_gb18030_wchar,
-	mbfl_filt_conv_gb18030_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_gb18030,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_gb18030,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_gb18030 = {
 	mbfl_no_encoding_gb18030,
 	"GB18030",
@@ -11942,8 +8784,8 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	mbfl_encoding_gb18030_aliases,
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_gb18030_wchar,
-	&vtbl_wchar_gb18030,
+	NULL,
+	NULL,
 	mb_gb18030_to_wchar,
 	mb_wchar_to_gb18030,
 	NULL,
@@ -11952,26 +8794,6 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 
 static const char *mbfl_encoding_cp936_aliases[] = {"CP-936", "GBK", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_cp936_wchar = {
-	mbfl_no_encoding_cp936,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_cp936_wchar,
-	mbfl_filt_conv_cp936_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp936,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_cp936,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
 const mbfl_encoding mbfl_encoding_cp936 = {
 	mbfl_no_encoding_cp936,
 	"CP936",
@@ -11979,8 +8801,8 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	mbfl_encoding_cp936_aliases,
 	mblen_table_81_to_fe,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_cp936_wchar,
-	&vtbl_wchar_cp936,
+	NULL,
+	NULL,
 	mb_cp936_to_wchar,
 	mb_wchar_to_cp936,
 	NULL,
@@ -12022,247 +8844,6 @@ static inline int is_in_cp950_pua(int c1, int c)
 	} else if (c1 == 0xc6) {
 		return c >= 0xa1 && c <= 0xfe;
 	}
-	return 0;
-}
-
-static int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
-{
-	int c1, w;
-
-	switch (filter->status) {
-	case 0:
-		if (c >= 0 && c < 0x80) { /* latin */
-			CK((*filter->output_function)(c, filter->data));
-		} else if (filter->from->no_encoding != mbfl_no_encoding_cp950 && c > 0xA0 && c <= 0xF9 && c != 0xC8) {
-			filter->status = 1;
-			filter->cache = c;
-		} else if (filter->from->no_encoding == mbfl_no_encoding_cp950 && c > 0x80 && c <= 0xFE) {
-			filter->status = 1;
-			filter->cache = c;
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-	case 1: /* dbcs second byte */
-		filter->status = 0;
-		c1 = filter->cache;
-		if ((c > 0x3f && c < 0x7f) || (c > 0xa0 && c < 0xff)) {
-			if (c < 0x7f) {
-				w = (c1 - 0xa1)*157 + (c - 0x40);
-			} else {
-				w = (c1 - 0xa1)*157 + (c - 0xa1) + 0x3f;
-			}
-			if (w >= 0 && w < big5_ucs_table_size) {
-				w = big5_ucs_table[w];
-			} else {
-				w = 0;
-			}
-
-			if (filter->from->no_encoding == mbfl_no_encoding_cp950) {
-				/* PUA for CP950 */
-				if (is_in_cp950_pua(c1, c)) {
-					int c2 = (c1 << 8) | c;
-
-					size_t k;
-					for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
-						if (c2 >= cp950_pua_tbl[k][2] && c2 <= cp950_pua_tbl[k][3]) {
-							break;
-						}
-					}
-
-					if ((cp950_pua_tbl[k][2] & 0xff) == 0x40) {
-						w = 157*(c1 - (cp950_pua_tbl[k][2]>>8)) + c - (c >= 0xa1 ? 0x62 : 0x40) + cp950_pua_tbl[k][0];
-					} else {
-						w = c2 - cp950_pua_tbl[k][2] + cp950_pua_tbl[k][0];
-					}
-				} else if (c1 == 0xA1) {
-					if (c == 0x45) {
-						w = 0x2027;
-					} else if (c == 0x4E) {
-						w = 0xFE51;
-					} else if (c == 0x5A) {
-						w = 0x2574;
-					} else if (c == 0xC2) {
-						w = 0x00AF;
-					} else if (c == 0xC3) {
-						w = 0xFFE3;
-					} else if (c == 0xC5) {
-						w = 0x02CD;
-					} else if (c == 0xE3) {
-						w = 0xFF5E;
-					} else if (c == 0xF2) {
-						w = 0x2295;
-					} else if (c == 0xF3) {
-						w = 0x2299;
-					} else if (c == 0xFE) {
-						w = 0xFF0F;
-					}
-				} else if (c1 == 0xA2) {
-					if (c == 0x40) {
-						w = 0xFF3C;
-					} else if (c == 0x41) {
-						w = 0x2215;
-					} else if (c == 0x42) {
-						w = 0xFE68;
-					} else if (c == 0x46) {
-						w = 0xFFE0;
-					} else if (c == 0x47) {
-						w = 0xFFE1;
-					} else if (c == 0xCC) {
-						w = 0x5341;
-					} else if (c == 0xCE) {
-						w = 0x5345;
-					}
-				}
-			}
-
-			if (w <= 0) {
-				w = MBFL_BAD_INPUT;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		}
-		break;
-
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_big5_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status == 1) {
-		/* 2-byte character was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
-{
-	int s = 0;
-
-	if (c >= ucs_a1_big5_table_min && c < ucs_a1_big5_table_max) {
-		s = ucs_a1_big5_table[c - ucs_a1_big5_table_min];
-	} else if (c >= ucs_a2_big5_table_min && c < ucs_a2_big5_table_max) {
-		s = ucs_a2_big5_table[c - ucs_a2_big5_table_min];
-	} else if (c >= ucs_a3_big5_table_min && c < ucs_a3_big5_table_max) {
-		s = ucs_a3_big5_table[c - ucs_a3_big5_table_min];
-	} else if (c >= ucs_i_big5_table_min && c < ucs_i_big5_table_max) {
-		s = ucs_i_big5_table[c - ucs_i_big5_table_min];
-	} else if (c >= ucs_r1_big5_table_min && c < ucs_r1_big5_table_max) {
-		s = ucs_r1_big5_table[c - ucs_r1_big5_table_min];
-	} else if (c >= ucs_r2_big5_table_min && c < ucs_r2_big5_table_max) {
-		s = ucs_r2_big5_table[c - ucs_r2_big5_table_min];
-	}
-
-	if (filter->to->no_encoding == mbfl_no_encoding_cp950) {
-		if (c >= 0xe000 && c <= 0xf848) { /* PUA for CP950 */
-			size_t k;
-			for (k = 0; k < sizeof(cp950_pua_tbl) / (sizeof(unsigned short)*4); k++) {
-				if (c <= cp950_pua_tbl[k][1]) {
-					break;
-				}
-			}
-
-			int c1 = c - cp950_pua_tbl[k][0];
-			if ((cp950_pua_tbl[k][2] & 0xff) == 0x40) {
-				int c2 = cp950_pua_tbl[k][2] >> 8;
-				s = ((c1 / 157) + c2) << 8;
-				c1 %= 157;
-				s |= c1 + (c1 >= 0x3f ? 0x62 : 0x40);
-			} else {
-				s = c1 + cp950_pua_tbl[k][2];
-			}
-		} else if (c == 0x00A2) {
-			s = 0;
-		} else if (c == 0x00A3) {
-			s = 0;
-		} else if (c == 0x00AF) {
-			s = 0xA1C2;
-		} else if (c == 0x02CD) {
-			s = 0xA1C5;
-		} else if (c == 0x0401) {
-			s = 0;
-		} else if (c >= 0x0414 && c <= 0x041C) {
-			s = 0;
-		} else if (c >= 0x0423 && c <= 0x044F) {
-			s = 0;
-		} else if (c == 0x0451) {
-			s = 0;
-		} else if (c == 0x2022) {
-			s = 0;
-		} else if (c == 0x2027) {
-			s = 0xA145;
-		} else if (c == 0x203E) {
-			s = 0;
-		} else if (c == 0x2215) {
-			s = 0xA241;
-		} else if (c == 0x223C) {
-			s = 0;
-		} else if (c == 0x2295) {
-			s = 0xA1F2;
-		} else if (c == 0x2299) {
-			s = 0xA1F3;
-		} else if (c >= 0x2460 && c <= 0x247D) {
-			s = 0;
-		} else if (c == 0x2574) {
-			s = 0xA15A;
-		} else if (c == 0x2609) {
-			s = 0;
-		} else if (c == 0x2641) {
-			s = 0;
-		} else if (c == 0x3005 || (c >= 0x302A && c <= 0x30FF)) {
-			s = 0;
-		} else if (c == 0xFE51) {
-			s = 0xA14E;
-		} else if (c == 0xFE68) {
-			s = 0xA242;
-		} else if (c == 0xFF3C) {
-			s = 0xA240;
-		} else if (c == 0xFF5E) {
-			s = 0xA1E3;
-		} else if (c == 0xFF64) {
-			s = 0;
-		} else if (c == 0xFFE0) {
-			s = 0xA246;
-		} else if (c == 0xFFE1) {
-			s = 0xA247;
-		} else if (c == 0xFFE3) {
-			s = 0xA1C3;
-		} else if (c == 0xFF0F) {
-			s = 0xA1FE;
-		}
-	}
-
-	if (s <= 0) {
-		if (c == 0) {
-			s = 0;
-		} else {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		if (s <= 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
 	return 0;
 }
 
@@ -12539,26 +9120,6 @@ static void mb_wchar_to_cp950(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 
 static const char *mbfl_encoding_big5_aliases[] = {"CN-BIG5", "BIG-FIVE", "BIGFIVE", NULL};
 
-static const struct mbfl_convert_vtbl vtbl_big5_wchar = {
-	mbfl_no_encoding_big5,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_big5_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_big5,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
-	NULL
-};
-
 const mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_no_encoding_big5,
 	"BIG-5",
@@ -12566,31 +9127,11 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_encoding_big5_aliases,
 	mblen_table_81_to_fe,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_big5_wchar,
-	&vtbl_wchar_big5,
+	NULL,
+	NULL,
 	mb_big5_to_wchar,
 	mb_wchar_to_big5,
 	NULL,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
-	mbfl_no_encoding_cp950,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_big5_wchar_flush,
-	NULL,
-};
-
-static const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp950,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
 	NULL,
 };
 
@@ -12601,8 +9142,8 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	NULL,
 	mblen_table_81_to_fe,
 	MBFL_ENCTYPE_GL_UNSAFE,
-	&vtbl_cp950_wchar,
-	&vtbl_wchar_cp950,
+	NULL,
+	NULL,
 	mb_cp950_to_wchar,
 	mb_wchar_to_cp950,
 	NULL,

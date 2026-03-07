@@ -41,7 +41,6 @@
 #include "php_standard.h"
 #include "ext/uri/php_uri.h"
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -421,7 +420,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	php_stream *reuseid=NULL;
 	size_t file_size = 0;
 	zval *tmpzval;
-	bool allow_overwrite = 0;
+	bool allow_overwrite = false;
 	int8_t read_write = 0;
 	char *transport;
 	int transport_len;

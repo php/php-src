@@ -425,7 +425,7 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashTable *control_ht)
 {
 	zval* val;
-	zend_string *control_oid;
+	zend_string *control_oid, *control_oid_tmp;
 	char** ldap_attrs = NULL;
 	LDAPSortKey** sort_keys = NULL;
 	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
@@ -436,8 +436,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 		return -1;
 	}
 
-	control_oid = zval_get_string(val);
-	if (EG(exception)) {
+	control_oid = zval_try_get_tmp_string(val, &control_oid_tmp);
+	if (!control_oid) {
 		return -1;
 	}
 
@@ -453,8 +453,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 
 	if ((val = zend_hash_find(control_ht, ZSTR_KNOWN(ZEND_STR_VALUE))) != NULL) {
 		if (Z_TYPE_P(val) != IS_ARRAY) {
-			tmpstring = zval_get_string(val);
-			if (EG(exception)) {
+			tmpstring = zval_try_get_string(val);
+			if (!tmpstring) {
 				rc = -1;
 				goto failure;
 			}
@@ -468,8 +468,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				pagesize = zval_get_long(tmp);
 			}
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "cookie", sizeof("cookie") - 1)) != NULL) {
-				tmpstring = zval_get_string(tmp);
-				if (EG(exception)) {
+				tmpstring = zval_try_get_string(tmp);
+				if (!tmpstring) {
 					rc = -1;
 					goto failure;
 				}
@@ -477,7 +477,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				cookie.bv_len = ZSTR_LEN(tmpstring);
 			}
 			/* ldap_create_page_control_value() allocates memory for control_value.bv_val */
-			control_value_alloc = 1;
+			control_value_alloc = true;
 			rc = ldap_create_page_control_value(ld, pagesize, &cookie, &control_value);
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
@@ -488,8 +488,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				rc = -1;
 				zend_value_error("%s(): Control must have a \"filter\" key", get_active_function_name());
 			} else {
-				zend_string* assert = zval_get_string(tmp);
-				if (EG(exception)) {
+				zend_string* assert = zval_try_get_string(tmp);
+				if (!assert) {
 					rc = -1;
 					goto failure;
 				}
@@ -498,7 +498,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				int success = LDAP_SUCCESS;
 				ldap_set_option(ld, LDAP_OPT_RESULT_CODE, &success);
 				/* ldap_create_assertion_control_value() allocates memory for control_value.bv_val */
-				control_value_alloc = 1;
+				control_value_alloc = true;
 				rc = ldap_create_assertion_control_value(ld, ZSTR_VAL(assert), &control_value);
 				if (rc != LDAP_SUCCESS) {
 					php_error_docref(NULL, E_WARNING, "Failed to create assert control value: %s (%d)", ldap_err2string(rc), rc);
@@ -516,8 +516,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
-					tmpstring = zval_get_string(tmp);
-					if (EG(exception)) {
+					tmpstring = zval_try_get_string(tmp);
+					if (!tmpstring) {
 						rc = -1;
 						goto failure;
 					}
@@ -555,8 +555,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 							goto failure;
 						}
 
-						tmpstrings1[num_tmpstrings1] = zval_get_string(attr);
-						if (EG(exception)) {
+						tmpstrings1[num_tmpstrings1] = zval_try_get_string(attr);
+						if (!tmpstrings1[num_tmpstrings1]) {
 							rc = -1;
 							goto failure;
 						}
@@ -603,8 +603,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 					goto failure;
 				}
 				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
-				tmpstrings1[num_tmpstrings1] = zval_get_string(tmp);
-				if (EG(exception)) {
+				tmpstrings1[num_tmpstrings1] = zval_try_get_string(tmp);
+				if (!tmpstrings1[num_tmpstrings1]) {
 					rc = -1;
 					goto failure;
 				}
@@ -612,8 +612,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				++num_tmpstrings1;
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
-					tmpstrings2[num_tmpstrings2] = zval_get_string(tmp);
-					if (EG(exception)) {
+					tmpstrings2[num_tmpstrings2] = zval_try_get_string(tmp);
+					if (!tmpstrings2[num_tmpstrings2]) {
 						rc = -1;
 						goto failure;
 					}
@@ -631,7 +631,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 			}
 			sort_keys[num_keys] = NULL;
 			/* ldap_create_sort_control_value() allocates memory for control_value.bv_val */
-			control_value_alloc = 1;
+			control_value_alloc = true;
 			rc = ldap_create_sort_control_value(ld, sort_keys, &control_value);
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
@@ -659,8 +659,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "attrvalue", sizeof("attrvalue") - 1)) != NULL) {
-				tmpstring = zval_get_string(tmp);
-				if (EG(exception)) {
+				tmpstring = zval_try_get_string(tmp);
+				if (!tmpstring) {
 					rc = -1;
 					goto failure;
 				}
@@ -686,8 +686,8 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 
 			zend_string *context_str = NULL;
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "context", sizeof("context") - 1)) != NULL) {
-				context_str = zval_get_string(tmp);
-				if (EG(exception)) {
+				context_str = zval_try_get_string(tmp);
+				if (!context_str) {
 					rc = -1;
 					goto failure;
 				}
@@ -699,7 +699,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 			}
 
 			/* ldap_create_vlv_control_value() allocates memory for control_value.bv_val */
-			control_value_alloc = 1;
+			control_value_alloc = true;
 			rc = ldap_create_vlv_control_value(ld, &vlvInfo, &control_value);
 			if (rc != LDAP_SUCCESS) {
 				php_error_docref(NULL, E_WARNING, "Failed to create VLV control value: %s (%d)", ldap_err2string(rc), rc);
@@ -718,7 +718,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 	}
 
 failure:
-	zend_string_release(control_oid);
+	zend_tmp_string_release(control_oid_tmp);
 	if (tmpstring != NULL) {
 		zend_string_release(tmpstring);
 	}
@@ -984,7 +984,8 @@ PHP_FUNCTION(ldap_connect)
 
 #ifdef HAVE_ORALDAP
 	if (ZEND_NUM_ARGS() == 3 || ZEND_NUM_ARGS() == 4) {
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!lssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
@@ -2799,8 +2800,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			zend_ulong value_index = 0;
 			zval *modification_value_zv = NULL;
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(modification_values), modification_value_zv) {
-				zend_string *modval = zval_get_string(modification_value_zv);
-				if (EG(exception)) {
+				zend_string *modval = zval_try_get_string(modification_value_zv);
+				if (!modval) {
 					RETVAL_FALSE;
 					ldap_mods[modification_index]->mod_bvalues[value_index] = NULL;
 					num_mods = modification_index + 1;
@@ -3941,7 +3942,7 @@ PHP_FUNCTION(ldap_escape)
 	char *value, *ignores;
 	size_t valuelen = 0, ignoreslen = 0;
 	zend_long flags = 0;
-	bool map[256] = {0}, havecharlist = 0;
+	bool map[256] = {0}, havecharlist = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sl", &value, &valuelen, &ignores, &ignoreslen, &flags) != SUCCESS) {
 		RETURN_THROWS();
@@ -3952,18 +3953,18 @@ PHP_FUNCTION(ldap_escape)
 	}
 
 	if (flags & PHP_LDAP_ESCAPE_FILTER) {
-		havecharlist = 1;
+		havecharlist = true;
 		php_ldap_escape_map_set_chars(map, "\\*()\0", sizeof("\\*()\0") - 1, true);
 	}
 
 	if (flags & PHP_LDAP_ESCAPE_DN) {
-		havecharlist = 1;
+		havecharlist = true;
 		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#\r", sizeof("\\,=+<>;\"#\r") - 1, true);
 	}
 
 	if (!havecharlist) {
 		for (uint16_t i = 0; i < 256; i++) {
-			map[i] = 1;
+			map[i] = true;
 		}
 	}
 

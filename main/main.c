@@ -23,6 +23,8 @@
 #include "php.h"
 #include <stdio.h>
 #include <fcntl.h>
+
+#include "zend_autoload.h"
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
@@ -62,7 +64,6 @@
 #include "win32/php_registry.h"
 #include "ext/standard/flock_compat.h"
 #endif
-#include "php_syslog.h"
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
@@ -73,7 +74,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_extensions.h"
 #include "zend_ini.h"
 #include "zend_dtrace.h"
 #include "zend_observer.h"
@@ -127,8 +127,8 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
 	smart_string version_info = {0};
 	smart_string_append_printf(&version_info,
-		"PHP %s (%s) (built: %s) (%s)\n",
-		PHP_VERSION, sapi_module->name, php_build_date,
+		"PHP " PHP_VERSION " (%s) (built: %s) (%s)\n",
+		sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
 #else
@@ -148,8 +148,12 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #endif
 	);
 	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
-	if (php_build_provider()) {
-		smart_string_append_printf(&version_info, "Built by %s\n", php_build_provider());
+
+	const char *build_provider = php_build_provider();
+	if (build_provider) {
+		smart_string_appends(&version_info, "Built by ");
+		smart_string_appends(&version_info, build_provider);
+		smart_string_appendc(&version_info, '\n');
 	}
 	smart_string_appends(&version_info, get_zend_version());
 	smart_string_0(&version_info);
@@ -160,7 +164,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 PHPAPI void php_print_version(sapi_module_struct *sapi_module)
 {
 	char *version_info = php_get_version(sapi_module);
-	php_printf("%s", version_info);
+	PHPWRITE(version_info, strlen(version_info));
 	efree(version_info);
 }
 
@@ -666,7 +670,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 
 static PHP_INI_MH(OnUpdateReportMemleaks)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	bool new_bool_value = zend_ini_parse_bool(new_value);
 
 	if (!new_bool_value) {
@@ -703,7 +707,7 @@ static PHP_INI_MH(OnUpdateErrorLog)
 			return FAILURE;
 		}
 	}
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -718,7 +722,7 @@ static PHP_INI_MH(OnUpdateMailLog)
 			return FAILURE;
 		}
 	}
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -2008,7 +2012,10 @@ void php_request_shutdown(void *dummy)
 		php_free_shutdown_functions();
 	}
 
-	/* 8. Destroy super-globals */
+	/* 8. Shutdown autoloader, freeing all held functions/closures */
+	zend_autoload_shutdown();
+
+	/* 9. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -2017,33 +2024,33 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
 
-	/* 10. free request-bound globals */
+	/* 11. free request-bound globals */
 	php_free_request_globals();
 
-	/* 11. Call all extensions post-RSHUTDOWN functions */
+	/* 12. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 12. SAPI related shutdown*/
+	/* 13. SAPI related shutdown*/
 	zend_try {
 		sapi_deactivate_module();
 	} zend_end_try();
 	/* free SAPI stuff */
 	sapi_deactivate_destroy();
 
-	/* 13. free virtual CWD memory */
+	/* 14. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 14. Destroy stream hashes */
+	/* 15. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 15. Free Willy (here be crashes) */
+	/* 16. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
 	zend_try {
@@ -2054,7 +2061,7 @@ void php_request_shutdown(void *dummy)
 	 * At this point, no memory beyond a single chunk should be in use. */
 	zend_set_memory_limit(PG(memory_limit));
 
-	/* 16. Deactivate Zend signals */
+	/* 17. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();
 #endif

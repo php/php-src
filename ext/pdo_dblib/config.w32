@@ -7,7 +7,7 @@ if (PHP_PDO_DBLIB != "no") {
 	 * otherwise we'll poke around and look for MSSQL libs */
 
 	if (CHECK_LIB("sybdb.lib", "pdo_dblib", PHP_PDO_DBLIB) &&
-			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_DBLIB",
+			CHECK_HEADER("sybfront.h", "CFLAGS_PDO_DBLIB",
 				PHP_PDO_DBLIB, null, null, true))
 	{
 		EXTENSION("pdo_dblib", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
@@ -24,7 +24,7 @@ if (PHP_PDO_MSSQL != "no") {
 	PDO_DBLIB_FLAVOUR = 0;
 
 	if (CHECK_LIB("sybdb.lib", "pdo_mssql", PHP_PDO_MSSQL) &&
-			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_MSSQL",
+			CHECK_HEADER("sybfront.h", "CFLAGS_PDO_MSSQL",
 			PHP_PDO_MSSQL, null, null, true)) {
 		/* smells like FreeTDS (or maybe native sybase dblib) */
 		PDO_DBLIB_FLAVOUR = "freetds";

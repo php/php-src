@@ -268,11 +268,12 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 	if (php_stream_stat(stream, &ssb) == SUCCESS) {
 		if (ssb.sb.st_mode & S_IFDIR) {
 			ret_val = "directory";
-		} else {
-			ret_val = magic_stream(magic, stream);
-			if (UNEXPECTED(ret_val == NULL)) {
-				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-			}
+		}
+	}
+	if (!ret_val) {
+		ret_val = magic_stream(magic, stream);
+		if (UNEXPECTED(ret_val == NULL)) {
+			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		}
 	}
 

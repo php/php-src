@@ -82,12 +82,10 @@ class ZipArchive implements Countable
      * @cvalue ZIP_OVERWRITE
      */
     public const int OVERWRITE = UNKNOWN;
-#ifdef ZIP_RDONLY
     /**
      * @cvalue ZIP_RDONLY
      */
     public const int RDONLY = UNKNOWN;
-#endif
 
     /**
      * @cvalue ZIP_FL_NOCASE
@@ -704,13 +702,11 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function setCommentName(string $name, string $comment): bool {}
 
-#ifdef HAVE_SET_MTIME
     /** @tentative-return-type */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0): bool {}
-#endif
 
     /** @tentative-return-type */
     public function getCommentIndex(int $index, int $flags = 0): string|false {}

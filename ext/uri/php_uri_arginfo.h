@@ -1,5 +1,6 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f3c524798d1933a400cc9377cfbfdcbaf77b87f0 */
+/* This is a generated file, edit php_uri.stub.php instead.
+ * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -374,9 +375,9 @@ static zend_class_entry *register_class_Uri_WhatWg_InvalidUrlException(zend_clas
 
 	zval property_errors_default_value;
 	ZVAL_UNDEF(&property_errors_default_value);
-	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, 1);
+	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, true);
 	zend_declare_typed_property(class_entry, property_errors_name, &property_errors_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_errors_name);
+	zend_string_release_ex(property_errors_name, true);
 
 	return class_entry;
 }
@@ -455,9 +456,9 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 
 	zval property_context_default_value;
 	ZVAL_UNDEF(&property_context_default_value);
-	zend_string *property_context_name = zend_string_init("context", sizeof("context") - 1, 1);
+	zend_string *property_context_name = zend_string_init("context", sizeof("context") - 1, true);
 	zend_declare_typed_property(class_entry, property_context_name, &property_context_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_context_name);
+	zend_string_release_ex(property_context_name, true);
 
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
@@ -466,9 +467,9 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 
 	zval property_failure_default_value;
 	ZVAL_UNDEF(&property_failure_default_value);
-	zend_string *property_failure_name = zend_string_init("failure", sizeof("failure") - 1, 1);
+	zend_string *property_failure_name = zend_string_init("failure", sizeof("failure") - 1, true);
 	zend_declare_typed_property(class_entry, property_failure_name, &property_failure_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_failure_name);
+	zend_string_release_ex(property_failure_name, true);
 
 	return class_entry;
 }

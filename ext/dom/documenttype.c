@@ -34,7 +34,11 @@ Since:
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
-	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
+	if (dtdptr->name) {
+		ZVAL_STRING(retval, (const char *) dtdptr->name);
+	} else {
+		ZVAL_EMPTY_STRING(retval);
+	}
 	return SUCCESS;
 }
 

@@ -19,22 +19,21 @@
 zend_result php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval retval;
-	int status;
+	zend_fcall_info_cache fcc;
 
-	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
+	if (!option_array || !zend_is_callable_ex(option_array, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
 		zend_type_error("%s(): Option must be a valid callback", get_active_function_name());
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 		return SUCCESS;
 	}
 
-	status = call_user_function(NULL, NULL, option_array, &retval, 1, value);
+	zend_call_known_fcc(&fcc, &retval, 1, value, NULL);
+	zval_ptr_dtor(value);
 
-	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
-		zval_ptr_dtor(value);
+	if (!Z_ISUNDEF(retval)) {
 		ZVAL_COPY_VALUE(value, &retval);
 	} else {
-		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
 	return SUCCESS;

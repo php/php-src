@@ -1134,12 +1134,12 @@ static zend_always_inline bool is_known_valid_utf8(
 		zend_string *subject_str, PCRE2_SIZE start_offset) {
 	if (!ZSTR_IS_VALID_UTF8(subject_str)) {
 		/* We don't know whether the string is valid UTF-8 or not. */
-		return 0;
+		return false;
 	}
 
 	if (start_offset == ZSTR_LEN(subject_str)) {
 		/* Degenerate case: Offset points to end of string. */
-		return 1;
+		return true;
 	}
 
 	/* Check that the offset does not point to an UTF-8 continuation byte. */
@@ -1708,10 +1708,10 @@ matched:
 			walk = ZSTR_VAL(replace_str);
 			replace_end = walk + ZSTR_LEN(replace_str);
 			walk_last = 0;
-			simple_string = 1;
+			simple_string = true;
 			while (walk < replace_end) {
 				if ('\\' == *walk || '$' == *walk) {
-					simple_string = 0;
+					simple_string = false;
 					if (walk_last == '\\') {
 						walk++;
 						walk_last = 0;
@@ -3015,7 +3015,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	if (match_data != mdata) {
 		pcre2_match_data_free(match_data);
 	}
+
 	mdata_used = old_mdata_used;
+
+	if (PCRE_G(error_code) != PHP_PCRE_NO_ERROR) {
+		zend_array_destroy(Z_ARR_P(return_value));
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

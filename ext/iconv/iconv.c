@@ -1825,7 +1825,7 @@ PHP_FUNCTION(iconv_substr)
 	size_t charset_len;
 	zend_string *str;
 	zend_long offset, length = 0;
-	bool len_is_null = 1;
+	bool len_is_null = true;
 
 	php_iconv_err_t err;
 

@@ -308,21 +308,21 @@ static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0;
-	bool use_binary = 0;
+	bool use_national_character_set = false;
+	bool use_binary = false;
 	size_t quotedlen;
 
 	if ((paramtype & PDO_PARAM_LOB) == PDO_PARAM_LOB) {
-		use_binary = 1;
+		use_binary = true;
 	} else {
 		if (H->assume_national_character_set_strings) {
-			use_national_character_set = 1;
+			use_national_character_set = true;
 		}
 		if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-			use_national_character_set = 1;
+			use_national_character_set = true;
 		}
 		if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-			use_national_character_set = 0;
+			use_national_character_set = false;
 		}
 	}
 

@@ -21,4 +21,4 @@ try {
 ?>
 --EXPECT--
 int(42)
-Property Test::$prop is read-only
+Cannot write to get-only virtual property Test::$prop

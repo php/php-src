@@ -122,7 +122,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 	bool uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 
 	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep, uppercase);
-	ZVAL_NEW_STR(retval, result);
+	ZVAL_STR(retval, result);
 
 	return SUCCESS;
 }
@@ -180,7 +180,7 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name)
 {
 #if ZEND_DEBUG
-	zend_string *name_zstr = ZSTR_INIT_LITERAL(name, false);
+	zend_string *name_zstr = zend_string_init(name, strlen(name), false);
 	const zend_property_info *prop_info = zend_get_property_info(obj->std.ce, name_zstr, 0);
 	zend_string_release_ex(name_zstr, false);
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == offset);
@@ -375,7 +375,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
-		ZVAL_NEW_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
+		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
 		zend_hash_next_index_insert(ht, &tmp);
 	}
 }
@@ -1019,7 +1019,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 			name_valid = xmlValidateName(BAD_CAST localname, 0);
 			if (name_valid != 0) {
 				errorcode = INVALID_CHARACTER_ERR;
-				stricterror = 1;
+				stricterror = true;
 			} else {
 				attr = xmlHasProp(elemp, BAD_CAST localname);
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
@@ -1210,19 +1210,17 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, getAttributeNodeNS)
 {
-	zval *id;
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
 	char *uri, *name;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(elemp, ZEND_THIS, xmlNodePtr, intern);
 
 	bool follow_spec = php_dom_follow_spec_intern(intern);
 	if (follow_spec && uri_len == 0) {
@@ -1239,16 +1237,11 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 				/* Keep parent alive, because we're a fake child. */
 				GC_ADDREF(&intern->std);
 				(void) php_dom_create_fake_namespace_decl(elemp, nsptr, return_value, intern);
-			} else {
-				RETURN_NULL();
 			}
-		} else {
-			RETURN_NULL();
 		}
 	} else {
 		DOM_RET_OBJ((xmlNodePtr) attrp, intern);
 	}
-
 }
 /* }}} end dom_element_get_attribute_node_ns */
 
@@ -1333,11 +1326,7 @@ PHP_METHOD(DOMElement, hasAttribute)
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
-	if (attr == NULL) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(attr != NULL);
 }
 /* }}} end dom_element_has_attribute */
 
@@ -1488,9 +1477,7 @@ PHP_METHOD(DOMElement, remove)
 {
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1608,9 +1595,10 @@ PHP_METHOD(DOMElement, replaceChildren)
 #define INSERT_ADJACENT_RES_SYNTAX_FAILED INSERT_ADJACENT_RES_ADOPT_FAILED
 #define INSERT_ADJACENT_RES_PRE_INSERT_FAILED ((void*) -2)
 
-static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp, dom_object *this_intern, xmlNodePtr otherp)
+static xmlNodePtr dom_insert_adjacent(zend_enum_Dom_AdjacentPosition where, xmlNodePtr thisp, dom_object *this_intern, xmlNodePtr otherp)
 {
-	if (zend_string_equals_literal_ci(where, "beforebegin")) {
+	switch (where) {
+	case ZEND_ENUM_Dom_AdjacentPosition_BeforeBegin:
 		if (thisp->parent == NULL) {
 			return NULL;
 		}
@@ -1620,21 +1608,24 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 		if (!php_dom_pre_insert(this_intern->document, otherp, thisp->parent, thisp)) {
 			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
-	} else if (zend_string_equals_literal_ci(where, "afterbegin")) {
+		break;
+	case ZEND_ENUM_Dom_AdjacentPosition_AfterBegin:
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
 			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
 		if (!php_dom_pre_insert(this_intern->document, otherp, thisp, thisp->children)) {
 			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
-	} else if (zend_string_equals_literal_ci(where, "beforeend")) {
+		break;
+	case ZEND_ENUM_Dom_AdjacentPosition_BeforeEnd:
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
 			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
 		if (!php_dom_pre_insert(this_intern->document, otherp, thisp, NULL)) {
 			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
-	} else if (zend_string_equals_literal_ci(where, "afterend")) {
+		break;
+	case ZEND_ENUM_Dom_AdjacentPosition_AfterEnd:
 		if (thisp->parent == NULL) {
 			return NULL;
 		}
@@ -1644,9 +1635,7 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 		if (!php_dom_pre_insert(this_intern->document, otherp, thisp->parent, thisp->next))  {
 			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
-	} else {
-		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(this_intern->document));
-		return INSERT_ADJACENT_RES_SYNTAX_FAILED;
+		break;
 	}
 	return otherp;
 }
@@ -1654,7 +1643,7 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
 Since:
 */
-static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, const zend_string *where, zval *element_zval)
+static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, zend_enum_Dom_AdjacentPosition where, zval *element_zval)
 {
 	zval *id;
 	xmlNodePtr thisp, otherp;
@@ -1673,12 +1662,41 @@ static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, co
 	}
 }
 
+static zend_result dom_adjacent_position_str_to_enum(zend_enum_Dom_AdjacentPosition *value, const zend_string *str)
+{
+	if (zend_string_equals_literal_ci(str, "beforebegin")) {
+		*value = ZEND_ENUM_Dom_AdjacentPosition_BeforeBegin;
+	} else if (zend_string_equals_literal_ci(str, "afterbegin")) {
+		*value = ZEND_ENUM_Dom_AdjacentPosition_AfterBegin;
+	} else if (zend_string_equals_literal_ci(str, "beforeend")) {
+		*value = ZEND_ENUM_Dom_AdjacentPosition_BeforeEnd;
+	} else if (zend_string_equals_literal_ci(str, "afterend")) {
+		*value = ZEND_ENUM_Dom_AdjacentPosition_AfterEnd;
+	} else {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 PHP_METHOD(DOMElement, insertAdjacentElement)
 {
-	zend_string *where;
+	zend_string *where_str;
+	zend_enum_Dom_AdjacentPosition where;
 	zval *element_zval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, dom_element_class_entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where_str, &element_zval, dom_element_class_entry) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (dom_adjacent_position_str_to_enum(&where, where_str) != SUCCESS) {
+		zval *id;
+		xmlNodePtr p;
+		dom_object *intern;
+		DOM_GET_THIS_OBJ(p, id, xmlNodePtr, intern);
+		(void)p;
+
+		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(intern->document));
 		RETURN_THROWS();
 	}
 
@@ -1687,14 +1705,14 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 
 PHP_METHOD(Dom_Element, insertAdjacentElement)
 {
-	zval *element_zval, *where_zv;
+	zend_enum_Dom_AdjacentPosition where;
+	zval *element_zval;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM(where, dom_adjacent_position_class_entry)
 		Z_PARAM_OBJECT_OF_CLASS(element_zval, dom_modern_element_class_entry)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, element_zval);
 }
 /* }}} end DOMElement::insertAdjacentElement */
@@ -1702,7 +1720,7 @@ PHP_METHOD(Dom_Element, insertAdjacentElement)
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
 Since:
 */
-static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, const zend_string *where, const zend_string *data)
+static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, zend_enum_Dom_AdjacentPosition where, const zend_string *data)
 {
 	dom_object *this_intern;
 	zval *id;
@@ -1724,9 +1742,21 @@ static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, const
 
 PHP_METHOD(DOMElement, insertAdjacentText)
 {
-	zend_string *where, *data;
+	zend_string *where_str, *data;
+	zend_enum_Dom_AdjacentPosition where;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where_str, &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (dom_adjacent_position_str_to_enum(&where, where_str) != SUCCESS) {
+		zval *id;
+		xmlNodePtr p;
+		dom_object *intern;
+		DOM_GET_THIS_OBJ(p, id, xmlNodePtr, intern);
+		(void)p;
+
+		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(intern->document));
 		RETURN_THROWS();
 	}
 
@@ -1735,15 +1765,14 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 
 PHP_METHOD(Dom_Element, insertAdjacentText)
 {
-	zval *where_zv;
+	zend_enum_Dom_AdjacentPosition where;
 	zend_string *data;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM(where, dom_adjacent_position_class_entry)
 		Z_PARAM_STR(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 	dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAM_PASSTHRU, where, data);
 }
 /* }}} end DOMElement::insertAdjacentText */
@@ -1751,7 +1780,7 @@ PHP_METHOD(Dom_Element, insertAdjacentText)
 /* https://html.spec.whatwg.org/#dom-element-insertadjacenthtml */
 PHP_METHOD(Dom_Element, insertAdjacentHTML)
 {
-	zval *where_zv;
+	zend_enum_Dom_AdjacentPosition where;
 	zend_string *string;
 
 	dom_object *this_intern;
@@ -1761,13 +1790,11 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 	bool created_context = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_OBJECT_OF_CLASS(where_zv, dom_adjacent_position_class_entry)
+		Z_PARAM_ENUM(where, dom_adjacent_position_class_entry)
 		Z_PARAM_STR(string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
-
-	const zend_string *where = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(where_zv)));
 
 	/* 1. We don't do injection sinks. */
 
@@ -1775,9 +1802,9 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 	xmlNodePtr context = NULL;
 
 	/* 3. Use the first matching item from this list: (...) */
-	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
-		case sizeof("BeforeBegin") - 1 + 'f':
-		case sizeof("AfterEnd") - 1 + 't':
+	switch (where) {
+		case ZEND_ENUM_Dom_AdjacentPosition_BeforeBegin:
+		case ZEND_ENUM_Dom_AdjacentPosition_AfterEnd:
 			/* 1. Set context to this's parent. */
 			context = thisp->parent;
 
@@ -1787,8 +1814,8 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 				RETURN_THROWS();
 			}
 			break;
-		case sizeof("AfterBegin") - 1 + 't':
-		case sizeof("BeforeEnd") - 1 + 'f':
+		case ZEND_ENUM_Dom_AdjacentPosition_AfterBegin:
+		case ZEND_ENUM_Dom_AdjacentPosition_BeforeEnd:
 			/* Set context to this. */
 			context = thisp;
 			break;
@@ -1818,17 +1845,17 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 	php_libxml_invalidate_node_list_cache(this_intern->document);
 
 	/* 6. Use the first matching item from this list: (...) */
-	switch (ZSTR_LEN(where) + ZSTR_VAL(where)[2]) {
-		case sizeof("BeforeBegin") - 1 + 'f':
+	switch (where) {
+		case ZEND_ENUM_Dom_AdjacentPosition_BeforeBegin:
 			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp);
 			break;
-		case sizeof("AfterEnd") - 1 + 't':
+		case ZEND_ENUM_Dom_AdjacentPosition_AfterEnd:
 			php_dom_pre_insert(this_intern->document, fragment, thisp->parent, thisp->next);
 			break;
-		case sizeof("AfterBegin") - 1 + 't':
+		case ZEND_ENUM_Dom_AdjacentPosition_AfterBegin:
 			php_dom_pre_insert(this_intern->document, fragment, thisp, thisp->children);
 			break;
-		case sizeof("BeforeEnd") - 1 + 'f':
+		case ZEND_ENUM_Dom_AdjacentPosition_BeforeEnd:
 			php_dom_node_append(this_intern->document, fragment, thisp);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();

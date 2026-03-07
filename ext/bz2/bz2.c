@@ -352,7 +352,7 @@ PHP_FUNCTION(bzopen)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_ZVAL_NULL_PATH(file)) {
+		if (zend_str_has_nul_byte(Z_STR_P(file))) {
 			zend_argument_type_error(1, "must not contain null bytes");
 			RETURN_THROWS();
 		}
@@ -538,7 +538,7 @@ PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
-		if (size > SIZE_MAX) {
+		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
@@ -549,7 +549,7 @@ PHP_FUNCTION(bzdecompress)
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
-			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
+			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
 		} else {

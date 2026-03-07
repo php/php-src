@@ -156,7 +156,7 @@ static void zend_verify_inference_def(zend_execute_data *execute_data, const zen
 	}
 	if (opline->op1_def_type
 	 && (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
-	 // array is actually changed by the the following instruction(s)
+	 // array is actually changed by the following instruction(s)
 	 && opline->opcode != ZEND_FETCH_DIM_W
 	 && opline->opcode != ZEND_FETCH_DIM_RW
 	 && opline->opcode != ZEND_FETCH_DIM_FUNC_ARG

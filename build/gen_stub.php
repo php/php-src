@@ -82,11 +82,22 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
             $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
+            $declFile = "{$stubFilenameWithoutExtension}_decl.h";
 
+            /* Check if the stub file changed, by checking that the hash stored
+             * in the generated arginfo.h matches.
+             * Also check that the decl.h file has the same hash. At this point
+             * we don't know if a decl.h file is supposed to exist, so extract
+             * this information (whether a decl file should exist) from the
+             * arginfo.h file. */
             $stubCode = file_get_contents($stubFile);
             $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
-            if ($stubHash === $oldStubHash && !$context->forceParse) {
+            $hasDeclHeader = extractHasDeclHeader($arginfoFile);
+            $oldStubHashDecl = extractStubHash($declFile);
+            $generatedFilesUpToDate = $stubHash === $oldStubHash
+                    && ($hasDeclHeader ? $stubHash === $oldStubHashDecl : $oldStubHashDecl === null);
+            if ($generatedFilesUpToDate && !$context->forceParse) {
                 /* Stub file did not change, do not regenerate. */
                 return null;
             }
@@ -122,26 +133,31 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             return $fileInfo;
         }
 
-        $arginfoCode = generateArgInfoCode(
+        [$arginfoCode, $declCode] = generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
             $fileInfo,
             $context->allConstInfos,
             $stubHash
         );
-        if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+        if ($context->forceRegeneration || !$generatedFilesUpToDate) {
             reportFilePutContents($arginfoFile, $arginfoCode);
+            if ($declCode !== '') {
+                reportFilePutContents($declFile, $declCode);
+            } else if (file_exists($declFile)) {
+                unlink($declFile);
+            }
         }
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
             $legacyFileInfo = $fileInfo->getLegacyVersion();
 
-            $arginfoCode = generateArgInfoCode(
+            [$arginfoCode] = generateArgInfoCode(
                 basename($stubFilenameWithoutExtension),
                 $legacyFileInfo,
                 $context->allConstInfos,
                 $stubHash
             );
-            if ($context->forceRegeneration || $stubHash !== $oldStubHash) {
+            if ($context->forceRegeneration || !$generatedFilesUpToDate) {
                 reportFilePutContents($legacyFile, $arginfoCode);
             }
         }
@@ -159,11 +175,20 @@ function extractStubHash(string $arginfoFile): ?string {
     }
 
     $arginfoCode = file_get_contents($arginfoFile);
-    if (!preg_match('/\* Stub hash: ([0-9a-f]+) \*/', $arginfoCode, $matches)) {
+    if (!preg_match('/\* Stub hash: ([0-9a-f]+)/', $arginfoCode, $matches)) {
         return null;
     }
 
     return $matches[1];
+}
+
+function extractHasDeclHeader(string $arginfoFile): bool {
+    if (!file_exists($arginfoFile)) {
+        return false;
+    }
+
+    $arginfoCode = file_get_contents($arginfoFile);
+    return str_contains($arginfoCode, '* Has decl header: yes *');
 }
 
 class Context {
@@ -2805,7 +2830,7 @@ class ConstInfo extends VariableLike
 
         $code = "\n" . $zvalCode;
 
-        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, 1);\n";
+        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, true);\n";
         $nameCode = "const_{$constName}_name";
 
         if ($this->exposedDocComment) {
@@ -2859,7 +2884,7 @@ class ConstInfo extends VariableLike
             $code .= "#endif\n";
         }
 
-        $code .= "\tzend_string_release(const_{$constName}_name);\n";
+        $code .= "\tzend_string_release_ex(const_{$constName}_name, true);\n";
 
         return $code;
     }
@@ -3064,13 +3089,13 @@ class StringBuilder {
         // Generally strings will not be known
         $initFn = $interned ? 'zend_string_init_interned' : 'zend_string_init';
         $result = [
-            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, true);\n",
             $varName,
-            "\tzend_string_release($varName);\n"
+            "\tzend_string_release_ex($varName, true);\n"
         ];
         // For attribute values that are not freed
         if ($varName === '') {
-            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n";
+            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, true);\n";
         }
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;
@@ -3286,7 +3311,7 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    private /* readonly */ string $name;
+    public /* readonly */ string $name;
     private /* readonly */ ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
@@ -3663,6 +3688,38 @@ class ClassInfo {
         }
 
         if ($this->type === "enum" && !$php81MinimumCompatibility) {
+            $code .= "#endif\n";
+        }
+
+        return $code;
+    }
+
+    public function getCDeclarations(): string
+    {
+        if ($this->type !== "enum") {
+            return '';
+        }
+
+        $code = '';
+
+        if ($this->cond) {
+            $code .= "#if {$this->cond}\n";
+        }
+
+        $cEnumName = 'zend_enum_' . str_replace('\\', '_', $this->name->toString());
+
+        $code .= "typedef enum {$cEnumName} {\n";
+
+        $i = 1;
+        foreach ($this->enumCaseInfos as $case) {
+            $cName = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString()) . '_' . $case->name;
+            $code .= "\t{$cName} = {$i},\n";
+            $i++;
+        }
+
+        $code .= "} {$cEnumName};\n";
+
+        if ($this->cond) {
             $code .= "#endif\n";
         }
 
@@ -4241,6 +4298,7 @@ class FileInfo {
     public bool $generateFunctionEntries = false;
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
+    public bool $generateCEnums = false;
     private bool $isUndocumentable = false;
     private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
@@ -4266,6 +4324,8 @@ class FileInfo {
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
             } else if ($tag->name === 'undocumentable') {
                 $this->isUndocumentable = true;
+            } else if ($tag->name === 'generate-c-enums') {
+                $this->generateCEnums = true;
             }
         }
 
@@ -4560,6 +4620,23 @@ class FileInfo {
 
         foreach ($this->classInfos as $class) {
             $code .= "\n" . $class->getRegistration($allConstInfos);
+        }
+
+        return $code;
+    }
+
+    public function generateCDeclarations(): string {
+        $code = "";
+
+        if (!$this->generateCEnums) {
+            return $code;
+        }
+
+        foreach ($this->classInfos as $class) {
+            $cdecl = $class->getCDeclarations();
+            if ($cdecl !== '') {
+                $code .= "\n" . $cdecl;
+            }
         }
 
         return $code;
@@ -5199,15 +5276,15 @@ function generateCodeWithConditions(
 
 /**
  * @param array<string, ConstInfo> $allConstInfos
+ * @return array{string, string}
  */
 function generateArgInfoCode(
     string $stubFilenameWithoutExtension,
     FileInfo $fileInfo,
     array $allConstInfos,
     string $stubHash
-): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead.\n"
-          . " * Stub hash: $stubHash */\n";
+): array {
+    $code = "";
 
     $generatedFuncInfos = [];
 
@@ -5299,7 +5376,26 @@ function generateArgInfoCode(
         $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
-    return $code;
+    $hasDeclFile = false;
+    $declCode = $fileInfo->generateCDeclarations();
+    if ($declCode !== '') {
+        $hasDeclFile = true;
+        $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
+        $declCode = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+            . " * Stub hash: $stubHash */\n"
+            . "\n"
+            . "#ifndef {$headerName}\n"
+            . "#define {$headerName}\n"
+            . $declCode . "\n"
+            . "#endif /* {$headerName} */\n";
+    }
+
+    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+          . " * Stub hash: $stubHash"
+          . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+          . $code;
+
+    return [$code, $declCode];
 }
 
 /** @param FuncInfo[] $funcInfos */
