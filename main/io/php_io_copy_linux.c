@@ -17,10 +17,8 @@
 #include "php_io_internal.h"
 #include <unistd.h>
 #include <errno.h>
-
 #include <sys/syscall.h>
 
-/* Provide copy_file_range wrapper if libc doesn't have it but kernel does */
 #if !defined(HAVE_COPY_FILE_RANGE) && defined(__NR_copy_file_range)
 #define HAVE_COPY_FILE_RANGE 1
 static inline ssize_t copy_file_range(
@@ -38,48 +36,36 @@ static inline ssize_t copy_file_range(
 #include <fcntl.h>
 #endif
 
-ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
+static ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_COPY_FILE_RANGE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
-		/* Clamp to SSIZE_MAX to avoid issues */
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
 		ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, to_copy, 0);
 
 		if (result > 0) {
 			total_copied += result;
-			/* File positions are automatically updated by copy_file_range */
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
 			}
 		} else if (result == 0) {
-			/* EOF - done */
 			break;
 		} else {
-			/* Error occurred */
 			switch (errno) {
 				case EINVAL:
 				case EXDEV:
 				case ENOSYS:
-					/* Expected failures - fall back to generic copy */
+				case EIO:
 					if (total_copied == 0) {
-						/* Haven't copied anything yet, can safely fall back */
 						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
-					/* If we already copied some, return what we have */
 					break;
 				default:
-					/* Unexpected error */
 					return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
-			break;
-		}
-
-		/* For bounded copies, stop if we reached maxlen */
-		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
 			break;
 		}
 	}
@@ -89,65 +75,42 @@ ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 	}
 #endif
 
-	/* Fallback to generic read/write loop */
 	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
-ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen)
+static ssize_t php_io_linux_sendfile(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_SENDFILE
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
-		/* Clamp to SSIZE_MAX */
 		size_t to_send = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
 		ssize_t result = sendfile(dest_fd, src_fd, NULL, to_send);
 
 		if (result > 0) {
 			total_copied += result;
-
 			if (maxlen != PHP_IO_COPY_ALL) {
 				remaining -= result;
 			}
 		} else if (result == 0) {
-			/* EOF - done */
 			break;
 		} else {
-			/* Error occurred */
 			switch (errno) {
 				case EINVAL:
 				case ENOSYS:
-					/* sendfile not supported - fall back */
 					if (total_copied == 0) {
 						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
-					/* Already copied some, continue with fallback for the rest */
-					if (maxlen != PHP_IO_COPY_ALL) {
-						remaining = (total_copied < maxlen) ? maxlen - total_copied : 0;
-					}
-					if (remaining > 0) {
-						ssize_t fallback_result
-								= php_io_generic_copy_fallback(src_fd, dest_fd, remaining);
-						if (fallback_result > 0) {
-							total_copied += fallback_result;
-						}
-					}
-					return total_copied > 0 ? (ssize_t) total_copied : -1;
+					break;
 				case EAGAIN:
-					/* Would block - return what we have */
-					return total_copied > 0 ? (ssize_t) total_copied : -1;
+					break;
 				default:
-					/* Other errors */
 					if (total_copied == 0) {
 						return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 					}
-					return total_copied > 0 ? (ssize_t) total_copied : -1;
+					break;
 			}
-		}
-
-		/* For bounded copies, stop if we reached maxlen */
-		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
 			break;
 		}
 	}
@@ -157,13 +120,39 @@ ssize_t php_io_linux_copy_file_to_generic(int src_fd, int dest_fd, size_t maxlen
 	}
 #endif
 
-	/* Fallback to generic read/write loop */
 	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 }
 
-ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
-{
 #ifdef HAVE_SPLICE
+static ssize_t php_io_linux_splice_from_pipe(int pipe_fd, int dest_fd, size_t maxlen)
+{
+	size_t total_copied = 0;
+	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
+
+	while (remaining > 0) {
+		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
+		ssize_t result = splice(pipe_fd, NULL, dest_fd, NULL, to_copy, 0);
+
+		if (result > 0) {
+			total_copied += result;
+			if (maxlen != PHP_IO_COPY_ALL) {
+				remaining -= result;
+			}
+		} else if (result == 0) {
+			break;
+		} else {
+			if (total_copied == 0) {
+				return php_io_generic_copy_fallback(pipe_fd, dest_fd, maxlen);
+			}
+			break;
+		}
+	}
+
+	return total_copied > 0 ? (ssize_t) total_copied : -1;
+}
+
+static ssize_t php_io_linux_splice_via_pipe(int src_fd, int dest_fd, size_t maxlen)
+{
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
 		return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
@@ -175,48 +164,32 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 	while (remaining > 0) {
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
 
-		/* src_fd → pipe */
 		ssize_t in_pipe = splice(src_fd, NULL, pipefd[1], NULL, to_copy, 0);
-
 		if (in_pipe < 0) {
-			/* Nothing was spliced into the pipe this iteration, so nothing to drain.
-			 * Close pipe and fall back to generic copy for remaining data. */
 			close(pipefd[0]);
 			close(pipefd[1]);
-
-			/* Continue with generic fallback for remaining data */
-			if (maxlen != PHP_IO_COPY_ALL) {
-				remaining = (total_copied < maxlen) ? maxlen - total_copied : 0;
+			if (total_copied == 0) {
+				return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
 			}
-			if (remaining > 0) {
-				ssize_t fallback_result = php_io_generic_copy_fallback(src_fd, dest_fd, remaining);
-				if (fallback_result > 0) {
-					total_copied += fallback_result;
-				}
-			}
-			return total_copied > 0 ? (ssize_t) total_copied : -1;
+			return (ssize_t) total_copied;
 		}
-
 		if (in_pipe == 0) {
-			/* EOF */
 			break;
 		}
 
-		/* pipe → dest_fd */
 		size_t pipe_remaining = in_pipe;
 		while (pipe_remaining > 0) {
 			ssize_t out = splice(pipefd[0], NULL, dest_fd, NULL, pipe_remaining, 0);
 			if (out <= 0) {
-				/* Error on splice out - need to drain the pipe first */
+				/* drain pipe before closing */
 				char drain_buf[1024];
 				while (pipe_remaining > 0) {
-					size_t to_drain = (pipe_remaining < sizeof(drain_buf)) ? pipe_remaining
-																		   : sizeof(drain_buf);
+					size_t to_drain = (pipe_remaining < sizeof(drain_buf))
+							? pipe_remaining : sizeof(drain_buf);
 					ssize_t drained = read(pipefd[0], drain_buf, to_drain);
 					if (drained <= 0) {
 						break;
 					}
-
 					ssize_t written = write(dest_fd, drain_buf, drained);
 					if (written <= 0) {
 						close(pipefd[0]);
@@ -228,18 +201,6 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 				}
 				close(pipefd[0]);
 				close(pipefd[1]);
-
-				/* Continue with generic fallback for remaining data */
-				if (maxlen != PHP_IO_COPY_ALL) {
-					remaining = (total_copied < maxlen) ? maxlen - total_copied : 0;
-				}
-				if (remaining > 0) {
-					ssize_t fallback_result
-							= php_io_generic_copy_fallback(src_fd, dest_fd, remaining);
-					if (fallback_result > 0) {
-						total_copied += fallback_result;
-					}
-				}
 				return total_copied > 0 ? (ssize_t) total_copied : -1;
 			}
 			pipe_remaining -= out;
@@ -249,19 +210,40 @@ ssize_t php_io_linux_copy_generic_to_any(int src_fd, int dest_fd, size_t maxlen)
 		if (maxlen != PHP_IO_COPY_ALL) {
 			remaining -= in_pipe;
 		}
-
-		if (maxlen != PHP_IO_COPY_ALL && remaining == 0) {
-			break;
-		}
 	}
 
 	close(pipefd[0]);
 	close(pipefd[1]);
-
 	return total_copied > 0 ? (ssize_t) total_copied : -1;
+}
+#endif /* HAVE_SPLICE */
+
+ssize_t php_io_linux_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
+{
+	if (src->fd_type == PHP_IO_FD_FILE && dest->fd_type == PHP_IO_FD_FILE) {
+		return php_io_linux_copy_file_to_file(src->fd, dest->fd, maxlen);
+	}
+
+	if (src->fd_type == PHP_IO_FD_FILE && dest->fd_type == PHP_IO_FD_SOCKET) {
+		return php_io_linux_sendfile(src->fd, dest->fd, maxlen);
+	}
+
+	/* sendfile also works for file to pipe on Linux */
+	if (src->fd_type == PHP_IO_FD_FILE && dest->fd_type == PHP_IO_FD_PIPE) {
+		return php_io_linux_sendfile(src->fd, dest->fd, maxlen);
+	}
+
+#ifdef HAVE_SPLICE
+	if (src->fd_type == PHP_IO_FD_PIPE) {
+		return php_io_linux_splice_from_pipe(src->fd, dest->fd, maxlen);
+	}
+
+	if (src->fd_type == PHP_IO_FD_SOCKET) {
+		return php_io_linux_splice_via_pipe(src->fd, dest->fd, maxlen);
+	}
 #endif
 
-	return php_io_generic_copy_fallback(src_fd, dest_fd, maxlen);
+	return php_io_generic_copy_fallback(src->fd, dest->fd, maxlen);
 }
 
 #endif /* __linux__ */

@@ -1637,8 +1637,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 
 	return result;
 }
-
-/* Fallback copy stream function */
+/* Fallback copy using stream read/write API */
 static ssize_t php_stream_copy_fallback(php_stream *src, php_stream *dest, size_t maxlen, size_t *len)
 {
 	char buf[CHUNK_SIZE];
@@ -1670,7 +1669,7 @@ static ssize_t php_stream_copy_fallback(php_stream *src, php_stream *dest, size_
 		while (towrite) {
 			ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
 			if (didwrite <= 0) {
-				*len = haveread - (didread - towrite);
+				*len = haveread - towrite;
 				return FAILURE;
 			}
 
@@ -1687,10 +1686,8 @@ static ssize_t php_stream_copy_fallback(php_stream *src, php_stream *dest, size_
 	return SUCCESS;
 }
 
-/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
 PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
 {
-	size_t haveread = 0;
 	size_t dummy;
 
 	if (!len) {
@@ -1702,53 +1699,39 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		return SUCCESS;
 	}
 
-	/* Try to use optimized I/O if both streams are castable to fd and not filtered */
-	if (!php_stream_is(src, PHP_STREAM_IS_USERSPACE) && !php_stream_is(dest, PHP_STREAM_IS_USERSPACE) &&
-			src->writepos == src->readpos) {  /* Read buffer must be empty */
-		int src_fd, dest_fd;
-		
-		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
-				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS) {
-			
-			/* Determine fd types based on stream type */
-			php_io_fd_type src_type = php_stream_is(src, PHP_STREAM_IS_STDIO) ? 
-									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
-			php_io_fd_type dest_type = php_stream_is(dest, PHP_STREAM_IS_STDIO) ? 
-									PHP_IO_FD_FILE : PHP_IO_FD_GENERIC;
+	/* Try optimized fd-level copy if both streams support it and read buffer is empty */
+	if (src->writepos == src->readpos &&
+			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest)) {
+		php_io_fd src_copy_fd, dest_copy_fd;
 
-			/* Check if destination file is opened in append mode as copy_file_range does not respect O_APPEND */
-			zend_bool can_use_optimized = 1;
+		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
+				php_stream_cast(dest, PHP_STREAM_AS_FD_FOR_COPY, (void *) &dest_copy_fd, 0) == SUCCESS) {
 
-			if (dest_type == PHP_IO_FD_FILE && src_type == PHP_IO_FD_FILE) {
+			/* copy_file_range does not work with O_APPEND */
+			if (src_copy_fd.fd_type == PHP_IO_FD_FILE && dest_copy_fd.fd_type == PHP_IO_FD_FILE) {
 				int dest_flags = 0;
-				if (php_stream_parse_fopen_modes(dest->mode, &dest_flags) == SUCCESS && (dest_flags & O_APPEND)) {
-					/* Append mode with file destination and source - cannot use optimized copy */
-					can_use_optimized = 0;
+				if (php_stream_parse_fopen_modes(dest->mode, &dest_flags) == SUCCESS
+						&& (dest_flags & O_APPEND)) {
+					goto fallback;
 				}
 			}
 
-			if (can_use_optimized) {
-				/* Try optimized copy */
-				size_t io_maxlen = (maxlen == PHP_STREAM_COPY_ALL) ? PHP_IO_COPY_ALL : maxlen;
-				ssize_t result = php_io_copy(src_fd, src_type, dest_fd, dest_type, io_maxlen);
+			size_t io_maxlen = (maxlen == PHP_STREAM_COPY_ALL) ? PHP_IO_COPY_ALL : maxlen;
+			ssize_t result = php_io_copy(&src_copy_fd, &dest_copy_fd, io_maxlen);
 
-				if (result >= 0) {
-					/* Success - update positions */
-					haveread = result;
-					src->position += result;
-					dest->position += result;
-					*len = haveread;
-					return SUCCESS;
-				}
-
-				/* I/O error occurred */
-				*len = 0;
-				return FAILURE;
+			if (result >= 0) {
+				src->position += result;
+				dest->position += result;
+				*len = result;
+				return SUCCESS;
 			}
+
+			*len = 0;
+			return FAILURE;
 		}
 	}
 
-	/* Classic read/write loop fallback (if cast failed) */
+fallback:
 	return php_stream_copy_fallback(src, dest, maxlen, len);
 }
 

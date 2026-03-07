@@ -34,6 +34,7 @@
 #endif
 #include "SAPI.h"
 
+#include "php_io.h"
 #include "php_streams_int.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -641,7 +642,6 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 		return ret;
 	}
 }
-
 static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 {
 	php_socket_t fd;
@@ -649,16 +649,10 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 
 	assert(data != NULL);
 
-	/* as soon as someone touches the stdio layer, buffering may ensue,
-	 * so we need to stop using the fd directly in that case */
-
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret) {
-
 				if (data->file == NULL) {
-					/* we were opened as a plain file descriptor, so we
-					 * need fdopen now */
 					char fixed_mode[5];
 					php_stream_mode_sanitize_fdopen_fopencookie(stream, fixed_mode);
 					data->file = fdopen(data->fd, fixed_mode);
@@ -666,7 +660,6 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 						return FAILURE;
 					}
 				}
-
 				*(FILE**)ret = data->file;
 				data->fd = SOCK_ERR;
 			}
@@ -684,7 +677,6 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
-
 			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
@@ -695,6 +687,22 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
+
+		case PHP_STREAM_AS_FD_FOR_COPY:
+			PHP_STDIOP_GET_FD(fd, data);
+			if (SOCK_ERR == fd) {
+				return FAILURE;
+			}
+			if (data->file) {
+				fflush(data->file);
+			}
+			if (ret) {
+				php_io_fd *copy_fd = (php_io_fd *) ret;
+				copy_fd->fd = fd;
+				copy_fd->fd_type = data->is_pipe ? PHP_IO_FD_PIPE : PHP_IO_FD_FILE;
+			}
+			return SUCCESS;
+
 		default:
 			return FAILURE;
 	}
