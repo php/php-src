@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 8a2ea9bb83616d997adf888553bc007ed0440dd8
+ * Stub hash: 4bb5b467b9d62c0e0c6a7c1e069e8755403a0af9
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -127,6 +127,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_call_with_consumed_arg
 	ZEND_ARG_TYPE_INFO(0, cb, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, consumed_args, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_refcount, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_ini_parse_quantity, 0, 1, IS_LONG, 0)
@@ -323,6 +327,7 @@ static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_object_init_with_constructor);
 static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_call_with_consumed_args);
+static ZEND_FUNCTION(zend_test_refcount);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
@@ -456,6 +461,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_object_init_with_constructor, arginfo_zend_object_init_with_constructor)
 	ZEND_FE(zend_call_method_if_exists, arginfo_zend_call_method_if_exists)
 	ZEND_FE(zend_test_call_with_consumed_args, arginfo_zend_test_call_with_consumed_args)
+	ZEND_FE(zend_test_refcount, arginfo_zend_test_refcount)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)

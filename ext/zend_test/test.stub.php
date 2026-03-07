@@ -307,6 +307,8 @@ namespace {
 
     function zend_test_call_with_consumed_args(callable $cb, array $args, int $consumed_args): array {}
 
+    function zend_test_refcount(mixed $value): int {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 

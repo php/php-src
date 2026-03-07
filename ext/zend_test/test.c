@@ -600,6 +600,21 @@ static ZEND_FUNCTION(zend_test_call_with_consumed_args)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_refcount)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_REFCOUNTED_P(value)) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(Z_REFCOUNT_P(value));
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
