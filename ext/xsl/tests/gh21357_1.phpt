@@ -3,6 +3,8 @@ GH-21357 (XSLTProcessor works with \DOMDocument, but fails with \Dom\XMLDocument
 --EXTENSIONS--
 dom
 xsl
+--CREDITS--
+jacekkow
 --FILE--
 <?php
 $xml = <<<'XML'

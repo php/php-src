@@ -211,12 +211,20 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_FALSE;
 	}
 
-	/* Detach object */
-	php_libxml_node_object *clone_lxml_obj = (php_libxml_node_object *) ((char *) Z_OBJ(clone_zv) - Z_OBJ_HT(clone_zv)->offset);
-	clone_lxml_obj->document->ptr = NULL;
-	OBJ_RELEASE(clone);
-
 	xsl_object *intern = Z_XSL_P(id);
+
+	/* Detach object */
+	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
+	clone_lxml_obj->document->ptr = NULL;
+	/* The namespace mappings need to be kept alive.
+	 * This is stored in the ref obj outside of libxml2, but that means that the sheet won't keep it alive
+	 * unlike with namespaces from old DOM. */
+	if (intern->sheet_ref_obj) {
+		php_libxml_decrement_doc_ref_directly(intern->sheet_ref_obj);
+	}
+	intern->sheet_ref_obj = clone_lxml_obj->document;
+	intern->sheet_ref_obj->refcount++;
+	OBJ_RELEASE(clone);
 
 	member = ZSTR_INIT_LITERAL("cloneDocument", 0);
 	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
