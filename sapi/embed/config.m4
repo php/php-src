@@ -1,10 +1,3 @@
-PHP_ARG_ENABLE([embed],,
-  [AS_HELP_STRING([[--enable-embed[=TYPE]]],
-    [Enable building of embedded SAPI library TYPE is either
-    'shared' or 'static'. [TYPE=shared]])],
-  [no],
-  [no])
-
 AC_MSG_CHECKING([for embedded SAPI library support])
 
 if test "$PHP_EMBED" != "no"; then
@@ -39,7 +32,6 @@ if test "$PHP_EMBED" != "no"; then
     PHP_SAPI_OBJS="$PHP_SAPI_OBJS sapi/embed/cli/php_cli.lo sapi/embed/cli/php_http_parser.lo sapi/embed/cli/php_cli_server.lo sapi/embed/cli/ps_title.lo sapi/embed/cli/php_cli_process_title.lo"
 
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
-    PHP_INSTALL_HEADERS([sapi/cli], [cli.h])
   ])
 else
   AC_MSG_RESULT([no])

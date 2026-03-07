@@ -5,7 +5,8 @@ PHP_ARG_ENABLE([cli],
   [yes],
   [no])
 
-if test "$PHP_CLI" != "no"; then
+dnl Embed SAPI builds cli files too, so run the feature checks
+if test "$PHP_CLI" != "no" || test "$PHP_EMBED" != "no"; then
   AC_CHECK_FUNCS([setproctitle])
 
   AC_CHECK_HEADERS([sys/pstat.h])
@@ -23,7 +24,9 @@ if test "$PHP_CLI" != "no"; then
     [php_cv_var_PS_STRINGS=no])])
   AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
     [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
+fi
 
+if test "$PHP_CLI" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cli/Makefile.frag])
 
   dnl Set filename.
