@@ -195,13 +195,17 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_THROWS();
 	}
 
+	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
+
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);
 	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
 	ZEND_DIAGNOSTIC_IGNORED_END
 
-	xsl_add_ns_defs(newdoc);
+	if (clone_lxml_obj->document->class_type == PHP_LIBXML_CLASS_MODERN) {
+		xsl_add_ns_defs(newdoc);
+	}
 
 	sheetp = xsltParseStylesheetDoc(newdoc);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
@@ -214,7 +218,6 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	xsl_object *intern = Z_XSL_P(id);
 
 	/* Detach object */
-	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
 	clone_lxml_obj->document->ptr = NULL;
 	/* The namespace mappings need to be kept alive.
 	 * This is stored in the ref obj outside of libxml2, but that means that the sheet won't keep it alive
