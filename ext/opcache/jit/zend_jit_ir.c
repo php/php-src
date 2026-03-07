@@ -14482,17 +14482,17 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			if (opline->opcode == ZEND_FETCH_OBJ_W || !(res_info & MAY_BE_GUARD) || !JIT_G(current_frame)) {
-				/* perform IS_UNDEF check only after result type guard (during deoptimization) */
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			/* Always check for IS_UNDEF to prevent infinite loop when
+			 * opline->handler has been replaced with JIT code and the
+			 * result type guard deoptimization dispatches back to it. */
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
-				if (!exit_addr) {
-					return 0;
-				}
-				prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
-				ir_GUARD(prop_type_ref, ir_CONST_ADDR(exit_addr));
+			if (!exit_addr) {
+				return 0;
 			}
+			prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
+			ir_GUARD(prop_type_ref, ir_CONST_ADDR(exit_addr));
 		} else {
 			prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
 			ir_ref if_def = ir_IF(prop_type_ref);
