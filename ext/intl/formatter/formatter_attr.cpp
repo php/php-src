@@ -16,13 +16,16 @@
 #include <config.h>
 #endif
 
+#include <unicode/unum.h>
+#include "../intl_convertcpp.h"
+#include "formatter_class.h"
+
 extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
 }
-#include "formatter_class.h"
 
-#include <unicode/ustring.h>
+#define FORMATTER_UNUM(nfo) reinterpret_cast<UNumberFormat*>(FORMATTER_OBJECT(nfo))
 
 /* {{{ Get formatter attribute value. */
 U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
@@ -62,7 +65,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 		case UNUM_MIN_SIGNIFICANT_DIGITS:
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
-			value = unum_getAttribute(FORMATTER_OBJECT(nfo), attribute);
+			value = unum_getAttribute(FORMATTER_UNUM(nfo), attribute);
 			if(value == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {
@@ -71,7 +74,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 		{
-			double value_double = unum_getDoubleAttribute(FORMATTER_OBJECT(nfo), attribute);
+			double value_double = unum_getDoubleAttribute(FORMATTER_UNUM(nfo), attribute);
 			if(value_double == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {
@@ -110,12 +113,12 @@ U_CFUNC PHP_FUNCTION( numfmt_get_text_attribute )
 
 	UNumberFormatTextAttribute attribute = static_cast<UNumberFormatTextAttribute>(lattribute);
 
-	length = unum_getTextAttribute( FORMATTER_OBJECT(nfo), attribute, value, value_buf_size, &INTL_DATA_ERROR_CODE(nfo) );
+	length = unum_getTextAttribute( FORMATTER_UNUM(nfo), attribute, value, value_buf_size, &INTL_DATA_ERROR_CODE(nfo) );
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= value_buf_size) {
 		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
-		length = unum_getTextAttribute( FORMATTER_OBJECT(nfo), attribute, value, length, &INTL_DATA_ERROR_CODE(nfo) );
+		length = unum_getTextAttribute( FORMATTER_UNUM(nfo), attribute, value, length, &INTL_DATA_ERROR_CODE(nfo) );
 		if(U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 			efree(value);
 			value = value_buf;
@@ -166,10 +169,10 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 		case UNUM_MIN_SIGNIFICANT_DIGITS:
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
-			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, zval_get_long(value));
+			unum_setAttribute(FORMATTER_UNUM(nfo), attribute, zval_get_long(value));
 			break;
 		case UNUM_ROUNDING_INCREMENT:
-			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, zval_get_double(value));
+			unum_setDoubleAttribute(FORMATTER_UNUM(nfo), attribute, zval_get_double(value));
 			break;
 		default:
 			INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
@@ -185,8 +188,6 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 /* {{{ Get formatter attribute value. */
 U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
 {
-	int32_t slength = 0;
-	UChar *svalue = NULL;
 	zend_long attribute;
 	char *value;
 	size_t len;
@@ -203,14 +204,12 @@ U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert given attribute value to UTF-16. */
-	intl_convert_utf8_to_utf16(&svalue, &slength, value, len, &INTL_DATA_ERROR_CODE(nfo));
+	UnicodeString svalue;
+	intl_stringFromChar(svalue, value, len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error converting attribute value to UTF-16" );
 
 	/* Actually set new attribute value. */
-	unum_setTextAttribute(FORMATTER_OBJECT(nfo), static_cast<UNumberFormatTextAttribute>(attribute), svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	unum_setTextAttribute(FORMATTER_UNUM(nfo), static_cast<UNumberFormatTextAttribute>(attribute), svalue.getBuffer(), svalue.length(), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
 	RETURN_TRUE;
@@ -243,12 +242,12 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	length = unum_getSymbol(FORMATTER_OBJECT(nfo), symbol, value_buf, length, &INTL_DATA_ERROR_CODE(nfo));
+	length = unum_getSymbol(FORMATTER_UNUM(nfo), symbol, value_buf, length, &INTL_DATA_ERROR_CODE(nfo));
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value_buf )) {
 		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
-		length = unum_getSymbol(FORMATTER_OBJECT(nfo), symbol, value, length, &INTL_DATA_ERROR_CODE(nfo));
+		length = unum_getSymbol(FORMATTER_UNUM(nfo), symbol, value, length, &INTL_DATA_ERROR_CODE(nfo));
 		if(U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 			efree(value);
 			value = value_buf;
@@ -266,8 +265,6 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 	zend_long  lsymbol;
 	char*      value     = NULL;
 	size_t     value_len = 0;
-	UChar*     svalue  = 0;
-	int32_t    slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -288,14 +285,12 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert given symbol to UTF-16. */
-	intl_convert_utf8_to_utf16(&svalue, &slength, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
+	UnicodeString svalue;
+	intl_stringFromChar(svalue, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error converting symbol value to UTF-16" );
 
 	/* Actually set the symbol. */
-	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	unum_setSymbol(FORMATTER_UNUM(nfo), symbol, svalue.getBuffer(), svalue.length(), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
 	RETURN_TRUE;
@@ -320,12 +315,12 @@ U_CFUNC PHP_FUNCTION( numfmt_get_pattern )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	length = unum_toPattern(FORMATTER_OBJECT(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo));
+	length = unum_toPattern(FORMATTER_UNUM(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo));
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value_buf )) {
 		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
-		length = unum_toPattern( FORMATTER_OBJECT(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo) );
+		length = unum_toPattern( FORMATTER_UNUM(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo) );
 		if(U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 			efree(value);
 			value = value_buf;
@@ -342,8 +337,6 @@ U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
 	size_t      value_len = 0;
-	int32_t     slength = 0;
-	UChar*	    svalue  = NULL;
 	UParseError spattern_error = {0};
 	FORMATTER_METHOD_INIT_VARS;
 
@@ -357,13 +350,11 @@ U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert given pattern to UTF-16. */
-	intl_convert_utf8_to_utf16(&svalue, &slength, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
+	UnicodeString svalue;
+	intl_stringFromChar(svalue, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error converting pattern to UTF-16" );
 
-	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, svalue, slength, &spattern_error, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	unum_applyPattern(FORMATTER_UNUM(nfo), 0, svalue.getBuffer(), svalue.length(), &spattern_error, &INTL_DATA_ERROR_CODE(nfo));
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 		char *msg;
 		spprintf(&msg, 0, "Error setting pattern value at line %d, offset %d", spattern_error.line, spattern_error.offset);
@@ -393,7 +384,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_locale )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	loc = unum_getLocaleByType(FORMATTER_OBJECT(nfo), static_cast<ULocDataLocaleType>(type), &INTL_DATA_ERROR_CODE(nfo));
+	loc = unum_getLocaleByType(FORMATTER_UNUM(nfo), static_cast<ULocDataLocaleType>(type), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting locale" );
 	RETURN_STRING(loc);
 }

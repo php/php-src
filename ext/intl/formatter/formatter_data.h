@@ -15,9 +15,21 @@
 #ifndef FORMATTER_DATA_H
 #define FORMATTER_DATA_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <php.h>
+#ifdef __cplusplus
+}
+#endif
 
-#include <unicode/unum.h>
+#include <unicode/numfmt.h>
+
+#ifdef __cplusplus
+using icu::NumberFormat;
+#else
+typedef void NumberFormat;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,7 +44,7 @@ typedef struct {
 	intl_error      error;
 
 	// formatter handling
-	UNumberFormat*  unum;
+	NumberFormat*    unum;
 } formatter_data;
 
 #ifdef __cplusplus
