@@ -74,6 +74,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     longer is a pointer, but a directly embedded HashTable struct.
   . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
     enums.
+  . Added zend_fcall_info.consumed_args together with
+    ZEND_FCI_CONSUMED_ARG(), which allows moving a selected callback argument
+    instead of copying it in zend_call_function(). Currently only a single
+    consumed argument is supported.
 
 ========================
 2. Build system changes

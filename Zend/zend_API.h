@@ -49,6 +49,7 @@ typedef struct _zend_fcall_info {
 	zval *params;
 	zend_object *object;
 	uint32_t param_count;
+	uint32_t consumed_args;
 	/* This hashtable can also contain positional arguments (with integer keys),
 	 * which will be appended to the normal params[]. This makes it easier to
 	 * integrate APIs like call_user_func_array(). The usual restriction that
@@ -339,6 +340,10 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
 #define ZEND_FCC_INITIALIZED(fcc) ((fcc).function_handler != NULL)
+#define ZEND_FCI_CONSUMED_ARG(arg_index) \
+	((arg_index) < 32 ? (1u << (arg_index)) : 0u)
+#define ZEND_FCI_IS_CONSUMED_ARG(consumed_args, arg_index) \
+	((arg_index) < 32 && ((consumed_args) & (1u << (arg_index))))
 
 ZEND_API int zend_next_free_module(void);
 

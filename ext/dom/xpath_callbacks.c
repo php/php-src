@@ -408,6 +408,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		fci.param_count = param_count;
 		fci.params = params;
 		fci.named_params = NULL;
+		fci.consumed_args = 0;
 		ZVAL_STRINGL(&fci.function_name, function_name, function_name_length);
 
 		zend_call_function(&fci, NULL);
