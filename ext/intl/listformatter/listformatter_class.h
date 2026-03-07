@@ -21,14 +21,20 @@
 #include "intl_error.h"
 #include "intl_data.h"
 
-#include <unicode/ulistformatter.h>
+#include <unicode/listformatter.h>
+
+#ifdef __cplusplus
+using icu::ListFormatter;
+#else
+typedef void ListFormatter;
+#endif
 
 typedef struct {
     // error handling
     intl_error      error;
 
     // formatter handling
-    UListFormatter*  ulistfmt;
+    ListFormatter*  ulistfmt;
 } listformatter_data;
 
 typedef struct {

@@ -16,12 +16,11 @@
 #include <config.h>
 #endif
 
-#include <unicode/ustring.h>
-#include <unicode/uloc.h>
+#include <unicode/locid.h>
+#include "../intl_convertcpp.h"
 
 extern "C" {
 #include "php_intl.h"
-#include "intl_convert.h"
 }
 #include "formatter_class.h"
 
@@ -32,8 +31,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	char*       pattern = NULL;
 	size_t      locale_len = 0, pattern_len = 0;
 	zend_long   style;
-	UChar*      spattern     = NULL;
-	int32_t     spattern_len = 0;
+	UnicodeString upattern;
 	FORMATTER_METHOD_INIT_VARS;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -53,7 +51,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
-		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+		intl_stringFromChar(upattern, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
 		INTL_CTOR_CHECK_STATUS(nfo, "error converting pattern to UTF-16");
 	}
 
@@ -61,7 +59,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	if (strlen(uloc_getISO3Language(locale)) == 0) {
+	if (icu::Locale(locale).getISO3Language()[0] == '\0') {
 		zend_argument_value_error(1, "\"%s\" is invalid", locale);
 		return FAILURE;
 	}
@@ -70,12 +68,10 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale;
 
 	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(static_cast<UNumberFormatStyle>(style), spattern, spattern_len, final_locale, nullptr, &INTL_DATA_ERROR_CODE(nfo));
+	FORMATTER_OBJECT(nfo) = unum_open(static_cast<UNumberFormatStyle>(style),
+		upattern.isEmpty() ? nullptr : upattern.getBuffer(), upattern.length(),
+		final_locale, nullptr, &INTL_DATA_ERROR_CODE(nfo));
 
-	if (spattern) {
-		efree(spattern);
-	}
-	
 	if (canonicalized_locale) {
 		efree(canonicalized_locale);
 	}
