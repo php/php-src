@@ -320,6 +320,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
     special characters in attributes when passing data to callback). (ndossche)
 
+- Zlib:
+  . Fixed bug GH-21376 (gzfile and readgzfile no longer detect corrupted gzip
+    data). (GabrielCordeiroBarrosoTeles)
+
 - Zip:
   . Fix crash in property existence test. (ndossche)
   . Don't truncate return value of zip_fread() with user sizes. (ndossche)
