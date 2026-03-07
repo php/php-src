@@ -3456,7 +3456,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 				if (!variadic) {
 					efree(params);
 				}
-				_DO_THROW("Given Closure is not compatible with the reflected Closure");
+				_DO_THROW("Given Closure is not the same as the reflected Closure");
 				RETURN_THROWS();
 			}
 		}

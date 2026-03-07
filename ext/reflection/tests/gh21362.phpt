@@ -46,8 +46,8 @@ foreach ($closures as $closure) {
 ?>
 --EXPECT--
 c1: foo=FOO, bar=BAR
-Given Closure is not compatible with the reflected Closure
-Given Closure is not compatible with the reflected Closure
+Given Closure is not the same as the reflected Closure
+Given Closure is not the same as the reflected Closure
 int(0)
 int(1)
 int(2)
