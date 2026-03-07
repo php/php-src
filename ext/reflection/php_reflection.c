@@ -3456,7 +3456,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 				if (!variadic) {
 					efree(params);
 				}
-				_DO_THROW("Given object is not an instance of the class this method was declared in");
+				_DO_THROW("Given Closure is not compatible with the reflected Closure");
 				RETURN_THROWS();
 			}
 		}
