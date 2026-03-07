@@ -988,11 +988,11 @@ PHP_FUNCTION(mysqli_get_charset)
 
 	add_property_string(return_value, "charset", (name) ? (char *)name : "");
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "");
-	add_property_string(return_value, "dir", "");
+	add_property_string(return_value, "dir", ""); /* Kept for backward compatibility */
 	add_property_long(return_value, "min_length", minlength);
 	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", 0);
-	add_property_long(return_value, "state", 1);
+	add_property_long(return_value, "number", 0); /* Kept for backward compatibility */
+	add_property_long(return_value, "state", 1); /* Kept for backward compatibility */
 }
 /* }}} */
 
