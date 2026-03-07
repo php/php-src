@@ -8,6 +8,14 @@
 #include "ir.h"
 #include "ir_private.h"
 
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+# include "ir_x86.h"
+#elif defined(IR_TARGET_AARCH64)
+# include "ir_aarch64.h"
+#else
+# error "Unknown IR target"
+#endif
+
 void ir_dump(const ir_ctx *ctx, FILE *f)
 {
 	ir_ref i, j, n, ref, *p;
@@ -52,7 +60,7 @@ void ir_dump(const ir_ctx *ctx, FILE *f)
 	}
 }
 
-void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f)
+void ir_dump_dot(const ir_ctx *ctx, const char *name, const char *comments, FILE *f)
 {
 	int DATA_WEIGHT    = 0;
 	int CONTROL_WEIGHT = 5;
@@ -62,6 +70,13 @@ void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f)
 	uint32_t flags;
 
 	fprintf(f, "digraph %s {\n", name);
+	fprintf(f, "\tlabelloc=t;\n");
+	fprintf(f, "\tlabel=\"");
+	ir_print_func_proto(ctx, name, 0, f);
+	if (comments) {
+		fprintf(f, " # %s", comments);
+	}
+	fprintf(f, "\"\n");
 	fprintf(f, "\trankdir=TB;\n");
 	for (i = 1 - ctx->consts_count, insn = ctx->ir_base + i; i < IR_UNUSED; i++, insn++) {
 		fprintf(f, "\tc%d [label=\"C%d: CONST %s(", -i, -i, ir_type_name[insn->type]);
@@ -456,8 +471,8 @@ void ir_dump_live_ranges(const ir_ctx *ctx, FILE *f)
 		}
 	}
 #if 1
-	n = ctx->vregs_count + ir_regs_number() + 2;
-	for (i = ctx->vregs_count + 1; i <= n; i++) {
+	n = ctx->vregs_count + 1 + IR_REG_SET_NUM;
+	for (i = ctx->vregs_count + 1; i < n; i++) {
 		ir_live_interval *ival = ctx->live_intervals[i];
 
 		if (ival) {

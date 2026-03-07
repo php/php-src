@@ -16,6 +16,7 @@
 */
 
 #include "php.h"
+#include "basic_functions_decl.h"
 
 /* Define rounding modes (all are round-to-nearest) */
 #ifndef PHP_ROUND_HALF_UP
@@ -52,4 +53,4 @@
 
 extern PHPAPI zend_class_entry *rounding_mode_ce;
 
-PHPAPI int php_math_round_mode_from_enum(zend_object *mode);
+PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode);

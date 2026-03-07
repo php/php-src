@@ -856,9 +856,7 @@ PHP_FUNCTION(mysqli_free_result)
 PHP_FUNCTION(mysqli_get_client_info)
 {
 	if (hasThis()) {
-		if (zend_parse_parameters_none() == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_NONE();
 	} else {
 		zval *mysql_link;
 
@@ -878,9 +876,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 /* {{{ Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG((zend_long)mysql_get_client_version());
 }
@@ -1198,6 +1194,11 @@ PHP_FUNCTION(mysqli_options)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
+	if (expected_type == IS_NULL) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants");
+		RETURN_THROWS();
+	}
+	
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
@@ -1405,10 +1406,7 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 		RETURN_THROWS();
 	}
 
-	if (mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len));
 }
 /* }}} */
 
@@ -1547,10 +1545,7 @@ PHP_FUNCTION(mysqli_stmt_reset)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (mysql_stmt_reset(stmt->stmt)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_reset(stmt->stmt));
 }
 /* }}} */
 
@@ -1947,9 +1942,7 @@ PHP_FUNCTION(mysqli_thread_id)
 /* {{{ Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(mysql_thread_safe());
 }

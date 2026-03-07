@@ -34,6 +34,7 @@
 # include "php.h"
 # include "php_random_csprng.h"
 # include "php_random_uint128.h"
+# include "random_decl.h"
 
 PHPAPI double php_combined_lcg(void);
 

@@ -899,12 +899,12 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_modern_node_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeType", dom_node_node_type_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeName", dom_node_node_name_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_node_base_uri_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_modern_node_base_uri_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "isConnected", dom_node_is_connected_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "ownerDocument", dom_node_owner_document_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentNode", dom_node_parent_node_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentElement", dom_node_parent_element_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_node_child_nodes_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_modern_node_child_nodes_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "firstChild", dom_node_first_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "lastChild", dom_node_last_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "previousSibling", dom_node_previous_sibling_read, NULL);
@@ -1305,7 +1305,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "firstChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "lastChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "textContent", dom_entity_reference_text_content_read, NULL);
-	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_entity_reference_child_nodes_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_modern_entity_reference_child_nodes_read, NULL);
 	zend_hash_add_new_ptr(&classes, dom_modern_entityreference_class_entry->name, &dom_modern_entity_reference_prop_handlers);
 
 	dom_processinginstruction_class_entry = register_class_DOMProcessingInstruction(dom_node_class_entry);
@@ -2267,7 +2267,7 @@ static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_l
 		if (0 == (is_numeric_string_type = is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), lval, &dval, true))) {
 			return true;
 		} else if (is_numeric_string_type == IS_DOUBLE) {
-			*lval = zend_dval_to_lval_cap(dval, Z_STR_P(offset));
+			*lval = zend_dval_to_lval_cap(dval);
 		}
 	} else {
 		*lval = zval_get_long(offset);

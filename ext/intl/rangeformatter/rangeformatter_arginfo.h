@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit rangeformatter.stub.php instead.
  * Stub hash: 7029642524e32984e893e1e050a5e0bbf275c416 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlNumberRangeFormatter___construct, 0, 0, 0)

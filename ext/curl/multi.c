@@ -398,7 +398,6 @@ PHP_FUNCTION(curl_multi_strerror)
 }
 /* }}} */
 
-
 static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp) /* {{{ */
 {
 	php_curl 				*ch;

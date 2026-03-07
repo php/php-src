@@ -76,6 +76,7 @@
 #include "zend_types.h"
 #include "zend_weakrefs.h"
 #include "zend_string.h"
+#include "zend_exceptions.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -1932,7 +1933,18 @@ static zend_fiber *gc_create_destructor_fiber(void)
 	return fiber;
 }
 
-static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
+static void remember_prev_exception(zend_object **prev_exception)
+{
+	if (EG(exception)) {
+		if (*prev_exception) {
+			zend_exception_set_previous(EG(exception), *prev_exception);
+		}
+		*prev_exception = EG(exception);
+		EG(exception) = NULL;
+	}
+}
+
+static zend_never_inline void gc_call_destructors_in_fiber(void)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
@@ -1947,6 +1959,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 		zend_fiber_resume(fiber, NULL, NULL);
 	}
 
+	zend_object *exception = NULL;
+	remember_prev_exception(&exception);
+
 	for (;;) {
 		/* At this point, fiber has executed until suspension */
 		GC_TRACE("resumed from destructor fiber");
@@ -1960,7 +1975,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 			/* We do not own the fiber anymore. It may be collected if the
 			 * application does not reference it. */
 			zend_object_release(&fiber->std);
+			remember_prev_exception(&exception);
 			fiber = gc_create_destructor_fiber();
+			remember_prev_exception(&exception);
 			continue;
 		} else {
 			/* Fiber suspended itself after calling all destructors */
@@ -1968,6 +1985,8 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 			break;
 		}
 	}
+
+	EG(exception) = exception;
 }
 
 /* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
@@ -2074,7 +2093,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
 			} else {
-				gc_call_destructors_in_fiber(end);
+				gc_call_destructors_in_fiber();
 			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 

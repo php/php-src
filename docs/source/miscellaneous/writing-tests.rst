@@ -235,7 +235,7 @@ and not in the INI section. This is because of the order in which settings are c
 
    date_default_timezone_set() -> TZ environmental -> INI setting -> System Setting
 
-If a TZ environmental varaibale is found the INI setting will be ignored.
+If a TZ environmental variable is found the INI setting will be ignored.
 
 Tests that run, or only have have matching EXPECT output, on 32bit platforms can use a SKIPIF
 section like:
@@ -1389,7 +1389,7 @@ Example 1 (full): :ref:`sample002.phpt`
 ``--EXPECT_EXTERNAL--``
 -----------------------
 
-**Description:** Similar to to ``--EXPECT--`` section, but just stating a filename where to load the
+**Description:** Similar to ``--EXPECT--`` section, but just stating a filename where to load the
 expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1526,7 +1526,7 @@ Example 2 (full): :ref:`sample020.phpt`
 ``--EXPECTF_EXTERNAL--``
 ------------------------
 
-**Description:** Similar to to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
+**Description:** Similar to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
 just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1607,7 +1607,7 @@ Example 3 (snippet):
 ``--EXPECTREGEX_EXTERNAL--``
 ----------------------------
 
-**Description:** Similar to to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
+**Description:** Similar to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
 section just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.

@@ -631,8 +631,10 @@ statme_baby:
 			if (data) {
 				sb.st_ino = data->inode;
 			}
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 			sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 			sb.st_blocks = -1;
 #endif
 			phar_fancy_stat(&sb, type, return_value);

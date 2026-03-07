@@ -87,14 +87,15 @@ enum _ir_reg {
 	IR_GP_REGS(IR_GP_REG_ENUM)
 	IR_FP_REGS(IR_FP_REG_ENUM)
 	IR_REG_NUM,
+	IR_REG_ALL = IR_REG_NUM, /* special name for regset */
+	IR_REG_SET_1,            /* special name for regset */
+	IR_REG_SET_NUM,
 };
 
 #define IR_REG_GP_FIRST IR_REG_X0
 #define IR_REG_FP_FIRST IR_REG_V0
 #define IR_REG_GP_LAST  (IR_REG_FP_FIRST - 1)
 #define IR_REG_FP_LAST  (IR_REG_NUM - 1)
-#define IR_REG_SCRATCH  (IR_REG_NUM)        /* special name for regset */
-#define IR_REG_ALL      (IR_REG_NUM + 1)    /* special name for regset */
 
 #define IR_REGSET_64BIT 1
 
@@ -124,66 +125,5 @@ enum _ir_reg {
 #define IR_REG_PR  IR_REG_X18
 #define IR_REG_LR  IR_REG_X30
 #define IR_REG_ZR  IR_REG_X31
-
-/* Calling Convention */
-#define IR_REG_INT_RET1 IR_REG_X0
-#define IR_REG_FP_RET1  IR_REG_V0
-#define IR_REG_INT_ARGS 8
-#define IR_REG_FP_ARGS  8
-#define IR_REG_INT_ARG1 IR_REG_X0
-#define IR_REG_INT_ARG2 IR_REG_X1
-#define IR_REG_INT_ARG3 IR_REG_X2
-#define IR_REG_INT_ARG4 IR_REG_X3
-#define IR_REG_INT_ARG5 IR_REG_X4
-#define IR_REG_INT_ARG6 IR_REG_X5
-#define IR_REG_INT_ARG7 IR_REG_X6
-#define IR_REG_INT_ARG8 IR_REG_X7
-#define IR_REG_FP_ARG1  IR_REG_V0
-#define IR_REG_FP_ARG2  IR_REG_V1
-#define IR_REG_FP_ARG3  IR_REG_V2
-#define IR_REG_FP_ARG4  IR_REG_V3
-#define IR_REG_FP_ARG5  IR_REG_V4
-#define IR_REG_FP_ARG6  IR_REG_V5
-#define IR_REG_FP_ARG7  IR_REG_V6
-#define IR_REG_FP_ARG8  IR_REG_V7
-#define IR_MAX_REG_ARGS 16
-#define IR_SHADOW_ARGS  0
-
-# define IR_REGSET_SCRATCH \
-	(IR_REGSET_INTERVAL(IR_REG_X0, IR_REG_X18) \
-	| IR_REGSET_INTERVAL(IR_REG_V0, IR_REG_V7) \
-	| IR_REGSET_INTERVAL(IR_REG_V16, IR_REG_V31))
-
-# define IR_REGSET_PRESERVED \
-	(IR_REGSET_INTERVAL(IR_REG_X19, IR_REG_X30) \
-	| IR_REGSET_INTERVAL(IR_REG_V8, IR_REG_V15))
-
-#ifndef __APPLE__
-typedef struct _ir_va_list {
-	void    *stack;
-	void    *gr_top;
-	void    *vr_top;
-	int32_t  gr_offset;
-	int32_t  vr_offset;
-} ir_va_list;
-#endif
-
-typedef struct _ir_tmp_reg {
-	union {
-		uint8_t num;
-		int8_t  reg;
-	};
-	uint8_t     type;
-	int8_t      start;
-	int8_t      end;
-} ir_tmp_reg;
-
-struct _ir_target_constraints {
-	int8_t      def_reg;
-	uint8_t     tmps_count;
-	uint8_t     hints_count;
-	ir_tmp_reg  tmp_regs[3];
-	int8_t      hints[IR_MAX_REG_ARGS + 3];
-};
 
 #endif /* IR_AARCH64_H */

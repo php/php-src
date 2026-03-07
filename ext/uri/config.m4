@@ -11,6 +11,7 @@ PHP_ARG_WITH([external-uriparser],
 PHP_INSTALL_HEADERS([ext/uri], m4_normalize([
   php_uri.h
   php_uri_common.h
+  php_uri_decl.h
   uri_parser_rfc3986.h
   uri_parser_whatwg.h
   uri_parser_php_parse_url.h
@@ -34,7 +35,7 @@ if test "$PHP_EXTERNAL_URIPARSER" = "no"; then
   URI_CFLAGS="-DURI_STATIC_BUILD"
 else
   PKG_CHECK_MODULES([LIBURIPARSER], [liburiparser >= 1.0.0])
-  PHP_EVAL_LIBLINE([$LIBURIPARSER_LIBS], [URI_SHARED_LIBADD])
+  PHP_EVAL_LIBLINE([$LIBURIPARSER_LIBS])
   PHP_EVAL_INCLINE([$LIBURIPARSER_CFLAGS])
 fi
 

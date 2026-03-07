@@ -235,7 +235,7 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 					if (result_size > sizeof(result)) {
 						goto error;
 					}
-					while (result[i] != isc_info_end && i < result_size) {
+					while (i < result_size && result[i] != isc_info_end) {
 						short len = (short) isc_vax_integer(&result[i + 1], 2);
 						if (len != 1 && len != 2 && len != 4) {
 							goto error;

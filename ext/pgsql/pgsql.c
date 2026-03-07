@@ -706,10 +706,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* create the link */
 			pgsql = PQconnectdb(connstring);
 			if (pgsql == NULL || PQstatus(pgsql) == CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql)
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 
@@ -790,19 +792,23 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (connect_type & PGSQL_CONNECT_ASYNC) {
 			pgsql = PQconnectStart(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		} else {
 			pgsql = PQconnectdb(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		}
@@ -3023,10 +3029,7 @@ PHP_FUNCTION(pg_lo_export)
 
 	pgsql = link->conn;
 
-	if (lo_export(pgsql, oid, ZSTR_VAL(file_out)) == -1) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(lo_export(pgsql, oid, ZSTR_VAL(file_out)) != -1);
 }
 /* }}} */
 
@@ -3676,7 +3679,6 @@ PHP_FUNCTION(pg_unescape_bytea)
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	if (!tmp) {
 		zend_error_noreturn(E_ERROR, "Out of memory");
-		return;
 	}
 
 	RETVAL_STRINGL(tmp, to_len);
@@ -3864,10 +3866,8 @@ PHP_FUNCTION(pg_connection_reset)
 	pgsql = link->conn;
 
 	PQreset(pgsql);
-	if (PQstatus(pgsql) == CONNECTION_BAD) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	
+	RETURN_BOOL(PQstatus(pgsql) != CONNECTION_BAD);
 }
 /* }}} */
 
@@ -5663,7 +5663,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				goto cleanup;
@@ -5848,7 +5848,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				return -1;

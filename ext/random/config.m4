@@ -38,4 +38,5 @@ PHP_INSTALL_HEADERS([ext/random], m4_normalize([
   php_random_csprng.h
   php_random_uint128.h
   php_random.h
+  random_decl.h
 ]))

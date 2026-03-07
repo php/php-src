@@ -3439,5 +3439,84 @@ IR_FOLD(COND(_, _)) // TODO: COND(_, _, _)
 	if (op2 == op3) {
 		IR_FOLD_COPY(op2);
 	}
+
+	if (op1_insn->type == IR_BOOL) {
+		if (op2 == IR_TRUE) {
+			if (op3 == IR_FALSE) {
+				/* a ? true : false => a */
+				IR_FOLD_COPY(op1);
+			} else {
+				/* a ? true : b => a | b */
+				opt = IR_OPT(IR_OR, IR_BOOL);
+				op2 = op3;
+				op3 = IR_UNUSED;
+				IR_FOLD_RESTART;
+			}
+		} else if (op3 == IR_FALSE) {
+			/* a ? b : false => a & b */
+			opt = IR_OPT(IR_AND, IR_BOOL);
+			op3 = IR_UNUSED;
+			IR_FOLD_RESTART;
+		} else if (op2 == IR_FALSE) {
+			if (op3 == IR_TRUE) {
+				/* a ? flase : true => !a */
+				opt = IR_OPT(IR_NOT, IR_BOOL);
+				op2 = IR_UNUSED;
+				op3 = IR_UNUSED;
+				IR_FOLD_RESTART;
+			}
+		} else if (IR_IS_TYPE_INT(IR_OPT_TYPE(opt))
+		 && IR_IS_CONST_REF(op2)
+		 && IR_IS_CONST_REF(op3)
+		 && op2_insn->val.u64 == 1
+		 && op3_insn->val.u64 == 0) {
+			if (ir_type_size[IR_OPT_TYPE(opt)] > 1) {
+				/* a ? 1 : 0 => ZEXT(a) */
+				opt = IR_OPT(IR_ZEXT, IR_OPT_TYPE(opt));
+			} else {
+				/* a ? 1 : 0 => BITCAST(a) */
+				opt = IR_OPT(IR_BITCAST, IR_OPT_TYPE(opt));
+			}
+			op2 = IR_UNUSED;
+			op3 = IR_UNUSED;
+			IR_FOLD_RESTART;
+	   }
+	} else if (IR_IS_TYPE_INT(op1_insn->type)) {
+		if (op2 == IR_TRUE) {
+			if (op3 == IR_FALSE) {
+				opt = IR_OPT(IR_NE, IR_BOOL);
+				val.u64 = 0;
+				op2 = ir_const(ctx, val, op1_insn->type);
+				op3 = IR_UNUSED;
+				IR_FOLD_RESTART;
+			}
+		} else if (op2 == IR_FALSE) {
+			if (op3 == IR_TRUE) {
+				opt = IR_OPT(IR_EQ, IR_BOOL);
+				val.u64 = 0;
+				op2 = ir_const(ctx, val, op1_insn->type);
+				op3 = IR_UNUSED;
+				IR_FOLD_RESTART;
+			}
+		}
+	}
+
+	if (op1_insn->op == IR_NE) {
+		if (IR_IS_CONST_REF(op1_insn->op2)
+		 && IR_IS_TYPE_INT(ctx->ir_base[op1_insn->op2].type)
+		 && ctx->ir_base[op1_insn->op2].val.u64 == 0) {
+			op1 = op1_insn->op1;
+			IR_FOLD_RESTART;
+		}
+	} else if (op1_insn->op == IR_EQ) {
+		if (IR_IS_CONST_REF(op1_insn->op2)
+		 && IR_IS_TYPE_INT(ctx->ir_base[op1_insn->op2].type)
+		 && ctx->ir_base[op1_insn->op2].val.u64 == 0) {
+			op1 = op1_insn->op1;
+			SWAP_REFS(op2, op3);
+			IR_FOLD_RESTART;
+		}
+	}
+
 	IR_FOLD_NEXT;
 }

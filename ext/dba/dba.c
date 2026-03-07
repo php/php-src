@@ -1301,9 +1301,7 @@ PHP_FUNCTION(dba_handlers)
 /* {{{ List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

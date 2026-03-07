@@ -45,7 +45,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -993,6 +993,35 @@ static void zend_calc_live_ranges(
 				if (EXPECTED(!keeps_op1_alive(opline))) {
 					/* OP_DATA is really part of the previous opcode. */
 					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+				}
+			} else if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) && opline->extended_value & ZEND_FREE_ON_RETURN) {
+				int jump_offset = 1;
+				while (((opline + jump_offset)->opcode == ZEND_FREE || (opline + jump_offset)->opcode == ZEND_FE_FREE)
+					&& (opline + jump_offset)->extended_value & ZEND_FREE_ON_RETURN) {
+					++jump_offset;
+				}
+				// loop var frees directly precede the jump (or return) operand, except that ZEND_VERIFY_RETURN_TYPE may happen first.
+				if ((opline + jump_offset)->opcode == ZEND_VERIFY_RETURN_TYPE) {
+					++jump_offset;
+				}
+				/* FREE with ZEND_FREE_ON_RETURN immediately followed by RETURN frees
+				 * the loop variable on early return. We need to split the live range
+				 * so GC doesn't access the freed variable after this FREE. */
+				uint32_t opnum_last_use = last_use[var_num];
+				zend_op *opline_last_use = op_array->opcodes + opnum_last_use;
+				ZEND_ASSERT(opline_last_use->opcode == opline->opcode); // any ZEND_FREE_ON_RETURN must be followed by a FREE without
+				if (opnum + jump_offset + 1 != opnum_last_use) {
+					emit_live_range_raw(op_array, var_num, opline->opcode == ZEND_FE_FREE ? ZEND_LIVE_LOOP : ZEND_LIVE_TMPVAR,
+							opnum + jump_offset + 1, opnum_last_use);
+				}
+
+				/* Update last_use so next range includes this FREE */
+				last_use[var_num] = opnum;
+
+				/* Store opline offset to loop end */
+				opline->op2.opline_num = opnum_last_use - opnum;
+				if (opline_last_use->extended_value & ZEND_FREE_ON_RETURN) {
+					opline->op2.opline_num += opline_last_use->op2.opline_num;
 				}
 			}
 		}

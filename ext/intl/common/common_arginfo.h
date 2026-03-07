@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit common.stub.php instead.
  * Stub hash: 9ed8bfc955a557c02171ec12b4634c60c6fb513e */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlIterator_current, 0, 0, IS_MIXED, 0)

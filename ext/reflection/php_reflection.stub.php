@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 class ReflectionException extends Exception
 {
@@ -571,6 +574,10 @@ class ReflectionProperty implements Reflector
     public function getHook(PropertyHookType $type): ?ReflectionMethod {}
 
     public function isFinal(): bool {}
+
+    public function isReadable(?string $scope, ?object $object = null): bool {}
+
+    public function isWritable(?string $scope, ?object $object = null): bool {}
 }
 
 /** @not-serializable */
@@ -911,6 +918,8 @@ class ReflectionConstant implements Reflector
     public function __construct(string $name) {}
 
     public function getName(): string {}
+
+    public function inNamespace(): bool {}
 
     public function getNamespaceName(): string {}
 

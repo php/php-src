@@ -4663,7 +4663,6 @@ static zend_result accel_preload(const char *config, bool in_child)
 		zend_destroy_file_handle(&file_handle);
 		if (op_array) {
 			zend_execute(op_array, NULL);
-			zend_exception_restore();
 			if (UNEXPECTED(EG(exception))) {
 				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 					zend_user_exception_handler();

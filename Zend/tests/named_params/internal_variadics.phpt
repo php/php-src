@@ -15,7 +15,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    $array = [1, 2];
+    array_push($array, ...['values' => 3]);
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-array_merge() does not accept unknown named parameters
-array_diff_key() does not accept unknown named parameters
+Internal function array_merge() does not accept named variadic arguments
+Internal function array_diff_key() does not accept named variadic arguments
+Internal function array_push() does not accept named variadic arguments

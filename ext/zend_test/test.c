@@ -74,6 +74,7 @@ static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
+static zend_class_entry *zend_test_enum_with_interface;
 static zend_class_entry *zend_test_magic_call;
 static zend_object_handlers zend_test_class_handlers;
 
@@ -492,7 +493,6 @@ static ZEND_FUNCTION(zend_call_method)
 		ce = zend_lookup_class(Z_STR_P(class_or_object));
 		if (!ce) {
 			zend_error_noreturn(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
-			return;
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
@@ -1527,6 +1527,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.clone_obj = NULL;
 	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
 	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
 
@@ -1576,6 +1577,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+	zend_test_enum_with_interface = register_class_ZendTestEnumWithInterface(zend_test_interface);
 
 	zend_test_magic_call = register_class__ZendTestMagicCall();
 

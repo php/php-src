@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit spl_array.stub.php instead.
  * Stub hash: c52e89992bd3c04877daab47f4328af0b6ce619e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)

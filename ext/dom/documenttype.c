@@ -53,7 +53,7 @@ zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry)));
 
 	xmlHashTable *entityht = (xmlHashTable *) dtdptr->entities;
 
@@ -74,7 +74,7 @@ zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	object_init_ex(retval, dom_get_dtd_namednodemap_ce(php_dom_follow_spec_intern(obj)));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry)));
 
 	xmlHashTable *notationht = (xmlHashTable *) dtdptr->notations;
 

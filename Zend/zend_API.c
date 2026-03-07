@@ -370,8 +370,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
-	zend_argument_count_error("%s%s%s() does not accept unknown named parameters",
-		class_name, space, get_active_function_name());
+	zend_argument_count_error("Internal function %s%s%s() does not accept named variadic arguments",
+		class_name, space, get_active_function_name()
+	);
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
@@ -2429,8 +2430,6 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {
 			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);
-			EG(current_module) = NULL;
-			return FAILURE;
 		}
 		EG(current_module) = NULL;
 	}
@@ -2742,7 +2741,7 @@ static void zend_check_magic_method_static(
 }
 
 static void zend_check_magic_method_public(
-		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		const zend_class_entry *ce, const zend_function *fptr)
 {
 	// TODO: Remove this warning after adding proper visibility handling.
 	if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -2785,77 +2784,77 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
 		zend_check_magic_method_args(2, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
 	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_BOOL);
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 		zend_check_magic_method_args(2, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_ARRAY);
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		zend_check_magic_method_args(2, ce, fptr, error_type);
 		zend_check_magic_method_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_ARRAY);
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_STRING);
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, (MAY_BE_ARRAY | MAY_BE_NULL));
 	} else if (zend_string_equals_literal(lcname, "__serialize")) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_ARRAY);
 	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ARRAY);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
 	} else if (zend_string_equals_literal(lcname, "__set_state")) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ARRAY);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_OBJECT);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_ARRAY);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_WAKEUP))) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
-		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
 	}
 }
@@ -4411,8 +4410,7 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 /* }}} */
 
 static zend_always_inline bool is_persistent_class(const zend_class_entry *ce) {
-	return (ce->type & ZEND_INTERNAL_CLASS)
-		&& ce->info.internal.module->type == MODULE_PERSISTENT;
+	return ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->type == MODULE_PERSISTENT;
 }
 
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
@@ -4535,7 +4533,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
 skip_property_storage:
-	if (ce->type & ZEND_INTERNAL_CLASS) {
+	if (ce->type == ZEND_INTERNAL_CLASS) {
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
 			name = zend_new_interned_string(zend_string_copy(name));
@@ -4754,7 +4752,7 @@ ZEND_API void zend_declare_property_string(zend_class_entry *ce, const char *nam
 {
 	zval property;
 
-	ZVAL_NEW_STR(&property, zend_string_init(value, strlen(value), ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, zend_string_init(value, strlen(value), ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
@@ -4763,7 +4761,7 @@ ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *na
 {
 	zval property;
 
-	ZVAL_NEW_STR(&property, zend_string_init(value, value_len, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, zend_string_init(value, value_len, ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
@@ -4877,7 +4875,7 @@ ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const ch
 {
 	zval constant;
 
-	ZVAL_NEW_STR(&constant, zend_string_init(value, value_length, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&constant, zend_string_init(value, value_length, ce->type == ZEND_INTERNAL_CLASS));
 	zend_declare_class_constant(ce, name, name_length, &constant);
 }
 /* }}} */

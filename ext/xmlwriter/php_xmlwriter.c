@@ -907,9 +907,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 	zval *self = getThis();
 	ze_xmlwriter_object *ze_obj = NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (self) {
 		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */

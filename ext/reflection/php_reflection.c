@@ -6547,16 +6547,16 @@ ZEND_METHOD(ReflectionProperty, hasHook)
 
 	reflection_object *intern;
 	property_reference *ref;
-	zend_object *type;
+	zend_enum_PropertyHookType type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+		Z_PARAM_ENUM(type, reflection_property_hook_type_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	zend_property_hook_kind kind;
-	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+	if (type == ZEND_ENUM_PropertyHookType_Get) {
 		kind = ZEND_PROPERTY_HOOK_GET;
 	} else {
 		kind = ZEND_PROPERTY_HOOK_SET;
@@ -6569,10 +6569,10 @@ ZEND_METHOD(ReflectionProperty, getHook)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zend_object *type;
+	zend_enum_PropertyHookType type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+		Z_PARAM_ENUM(type, reflection_property_hook_type_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
@@ -6583,7 +6583,7 @@ ZEND_METHOD(ReflectionProperty, getHook)
 	}
 
 	zend_function *hook;
-	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+	if (type == ZEND_ENUM_PropertyHookType_Get) {
 		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_GET];
 	} else {
 		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_SET];
@@ -6599,6 +6599,242 @@ ZEND_METHOD(ReflectionProperty, getHook)
 ZEND_METHOD(ReflectionProperty, isFinal)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+
+static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string *scope_name, zend_execute_data *execute_data)
+{
+	if (!scope_name) {
+		*scope = NULL;
+		return SUCCESS;
+	}
+
+	*scope = zend_lookup_class(scope_name);
+	if (!*scope) {
+		zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(scope_name));
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_always_inline uint32_t set_visibility_to_visibility(uint32_t set_visibility)
+{
+	switch (set_visibility) {
+		case ZEND_ACC_PUBLIC_SET:
+			return ZEND_ACC_PUBLIC;
+		case ZEND_ACC_PROTECTED_SET:
+			return ZEND_ACC_PROTECTED;
+		case ZEND_ACC_PRIVATE_SET:
+			return ZEND_ACC_PRIVATE;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+static bool check_visibility(uint32_t visibility, zend_class_entry *ce, zend_class_entry *scope)
+{
+	if (!(visibility & ZEND_ACC_PUBLIC) && (scope != ce)) {
+		if (!scope) {
+			return false;
+		}
+		if (visibility & ZEND_ACC_PRIVATE) {
+			return false;
+		}
+		ZEND_ASSERT(visibility & ZEND_ACC_PROTECTED);
+		if (!instanceof_function(scope, ce) && !instanceof_function(ce, scope)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ZEND_METHOD(ReflectionProperty, isReadable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_string *scope_name;
+	zend_object *obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			_DO_THROW("null is expected as object argument for static properties");
+			RETURN_THROWS();
+		}
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
+	}
+
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (obj && obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
+			RETURN_TRUE;
+		}
+handle_magic_get:
+		if (ce->__get) {
+			if (obj && ce->__isset) {
+				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
+				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
+					GC_ADDREF(obj);
+					*guard |= ZEND_GUARD_PROPERTY_ISSET;
+					zval member;
+					ZVAL_STR(&member, ref->unmangled_name);
+					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
+					OBJ_RELEASE(obj);
+					return;
+				}
+			}
+			RETURN_TRUE;
+		}
+		if (obj && zend_lazy_object_must_init(obj)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			if (obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
+				RETURN_TRUE;
+			}
+		}
+		RETURN_FALSE;
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_get;
+		}
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+			RETURN_FALSE;
+		}
+	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
+retry_declared:;
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) == IS_UNDEF) {
+			if (zend_lazy_object_must_init(obj) && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+				obj = zend_lazy_object_init(obj);
+				if (!obj) {
+					RETURN_THROWS();
+				}
+				goto retry_declared;
+			}
+			if (!(Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
+				goto handle_magic_get;
+			}
+			RETURN_FALSE;
+		}
+	} else if (prop->flags & ZEND_ACC_STATIC) {
+		if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+			zend_class_init_statics(ce);
+		}
+		zval *prop_val = CE_STATIC_MEMBERS(ce) + prop->offset;
+		RETURN_BOOL(!Z_ISUNDEF_P(prop_val));
+	}
+
+	RETURN_TRUE;
+}
+
+ZEND_METHOD(ReflectionProperty, isWritable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_string *scope_name;
+	zend_object *obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			_DO_THROW("null is expected as object argument for static properties");
+			RETURN_THROWS();
+		}
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
+	}
+
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (!(ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+			RETURN_TRUE;
+		}
+		/* This path is effectively unreachable, but theoretically possible for
+		 * two internal classes where ZEND_ACC_NO_DYNAMIC_PROPERTIES is only
+		 * added to the subclass, in which case a ReflectionProperty can be
+		 * constructed on the parent class, and then tested on the subclass. */
+handle_magic_set:
+		RETURN_BOOL(ce->__set);
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_set;
+		}
+		RETURN_FALSE;
+	}
+	uint32_t set_visibility = prop->flags & ZEND_ACC_PPP_SET_MASK;
+	if (!set_visibility) {
+		set_visibility = zend_visibility_to_set_visibility(prop->flags & ZEND_ACC_PPP_MASK);
+	}
+	if (!check_visibility(set_visibility_to_visibility(set_visibility), prop->ce, scope)) {
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+			RETURN_FALSE;
+		}
+	} else if (obj && (prop->flags & ZEND_ACC_READONLY)) {
+retry:;
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) == IS_UNDEF
+		 && zend_lazy_object_must_init(obj)
+		 && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			goto retry;
+		}
+		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_TRUE;
 }
 
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */
@@ -7713,6 +7949,20 @@ ZEND_METHOD(ReflectionConstant, getName)
 	GET_REFLECTION_OBJECT_PTR(const_);
 	RETURN_STR_COPY(const_->name);
 }
+
+ZEND_METHOD(ReflectionConstant, inNamespace)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	const char *backslash = zend_memrchr(ZSTR_VAL(const_->name), '\\', ZSTR_LEN(const_->name));
+	RETURN_BOOL(backslash);
+}
+/* }}} */
 
 ZEND_METHOD(ReflectionConstant, getNamespaceName)
 {

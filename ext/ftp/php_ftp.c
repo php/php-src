@@ -40,9 +40,7 @@ static zend_class_entry *php_ftp_ce = NULL;
 static zend_object_handlers ftp_object_handlers;
 
 zend_module_entry php_ftp_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+	STANDARD_MODULE_HEADER,
 	"ftp",
 	ext_functions,
 	PHP_MINIT(ftp),
@@ -680,11 +678,8 @@ PHP_FUNCTION(ftp_pasv)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(ftp_pasv(ftp, pasv ? 1 : 0));
 
-	RETURN_TRUE;
 }
 /* }}} */
 

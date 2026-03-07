@@ -294,7 +294,18 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
+	object_init_ex(retval, dom_get_nodelist_ce(false));
+	dom_object *intern = Z_DOMOBJ_P(retval);
+	php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_node_child_nodes_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	object_init_ex(retval, dom_get_nodelist_ce(true));
 	dom_object *intern = Z_DOMOBJ_P(retval);
 	php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
 
@@ -666,14 +677,25 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 		ZVAL_STRING(retval, (const char *) baseuri);
 		xmlFree(baseuri);
 	} else {
-		if (php_dom_follow_spec_intern(obj)) {
-			if (nodep->doc->URL) {
-				ZVAL_STRING(retval, (const char *) nodep->doc->URL);
-			} else {
-				ZVAL_STRING(retval, "about:blank");
-			}
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
+	if (baseuri) {
+		ZVAL_STRING(retval, (const char *) baseuri);
+		xmlFree(baseuri);
+	} else {
+		if (nodep->doc && nodep->doc->URL) {
+			ZVAL_STRING(retval, (const char *) nodep->doc->URL);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_STRING(retval, "about:blank");
 		}
 	}
 
