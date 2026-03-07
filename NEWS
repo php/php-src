@@ -71,6 +71,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
+    and ltrim(). (Weilin Du, LamentXU)
 
 - Streams:
   . Added so_reuseaddr streams context socket option that allows disabling
