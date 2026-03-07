@@ -26,10 +26,8 @@ if test "$PHP_EMBED" != "no"; then
       [php_embed.c],
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-    dnl Include CLI sources in embed SAPI so do_php_cli() is available
-    PHP_ADD_BUILD_DIR([sapi/embed/cli])
-    PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/embed/Makefile.frag])
-    PHP_SAPI_OBJS="$PHP_SAPI_OBJS sapi/embed/cli/php_cli.lo sapi/embed/cli/php_http_parser.lo sapi/embed/cli/php_cli_server.lo sapi/embed/cli/ps_title.lo sapi/embed/cli/php_cli_process_title.lo"
+    dnl Reuse CLI object files (excluding php_cli_main.lo) for do_php_cli()
+    PHP_SAPI_OBJS="$PHP_SAPI_OBJS sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo"
 
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   ])

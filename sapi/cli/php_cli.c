@@ -1388,19 +1388,3 @@ out:
 	return exit_status;
 }
 /* }}} */
-
-/* {{{ main */
-#ifndef PHP_EMBED_SAPI
-# ifdef PHP_CLI_WIN32_NO_CONSOLE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
-	exit(do_php_cli(__argc, __argv));
-}
-# else
-int main(int argc, char *argv[])
-{
-	exit(do_php_cli(argc, argv));
-}
-# endif
-#endif /* PHP_EMBED_SAPI */
-/* }}} */
