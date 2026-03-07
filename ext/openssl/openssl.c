@@ -3378,7 +3378,11 @@ PHP_FUNCTION(openssl_csr_sign)
 			goto cleanup;
 		}
 	} else {
-		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+		if (!PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial)) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error setting serial number");
+			goto cleanup;
+		}
 	}
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
