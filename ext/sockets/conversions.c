@@ -580,7 +580,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -629,7 +629,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
