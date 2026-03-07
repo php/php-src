@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Sysvshm:
   . Fix memory leak in shm_get_var() when variable is corrupted. (ndossche)
 
+- XSL:
+  . Fix GH-21357 (XSLTProcessor works with DOMDocument, but fails with
+    Dom\XMLDocument). (ndossche)
+
 12 Mar 2026, PHP 8.4.19
 
 - Core:
