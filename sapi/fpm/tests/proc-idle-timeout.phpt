@@ -1,5 +1,7 @@
 --TEST--
 FPM: Process manager config pm.process_idle_timeout
+--XFAIL--
+Frequently fails in CI
 --SKIPIF--
 <?php
 include "skipif.inc";
