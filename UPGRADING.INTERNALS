@@ -103,6 +103,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The deprecated Z_IMMUTABLE(), Z_IMMUTABLE_P(), Z_OPT_IMMUTABLE(), and
     Z_OPT_IMMUTABLE_P() macros have been removed. Check for
     IS_ARRAY && !REFCOUNTED directly.
+  . Added zend_fcall_info.consumed_args together with
+    zend_fci_consumed_arg(), which allows moving a selected callback argument
+    instead of copying it in zend_call_function(). Currently only a single
+    consumed argument is supported.
 
 ========================
 2. Build system changes

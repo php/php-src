@@ -4243,6 +4243,7 @@ ZEND_API zend_result zend_fcall_info_init(const zval *callable, uint32_t check_f
 	fci->param_count = 0;
 	fci->params = NULL;
 	fci->named_params = NULL;
+	fci->consumed_args = 0;
 
 	return SUCCESS;
 }
