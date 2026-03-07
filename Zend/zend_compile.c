@@ -1335,8 +1335,34 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 	if (UNEXPECTED(!success)) {
 		zend_class_entry *old_class = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
 		ZEND_ASSERT(old_class);
-		zend_class_redeclaration_error(E_COMPILE_ERROR, old_class);
-		return NULL;
+		if ((old_class->ce_flags & (ZEND_ACC_LINKED | ZEND_ACC_TOP_LEVEL))
+				== (ZEND_ACC_LINKED | ZEND_ACC_TOP_LEVEL)
+		 && !(ce->ce_flags & ZEND_ACC_TOP_LEVEL)
+		 && old_class->type == ZEND_USER_CLASS
+		 && !is_preloaded) {
+			/* A non-toplevel runtime declaration is colliding with a
+			 * toplevel class that was early-bound at compile time. This
+			 * is the polyfill pattern:
+			 *
+			 *   if (PHP_VERSION_ID >= 80000) {
+			 *       class Foo extends \Bar {}   // non-toplevel, runs
+			 *       return;
+			 *   }
+			 *   class Foo { ... }               // toplevel, early-bound
+			 *
+			 * The toplevel fallback was hoisted at compile time, but the
+			 * conditional branch is the one actually executing. Remove
+			 * the early-bound entry and let the runtime declaration
+			 * take its place. */
+			zend_hash_del(EG(class_table), Z_STR_P(lcname));
+			if (EXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*) class_table_slot, Z_STR_P(lcname)) != NULL)) {
+				success = true;
+			}
+		}
+		if (UNEXPECTED(!success)) {
+			zend_class_redeclaration_error(E_COMPILE_ERROR, old_class);
+			return NULL;
+		}
 	}
 
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
@@ -5140,7 +5166,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	 * breaking for the generated call.
 	 */
 	if (callback->kind == ZEND_AST_CALL
-	 && callback->child[0]->kind == ZEND_AST_ZVAL 
+	 && callback->child[0]->kind == ZEND_AST_ZVAL
 	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
 	 && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
 		return FAILURE;
@@ -9527,6 +9553,50 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+/* Check if all unresolved interfaces on a class entry are internal (built-in)
+ * interfaces that can be safely resolved during early binding.
+ *
+ * We use an allowlist of known-safe core interfaces rather than allowing all
+ * internal interfaces, because some internal interfaces have
+ * interface_gets_implemented callbacks that can trigger fatal errors or
+ * user-observable side effects at compile time:
+ *  - Serializable: calls zend_error(E_DEPRECATED), triggering the user error
+ *    handler which may not be set up during compilation.
+ *  - DateTimeInterface: calls zend_error_noreturn(E_ERROR) for user classes
+ *    that don't extend DateTime/DateTimeImmutable.
+ *  - Throwable: calls zend_error_noreturn(E_ERROR) for user classes that
+ *    don't extend Exception/Error.
+ *
+ * The allowed interfaces are registered during engine startup and are always
+ * available. Their callbacks either don't exist (Stringable, Countable) or
+ * only perform safe struct initialization (ArrayAccess, Iterator,
+ * IteratorAggregate, Traversable).
+ *
+ * Returns true if there are no interfaces, or all interfaces are in the
+ * known-safe allowlist. */
+static bool zend_can_early_bind_interfaces(const zend_class_entry *ce) {
+	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+		zend_class_entry *iface = zend_lookup_class_ex(
+			ce->interface_names[i].name, ce->interface_names[i].lc_name,
+			ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		if (!iface
+			|| iface->type != ZEND_INTERNAL_CLASS
+			|| !(iface->ce_flags & ZEND_ACC_INTERFACE)) {
+			return false;
+		}
+		/* Only allow interfaces whose callbacks are known to be safe during
+		 * early binding. Interfaces without a callback are always safe. */
+		if (iface->interface_gets_implemented != NULL
+			&& iface != zend_ce_arrayaccess
+			&& iface != zend_ce_aggregate
+			&& iface != zend_ce_iterator
+			&& iface != zend_ce_traversable) {
+			return false;
+		}
+	}
+	return true;
+}
+
 static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
 {
 	const zend_ast_decl *decl = (const zend_ast_decl *) ast;
@@ -9648,11 +9718,22 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	/* We currently don't early-bind classes that implement interfaces or use traits */
-	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
+	/* We currently don't early-bind classes that use traits, enums, or that
+	 * implement non-internal interfaces. We allow early binding when all
+	 * interfaces are internal engine interfaces (e.g. Stringable, Countable,
+	 * Iterator), since these are registered during engine startup and always
+	 * available.
+	 *
+	 * Enums are excluded because zend_enum_register_funcs() adds arena-allocated
+	 * internal methods (cases/from/tryFrom) that interact poorly with opcache's
+	 * inheritance cache, matching the is_cacheable=false guard in
+	 * zend_do_link_class(). Enums can't be extended, so forward references
+	 * aren't an issue, they're linked at runtime via ZEND_DECLARE_CLASS. */
+	if (!(ce->ce_flags & ZEND_ACC_ENUM)
+	 && !ce->num_traits && !ce->num_hooked_prop_variance_checks
+	 && zend_can_early_bind_interfaces(ce)
 #ifdef ZEND_OPCACHE_SHM_REATTACHMENT
-	 /* See zend_link_hooked_object_iter(). */
-	 && !ce->num_hooked_props
+	 && !ce->num_hooked_props /* See zend_link_hooked_object_iter(). */
 #endif
 	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 		if (toplevel) {
@@ -9667,22 +9748,31 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 						return;
 					}
 				}
-			} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
-				zend_string_release(lcname);
-				zend_build_properties_info_table(ce);
-				zend_inheritance_check_override(ce);
-				ce->ce_flags |= ZEND_ACC_LINKED;
-				zend_observer_class_linked_notify(ce, lcname);
-				return;
 			} else {
-				goto link_unbound;
+				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
+					zend_string_release(lcname);
+					zend_build_properties_info_table(ce);
+					ce->ce_flags |= ZEND_ACC_LINKED;
+					if (ce->num_interfaces) {
+						zend_early_bind_resolve_internal_interfaces(ce);
+					}
+					zend_inheritance_check_override(ce);
+					zend_observer_class_linked_notify(ce, lcname);
+					return;
+				}
+				/* If zend_hash_add_ptr failed, the class name already exists
+				 * in the class table (e.g. polyfill pattern with two conditional
+				 * declarations of the same class). Fall through to emit a
+				 * runtime ZEND_DECLARE_CLASS opcode instead. */
 			}
 		} else if (!extends_ast) {
-link_unbound:
 			/* Link unbound simple class */
 			zend_build_properties_info_table(ce);
-			zend_inheritance_check_override(ce);
 			ce->ce_flags |= ZEND_ACC_LINKED;
+			if (ce->num_interfaces) {
+				zend_early_bind_resolve_internal_interfaces(ce);
+			}
+			zend_inheritance_check_override(ce);
 		}
 	}
 
@@ -9727,8 +9817,9 @@ link_unbound:
 		opline->opcode = ZEND_DECLARE_CLASS;
 		if (toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
-				/* We currently don't early-bind classes that implement interfaces or use traits */
-			 && !ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
+				/* We currently don't early-bind classes that use traits, enums, or have non-internal interfaces */
+			 && !(ce->ce_flags & ZEND_ACC_ENUM)
+			 && zend_can_early_bind_interfaces(ce) && !ce->num_traits && !ce->num_hooked_prop_variance_checks
 		) {
 			if (!extends_ast) {
 				/* Use empty string for classes without parents to avoid new handler, and special

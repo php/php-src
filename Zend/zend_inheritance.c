@@ -3886,11 +3886,44 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 	return false;
 }
 
+/* Resolve internal interface names to class entry pointers during early binding
+ * for classes without a parent. Uses zend_do_implement_interfaces() for correct
+ * deduplication of overlapping interface hierarchies (e.g. a class implementing
+ * both RecursiveIterator and Iterator).
+ *
+ * This must only be called when zend_can_early_bind_interfaces() in
+ * zend_compile.c returned true, guaranteeing all interfaces are internal.
+ * The class must already have ZEND_ACC_LINKED set. */
+void zend_early_bind_resolve_internal_interfaces(zend_class_entry *ce)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
+	ZEND_ASSERT(!ce->parent);
+
+	uint32_t num_interfaces = ce->num_interfaces;
+	zend_class_entry **interfaces = emalloc(
+		sizeof(zend_class_entry *) * num_interfaces);
+
+	for (uint32_t i = 0; i < num_interfaces; i++) {
+		zend_class_entry *iface = zend_lookup_class_ex(
+			ce->interface_names[i].name, ce->interface_names[i].lc_name,
+			ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		ZEND_ASSERT(iface && iface->type == ZEND_INTERNAL_CLASS
+			&& (iface->ce_flags & ZEND_ACC_INTERFACE));
+		interfaces[i] = iface;
+	}
+
+	/* zend_do_implement_interfaces() frees interface_names, sets
+	 * ce->interfaces, ce->num_interfaces, and ZEND_ACC_RESOLVED_INTERFACES. */
+	zend_do_implement_interfaces(ce, interfaces);
+}
+
 ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
 	inheritance_status status;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
+	zend_class_entry **traits_and_interfaces = NULL;
 
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
 		ZEND_ASSERT(ce->parent == NULL);
@@ -3901,12 +3934,33 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		return ce;
 	}
 
+	ALLOCA_FLAG(use_heap);
 	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
-	UPDATE_IS_CACHEABLE(parent_ce);
+	if (parent_ce) {
+		UPDATE_IS_CACHEABLE(parent_ce);
+	}
 	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
-			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
+			/* Build traits_and_interfaces array for the inheritance cache.
+			 * In the early-bind path num_traits is always 0, so only
+			 * interfaces need to be resolved. */
+			if (ce->num_interfaces) {
+				traits_and_interfaces = do_alloca(
+					sizeof(zend_class_entry *) * ce->num_interfaces, use_heap);
+				for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+					zend_class_entry *iface = zend_lookup_class_ex(
+						ce->interface_names[i].name,
+						ce->interface_names[i].lc_name,
+						ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					ZEND_ASSERT(iface && (iface->ce_flags & ZEND_ACC_INTERFACE));
+					traits_and_interfaces[i] = iface;
+				}
+			}
+			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, traits_and_interfaces);
 			if (ret) {
+				if (traits_and_interfaces) {
+					free_alloca(traits_and_interfaces, use_heap);
+				}
 				if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ret))) {
 					return NULL;
 				}
@@ -3921,7 +3975,14 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 
 	orig_linking_class = CG(current_linking_class);
 	CG(current_linking_class) = NULL;
-	status = zend_can_early_bind(ce, parent_ce);
+	if (parent_ce) {
+		status = zend_can_early_bind(ce, parent_ce);
+	} else {
+		/* No parent nothing to check compatibility against.
+		 * This path is used for no-parent classes with internal
+		 * interfaces (e.g. Stringable) during delayed early binding. */
+		status = INHERITANCE_SUCCESS;
+	}
 	CG(current_linking_class) = orig_linking_class;
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
 		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
@@ -3953,8 +4014,33 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			zend_link_hooked_object_iter(ce);
 #endif
 
-			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
-			if (parent_ce && parent_ce->num_interfaces) {
+			if (parent_ce) {
+				zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+			}
+			if (ce->num_interfaces) {
+				/* Class has its own unresolved interfaces (e.g. implicitly added
+				 * Stringable from __toString()). Resolve them and combine with
+				 * parent interfaces, similar to zend_do_link_class(). */
+				uint32_t num_parent_interfaces = parent_ce ? parent_ce->num_interfaces : 0;
+				uint32_t num_own_interfaces = ce->num_interfaces;
+				zend_class_entry **interfaces = emalloc(
+					sizeof(zend_class_entry *) * (num_own_interfaces + num_parent_interfaces));
+
+				if (num_parent_interfaces) {
+					memcpy(interfaces, parent_ce->interfaces,
+						sizeof(zend_class_entry *) * num_parent_interfaces);
+				}
+
+				for (uint32_t i = 0; i < num_own_interfaces; i++) {
+					zend_class_entry *iface = zend_lookup_class_ex(
+						ce->interface_names[i].name, ce->interface_names[i].lc_name,
+						ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					ZEND_ASSERT(iface && (iface->ce_flags & ZEND_ACC_INTERFACE));
+					interfaces[num_parent_interfaces + i] = iface;
+				}
+
+				zend_do_implement_interfaces(ce, interfaces);
+			} else if (parent_ce && parent_ce->num_interfaces) {
 				zend_do_inherit_interfaces(ce, parent_ce);
 			}
 			zend_build_properties_info_table(ce);
@@ -3979,7 +4065,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			zend_class_entry *new_ce;
 
 			ce->inheritance_cache = NULL;
-			new_ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
+			new_ce = zend_inheritance_cache_add(ce, proto, parent_ce, traits_and_interfaces, ht);
 			if (new_ce) {
 				zval *zv = zend_hash_find_known_hash(CG(class_table), lcname);
 				ce = new_ce;
@@ -3996,12 +4082,19 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			zend_free_recorded_errors();
 		}
 
+		if (traits_and_interfaces) {
+			free_alloca(traits_and_interfaces, use_heap);
+		}
+
 		if (ZSTR_HAS_CE_CACHE(ce->name)) {
 			ZSTR_SET_CE_CACHE(ce->name, ce);
 		}
 		zend_observer_class_linked_notify(ce, lcname);
 
 		return ce;
+	}
+	if (traits_and_interfaces) {
+		free_alloca(traits_and_interfaces, use_heap);
 	}
 	return NULL;
 }
