@@ -12,7 +12,7 @@ class test2
     function __toString()
     {
         echo __METHOD__ . "()\n";
-        return "\fConverted\n";
+        return "Converted\n";
     }
 }
 
@@ -24,6 +24,16 @@ class test3
         return [];
     }
 }
+
+class test4
+{
+    function __toString()
+    {
+        echo __METHOD__ . "()\n";
+        return "\fConverted";
+    }
+}
+
 echo "====test1====\n";
 $o = new test1;
 print_r($o);
@@ -77,7 +87,8 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
-
+echo "====test11====\n";
+print $o;
 ?>
 ====DONE====
 --EXPECT--
@@ -132,4 +143,6 @@ object(test3)#2 (0) {
 }
 test3::__toString()
 test3::__toString(): Return value must be of type string, array returned
+====test11====
+Converted
 ====DONE====
