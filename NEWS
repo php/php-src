@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21333 (use after free when unlinking entries during iteration
     of a compressed phar). (David Carlier)
 
+- Session:
+  . Fix memory leak due to multiple exception happening during session abort.
+    (arshidkv12)
+
 - SNMP:
   . Fixed bug GH-21336 (SNMP::setSecurity() undefined behavior with
     NULL arguments). (David Carlier)
