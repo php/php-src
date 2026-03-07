@@ -43,6 +43,8 @@ var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i
 --EXPECTF--
 *** Testing session_set_save_handler() : incorrect arguments for existing handler open ***
 Open:
+
+Warning: SessionHandler::close(): Parent session handler is not open in %s on line %d
 SessionHandler::open() expects exactly 2 arguments, 0 given
 
 Warning: Undefined global variable $_SESSION in %s on line %d
