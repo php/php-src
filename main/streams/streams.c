@@ -1700,8 +1700,8 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	}
 
 	/* Try optimized fd-level copy if both streams support it and read buffer is empty */
-	if (src->writepos == src->readpos &&
-			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest)) {
+	if (!php_stream_is(src, PHP_STREAM_IS_USERSPACE) && !php_stream_is(dest, PHP_STREAM_IS_USERSPACE) &&
+			src->writepos == src->readpos && !php_stream_is_filtered(src) && !php_stream_is_filtered(dest)) {
 		php_io_fd src_copy_fd, dest_copy_fd;
 
 		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
