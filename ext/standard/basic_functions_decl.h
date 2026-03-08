@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: f5583557f058e4862750d1262296d7f59cb0eed0  */
+ * Stub hash: f5583557f058e4862750d1262296d7f59cb0eed0 */
 
 #ifndef ZEND_BASIC_FUNCTIONS_DECL_f5583557f058e4862750d1262296d7f59cb0eed0_H
 #define ZEND_BASIC_FUNCTIONS_DECL_f5583557f058e4862750d1262296d7f59cb0eed0_H
