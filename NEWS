@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-20627 (Cannot identify some avif images with getimagesize).
     (y-guyon)
 
+- Sysvshm:
+  . Fix memory leak in shm_get_var() when variable is corrupted. (ndossche)
+
 12 Mar 2026, PHP 8.4.19
 
 - Core:
