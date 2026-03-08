@@ -2,33 +2,66 @@
 stream_copy_to_stream() socket to socket (splice both directions)
 --SKIPIF--
 <?php
-$sockets = @stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-if (!$sockets) die("skip stream_socket_pair not available");
+if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
 
-$sockets1 = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-$sockets2 = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+$sourceCode = <<<'CODE'
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
+    phpt_notify_server_start($server);
 
-$data = str_repeat('test data ', 1000);
-fwrite($sockets1[0], $data);
-stream_socket_shutdown($sockets1[0], STREAM_SHUT_WR);
+    /* Send address again so the client can read it via phpt_wait(). */
+    phpt_notify(message: stream_socket_get_name($server, false));
 
-$copied = stream_copy_to_stream($sockets1[1], $sockets2[0]);
-var_dump($copied);
+    $conn = stream_socket_accept($server);
+    $data = str_repeat('test data ', 1000);
+    fwrite($conn, $data);
+    stream_socket_shutdown($conn, STREAM_SHUT_WR);
 
-stream_socket_shutdown($sockets2[0], STREAM_SHUT_WR);
+    /* Keep alive until client is done reading. */
+    fread($conn, 1);
 
-$result = stream_get_contents($sockets2[1]);
-var_dump(strlen($result));
-var_dump($result === $data);
+    fclose($conn);
+    fclose($server);
+CODE;
 
-fclose($sockets1[0]);
-fclose($sockets1[1]);
-fclose($sockets2[0]);
-fclose($sockets2[1]);
+$destCode = <<<'CODE'
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
+    phpt_notify_server_start($server);
 
+    $conn = stream_socket_accept($server);
+    $result = stream_get_contents($conn);
+
+    phpt_notify(message: strlen($result));
+    phpt_notify(message: $result === str_repeat('test data ', 1000) ? "match" : "mismatch");
+
+    fclose($conn);
+    fclose($server);
+CODE;
+
+$clientCode = <<<'CODE'
+    $sourceAddr = trim(phpt_wait("source"));
+    $source = stream_socket_client("tcp://$sourceAddr", $errno, $errstr, 10);
+    $dest = stream_socket_client("tcp://{{ ADDR }}", $errno, $errstr, 10);
+
+    $copied = stream_copy_to_stream($source, $dest);
+    var_dump($copied);
+
+    stream_socket_shutdown($dest, STREAM_SHUT_WR);
+    fclose($source);
+
+    var_dump((int) trim(phpt_wait("dest")));
+    var_dump(trim(phpt_wait("dest")) === "match");
+
+    fclose($dest);
+CODE;
+
+include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+ServerClientTestCase::getInstance()->run($clientCode, [
+    'source' => $sourceCode,
+    'dest' => $destCode,
+]);
 ?>
 --EXPECT--
 int(10000)

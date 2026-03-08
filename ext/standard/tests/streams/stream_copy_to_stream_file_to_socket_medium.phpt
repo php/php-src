@@ -2,32 +2,45 @@
 stream_copy_to_stream() 16k with file as $source and socket as $dest
 --SKIPIF--
 <?php
-$sockets = @stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-if (!$sockets) die("skip stream_socket_pair");
+if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
 
-$sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
-$src = tmpfile();
+$serverCode = <<<'CODE'
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
+    phpt_notify_server_start($server);
 
-$data = str_repeat('data', 4096);
-fwrite($src, $data);
-rewind($src);
+    $conn = stream_socket_accept($server);
+    $data = str_repeat('data', 4096);
+    $result = stream_get_contents($conn);
 
-$copied = stream_copy_to_stream($src, $sockets[0]);
-var_dump($copied);
+    phpt_notify(message: strlen($result));
+    phpt_notify(message: $result === $data ? "match" : "mismatch");
 
-stream_socket_shutdown($sockets[0], STREAM_SHUT_WR);
+    fclose($conn);
+    fclose($server);
+CODE;
 
-$result = stream_get_contents($sockets[1]);
-var_dump(strlen($result));
-var_dump($result === $data);
+$clientCode = <<<'CODE'
+    $src = tmpfile();
+    $data = str_repeat('data', 4096);
+    fwrite($src, $data);
+    rewind($src);
 
-fclose($src);
-fclose($sockets[0]);
-fclose($sockets[1]);
+    $dest = stream_socket_client("tcp://{{ ADDR }}", $errno, $errstr, 10);
+    $copied = stream_copy_to_stream($src, $dest);
+    var_dump($copied);
 
+    fclose($dest);
+    fclose($src);
+
+    var_dump((int) trim(phpt_wait()));
+    var_dump(trim(phpt_wait()) === "match");
+CODE;
+
+include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 int(16384)
