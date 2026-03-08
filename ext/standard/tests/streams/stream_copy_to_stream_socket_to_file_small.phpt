@@ -1,5 +1,5 @@
 --TEST--
-stream_copy_to_stream() 200k bytes with socket as $source and file as $dest
+stream_copy_to_stream() 2048 bytes with socket as $source and file as $dest
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
@@ -12,7 +12,7 @@ $serverCode = <<<'CODE'
     phpt_notify_server_start($server);
 
     $conn = stream_socket_accept($server);
-    fwrite($conn, str_repeat("a", 200000));
+    fwrite($conn, str_repeat("a", 2048));
     stream_socket_shutdown($conn, STREAM_SHUT_WR);
 
     /* Keep alive until client is done reading. */
@@ -29,7 +29,7 @@ $clientCode = <<<'CODE'
     stream_copy_to_stream($source, $tmp);
 
     fseek($tmp, 0, SEEK_SET);
-    var_dump(strlen(stream_get_contents($tmp)));
+    var_dump(stream_get_contents($tmp));
 
     fclose($tmp);
     fclose($source);
@@ -38,5 +38,5 @@ CODE;
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
---EXPECT--
-int(200000)
+--EXPECTF--
+string(2048) "aaaaa%saaa"
