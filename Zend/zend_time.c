@@ -16,11 +16,6 @@
 
 #include "zend_time.h"
 
-/* Current real/wall-time in seconds */
-ZEND_API time_t zend_time_real_sec(void) {
-	return time(NULL);
-}
-
 ZEND_API void zend_time_real_spec(struct timespec *ts) {
 #if defined(HAVE_CLOCK_GETTIME)
 

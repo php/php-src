@@ -37,8 +37,8 @@
 # define tv_usec_t long
 #endif
 
-#define ZEND_MILLI_IN_SEC 1000U
-#define ZEND_MICRO_IN_SEC 1000000U
+#define ZEND_TIME_MILLI_IN_SEC 1000U
+#define ZEND_TIME_MICRO_IN_SEC 1000000U
 
 BEGIN_EXTERN_C()
 
@@ -50,11 +50,11 @@ static zend_always_inline void zend_time_sec2val(time_t s, struct timeval *tv) {
 
 /* Assign microseconds to timeval */
 static zend_always_inline void zend_time_usec2val(int64_t usec, struct timeval *tv) {
-	tv->tv_sec  = (tv_sec_t) (usec / ZEND_MICRO_IN_SEC);
-	tv->tv_usec = (tv_usec_t) (usec % ZEND_MICRO_IN_SEC);
+	tv->tv_sec  = (tv_sec_t) (usec / ZEND_TIME_MICRO_IN_SEC);
+	tv->tv_usec = (tv_usec_t) (usec % ZEND_TIME_MICRO_IN_SEC);
 
 	if (UNEXPECTED(tv->tv_usec < 0)) {
-		tv->tv_usec += ZEND_MICRO_IN_SEC;
+		tv->tv_usec += ZEND_TIME_MICRO_IN_SEC;
 		tv->tv_sec  -= 1;
 	}
 }
@@ -62,14 +62,14 @@ static zend_always_inline void zend_time_usec2val(int64_t usec, struct timeval *
 /* Assign double (seconds) to timeval */
 static zend_always_inline void zend_time_dbl2val(double s, struct timeval *tv) {
 	tv->tv_sec  = (tv_sec_t) s;
-	tv->tv_usec = (tv_usec_t) ((s - tv->tv_sec) * ZEND_MICRO_IN_SEC);
+	tv->tv_usec = (tv_usec_t) ((s - tv->tv_sec) * ZEND_TIME_MICRO_IN_SEC);
 
 	if (UNEXPECTED(tv->tv_usec < 0)) {
-		tv->tv_usec += ZEND_MICRO_IN_SEC;
+		tv->tv_usec += ZEND_TIME_MICRO_IN_SEC;
 		tv->tv_sec  -= 1;
-	} else if (UNEXPECTED(tv->tv_usec >= ZEND_MICRO_IN_SEC)) {
+	} else if (UNEXPECTED(tv->tv_usec >= ZEND_TIME_MICRO_IN_SEC)) {
 		// rare, but protects against rounding up to exactly 1 second
-		tv->tv_usec -= ZEND_MICRO_IN_SEC;
+		tv->tv_usec -= ZEND_TIME_MICRO_IN_SEC;
 		tv->tv_sec  += 1;
 	}
 }
@@ -81,7 +81,9 @@ static zend_always_inline void zend_time_val2spec(struct timeval tv, struct time
 }
 
 /* Current real/wall-time in seconds */
-ZEND_API time_t zend_time_real_sec(void);
+static zend_always_inline time_t zend_time_real_sec(void) {
+	return time(NULL);
+}
 
 /* Current real/wall-time in up-to nano seconds */
 ZEND_API void zend_time_real_spec(struct timespec *ts);
