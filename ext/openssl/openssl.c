@@ -3828,7 +3828,10 @@ static int php_openssl_get_evp_pkey_type(int key_type) {
 /* {{{ php_openssl_generate_private_key */
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 {
-	if (req->priv_key_bits < MIN_KEY_LENGTH) {
+	if ((req->priv_key_type == OPENSSL_KEYTYPE_RSA ||
+			req->priv_key_type == OPENSSL_KEYTYPE_DH ||
+			req->priv_key_type == OPENSSL_KEYTYPE_DSA) &&
+			req->priv_key_bits < MIN_KEY_LENGTH) {
 		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
 			MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
