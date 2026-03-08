@@ -121,7 +121,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
   . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
-    and ltrim(). (Weilin Du, LamentXU)
+    and ltrim(). (Weilin Du)
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0. (Jorg Sowa)
   . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
