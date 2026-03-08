@@ -3,8 +3,13 @@
 ARG_ENABLE('cli', 'Build CLI version of PHP', 'yes');
 ARG_ENABLE('cli-win32', 'Build console-less CLI version of PHP', 'no');
 
+// The embed SAPI requires the CLI sources for do_php_cli().
+if (PHP_EMBED != "no" && PHP_CLI != "yes") {
+	ERROR("--enable-embed requires the CLI SAPI, do not use --disable-cli with --enable-embed");
+}
+
 if (PHP_CLI == "yes") {
-	SAPI('cli', 'php_cli.c php_http_parser.c php_cli_server.c', 'php.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	SAPI('cli', 'php_cli.c php_cli_main.c php_http_parser.c php_cli_server.c', 'php.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	ADD_SOURCES(configure_module_dirname, 'php_cli_process_title.c ps_title.c', 'cli');
 	ADD_FLAG("LIBS_CLI", "ws2_32.lib");
 	ADD_FLAG("LIBS_CLI", "shell32.lib");
