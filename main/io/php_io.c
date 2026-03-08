@@ -41,7 +41,7 @@ PHPAPI ssize_t php_io_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
 ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 {
 	char buf[8192];
-	size_t total_copied = 0;
+	ssize_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
@@ -49,9 +49,9 @@ ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 		ssize_t bytes_read = read(src_fd, buf, to_read);
 
 		if (bytes_read < 0) {
-			return total_copied > 0 ? (ssize_t) total_copied : -1;
+			return total_copied > 0 ? total_copied : -1;
 		} else if (bytes_read == 0) {
-			return (ssize_t) total_copied;
+			return total_copied;
 		}
 
 		char *writeptr = buf;
@@ -60,7 +60,7 @@ ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 		while (to_write > 0) {
 			ssize_t bytes_written = write(dest_fd, writeptr, to_write);
 			if (bytes_written <= 0) {
-				return total_copied > 0 ? (ssize_t) total_copied : -1;
+				return total_copied > 0 ? total_copied : -1;
 			}
 			total_copied += bytes_written;
 			writeptr += bytes_written;
@@ -72,7 +72,7 @@ ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 		}
 	}
 
-	return (ssize_t) total_copied;
+	return total_copied;
 }
 
 ssize_t php_io_generic_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
