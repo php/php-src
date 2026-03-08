@@ -309,11 +309,13 @@ PHP_FUNCTION(shm_get_var)
 	shm_data = &shm_var->mem;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
-		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
-		RETVAL_FALSE;
-	}
+	int res = php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (res != 1) {
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
