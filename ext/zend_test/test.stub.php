@@ -2,6 +2,7 @@
 
 /**
  * @generate-class-entries static
+ * @generate-c-enums
  * @generate-legacy-arginfo 80000
  * @undocumentable
  */
@@ -206,6 +207,11 @@ namespace {
         case Foo = 1;
         case Bar = 3;
         case Baz = -1;
+    }
+
+    enum ZendTestEnumWithInterface implements _ZendTestInterface {
+        case Foo;
+        case Bar;
     }
 
     function zend_trigger_bailout(): never {}

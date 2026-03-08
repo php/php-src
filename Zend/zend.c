@@ -157,7 +157,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
@@ -811,7 +811,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->user_error_handler_error_reporting = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
-	executor_globals->in_autoload = NULL;
 	executor_globals->current_execute_data = NULL;
 	executor_globals->current_module = NULL;
 	executor_globals->exit_status = 0;
@@ -1082,7 +1081,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
     zend_enum_startup();
-    zend_closure_startup();
 }
 /* }}} */
 
@@ -1979,7 +1977,6 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 	zend_result ret = SUCCESS;
 	if (op_array) {
 		zend_execute(op_array, retval);
-		zend_exception_restore();
 		if (UNEXPECTED(EG(exception))) {
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();

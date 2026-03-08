@@ -343,9 +343,7 @@ PHP_METHOD(mysqli, init)
 /* {{{ Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(MyG(error_no));
 }
@@ -354,9 +352,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 /* {{{ Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (MyG(error_msg)) {
 		RETURN_STRING(MyG(error_msg));
@@ -448,9 +444,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 /* {{{ Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_client_stats)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	mysqlnd_get_client_stats(return_value);
 }
 /* }}} */
@@ -1088,9 +1082,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 /* {{{ Returns information about open and cached links */
 PHP_FUNCTION(mysqli_get_links_stats)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));

@@ -5,6 +5,9 @@ Test strftime() function : usage variation - Checking time related formats which
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris uses ' 8:08:08 AM' for %r (time format differs)");
+}
 ?>
 --FILE--
 <?php

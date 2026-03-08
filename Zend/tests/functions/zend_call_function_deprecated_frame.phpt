@@ -19,7 +19,6 @@ var_dump($a);
 --EXPECTF--
 Fatal error: Uncaught Exception: Function foo() is deprecated in %s:%d
 Stack trace:
-#0 [internal function]: {closure:%s:%d}(16384, 'Function foo() ...', '%s', %d)
-#1 %s(%d): array_map(Object(Closure), Array)
-#2 {main}
+#0 %s(%d): {closure:%s:%d}(16384, 'Function foo() ...', '%s', %d)
+#1 {main}
   thrown in %s on line %d

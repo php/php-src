@@ -646,9 +646,7 @@ PHP_FUNCTION(sapi_windows_cp_get)
 /* {{{ Indicates whether the codepage is UTF-8 compatible. */
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
 }

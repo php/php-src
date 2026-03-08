@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit password.stub.php instead.
  * Stub hash: f61df8d477588718e0eb1b055e5a3e138e6bcad3 */
 
 static void register_password_symbols(int module_number)

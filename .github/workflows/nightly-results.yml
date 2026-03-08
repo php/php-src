@@ -2,13 +2,13 @@ name: Nightly results
 on:
   workflow_run:
     workflows:
-      - Nightly
+      - Test
     types:
       - completed
 jobs:
   on-failure:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'php/php-src' && github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.repository == 'php/php-src' && github.event.workflow_run.event == 'schedule' && github.event.workflow_run.conclusion == 'failure' }}
     steps:
       - run: |
           export DEBIAN_FRONTEND=noninteractive

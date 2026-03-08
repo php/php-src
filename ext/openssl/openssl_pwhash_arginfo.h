@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit openssl_pwhash.stub.php instead.
  * Stub hash: 23ee957ba4945be3a21db58051e548729c3ff44e */
 
 static void register_openssl_pwhash_symbols(int module_number)

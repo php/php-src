@@ -1558,7 +1558,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 {
 	php_convert_filter *inst;
 
-	char *dot;
+	const char *dot;
 	int conv_mode = 0;
 
 	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {

@@ -255,7 +255,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 		: "=&r"(res), "=&r"(m_overflow)
 		: "r"(nmemb),
 		  "r"(size),
-		  "r"(offset));
+		  "r"(offset)
+		: "cc");
 
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;
@@ -279,7 +280,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
              : "=&r"(res), "=&r"(m_overflow)
              : "r"(nmemb),
                "r"(size),
-               "r"(offset));
+               "r"(offset)
+             : "xer");
 
         if (UNEXPECTED(m_overflow)) {
                 *overflow = 1;
@@ -340,7 +342,6 @@ static zend_always_inline size_t zend_safe_address_guarded(size_t nmemb, size_t 
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }
@@ -353,7 +354,6 @@ static zend_always_inline size_t zend_safe_addmult(size_t nmemb, size_t size, si
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in %s (%zu * %zu + %zu)", message, nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }

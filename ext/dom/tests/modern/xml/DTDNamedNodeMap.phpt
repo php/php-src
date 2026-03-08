@@ -148,7 +148,7 @@ object(Dom\Notation)#4 (13) {
   ["nodeName"]=>
   string(3) "GIF"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["parentNode"]=>

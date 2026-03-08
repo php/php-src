@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit php_xmlreader.stub.php instead.
  * Stub hash: 80288a0f40eabc7802a928963386616ea31e448d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)

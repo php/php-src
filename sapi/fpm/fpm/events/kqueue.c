@@ -150,7 +150,7 @@ static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long 
 /* }}} */
 
 /*
- * Add a FD to to kevent queue
+ * Add a FD to kevent queue
  */
 static int fpm_event_kqueue_add(struct fpm_event_s *ev) /* {{{ */
 {

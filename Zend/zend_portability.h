@@ -146,6 +146,19 @@
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
+/* Define an enum with a fixed underlying type as C23_ENUM(name, underlying_type) { }. */
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define C23_ENUM(name, underlying_type) \
+    enum name: underlying_type; \
+    typedef enum name name; \
+    enum name: underlying_type
+#else
+# define C23_ENUM(name, underlying_type) \
+    enum name; \
+    typedef underlying_type name; \
+    enum name
+#endif
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
@@ -336,9 +349,12 @@ char *alloca();
 # define ZEND_PRESERVE_NONE __attribute__((preserve_none))
 #endif
 
-#if __has_attribute(musttail)
-# define HAVE_MUSTTAIL
-# define ZEND_MUSTTAIL __attribute__((musttail))
+
+#if !defined(__apple_build_version__) || (defined(__apple_build_version__) && __apple_build_version__ >= 17000404)
+# if __has_attribute(musttail)
+#  define HAVE_MUSTTAIL
+#  define ZEND_MUSTTAIL __attribute__((musttail))
+# endif
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)

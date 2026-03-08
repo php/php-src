@@ -7,12 +7,12 @@ if (PHP_TIDY != "no") {
 	if ((CHECK_LIB("libtidy_a.lib;tidy_a.lib", "tidy", PHP_TIDY) && (tidy_static = true) ||
 		CHECK_LIB("libtidy.lib;tidy.lib", "tidy", PHP_TIDY)) &&
 			(
-				CHECK_HEADER_ADD_INCLUDE("tidy.h", "CFLAGS_TIDY") ||
-				CHECK_HEADER_ADD_INCLUDE("tidy/tidy.h", "CFLAGS_TIDY", null, null, true) ||
-				CHECK_HEADER_ADD_INCLUDE("libtidy/tidy.h", "CFLAGS_TIDY", null, null, true)
+				CHECK_HEADER("tidy.h", "CFLAGS_TIDY") ||
+				CHECK_HEADER("tidy/tidy.h", "CFLAGS_TIDY", null, null, true) ||
+				CHECK_HEADER("libtidy/tidy.h", "CFLAGS_TIDY", null, null, true)
 			)) {
 
-		if (CHECK_HEADER_ADD_INCLUDE("tidybuffio.h", "CFLAGS_TIDY")) {
+		if (CHECK_HEADER("tidybuffio.h", "CFLAGS_TIDY")) {
 			AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Define to 1 if you have the <tidybuffio.h> header file.');
 		}
 

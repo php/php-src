@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit spoofchecker.stub.php instead.
  * Stub hash: 4834be57a3f0cb74dbc4422e609846139f09f6cb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)

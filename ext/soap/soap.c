@@ -349,7 +349,7 @@ ZEND_GET_MODULE(soap)
 
 ZEND_INI_MH(OnUpdateCacheMode)
 {
-	char *p = (char *) ZEND_INI_GET_ADDR();
+	char *p = ZEND_INI_GET_ADDR();
 	*p = (char)atoi(ZSTR_VAL(new_value));
 	return SUCCESS;
 }

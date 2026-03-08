@@ -56,6 +56,12 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 {
 	const char *prop_name, *class_name;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		php_printf("%*cnesting level too deep", level + 1, ' ');
+		return;
+	}
+#endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
@@ -934,7 +940,7 @@ static int php_var_serialize_get_sleep_props(
 
 		priv_name = zend_mangle_property_name(
 			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(priv_name);
@@ -949,7 +955,7 @@ static int php_var_serialize_get_sleep_props(
 		}
 
 		prot_name = zend_mangle_property_name(
-			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(prot_name);

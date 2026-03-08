@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit listformatter.stub.php instead.
  * Stub hash: cdbbdb55d1e53f422c5854460c3c6cc3d01360d7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlListFormatter___construct, 0, 0, 1)

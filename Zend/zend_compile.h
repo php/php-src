@@ -497,6 +497,12 @@ typedef struct _zend_class_constant {
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
+C23_ENUM(zend_function_type, uint8_t) {
+	ZEND_INTERNAL_FUNCTION = 1,
+	ZEND_USER_FUNCTION = 2,
+	ZEND_EVAL_CODE = 4,
+};
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
@@ -524,7 +530,7 @@ typedef struct _zend_internal_function_info {
 
 struct _zend_op_array {
 	/* Common elements */
-	uint8_t type;
+	zend_function_type type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
@@ -584,7 +590,7 @@ typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef struct _zend_internal_function {
 	/* Common elements */
-	uint8_t type;
+	zend_function_type type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
@@ -610,11 +616,11 @@ typedef struct _zend_internal_function {
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
-	uint8_t type;	/* MUST be the first element of this struct! */
+	zend_function_type type;	/* MUST be the first element of this struct! */
 	uint32_t   quick_arg_flags;
 
 	struct {
-		uint8_t type;  /* never used */
+		zend_function_type type;  /* never used */
 		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
@@ -956,7 +962,7 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle);
 ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
-ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
+ZEND_API void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
@@ -1031,12 +1037,6 @@ void zend_assert_valid_class_name(const zend_string *const_name, const char *typ
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
 ZEND_API zend_string *zend_type_to_string(zend_type type);
 
-/* BEGIN: OPCODES */
-
-#include "zend_vm_opcodes.h"
-
-/* END: OPCODES */
-
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
@@ -1077,14 +1077,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-#define ZEND_INTERNAL_FUNCTION		1
-#define ZEND_USER_FUNCTION			2
-#define ZEND_EVAL_CODE				4
-
 #define ZEND_USER_CODE(type)		((type) != ZEND_INTERNAL_FUNCTION)
-
-#define ZEND_INTERNAL_CLASS         1
-#define ZEND_USER_CLASS             2
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
@@ -1236,6 +1229,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 #define ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opcode) \
 	(((opcode) >= ZEND_ADD) && ((opcode) <= ZEND_POW))
 
+/* PFAs/FCCs */
+#define ZEND_PLACEHOLDER_VARIADIC (1<<0)
+
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253
 #define ZEND_BRK   254
@@ -1326,5 +1322,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
 
 bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1);
+
+bool zend_op_may_elide_result(uint8_t opcode);
 
 #endif /* ZEND_COMPILE_H */

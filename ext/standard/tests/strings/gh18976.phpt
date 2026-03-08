@@ -2,6 +2,10 @@
 GH-18976 (pack overflow with h/H format)
 --INI--
 memory_limit=-1
+--SKIPIF--
+<?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
+?>
 --FILE--
 <?php
 pack('h2147483647', 1);

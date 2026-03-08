@@ -758,7 +758,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 			ret = -1;
 			goto free_statement;
 		}
-		while (result[i] != isc_info_end && i < result_size) {
+		while (i < result_size && result[i] != isc_info_end) {
 			short len = (short)isc_vax_integer(&result[i+1],2);
 			/* bail out on bad len */
 			if (len != 1 && len != 2 && len != 4) {

@@ -1016,10 +1016,8 @@ PHPAPI PHP_FUNCTION(fflush)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ret = php_stream_flush(stream);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+
+	RETURN_BOOL(!ret);
 }
 /* }}} */
 
@@ -1032,10 +1030,7 @@ PHPAPI PHP_FUNCTION(rewind)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (-1 == php_stream_rewind(stream)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(-1 != php_stream_rewind(stream));
 }
 /* }}} */
 

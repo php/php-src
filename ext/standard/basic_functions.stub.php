@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* array.c */
 
@@ -109,6 +112,11 @@ const COUNT_NORMAL = UNKNOWN;
  */
 const COUNT_RECURSIVE = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
 /**
  * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
@@ -1866,7 +1874,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_KEY): array {}
 
 function array_find(array $array, callable $callback): mixed {}
 

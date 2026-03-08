@@ -703,11 +703,7 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
-	if (zend_hash_del(intern->parameter, key) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_del(intern->parameter, key) == SUCCESS);
 	zend_string_release_ex(key, false);
 }
 /* }}} end XSLTProcessor::removeParameter */
@@ -818,9 +814,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_XSL_P(id);
 
@@ -831,9 +825,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 /* {{{ */
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_XSL_EXSLT
 	RETURN_TRUE;

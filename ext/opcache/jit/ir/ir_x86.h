@@ -82,14 +82,17 @@ enum _ir_reg {
 	IR_GP_REGS(IR_GP_REG_ENUM)
 	IR_FP_REGS(IR_FP_REG_ENUM)
 	IR_REG_NUM,
+	IR_REG_ALL = IR_REG_NUM, /* special name for regset */
+	IR_REG_SET_1,            /* special name for regset */
+	IR_REG_SET_2,            /* special name for regset */
+	IR_REG_SET_3,            /* special name for regset */
+	IR_REG_SET_NUM,
 };
 
 #define IR_REG_GP_FIRST IR_REG_R0
 #define IR_REG_FP_FIRST IR_REG_XMM0
 #define IR_REG_GP_LAST  (IR_REG_FP_FIRST - 1)
 #define IR_REG_FP_LAST  (IR_REG_NUM - 1)
-#define IR_REG_SCRATCH  (IR_REG_NUM)        /* special name for regset */
-#define IR_REG_ALL      (IR_REG_NUM + 1)    /* special name for regset */
 
 #define IR_REGSET_64BIT 0
 
@@ -112,122 +115,5 @@ enum _ir_reg {
 #define IR_REG_RBP IR_REG_R5
 #define IR_REG_RSI IR_REG_R6
 #define IR_REG_RDI IR_REG_R7
-
-/* Calling Convention */
-#ifdef _WIN64
-
-# define IR_REG_INT_RET1 IR_REG_RAX
-# define IR_REG_FP_RET1  IR_REG_XMM0
-# define IR_REG_INT_ARGS 4
-# define IR_REG_FP_ARGS  4
-# define IR_REG_INT_ARG1 IR_REG_RCX
-# define IR_REG_INT_ARG2 IR_REG_RDX
-# define IR_REG_INT_ARG3 IR_REG_R8
-# define IR_REG_INT_ARG4 IR_REG_R9
-# define IR_REG_FP_ARG1  IR_REG_XMM0
-# define IR_REG_FP_ARG2  IR_REG_XMM1
-# define IR_REG_FP_ARG3  IR_REG_XMM2
-# define IR_REG_FP_ARG4  IR_REG_XMM3
-# define IR_MAX_REG_ARGS 4
-# define IR_SHADOW_ARGS  32 /* Reserved space in bytes - "home space" or "shadow store" for register arguments */
-
-# define IR_REGSET_SCRATCH \
-	(IR_REGSET_INTERVAL(IR_REG_RAX, IR_REG_RDX) \
-	| IR_REGSET_INTERVAL(IR_REG_R8, IR_REG_R11) \
-	| IR_REGSET_INTERVAL(IR_REG_XMM0, IR_REG_XMM5))
-
-# define IR_REGSET_PRESERVED \
-	(IR_REGSET(IR_REG_RBX) \
-	| IR_REGSET_INTERVAL(IR_REG_RBP, IR_REG_RDI) \
-	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15) \
-	| IR_REGSET_INTERVAL(IR_REG_XMM6, IR_REG_XMM15))
-
-#elif defined(IR_TARGET_X64)
-
-# define IR_REG_INT_RET1 IR_REG_RAX
-# define IR_REG_FP_RET1  IR_REG_XMM0
-# define IR_REG_INT_ARGS 6
-# define IR_REG_FP_ARGS  8
-# define IR_REG_INT_ARG1 IR_REG_RDI
-# define IR_REG_INT_ARG2 IR_REG_RSI
-# define IR_REG_INT_ARG3 IR_REG_RDX
-# define IR_REG_INT_ARG4 IR_REG_RCX
-# define IR_REG_INT_ARG5 IR_REG_R8
-# define IR_REG_INT_ARG6 IR_REG_R9
-# define IR_REG_FP_ARG1  IR_REG_XMM0
-# define IR_REG_FP_ARG2  IR_REG_XMM1
-# define IR_REG_FP_ARG3  IR_REG_XMM2
-# define IR_REG_FP_ARG4  IR_REG_XMM3
-# define IR_REG_FP_ARG5  IR_REG_XMM4
-# define IR_REG_FP_ARG6  IR_REG_XMM5
-# define IR_REG_FP_ARG7  IR_REG_XMM6
-# define IR_REG_FP_ARG8  IR_REG_XMM7
-# define IR_MAX_REG_ARGS 14
-# define IR_SHADOW_ARGS  0
-
-# define IR_REG_VARARG_FP_REGS IR_REG_RAX /* hidden argument to specify the number of vector registers used */
-
-# define IR_REGSET_SCRATCH \
-	(IR_REGSET_INTERVAL(IR_REG_RAX, IR_REG_RDX) \
-	| IR_REGSET_INTERVAL(IR_REG_RSI, IR_REG_RDI) \
-	| IR_REGSET_INTERVAL(IR_REG_R8, IR_REG_R11) \
-	| IR_REGSET_FP)
-
-# define IR_REGSET_PRESERVED \
-	(IR_REGSET(IR_REG_RBX) \
-	| IR_REGSET(IR_REG_RBP) \
-	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
-
-typedef struct _ir_va_list {
-	uint32_t  gp_offset;
-	uint32_t  fp_offset;
-	void     *overflow_arg_area;
-	void     *reg_save_area;
-} ir_va_list;
-
-#elif defined(IR_TARGET_X86)
-
-# define IR_REG_INT_RET1   IR_REG_RAX
-# define IR_REG_INT_RET2   IR_REG_RDX
-# define IR_REG_INT_ARGS   0
-# define IR_REG_FP_ARGS    0
-
-# define IR_HAVE_FASTCALL  1
-# define IR_REG_INT_FCARGS 2
-# define IR_REG_FP_FCARGS  0
-# define IR_REG_INT_FCARG1 IR_REG_RCX
-# define IR_REG_INT_FCARG2 IR_REG_RDX
-# define IR_MAX_REG_ARGS   2
-# define IR_SHADOW_ARGS    0
-
-# define IR_REGSET_SCRATCH \
-	(IR_REGSET_INTERVAL(IR_REG_RAX, IR_REG_RDX) | IR_REGSET_FP)
-
-# define IR_REGSET_PRESERVED \
-	(IR_REGSET(IR_REG_RBX) \
-	| IR_REGSET(IR_REG_RBP) \
-	| IR_REGSET_INTERVAL(IR_REG_RSI, IR_REG_RDI))
-
-#else
-# error "Unsupported target architecture"
-#endif
-
-typedef struct _ir_tmp_reg {
-	union {
-		uint8_t num;
-		int8_t  reg;
-	};
-	uint8_t     type;
-	int8_t      start;
-	int8_t      end;
-} ir_tmp_reg;
-
-struct _ir_target_constraints {
-	int8_t      def_reg;
-	uint8_t     tmps_count;
-	uint8_t     hints_count;
-	ir_tmp_reg  tmp_regs[3];
-	int8_t      hints[IR_MAX_REG_ARGS + 3];
-};
 
 #endif /* IR_X86_H */
