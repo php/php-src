@@ -7,7 +7,9 @@ ffi
 ffi.enable=1
 --SKIPIF--
 <?php
-if (!function_exists('ftok')){ print 'skip'; }
+if (!function_exists('ftok')) die('skip needs ftok');
+if (PHP_INT_SIZE !== 8) die('skip only for 64-bit');
+if (PHP_OS_FAMILY !== 'Linux') die('skip only for decent operating systems');
 ?>
 --FILE--
 <?php
