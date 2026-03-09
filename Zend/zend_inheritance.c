@@ -320,7 +320,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 	}
 
 	if (ce1->parent) {
-		zend_class_entry *parent_ce;
+		const zend_class_entry *parent_ce;
 		if (ce1->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			parent_ce = ce1->parent;
 		} else {
