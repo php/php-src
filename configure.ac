@@ -226,11 +226,6 @@ case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
-  *hpux*)
-    if test "$GCC" = "yes"; then
-      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
-    fi
-    ;;
 esac
 
 dnl Disable PIC mode by default where it is known to be safe to do so, to avoid

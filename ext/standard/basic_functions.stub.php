@@ -816,23 +816,17 @@ const LOG_SYSLOG = UNKNOWN;
  * @cvalue LOG_LPR
  */
 const LOG_LPR = UNKNOWN;
-#ifdef LOG_NEWS
-/* No LOG_NEWS on HP-UX */
 /**
  * usenet new
  * @var int
  * @cvalue LOG_NEWS
  */
 const LOG_NEWS = UNKNOWN;
-#endif
-#ifdef LOG_UUCP
-/* No LOG_UUCP on HP-UX */
 /**
  * @var int
  * @cvalue LOG_UUCP
  */
 const LOG_UUCP = UNKNOWN;
-#endif
 #ifdef LOG_CRON
 /* apparently some systems don't have this one */
 /**

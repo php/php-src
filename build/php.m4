@@ -1079,28 +1079,11 @@ AC_DEFUN([PHP_CHECK_SIZEOF], [
 dnl
 dnl PHP_TIME_R_TYPE
 dnl
-dnl Check type of reentrant time-related functions. Type can be: irix, hpux or
-dnl POSIX.
+dnl Check type of reentrant time-related functions. Type can be: irix or POSIX.
 dnl
 AC_DEFUN([PHP_TIME_R_TYPE],
 [AC_CACHE_CHECK([for type of reentrant time-related functions],
   [php_cv_time_r_type],
-  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <time.h>
-
-int main(void) {
-char buf[27];
-struct tm t;
-time_t old = 0;
-int r, s;
-
-s = gmtime_r(&old, &t);
-r = (int) asctime_r(&t, buf, 26);
-if (r == s && s == 0) return (0);
-return (1);
-}
-  ]])],
-  [php_cv_time_r_type=hpux],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
 int main(void) {
@@ -1116,12 +1099,9 @@ int main(void) {
   ]])],
   [php_cv_time_r_type=irix],
   [php_cv_time_r_type=POSIX],
-  [php_cv_time_r_type=POSIX])],
   [php_cv_time_r_type=POSIX])
 ])
 AS_CASE([$php_cv_time_r_type],
-  [hpux], [AC_DEFINE([PHP_HPUX_TIME_R], [1],
-    [Define to 1 if you have HP-UX 10.x.-style reentrant time functions.])],
   [irix], [AC_DEFINE([PHP_IRIX_TIME_R], [1],
     [Define to 1 you have IRIX-style reentrant time functions.])])
 ])
@@ -1507,19 +1487,14 @@ dnl ----------------------------------------------------------------------------
 dnl
 dnl PHP_SHLIB_SUFFIX_NAMES
 dnl
-dnl Determines link library suffix SHLIB_SUFFIX_NAME which can be: .so, .sl or
+dnl Determines link library suffix SHLIB_SUFFIX_NAME which can be: .so, or
 dnl .dylib
 dnl
-dnl Determines shared library suffix SHLIB_DL_SUFFIX_NAME suffix can be: .so or
-dnl .sl
+dnl Determines shared library suffix SHLIB_DL_SUFFIX_NAME suffix can be: .so.
 dnl
 AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES], [
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
 AS_CASE([$host_alias],
-  [*hpux*], [
-    SHLIB_SUFFIX_NAME=sl
-    SHLIB_DL_SUFFIX_NAME=sl
-  ],
   [*darwin*], [
     SHLIB_SUFFIX_NAME=dylib
     SHLIB_DL_SUFFIX_NAME=so
