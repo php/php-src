@@ -60,8 +60,8 @@ static void add_property_hook_obligation(
 		zend_class_entry *ce, const zend_property_info *hooked_prop, const zend_function *hook_func);
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status);
 
 static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent);
@@ -897,7 +897,7 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
+		smart_str *str, const zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
@@ -911,7 +911,7 @@ static ZEND_COLD void zend_append_type_hint(
 /* }}} */
 
 static ZEND_COLD zend_string *zend_get_function_declaration(
-		const zend_function *fptr, zend_class_entry *scope) /* {{{ */
+		const zend_function *fptr, const zend_class_entry *scope) /* {{{ */
 {
 	smart_str str = {0};
 
@@ -1054,8 +1054,8 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 }
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status) {
 	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
 	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
