@@ -105,7 +105,8 @@ bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 	tar_header *header = (tar_header *) buf;
 	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
 	bool is_tar;
-	char save[sizeof(header->checksum)], *bname;
+	char save[sizeof(header->checksum)];
+	const char *bname;
 
 	/* assume that the first filename in a tar won't begin with <?php */
 	if (!strncmp(buf, "<?php", sizeof("<?php")-1)) {
