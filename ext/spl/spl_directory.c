@@ -2240,9 +2240,17 @@ PHP_METHOD(SplFileObject, next)
 		RETURN_THROWS();
 	}
 
+	bool had_current_line = (intern->u.file.current_line != NULL || !Z_ISUNDEF(intern->u.file.current_zval));
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
+	} else if (!had_current_line) {
+		/* If there was no current line before, we need to advance the stream position
+		 * for iterator_count() and other iterator operations to work correctly.
+		 * Read and immediately discard a line. */
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == SUCCESS) {
+			spl_filesystem_file_free_line(intern);
+		}
 	}
 	intern->u.file.current_line_num++;
 } /* }}} */
