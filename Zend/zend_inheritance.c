@@ -2925,9 +2925,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
 					}
-					if (!(flags & ZEND_ACC_STATIC)) {
-						continue;
-					}
+					continue;
 				}
 			}
 
