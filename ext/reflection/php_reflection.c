@@ -3302,10 +3302,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 
 	lcname = zend_str_tolower_dup(method_name, method_name_len);
 
-	if (ce == zend_ce_closure && orig_obj && (method_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
-	{
+	if (is_closure_invoke(ce, lcname) && orig_obj && (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL) {
 		/* Store the original closure object so we can validate it in invoke/invokeArgs.
 		 * Each closure has a unique __invoke signature, so we must reject different closures. */
 		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
