@@ -4485,6 +4485,9 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	}
 #if ZEND_DEBUG
 	zend_property_info *existing_prop = zend_hash_find_ptr(&ce->properties_info, name);
+	if (existing_prop) {
+		fprintf(stderr, "Redeclared prop: %s::$%s\n", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
 	ZEND_ASSERT(!existing_prop);
 #endif
 	if (access_type & ZEND_ACC_STATIC) {
