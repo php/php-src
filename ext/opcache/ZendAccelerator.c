@@ -1993,7 +1993,7 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 	return op_array;
 }
 
-static int check_persistent_script_access(zend_persistent_script *persistent_script)
+static bool check_persistent_script_access(zend_persistent_script *persistent_script)
 {
 	char *phar_path, *ptr;
 	if ((ZSTR_LEN(persistent_script->script.filename)<sizeof("phar://.phar")) ||
