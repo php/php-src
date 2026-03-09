@@ -964,7 +964,7 @@ static inline bool accel_is_inactive(void)
 	return false;
 }
 
-static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
+static zend_result zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
