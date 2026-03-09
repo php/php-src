@@ -12,4 +12,4 @@ class C implements I {
 
 ?>
 --EXPECTF--
-Fatal error: Non-enum class C cannot implement interface I in %s on line %d
+Fatal error: Non-enum class C cannot implement interface UnitEnum in %s on line %d

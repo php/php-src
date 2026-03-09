@@ -1579,18 +1579,13 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 }
 /* }}} */
 
-static inline void do_implement_interface_ex(zend_class_entry *ce, const zend_class_entry *inherited_iface, zend_class_entry *base_iface)
-{
-	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && inherited_iface->interface_gets_implemented && inherited_iface->interface_gets_implemented(base_iface, ce) == FAILURE) {
-		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(base_iface->name));
-	}
-	/* This should be prevented by the class lookup logic. */
-	ZEND_ASSERT(ce != base_iface);
-}
-
 static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
 {
-	do_implement_interface_ex(ce, iface, iface);
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
+		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+	}
+	/* This should be prevented by the class lookup logic. */
+	ZEND_ASSERT(ce != iface);
 }
 
 static void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
@@ -1622,7 +1617,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *i
 
 	/* and now call the implementing handlers */
 	while (ce_num < ce->num_interfaces) {
-		do_implement_interface_ex(ce, ce->interfaces[ce_num++], iface);
+		do_implement_interface(ce, ce->interfaces[ce_num++]);
 	}
 }
 /* }}} */
