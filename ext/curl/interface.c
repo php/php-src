@@ -1112,7 +1112,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120L);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20L); /* prevent infinite redirects */
 
-	const char* cainfo = zend_ini_string_literal("openssl.cafile");
+	const char *cainfo = zend_ini_string_literal("openssl.cafile");
 	if (!(cainfo && cainfo[0] != '\0')) {
 		cainfo = zend_ini_string_literal("curl.cainfo");
 	}
