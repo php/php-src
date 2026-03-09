@@ -15,7 +15,7 @@
 #include "php.h"
 #include "cli.h"
 
-int main(const int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	return do_php_cli(argc, argv);
 }
