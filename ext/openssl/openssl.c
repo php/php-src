@@ -957,7 +957,9 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	if (str != NULL && php_openssl_check_path_ex(str, strlen(str), path, 0, false, false, "oid_file")) {
 		BIO *oid_bio = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
-			OBJ_create_objects(oid_bio);
+			if (OBJ_create_objects(oid_bio) != 1) {
+				php_openssl_store_errors();
+			}
 			BIO_free(oid_bio);
 			php_openssl_store_errors();
 		}
@@ -1277,7 +1279,9 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_algorithms();
 	SSL_load_error_strings();
 #else
-	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
+	if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) != 1) {
+		php_error_docref(NULL, E_WARNING, "Failed to initialize OpenSSL");
+	}
 #endif
 
 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
@@ -2044,20 +2048,26 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 			case GEN_EMAIL:
 				BIO_puts(bio, "email:");
 				as = name->d.rfc822Name;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
@@ -2288,7 +2298,9 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	while (sk_X509_INFO_num(sk)) {
 		xi=sk_X509_INFO_shift(sk);
 		if (xi->x509 != NULL) {
-			sk_X509_push(stack,xi->x509);
+			if (sk_X509_push(stack,xi->x509) == 0) {
+				php_openssl_store_errors();
+			}
 			xi->x509=NULL;
 		}
 		X509_INFO_free(xi);
@@ -2549,7 +2561,10 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 				}
 
 			}
-			sk_X509_push(sk, cert);
+			if (sk_X509_push(sk, cert) == 0) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -2567,7 +2582,10 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(sk, cert);
+		if (sk_X509_push(sk, cert) == 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 	}
 
 clean_exit:
@@ -3295,7 +3313,10 @@ PHP_FUNCTION(openssl_csr_sign)
 	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
 #endif
 
-	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
+	if (!X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr))) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 
 	if (cert == NULL) {
 		cert = new_cert;
@@ -5615,7 +5636,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 					goto clean_exit;
 				}
 			}
-			sk_X509_push(recipcerts, cert);
+			if (sk_X509_push(recipcerts, cert) == 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -5636,7 +5660,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(recipcerts, cert);
+		if (sk_X509_push(recipcerts, cert) == 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 	}
 
 	/* sanity check the cipher */
@@ -6221,7 +6248,10 @@ PHP_FUNCTION(openssl_cms_encrypt)
 					goto clean_exit;
 				}
 			}
-			sk_X509_push(recipcerts, cert);
+			if (sk_X509_push(recipcerts, cert) == 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -6241,7 +6271,10 @@ PHP_FUNCTION(openssl_cms_encrypt)
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(recipcerts, cert);
+		if (sk_X509_push(recipcerts, cert) == 0) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
 	}
 
 	/* sanity check the cipher */
