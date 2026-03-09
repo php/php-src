@@ -1010,7 +1010,6 @@ try_again:
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			smart_str name = {0};
-			int cookie_len;
 			zval zcookie;
 
 			if (sempos != NULL) {
@@ -1026,7 +1025,7 @@ try_again:
 			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
 
 			if (sempos != NULL) {
-				char *options = cookie + cookie_len+1;
+				char *options = sempos + 1;
 				while (*options) {
 					while (*options == ' ') {options++;}
 					sempos = strstr(options, ";");
