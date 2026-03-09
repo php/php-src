@@ -630,5 +630,7 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	ZVAL_STR(&attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

@@ -110,5 +110,7 @@ static zend_class_entry *register_class_Dba_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "Dba", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

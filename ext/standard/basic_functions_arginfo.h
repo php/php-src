@@ -3991,6 +3991,8 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, 0);
 	zend_string_release_ex(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -3999,7 +4001,10 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Error, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -4023,6 +4028,8 @@ static zend_class_entry *register_class_RoundingMode(void)
 	zend_enum_add_case_cstr(class_entry, "NegativeInfinity", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "PositiveInfinity", NULL);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

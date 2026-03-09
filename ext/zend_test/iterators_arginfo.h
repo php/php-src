@@ -22,6 +22,8 @@ static zend_class_entry *register_class_ZendTest_Iterators_TraversableTest(zend_
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTest\\Iterators", "TraversableTest", class_ZendTest_Iterators_TraversableTest_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	return class_entry;

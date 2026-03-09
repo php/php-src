@@ -2585,6 +2585,10 @@ static zend_always_inline bool zend_parse_arg_obj_or_str(
 	return zend_parse_arg_str(arg, destination_string, allow_null, arg_num);
 }
 
+/* Used in arginfo.h files, copied from zend_inheritance.h to avoid its inclusion. */
+void zend_build_properties_info_table(zend_class_entry *ce);
+ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked);
+
 END_EXTERN_C()
 
 #endif /* ZEND_API_H */

@@ -237,6 +237,8 @@ static zend_class_entry *register_class_SplObserver(void)
 	INIT_CLASS_ENTRY(ce, "SplObserver", class_SplObserver_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -247,6 +249,8 @@ static zend_class_entry *register_class_SplSubject(void)
 	INIT_CLASS_ENTRY(ce, "SplSubject", class_SplSubject_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -256,7 +260,6 @@ static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
 
 
 	zend_attribute *attribute_Deprecated_func_attach_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "attach", sizeof("attach") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -280,6 +283,9 @@ static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class
 	ZVAL_STR(&attribute_Deprecated_func_contains_0->args[1].value, attribute_Deprecated_func_contains_0_arg1_str);
 	attribute_Deprecated_func_contains_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
+
 	return class_entry;
 }
 
@@ -289,7 +295,6 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "MultipleIterator", class_MultipleIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	zval const_MIT_NEED_ANY_value;
 	ZVAL_LONG(&const_MIT_NEED_ANY_value, MIT_NEED_ANY);
@@ -314,6 +319,9 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_MIT_KEYS_ASSOC_name, true);
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;
 }

@@ -4505,12 +4505,6 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		ce->default_properties_count++;
 		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
 
-		/* For user classes this is handled during linking */
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
-			ce->properties_info_table[ce->default_properties_count - 1] = property_info;
-		}
-
 		zval *property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 		ZVAL_COPY_VALUE(property_default_ptr, property);
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;

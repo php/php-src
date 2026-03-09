@@ -525,7 +525,6 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 
 	INIT_CLASS_ENTRY(ce, "ZipArchive", class_ZipArchive_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 1, class_entry_Countable);
 
 	zval const_CREATE_value;
 	ZVAL_LONG(&const_CREATE_value, ZIP_CREATE);
@@ -1277,6 +1276,9 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionindex", sizeof("setencryptionindex") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_Countable);
 
 	return class_entry;
 }

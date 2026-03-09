@@ -333,6 +333,8 @@ static zend_class_entry *register_class_Soap_Url(void)
 	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -342,6 +344,8 @@ static zend_class_entry *register_class_Soap_Sdl(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -364,6 +368,8 @@ static zend_class_entry *register_class_SoapParam(void)
 	zend_string *property_param_data_name = zend_string_init("param_data", sizeof("param_data") - 1, true);
 	zend_declare_typed_property(class_entry, property_param_data_name, &property_param_data_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release_ex(property_param_data_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -403,6 +409,8 @@ static zend_class_entry *register_class_SoapHeader(void)
 	zend_declare_typed_property(class_entry, property_actor_name, &property_actor_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL));
 	zend_string_release_ex(property_actor_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -411,7 +419,7 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SoapFault", class_SoapFault_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_faultstring_default_value;
 	ZVAL_UNDEF(&property_faultstring_default_value);
@@ -461,6 +469,9 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	zend_declare_typed_property(class_entry, property_lang_name, &property_lang_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_lang_name, true);
 
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -507,6 +518,8 @@ static zend_class_entry *register_class_SoapVar(void)
 	zend_declare_typed_property(class_entry, property_enc_namens_name, &property_enc_namens_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property_enc_namens_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -523,6 +536,8 @@ static zend_class_entry *register_class_SoapServer(void)
 	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
 	zend_string_release_ex(property___soap_fault_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -750,6 +765,8 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, true);
 	zend_declare_typed_property(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property___last_response_headers_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

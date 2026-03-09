@@ -1325,6 +1325,8 @@ static zend_class_entry *register_class_mysqli_driver(void)
 	zend_declare_typed_property(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_report_mode_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1487,6 +1489,8 @@ static zend_class_entry *register_class_mysqli(void)
 	ZVAL_STR(&attribute_Deprecated_func_refresh_0->args[1].value, attribute_Deprecated_func_refresh_0_arg1_str);
 	attribute_Deprecated_func_refresh_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1496,7 +1500,6 @@ static zend_class_entry *register_class_mysqli_result(zend_class_entry *class_en
 
 	INIT_CLASS_ENTRY(ce, "mysqli_result", class_mysqli_result_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_current_field_default_value;
 	ZVAL_UNDEF(&property_current_field_default_value);
@@ -1525,6 +1528,9 @@ static zend_class_entry *register_class_mysqli_result(zend_class_entry *class_en
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TYPE), &property_type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	return class_entry;
 }
@@ -1596,6 +1602,8 @@ static zend_class_entry *register_class_mysqli_stmt(void)
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_id_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1622,6 +1630,8 @@ static zend_class_entry *register_class_mysqli_warning(void)
 	zend_declare_typed_property(class_entry, property_errno_name, &property_errno_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_errno_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1630,7 +1640,7 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_sql_exception", class_mysqli_sql_exception_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, ZEND_ACC_FINAL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_sqlstate_default_value;
 	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", strlen("00000"), 1);
@@ -1638,6 +1648,9 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, true);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_sqlstate_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_RuntimeException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

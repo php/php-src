@@ -21,7 +21,7 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlIterator, ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_KEY_SEQUENTIAL_value;
 	ZVAL_LONG(&const_KEY_SEQUENTIAL_value, PARTS_ITERATOR_KEY_SEQUENTIAL);
@@ -40,6 +40,9 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 	zend_string *const_KEY_RIGHT_name = zend_string_init_interned("KEY_RIGHT", sizeof("KEY_RIGHT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_KEY_RIGHT_name, &const_KEY_RIGHT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_KEY_RIGHT_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_IntlIterator, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

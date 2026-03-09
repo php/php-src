@@ -16,7 +16,7 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Firebird", class_Pdo_Firebird_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_DATE_FORMAT_value;
 	ZVAL_LONG(&const_ATTR_DATE_FORMAT_value, PDO_FB_ATTR_DATE_FORMAT);
@@ -65,6 +65,9 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_string *const_WRITABLE_TRANSACTION_name = zend_string_init_interned("WRITABLE_TRANSACTION", sizeof("WRITABLE_TRANSACTION") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_WRITABLE_TRANSACTION_name, &const_WRITABLE_TRANSACTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_WRITABLE_TRANSACTION_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_PDO, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
