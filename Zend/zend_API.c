@@ -4415,7 +4415,7 @@ static zend_always_inline bool is_persistent_class(const zend_class_entry *ce) {
 
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
-	zend_property_info *property_info, *property_info_ptr;
+	zend_property_info *property_info;
 
 	if (ZEND_TYPE_IS_SET(type)) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
@@ -4483,19 +4483,13 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 			goto skip_property_storage;
 		}
 	}
+#if ZEND_DEBUG
+	zend_property_info *existing_prop = zend_hash_find_ptr(&ce->properties_info, name);
+	ZEND_ASSERT(!existing_prop);
+#endif
 	if (access_type & ZEND_ACC_STATIC) {
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
-			ZEND_ASSERT(property_info_ptr->flags & ZEND_ACC_STATIC);
-			property_info->offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
-			if (property_info_ptr->doc_comment && property_info_ptr->ce == ce) {
-				zend_string_release(property_info_ptr->doc_comment);
-			}
-			zend_hash_del(&ce->properties_info, name);
-		} else {
-			property_info->offset = ce->default_static_members_count++;
-			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
-		}
+		property_info->offset = ce->default_static_members_count++;
+		ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
 		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
 		if (!ZEND_MAP_PTR(ce->static_members_table)) {
 			if (ce->type == ZEND_INTERNAL_CLASS &&
@@ -4504,31 +4498,17 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 			}
 		}
 	} else {
-		zval *property_default_ptr;
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
-			ZEND_ASSERT(!(property_info_ptr->flags & ZEND_ACC_STATIC));
-			property_info->offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
-			if (property_info_ptr->doc_comment && property_info_ptr->ce == ce) {
-				zend_string_release_ex(property_info_ptr->doc_comment, 1);
-			}
-			zend_hash_del(&ce->properties_info, name);
+		property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
+		ce->default_properties_count++;
+		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
 
-			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
-			ZEND_ASSERT(ce->properties_info_table != NULL);
-			ce->properties_info_table[OBJ_PROP_TO_NUM(property_info->offset)] = property_info;
-		} else {
-			property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
-			ce->default_properties_count++;
-			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
-
-			/* For user classes this is handled during linking */
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
-				ce->properties_info_table[ce->default_properties_count - 1] = property_info;
-			}
+		/* For user classes this is handled during linking */
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
+			ce->properties_info_table[ce->default_properties_count - 1] = property_info;
 		}
-		property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
+
+		zval *property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 		ZVAL_COPY_VALUE(property_default_ptr, property);
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
