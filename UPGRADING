@@ -48,7 +48,7 @@ PHP 8.6 UPGRADE NOTES
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0.
   . Form feed (\f) is now added in the default trimmed characters of trim(),
-    rtrim() and ltrim().
+    rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed
 
 ========================================
 2. New Features
