@@ -1579,9 +1579,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 }
 /* }}} */
 
-static inline void do_implement_interface_ex(zend_class_entry *ce, zend_class_entry *inherited_face, zend_class_entry *base_iface)
+static inline void do_implement_interface_ex(zend_class_entry *ce, const zend_class_entry *inherited_iface, zend_class_entry *base_iface)
 {
-	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && inherited_face->interface_gets_implemented && inherited_face->interface_gets_implemented(base_iface, ce) == FAILURE) {
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && inherited_iface->interface_gets_implemented && inherited_iface->interface_gets_implemented(base_iface, ce) == FAILURE) {
 		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(base_iface->name));
 	}
 	/* This should be prevented by the class lookup logic. */
