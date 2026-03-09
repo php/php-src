@@ -3445,24 +3445,26 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 		}
 
 		/* For Closure::__invoke(), closures from different source locations have
-		 * different signatures, so we must reject those. However, closures created
-		 * from the same source (e.g. in a loop) share the same op_array and should
-		 * be allowed. For user closures compare op_array.opcodes, for internal
-		 * closures (e.g. var_dump(...)) compare function_name and scope since
-		 * zend_get_closure_method_def() returns a per-object embedded copy. */
+		 * different signatures, so we must reject those. */
 		if (obj_ce == zend_ce_closure && !Z_ISUNDEF(intern->obj)
 				&& Z_OBJ_P(object) != Z_OBJ(intern->obj)) {
 			const zend_function *orig_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
 			const zend_function *given_func = zend_get_closure_method_def(Z_OBJ_P(object));
-			bool same_closure;
-			if (orig_func->type == ZEND_USER_FUNCTION && given_func->type == ZEND_USER_FUNCTION) {
-				same_closure = orig_func->op_array.opcodes == given_func->op_array.opcodes;
-			} else if (orig_func->type == ZEND_INTERNAL_FUNCTION && given_func->type == ZEND_INTERNAL_FUNCTION) {
-				same_closure = orig_func->common.function_name == given_func->common.function_name
-					&& orig_func->common.scope == given_func->common.scope;
-			} else {
-				same_closure = false;
+
+			bool same_closure = false;
+			/* Check if they are either both fake closures or they both are not. */
+			if ((orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) == (given_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+				if (orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					/* For fake closures, scope and name must match. */
+					same_closure = orig_func->common.scope == given_func->common.scope
+						&& orig_func->common.function_name == given_func->common.function_name;
+				} else {
+					/* Otherwise the opcode structure must be identical. */
+					ZEND_ASSERT(orig_func->type == ZEND_USER_FUNCTION);
+					same_closure = orig_func->op_array.opcodes == given_func->op_array.opcodes;
+				}
 			}
+
 			if (!same_closure) {
 				if (!variadic) {
 					efree(params);
