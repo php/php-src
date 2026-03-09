@@ -591,13 +591,12 @@ static zend_string* ZEND_FASTCALL accel_new_interned_string_for_php(zend_string 
 static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
 {
 	zend_string_table_pos_t pos;
-	zend_string *s;
 
 	/* check for existing interned string */
 	pos = *STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
 	if (EXPECTED(pos != STRTAB_INVALID_POS)) {
 		do {
-			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
+			zend_string *s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
 			if (EXPECTED(ZSTR_H(s) == h) && zend_string_equals_cstr(s, str, size)) {
 				return s;
 			}
@@ -720,14 +719,13 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				Z_FUNC(q->val)->common.function_name = new_interned_string(Z_FUNC(q->val)->common.function_name);
 			}
 			if (Z_FUNC(q->val)->common.scope == ce) {
-				uint32_t i;
 				uint32_t num_args = Z_FUNC(q->val)->common.num_args + 1;
 				zend_arg_info *arg_info = Z_FUNC(q->val)->common.arg_info - 1;
 
 				if (Z_FUNC(q->val)->common.fn_flags & ZEND_ACC_VARIADIC) {
 					num_args++;
 				}
-				for (i = 0 ; i < num_args; i++) {
+				for (uint32_t i = 0 ; i < num_args; i++) {
 					if (i > 0) {
 						arg_info[i].name = new_interned_string(arg_info[i].name);
 						if (arg_info[i].default_value) {
@@ -860,7 +858,6 @@ static void accel_use_shm_interned_strings(void)
 #ifndef ZEND_WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
 {
-	int tries;
 	/* so that other process won't try to force while we are busy cleaning up */
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
@@ -868,7 +865,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 		int signal = SIGTERM;
 		errno = 0;
 		bool success = false;
-		tries = 10;
+		int tries = 10;
 
 		while (tries--) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Attempting to kill locker %d", mem_usage_check->l_pid);
@@ -1225,8 +1222,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 {
 	const char *path = ZSTR_VAL(str);
 	size_t path_length = ZSTR_LEN(str);
-	char *key;
-	int key_length;
 
 	ZEND_ASSERT(GC_REFCOUNT(ZCG(key)) == 1);
 	ZSTR_LEN(ZCG(key)) = 0;
@@ -1245,7 +1240,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		const char *include_path = NULL, *cwd = NULL;
 		int include_path_len = 0, cwd_len = 0;
 		zend_string *parent_script = NULL;
-		size_t parent_script_len = 0;
 
 		if (EXPECTED(ZCG(cwd_key_len))) {
 			cwd = ZCG(cwd_key);
@@ -1348,10 +1342,10 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		 * since in itself, it may include colons (which we use to separate
 		 * different components of the key)
 		 */
-		key = ZSTR_VAL(ZCG(key));
+		char *key = ZSTR_VAL(ZCG(key));
 		memcpy(key, path, path_length);
 		key[path_length] = ':';
-		key_length = path_length + 1;
+		int key_length = path_length + 1;
 		memcpy(key + key_length, cwd, cwd_len);
 		key_length += cwd_len;
 
@@ -1369,7 +1363,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		if (EXPECTED(EG(current_execute_data)) &&
 		    EXPECTED((parent_script = zend_get_executed_filename_ex()) != NULL)) {
 
-			parent_script_len = ZSTR_LEN(parent_script);
+			size_t parent_script_len = ZSTR_LEN(parent_script);
 			while (parent_script_len > 0) {
 				--parent_script_len;
 				if (IS_SLASH(ZSTR_VAL(parent_script)[parent_script_len])) {
@@ -2341,7 +2335,6 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 
 static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
-	uint32_t i;
 	bool needs_autoload;
 	zend_inheritance_cache_entry *entry = ce->inheritance_cache;
 
@@ -2360,7 +2353,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 				return ce;
 			}
 
-			for (i = 0; i < entry->dependencies_count; i++) {
+			for (uint32_t i = 0; i < entry->dependencies_count; i++) {
 				zend_class_entry *ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, 0);
 
 				if (ce == NULL) {
@@ -3925,10 +3918,9 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 			ce->ce_flags &= ~ZEND_ACC_HAS_AST_CONSTANTS;
 		}
 		if (ce->default_properties_count) {
-			uint32_t i;
 			bool resolved = true;
 
-			for (i = 0; i < ce->default_properties_count; i++) {
+			for (uint32_t i = 0; i < ce->default_properties_count; i++) {
 				zend_property_info *prop = ce->properties_info_table[i];
 				if (!prop) {
 					continue;
@@ -4351,7 +4343,6 @@ static void preload_remove_empty_includes(void)
 
 static void preload_register_trait_methods(zend_class_entry *ce) {
 	zend_op_array *op_array;
-	zend_property_info *info;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 		if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
@@ -4361,7 +4352,7 @@ static void preload_register_trait_methods(zend_class_entry *ce) {
 	} ZEND_HASH_FOREACH_END();
 
 	if (ce->num_hooked_props > 0) {
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, info) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *info) {
 			if (info->hooks) {
 				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
 					if (info->hooks[i]) {
