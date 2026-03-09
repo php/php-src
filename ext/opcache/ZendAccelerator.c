@@ -312,7 +312,7 @@ static inline void accel_restart_leave(void)
 #endif
 }
 
-static inline int accel_restart_is_active(void)
+static inline bool accel_restart_is_active(void)
 {
 	if (ZCSG(restart_in_progress)) {
 #ifndef ZEND_WIN32
@@ -325,19 +325,19 @@ static inline int accel_restart_is_active(void)
 
 		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "RestartC:  %s (%d)", strerror(errno), errno);
-			return FAILURE;
+			return true;
 		}
 		if (restart_check.l_type == F_UNLCK) {
 			ZCSG(restart_in_progress) = false;
-			return 0;
+			return false;
 		} else {
-			return 1;
+			return true;
 		}
 #else
 		return LOCKVAL(restart_in) != 0;
 #endif
 	}
-	return 0;
+	return false;
 }
 
 /* Creates a read lock for SHM access */
