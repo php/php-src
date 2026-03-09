@@ -1444,15 +1444,14 @@ static const char *php_openssl_get_evp_pkey_name(int key_type) {
 
 EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 {
-	if (req->priv_key_bits < MIN_KEY_LENGTH) {
-		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
-			MIN_KEY_LENGTH, req->priv_key_bits);
-		return NULL;
-	}
-
 	int type = php_openssl_get_evp_pkey_type(req->priv_key_type);
 	if (type < 0) {
 		php_error_docref(NULL, E_WARNING, "Unsupported private key type");
+		return NULL;
+	}
+	if ((type == EVP_PKEY_RSA || type == EVP_PKEY_DSA || type == EVP_PKEY_DH) && req->priv_key_bits < MIN_KEY_LENGTH) {
+		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
+			MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
 	}
 	const char *name = php_openssl_get_evp_pkey_name(req->priv_key_type);
