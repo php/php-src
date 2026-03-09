@@ -414,7 +414,7 @@ namespace {
      * @cvalue PGSQL_DML_STRING
      */
     const PGSQL_DML_STRING = UNKNOWN;
-#ifdef PQTRACE_SUPPPRESS_TIMESTAMPS
+#ifdef PQTRACE_SUPPRESS_TIMESTAMPS
     /**
      * @var int
      * @cvalue PQTRACE_SUPPRESS_TIMESTAMPS
