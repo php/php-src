@@ -687,6 +687,7 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
+				zval_ptr_dtor(&dest_array);
 				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
 				return FAILURE;
 		  	}
@@ -782,12 +783,18 @@ PHP_FUNCTION(mysqli_poll)
 	mysqlnd_dont_poll_zval_array_from_mysqlnd_array(r_array != NULL ? new_dont_poll_array:NULL, r_array, dont_poll_array);
 
 	if (r_array != NULL) {
-		mysqlnd_zval_array_from_mysqlnd_array(new_r_array, r_array);
+		if (UNEXPECTED(mysqlnd_zval_array_from_mysqlnd_array(new_r_array, r_array) == FAILURE)) {
+			ret = FAIL;
+			goto cleanup;
+		}
 	}
 	if (e_array != NULL) {
-		mysqlnd_zval_array_from_mysqlnd_array(new_e_array, e_array);
+		if (UNEXPECTED(mysqlnd_zval_array_from_mysqlnd_array(new_e_array, e_array) == FAILURE)) {
+			ret = FAIL;
+		}
 	}
 
+cleanup:
 	if (new_dont_poll_array) {
 		efree(new_dont_poll_array);
 	}
