@@ -52,8 +52,10 @@ if test "$PHP_EMBED" != "no"; then
     AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
       [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
 
-    dnl When CLI SAPI is also enabled, these are already in PHP_GLOBAL_OBJS.
-    if test "$PHP_CLI" = "no"; then
+    dnl When CLI SAPI is also enabled, sources are already compiled into PHP_CLI_OBJS
+    if test "$PHP_CLI" != "no"; then
+      PHP_SAPI_OBJS="$PHP_SAPI_OBJS main/cli/php_cli.lo main/cli/php_http_parser.lo main/cli/php_cli_server.lo main/cli/ps_title.lo main/cli/php_cli_process_title.lo"
+    else
       PHP_ADD_SOURCES([main/cli],
         [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
         [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],

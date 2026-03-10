@@ -35,9 +35,10 @@ if test "$PHP_CLI" != "no"; then
     [php_cli_main.c],
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  PHP_ADD_SOURCES([main/cli],
+  PHP_ADD_SOURCES_X([main/cli],
     [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
-    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+    [PHP_CLI_OBJS])
 
   AS_CASE([$host_alias],
     [*aix*], [
