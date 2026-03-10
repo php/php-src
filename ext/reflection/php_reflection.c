@@ -612,7 +612,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		smart_str_append(str, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 	} else if (Z_TYPE_P(value) == IS_STRING) {
-		smart_str_appends(str, Z_STRVAL_P(value));
+		smart_str_append(str, Z_STR_P(value));
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(value, &tmp_value_str);

@@ -1073,7 +1073,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					goto out;
 				}
 
-				smart_str_appendl(pretval, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+				smart_str_append(pretval, encoded);
 				char_cnt -= ZSTR_LEN(encoded);
 				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
 				char_cnt -= 2;
