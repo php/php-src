@@ -502,7 +502,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 					ZSTR_VAL(key));                                         \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
-				smart_str_appends(str, Z_STRVAL_P(tmp));                    \
+				smart_str_append(str, Z_STR_P(tmp));                        \
 			}                                                               \
 		} \
 	} while (0)
@@ -532,7 +532,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			case IS_OBJECT: {
 				zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
 				smart_str_appends(str, "Object(");
-				smart_str_appends(str, ZSTR_VAL(class_name));
+				smart_str_append(str, class_name);
 				smart_str_appends(str, "), ");
 				zend_string_release_ex(class_name, 0);
 				break;
