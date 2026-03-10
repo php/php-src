@@ -2524,8 +2524,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	if (data &&
 	    (attr = get_soap_enc_attribute(data->properties,"arrayType")) &&
 	    attr->children && attr->children->content) {
-		const char *type;
-		char *end, *ns;
+		char *type, *end, *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(attr->children->content, &type, &ns);
