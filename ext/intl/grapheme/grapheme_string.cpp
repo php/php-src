@@ -1178,11 +1178,12 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 		intl_error_set_custom_msg(nullptr, "Error ubrk_setUText");
 
 		RETVAL_FALSE;
-		goto ubrk_end;
+		goto ubrk_false_end;
 	}
 
 	pos = ubrk_last(bi);
 	if (pos == UBRK_DONE) {
+		RETVAL_EMPTY_STRING();
 		goto ubrk_end;
 	}
 
@@ -1201,6 +1202,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 ubrk_end:
 	*p = '\0';
 	RETVAL_NEW_STR(ret);
+ubrk_false_end:
 	ubrk_close(bi);
 close:
 	utext_close(ut);
