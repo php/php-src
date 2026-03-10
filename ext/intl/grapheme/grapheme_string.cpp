@@ -1173,6 +1173,14 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	p = ZSTR_VAL(ret);
 
 	ubrk_setUText(bi, ut, &ustatus);
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Error ubrk_setUText");
+
+		RETVAL_FALSE;
+		goto ubrk_end;
+	}
+
 	pos = ubrk_last(bi);
 	if (pos == UBRK_DONE) {
 		goto ubrk_end;
