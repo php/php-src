@@ -1014,22 +1014,22 @@ try_again:
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-			size_t cookie_len;
 			zval zcookie;
+			size_t cookie_value_len;
 
 			if (sempos != NULL) {
-				cookie_len = sempos-(eqpos+1);
+				cookie_value_len = sempos-(eqpos+1);
 			} else {
-				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+				cookie_value_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
 			zend_string *name = zend_string_init(cookie, eqpos - cookie, false);
 
 			array_init(&zcookie);
-			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
+			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_value_len);
 
 			if (sempos != NULL) {
-				char *options = cookie + cookie_len+1;
+				char *options = sempos + 1;
 				while (*options) {
 					while (*options == ' ') {options++;}
 					sempos = strstr(options, ";");
