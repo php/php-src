@@ -1011,18 +1011,19 @@ try_again:
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			smart_str name = {0};
 			zval zcookie;
+			size_t cookie_value_len;
 
 			if (sempos != NULL) {
-				cookie_len = sempos-(eqpos+1);
+				cookie_value_len = sempos-(eqpos+1);
 			} else {
-				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+				cookie_value_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
 			smart_str_appendl(&name, cookie, eqpos - cookie);
 			smart_str_0(&name);
 
 			array_init(&zcookie);
-			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
+			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_value_len);
 
 			if (sempos != NULL) {
 				char *options = sempos + 1;
