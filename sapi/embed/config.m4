@@ -1,3 +1,10 @@
+PHP_ARG_ENABLE([embed],,
+  [AS_HELP_STRING([[--enable-embed[=TYPE]]],
+    [Enable building of embedded SAPI library TYPE is either
+    'shared' or 'static'. [TYPE=shared]])],
+  [no],
+  [no])
+
 AC_MSG_CHECKING([for embedded SAPI library support])
 
 if test "$PHP_EMBED" != "no"; then
@@ -26,8 +33,32 @@ if test "$PHP_EMBED" != "no"; then
       [php_embed.c],
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-    dnl Reuse CLI object files (excluding php_cli_main.lo) for do_php_cli()
-    PHP_SAPI_OBJS="$PHP_SAPI_OBJS sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo"
+    dnl Feature checks for CLI sources.
+    AC_CHECK_FUNCS([setproctitle])
+
+    AC_CHECK_HEADERS([sys/pstat.h])
+
+    AC_CACHE_CHECK([for PS_STRINGS], [php_cv_var_PS_STRINGS],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([
+        #include <machine/vmparam.h>
+        #include <sys/exec.h>
+      ],
+      [
+        PS_STRINGS->ps_nargvstr = 1;
+        PS_STRINGS->ps_argvstr = "foo";
+      ])],
+      [php_cv_var_PS_STRINGS=yes],
+      [php_cv_var_PS_STRINGS=no])])
+    AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
+      [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
+
+    dnl When CLI SAPI is also enabled, these are already in PHP_GLOBAL_OBJS.
+    if test "$PHP_CLI" = "no"; then
+      PHP_ADD_SOURCES([main/cli],
+        [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
+        [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+        [sapi])
+    fi
 
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   ])

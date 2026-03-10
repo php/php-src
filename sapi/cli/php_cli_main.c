@@ -12,7 +12,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "cli.h"
+#include "php.h"
+#include "main/cli/cli.h"
 #include <stdlib.h>
 
 #ifdef PHP_WIN32
