@@ -2529,23 +2529,25 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	if (data &&
 	    (attr = get_attribute(data->properties,"arrayType")) &&
 	    attr->children && attr->children->content) {
-		char *type, *end, *ns;
+		const char *type;
+		char *end, *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(attr->children->content, &type, &ns);
+		char *type_dup = estrdup(type);
 		nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns));
 
-		end = strrchr(type,'[');
+		end = strrchr(type_dup,'[');
 		if (end) {
 			*end = '\0';
 			dimension = calc_dimension(end+1);
 			dims = get_position(dimension, end+1);
 		}
 		if (nsptr != NULL) {
-			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
+			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type_dup);
 		}
 		if (ns) {efree(ns);}
-
+		if (type_dup) efree(type_dup);
 	} else if ((attr = get_attribute(data->properties,"itemType")) &&
 	    attr->children &&
 	    attr->children->content) {
