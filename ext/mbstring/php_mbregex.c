@@ -1115,7 +1115,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
-					smart_str_appendl(&out_buf, (char *)pos, 1);
+					smart_str_appendc(&out_buf, *(char *)pos);
 				}
 				pos++;
 			}

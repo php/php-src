@@ -1719,7 +1719,7 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 		}
 
 		if (++i != count) {
-			smart_str_appendl(&csvline, &delimiter, 1);
+			smart_str_appendc(&csvline, delimiter);
 		}
 		zend_tmp_string_release(tmp_field_str);
 	} ZEND_HASH_FOREACH_END();
