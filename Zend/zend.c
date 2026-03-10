@@ -407,7 +407,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 					if (class_name[0] == '*') {
 						smart_str_appends(buf, ":protected");
 					} else {
-						smart_str_appends(buf, ":");
+						smart_str_appendc(buf, ':');
 						smart_str_appends(buf, class_name);
 						smart_str_appends(buf, ":private");
 					}

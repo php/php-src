@@ -3254,7 +3254,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			smart_str proxy = {0};
 			smart_str_appends(&proxy,"tcp://");
 			smart_str_append(&proxy, Z_STR_P(proxy_host));
-			smart_str_appends(&proxy,":");
+			smart_str_appendc(&proxy,':');
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
 

@@ -885,9 +885,9 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 		}
 		smart_str_append(&buf, op_array->function_name);
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			smart_str_appends(&buf, ":");
+			smart_str_appendc(&buf, ':');
 			smart_str_append(&buf, op_array->filename);
-			smart_str_appends(&buf, ":");
+			smart_str_appendc(&buf, ':');
 			smart_str_append_long(&buf, op_array->line_start);
 		}
 		smart_str_0(&buf);
