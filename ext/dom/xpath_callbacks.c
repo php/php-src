@@ -435,7 +435,6 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			if (xpath_callbacks->node_list == NULL) {
 				xpath_callbacks->node_list = zend_new_array(0);
 			}
-			Z_ADDREF_P(&callback_retval);
 			zend_hash_next_index_insert_new(xpath_callbacks->node_list, &callback_retval);
 			obj = Z_DOMOBJ_P(&callback_retval);
 			nodep = dom_object_get_node(obj);
@@ -447,12 +446,10 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
-			zend_string *tmp_str;
-			zend_string *str = zval_get_tmp_string(&callback_retval, &tmp_str);
-			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
-			zend_tmp_string_release(tmp_str);
+			convert_to_string(&callback_retval);
+			valuePush(ctxt, xmlXPathNewString(BAD_CAST Z_STRVAL(callback_retval)));
+			zval_ptr_dtor_str(&callback_retval);
 		}
-		zval_ptr_dtor(&callback_retval);
 	}
 
 	return SUCCESS;
