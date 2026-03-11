@@ -62,11 +62,8 @@ try {
     printf("%s: %s\n", $ex::class, $ex->getMessage());
 }
 
-try {
-    $usleep(1, 2);
-} catch (Error $ex) {
-    printf("%s: %s\n", $ex::class, $ex->getMessage());
-}
+$usleep(1, 2);
+
 ?>
 --EXPECTF--
 ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected

@@ -37,11 +37,7 @@ try {
 }
 
 echo "# Can unbind \$this on static method:\n";
-try {
-    $g->bindTo(null)($c);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$g->bindTo(null)($c);
 
 ?>
 --EXPECTF--

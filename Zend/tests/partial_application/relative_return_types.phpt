@@ -23,6 +23,8 @@ class D extends C {
 
 $c = new C;
 
+echo "# C::getSelf():\n";
+
 $self = $c->getSelf(?);
 
 echo (string) new ReflectionFunction($self), "\n";
@@ -34,6 +36,8 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
+echo "# C::getStatic():\n";
 
 $static = $c->getStatic(?);
 
@@ -49,24 +53,32 @@ try {
 
 $d = new D;
 
+echo "# D::getSelf():\n";
+
 $self = $d->getSelf(?);
 
 echo (string) new ReflectionFunction($self), "\n";
 
 var_dump($self($d));
-var_dump($self(new D));
+var_dump($self(new C));
 try {
     $self(new stdClass);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
+
+echo "# D::getStatic():\n";
 
 $static = $d->getStatic(?);
 
 echo (string) new ReflectionFunction($static), "\n";
 
 var_dump($static($d));
-var_dump($static(new D));
+try {
+    var_dump($static(new C));
+} catch (Error $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+}
 try {
     $static(new stdClass);
 } catch (Error $e) {
@@ -75,8 +87,9 @@ try {
 
 ?>
 --EXPECTF--
+# C::getSelf():
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s.php 23 - 23
+  @@ %s 25 - 25
 
   - Parameters [1] {
     Parameter #0 [ <required> object $o ]
@@ -89,8 +102,9 @@ object(C)#%d (0) {
 object(D)#%d (0) {
 }
 C::getSelf(): Return value must be of type C, stdClass returned
+# C::getStatic():
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s.php 35 - 35
+  @@ %s 39 - 39
 
   - Parameters [1] {
     Parameter #0 [ <required> object $o ]
@@ -103,8 +117,9 @@ object(C)#%d (0) {
 object(D)#%d (0) {
 }
 C::getStatic(): Return value must be of type C, stdClass returned
+# D::getSelf():
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s.php 49 - 49
+  @@ %s 55 - 55
 
   - Parameters [1] {
     Parameter #0 [ <required> object $o ]
@@ -114,11 +129,12 @@ Closure [ <user> public method {closure:%s:%d} ] {
 
 object(D)#%d (0) {
 }
-object(D)#%d (0) {
+object(C)#%d (0) {
 }
-C::getSelf(): Return value must be of type C, stdClass returned
+TypeError: C::getSelf(): Return value must be of type C, stdClass returned
+# D::getStatic():
 Closure [ <user> public method {closure:%s:%d} ] {
-  @@ %s.php 61 - 61
+  @@ %s 69 - 69
 
   - Parameters [1] {
     Parameter #0 [ <required> object $o ]
@@ -128,6 +144,5 @@ Closure [ <user> public method {closure:%s:%d} ] {
 
 object(D)#%d (0) {
 }
-object(D)#%d (0) {
-}
+TypeError: C::getStatic(): Return value must be of type D, C returned
 C::getStatic(): Return value must be of type D, stdClass returned
