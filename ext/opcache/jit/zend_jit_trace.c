@@ -4556,6 +4556,12 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						op2_info = OP2_INFO();
 						op2_addr = OP2_REG_ADDR();
 						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+							if (op1_type == IS_LONG || op1_type == IS_DOUBLE) {
+								CHECK_OP1_TRACE_TYPE();
+							}
+							if (op2_type == IS_LONG || op2_type == IS_DOUBLE) {
+								CHECK_OP2_TRACE_TYPE();
+							}
 							break;
 						}
 						if (opline->opcode == ZEND_ADD &&
@@ -4564,6 +4570,12 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							/* pass */
 						} else if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
 						    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+							if (op1_type == IS_LONG || op1_type == IS_DOUBLE) {
+								CHECK_OP1_TRACE_TYPE();
+							}
+							if (op2_type == IS_LONG || op2_type == IS_DOUBLE) {
+								CHECK_OP2_TRACE_TYPE();
+							}
 							break;
 						}
 						if (orig_op1_type != IS_UNKNOWN
