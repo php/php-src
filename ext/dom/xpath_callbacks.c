@@ -430,14 +430,12 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	if (Z_TYPE(callback_retval) != IS_UNDEF) {
 		if (Z_TYPE(callback_retval) == IS_OBJECT
 		 && (instanceof_function(Z_OBJCE(callback_retval), dom_get_node_ce(php_dom_follow_spec_node((const xmlNode *) ctxt->context->doc))))) {
-			xmlNode *nodep;
-			dom_object *obj;
 			if (xpath_callbacks->node_list == NULL) {
 				xpath_callbacks->node_list = zend_new_array(0);
 			}
 			zend_hash_next_index_insert_new(xpath_callbacks->node_list, &callback_retval);
-			obj = Z_DOMOBJ_P(&callback_retval);
-			nodep = dom_object_get_node(obj);
+			dom_object *obj = Z_DOMOBJ_P(&callback_retval);
+			xmlNodePtr nodep = dom_object_get_node(obj);
 			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
