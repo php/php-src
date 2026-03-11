@@ -396,8 +396,6 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 }
 /* }}} */
 
-#include "ext/mysqlnd/mysqlnd_reverse_api.h"
-
 static PHP_INI_MH(OnUpdateDefaultPort)
 {
 	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
@@ -519,8 +517,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_hash_add_ptr(&classes, mysqli_stmt_class_entry->name, &mysqli_stmt_properties);
 
 	register_mysqli_symbols(module_number);
-
-	mysqlnd_reverse_api_register_api(&mysqli_module_entry);
 
 	return SUCCESS;
 }

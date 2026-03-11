@@ -23,7 +23,6 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_reverse_api.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
@@ -55,23 +54,6 @@ mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf)
 		smart_str_appends(buffer, plugin_header->plugin_name);
 	}
 	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_minfo_dump_api_plugins */
-static void
-mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
-{
-	HashTable *ht = mysqlnd_reverse_api_get_api_list();
-	zend_module_entry * ext;
-
-	ZEND_HASH_MAP_FOREACH_PTR(ht, ext) {
-		if (buffer->s) {
-			smart_str_appendc(buffer, ',');
-		}
-		smart_str_appends(buffer, ext->name);
-	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -119,11 +101,6 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_loaded_plugins, &tmp_str);
 		smart_str_0(&tmp_str);
 		php_info_print_table_row(2, "Loaded plugins", tmp_str.s? ZSTR_VAL(tmp_str.s) : "");
-		smart_str_free(&tmp_str);
-
-		mysqlnd_minfo_dump_api_plugins(&tmp_str);
-		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "API Extensions", tmp_str.s? ZSTR_VAL(tmp_str.s) : "");
 		smart_str_free(&tmp_str);
 	}
 

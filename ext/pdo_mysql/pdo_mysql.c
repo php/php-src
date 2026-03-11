@@ -59,10 +59,6 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 # endif
 #endif
 
-#ifdef PDO_USE_MYSQLND
-#include "ext/mysqlnd/mysqlnd_reverse_api.h"
-#endif
-
 /* Returns the number of SQL warnings during the execution of the last statement */
 PHP_METHOD(Pdo_Mysql, getWarningCount)
 {
@@ -125,10 +121,6 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 #endif
 #if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
 	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_LOCAL_INFILE_DIRECTORY", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY);
-#endif
-
-#ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_module_entry);
 #endif
 
 	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);
