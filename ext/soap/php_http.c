@@ -1169,9 +1169,8 @@ try_again:
 							char *p = strrchr(t, '/');
 							if (p) {
 								zend_string *s = zend_string_alloc((p - t) + ZSTR_LEN(new_uri->path) + 2, 0);
-								strncpy(ZSTR_VAL(s), t, (p - t) + 1);
-								ZSTR_VAL(s)[(p - t) + 1] = 0;
-								strcat(ZSTR_VAL(s), ZSTR_VAL(new_uri->path));
+								memcpy(ZSTR_VAL(s), t, (p - t) + 1);
+								memcpy(ZSTR_VAL(s) + (p - t) + 1, ZSTR_VAL(new_uri->path), ZSTR_LEN(new_uri->path) + 1);
 								zend_string_release_ex(new_uri->path, 0);
 								new_uri->path = s;
 							}
@@ -1179,7 +1178,7 @@ try_again:
 							zend_string *s = zend_string_alloc(ZSTR_LEN(new_uri->path) + 2, 0);
 							ZSTR_VAL(s)[0] = '/';
 							ZSTR_VAL(s)[1] = 0;
-							strcat(ZSTR_VAL(s), ZSTR_VAL(new_uri->path));
+							memcpy(ZSTR_VAL(s) + 1, ZSTR_VAL(new_uri->path), ZSTR_LEN(new_uri->path) + 1);
 							zend_string_release_ex(new_uri->path, 0);
 							new_uri->path = s;
 						}
