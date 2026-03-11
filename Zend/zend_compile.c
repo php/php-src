@@ -7426,11 +7426,14 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
-		zend_string *type_name = zend_ast_get_str(ast);
+		ZEND_ASSERT(ast->kind == ZEND_AST_CLASS_REF);
+		zend_ast *name_ast = ast->child[0];
+		zend_ast *args_ast = ast->child[1];
+		zend_string *type_name = zend_ast_get_str(name_ast);
 		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
 
 		if (type_code != 0) {
-			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
+			if ((name_ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(type_name)));
@@ -7447,7 +7450,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
 			const char *correct_name;
-			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
+			uint32_t fetch_type = zend_get_class_fetch_type_ast(name_ast);
 
 			if (ce && ce->num_generic_parameters > 0) {
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
@@ -7460,7 +7463,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			zend_string *class_name = type_name;
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-				class_name = zend_resolve_class_name_ast(ast);
+				class_name = zend_resolve_class_name_ast(name_ast);
 				zend_assert_valid_class_name(class_name, "a type name");
 			} else {
 				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
@@ -7487,7 +7490,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_string_addref(class_name);
 			}
 
-			if (ast->attr == ZEND_NAME_NOT_FQ
+			if (name_ast->attr == ZEND_NAME_NOT_FQ && !args_ast
 					&& zend_is_confusable_type(type_name, &correct_name)
 					&& zend_is_not_imported(type_name)) {
 				const char *extra =
@@ -7508,6 +7511,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			class_name = zend_new_interned_string(class_name);
 			zend_alloc_ce_cache(class_name);
+			// TODO: use args_ast
 			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, 0);
 		}
 	}

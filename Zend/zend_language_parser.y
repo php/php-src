@@ -893,7 +893,8 @@ type_expr_without_static:
 type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+	|	name		{ $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, NULL); }
+	|	name '<' generic_arg_list '>' { $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, $3); }
 ;
 
 union_type_without_static_element:
