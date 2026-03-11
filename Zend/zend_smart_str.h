@@ -180,6 +180,7 @@ static zend_always_inline void smart_str_append(smart_str *dest, const zend_stri
 {
 	smart_str_append_ex(dest, src, false);
 }
+#define smart_str_append_literal(dest, src) smart_str_appendl_ex(dest, "" src, sizeof(src)-1, false);
 static zend_always_inline void smart_str_appendc(smart_str *dest, char ch)
 {
 	smart_str_appendc_ex(dest, ch, false);
