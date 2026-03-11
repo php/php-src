@@ -397,27 +397,6 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 /* }}} */
 
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
-{
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), mysqli_link_class_entry)) {
-		MY_MYSQL *mysql;
-		MYSQLI_RESOURCE  *my_res;
-		mysqli_object *intern = Z_MYSQLI_P(zv);
-		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-			/* We know that we have a mysqli object, so this failure should be emitted */
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
-			return NULL;
-		}
-		mysql = (MY_MYSQL *)(my_res->ptr);
-		return mysql ? mysql->mysql : NULL;
-	}
-	return NULL;
-}
-
-static const MYSQLND_REVERSE_API mysqli_reverse_api = {
-	&mysqli_module_entry,
-	mysqli_convert_zv_to_mysqlnd
-};
 
 static PHP_INI_MH(OnUpdateDefaultPort)
 {
@@ -541,7 +520,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	register_mysqli_symbols(module_number);
 
-	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
+	mysqlnd_reverse_api_register_api(&mysqli_module_entry);
 
 	return SUCCESS;
 }

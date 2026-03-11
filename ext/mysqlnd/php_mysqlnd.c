@@ -64,13 +64,13 @@ static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 {
 	HashTable *ht = mysqlnd_reverse_api_get_api_list();
-	MYSQLND_REVERSE_API *ext;
+	zend_module_entry * ext;
 
 	ZEND_HASH_MAP_FOREACH_PTR(ht, ext) {
 		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
-		smart_str_appends(buffer, ext->module->name);
+		smart_str_appends(buffer, ext->name);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */

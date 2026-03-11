@@ -44,7 +44,7 @@ mysqlnd_reverse_api_end(void)
 /* }}} */
 
 
-/* {{{ myslqnd_get_api_extensions */
+/* {{{ mysqlnd_get_api_extensions */
 PHPAPI HashTable *
 mysqlnd_reverse_api_get_api_list(void)
 {
@@ -55,29 +55,8 @@ mysqlnd_reverse_api_get_api_list(void)
 
 /* {{{ mysqlnd_reverse_api_register_api */
 PHPAPI void
-mysqlnd_reverse_api_register_api(const MYSQLND_REVERSE_API * apiext)
+mysqlnd_reverse_api_register_api(const zend_module_entry * apiext)
 {
-	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name), (void*)apiext);
-}
-/* }}} */
-
-
-/* {{{ zval_to_mysqlnd */
-PHPAPI MYSQLND *
-zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities)
-{
-	MYSQLND_REVERSE_API *api;
-	ZEND_HASH_MAP_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
-		if (api->conversion_cb) {
-			MYSQLND *retval = api->conversion_cb(zv);
-			if (retval) {
-				if (retval->data) {
-					*save_client_api_capabilities = retval->data->m->negotiate_client_api_capabilities(retval->data, client_api_capabilities);
-				}
-				return retval;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-	return NULL;
+	zend_hash_str_add_ptr(&mysqlnd_api_ext_ht, apiext->name, strlen(apiext->name), (void*)apiext);
 }
 /* }}} */

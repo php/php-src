@@ -61,27 +61,6 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 
 #ifdef PDO_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
-{
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
-		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
-
-		ZEND_ASSERT(dbh);
-
-		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
-			return NULL;
-		}
-
-		return ((pdo_mysql_db_handle *)dbh->driver_data)->server;
-	}
-	return NULL;
-}
-
-static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
-	&pdo_mysql_module_entry,
-	pdo_mysql_convert_zv_to_mysqlnd
-};
 #endif
 
 /* Returns the number of SQL warnings during the execution of the last statement */
@@ -149,7 +128,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 #endif
 
 #ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
+	mysqlnd_reverse_api_register_api(&pdo_mysql_module_entry);
 #endif
 
 	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);
