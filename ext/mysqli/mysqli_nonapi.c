@@ -669,7 +669,7 @@ static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND *
 /* }}} */
 
 /* {{{ mysqlnd_zval_array_from_mysqlnd_array */
-static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
+static void mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
 {
 	MYSQLND **p = in_array;
 	zval dest_array;
@@ -702,8 +702,6 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 	/* destroy old array and add new one */
 	zval_ptr_dtor(out_array);
 	ZVAL_COPY_VALUE(out_array, &dest_array);
-
-	return SUCCESS;
 }
 /* }}} */
 
