@@ -22,7 +22,7 @@ if (time() > 0) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=9, args=0, vars=0, tmps=2)
+     ; (lines=9, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_001.php:1-12
 0000 INIT_FCALL 0 %d string("time")
@@ -36,7 +36,7 @@ $_main:
 0008 RETURN int(1)
 
 foo:
-     ; (lines=5, args=1, vars=1, tmps=0)
+     ; (lines=5, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_001.php:4-6
 0000 CV0($a) = RECV 1

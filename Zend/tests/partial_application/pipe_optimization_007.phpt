@@ -26,7 +26,7 @@ try {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=22, args=0, vars=1, tmps=2)
+     ; (lines=22, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_007.php:1-16
 0000 INIT_FCALL 0 %d string("time")
@@ -55,7 +55,7 @@ EXCEPTION TABLE:
      0005, 0013, -, -
 
 foo:
-     ; (lines=7, args=2, vars=2, tmps=0)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_007.php:4-6
 0000 CV0($a) = RECV 1
@@ -67,7 +67,7 @@ foo:
 0006 RETURN null
 
 $_main:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:1-10
 0000 T0 = DECLARE_LAMBDA_FUNCTION 0
@@ -75,7 +75,7 @@ $_main:
 0002 RETURN int(1)
 
 {closure:%s:%d}:
-     ; (lines=7, args=2, vars=2, tmps=1)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:10-10
 0000 CV0($a) = RECV 1

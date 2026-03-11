@@ -22,7 +22,7 @@ if (time() > 0) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=12, args=0, vars=0, tmps=2)
+     ; (lines=12, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:1-12
 0000 INIT_FCALL 0 %d string("time")
@@ -39,7 +39,7 @@ $_main:
 0011 RETURN int(1)
 
 foo:
-     ; (lines=7, args=2, vars=2, tmps=0)
+     ; (lines=7, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:4-6
 0000 CV0($a) = RECV 1
@@ -51,7 +51,7 @@ foo:
 0006 RETURN null
 
 $_main:
-     ; (lines=4, args=0, vars=1, tmps=1)
+     ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:1-9
 0000 T1 = DECLARE_LAMBDA_FUNCTION 0
@@ -62,7 +62,7 @@ LIVE RANGES:
      1: 0001 - 0002 (tmp/var)
 
 {closure:pfa:%s:9}:
-     ; (lines=18, args=1, vars=2, tmps=2)
+     ; (lines=18, args=1, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:9-9
 0000 CV0($a) = RECV 1

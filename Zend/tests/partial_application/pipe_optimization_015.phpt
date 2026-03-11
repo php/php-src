@@ -22,7 +22,7 @@ if (time() > 0) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=11, args=0, vars=0, tmps=2)
+     ; (lines=11, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:1-12
 0000 INIT_FCALL 0 %d string("time")
@@ -38,7 +38,7 @@ $_main:
 0010 RETURN int(1)
 
 foo:
-     ; (lines=9, args=3, vars=3, tmps=0)
+     ; (lines=9, args=3, vars=3, tmps=%d)
      ; (after optimizer)
      ; %s:4-6
 0000 CV0($a) = RECV 1

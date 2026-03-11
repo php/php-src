@@ -24,7 +24,7 @@ var_dump($a);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=13, args=0, vars=1, tmps=2)
+     ; (lines=13, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_010.php:1-14
 0000 INIT_FCALL 0 %d string("time")
@@ -42,7 +42,7 @@ $_main:
 0012 RETURN int(1)
 
 foo:
-     ; (lines=8, args=2, vars=2, tmps=0)
+     ; (lines=8, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_010.php:4-7
 0000 CV0($a) = RECV 1

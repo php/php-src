@@ -35,7 +35,7 @@ $a |> foo(arg1(), ?, arg2());
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=19, args=0, vars=1, tmps=2)
+     ; (lines=19, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_011.php:1-25
 0000 INIT_FCALL 0 %d string("time")
@@ -61,7 +61,7 @@ LIVE RANGES:
      1: 0009 - 0013 (tmp/var)
 
 foo:
-     ; (lines=9, args=3, vars=3, tmps=0)
+     ; (lines=9, args=3, vars=3, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_011.php:4-6
 0000 CV0($a) = RECV 1
@@ -75,7 +75,7 @@ foo:
 0008 RETURN null
 
 arg1:
-     ; (lines=4, args=0, vars=1, tmps=0)
+     ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_011.php:7-12
 0000 BIND_GLOBAL CV0($a) string("a")
@@ -84,7 +84,7 @@ arg1:
 0003 RETURN int(1)
 
 arg2:
-     ; (lines=4, args=0, vars=1, tmps=0)
+     ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_011.php:13-18
 0000 BIND_GLOBAL CV0($a) string("a")

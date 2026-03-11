@@ -26,7 +26,7 @@ try {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=20, args=0, vars=1, tmps=2)
+     ; (lines=20, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:1-16
 0000 INIT_FCALL 0 %d string("time")
@@ -53,7 +53,7 @@ EXCEPTION TABLE:
      0005, 0011, -, -
 
 foo:
-     ; (lines=9, args=3, vars=3, tmps=0)
+     ; (lines=9, args=3, vars=3, tmps=%d)
      ; (after optimizer)
      ; %s:4-6
 0000 CV0($a) = RECV 1

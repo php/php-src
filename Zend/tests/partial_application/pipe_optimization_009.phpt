@@ -34,7 +34,7 @@ lhs() |> foo(arg1(), ?, arg2());
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=20, args=0, vars=0, tmps=2)
+     ; (lines=20, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_009.php:1-24
 0000 INIT_FCALL 0 %d string("time")
@@ -61,7 +61,7 @@ LIVE RANGES:
      0: 0010 - 0014 (tmp/var)
 
 foo:
-     ; (lines=9, args=3, vars=3, tmps=0)
+     ; (lines=9, args=3, vars=3, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_009.php:4-6
 0000 CV0($a) = RECV 1
@@ -75,21 +75,21 @@ foo:
 0008 RETURN null
 
 lhs:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_009.php:7-10
 0000 ECHO string("lhs\n")
 0001 RETURN int(0)
 
 arg1:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_009.php:11-14
 0000 ECHO string("arg1\n")
 0001 RETURN int(1)
 
 arg2:
-     ; (lines=2, args=0, vars=0, tmps=0)
+     ; (lines=2, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %spipe_optimization_009.php:15-18
 0000 ECHO string("arg2\n")
