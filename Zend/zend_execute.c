@@ -890,7 +890,7 @@ ZEND_COLD void zend_match_unhandled_error(const zval *value)
 		|| (Z_TYPE_P(value) == IS_STRING && max_len == 0)
 		|| smart_str_append_zval(&msg, value, max_len) != SUCCESS
 	) {
-		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
+		smart_str_append_literal(&msg, "of type ");
 		smart_str_appends(&msg, zend_zval_type_name(value));
 	}
 	smart_str_0(&msg);

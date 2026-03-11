@@ -30,7 +30,7 @@ static inline void phpdbg_append_individual_arg(smart_str *s, uint32_t i, zend_f
 	char *arg_name = NULL;
 
 	if (i) {
-		smart_str_appends(s, ", ");
+		smart_str_append_literal(s, ", ");
 	}
 	if (i < func->common.num_args) {
 		if (arginfo) {
@@ -54,7 +54,7 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 
 	if (op_array->scope) {
 		smart_str_append(&s, op_array->scope->name);
-		smart_str_appends(&s, "::");
+		smart_str_append_literal(&s, "::");
 	}
 	smart_str_append(&s, op_array->function_name);
 	smart_str_appendc(&s, '(');
@@ -74,12 +74,12 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 	smart_str_appendc(&s, ')');
 
 	if (ex->func->type == ZEND_USER_FUNCTION) {
-		smart_str_appends(&s, " at ");
+		smart_str_append_literal(&s, " at ");
 		smart_str_append(&s, op_array->filename);
 		smart_str_appendc(&s, ':');
 		smart_str_append_unsigned(&s, ex->opline->lineno);
 	} else {
-		smart_str_appends(&s, " [internal function]");
+		smart_str_append_literal(&s, " [internal function]");
 	}
 
 	return s.s;

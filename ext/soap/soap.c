@@ -2427,9 +2427,9 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	 		} else {
 	 			smart_str error = {0};
-	 			smart_str_appends(&error,"Function (\"");
+	 			smart_str_append_literal(&error,"Function (\"");
 				smart_str_append(&error,function);
-	 			smart_str_appends(&error,"\") is not a valid method for this service");
+	 			smart_str_append_literal(&error,"\") is not a valid method for this service");
 	 			smart_str_0(&error);
 				add_soap_fault_en(this_ptr, "Client", ZSTR_VAL(error.s), NULL, NULL);
 				smart_str_free(&error);
@@ -4347,28 +4347,28 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 				smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
 				smart_str_appendc(buf, ' ');
 			} else {
-				smart_str_appendl(buf, "UNKNOWN ", 8);
+				smart_str_append_literal(buf, "UNKNOWN ");
 			}
 		} else {
 			i = 0;
-			smart_str_appendl(buf, "list(", 5);
+			smart_str_append_literal(buf, "list(");
 			ZEND_HASH_FOREACH_PTR(function->responseParameters, param) {
 				if (i > 0) {
-					smart_str_appendl(buf, ", ", 2);
+					smart_str_append_literal(buf, ", ");
 				}
 				if (param->encode && param->encode->details.type_str) {
 					smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
 				} else {
-					smart_str_appendl(buf, "UNKNOWN", 7);
+					smart_str_append_literal(buf, "UNKNOWN");
 				}
-				smart_str_appendl(buf, " $", 2);
+				smart_str_append_literal(buf, " $");
 				smart_str_appendl(buf, param->paramName, strlen(param->paramName));
 				i++;
 			} ZEND_HASH_FOREACH_END();
-			smart_str_appendl(buf, ") ", 2);
+			smart_str_append_literal(buf, ") ");
 		}
 	} else {
-		smart_str_appendl(buf, "void ", 5);
+		smart_str_append_literal(buf, "void ");
 	}
 
 	smart_str_appendl(buf, function->functionName, strlen(function->functionName));
@@ -4378,14 +4378,14 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 		i = 0;
 		ZEND_HASH_FOREACH_PTR(function->requestParameters, param) {
 			if (i > 0) {
-				smart_str_appendl(buf, ", ", 2);
+				smart_str_append_literal(buf, ", ");
 			}
 			if (param->encode && param->encode->details.type_str) {
 				smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
 			} else {
-				smart_str_appendl(buf, "UNKNOWN", 7);
+				smart_str_append_literal(buf, "UNKNOWN");
 			}
-			smart_str_appendl(buf, " $", 2);
+			smart_str_append_literal(buf, " $");
 			smart_str_appendl(buf, param->paramName, strlen(param->paramName));
 			i++;
 		} ZEND_HASH_FOREACH_END();
@@ -4402,13 +4402,13 @@ static void model_to_string(sdlContentModelPtr model, smart_str *buf, int level)
 	switch (model->kind) {
 		case XSD_CONTENT_ELEMENT:
 			type_to_string(model->u.element, buf, level);
-			smart_str_appendl(buf, ";\n", 2);
+			smart_str_append_literal(buf, ";\n");
 			break;
 		case XSD_CONTENT_ANY:
 			for (i = 0;i < level;i++) {
 				smart_str_appendc(buf, ' ');
 			}
-			smart_str_appendl(buf, "<anyXML> any;\n", sizeof("<anyXML> any;\n")-1);
+			smart_str_append_literal(buf, "<anyXML> any;\n");
 			break;
 		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL:
@@ -4445,7 +4445,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
 				smart_str_appendc(buf, ' ');
 			} else {
-				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
+				smart_str_append_literal(buf, "anyType ");
 			}
 			smart_str_appendl(buf, type->name, strlen(type->name));
 
@@ -4453,12 +4453,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				zend_string *key;
 				bool first = true;
 
-				smart_str_appends(buf, " {");
+				smart_str_append_literal(buf, " {");
 				ZEND_HASH_MAP_FOREACH_STR_KEY(type->restrictions->enumeration, key) {
 					if (first) {
 						first = false;
 					} else {
-						smart_str_appends(buf, ", ");
+						smart_str_append_literal(buf, ", ");
 					}
 					smart_str_append(buf, key);
 				} ZEND_HASH_FOREACH_END();
@@ -4466,12 +4466,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 			}
 			break;
 		case XSD_TYPEKIND_LIST:
-			smart_str_appendl(buf, "list ", 5);
+			smart_str_append_literal(buf, "list ");
 			smart_str_appendl(buf, type->name, strlen(type->name));
 			if (type->elements) {
 				sdlTypePtr item_type;
 
-				smart_str_appendl(buf, " {", 2);
+				smart_str_append_literal(buf, " {");
 				ZEND_HASH_FOREACH_PTR(type->elements, item_type) {
 					smart_str_appendl(buf, item_type->name, strlen(item_type->name));
 				} ZEND_HASH_FOREACH_END();
@@ -4479,13 +4479,13 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 			}
 			break;
 		case XSD_TYPEKIND_UNION:
-			smart_str_appendl(buf, "union ", 6);
+			smart_str_append_literal(buf, "union ");
 			smart_str_appendl(buf, type->name, strlen(type->name));
 			if (type->elements) {
 				sdlTypePtr item_type;
 				int first = 0;
 
-				smart_str_appendl(buf, " {", 2);
+				smart_str_append_literal(buf, " {");
 				ZEND_HASH_FOREACH_PTR(type->elements, item_type) {
 					if (!first) {
 						smart_str_appendc(buf, ',');
@@ -4518,7 +4518,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						len = end - ext->val;
 					}
 					if (len == 0) {
-						smart_str_appendl(buf, "anyType", sizeof("anyType")-1);
+						smart_str_append_literal(buf, "anyType");
 					} else {
 						smart_str_appendl(buf, ext->val, len);
 					}
@@ -4544,7 +4544,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						smart_str_appends(buf, elementType->encode->details.type_str);
 						smart_str_appendc(buf, ' ');
 					} else {
-						smart_str_appendl(buf, "anyType ", 8);
+						smart_str_append_literal(buf, "anyType ");
 					}
 					smart_str_appendl(buf, type->name, strlen(type->name));
 					if (type->attributes &&
@@ -4556,14 +4556,14 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						smart_str_appends(buf, ext->val);
 						smart_str_appendc(buf, ']');
 					} else {
-						smart_str_appendl(buf, "[]", 2);
+						smart_str_append_literal(buf, "[]");
 					}
 				}
 			} else {
-				smart_str_appendl(buf, "struct ", 7);
+				smart_str_append_literal(buf, "struct ");
 				smart_str_appendl(buf, type->name, strlen(type->name));
 				smart_str_appendc(buf, ' ');
-				smart_str_appendl(buf, "{\n", 2);
+				smart_str_append_literal(buf, "{\n");
 				if ((type->kind == XSD_TYPEKIND_RESTRICTION ||
 				     type->kind == XSD_TYPEKIND_EXTENSION) && type->encode) {
 					encodePtr enc = type->encode;
@@ -4580,7 +4580,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						}
 						smart_str_appendc(buf, ' ');
 						smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
-						smart_str_appendl(buf, " _;\n", 4);
+						smart_str_append_literal(buf, " _;\n");
 					}
 				}
 				if (type->model) {
@@ -4598,10 +4598,10 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 							smart_str_appends(buf, attr->encode->details.type_str);
 							smart_str_appendc(buf, ' ');
 						} else {
-							smart_str_appendl(buf, "UNKNOWN ", 8);
+							smart_str_append_literal(buf, "UNKNOWN ");
 						}
 						smart_str_appends(buf, attr->name);
-						smart_str_appendl(buf, ";\n", 2);
+						smart_str_append_literal(buf, ";\n");
 					} ZEND_HASH_FOREACH_END();
 				}
 				if (spaces.s) {

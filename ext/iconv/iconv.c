@@ -968,7 +968,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 	_php_iconv_appendl(pretval, fname, fname_nbytes, cd_pl);
 	char_cnt -= fname_nbytes;
-	smart_str_appendl(pretval, ": ", sizeof(": ") - 1);
+	smart_str_append_literal(pretval, ": ");
 	char_cnt -= 2;
 
 	in_p = fval;
@@ -986,7 +986,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 			char_cnt = max_line_len - 1;
 		}
 
-		smart_str_appendl(pretval, "=?", sizeof("=?") - 1);
+		smart_str_append_literal(pretval, "=?");
 		char_cnt -= 2;
 		smart_str_appendl(pretval, out_charset, out_charset_len);
 		char_cnt -= out_charset_len;
@@ -1075,7 +1075,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 				smart_str_append(pretval, encoded);
 				char_cnt -= ZSTR_LEN(encoded);
-				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
+				smart_str_append_literal(pretval, "?=");
 				char_cnt -= 2;
 
 				zend_string_release_ex(encoded, 0);
@@ -1158,7 +1158,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					}
 				}
 
-				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
+				smart_str_append_literal(pretval, "?=");
 				char_cnt -= 2;
 
 				if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {

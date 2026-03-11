@@ -246,9 +246,9 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 
 	if (url_parts->scheme) {
 		smart_str_append(dest, url_parts->scheme);
-		smart_str_appends(dest, "://");
+		smart_str_append_literal(dest, "://");
 	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
-		smart_str_appends(dest, "//");
+		smart_str_append_literal(dest, "//");
 	}
 	if (url_parts->user) {
 		smart_str_append(dest, url_parts->user);
@@ -778,11 +778,11 @@ static inline void php_url_scanner_add_var_impl(const char *name, size_t name_le
 	smart_str_appendc(&url_state->url_app, '=');
 	smart_str_append_smart_str(&url_state->url_app, &svalue);
 
-	smart_str_appends(&url_state->form_app, "<input type=\"hidden\" name=\"");
+	smart_str_append_literal(&url_state->form_app, "<input type=\"hidden\" name=\"");
 	smart_str_append_smart_str(&url_state->form_app, &hname);
-	smart_str_appends(&url_state->form_app, "\" value=\"");
+	smart_str_append_literal(&url_state->form_app, "\" value=\"");
 	smart_str_append_smart_str(&url_state->form_app, &hvalue);
-	smart_str_appends(&url_state->form_app, "\" />");
+	smart_str_append_literal(&url_state->form_app, "\" />");
 
 	smart_str_free(&sname);
 	smart_str_free(&svalue);
@@ -883,9 +883,9 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 	smart_str_appendc(&url_app, '=');
 	smart_str_0(&url_app);
 
-	smart_str_appends(&form_app, "<input type=\"hidden\" name=\"");
+	smart_str_append_literal(&form_app, "<input type=\"hidden\" name=\"");
 	smart_str_append_smart_str(&form_app, &hname);
-	smart_str_appends(&form_app, "\" value=\"");
+	smart_str_append_literal(&form_app, "\" value=\"");
 	smart_str_0(&form_app);
 
 	/* Short circuit check. Only check url_app. */

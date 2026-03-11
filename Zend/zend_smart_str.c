@@ -120,7 +120,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_double(
 	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
 	smart_str_appends(str, buf);
 	if (zero_fraction && zend_finite(num) && !strchr(buf, '.')) {
-		smart_str_appendl(str, ".0", 2);
+		smart_str_append_literal(str, ".0");
 	}
 }
 
@@ -194,7 +194,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, c
 	smart_str_append_escaped(str, ZSTR_VAL(value), MIN(length, ZSTR_LEN(value)));
 
 	if (ZSTR_LEN(value) > length) {
-		smart_str_appendl(str, "...", sizeof("...")-1);
+		smart_str_append_literal(str, "...");
 	}
 }
 
@@ -204,15 +204,15 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 	switch (Z_TYPE_P(value)) {
 		case IS_UNDEF:
 		case IS_NULL:
-			smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
+			smart_str_append_literal(dest, "NULL");
 		break;
 
 		case IS_TRUE:
-			smart_str_appendl(dest, "true", sizeof("true")-1);
+			smart_str_append_literal(dest, "true");
 		break;
 
 		case IS_FALSE:
-			smart_str_appendl(dest, "false", sizeof("false")-1);
+			smart_str_append_literal(dest, "false");
 		break;
 
 		case IS_DOUBLE:

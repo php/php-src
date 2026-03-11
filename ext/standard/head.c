@@ -131,11 +131,11 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
-		smart_str_appends(&buf, "Set-Cookie: ");
+		smart_str_append_literal(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
-		smart_str_appends(&buf, "=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0");
+		smart_str_append_literal(&buf, "=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0");
 	} else {
-		smart_str_appends(&buf, "Set-Cookie: ");
+		smart_str_append_literal(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
 		smart_str_appendc(&buf, '=');
 		if (url_encode) {
@@ -149,7 +149,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		if (expires > 0) {
 			double diff;
 
-			smart_str_appends(&buf, COOKIE_EXPIRES);
+			smart_str_append_literal(&buf, COOKIE_EXPIRES);
 			dt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, expires, 0);
 
 			smart_str_append(&buf, dt);
@@ -160,31 +160,31 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 				diff = 0;
 			}
 
-			smart_str_appends(&buf, COOKIE_MAX_AGE);
+			smart_str_append_literal(&buf, COOKIE_MAX_AGE);
 			smart_str_append_long(&buf, (zend_long) diff);
 		}
 	}
 
 	if (path && ZSTR_LEN(path)) {
-		smart_str_appends(&buf, COOKIE_PATH);
+		smart_str_append_literal(&buf, COOKIE_PATH);
 		smart_str_append(&buf, path);
 	}
 	if (domain && ZSTR_LEN(domain)) {
-		smart_str_appends(&buf, COOKIE_DOMAIN);
+		smart_str_append_literal(&buf, COOKIE_DOMAIN);
 		smart_str_append(&buf, domain);
 	}
 	if (secure) {
-		smart_str_appends(&buf, COOKIE_SECURE);
+		smart_str_append_literal(&buf, COOKIE_SECURE);
 	}
 	if (httponly) {
-		smart_str_appends(&buf, COOKIE_HTTPONLY);
+		smart_str_append_literal(&buf, COOKIE_HTTPONLY);
 	}
 	if (samesite && ZSTR_LEN(samesite)) {
-		smart_str_appends(&buf, COOKIE_SAMESITE);
+		smart_str_append_literal(&buf, COOKIE_SAMESITE);
 		smart_str_append(&buf, samesite);
 	}
 	if (partitioned) {
-		smart_str_appends(&buf, COOKIE_PARTITIONED);
+		smart_str_append_literal(&buf, COOKIE_PARTITIONED);
 	}
 
 	ctr.line = ZSTR_VAL(buf.s);

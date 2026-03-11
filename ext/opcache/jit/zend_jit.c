@@ -878,10 +878,10 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 	smart_str buf = {0};
 
 	if (op_array->function_name) {
-		smart_str_appends(&buf, JIT_PREFIX);
+		smart_str_append_literal(&buf, JIT_PREFIX);
 		if (op_array->scope) {
 			smart_str_append(&buf, op_array->scope->name);
-			smart_str_appends(&buf, "::");
+			smart_str_append_literal(&buf, "::");
 		}
 		smart_str_append(&buf, op_array->function_name);
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
@@ -893,7 +893,7 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 		smart_str_0(&buf);
 		return buf.s;
 	} else if (op_array->filename) {
-		smart_str_appends(&buf, JIT_PREFIX);
+		smart_str_append_literal(&buf, JIT_PREFIX);
 		smart_str_append(&buf, op_array->filename);
 		smart_str_0(&buf);
 		return buf.s;

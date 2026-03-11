@@ -500,7 +500,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
 				zend_error(E_WARNING, "Value for %s is not a string",       \
 					ZSTR_VAL(key));                                         \
-				smart_str_appends(str, "[unknown]");                        \
+				smart_str_append_literal(str, "[unknown]");                        \
 			} else {                                                        \
 				smart_str_append(str, Z_STR_P(tmp));                        \
 			}                                                               \
@@ -518,22 +518,22 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 	ZVAL_DEREF(arg);
 
 	if (smart_str_append_zval(str, arg, EG(exception_string_param_max_len)) == SUCCESS) {
-		smart_str_appends(str, ", ");
+		smart_str_append_literal(str, ", ");
 	} else {
 		switch (Z_TYPE_P(arg)) {
 			case IS_RESOURCE:
-				smart_str_appends(str, "Resource id #");
+				smart_str_append_literal(str, "Resource id #");
 				smart_str_append_long(str, Z_RES_HANDLE_P(arg));
-				smart_str_appends(str, ", ");
+				smart_str_append_literal(str, ", ");
 				break;
 			case IS_ARRAY:
-				smart_str_appends(str, "Array, ");
+				smart_str_append_literal(str, "Array, ");
 				break;
 			case IS_OBJECT: {
 				zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
-				smart_str_appends(str, "Object(");
+				smart_str_append_literal(str, "Object(");
 				smart_str_append(str, class_name);
-				smart_str_appends(str, "), ");
+				smart_str_append_literal(str, "), ");
 				zend_string_release_ex(class_name, 0);
 				break;
 			}
@@ -554,7 +554,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 	if (file) {
 		if (UNEXPECTED(Z_TYPE_P(file) != IS_STRING)) {
 			zend_error(E_WARNING, "File name is not a string");
-			smart_str_appends(str, "[unknown file]: ");
+			smart_str_append_literal(str, "[unknown file]: ");
 		} else{
 			zend_long line = 0;
 			tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_LINE));
@@ -568,10 +568,10 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 			smart_str_append(str, Z_STR_P(file));
 			smart_str_appendc(str, '(');
 			smart_str_append_long(str, line);
-			smart_str_appends(str, "): ");
+			smart_str_append_literal(str, "): ");
 		}
 	} else {
-		smart_str_appends(str, "[internal function]: ");
+		smart_str_append_literal(str, "[internal function]: ");
 	}
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_CLASS));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
@@ -587,7 +587,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
 				if (name) {
 					smart_str_append(str, name);
-					smart_str_appends(str, ": ");
+					smart_str_append_literal(str, ": ");
 				}
 				_build_trace_args(arg, str);
 			} ZEND_HASH_FOREACH_END();
@@ -599,7 +599,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 			zend_error(E_WARNING, "args element is not an array");
 		}
 	}
-	smart_str_appends(str, ")\n");
+	smart_str_append_literal(str, ")\n");
 }
 /* }}} */
 
@@ -621,7 +621,7 @@ ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_
 	if (include_main) {
 		smart_str_appendc(&str, '#');
 		smart_str_append_long(&str, num);
-		smart_str_appends(&str, " {main}");
+		smart_str_append_literal(&str, " {main}");
 	}
 
 	smart_str_0(&str);

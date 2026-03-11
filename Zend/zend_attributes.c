@@ -437,7 +437,7 @@ ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
 	for (uint32_t i = 0; i < (sizeof(target_names) / sizeof(char *)); i++) {
 		if (flags & (1 << i)) {
 			if (smart_str_get_len(&str)) {
-				smart_str_appends(&str, ", ");
+				smart_str_append_literal(&str, ", ");
 			}
 
 			smart_str_appends(&str, target_names[i]);

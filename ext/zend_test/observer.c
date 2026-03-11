@@ -103,12 +103,12 @@ static void get_retval_info(zval *retval, smart_str *buf)
 
 	smart_str_appendc(buf, ':');
 	if (retval == NULL) {
-		smart_str_appendl(buf, "NULL", 4);
+		smart_str_append_literal(buf, "NULL");
 	} else if (ZT_G(observer_show_return_value)) {
 		if (Z_TYPE_P(retval) == IS_OBJECT) {
-			smart_str_appendl(buf, "object(", 7);
+			smart_str_append_literal(buf, "object(");
 			smart_str_append(buf, Z_OBJCE_P(retval)->name);
-			smart_str_appendl(buf, ")#", 2);
+			smart_str_append_literal(buf, ")#");
 			smart_str_append_long(buf, Z_OBJ_HANDLE_P(retval));
 		} else {
 			php_var_export_ex(retval, 2 * ZT_G(observer_nesting_depth) + 3, buf);

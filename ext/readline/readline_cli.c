@@ -152,7 +152,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 
 
 			case 'v':
-				smart_str_appends(&retval, PHP_VERSION);
+				smart_str_append_literal(&retval, PHP_VERSION);
 				prompt_spec++;
 				break;
 			case 'b':

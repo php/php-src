@@ -876,7 +876,7 @@ try_again:
 						   in_domain(uri->host, Z_STR_P(tmp))) &&
 						  (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 							if (!first_cookie) {
-								smart_str_appends(&soap_headers, "; ");
+								smart_str_append_literal(&soap_headers, "; ");
 							}
 							first_cookie = false;
 							smart_str_append(&soap_headers, key);
