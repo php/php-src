@@ -9057,8 +9057,8 @@ static void zend_compile_property_hooks(
 				value_type_ast_ptr = &param->child[0];
 				hook->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
 			}
-			zend_ast *return_type = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VOID));
-			return_type->attr = ZEND_NAME_NOT_FQ;
+			zend_ast *return_type = zend_ast_create(ZEND_AST_TYPE);
+			return_type->attr = IS_VOID;
 			hook->child[3] = return_type;
 		} else {
 			ZEND_UNREACHABLE();
