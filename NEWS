@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.31
 
+- OpenSSL:
+  . Fixed bug GH-21083 (openssl_pkey_new() fails for EC keys when
+    private_key_bits is not explicitly set). (ThanhNguyxn)
 
 15 Jan 2026, PHP 8.3.30
 
