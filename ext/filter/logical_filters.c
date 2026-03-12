@@ -21,6 +21,7 @@
 #include "filter_private.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/uri/php_uri.h"
+#include "ext/standard/html.h"
 
 #include "zend_multiply.h"
 
@@ -1153,6 +1154,24 @@ zend_result php_filter_validate_str(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
     FETCH_LONG_OPTION(min_range, "min_range");
     FETCH_LONG_OPTION(max_range, "max_range");
+
+    if (min_range_set && min_range < 0) {
+        php_error_docref(NULL, E_WARNING,
+            "min_range must be greater than or equal to 0");
+        RETURN_VALIDATION_FAILED;
+    }
+
+    if (max_range_set && max_range < 0) {
+        php_error_docref(NULL, E_WARNING,
+            "max_range must be greater than or equal to 0");
+        RETURN_VALIDATION_FAILED;
+    }
+
+    if (min_range_set && max_range_set && min_range > max_range) {
+        php_error_docref(NULL, E_WARNING,
+            "min_range must be less than or equal to max_range");
+        RETURN_VALIDATION_FAILED;
+    }
 
     len = php_utf8_strlen((const unsigned char *)str, str_size);
 
