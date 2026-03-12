@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
     script). (ilutov)
 
+- OpenSSL:
+  . Fixed bug GH-21083 (Skip private_key_bits validation for EC/curve-based
+    keys). (iliaal)
+
 - PCNTL:
   . Fixed signal handler installation on AIX by bumping the storage size of the
     num_signals global. (Calvin Buckley)
