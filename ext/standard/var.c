@@ -168,7 +168,7 @@ again:
 			break;
 		case IS_OBJECT: {
 			zend_class_entry *ce = Z_OBJCE_P(struc);
-			if (ce->ce_flags & ZEND_ACC_ENUM) {
+			if (ce->ce_flags & ZEND_ACC_ENUM && ce->__debugInfo == NULL) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
 				php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
 				return;
