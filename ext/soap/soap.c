@@ -185,6 +185,7 @@ zend_class_entry* soap_var_class_entry;
 zend_class_entry *soap_url_class_entry;
 zend_class_entry *soap_sdl_class_entry;
 
+static zend_object_handlers soap_client_object_handlers;
 static zend_object_handlers soap_server_object_handlers;
 static zend_object_handlers soap_url_object_handlers;
 static zend_object_handlers soap_sdl_object_handlers;
@@ -194,8 +195,34 @@ typedef struct {
 	zend_object std;
 } soap_server_object;
 
+typedef struct {
+	HashTable *typemap;
+	zend_object std;
+} soap_client_object;
+
+static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
+	return (soap_client_object *) ((char *) obj - XtOffsetOf(soap_client_object, std));
+}
+
 static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
 	return (soap_server_object *) ((char *) obj - XtOffsetOf(soap_server_object, std));
+}
+
+static zend_object *soap_client_object_create(zend_class_entry *ce)
+{
+	soap_client_object *obj = zend_object_alloc(sizeof(soap_client_object), ce);
+	zend_object_std_init(&obj->std, ce);
+	object_properties_init(&obj->std, ce);
+	return &obj->std;
+}
+
+static void soap_client_object_free(zend_object *obj) {
+	soap_client_object *client_obj = soap_client_object_fetch(obj);
+	if (client_obj->typemap) {
+		zend_hash_destroy(client_obj->typemap);
+		FREE_HASHTABLE(client_obj->typemap);
+	}
+	zend_object_std_dtor(obj);
 }
 
 static zend_object *soap_server_object_create(zend_class_entry *ce)
@@ -496,6 +523,13 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapClient class */
 	soap_class_entry = register_class_SoapClient();
+	soap_class_entry->create_object = soap_client_object_create;
+	soap_class_entry->default_object_handlers = &soap_client_object_handlers;
+
+	memcpy(&soap_client_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_client_object_handlers.offset = XtOffsetOf(soap_client_object, std);
+	soap_client_object_handlers.free_obj = soap_client_object_free;
+	soap_client_object_handlers.clone_obj = NULL;
 
 	/* Register SoapVar class */
 	soap_var_class_entry = register_class_SoapVar();
@@ -1978,6 +2012,7 @@ PHP_FUNCTION(is_soap_fault)
 /* SoapClient functions */
 
 /* {{{ SoapClient constructor */
+/* FIXME: double construct call will break this class */
 PHP_METHOD(SoapClient, __construct)
 {
 
@@ -2201,10 +2236,7 @@ PHP_METHOD(SoapClient, __construct)
 	}
 
 	if (typemap_ht) {
-		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
-		if (typemap) {
-			ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
-		}
+		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
 	SOAP_CLIENT_END_CODE();
 }
@@ -2333,10 +2365,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		sdl = Z_SOAP_SDL_P(tmp)->sdl;
 	}
 
-	tmp = Z_CLIENT_TYPEMAP_P(this_ptr);
-	if (Z_TYPE_P(tmp) == IS_ARRAY) {
-		typemap = Z_ARR_P(tmp);
-	}
+	typemap = soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap;
 
 	clear_soap_fault(this_ptr);
 
