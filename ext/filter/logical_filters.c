@@ -1125,8 +1125,8 @@ zend_result php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 /* }}} */
 
 /**
- * Returns the number of Unicode codepoints (including U+FFFD for invalid sequences)
- * in a UTF-8 encoded string.
+ * Returns the number of Unicode code points in a UTF-8 encoded string.
+ * Invalid UTF-8 byte sequences (U+FFFD) are counted as one replacement character.
  */
 static size_t php_utf8_strlen(const unsigned char *str, size_t str_len)
 {
