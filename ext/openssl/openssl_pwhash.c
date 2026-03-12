@@ -51,6 +51,7 @@ ZEND_EXTERN_MODULE_GLOBALS(openssl)
 static inline zend_result get_options(zend_array *options, uint32_t *memlimit, uint32_t *iterlimit, uint32_t *threads)
 {
 	zval *opt;
+	zend_long sthreads;
 
 	*iterlimit = PHP_OPENSSL_PWHASH_ITERLIMIT;
 	*memlimit  = PHP_OPENSSL_PWHASH_MEMLIMIT;
@@ -76,8 +77,7 @@ static inline zend_result get_options(zend_array *options, uint32_t *memlimit, u
 		}
 		*iterlimit = siterlimit;
 	}
-	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-		zend_long sthreads = zval_get_long(opt);
+	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && ((sthreads = zval_get_long(opt)) != 1)) {
 		if ((sthreads < PHP_OPENSSL_THREADS_MIN) || (sthreads > PHP_OPENSSL_THREADS_MAX)) {
 			zend_value_error("Invalid number of threads");
 			return FAILURE;
