@@ -14,7 +14,7 @@ echo (string) new ReflectionFunction($closure2(1, ?));
 
 ?>
 --EXPECTF--
-Closure [ <user> static function {closure:%s:%d} ] {
+Closure [ <user> function {closure:%s:%d} ] {
   @@ %s 5 - 5
 
   - Bound Variables [2] {
@@ -26,7 +26,7 @@ Closure [ <user> static function {closure:%s:%d} ] {
     Parameter #0 [ <required> $b ]
   }
 }
-Closure [ <user> static function {closure:pfa:%s:%d} ] {
+Closure [ <user> function {closure:pfa:%s:%d} ] {
   @@ %s 10 - 10
 
   - Bound Variables [2] {

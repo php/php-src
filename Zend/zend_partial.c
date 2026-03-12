@@ -58,6 +58,10 @@ static zend_always_inline bool zp_is_static_closure(const zend_function *functio
 	return ((function->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE)) == (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE));
 }
 
+static zend_always_inline bool zp_is_non_static_closure(const zend_function *function) {
+	return ((function->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE)) == ZEND_ACC_CLOSURE);
+}
+
 static zend_never_inline ZEND_COLD void zp_args_underflow(
 		const zend_function *function, uint32_t args, uint32_t expected)
 {
@@ -965,7 +969,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 			NULL, params_ast, lexical_vars_ast, stmts_ast,
 			return_type_ast, attributes_ast);
 
-	if (Z_TYPE_P(this_ptr) != IS_OBJECT || zp_is_static_closure(function)) {
+	if (Z_TYPE_P(this_ptr) != IS_OBJECT && !zp_is_non_static_closure(function)) {
 		((zend_ast_decl*)closure_ast)->flags |= ZEND_ACC_STATIC;
 	}
 
