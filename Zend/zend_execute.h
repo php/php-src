@@ -584,17 +584,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
-static zend_always_inline bool zend_scope_is_derived_from(
-	const zend_class_entry *scope, const zend_class_entry *ancestor)
-{
-	for (const zend_class_entry *ce = scope; ce != NULL; ce = ce->parent) {
-		if (ce == ancestor) {
-			return true;
-		}
-	}
-	return false;
-}
-
 static zend_always_inline bool zend_has_active_ctor_with_promoted_property(
 	const zend_execute_data *ex, zend_object *obj, zend_string *property_name)
 {
