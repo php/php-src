@@ -605,7 +605,8 @@ PHP_FUNCTION(ip2long)
         For consistency, we convert back the IP to a string and check if it is equal to
         the original string. If not, the IP should be considered invalid.
         */
-        if (strcmp(addr, inet_ntoa(ip)) != 0) {
+        char str[INET_ADDRSTRLEN];
+        if (strcmp(addr, inet_ntop(AF_INET, &ip, str, sizeof(str))) != 0) {
                 RETURN_FALSE;
        }
 #endif
