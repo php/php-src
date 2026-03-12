@@ -1508,7 +1508,7 @@ static unsigned char *php_openssl_alpn_protos_parse(unsigned short *outlen, cons
 		return NULL;
 	}
 
-	out = emalloc(strlen(in) + 1);
+	out = emalloc(len + 1);
 
 	for (i = 0; i <= len; ++i) {
 		if (i == len || in[i] == ',') {
