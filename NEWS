@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Bz2:
   . Fix truncation of total output size causing erroneous errors. (ndossche)
 
+- Opcache:
+  . Fixed bug GH-20838 (JIT compiler produces wrong arithmetic results).
+    (Dmitry, iliaal)
+
 - OpenSSL:
   . Fixed bug GH-21083 (Skip private_key_bits validation for EC/curve-based
     keys). (iliaal)
