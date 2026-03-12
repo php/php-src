@@ -2330,7 +2330,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	ret = stack;
 end:
 	BIO_free(in);
-	sk_X509_INFO_free(sk);
+	sk_X509_INFO_pop_free(sk, X509_INFO_free);
 
 	return ret;
 }
