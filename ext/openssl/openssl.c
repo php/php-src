@@ -1530,6 +1530,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (pkey) {
 			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
+
 			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1544,13 +1548,16 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		cert_num = sk_X509_num(ca);
 		if (ca && cert_num) {
 			array_init(&zextracerts);
+			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
 
 			for (i = 0; i < cert_num; i++) {
 				zval zextracert;
 				X509* aCA = sk_X509_pop(ca);
 				if (!aCA) break;
 
-				bio_out = BIO_new(BIO_s_mem());
 				if (PEM_write_bio_X509(bio_out, aCA)) {
 					BUF_MEM *bio_buf;
 					BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1558,9 +1565,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 					add_index_zval(&zextracerts, i, &zextracert);
 				}
 
+				BIO_reset(bio_out);
 				X509_free(aCA);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 
 			sk_X509_free(ca);
 			add_assoc_zval(zout, "extracerts", &zextracerts);
@@ -2806,33 +2814,41 @@ PHP_FUNCTION(openssl_pkcs7_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
@@ -3467,33 +3483,43 @@ PHP_FUNCTION(openssl_cms_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
