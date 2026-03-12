@@ -157,7 +157,7 @@ static void do_from_to_zval_err(struct err_s *err,
 			node != NULL;
 			node = zend_llist_get_next_ex(keys, &pos)) {
 		smart_str_appends(&path, *node);
-		smart_str_appends(&path, " > ");
+		smart_str_append_literal(&path, " > ");
 	}
 
 	if (path.s && ZSTR_LEN(path.s) > 3) {

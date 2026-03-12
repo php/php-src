@@ -679,7 +679,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		Z_PARAM_LONG(connect_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	smart_str_appends(&str, "pgsql");
+	smart_str_append_literal(&str, "pgsql");
 	smart_str_appendl(&str, connstring, connstring_len);
 	smart_str_appendc(&str, '_');
 	/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent
@@ -1750,7 +1750,7 @@ PHP_FUNCTION(pg_field_table)
 
 	/* Not found, lookup by querying PostgreSQL system tables */
 	smart_str querystr = {0};
-	smart_str_appends(&querystr, "select relname from pg_class where oid=");
+	smart_str_append_literal(&querystr, "select relname from pg_class where oid=");
 	smart_str_append_unsigned(&querystr, oid);
 	smart_str_0(&querystr);
 
@@ -4590,7 +4590,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	}
 
 	if (extended) {
-		smart_str_appends(&querystr,
+		smart_str_append_literal(&querystr,
 						  "SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef, a.attndims, t.typtype, "
 						  "d.description "
 						  "FROM pg_class as c "
@@ -4600,7 +4600,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 						  " LEFT JOIN pg_description d ON (d.objoid=a.attrelid AND d.objsubid=a.attnum AND c.oid=d.objoid) "
 						  "WHERE a.attnum > 0  AND c.relname = '");
 	} else {
-		smart_str_appends(&querystr,
+		smart_str_append_literal(&querystr,
 						  "SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotnull, a.atthasdef, a.attndims, t.typtype "
 						  "FROM pg_class as c "
 						  " JOIN pg_attribute a ON (a.attrelid = c.oid) "
@@ -4623,7 +4623,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	}
 	efree(escaped);
 
-	smart_str_appends(&querystr, "' AND n.nspname = '");
+	smart_str_append_literal(&querystr, "' AND n.nspname = '");
 	len = strlen(tmp_name);
 	escaped = (char *)safe_emalloc(len, 2, 1);
 	new_len = PQescapeStringConn(pg_link, escaped, tmp_name, len, &err);
@@ -4639,7 +4639,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	}
 	efree(escaped);
 
-	smart_str_appends(&querystr, "' ORDER BY a.attnum;");
+	smart_str_append_literal(&querystr, "' ORDER BY a.attnum;");
 	smart_str_0(&querystr);
 	efree(src);
 
@@ -5628,11 +5628,11 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 
 	ZVAL_UNDEF(&converted);
 	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
-		smart_str_appends(&querystr, "INSERT INTO ");
+		smart_str_append_literal(&querystr, "INSERT INTO ");
 		if (build_tablename(&querystr, pg_link, table) == FAILURE) {
 			goto cleanup;
 		}
-		smart_str_appends(&querystr, " DEFAULT VALUES");
+		smart_str_append_literal(&querystr, " DEFAULT VALUES");
 
 		goto no_values;
 	}
@@ -5646,11 +5646,11 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 		var_array = &converted;
 	}
 
-	smart_str_appends(&querystr, "INSERT INTO ");
+	smart_str_append_literal(&querystr, "INSERT INTO ");
 	if (build_tablename(&querystr, pg_link, table) == FAILURE) {
 		goto cleanup;
 	}
-	smart_str_appends(&querystr, " (");
+	smart_str_append_literal(&querystr, " (");
 
 	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
 		if (fld == NULL) {
@@ -5671,7 +5671,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 		smart_str_appendc(&querystr, ',');
 	} ZEND_HASH_FOREACH_END();
 	ZSTR_LEN(querystr.s)--;
-	smart_str_appends(&querystr, ") VALUES (");
+	smart_str_append_literal(&querystr, ") VALUES (");
 
 	/* make values string */
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(var_array), fld, val) {
@@ -5702,7 +5702,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_append_double(&querystr, Z_DVAL_P(val), 6, false);
 				break;
 			case IS_NULL:
-				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
+				smart_str_append_literal(&querystr, "NULL");
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
@@ -5712,7 +5712,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 	} ZEND_HASH_FOREACH_END();
 	/* Remove the trailing "," */
 	ZSTR_LEN(querystr.s)--;
-	smart_str_appends(&querystr, ");");
+	smart_str_append_literal(&querystr, ");");
 
 no_values:
 
@@ -5855,7 +5855,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 		}
 		if (where_cond && (Z_TYPE_P(val) == IS_TRUE || Z_TYPE_P(val) == IS_FALSE ||
 				(Z_TYPE_P(val) == IS_STRING && zend_string_equals_literal(Z_STR_P(val), "NULL")))) {
-			smart_str_appends(querystr, " IS ");
+			smart_str_append_literal(querystr, " IS ");
 		} else {
 			smart_str_appendc(querystr, '=');
 		}
@@ -5887,7 +5887,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				}
 				break;
 			case IS_NULL:
-				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);
+				smart_str_append_literal(querystr, "NULL");
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
@@ -5936,16 +5936,16 @@ PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const zend_string *t
 		ids_array = &ids_converted;
 	}
 
-	smart_str_appends(&querystr, "UPDATE ");
+	smart_str_append_literal(&querystr, "UPDATE ");
 	if (build_tablename(&querystr, pg_link, table) == FAILURE) {
 		goto cleanup;
 	}
-	smart_str_appends(&querystr, " SET ");
+	smart_str_append_literal(&querystr, " SET ");
 
 	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(var_array), 0, ",", 1, opt))
 		goto cleanup;
 
-	smart_str_appends(&querystr, " WHERE ");
+	smart_str_append_literal(&querystr, " WHERE ");
 
 	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
 		goto cleanup;
@@ -6044,11 +6044,11 @@ PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *t
 		ids_array = &ids_converted;
 	}
 
-	smart_str_appends(&querystr, "DELETE FROM ");
+	smart_str_append_literal(&querystr, "DELETE FROM ");
 	if (build_tablename(&querystr, pg_link, table) == FAILURE) {
 		goto cleanup;
 	}
-	smart_str_appends(&querystr, " WHERE ");
+	smart_str_append_literal(&querystr, " WHERE ");
 
 	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
 		goto cleanup;
@@ -6190,13 +6190,13 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 		}
 	}
 
-	smart_str_appends(&querystr, "SELECT * FROM ");
+	smart_str_append_literal(&querystr, "SELECT * FROM ");
 	if (build_tablename(&querystr, pg_link, table) == FAILURE) {
 		goto cleanup;
 	}
 
 	if (is_valid_ids_array) {
-		smart_str_appends(&querystr, " WHERE ");
+		smart_str_append_literal(&querystr, " WHERE ");
 		if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt)) {
 			goto cleanup;
 		}

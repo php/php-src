@@ -505,7 +505,7 @@ PHP_METHOD(DOMXPath, quote) {
 	} else {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
-		smart_str_appendl(&output, ZEND_STRL("concat("));
+		smart_str_append_literal(&output, "concat(");
 		const char *ptr = input;
 		const char *const end = input + input_len;
 		while (ptr < end) {

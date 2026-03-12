@@ -79,13 +79,13 @@ static zend_always_inline void smart_str_free(smart_str *str)
 	smart_str_free_ex(str, false);
 }
 
-static zend_always_inline void smart_str_0(smart_str *str) {
+static zend_always_inline void smart_str_0(const smart_str *str) {
 	if (str->s) {
 		ZSTR_VAL(str->s)[ZSTR_LEN(str->s)] = '\0';
 	}
 }
 
-static zend_always_inline size_t smart_str_get_len(smart_str *str) {
+static zend_always_inline size_t smart_str_get_len(const smart_str *str) {
 	return str->s ? ZSTR_LEN(str->s) : 0;
 }
 
@@ -180,6 +180,7 @@ static zend_always_inline void smart_str_append(smart_str *dest, const zend_stri
 {
 	smart_str_append_ex(dest, src, false);
 }
+#define smart_str_append_literal(dest, src) smart_str_appendl_ex(dest, "" src, sizeof(src)-1, false);
 static zend_always_inline void smart_str_appendc(smart_str *dest, char ch)
 {
 	smart_str_appendc_ex(dest, ch, false);

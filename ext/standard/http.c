@@ -46,7 +46,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append_long(form_str, index_int);
 	}
 	if (key_prefix) {
-		smart_str_appendl(form_str, "%5D", strlen("%5D"));
+		smart_str_append_literal(form_str, "%5D");
 	}
 	smart_str_appendc(form_str, '=');
 

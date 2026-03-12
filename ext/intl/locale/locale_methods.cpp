@@ -813,9 +813,9 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char
 		if(strcmp(key_name, LOC_LANG_TAG) != 0 &&
 		   strcmp(key_name, LOC_GRANDFATHERED_LANG_TAG)!=0 ) {
 			/* not lang or grandfathered tag */
-			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+			smart_str_append_literal(loc_name, SEPARATOR);
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+		smart_str_append(loc_name, Z_STR_P(ele_value));
 		return SUCCESS;
 	}
 
@@ -829,8 +829,8 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char
 static void add_prefix(smart_str* loc_name, const char* key_name)
 {
 	if( strncmp(key_name , LOC_PRIVATE_TAG , 7) == 0 ){
-		smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-		smart_str_appendl(loc_name, PRIVATE_PREFIX , sizeof(PRIVATE_PREFIX)-1);
+		smart_str_append_literal(loc_name, SEPARATOR);
+		smart_str_append_literal(loc_name, PRIVATE_PREFIX);
 	}
 }
 /* }}} */
@@ -852,8 +852,8 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 		if( Z_TYPE_P(ele_value) == IS_STRING ){
 			add_prefix( loc_name , key_name);
 
-			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+			smart_str_append_literal(loc_name, SEPARATOR);
+			smart_str_append(loc_name, Z_STR_P(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
 			HashTable *arr = Z_ARRVAL_P(ele_value);
@@ -867,8 +867,8 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 				if (isFirstSubtag++ == 0){
 					add_prefix(loc_name , key_name);
 				}
-				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
+				smart_str_append_literal(loc_name, SEPARATOR);
+				smart_str_append(loc_name, Z_STR_P(data));
 			} ZEND_HASH_FOREACH_END();
 			return SUCCESS;
 		} else {
@@ -901,8 +901,8 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 				if (isFirstSubtag++ == 0){
 					add_prefix(loc_name , cur_key_name);
 				}
-				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+				smart_str_append_literal(loc_name, SEPARATOR);
+				smart_str_append(loc_name, Z_STR_P(ele_value));
 			}
 		} /* end of for */
 	} /* end of else */

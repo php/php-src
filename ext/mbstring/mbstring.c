@@ -4736,7 +4736,7 @@ PHP_FUNCTION(mb_send_mail)
 		if (!empty) {
 			smart_str_appendl(&str, line_sep, line_sep_len);
 		}
-		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
+		smart_str_append_literal(&str, PHP_MBSTR_MAIL_MIME_HEADER1);
 		empty = false;
 	}
 
@@ -4744,11 +4744,11 @@ PHP_FUNCTION(mb_send_mail)
 		if (!empty) {
 			smart_str_appendl(&str, line_sep, line_sep_len);
 		}
-		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
+		smart_str_append_literal(&str, PHP_MBSTR_MAIL_MIME_HEADER2);
 
 		p = (char *)mbfl_encoding_preferred_mime_name(tran_cs);
 		if (p != NULL) {
-			smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
+			smart_str_append_literal(&str, PHP_MBSTR_MAIL_MIME_HEADER3);
 			smart_str_appends(&str, p);
 		}
 		empty = false;
@@ -4758,7 +4758,7 @@ PHP_FUNCTION(mb_send_mail)
 		if (!empty) {
 			smart_str_appendl(&str, line_sep, line_sep_len);
 		}
-		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
+		smart_str_append_literal(&str, PHP_MBSTR_MAIL_MIME_HEADER4);
 		p = (char *)mbfl_encoding_preferred_mime_name(body_enc);
 		if (p == NULL) {
 			p = "7bit";

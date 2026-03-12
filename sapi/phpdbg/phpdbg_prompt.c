@@ -441,7 +441,7 @@ PHPDBG_COMMAND(stdin)
 	int seplen = param->len;
 	int bytes = 0;
 
-	smart_str_appends(&code, "?>");
+	smart_str_append_literal(&code, "?>");
 
 	do {
 		PHPDBG_G(input_buflen) += bytes;

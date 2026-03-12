@@ -223,66 +223,67 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 
 	assert( pe != NULL );
 
-	smart_str_appends( &ret, "parse error " );
+	smart_str_append_literal( &ret, "parse error " );
 	if( pe->line > 0 )
 	{
-		smart_str_appends( &ret, "on line " );
+		smart_str_append_literal( &ret, "on line " );
 		smart_str_append_long( &ret, (zend_long ) pe->line );
 		any = 1;
 	}
 	if( pe->offset >= 0 ) {
-		if( any )
-			smart_str_appends( &ret, ", " );
-		else
-			smart_str_appends( &ret, "at " );
+		if ( any ) {
+			smart_str_append_literal( &ret, ", " );
+		} else {
+			smart_str_append_literal( &ret, "at " );
+		}
 
-		smart_str_appends( &ret, "offset " );
+		smart_str_append_literal( &ret, "offset " );
 		smart_str_append_long( &ret, (zend_long ) pe->offset );
 		any = 1;
 	}
 
 	if (pe->preContext[0] != 0 ) {
 		if( any )
-			smart_str_appends( &ret, ", " );
+			smart_str_append_literal( &ret, ", " );
 
-		smart_str_appends( &ret, "after \"" );
+		smart_str_append_literal( &ret, "after \"" );
 		u8str = intl_convert_utf16_to_utf8(pe->preContext, -1, &status );
 		if( !u8str )
 		{
-			smart_str_appends( &ret, "(could not convert parser error pre-context to UTF-8)" );
+			smart_str_append_literal( &ret, "(could not convert parser error pre-context to UTF-8)" );
 		}
 		else {
 			smart_str_append( &ret, u8str );
 			zend_string_release_ex( u8str, 0 );
 		}
-		smart_str_appends( &ret, "\"" );
+		smart_str_append_literal( &ret, "\"" );
 		any = 1;
 	}
 
 	if( pe->postContext[0] != 0 )
 	{
 		if( any )
-			smart_str_appends( &ret, ", " );
+			smart_str_append_literal( &ret, ", " );
 
-		smart_str_appends( &ret, "before or at \"" );
+		smart_str_append_literal( &ret, "before or at \"" );
 		u8str = intl_convert_utf16_to_utf8(pe->postContext, -1, &status );
 		if( !u8str )
 		{
-			smart_str_appends( &ret, "(could not convert parser error post-context to UTF-8)" );
+			smart_str_append_literal( &ret, "(could not convert parser error post-context to UTF-8)" );
 		}
 		else
 		{
 			smart_str_append( &ret, u8str );
 			zend_string_release_ex( u8str, 0 );
 		}
-		smart_str_appends( &ret, "\"" );
+		smart_str_append_literal( &ret, "\"" );
 		any = 1;
 	}
 
 	if( !any )
 	{
 		smart_str_free( &ret );
-		smart_str_appends( &ret, "no parse error" );
+		smart_str_append_literal( &ret, "no parse error" );
 	}
 
 	smart_str_0( &ret );

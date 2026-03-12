@@ -1437,15 +1437,20 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	tmp_pass = !strstr((char *) dbh->data_source, "password=") ? _pdo_pgsql_escape_credentials(dbh->password) : NULL;
 
 	smart_str_appendl(&conn_str, dbh->data_source, dbh->data_source_len);
-	smart_str_append_printf(&conn_str, " connect_timeout=" ZEND_LONG_FMT, connect_timeout);
+	smart_str_append_literal(&conn_str, " connect_timeout=");
+	smart_str_append_long(&conn_str, connect_timeout);
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user) {
-		smart_str_append_printf(&conn_str, " user='%s'", ZSTR_VAL(tmp_user));
+		smart_str_append_literal(&conn_str, " user='");
+		smart_str_append(&conn_str, tmp_user);
+		smart_str_appendc(&conn_str, '\'');
 	}
 
 	if (tmp_pass) {
-		smart_str_append_printf(&conn_str, " password='%s'", ZSTR_VAL(tmp_pass));
+		smart_str_append_literal(&conn_str, " password='");
+		smart_str_append(&conn_str, tmp_pass);
+		smart_str_appendc(&conn_str, '\'');
 	}
 	smart_str_0(&conn_str);
 

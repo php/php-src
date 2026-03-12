@@ -1687,26 +1687,26 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_D
 {
 	if ((mode & TRANS_COR_AND_CHAIN) && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendc(str, ' ');
 		}
-		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
+		smart_str_append_literal(str, "AND CHAIN");
 	} else if ((mode & TRANS_COR_AND_NO_CHAIN) && !(mode & TRANS_COR_AND_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendc(str, ' ');
 		}
-		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
+		smart_str_append_literal(str, "AND NO CHAIN");
 	}
 
 	if ((mode & TRANS_COR_RELEASE) && !(mode & TRANS_COR_NO_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendc(str, ' ');
 		}
-		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
+		smart_str_append_literal(str, "RELEASE");
 	} else if ((mode & TRANS_COR_NO_RELEASE) && !(mode & TRANS_COR_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendc(str, ' ');
 		}
-		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
+		smart_str_append_literal(str, "NO RELEASE");
 	}
 	smart_str_0(str);
 }
@@ -1798,20 +1798,20 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 	smart_str tmp_str = {0, 0};
 	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
 		if (tmp_str.s) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_append_literal(&tmp_str, ", ");
 		}
-		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
+		smart_str_append_literal(&tmp_str, "WITH CONSISTENT SNAPSHOT");
 	}
 	if (mode & TRANS_START_READ_WRITE) {
 		if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_append_literal(&tmp_str, ", ");
 		}
-		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+		smart_str_append_literal(&tmp_str, "READ WRITE");
 	} else if (mode & TRANS_START_READ_ONLY) {
 		if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_append_literal(&tmp_str, ", ");
 		}
-		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+		smart_str_append_literal(&tmp_str, "READ ONLY");
 	}
 	smart_str_0(&tmp_str);
 

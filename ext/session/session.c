@@ -1353,7 +1353,7 @@ static zend_result php_session_send_cookie(void)
 	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
 
-	smart_str_appends(&ncookie, "Set-Cookie: ");
+	smart_str_append_literal(&ncookie, "Set-Cookie: ");
 	smart_str_append(&ncookie, PS(session_name));
 	smart_str_appendc(&ncookie, '=');
 	smart_str_append(&ncookie, e_id);
@@ -1369,39 +1369,39 @@ static zend_result php_session_send_cookie(void)
 
 		if (t > 0) {
 			date_fmt = php_format_date(ZEND_STRL("D, d M Y H:i:s \\G\\M\\T"), t, false);
-			smart_str_appends(&ncookie, COOKIE_EXPIRES);
+			smart_str_append_literal(&ncookie, COOKIE_EXPIRES);
 			smart_str_append(&ncookie, date_fmt);
 			zend_string_release_ex(date_fmt, false);
 
-			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
+			smart_str_append_literal(&ncookie, COOKIE_MAX_AGE);
 			smart_str_append_long(&ncookie, PS(cookie_lifetime));
 		}
 	}
 
 	if (ZSTR_LEN(PS(cookie_path))) {
-		smart_str_appends(&ncookie, COOKIE_PATH);
+		smart_str_append_literal(&ncookie, COOKIE_PATH);
 		smart_str_append(&ncookie, PS(cookie_path));
 	}
 
 	if (ZSTR_LEN(PS(cookie_domain))) {
-		smart_str_appends(&ncookie, COOKIE_DOMAIN);
+		smart_str_append_literal(&ncookie, COOKIE_DOMAIN);
 		smart_str_append(&ncookie, PS(cookie_domain));
 	}
 
 	if (PS(cookie_secure)) {
-		smart_str_appends(&ncookie, COOKIE_SECURE);
+		smart_str_append_literal(&ncookie, COOKIE_SECURE);
 	}
 
 	if (PS(cookie_partitioned)) {
-		smart_str_appends(&ncookie, COOKIE_PARTITIONED);
+		smart_str_append_literal(&ncookie, COOKIE_PARTITIONED);
 	}
 
 	if (PS(cookie_httponly)) {
-		smart_str_appends(&ncookie, COOKIE_HTTPONLY);
+		smart_str_append_literal(&ncookie, COOKIE_HTTPONLY);
 	}
 
 	if (ZSTR_LEN(PS(cookie_samesite))) {
-		smart_str_appends(&ncookie, COOKIE_SAMESITE);
+		smart_str_append_literal(&ncookie, COOKIE_SAMESITE);
 		smart_str_append(&ncookie, PS(cookie_samesite));
 	}
 
@@ -2537,7 +2537,7 @@ PHP_FUNCTION(session_decode)
 static zend_result php_session_start_set_ini(const zend_string *varname, zend_string *new_value) {
 	zend_result ret;
 	smart_str buf ={0};
-	smart_str_appends(&buf, "session");
+	smart_str_append_literal(&buf, "session");
 	smart_str_appendc(&buf, '.');
 	smart_str_append(&buf, varname);
 	smart_str_0(&buf);

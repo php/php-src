@@ -296,7 +296,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 					id = ZSTR_VAL(prefix.s);
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
-					smart_str_appendl(&prefix, "#ref", 4);
+					smart_str_append_literal(&prefix, "#ref");
 					smart_str_append_long(&prefix, SOAP_GLOBAL(cur_uniq_ref));
 					smart_str_0(&prefix);
 					id = ZSTR_VAL(prefix.s);
@@ -313,7 +313,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 					id = ZSTR_VAL(prefix.s);
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
-					smart_str_appendl(&prefix, "#ref", 4);
+					smart_str_append_literal(&prefix, "#ref");
 					smart_str_append_long(&prefix, SOAP_GLOBAL(cur_uniq_ref));
 					smart_str_0(&prefix);
 					id = ZSTR_VAL(prefix.s);
@@ -2442,7 +2442,7 @@ iterator_failed_to_get:
 				bool is_xsd_any_type = zend_string_equals_literal(array_type.s, "xsd:anyType");
 				if (is_xsd_any_type) {
 					smart_str_free(&array_type);
-					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);
+					smart_str_append_literal(&array_type,"xsd:ur-type");
 				}
 				smart_str_appendc(&array_type, '[');
 				smart_str_append_smart_str(&array_type, &array_size);
@@ -3472,7 +3472,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 			int num = ++SOAP_GLOBAL(cur_uniq_ns);
 
 			while (1) {
-				smart_str_appendl(&prefix, "ns", 2);
+				smart_str_append_literal(&prefix, "ns");
 				smart_str_append_long(&prefix, num);
 				smart_str_0(&prefix);
 				if (xmlSearchNs(node->doc, node, BAD_CAST(ZSTR_VAL(prefix.s))) == NULL) {
@@ -3556,7 +3556,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 	char *prev_stype = NULL, *cur_stype = NULL, *prev_ns = NULL, *cur_ns = NULL;
 
 	if (!array || Z_TYPE_P(array) != IS_ARRAY) {
-		smart_str_appendl(type, "xsd:anyType", sizeof("xsd:anyType")-1);
+		smart_str_append_literal(type, "xsd:anyType");
 		return get_conversion(XSD_ANYTYPE);
 	}
 
@@ -3622,7 +3622,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 	} ZEND_HASH_FOREACH_END();
 
 	if (different || i == 0) {
-		smart_str_appendl(type, "xsd:anyType", sizeof("xsd:anyType")-1);
+		smart_str_append_literal(type, "xsd:anyType");
 		return get_conversion(XSD_ANYTYPE);
 	} else {
 		encodePtr enc;

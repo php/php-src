@@ -3239,9 +3239,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
-			smart_str_appends(&headers, "User-Agent: ");
-			smart_str_appends(&headers, Z_STRVAL_P(tmp));
-			smart_str_appends(&headers, "\r\n");
+			smart_str_append_literal(&headers, "User-Agent: ");
+			smart_str_append(&headers, Z_STR_P(tmp));
+			smart_str_append_literal(&headers, "\r\n");
 		}
 
 		zval *proxy_host = Z_CLIENT_PROXY_HOST_P(this_ptr);
@@ -3249,9 +3249,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		if (Z_TYPE_P(proxy_host) == IS_STRING && Z_TYPE_P(proxy_port) == IS_LONG) {
 			zval str_proxy;
 			smart_str proxy = {0};
-			smart_str_appends(&proxy,"tcp://");
-			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
-			smart_str_appends(&proxy,":");
+			smart_str_append_literal(&proxy, "tcp://");
+			smart_str_append(&proxy, Z_STR_P(proxy_host));
+			smart_str_appendc(&proxy,':');
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
 
@@ -3283,7 +3283,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);
-		smart_str_appendl(&headers, "Connection: close\r\n", sizeof("Connection: close\r\n")-1);
+		smart_str_append_literal(&headers, "Connection: close\r\n");
 	}
 
 	if (headers.s && ZSTR_LEN(headers.s) > 0) {

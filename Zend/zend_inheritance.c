@@ -924,9 +924,9 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			/* cut off on NULL byte ... class@anonymous */
 			smart_str_appends(&str, ZSTR_VAL(fptr->common.scope->name));
 		} else {
-			smart_str_appendl(&str, ZSTR_VAL(fptr->common.scope->name), ZSTR_LEN(fptr->common.scope->name));
+			smart_str_append(&str, fptr->common.scope->name);
 		}
-		smart_str_appends(&str, "::");
+		smart_str_append_literal(&str, "::");
 	}
 
 	smart_str_append(&str, fptr->common.function_name);
@@ -949,20 +949,20 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			}
 
 			if (ZEND_ARG_IS_VARIADIC(arg_info)) {
-				smart_str_appends(&str, "...");
+				smart_str_append_literal(&str, "...");
 			}
 
 			smart_str_appendc(&str, '$');
 			smart_str_append(&str, arg_info->name);
 
 			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
-				smart_str_appends(&str, " = ");
+				smart_str_append_literal(&str, " = ");
 
 				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 					if (arg_info->default_value) {
 						smart_str_append(&str, arg_info->default_value);
 					} else {
-						smart_str_appends(&str, "<default>");
+						smart_str_append_literal(&str, "<default>");
 					}
 				} else {
 					zend_op *precv = NULL;
@@ -985,23 +985,23 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 						zval *zv = RT_CONSTANT(precv, precv->op2);
 
 						if (Z_TYPE_P(zv) == IS_FALSE) {
-							smart_str_appends(&str, "false");
+							smart_str_append_literal(&str, "false");
 						} else if (Z_TYPE_P(zv) == IS_TRUE) {
-							smart_str_appends(&str, "true");
+							smart_str_append_literal(&str, "true");
 						} else if (Z_TYPE_P(zv) == IS_NULL) {
-							smart_str_appends(&str, "null");
+							smart_str_append_literal(&str, "null");
 						} else if (Z_TYPE_P(zv) == IS_STRING) {
 							smart_str_appendc(&str, '\'');
 							smart_str_appendl(&str, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
 							if (Z_STRLEN_P(zv) > 10) {
-								smart_str_appends(&str, "...");
+								smart_str_append_literal(&str, "...");
 							}
 							smart_str_appendc(&str, '\'');
 						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 							if (zend_hash_num_elements(Z_ARRVAL_P(zv)) == 0) {
-								smart_str_appends(&str, "[]");
+								smart_str_append_literal(&str, "[]");
 							} else {
-								smart_str_appends(&str, "[...]");
+								smart_str_append_literal(&str, "[...]");
 							}
 						} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
 							zend_ast *ast = Z_ASTVAL_P(zv);
@@ -1011,10 +1011,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 							 && ast->child[1]->kind == ZEND_AST_ZVAL
 							 && Z_TYPE_P(zend_ast_get_zval(ast->child[1])) == IS_STRING) {
 								smart_str_append(&str, zend_ast_get_str(ast->child[0]));
-								smart_str_appends(&str, "::");
+								smart_str_append_literal(&str, "::");
 								smart_str_append(&str, zend_ast_get_str(ast->child[1]));
 							} else {
-								smart_str_appends(&str, "<expression>");
+								smart_str_append_literal(&str, "<expression>");
 							}
 						} else {
 							zend_string *tmp_zv_str;
@@ -1027,7 +1027,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			}
 
 			if (++i < num_args) {
-				smart_str_appends(&str, ", ");
+				smart_str_append_literal(&str, ", ");
 			}
 			arg_info++;
 		}
@@ -1036,7 +1036,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 	smart_str_appendc(&str, ')');
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		smart_str_appends(&str, ": ");
+		smart_str_append_literal(&str, ": ");
 		zend_append_type_hint(&str, scope, fptr->common.arg_info - 1, true);
 	}
 	smart_str_0(&str);

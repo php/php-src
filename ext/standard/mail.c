@@ -160,9 +160,9 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 					return;
 			}
 			smart_str_append(s, key);
-			smart_str_appendl(s, ": ", 2);
+			smart_str_append_literal(s, ": ");
 			smart_str_append(s, str_value);
-			smart_str_appendl(s, "\r\n", 2);
+			smart_str_append_literal(s, "\r\n");
 			break;
 		case IS_ARRAY:
 			php_mail_build_headers_elems(s, key, val);

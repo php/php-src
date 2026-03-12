@@ -132,7 +132,7 @@ static zend_result php_stream_handle_proxy_authorization_header(const char *s, s
 									   "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
 				while (*p != 0 && *p != '\r' && *p !='\n') p++;
 				smart_str_appendl(header, s, p - s);
-				smart_str_appendl(header, "\r\n", sizeof("\r\n")-1);
+				smart_str_append_literal(header, "\r\n");
 				return SUCCESS;
 			} else {
 				while (*p != 0 && *p != '\r' && *p !='\n') p++;
@@ -514,11 +514,11 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			reset_ssl_peer_name = true;
 		}
 
-		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
-		smart_str_appends(&header, ZSTR_VAL(resource->host));
+		smart_str_append_literal(&header, "CONNECT ");
+		smart_str_append(&header, resource->host);
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
-		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
+		smart_str_append_literal(&header, " HTTP/1.0\r\n");
 
 	    /* check if we have Proxy-Authorization header */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
@@ -543,7 +543,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			}
 		}
 finish:
-		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+		smart_str_append_literal(&header, "\r\n");
 
 		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
@@ -619,7 +619,7 @@ finish:
 	}
 
 	if (!custom_request_method) {
-		smart_str_appends(&req_buf, "GET ");
+		smart_str_append_literal(&req_buf, "GET ");
 	}
 
 	if (request_fulluri) {
@@ -630,7 +630,7 @@ finish:
 
 		/* file */
 		if (resource->path && ZSTR_LEN(resource->path)) {
-			smart_str_appends(&req_buf, ZSTR_VAL(resource->path));
+			smart_str_append(&req_buf, resource->path);
 		} else {
 			smart_str_appendc(&req_buf, '/');
 		}
@@ -638,17 +638,17 @@ finish:
 		/* query string */
 		if (resource->query) {
 			smart_str_appendc(&req_buf, '?');
-			smart_str_appends(&req_buf, ZSTR_VAL(resource->query));
+			smart_str_append(&req_buf, resource->query);
 		}
 	}
 
 	/* protocol version we are speaking */
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
-		smart_str_appends(&req_buf, " HTTP/");
+		smart_str_append_literal(&req_buf, " HTTP/");
 		smart_str_append_printf(&req_buf, "%.1F", zval_get_double(tmpzval));
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 	} else {
-		smart_str_appends(&req_buf, " HTTP/1.1\r\n");
+		smart_str_append_literal(&req_buf, " HTTP/1.1\r\n");
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
@@ -661,7 +661,7 @@ finish:
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 				if (Z_TYPE_P(tmpheader) == IS_STRING) {
 					smart_str_append(&tmpstr, Z_STR_P(tmpheader));
-					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
+					smart_str_append_literal(&tmpstr, "\r\n");
 				}
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tmpstr);
@@ -765,9 +765,9 @@ finish:
 		zend_string *scratch_str = smart_str_extract(&scratch);
 		zend_string *stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
 
-		smart_str_appends(&req_buf, "Authorization: Basic ");
+		smart_str_append_literal(&req_buf, "Authorization: Basic ");
 		smart_str_append(&req_buf, stmp);
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
@@ -777,21 +777,21 @@ finish:
 
 	/* if the user has configured who they are, send a From: line */
 	if (!(have_header & HTTP_HEADER_FROM) && FG(from_address)) {
-		smart_str_appends(&req_buf, "From: ");
+		smart_str_append_literal(&req_buf, "From: ");
 		smart_str_appends(&req_buf, FG(from_address));
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 	}
 
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
-		smart_str_appends(&req_buf, "Host: ");
-		smart_str_appends(&req_buf, ZSTR_VAL(resource->host));
+		smart_str_append_literal(&req_buf, "Host: ");
+		smart_str_append(&req_buf, resource->host);
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
 			smart_str_appendc(&req_buf, ':');
 			smart_str_append_unsigned(&req_buf, resource->port);
 		}
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 	}
 
 	/* Send a Connection: close header to avoid hanging when the server
@@ -801,7 +801,7 @@ finish:
 	 * HTTP/1.0 to avoid issues when the server respond with an HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
-		smart_str_appends(&req_buf, "Connection: close\r\n");
+		smart_str_append_literal(&req_buf, "Connection: close\r\n");
 	}
 
 	if (context &&
@@ -843,14 +843,14 @@ finish:
 				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0
 		) {
-			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_literal(&req_buf, "Content-Length: ");
 			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
-			smart_str_appends(&req_buf, "\r\n");
+			smart_str_append_literal(&req_buf, "\r\n");
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
 
 		smart_str_appends(&req_buf, user_headers);
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 		efree(user_headers);
 	}
 
@@ -859,18 +859,18 @@ finish:
 		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			smart_str_appends(&req_buf, "Content-Length: ");
+			smart_str_append_literal(&req_buf, "Content-Length: ");
 			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
-			smart_str_appends(&req_buf, "\r\n");
+			smart_str_append_literal(&req_buf, "\r\n");
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
-			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
+			smart_str_append_literal(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
 			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
 		}
-		smart_str_appends(&req_buf, "\r\n");
-		smart_str_appendl(&req_buf, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		smart_str_append_literal(&req_buf, "\r\n");
+		smart_str_append(&req_buf, Z_STR_P(tmpzval));
 	} else {
-		smart_str_appends(&req_buf, "\r\n");
+		smart_str_append_literal(&req_buf, "\r\n");
 	}
 
 	/* send it */

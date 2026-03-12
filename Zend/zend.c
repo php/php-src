@@ -389,7 +389,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 	for (i = 0; i < indent; i++) {
 		smart_str_appendc(buf, ' ');
 	}
-	smart_str_appends(buf, "(\n");
+	smart_str_append_literal(buf, "(\n");
 	indent += PRINT_ZVAL_INDENT;
 	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
 		for (i = 0; i < indent; i++) {
@@ -405,11 +405,11 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 				smart_str_appendl(buf, prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {
 					if (class_name[0] == '*') {
-						smart_str_appends(buf, ":protected");
+						smart_str_append_literal(buf, ":protected");
 					} else {
-						smart_str_appends(buf, ":");
+						smart_str_appendc(buf, ':');
 						smart_str_appends(buf, class_name);
-						smart_str_appends(buf, ":private");
+						smart_str_append_literal(buf, ":private");
 					}
 				}
 			} else {
@@ -418,15 +418,15 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 		} else {
 			smart_str_append_long(buf, num_key);
 		}
-		smart_str_appends(buf, "] => ");
+		smart_str_append_literal(buf, "] => ");
 		zend_print_zval_r_to_buf(buf, tmp, indent+PRINT_ZVAL_INDENT);
-		smart_str_appends(buf, "\n");
+		smart_str_append_literal(buf, "\n");
 	} ZEND_HASH_FOREACH_END();
 	indent -= PRINT_ZVAL_INDENT;
 	for (i = 0; i < indent; i++) {
 		smart_str_appendc(buf, ' ');
 	}
-	smart_str_appends(buf, ")\n");
+	smart_str_append_literal(buf, ")\n");
 }
 /* }}} */
 
@@ -447,7 +447,7 @@ static void print_flat_hash(smart_str *buf, HashTable *ht) /* {{{ */
 		} else {
 			smart_str_append_unsigned(buf, num_key);
 		}
-		smart_str_appends(buf, "] => ");
+		smart_str_append_literal(buf, "] => ");
 		zend_print_flat_zval_r_to_buf(buf, tmp);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -483,10 +483,10 @@ void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr) /* {{{ */
 {
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
-			smart_str_appends(buf, "Array (");
+			smart_str_append_literal(buf, "Array (");
 			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(Z_ARRVAL_P(expr))) {
-					smart_str_appends(buf, " *RECURSION*");
+					smart_str_append_literal(buf, " *RECURSION*");
 					return;
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
@@ -500,11 +500,11 @@ void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr) /* {{{ */
 			HashTable *properties;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			smart_str_append(buf, class_name);
-			smart_str_appends(buf, " Object (");
+			smart_str_append_literal(buf, " Object (");
 			zend_string_release_ex(class_name, 0);
 
 			if (GC_IS_RECURSIVE(Z_COUNTED_P(expr))) {
-				smart_str_appends(buf, " *RECURSION*");
+				smart_str_append_literal(buf, " *RECURSION*");
 				return;
 			}
 
@@ -547,10 +547,10 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 {
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
-			smart_str_appends(buf, "Array\n");
+			smart_str_append_literal(buf, "Array\n");
 			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(Z_ARRVAL_P(expr))) {
-					smart_str_appends(buf, " *RECURSION*");
+					smart_str_append_literal(buf, " *RECURSION*");
 					return;
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
@@ -565,13 +565,13 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				zend_object *zobj = Z_OBJ_P(expr);
 				uint32_t *guard = zend_get_recursion_guard(zobj);
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
-				smart_str_appends(buf, ZSTR_VAL(class_name));
+				smart_str_append(buf, class_name);
 				zend_string_release_ex(class_name, 0);
 
 				if (!(zobj->ce->ce_flags & ZEND_ACC_ENUM)) {
-					smart_str_appends(buf, " Object\n");
+					smart_str_append_literal(buf, " Object\n");
 				} else {
-					smart_str_appends(buf, " Enum");
+					smart_str_append_literal(buf, " Enum");
 					if (zobj->ce->enum_backing_type != IS_UNDEF) {
 						smart_str_appendc(buf, ':');
 						smart_str_appends(buf, zend_get_type_by_const(zobj->ce->enum_backing_type));
@@ -580,7 +580,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
-					smart_str_appends(buf, " *RECURSION*");
+					smart_str_append_literal(buf, " *RECURSION*");
 					return;
 				}
 
