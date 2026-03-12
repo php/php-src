@@ -1145,40 +1145,40 @@ static size_t php_utf8_strlen(const unsigned char *str, size_t str_len)
 
 zend_result php_filter_validate_str(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-    int min_range_set, max_range_set;
+    int min_len_set, max_len_set;
     zval *option_val;
-    zend_long min_range, max_range;
+    zend_long min_len, max_len;
     size_t len;
     const char *str = Z_STRVAL_P(value);
     size_t str_size = Z_STRLEN_P(value);
 
-    FETCH_LONG_OPTION(min_range, "min_range");
-    FETCH_LONG_OPTION(max_range, "max_range");
+    FETCH_LONG_OPTION(min_len, "min_len");
+    FETCH_LONG_OPTION(max_len, "max_len");
 
-    if (min_range_set && min_range < 0) {
+    if (min_len_set && min_len < 0) {
         php_error_docref(NULL, E_WARNING,
-            "min_range must be greater than or equal to 0");
+            "min_len must be greater than or equal to 0");
         RETURN_VALIDATION_FAILED;
     }
 
-    if (max_range_set && max_range < 0) {
+    if (max_len_set && max_len < 0) {
         php_error_docref(NULL, E_WARNING,
-            "max_range must be greater than or equal to 0");
+            "max_len must be greater than or equal to 0");
         RETURN_VALIDATION_FAILED;
     }
 
-    if (min_range_set && max_range_set && min_range > max_range) {
+    if (min_len_set && max_len_set && min_len > max_len) {
         php_error_docref(NULL, E_WARNING,
-            "min_range must be less than or equal to max_range");
+            "min_len must be less than or equal to max_len");
         RETURN_VALIDATION_FAILED;
     }
 
     len = php_utf8_strlen((const unsigned char *)str, str_size);
 
-    if (min_range_set && len < min_range) {
+    if (min_len_set && len < min_len) {
         RETURN_VALIDATION_FAILED;
     }
-    if (max_range_set && max_range < len) {
+    if (max_len_set && max_len < len) {
         RETURN_VALIDATION_FAILED;
     }
 	return SUCCESS;

@@ -14,7 +14,7 @@ FILTER_VALIDATE_STR: Invalid input types
  * This test ensures FILTER_VALIDATE_STR behaves accordingly for various input types.
  */
 
-$options = ['options' => ['min_range' => 2, 'max_range' => 4]];
+$options = ['options' => ['min_len' => 2, 'max_len' => 4]];
 $handle = fopen("php://memory", "r");
 class Dummy { public $x = 1; }
 
