@@ -5957,3 +5957,49 @@ ZEND_API void zend_return_unwrap_ref(zend_execute_data *execute_data, zval *retu
 
 	zend_unwrap_reference(return_value);
 }
+
+static zend_always_inline bool zend_has_ctor_for_cpp_reassignment(
+	const zend_execute_data *ex, zend_object *obj, zend_string *property_name)
+{
+	for (const zend_execute_data *frame = ex; frame != NULL; frame = frame->prev_execute_data) {
+		if (!(ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_THIS) || Z_OBJ(frame->This) != obj) {
+			return false;
+		}
+		if (!(frame->func->common.fn_flags & ZEND_ACC_CTOR)) {
+			continue;
+		}
+
+		zend_class_entry *scope = frame->func->common.scope;
+		ZEND_ASSERT(scope);
+
+		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(&scope->properties_info, property_name);
+		ZEND_ASSERT(scope_prop);
+		return scope_prop->ce == scope && (scope_prop->flags & (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED);
+	}
+
+	return false;
+}
+
+ZEND_API ZEND_COLD zend_property_write_kind zend_verify_readonly_slow(zval *property_val, const zend_property_info *info)
+{
+	ZEND_ASSERT(info->flags & ZEND_ACC_READONLY);
+
+	if (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) {
+		return ZEND_PROPERTY_WRITE_READONLY_REINITABLE;
+	}
+	if (Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REASSIGNED) {
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
+	}
+	zend_execute_data *execute_data = EG(current_execute_data);
+	if (!execute_data || !(EX_CALL_INFO() & ZEND_CALL_HAS_THIS)) {
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
+	}
+	const zend_op *opline = EX(opline);
+	zend_object *obj = zend_get_object_from_slot(property_val, info);
+	if (!zend_has_ctor_for_cpp_reassignment(execute_data, obj, info->name)
+	 || ((opline->opcode == ZEND_ASSIGN_OBJ || opline->opcode == ZEND_ASSIGN_OBJ_REF)
+	  && opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT)) {
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
+	}
+	return ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED;
+}

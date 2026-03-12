@@ -584,28 +584,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
-static zend_always_inline bool zend_has_active_ctor_with_promoted_property(
-	const zend_execute_data *ex, zend_object *obj, zend_string *property_name)
-{
-	for (const zend_execute_data *frame = ex; frame != NULL; frame = frame->prev_execute_data) {
-		if (!(ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_THIS) || Z_OBJ(frame->This) != obj) {
-			return false;
-		}
-		if (!(frame->func->common.fn_flags & ZEND_ACC_CTOR)) {
-			continue;
-		}
-
-		zend_class_entry *scope = frame->func->common.scope;
-		ZEND_ASSERT(scope);
-
-		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(&scope->properties_info, property_name);
-		ZEND_ASSERT(scope_prop);
-		return scope_prop->ce == scope && (scope_prop->flags & (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED);
-	}
-
-	return false;
-}
-
 typedef enum _zend_property_write_kind {
 	ZEND_PROPERTY_WRITE_FORBIDDEN = 0,            /* Write disallowed */
 	ZEND_PROPERTY_WRITE_OK,                       /* Write allowed */
@@ -613,28 +591,7 @@ typedef enum _zend_property_write_kind {
 	ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED, /* CPP ctor reassignment: set IS_PROP_CTOR_REASSIGNED after write */
 } zend_property_write_kind;
 
-static zend_always_inline zend_property_write_kind zend_get_readonly_write_kind(
-	const zval *property_val, const zend_property_info *prop_info)
-{
-	if (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) {
-		return ZEND_PROPERTY_WRITE_READONLY_REINITABLE;
-	}
-	if (Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REASSIGNED) {
-		return ZEND_PROPERTY_WRITE_FORBIDDEN;
-	}
-	zend_execute_data *ex = EG(current_execute_data);
-	if (ex == NULL || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
-		return ZEND_PROPERTY_WRITE_FORBIDDEN;
-	}
-	zend_object *obj = zend_get_object_from_slot(property_val, prop_info);
-	if (!zend_has_active_ctor_with_promoted_property(ex, obj, prop_info->name)
-	 || (ex->opline
-	  && (ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
-	  && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
-		return ZEND_PROPERTY_WRITE_FORBIDDEN;
-	}
-	return ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED;
-}
+ZEND_API ZEND_COLD zend_property_write_kind zend_verify_readonly_slow(zval *property_val, const zend_property_info *info);
 
 static zend_always_inline zend_property_write_kind zend_verify_readonly_and_avis(
 	zval *property_val, const zend_property_info *info, bool indirect)
@@ -642,7 +599,7 @@ static zend_always_inline zend_property_write_kind zend_verify_readonly_and_avis
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
 		zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
 		if ((info->flags & ZEND_ACC_READONLY) && !Z_ISUNDEF_P(property_val)) {
-			prop_write_kind = zend_get_readonly_write_kind(property_val, info);
+			prop_write_kind = zend_verify_readonly_slow(property_val, info);
 			if (prop_write_kind == ZEND_PROPERTY_WRITE_FORBIDDEN) {
 				zend_readonly_property_modification_error(info);
 				return ZEND_PROPERTY_WRITE_FORBIDDEN;
