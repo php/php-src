@@ -338,8 +338,6 @@ typedef struct _zend_oparray_context {
 /* loaded from file cache to process memory               |     |     |     */
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-#define ZEND_ACC_HAS_PROMOTED_READONLY_PROPS (1u << 31) /* X |  |     |     */
-
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -1098,6 +1096,9 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_REF			1
 #define ZEND_FETCH_DIM_WRITE	2
 #define ZEND_FETCH_OBJ_FLAGS	3
+
+#define ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT (1u << 31)
+#define ZEND_ASSIGN_OBJ_FLAGS (ZEND_FETCH_OBJ_FLAGS | ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT)
 
 /* Used to mark what kind of operation a writing FETCH_DIM is used in,
  * to produce a more precise error on incorrect string offset use. */

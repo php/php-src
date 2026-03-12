@@ -2803,22 +2803,31 @@ static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_str
 	}
 }
 
-static zend_always_inline bool verify_readonly_and_avis(zval *property_val, zend_property_info *info, bool indirect)
+static zend_always_inline zend_readonly_write_kind verify_readonly_and_avis(
+	zval *property_val, zend_property_info *info, bool indirect, bool *ok)
 {
+	*ok = true;
 	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+		zend_readonly_write_kind readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
+		if (info->flags & ZEND_ACC_READONLY) {
+			readonly_write_kind = zend_get_readonly_write_kind(property_val, info);
+		}
 		if ((info->flags & ZEND_ACC_READONLY)
-		 && (!zend_readonly_property_is_reinitable_for_context(property_val, info)
+		 && (readonly_write_kind == ZEND_READONLY_WRITE_FORBIDDEN
 		     || zend_is_foreign_cpp_overwrite(property_val, info))) {
 			zend_readonly_property_modification_error(info);
-			return false;
+			*ok = false;
+			return ZEND_READONLY_WRITE_FORBIDDEN;
 		}
 		if ((info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(info)) {
 			const char *operation = indirect ? "indirectly modify" : "modify";
 			zend_asymmetric_visibility_property_modification_error(info, operation);
-			return false;
+			*ok = false;
+			return ZEND_READONLY_WRITE_FORBIDDEN;
 		}
+		return readonly_write_kind;
 	}
-	return true;
+	return ZEND_READONLY_WRITE_FORBIDDEN;
 }
 
 static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend_property_info *info, zval *value, zval *result)
@@ -2826,6 +2835,8 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_refcounted *garbage = NULL;
 	zval tmp;
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
 	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 		const zend_op *op_data = execute_data->opline + 1;
@@ -2834,7 +2845,8 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 		value = &EG(uninitialized_zval);
 	}
 
-	if (UNEXPECTED(!verify_readonly_and_avis(property_val, info, false))) {
+	readonly_write_kind = verify_readonly_and_avis(property_val, info, false, &ok);
+	if (UNEXPECTED(!ok)) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -2852,7 +2864,11 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 		return;
 	}
 
-	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+	if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+		Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+		Z_PROP_FLAG_P(property_val) |= IS_PROP_CTOR_REASSIGNED;
+	}
 
 	value = zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), &garbage);
 	if (result) {
@@ -2894,8 +2910,11 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval z_copy;
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
-	if (UNEXPECTED(!verify_readonly_and_avis(zptr, prop_info, true))) {
+	readonly_write_kind = verify_readonly_and_avis(zptr, prop_info, true, &ok);
+	if (UNEXPECTED(!ok)) {
 		return;
 	}
 
@@ -2909,7 +2928,11 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 
 	binary_op(&z_copy, zptr, value);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
-		Z_PROP_FLAG_P(zptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+			Z_PROP_FLAG_P(zptr) &= ~IS_PROP_REINITABLE;
+		} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+			Z_PROP_FLAG_P(zptr) |= IS_PROP_CTOR_REASSIGNED;
+		}
 		zval_ptr_dtor(zptr);
 		ZVAL_COPY_VALUE(zptr, &z_copy);
 	} else {
@@ -2988,8 +3011,11 @@ static ZEND_COLD zend_long _zend_jit_throw_dec_prop_error(zend_property_info *pr
 static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info)
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
-	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
+	readonly_write_kind = verify_readonly_and_avis(var_ptr, prop_info, true, &ok);
+	if (UNEXPECTED(!ok)) {
 		return;
 	}
 
@@ -3006,13 +3032,21 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+				Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+				Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+			}
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, &tmp);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+			Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+		}
 		zval_ptr_dtor(&tmp);
 	}
 }
@@ -3020,8 +3054,11 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info)
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
-	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
+	readonly_write_kind = verify_readonly_and_avis(var_ptr, prop_info, true, &ok);
+	if (UNEXPECTED(!ok)) {
 		return;
 	}
 
@@ -3038,13 +3075,21 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+				Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+				Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+			}
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, &tmp);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+			Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+		}
 		zval_ptr_dtor(&tmp);
 	}
 }
@@ -3066,8 +3111,11 @@ static void ZEND_FASTCALL zend_jit_pre_dec_typed_prop(zval *var_ptr, zend_proper
 static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
-	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
+	readonly_write_kind = verify_readonly_and_avis(var_ptr, prop_info, true, &ok);
+	if (UNEXPECTED(!ok)) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -3086,22 +3134,33 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_prope
 			zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+				Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+				Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+			}
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, result);
 		ZVAL_UNDEF(result);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+			Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+		}
 	}
 }
 
 static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+	bool ok;
+	zend_readonly_write_kind readonly_write_kind;
 
-	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
+	readonly_write_kind = verify_readonly_and_avis(var_ptr, prop_info, true, &ok);
+	if (UNEXPECTED(!ok)) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -3120,14 +3179,22 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_prope
 			zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 			ZVAL_LONG(var_ptr, val);
 		} else {
-			Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+				Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+				Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+			}
 		}
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, result);
 		ZVAL_UNDEF(result);
 	} else {
-		Z_PROP_FLAG_P(var_ptr) &= ~(IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE);
+		if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+			Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_REINITABLE;
+		} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+			Z_PROP_FLAG_P(var_ptr) |= IS_PROP_CTOR_REASSIGNED;
+		}
 	}
 }
 

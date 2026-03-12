@@ -1049,12 +1049,14 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
+	zend_readonly_write_kind readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
+		readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 
 		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
@@ -1066,9 +1068,12 @@ try_again:
 				error = (*guard) & IN_SET;
 			}
 			if (error) {
+				if ((prop_info->flags & ZEND_ACC_READONLY) && Z_TYPE_P(variable_ptr) != IS_UNDEF) {
+					readonly_write_kind = zend_get_readonly_write_kind(variable_ptr, prop_info);
+				}
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
-				 && (!zend_readonly_property_is_reinitable_for_context(variable_ptr, prop_info)
+				 && (readonly_write_kind == ZEND_READONLY_WRITE_FORBIDDEN
 				     || zend_is_foreign_cpp_overwrite(variable_ptr, prop_info))) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
@@ -1103,42 +1108,7 @@ typed_property:
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				/* For readonly properties initialized for the first time via CPP, set
-				 * IS_PROP_REINITABLE to allow one reassignment in the constructor body.
-				 * The flag is cleared by zend_leave_helper when the constructor exits.
-				 *
-				 * Classical case: the property is promoted in the declaring class and the
-				 * executing constructor belongs to that class (scope == prop_info->ce).
-				 *
-				 * Extended case: a child class redeclared the property without CPP, so
-				 * prop_info->ce is the child but the property isn't promoted there. CPP
-				 * "ownership" still belongs to the ancestor whose constructor has CPP for
-				 * this property name, so its body is allowed to reassign once. The clearing
-				 * loop in zend_leave_helper iterates the exiting ctor's own promoted props,
-				 * which share the same object slot, so cleanup happens automatically. */
-				bool reinitable = false;
-				if ((prop_info->flags & ZEND_ACC_READONLY)
-				 && (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT)
-				 && EG(current_execute_data)
-				 && (EG(current_execute_data)->func->common.fn_flags & ZEND_ACC_CTOR)) {
-					zend_class_entry *ctor_scope = EG(current_execute_data)->func->common.scope;
-					if (prop_info->flags & ZEND_ACC_PROMOTED) {
-						reinitable = (ctor_scope == prop_info->ce);
-					} else if (ctor_scope != prop_info->ce) {
-						/* Child redeclared without CPP: check if the executing ctor's class
-						 * has a CPP declaration for this property name. */
-						zend_property_info *scope_prop = zend_hash_find_ptr(
-							&ctor_scope->properties_info, prop_info->name);
-						reinitable = scope_prop != NULL
-							&& (scope_prop->flags & (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED))
-							   == (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED);
-					}
-				}
-				if (reinitable) {
-					Z_PROP_FLAG_P(variable_ptr) = IS_PROP_REINITABLE | IS_PROP_CTOR_REINITABLE;
-				} else {
-					Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE|IS_PROP_CTOR_REINITABLE);
-				}
+				Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
 				value = &tmp;
 			}
 
@@ -1147,6 +1117,12 @@ found:;
 
 			variable_ptr = zend_assign_to_variable_ex(
 				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types(), &garbage);
+
+			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
+				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
+			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
+				Z_PROP_FLAG_P(variable_ptr) |= IS_PROP_CTOR_REASSIGNED;
+			}
 
 			if (garbage) {
 				if (GC_DELREF(garbage) == 0) {
@@ -1556,7 +1532,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
 				 && Z_TYPE_P(slot) != IS_UNDEF
-				 && !zend_readonly_property_is_reinitable_for_context(slot, prop_info)) {
+				 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE)) {
 					zend_readonly_property_unset_error(prop_info->ce, name);
 					return;
 				}

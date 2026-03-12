@@ -2512,8 +2512,8 @@ ZEND_VM_HANDLER(24, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMP|CV, CACHE_SLO
 ZEND_VM_C_LABEL(assign_object):
 	zobj = Z_OBJ_P(object);
 	if (OP2_TYPE == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -2619,7 +2619,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (OP2_TYPE != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -3000,7 +3000,6 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -3035,7 +3034,6 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {

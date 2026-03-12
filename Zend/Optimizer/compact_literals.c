@@ -514,15 +514,18 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_POST_INC_OBJ:
 				case ZEND_POST_DEC_OBJ:
 					if (opline->op2_type == IS_CONST) {
+						uint32_t obj_flags = (opline->opcode == ZEND_ASSIGN_OBJ || opline->opcode == ZEND_ASSIGN_OBJ_REF)
+							? ZEND_ASSIGN_OBJ_FLAGS
+							: ZEND_FETCH_OBJ_FLAGS;
 						// op2 property
 						if (opline->op1_type == IS_UNUSED &&
 						    property_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
+							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & obj_flags);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
+							opline->extended_value = cache_size | (opline->extended_value & obj_flags);
 							cache_size += 3 * sizeof(void *);
 							if (opline->op1_type == IS_UNUSED) {
-								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
+								property_slot[opline->op2.constant] = opline->extended_value & ~obj_flags;
 							}
 						}
 					}

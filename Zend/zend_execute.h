@@ -583,7 +583,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
-#define ZEND_CLASS_HAS_PROMOTED_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_PROMOTED_READONLY_PROPS))
 
 static zend_always_inline bool zend_scope_is_derived_from(
 	const zend_class_entry *scope, const zend_class_entry *ancestor)
@@ -650,19 +649,53 @@ static zend_always_inline bool zend_has_active_ctor_with_promoted_property(
 	return false;
 }
 
-static zend_always_inline bool zend_readonly_property_is_reinitable_for_context(
-	const zval *property_val, const zend_property_info *prop_info)
+static zend_always_inline bool zend_is_promoted_readonly_ctor_init_assign(
+	const zend_execute_data *ex, const zend_property_info *prop_info)
 {
-	if (!(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+	if (ex == NULL
+	 || ex->opline == NULL
+	 || !((ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
+	  && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
 		return false;
 	}
-	if (!(Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REINITABLE)) {
-		return true;
+	if (!(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
+		return false;
+	}
+	return zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name);
+}
+
+static zend_always_inline zend_object *zend_property_owner_from_slot(
+	const zval *property_val, const zend_property_info *prop_info)
+{
+	return (zend_object *) ((char *) property_val - prop_info->offset);
+}
+
+typedef enum _zend_readonly_write_kind {
+	ZEND_READONLY_WRITE_FORBIDDEN = 0, /* Write disallowed, or no special flag update needed */
+	ZEND_READONLY_WRITE_REINITABLE,    /* Clone reinit window: clear IS_PROP_REINITABLE after write */
+	ZEND_READONLY_WRITE_CTOR_REASSIGNED, /* CPP ctor reassignment: set IS_PROP_CTOR_REASSIGNED after write */
+} zend_readonly_write_kind;
+
+static zend_always_inline zend_readonly_write_kind zend_get_readonly_write_kind(
+	const zval *property_val, const zend_property_info *prop_info)
+{
+	if (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) {
+		return ZEND_READONLY_WRITE_REINITABLE;
+	}
+	if (Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REASSIGNED) {
+		return ZEND_READONLY_WRITE_FORBIDDEN;
 	}
 	zend_execute_data *ex = EG(current_execute_data);
-	return ex
-		&& (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
-		&& zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name);
+	if (ex == NULL
+	 || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
+	 || !zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name)
+	 || zend_property_owner_from_slot(property_val, prop_info) != Z_OBJ(ex->This)
+	 || (ex->opline != NULL
+	     && (ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
+	     && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
+		return ZEND_READONLY_WRITE_FORBIDDEN;
+	}
+	return ZEND_READONLY_WRITE_CTOR_REASSIGNED;
 }
 
 /* Check if a foreign constructor is attempting a CPP initial assignment on an
@@ -684,7 +717,6 @@ static zend_always_inline bool zend_is_foreign_cpp_overwrite(
 		return true;
 	}
 	if (!(prop_info->flags & ZEND_ACC_PROMOTED)
-	 && (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)
 	 && zend_has_active_derived_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info)) {
 		return true;
 	}
@@ -697,7 +729,6 @@ ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
 ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property);
-ZEND_API void ZEND_FASTCALL zend_ctor_clear_promoted_readonly_reinitable(zend_execute_data *ex, uint32_t call_info);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
 	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)

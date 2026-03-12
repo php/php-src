@@ -1160,7 +1160,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -1195,7 +1194,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -24405,8 +24403,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -24513,7 +24511,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -24562,8 +24560,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -24669,7 +24667,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -24717,8 +24715,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -24825,7 +24823,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -27113,8 +27111,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -27221,7 +27219,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -27269,8 +27267,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -27376,7 +27374,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -27423,8 +27421,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -27531,7 +27529,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -30937,8 +30935,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -31045,7 +31043,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -31094,8 +31092,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -31201,7 +31199,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -31249,8 +31247,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -31357,7 +31355,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -33471,8 +33469,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -33579,7 +33577,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -33629,8 +33627,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -33736,7 +33734,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -33785,8 +33783,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -33893,7 +33891,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -35569,8 +35567,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -35677,7 +35675,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -35726,8 +35724,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -35833,7 +35831,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -35881,8 +35879,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -35989,7 +35987,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -38138,8 +38136,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -38246,7 +38244,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -38296,8 +38294,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -38403,7 +38401,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -38452,8 +38450,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -38560,7 +38558,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -42507,8 +42505,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -42615,7 +42613,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -42665,8 +42663,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -42772,7 +42770,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -42821,8 +42819,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -42929,7 +42927,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -46330,8 +46328,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -46438,7 +46436,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -46487,8 +46485,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -46594,7 +46592,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -46642,8 +46640,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -46750,7 +46748,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -51444,8 +51442,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -51552,7 +51550,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -51602,8 +51600,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -51709,7 +51707,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -51758,8 +51756,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_SP
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -51866,7 +51864,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -53882,7 +53880,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -53917,7 +53914,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -76809,8 +76805,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -76917,7 +76913,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -76966,8 +76962,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -77073,7 +77069,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -77121,8 +77117,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -77229,7 +77225,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -79517,8 +79513,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -79625,7 +79621,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -79673,8 +79669,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -79780,7 +79776,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -79827,8 +79823,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -79935,7 +79931,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -83341,8 +83337,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -83449,7 +83445,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -83498,8 +83494,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -83605,7 +83601,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -83653,8 +83649,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_VA
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -83761,7 +83757,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -85875,8 +85871,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -85983,7 +85979,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -86033,8 +86029,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -86140,7 +86136,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -86189,8 +86185,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -86297,7 +86293,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -87973,8 +87969,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -88081,7 +88077,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -88130,8 +88126,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -88237,7 +88233,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -88285,8 +88281,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -88393,7 +88389,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -90542,8 +90538,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -90650,7 +90646,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -90700,8 +90696,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -90807,7 +90803,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -90856,8 +90852,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_UN
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -90964,7 +90960,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -94911,8 +94907,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -95019,7 +95015,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -95069,8 +95065,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -95176,7 +95172,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -95225,8 +95221,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CONST == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -95333,7 +95329,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -98734,8 +98730,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -98842,7 +98838,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -98891,8 +98887,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -98998,7 +98994,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -99046,8 +99042,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_TMP_VAR == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -99154,7 +99150,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_TMP_VAR == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_TMP_VAR != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -103746,8 +103742,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -103854,7 +103850,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -103904,8 +103900,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -104011,7 +104007,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -104060,8 +104056,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_SPEC_CV
 assign_object:
 	zobj = Z_OBJ_P(object);
 	if (IS_CV == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -104168,7 +104164,7 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
@@ -110152,7 +110148,6 @@ zend_leave_helper_SPEC_LABEL:
 #ifdef ZEND_PREFER_RELOAD
 		call_info = EX_CALL_INFO();
 #endif
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -110187,7 +110182,6 @@ zend_leave_helper_SPEC_LABEL:
 		 * as that may free the op_array. */
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 
-		zend_ctor_clear_promoted_readonly_reinitable(execute_data, call_info);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
