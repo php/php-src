@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
     script). (ilutov)
+  . Fixed bug GH-20838 (JIT compiler produces wrong arithmetic results).
+    (Dmitry, iliaal)
 
 - OpenSSL:
   . Fixed bug GH-21083 (Skip private_key_bits validation for EC/curve-based
