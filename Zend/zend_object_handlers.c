@@ -1049,13 +1049,13 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
+	zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
-try_again:;
-		zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
+try_again:
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 
 		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
