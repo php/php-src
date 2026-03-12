@@ -1049,14 +1049,13 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
-	zend_readonly_write_kind readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
-try_again:
-		readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
+try_again:;
+		zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 
 		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
@@ -1068,19 +1067,8 @@ try_again:
 				error = (*guard) & IN_SET;
 			}
 			if (error) {
-				if ((prop_info->flags & ZEND_ACC_READONLY) && Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-					readonly_write_kind = zend_get_readonly_write_kind(variable_ptr, prop_info);
-				}
-				if ((prop_info->flags & ZEND_ACC_READONLY)
-				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
-				 && (readonly_write_kind == ZEND_READONLY_WRITE_FORBIDDEN
-				     || zend_is_foreign_cpp_overwrite(variable_ptr, prop_info))) {
-					zend_readonly_property_modification_error(prop_info);
-					variable_ptr = &EG(error_zval);
-					goto exit;
-				}
-				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
-					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
+				prop_write_kind = zend_verify_readonly_and_avis(variable_ptr, prop_info, false);
+				if (prop_write_kind == ZEND_PROPERTY_WRITE_FORBIDDEN) {
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
@@ -1118,11 +1106,7 @@ found:;
 			variable_ptr = zend_assign_to_variable_ex(
 				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types(), &garbage);
 
-			if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
-				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
-			} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
-				Z_PROP_FLAG_P(variable_ptr) |= IS_PROP_CTOR_REASSIGNED;
-			}
+			zend_property_write_commit(variable_ptr, prop_write_kind);
 
 			if (garbage) {
 				if (GC_DELREF(garbage) == 0) {

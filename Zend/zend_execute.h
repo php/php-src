@@ -595,132 +595,87 @@ static zend_always_inline bool zend_scope_is_derived_from(
 	return false;
 }
 
-static zend_always_inline bool zend_has_active_derived_ctor_with_promoted_property(
-	const zend_execute_data *ex, zend_object *obj, const zend_property_info *prop_info)
-{
-	for (const zend_execute_data *prev = ex->prev_execute_data; prev != NULL; prev = prev->prev_execute_data) {
-		if (!(ZEND_CALL_INFO(prev) & ZEND_CALL_HAS_THIS)
-		 || !(prev->func->common.fn_flags & ZEND_ACC_CTOR)
-		 || Z_OBJ(prev->This) != obj) {
-			continue;
-		}
-
-		zend_class_entry *scope = prev->func->common.scope;
-		if (scope == NULL || !zend_scope_is_derived_from(scope, ex->func->common.scope)) {
-			continue;
-		}
-
-		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(
-			&scope->properties_info, prop_info->name);
-		if (scope_prop != NULL
-		 && (scope_prop->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED))
-			== (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 static zend_always_inline bool zend_has_active_ctor_with_promoted_property(
 	const zend_execute_data *ex, zend_object *obj, zend_string *property_name)
 {
 	for (const zend_execute_data *frame = ex; frame != NULL; frame = frame->prev_execute_data) {
-		if (!(ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_THIS)
-		 || !(frame->func->common.fn_flags & ZEND_ACC_CTOR)
-		 || Z_OBJ(frame->This) != obj) {
+		if (!(ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_THIS) || Z_OBJ(frame->This) != obj) {
+			return false;
+		}
+		if (!(frame->func->common.fn_flags & ZEND_ACC_CTOR)) {
 			continue;
 		}
 
 		zend_class_entry *scope = frame->func->common.scope;
-		if (scope == NULL) {
-			continue;
-		}
+		ZEND_ASSERT(scope);
 
-		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(
-			&scope->properties_info, property_name);
-		if (scope_prop != NULL
-		 && (scope_prop->flags & (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED))
-			== (ZEND_ACC_READONLY | ZEND_ACC_PROMOTED)) {
-			return true;
-		}
+		zend_property_info *scope_prop = (zend_property_info *) zend_hash_find_ptr(&scope->properties_info, property_name);
+		ZEND_ASSERT(scope_prop);
+		return scope_prop->ce == scope && (scope_prop->flags & (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED)) == (ZEND_ACC_READONLY|ZEND_ACC_PROMOTED);
 	}
 
 	return false;
 }
 
-static zend_always_inline bool zend_is_promoted_readonly_ctor_init_assign(
-	const zend_execute_data *ex, const zend_property_info *prop_info)
-{
-	if (ex == NULL
-	 || ex->opline == NULL
-	 || !((ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
-	  && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
-		return false;
-	}
-	if (!(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
-		return false;
-	}
-	return zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name);
-}
+typedef enum _zend_property_write_kind {
+	ZEND_PROPERTY_WRITE_FORBIDDEN = 0,            /* Write disallowed */
+	ZEND_PROPERTY_WRITE_OK,                       /* Write allowed */
+	ZEND_PROPERTY_WRITE_READONLY_REINITABLE,      /* Clone reinit window: clear IS_PROP_REINITABLE after write */
+	ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED, /* CPP ctor reassignment: set IS_PROP_CTOR_REASSIGNED after write */
+} zend_property_write_kind;
 
-static zend_always_inline zend_object *zend_property_owner_from_slot(
-	const zval *property_val, const zend_property_info *prop_info)
-{
-	return (zend_object *) ((char *) property_val - prop_info->offset);
-}
-
-typedef enum _zend_readonly_write_kind {
-	ZEND_READONLY_WRITE_FORBIDDEN = 0, /* Write disallowed, or no special flag update needed */
-	ZEND_READONLY_WRITE_REINITABLE,    /* Clone reinit window: clear IS_PROP_REINITABLE after write */
-	ZEND_READONLY_WRITE_CTOR_REASSIGNED, /* CPP ctor reassignment: set IS_PROP_CTOR_REASSIGNED after write */
-} zend_readonly_write_kind;
-
-static zend_always_inline zend_readonly_write_kind zend_get_readonly_write_kind(
+static zend_always_inline zend_property_write_kind zend_get_readonly_write_kind(
 	const zval *property_val, const zend_property_info *prop_info)
 {
 	if (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) {
-		return ZEND_READONLY_WRITE_REINITABLE;
+		return ZEND_PROPERTY_WRITE_READONLY_REINITABLE;
 	}
 	if (Z_PROP_FLAG_P(property_val) & IS_PROP_CTOR_REASSIGNED) {
-		return ZEND_READONLY_WRITE_FORBIDDEN;
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
 	}
 	zend_execute_data *ex = EG(current_execute_data);
-	if (ex == NULL
-	 || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)
-	 || !zend_has_active_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info->name)
-	 || zend_property_owner_from_slot(property_val, prop_info) != Z_OBJ(ex->This)
-	 || (ex->opline != NULL
-	     && (ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
-	     && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
-		return ZEND_READONLY_WRITE_FORBIDDEN;
+	if (ex == NULL || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
 	}
-	return ZEND_READONLY_WRITE_CTOR_REASSIGNED;
+	zend_object *obj = zend_get_object_from_slot(property_val, prop_info);
+	if (!zend_has_active_ctor_with_promoted_property(ex, obj, prop_info->name)
+	 || (ex->opline
+	  && (ex->opline->opcode == ZEND_ASSIGN_OBJ || ex->opline->opcode == ZEND_ASSIGN_OBJ_REF)
+	  && (ex->opline->extended_value & ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT))) {
+		return ZEND_PROPERTY_WRITE_FORBIDDEN;
+	}
+	return ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED;
 }
 
-/* Check if a foreign constructor is attempting a CPP initial assignment on an
- * already-initialized property owned by a different class (e.g., child has CPP
- * for $x, parent's CPP also tries to set $x on the child's object). */
-static zend_always_inline bool zend_is_foreign_cpp_overwrite(
-	const zval *property_val, const zend_property_info *prop_info)
+static zend_always_inline zend_property_write_kind zend_verify_readonly_and_avis(
+	zval *property_val, const zend_property_info *info, bool indirect)
 {
-	if (Z_PROP_FLAG_P(property_val) & IS_PROP_UNINIT) {
-		return false;
+	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+		zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
+		if ((info->flags & ZEND_ACC_READONLY) && !Z_ISUNDEF_P(property_val)) {
+			prop_write_kind = zend_get_readonly_write_kind(property_val, info);
+			if (prop_write_kind == ZEND_PROPERTY_WRITE_FORBIDDEN) {
+				zend_readonly_property_modification_error(info);
+				return ZEND_PROPERTY_WRITE_FORBIDDEN;
+			}
+		}
+		if ((info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(info)) {
+			const char *operation = indirect ? "indirectly modify" : "modify";
+			zend_asymmetric_visibility_property_modification_error(info, operation);
+			return ZEND_PROPERTY_WRITE_FORBIDDEN;
+		}
+		return prop_write_kind;
 	}
-	zend_execute_data *ex = EG(current_execute_data);
-	if (!ex
-	 || !(ex->func->common.fn_flags & ZEND_ACC_CTOR)
-	 || !(ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_THIS)) {
-		return false;
+	return ZEND_PROPERTY_WRITE_OK;
+}
+
+static zend_always_inline void zend_property_write_commit(zval *property_val, zend_property_write_kind kind)
+{
+	if (kind == ZEND_PROPERTY_WRITE_READONLY_REINITABLE) {
+		Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	} else if (kind == ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED) {
+		Z_PROP_FLAG_P(property_val) |= IS_PROP_CTOR_REASSIGNED;
 	}
-	if ((prop_info->flags & ZEND_ACC_PROMOTED) && ex->func->common.scope != prop_info->ce) {
-		return true;
-	}
-	if (!(prop_info->flags & ZEND_ACC_PROMOTED)
-	 && zend_has_active_derived_ctor_with_promoted_property(ex, Z_OBJ(ex->This), prop_info)) {
-		return true;
-	}
-	return false;
 }
 
 ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);

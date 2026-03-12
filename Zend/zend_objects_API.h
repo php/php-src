@@ -137,6 +137,11 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline zend_object *zend_get_object_from_slot(const zval *slot, const zend_property_info *prop_info)
+{
+	return (zend_object *)((char *)slot - prop_info->offset);
+}
+
 static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
 {
 	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)

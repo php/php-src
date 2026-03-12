@@ -1071,22 +1071,9 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
 {
 	zval tmp;
-	zend_readonly_write_kind readonly_write_kind = ZEND_READONLY_WRITE_FORBIDDEN;
-
-	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
-		if (info->flags & ZEND_ACC_READONLY) {
-			readonly_write_kind = zend_get_readonly_write_kind(property_val, info);
-		}
-		if ((info->flags & ZEND_ACC_READONLY)
-		 && (readonly_write_kind == ZEND_READONLY_WRITE_FORBIDDEN
-		     || zend_is_foreign_cpp_overwrite(property_val, info))) {
-			zend_readonly_property_modification_error(info);
-			return &EG(uninitialized_zval);
-		}
-		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
-			zend_asymmetric_visibility_property_modification_error(info, "modify");
-			return &EG(uninitialized_zval);
-		}
+	zend_property_write_kind prop_write_kind = zend_verify_readonly_and_avis(property_val, info, false);
+	if (prop_write_kind == ZEND_PROPERTY_WRITE_FORBIDDEN) {
+		return &EG(uninitialized_zval);
 	}
 
 	ZVAL_DEREF(value);
@@ -1097,11 +1084,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 		return &EG(uninitialized_zval);
 	}
 
-	if (readonly_write_kind == ZEND_READONLY_WRITE_REINITABLE) {
-		Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
-	} else if (readonly_write_kind == ZEND_READONLY_WRITE_CTOR_REASSIGNED) {
-		Z_PROP_FLAG_P(property_val) |= IS_PROP_CTOR_REASSIGNED;
-	}
+	zend_property_write_commit(property_val, prop_write_kind);
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
