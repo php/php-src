@@ -21,18 +21,18 @@
 
 BEGIN_EXTERN_C()
 PHPAPI void config_zval_dtor(zval *zvalue);
-int php_init_config(void);
-int php_shutdown_config(void);
+void php_init_config(void);
+void php_shutdown_config(void);
 void php_ini_register_extensions(void);
 PHPAPI zval *cfg_get_entry_ex(zend_string *name);
 PHPAPI zval *cfg_get_entry(const char *name, size_t name_length);
-PHPAPI int cfg_get_long(const char *varname, zend_long *result);
-PHPAPI int cfg_get_double(const char *varname, double *result);
-PHPAPI int cfg_get_string(const char *varname, char **result);
-PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash);
-PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage);
-PHPAPI int php_ini_has_per_dir_config(void);
-PHPAPI int php_ini_has_per_host_config(void);
+PHPAPI zend_result cfg_get_long(const char *varname, zend_long *result);
+PHPAPI zend_result cfg_get_double(const char *varname, double *result);
+PHPAPI zend_result cfg_get_string(const char *varname, char **result);
+PHPAPI zend_result php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash);
+PHPAPI void php_ini_activate_config(const HashTable *source_hash, int modify_type, int stage);
+PHPAPI bool php_ini_has_per_dir_config(void);
+PHPAPI bool php_ini_has_per_host_config(void);
 PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len);
 PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len);
 PHPAPI HashTable* php_ini_get_configuration_hash(void);

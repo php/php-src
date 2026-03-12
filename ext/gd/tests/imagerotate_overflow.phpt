@@ -11,14 +11,6 @@ $tmp = imagerotate ($im, 5, -9999999);
 
 var_dump($tmp);
 
-if ($tmp) {
-        imagedestroy($tmp);
-}
-
-if ($im) {
-        imagedestroy($im);
-}
-
 ?>
 --EXPECT--
 bool(false)

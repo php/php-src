@@ -103,7 +103,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	if (req_size > ZSTR_LEN(*buffer)) {
 		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
-			if (size > ZEND_SIZE_MAX/2) {
+			if (size > SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
 			}
 			size <<= 1;
@@ -298,9 +298,9 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			char exp_char = fmt == 'G' || fmt == 'H' ? 'E' : 'e';
 			/* We use &num_buf[ 1 ], so that we have room for the sign. */
 			s = zend_gcvt(number, precision, decimal_point, exp_char, &num_buf[1]);
-			is_negative = 0;
+			is_negative = false;
 			if (*s == '-') {
-				is_negative = 1;
+				is_negative = true;
 				s = &num_buf[1];
 			} else if (always_sign) {
 				num_buf[0] = '+';

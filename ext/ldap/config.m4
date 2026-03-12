@@ -91,14 +91,17 @@ if test "$PHP_LDAP" != "no"; then
     elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
       PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
       AC_DEFINE([HAVE_ORALDAP], [1])
+      AC_MSG_WARN([Build with Oracle Instant Client is deprecated as of PHP 8.5])
 
     elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
       PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
       AC_DEFINE([HAVE_ORALDAP], [1])
+      AC_MSG_WARN([Build with Oracle Instant Client is deprecated as of PHP 8.5])
 
     elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME; then
-       PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
-       AC_DEFINE([HAVE_ORALDAP], [1])
+      PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+      AC_DEFINE([HAVE_ORALDAP], [1])
+      AC_MSG_WARN([Build with Oracle Instant Client is deprecated as of PHP 8.5])
 
     else
       AC_MSG_ERROR([Cannot find ldap libraries in $LDAP_LIBDIR.])

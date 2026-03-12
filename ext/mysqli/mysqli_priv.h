@@ -55,7 +55,6 @@ extern void php_clear_mysql(MY_MYSQL *);
 extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql);
 
 extern void php_clear_warnings(MYSQLI_WARNING *w);
-extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error);
 extern void php_mysqli_report_index(const char *query, unsigned int status);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);

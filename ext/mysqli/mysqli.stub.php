@@ -58,6 +58,11 @@ const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
  * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
  */
 const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_COMPRESS
+ */
+const MYSQLI_OPT_COMPRESS = UNKNOWN;
 
 /**
  * @var int
@@ -589,9 +594,6 @@ const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 
-/**
- * @var bool
- */
 #[\Deprecated(since: '8.2', message: 'as it is always false')]
 const MYSQLI_IS_MARIADB = false;
 
@@ -1383,6 +1385,7 @@ function mysqli_error_list(mysqli $mysql): array {}
 function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 /** @alias mysqli_stmt_execute */
+#[\Deprecated(since: '8.5', message: "use mysqli_stmt_execute() instead")]
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}

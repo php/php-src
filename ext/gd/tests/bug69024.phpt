@@ -6,7 +6,6 @@ gd
 <?php
 $im = imagecreate(256, 256);
 imagescale($im, 32, 32, IMG_BICUBIC);
-imagedestroy($im);
 echo "done\n";
 ?>
 --EXPECT--

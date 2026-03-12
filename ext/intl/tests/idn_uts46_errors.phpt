@@ -9,7 +9,6 @@ intl
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 echo "=> PHP level errors", "\n";
 
 echo "bad variant:", "\n";

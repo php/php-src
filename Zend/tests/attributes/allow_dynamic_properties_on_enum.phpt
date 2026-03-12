@@ -8,4 +8,4 @@ enum Test {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[AllowDynamicProperties] to enum Test in %s on line %d
+Fatal error: Cannot apply #[\AllowDynamicProperties] to enum Test in %s on line %d

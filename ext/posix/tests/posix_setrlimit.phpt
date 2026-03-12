@@ -12,9 +12,25 @@ if (str_contains(PHP_OS, 'FreeBSD')) die('skip different behavior on FreeBSD');
 <?php
 
 var_dump(posix_setrlimit(POSIX_RLIMIT_NOFILE, 128, 128));
-var_dump(posix_setrlimit(POSIX_RLIMIT_NOFILE, 129, 128));
+try {
+	posix_setrlimit(POSIX_RLIMIT_NOFILE, 129, 128);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+try {
+	posix_setrlimit(POSIX_RLIMIT_NOFILE, -2, -1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+try {
+	posix_setrlimit(POSIX_RLIMIT_NOFILE, -1, -2);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 
 ?>
 --EXPECT--
 bool(true)
-bool(false)
+posix_setrlimit(): Argument #2 ($soft_limit) must be lower or equal to 128
+posix_setrlimit(): Argument #2 ($soft_limit) must be greater or equal to -1
+posix_setrlimit(): Argument #3 ($hard_limit) must be greater or equal to -1

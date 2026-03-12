@@ -2,10 +2,10 @@
 Test mb_stripos() function :  with empty needle
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'abc def';
 // Japanese string in UTF-8

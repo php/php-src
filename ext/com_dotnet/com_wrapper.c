@@ -423,7 +423,7 @@ static void generate_dispids(php_dispatchex *disp)
 	HashPosition pos;
 	zend_string *name = NULL;
 	zval *tmp, tmp2;
-	int keytype;
+	zend_hash_key_type keytype;
 	zend_long pid;
 
 	if (disp->dispid_to_name == NULL) {

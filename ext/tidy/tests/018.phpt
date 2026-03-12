@@ -7,7 +7,7 @@ tidy
 $x = tidy_repair_string("<p>abra\0cadabra</p>",
     array(	'show-body-only' => true,
             'clean' => false,
-            'newline' => "\n")
+            'newline' => "LF")
     );
 var_dump($x);
 ?>

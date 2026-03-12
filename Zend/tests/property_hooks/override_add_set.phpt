@@ -30,7 +30,7 @@ var_dump($b->prop);
 
 ?>
 --EXPECT--
-Property A::$prop is read-only
+Cannot write to get-only virtual property A::$prop
 A::A::$prop::get
 int(42)
 B::B::$prop::set

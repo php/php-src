@@ -110,7 +110,7 @@ static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
-	int i, j, n, *map;
+	int n, *map;
 	uint32_t cache_size;
 	zval zv, *pos;
 	literal_info *info;
@@ -124,6 +124,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
 
 	if (op_array->last_literal) {
+		uint32_t j;
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
 
 	    /* Mark literals of specific types */
@@ -258,9 +259,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					op_array->function_name ? op_array->function_name->val : "main");
 			fprintf(stderr, "Literals table size %d\n", op_array->last_literal);
 
-			for (int i = 0; i < op_array->last_literal; i++) {
+			for (uint32_t i = 0; i < op_array->last_literal; i++) {
 				zend_string *str = zval_get_string(op_array->literals + i);
-				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
+				fprintf(stderr, "Literal %" PRIu32 ", val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
 				zend_string_release(str);
 			}
 			fflush(stderr);
@@ -272,7 +273,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
-		for (i = 0; i < op_array->last_literal; i++) {
+		for (uint32_t i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].num_related) {
 				/* unset literal */
 				zval_ptr_dtor_nogc(&op_array->literals[i]);
@@ -740,6 +741,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						cache_size += 2 * sizeof(void *);
 					}
 					break;
+				case ZEND_CALLABLE_CONVERT:
+					if (opline->extended_value != (uint32_t)-1) {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
 			}
 			opline++;
 		}
@@ -770,9 +777,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		{
 			fprintf(stderr, "Optimized literals table size %d\n", op_array->last_literal);
 
-			for (int i = 0; i < op_array->last_literal; i++) {
+			for (uint32_t i = 0; i < op_array->last_literal; i++) {
 				zend_string *str = zval_get_string(op_array->literals + i);
-				fprintf(stderr, "Literal %d, val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
+				fprintf(stderr, "Literal %" PRIu32 ", val (%zu):%s\n", i, ZSTR_LEN(str), ZSTR_VAL(str));
 				zend_string_release(str);
 			}
 			fflush(stderr);

@@ -3,10 +3,10 @@ SPL: RecursiveIteratorIterator - Test where the case is RS_SELF and mode is CHIL
 --FILE--
 <?php
 
-$arr = array(array(1,2),2);
-$arrOb = new ArrayObject($arr);
-
-$recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
+$recArrIt = new RecursiveArrayIterator([
+    [1, 2],
+    ['a', 'b'],
+]);
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
 
@@ -28,5 +28,9 @@ MyRecursiveIteratorIterator::nextelement
 1
 MyRecursiveIteratorIterator::nextelement
 0
+MyRecursiveIteratorIterator::nextelement
+0
+MyRecursiveIteratorIterator::nextelement
+1
 MyRecursiveIteratorIterator::nextelement
 1

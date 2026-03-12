@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c75c8a3d2e37b201d31f37cc3ed15fbf41d37f54 */
+/* This is a generated file, edit filter.stub.php instead.
+ * Stub hash: c3eb55dfec619af1e46be206f51a2b0893ed399f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input_type, IS_LONG, 0)
@@ -69,6 +69,7 @@ static void register_filter_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_ARRAY", FILTER_REQUIRE_ARRAY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_THROW_ON_FAILURE", FILTER_THROW_ON_FAILURE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOL", FILTER_VALIDATE_BOOL, CONST_PERSISTENT);
@@ -120,18 +121,33 @@ static void register_filter_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_const_FILTER_SANITIZE_STRING_0 = zend_add_global_constant_attribute(const_FILTER_SANITIZE_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1;
 	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str = zend_string_init("use htmlspecialchars() instead", strlen("use htmlspecialchars() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
 	attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0 = zend_add_global_constant_attribute(const_FILTER_SANITIZE_STRIPPED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1;
-	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1_str = zend_string_init("use htmlspecialchars() instead", strlen("use htmlspecialchars() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1, attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
+static zend_class_entry *register_class_Filter_FilterException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Filter", "FilterException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Filter_FilterFailedException(zend_class_entry *class_entry_Filter_FilterException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Filter", "FilterFailedException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Filter_FilterException, 0);
+
+	return class_entry;
 }

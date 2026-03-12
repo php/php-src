@@ -48,9 +48,7 @@ PHP_FUNCTION(cli_get_process_title)
 	size_t length = 0;
 	const char* title = NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ps_title_status rc = get_ps_title(&length, &title);
 	if (rc != PS_TITLE_SUCCESS) {

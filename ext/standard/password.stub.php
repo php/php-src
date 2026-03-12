@@ -2,13 +2,7 @@
 
 /** @generate-class-entries */
 
-/**
- * @var string
- */
 const PASSWORD_DEFAULT = "2y";
-/**
- * @var string
- */
 const PASSWORD_BCRYPT = "2y";
 /**
  * @var int
@@ -17,17 +11,8 @@ const PASSWORD_BCRYPT = "2y";
 const PASSWORD_BCRYPT_DEFAULT_COST = UNKNOWN;
 
 #ifdef HAVE_ARGON2LIB
-/**
- * @var string
- */
 const PASSWORD_ARGON2I = "argon2i";
-/**
- * @var string
- */
 const PASSWORD_ARGON2ID = "argon2id";
-/**
- * @var string
- */
 const PASSWORD_ARGON2_PROVIDER = "standard";
 /**
  * @var int

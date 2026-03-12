@@ -2,10 +2,11 @@
 Test mb_decode_mimeheader() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 echo "*** Testing mb_decode_mimeheader() : basic functionality ***\n";
-mb_internal_encoding('utf-8');
 
 //the following encoded-words are identical and are UTF-8 Japanese.
 $a = "=?UTF-8?b?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?=";

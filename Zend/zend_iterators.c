@@ -31,6 +31,7 @@ static const zend_object_handlers iterator_object_handlers = {
 	iter_wrapper_free,
 	iter_wrapper_dtor,
 	NULL, /* clone_obj */
+	NULL, /* clone_obj_with */
 	NULL, /* prop read */
 	NULL, /* prop write */
 	NULL, /* read dim */

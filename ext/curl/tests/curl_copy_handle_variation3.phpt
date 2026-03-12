@@ -29,7 +29,11 @@ curl_close($ch2);
 --EXPECTF--
 bool(true)
 string(%d) "curl_copy_handle_variation3.txt|application/octet-stream|5"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 string(%d) "curl_copy_handle_variation3.txt|application/octet-stream|5"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/curl_copy_handle_variation3.txt');

@@ -2,8 +2,6 @@
 UConverter::getDestinationEncoding()
 --CREDITS--
 Andy McNeice - PHP Testfest 2017
---INI--
-intl.error_level = E_WARNING
 --EXTENSIONS--
 intl
 --FILE--

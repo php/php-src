@@ -14,7 +14,6 @@ namespace Dba {
 
 namespace {
 #ifdef DBA_LMDB
-    /** @var int */
     const DBA_LMDB_USE_SUB_DIR = 0;
     /**
      * @var int

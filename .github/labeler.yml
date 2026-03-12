@@ -492,6 +492,7 @@
       - 'ext/spl/spl_iterators.h'
       - 'ext/spl/spl_observer.h'
       - 'ext/standard/*.h'
+      - 'ext/uri/*.h'
       - 'ext/xml/expat_compat.h'
       - 'ext/xml/php_xml.h'
       - 'main/*.h'

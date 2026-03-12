@@ -23,9 +23,9 @@ GetImageSize()
     var_dump($result);
 ?>
 --EXPECT--
-array(17) {
+array(18) {
   ["test-1pix.bmp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(1)
     [1]=>
@@ -38,9 +38,13 @@ array(17) {
     int(24)
     ["mime"]=>
     string(9) "image/bmp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test12pix.webp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(4)
     [1]=>
@@ -53,9 +57,13 @@ array(17) {
     int(8)
     ["mime"]=>
     string(10) "image/webp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1bpix.bmp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(1)
     [1]=>
@@ -68,9 +76,13 @@ array(17) {
     int(32)
     ["mime"]=>
     string(9) "image/bmp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1pix.avif"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(102)
     [1]=>
@@ -85,9 +97,13 @@ array(17) {
     int(4)
     ["mime"]=>
     string(10) "image/avif"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1pix.bmp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(1)
     [1]=>
@@ -100,9 +116,13 @@ array(17) {
     int(24)
     ["mime"]=>
     string(9) "image/bmp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1pix.jp2"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(1)
     [1]=>
@@ -117,9 +137,13 @@ array(17) {
     int(3)
     ["mime"]=>
     string(9) "image/jp2"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1pix.jpc"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(1)
     [1]=>
@@ -134,9 +158,13 @@ array(17) {
     int(3)
     ["mime"]=>
     string(24) "application/octet-stream"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test1pix.jpg"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(1)
     [1]=>
@@ -151,9 +179,13 @@ array(17) {
     int(3)
     ["mime"]=>
     string(10) "image/jpeg"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test2pix.gif"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(2)
     [1]=>
@@ -168,9 +200,13 @@ array(17) {
     int(3)
     ["mime"]=>
     string(9) "image/gif"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test3llpix.webp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(1)
     [1]=>
@@ -183,9 +219,13 @@ array(17) {
     int(8)
     ["mime"]=>
     string(10) "image/webp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test3pix.webp"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(1)
     [1]=>
@@ -198,9 +238,13 @@ array(17) {
     int(8)
     ["mime"]=>
     string(10) "image/webp"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.gif"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(4)
     [1]=>
@@ -215,9 +259,34 @@ array(17) {
     int(3)
     ["mime"]=>
     string(9) "image/gif"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
+  }
+  ["test4pix.heic"]=>
+  array(9) {
+    [0]=>
+    int(54)
+    [1]=>
+    int(84)
+    [2]=>
+    int(20)
+    [3]=>
+    string(22) "width="54" height="84""
+    ["bits"]=>
+    int(8)
+    ["channels"]=>
+    int(3)
+    ["mime"]=>
+    string(10) "image/heif"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.iff"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(4)
     [1]=>
@@ -230,9 +299,13 @@ array(17) {
     int(4)
     ["mime"]=>
     string(9) "image/iff"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.png"]=>
-  array(6) {
+  array(8) {
     [0]=>
     int(4)
     [1]=>
@@ -245,9 +318,13 @@ array(17) {
     int(4)
     ["mime"]=>
     string(9) "image/png"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.psd"]=>
-  array(5) {
+  array(7) {
     [0]=>
     int(4)
     [1]=>
@@ -258,9 +335,13 @@ array(17) {
     string(20) "width="4" height="1""
     ["mime"]=>
     string(9) "image/psd"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.swf"]=>
-  array(5) {
+  array(7) {
     [0]=>
     int(550)
     [1]=>
@@ -271,9 +352,13 @@ array(17) {
     string(24) "width="550" height="400""
     ["mime"]=>
     string(29) "application/x-shockwave-flash"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.tiff"]=>
-  array(5) {
+  array(7) {
     [0]=>
     int(4)
     [1]=>
@@ -284,5 +369,9 @@ array(17) {
     string(20) "width="4" height="1""
     ["mime"]=>
     string(10) "image/tiff"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
 }

@@ -28,7 +28,7 @@ EOT;
 
 // heredoc with different whitespaces
 $diff_whitespaces = <<<EOT
-hello\r world\t
+hello\n world\t
 1111\t\t != 2222\v\v
 heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
 EOT;
@@ -48,8 +48,8 @@ $inputs = array (
        array(false,true), // with default keys and boolean values
        array(), // empty array
 /*5*/  array(NULL), // with NULL
-       array("a\v\f", "aaaa\r", "b\tbbb", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f', 'aaaa\r', 'b\tbbb', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
+       array("a\v\f", "aaaa\n", "b\tbbb", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
+       array('a\v\f', 'aaaa\n', 'b\tbbb', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
        array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $numeric_string),  // with heredocs
 
        // associative arrays
@@ -60,11 +60,11 @@ $inputs = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*14*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -237,7 +237,8 @@ array(6) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [2]=>
   string(5) "b	bbb"
   [3]=>
@@ -255,7 +256,8 @@ array(6) {
   [2]=>
   string(3) "a"
   [3]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [4]=>
   string(5) "b	bbb"
   [5]=>
@@ -266,7 +268,7 @@ array(6) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
   [2]=>
   string(6) "b\tbbb"
   [3]=>
@@ -284,7 +286,7 @@ array(6) {
   [2]=>
   string(5) "a\v\f"
   [3]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
   [4]=>
   string(6) "b\tbbb"
   [5]=>
@@ -301,7 +303,8 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -330,7 +333,8 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -488,17 +492,17 @@ array(6) {
 }
 -- Iteration 14 --
 array(6) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
   [0]=>
-  string(5) "HELLO"
+  string(4) "true"
   [1]=>
-  string(5) "HELLO"
+  string(5) "false"
+  ["false"]=>
+  bool(false)
+  ["true"]=>
+  bool(true)
   [2]=>
+  string(5) "HELLO"
+  [3]=>
   string(5) "HELLO"
 }
 array(6) {
@@ -507,27 +511,27 @@ array(6) {
   [1]=>
   string(5) "HELLO"
   [2]=>
-  string(5) "HELLO"
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
+  string(4) "true"
+  [3]=>
+  string(5) "false"
+  ["false"]=>
+  bool(false)
+  ["true"]=>
+  bool(true)
 }
 -- Iteration 15 --
 array(6) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
   [0]=>
-  string(4) "true"
-  [1]=>
-  string(5) "false"
-  ["false"]=>
-  bool(false)
-  ["true"]=>
-  bool(true)
-  [2]=>
   string(5) "HELLO"
-  [3]=>
+  [1]=>
+  string(5) "HELLO"
+  [2]=>
   string(5) "HELLO"
 }
 array(6) {
@@ -536,27 +540,27 @@ array(6) {
   [1]=>
   string(5) "HELLO"
   [2]=>
-  string(4) "true"
-  [3]=>
-  string(5) "false"
-  ["false"]=>
-  bool(false)
-  ["true"]=>
-  bool(true)
+  string(5) "HELLO"
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 -- Iteration 16 --
 array(6) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
-  ["emptys"]=>
-  string(0) ""
   [0]=>
-  string(5) "HELLO"
+  string(0) ""
   [1]=>
-  string(5) "HELLO"
+  string(0) ""
   [2]=>
+  bool(false)
+  [3]=>
+  bool(true)
+  [4]=>
+  string(5) "HELLO"
+  [5]=>
   string(5) "HELLO"
 }
 array(6) {
@@ -565,73 +569,44 @@ array(6) {
   [1]=>
   string(5) "HELLO"
   [2]=>
-  string(5) "HELLO"
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
   string(0) ""
-  ["emptys"]=>
+  [3]=>
   string(0) ""
+  [4]=>
+  bool(false)
+  [5]=>
+  bool(true)
 }
 -- Iteration 17 --
 array(6) {
+  [""]=>
+  int(2)
+  [0]=>
+  int(5)
   [1]=>
-  string(0) ""
+  int(6)
   [2]=>
-  string(0) ""
+  string(5) "HELLO"
   [3]=>
-  NULL
+  string(5) "HELLO"
   [4]=>
-  NULL
-  [5]=>
-  bool(false)
-  [6]=>
-  bool(true)
+  string(5) "HELLO"
 }
 array(6) {
+  [0]=>
+  string(5) "HELLO"
   [1]=>
-  string(0) ""
+  string(5) "HELLO"
   [2]=>
-  string(0) ""
+  string(5) "HELLO"
+  [""]=>
+  int(2)
   [3]=>
-  NULL
+  int(5)
   [4]=>
-  NULL
-  [5]=>
-  bool(false)
-  [6]=>
-  bool(true)
+  int(6)
 }
 -- Iteration 18 --
-array(6) {
-  [""]=>
-  int(4)
-  [0]=>
-  int(5)
-  [1]=>
-  int(6)
-  [2]=>
-  string(5) "HELLO"
-  [3]=>
-  string(5) "HELLO"
-  [4]=>
-  string(5) "HELLO"
-}
-array(6) {
-  [0]=>
-  string(5) "HELLO"
-  [1]=>
-  string(5) "HELLO"
-  [2]=>
-  string(5) "HELLO"
-  [""]=>
-  int(4)
-  [3]=>
-  int(5)
-  [4]=>
-  int(6)
-}
--- Iteration 19 --
 array(6) {
   ["One"]=>
   int(10)

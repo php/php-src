@@ -208,8 +208,11 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 		break;
 
 		case IS_TRUE:
+			smart_str_appendl(dest, "true", sizeof("true")-1);
+		break;
+
 		case IS_FALSE:
-			smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+			smart_str_appendl(dest, "false", sizeof("false")-1);
 		break;
 
 		case IS_DOUBLE:

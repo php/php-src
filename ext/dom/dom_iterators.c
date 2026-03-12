@@ -127,9 +127,9 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 		if (intern->ptr != NULL) {
 			xmlNodePtr curnode = ((php_libxml_node_ptr *)intern->ptr)->node;
 			if (curnode->type == XML_ATTRIBUTE_NODE && php_dom_follow_spec_intern(intern)) {
-				ZVAL_NEW_STR(key, dom_node_get_node_name_attribute_or_element(curnode, false));
+				ZVAL_STR(key, dom_node_get_node_name_attribute_or_element(curnode, false));
 			} else {
-				ZVAL_STRINGL(key, (const char *) curnode->name, xmlStrlen(curnode->name));
+				ZVAL_STRINGL_FAST(key, (const char *) curnode->name, xmlStrlen(curnode->name));
 			}
 		} else {
 			ZVAL_NULL(key);

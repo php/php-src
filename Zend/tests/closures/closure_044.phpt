@@ -52,7 +52,7 @@ bool(false)
 bool(false)
 
 
-Warning: Cannot unbind $this of closure using $this in %s on line %d
+Warning: Cannot unbind $this of closure using $this, this will be an error in PHP 9 in %s on line %d
 NULL
 
 After binding, null scope, with instance
@@ -67,7 +67,7 @@ bool(true)
 bool(false)
 
 
-Warning: Cannot unbind $this of closure using $this in %s on line %d
+Warning: Cannot unbind $this of closure using $this, this will be an error in PHP 9 in %s on line %d
 NULL
 
 After binding, with scope, with instance

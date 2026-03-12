@@ -76,6 +76,7 @@
 #include "zend_types.h"
 #include "zend_weakrefs.h"
 #include "zend_string.h"
+#include "zend_exceptions.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -172,7 +173,9 @@
 #define GC_IDX2PTR(idx)      (GC_G(buf) + (idx))
 #define GC_PTR2IDX(ptr)      ((ptr) - GC_G(buf))
 
+/* Get the value to be placed in an unused buffer entry with the specified next unused list index */
 #define GC_IDX2LIST(idx)     ((void*)(uintptr_t)(((idx) * sizeof(void*)) | GC_UNUSED))
+/* Get the index of the next item in the unused list from the given root buffer entry. */
 #define GC_LIST2IDX(list)    (((uint32_t)(uintptr_t)(list)) / sizeof(void*))
 
 /* GC buffers */
@@ -228,10 +231,16 @@
 } while (0)
 
 /* unused buffers */
+
+/* Are there any unused root buffer entries? */
 #define GC_HAS_UNUSED() \
 	(GC_G(unused) != GC_INVALID)
+
+/* Get the next unused entry and remove it from the list */
 #define GC_FETCH_UNUSED() \
 	gc_fetch_unused()
+
+/* Add a root buffer entry to the unused list */
 #define GC_LINK_UNUSED(root) \
 	gc_link_unused(root)
 
@@ -244,12 +253,23 @@
 
 ZEND_API int (*gc_collect_cycles)(void);
 
+/* The type of a root buffer entry.
+ *
+ * The lower two bits are used for flags and need to be masked out to
+ * reconstruct a pointer.
+ *
+ * When a node in the root buffer is removed, the non-flag bits of the
+ * unused entry are used to store the index of the next entry in the unused
+ * list. */
 typedef struct _gc_root_buffer {
 	zend_refcounted  *ref;
 } gc_root_buffer;
 
 typedef struct _zend_gc_globals {
-	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
+	/* The root buffer, which stores possible roots of reference cycles. It is
+	 * also used to store garbage to be collected at the end of a run.
+	 * A single array which is reallocated as necessary. */
+	gc_root_buffer   *buf;
 
 	bool         gc_enabled;
 	bool         gc_active;        /* GC currently running, forbid nested GC */
@@ -262,13 +282,13 @@ typedef struct _zend_gc_globals {
 	uint32_t          buf_size;			/* size of the GC buffer            */
 	uint32_t          num_roots;		/* number of roots in GC buffer     */
 
-	uint32_t gc_runs;
-	uint32_t collected;
+	uint32_t gc_runs;					/* number of GC runs since reset */
+	uint32_t collected;					/* number of collected nodes since reset */
 
-	zend_hrtime_t activated_at;
-	zend_hrtime_t collector_time;
-	zend_hrtime_t dtor_time;
-	zend_hrtime_t free_time;
+	zend_hrtime_t activated_at;			/* the timestamp of the last reset */
+	zend_hrtime_t collector_time;		/* time spent running GC (ns) */
+	zend_hrtime_t dtor_time;			/* time spent calling destructors (ns) */
+	zend_hrtime_t free_time;			/* time spent destroying nodes and freeing memory (ns) */
 
 	uint32_t dtor_idx;			/* root buffer index */
 	uint32_t dtor_end;
@@ -313,6 +333,7 @@ static zend_gc_globals gc_globals;
 
 typedef struct _gc_stack gc_stack;
 
+/* The stack used for graph traversal is stored as a linked list of segments */
 struct _gc_stack {
 	gc_stack        *prev;
 	gc_stack        *next;
@@ -375,6 +396,11 @@ static void gc_stack_free(gc_stack *stack)
 	}
 }
 
+/* Map a full index to a compressed index.
+ *
+ * The root buffer can have up to 2^30 entries, but we only have 20 bits to
+ * store the index. So we use the 1<<19 bit as a compression flag and use the
+ * other 19 bits to store the index modulo 2^19. */
 static zend_always_inline uint32_t gc_compress(uint32_t idx)
 {
 	if (EXPECTED(idx < GC_MAX_UNCOMPRESSED)) {
@@ -383,6 +409,9 @@ static zend_always_inline uint32_t gc_compress(uint32_t idx)
 	return (idx % GC_MAX_UNCOMPRESSED) | GC_MAX_UNCOMPRESSED;
 }
 
+/* Find the root buffer entry given a pointer and a compressed index.
+ * Iterate through the root buffer in steps of 2^19 until the pointer
+ * matches. */
 static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t idx)
 {
 	gc_root_buffer *root = GC_IDX2PTR(idx);
@@ -401,6 +430,8 @@ static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, ui
 	}
 }
 
+/* Get the index of the next unused root buffer entry, and remove it from the
+ * unused list. GC_HAS_UNUSED() must be true before calling this. */
 static zend_always_inline uint32_t gc_fetch_unused(void)
 {
 	uint32_t idx;
@@ -414,6 +445,7 @@ static zend_always_inline uint32_t gc_fetch_unused(void)
 	return idx;
 }
 
+/* Add a root buffer entry to the unused list */
 static zend_always_inline void gc_link_unused(gc_root_buffer *root)
 {
 	root->ref = GC_IDX2LIST(GC_G(unused));
@@ -463,6 +495,7 @@ static void gc_trace_ref(zend_refcounted *ref) {
 }
 #endif
 
+/* Mark a root buffer entry unused */
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 {
 	GC_LINK_UNUSED(root);
@@ -480,10 +513,10 @@ static void root_buffer_dtor(zend_gc_globals *gc_globals)
 
 static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 {
-	gc_globals->gc_enabled = 0;
-	gc_globals->gc_active = 0;
-	gc_globals->gc_protected = 1;
-	gc_globals->gc_full = 0;
+	gc_globals->gc_enabled = false;
+	gc_globals->gc_active = false;
+	gc_globals->gc_protected = true;
+	gc_globals->gc_full = false;
 
 	gc_globals->buf = NULL;
 	gc_globals->unused = GC_INVALID;
@@ -565,6 +598,8 @@ void gc_reset(void)
 	GC_G(activated_at) = zend_hrtime();
 }
 
+/* Enable/disable the garbage collector.
+ * Initialize globals if necessary. */
 ZEND_API bool gc_enable(bool enable)
 {
 	bool old_enabled = GC_G(gc_enabled);
@@ -584,6 +619,7 @@ ZEND_API bool gc_enabled(void)
 	return GC_G(gc_enabled);
 }
 
+/* Protect the GC root buffer (prevent additions) */
 ZEND_API bool gc_protect(bool protect)
 {
 	bool old_protected = GC_G(gc_protected);
@@ -621,6 +657,7 @@ static void gc_grow_root_buffer(void)
 	GC_G(buf_size) = new_size;
 }
 
+/* Adjust the GC activation threshold given the number of nodes collected by the last run */
 static void gc_adjust_threshold(int count)
 {
 	uint32_t new_threshold;
@@ -651,6 +688,7 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
+/* Perform a GC run and then add a node as a possible root. */
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -695,6 +733,8 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
+/* Add a possible root node to the buffer.
+ * Maybe perform a GC run. */
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -731,6 +771,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
+/* Add an extra root during a GC run */
 static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -764,6 +805,7 @@ static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
+/* Remove a node from the root buffer given its compressed index */
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
 	gc_root_buffer *root = gc_decompress(ref, idx);
@@ -793,6 +835,10 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
+/* Mark all nodes reachable from ref as black (live). Restore the reference
+ * counts decremented by gc_mark_grey(). See ScanBlack() in Bacon & Rajan.
+ * To implement a depth-first search, discovered nodes are added to a stack
+ * which is processed iteratively. */
 static void gc_scan_black(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
@@ -992,6 +1038,8 @@ next:
 	}
 }
 
+/* Traverse the graph of nodes referred to by ref. Decrement the reference
+ * counts and mark visited nodes grey. See MarkGray() in Bacon & Rajan. */
 static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
@@ -1204,6 +1252,9 @@ static void gc_compact(void)
 	}
 }
 
+/* For all roots marked purple, traverse the graph, decrementing the reference
+ * count of their child nodes. Mark visited nodes grey so that they are not
+ * visited again. See MarkRoots() in Bacon & Rajan. */
 static void gc_mark_roots(gc_stack *stack)
 {
 	gc_root_buffer *current, *last;
@@ -1223,6 +1274,10 @@ static void gc_mark_roots(gc_stack *stack)
 	}
 }
 
+/* Traverse the reference graph of ref. Evaluate grey nodes and mark them
+ * black (to keep) or white (to free). Note that nodes initially marked white
+ * may later become black if they are visited from a live node.
+ * See Scan() in Bacon & Rajan. */
 static void gc_scan(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
@@ -1376,6 +1431,7 @@ next:
 	}
 }
 
+/* Scan all roots, coloring grey nodes black or white */
 static void gc_scan_roots(gc_stack *stack)
 {
 	uint32_t idx, end;
@@ -1409,6 +1465,8 @@ static void gc_scan_roots(gc_stack *stack)
 	}
 }
 
+/* Add a node to the buffer with the garbage flag, so that it will be
+ * destroyed and freed when the scan is complete. */
 static void gc_add_garbage(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -1434,6 +1492,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 	GC_G(num_roots)++;
 }
 
+/* Traverse the reference graph from ref, marking any white nodes as garbage. */
 static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *stack)
 {
 	int count = 0;
@@ -1622,6 +1681,7 @@ next:
 	return count;
 }
 
+/* Traverse the reference graph from all roots, marking white nodes as garbage. */
 static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 {
 	uint32_t idx, end;
@@ -1808,6 +1868,7 @@ static ZEND_COLD ZEND_NORETURN void gc_start_destructor_fiber_error(void)
 	zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
 }
 
+/* Call destructors for garbage in the buffer. */
 static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t end, zend_fiber *fiber)
 {
 	gc_root_buffer *current;
@@ -1872,7 +1933,18 @@ static zend_fiber *gc_create_destructor_fiber(void)
 	return fiber;
 }
 
-static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
+static void remember_prev_exception(zend_object **prev_exception)
+{
+	if (EG(exception)) {
+		if (*prev_exception) {
+			zend_exception_set_previous(EG(exception), *prev_exception);
+		}
+		*prev_exception = EG(exception);
+		EG(exception) = NULL;
+	}
+}
+
+static zend_never_inline void gc_call_destructors_in_fiber(void)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
@@ -1887,6 +1959,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 		zend_fiber_resume(fiber, NULL, NULL);
 	}
 
+	zend_object *exception = NULL;
+	remember_prev_exception(&exception);
+
 	for (;;) {
 		/* At this point, fiber has executed until suspension */
 		GC_TRACE("resumed from destructor fiber");
@@ -1900,7 +1975,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 			/* We do not own the fiber anymore. It may be collected if the
 			 * application does not reference it. */
 			zend_object_release(&fiber->std);
+			remember_prev_exception(&exception);
 			fiber = gc_create_destructor_fiber();
+			remember_prev_exception(&exception);
 			continue;
 		} else {
 			/* Fiber suspended itself after calling all destructors */
@@ -1908,13 +1985,16 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 			break;
 		}
 	}
+
+	EG(exception) = exception;
 }
 
+/* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int total_count = 0;
-	bool should_rerun_gc = 0;
-	bool did_rerun_gc = 0;
+	bool should_rerun_gc = false;
+	bool did_rerun_gc = false;
 
 	zend_hrtime_t start_time = zend_hrtime();
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
@@ -1968,7 +2048,7 @@ rerun_gc:
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
 			 * destructors at this point and automatically re-run GC afterwards. */
-			should_rerun_gc = 1;
+			should_rerun_gc = true;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -2013,7 +2093,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
 			} else {
-				gc_call_destructors_in_fiber(end);
+				gc_call_destructors_in_fiber();
 			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 
@@ -2094,7 +2174,7 @@ rerun_gc:
 	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
 	 * run GC another time. */
 	if (should_rerun_gc && !did_rerun_gc) {
-		did_rerun_gc = 1;
+		did_rerun_gc = true;
 		goto rerun_gc;
 	}
 

@@ -14,7 +14,6 @@ XML;
 
 $parser = xml_parser_create();
 xml_parse_into_struct($parser, $xml, $vals);
-xml_parser_free($parser);
 var_dump($vals);
 ?>
 --EXPECT--

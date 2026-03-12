@@ -121,20 +121,23 @@ const ZEND_THREAD_SAFE = UNKNOWN;
  */
 const ZEND_DEBUG_BUILD = UNKNOWN;
 
+/**
+ * @var string
+ * @cvalue zend_vm_kind_name[ZEND_VM_KIND]
+ */
+const ZEND_VM_KIND = UNKNOWN;
+
 /* Special constants true/false/null.  */
 
 /**
- * @var bool
  * @undocumentable
  */
 const TRUE = true;
 /**
- * @var bool
  * @undocumentable
  */
 const FALSE = false;
 /**
- * @var null
  * @undocumentable
  */
 const NULL = null;

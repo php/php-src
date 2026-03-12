@@ -49,6 +49,7 @@ ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void);
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module);
 PHPAPI void php_print_version(sapi_module_struct *sapi_module);
 
+PHPAPI void php_child_init(void);
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);

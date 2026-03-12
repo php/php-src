@@ -1,13 +1,9 @@
 --TEST--
 IntlCalendar::getMaximum(), ::getActualMaximum(), ::getLeastMaximum() basic test
---INI--
-date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->setTime(strtotime('2012-02-29 05:06:07 +0000') * 1000);
@@ -27,4 +23,4 @@ int(28)
 int(29)
 int(29)
 int(31)
-int(31)
+int(31)

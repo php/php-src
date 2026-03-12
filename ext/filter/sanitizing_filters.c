@@ -168,7 +168,7 @@ static void filter_map_apply(zval *value, const filter_map *map)
 /* }}} */
 
 /* {{{ php_filter_string */
-void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t new_len;
 	unsigned char enc[256] = {0};
@@ -206,23 +206,24 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 		} else {
 			ZVAL_EMPTY_STRING(value);
 		}
-		return;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_encoded */
-void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* apply strip_high and strip_low filters */
 	php_filter_strip(value, flags);
 	/* urlencode */
 	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_special_chars */
-void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	unsigned char enc[256] = {0};
 
@@ -239,11 +240,12 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 
 	php_filter_encode_html(value, enc);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_full_special_chars */
-void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf;
 	int quotes;
@@ -258,11 +260,12 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 		/* charset_hint */ NULL, /* double_encode */ 0, /* quiet */ 0);
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_unsafe_raw */
-void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Only if no flags are set (optimization) */
 	if (flags != 0 && Z_STRLEN_P(value) > 0) {
@@ -285,6 +288,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -295,7 +299,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 #define PUNCTUATION "<>#%\""
 #define RESERVED    ";/?:@&="
 
-void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Check section 6 of rfc 822 http://www.faqs.org/rfcs/rfc822.html */
 	const unsigned char allowed_list[] = LOWALPHA HIALPHA DIGIT "!#$%&'*+-=?^_`{|}~@.[]";
@@ -304,11 +308,12 @@ void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_init(&map);
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_url */
-void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Strip all chars not part of section 5 of
 	 * http://www.faqs.org/rfcs/rfc1738.html */
@@ -318,11 +323,12 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_init(&map);
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_number_int */
-void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
 	const unsigned char allowed_list[] = "+-" DIGIT;
@@ -331,11 +337,12 @@ void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_init(&map);
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_number_float */
-void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
 	const unsigned char allowed_list[] = "+-" DIGIT;
@@ -355,15 +362,17 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 		filter_map_update(&map, 4,  (const unsigned char *) "eE");
 	}
 	filter_map_apply(value, &map);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_filter_add_slashes */
-void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf = php_addslashes(Z_STR_P(value));
 
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
+	return SUCCESS;
 }
 /* }}} */

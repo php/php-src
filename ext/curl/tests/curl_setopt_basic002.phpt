@@ -41,9 +41,6 @@ fclose($handle);
 unset($handle);
 var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 @unlink($temp_file);
-
-curl_close($ch);
-
 ?>
 --EXPECTF--
 *** Testing curl_setopt with CURLOPT_STDERR

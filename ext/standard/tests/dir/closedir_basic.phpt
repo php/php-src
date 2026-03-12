@@ -38,6 +38,8 @@ rmdir($dir_path);
 *** Testing closedir() : basic functionality ***
 
 -- Call closedir() with no arguments: --
+
+Deprecated: closedir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 NULL
 -- Check Directory Handle: --
 resource(%d) of type (Unknown)

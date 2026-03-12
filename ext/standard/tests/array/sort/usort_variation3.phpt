@@ -45,13 +45,11 @@ $array_arg = array(
   'key' => 5,  //single quoted key
   "two" => 4,  //double quoted key
   " " => 0,  // space as key
+  '' => 35,
 
   // bool keys
   TRUE => 100,
   FALSE => 25,
-
-  // null keys
-  NULL => 35,
 
   // binary key
   "a".chr(0)."b" => 45,

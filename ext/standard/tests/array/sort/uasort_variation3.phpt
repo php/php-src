@@ -51,19 +51,12 @@ $array_arg = array(
   // string keys
   'key' => 5,  //single quoted key
   "two" => 4,  //double quoted key
-  '' => 3,
-  "" => 2,
+  '' => 35,
   " " => 0,  // space as key
 
   // bool keys
-  true => 15,
-  false => 5,
-  TRUE => 100,
-  FALSE => 25,
-
-  // null keys
-  null => 20,  // expecting: value will be replaced by 'NULL'
-  NULL => 35,
+  true => 100,
+  false => 25,
 
   // binary key
   "a".chr(0)."b" => 45,

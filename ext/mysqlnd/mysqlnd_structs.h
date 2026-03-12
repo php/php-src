@@ -182,7 +182,6 @@ typedef struct st_mysqlnd_charset
 	const char		*collation;
 	unsigned int	char_minlen;
 	unsigned int	char_maxlen;
-	const char		*comment;
 	short			mb_charlen;
 	short			mb_valid;
 	unsigned int    lowest_mb_byte;
@@ -1323,7 +1322,6 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_SESSION_OPTIONS * const session_options,
 														const MYSQLND_PFC_DATA * const pfc_data, const zend_ulong mysql_flags
 														);
 

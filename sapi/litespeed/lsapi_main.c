@@ -591,7 +591,7 @@ static int sapi_lsapi_activate(void)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V8.2",
+    "LiteSpeed V8.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1395,6 +1395,8 @@ void start_children( int children )
             switch( pid ) {
             case 0: /* children process */
 
+                php_child_init();
+
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
                 sigaction( SIGQUIT, &old_quit, 0 );
@@ -1656,9 +1658,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 /* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-    if (zend_parse_parameters_none() == FAILURE) {
-        RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
 
@@ -1677,9 +1677,7 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (zend_parse_parameters_none() == FAILURE) {
-	    RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_NONE();
 
     if (!zend_llist_count(&SG(sapi_headers).headers)) {
 	    RETURN_FALSE;
@@ -1719,9 +1717,7 @@ PHP_FUNCTION(apache_get_modules)
     };
     const char **name = mod_names;
 
-    if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
     while( *name )
@@ -1736,9 +1732,7 @@ PHP_FUNCTION(apache_get_modules)
 /* {{{ Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     php_output_end_all();
     php_header();

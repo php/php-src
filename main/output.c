@@ -187,8 +187,12 @@ PHPAPI void php_output_deactivate(void)
 		/* release all output handlers */
 		if (OG(handlers).elements) {
 			while ((handler = zend_stack_top(&OG(handlers)))) {
-				php_output_handler_free(handler);
 				zend_stack_del_top(&OG(handlers));
+				/* It's possible to start a new output handler and mark it as active,
+				 * however this loop will destroy all active handlers. */
+				OG(active) = NULL;
+				ZEND_ASSERT(OG(running) == NULL && "output is deactivated therefore running should stay NULL");
+				php_output_handler_free(handler);
 			}
 		}
 		zend_stack_destroy(&OG(handlers));
@@ -534,6 +538,10 @@ PHPAPI zend_result php_output_handler_start(php_output_handler *handler)
 	HashTable *rconflicts;
 	php_output_handler_conflict_check_t conflict;
 
+	if (!(OG(flags) & PHP_OUTPUT_ACTIVATED)) {
+		return FAILURE;
+	}
+
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START) || !handler) {
 		return FAILURE;
 	}
@@ -601,7 +609,6 @@ PHPAPI zend_result php_output_handler_conflict_register(const char *name, size_t
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
@@ -618,7 +625,6 @@ PHPAPI zend_result php_output_handler_reverse_conflict_register(const char *name
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
@@ -655,7 +661,6 @@ PHPAPI zend_result php_output_handler_alias_register(const char *name, size_t na
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler alias outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
@@ -718,10 +723,11 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler)
  * Destroy and free an output handler */
 PHPAPI void php_output_handler_free(php_output_handler **h)
 {
-	if (*h) {
-		php_output_handler_dtor(*h);
-		efree(*h);
+	php_output_handler *handler = *h;
+	if (handler) {
 		*h = NULL;
+		php_output_handler_dtor(handler);
+		efree(handler);
 	}
 }
 /* }}} */
@@ -956,7 +962,6 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
 			zval ob_args[2];
 			zval retval;
-			ZVAL_UNDEF(&retval);
 
 			/* ob_data */
 			ZVAL_STRINGL(&ob_args[0], handler->buffer.data, handler->buffer.used);
@@ -969,17 +974,10 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.retval = &retval;
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
-				if (Z_TYPE(retval) != IS_STRING || handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+				if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
 					// Make sure that we don't get lost in the current output buffer
 					// by disabling it
 					handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
-					// Make sure we keep a reference to the handler name in
-					// case
-					// * The handler produced output *and* returned a non-string
-					// * The first deprecation message causes the handler to
-					// be removed
-					zend_string *handler_name = handler->name;
-					zend_string_addref(handler_name);
 					if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
 						// The handler might not always produce output
 						handler->flags &= ~PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
@@ -987,18 +985,9 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 							NULL,
 							E_DEPRECATED,
 							"Producing output from user output handler %s is deprecated",
-							ZSTR_VAL(handler_name)
+							ZSTR_VAL(handler->name)
 						);
 					}
-					if (Z_TYPE(retval) != IS_STRING) {
-						php_error_docref(
-							NULL,
-							E_DEPRECATED,
-							"Returning a non-string result from user output handler %s is deprecated",
-							ZSTR_VAL(handler_name)
-						);
-					}
-					zend_string_release(handler_name);
 
 					// Check if the handler is still in the list of handlers to
 					// determine if the PHP_OUTPUT_HANDLER_DISABLED flag can

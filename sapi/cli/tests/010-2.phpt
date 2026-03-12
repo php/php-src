@@ -22,7 +22,9 @@ hello
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat $filename_txt_escaped | $php -n -R "var_dump(1);"`);
+var_dump(shell_exec(<<<SHELL
+cat $filename_txt_escaped | $php -n -R "var_dump(1);"
+SHELL));
 
 @unlink($filename_txt);
 

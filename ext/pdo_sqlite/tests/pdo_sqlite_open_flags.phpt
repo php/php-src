@@ -12,7 +12,7 @@ $db = new PDO('sqlite:' . $filename, null, null, [PDO::ATTR_ERRMODE => PDO::ERRM
 
 var_dump($db->exec('CREATE TABLE test_sqlite_open_flags (id INT);'));
 
-$db = new PDO('sqlite:' . $filename, null, null, [PDO::SQLITE_ATTR_OPEN_FLAGS => PDO::SQLITE_OPEN_READONLY, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+$db = new PDO('sqlite:' . $filename, null, null, [Pdo\Sqlite::ATTR_OPEN_FLAGS => Pdo\Sqlite::OPEN_READONLY, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 var_dump($db->exec('CREATE TABLE test_sqlite_open_flags_2 (id INT);'));
 ?>

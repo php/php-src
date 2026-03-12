@@ -59,9 +59,6 @@ if (!($alpha >= EXP_ALPHA - 1 && $alpha <= EXP_ALPHA + 1)) {
     printf("alpha: expected roughly %d, got %d\n", EXP_ALPHA, $alpha);
 }
 
-imagedestroy($copy);
-imagedestroy($im);
-
 echo 'DONE';
 ?>
 --EXPECT--

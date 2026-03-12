@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c2245ec496551980ca17ff4472cc1790653e41bd */
+/* This is a generated file, edit curl.stub.php instead.
+ * Stub hash: 10ebdc94560ed19ecd6b61a11b3dab5d32989d66 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -49,7 +49,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_curl_init, 0, 0, CurlHandle,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, url, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_upkeep, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
 ZEND_END_ARG_INFO()
@@ -157,7 +157,7 @@ ZEND_FUNCTION(curl_exec);
 ZEND_FUNCTION(curl_file_create);
 ZEND_FUNCTION(curl_getinfo);
 ZEND_FUNCTION(curl_init);
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 ZEND_FUNCTION(curl_upkeep);
 #endif
 ZEND_FUNCTION(curl_multi_add_handle);
@@ -185,7 +185,7 @@ ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(curl_close, arginfo_curl_close)
+	ZEND_RAW_FENTRY("curl_close", zif_curl_close, arginfo_curl_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(curl_copy_handle, arginfo_curl_copy_handle)
 	ZEND_FE(curl_errno, arginfo_curl_errno)
 	ZEND_FE(curl_error, arginfo_curl_error)
@@ -196,7 +196,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_file_create, arginfo_curl_file_create)
 	ZEND_FE(curl_getinfo, arginfo_curl_getinfo)
 	ZEND_FE(curl_init, arginfo_curl_init)
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 	ZEND_FE(curl_upkeep, arginfo_curl_upkeep)
 #endif
 	ZEND_FE(curl_multi_add_handle, arginfo_curl_multi_add_handle)
@@ -214,7 +214,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_reset, arginfo_curl_reset)
 	ZEND_FE(curl_setopt_array, arginfo_curl_setopt_array)
 	ZEND_FE(curl_setopt, arginfo_curl_setopt)
-	ZEND_FE(curl_share_close, arginfo_curl_share_close)
+	ZEND_RAW_FENTRY("curl_share_close", zif_curl_share_close, arginfo_curl_share_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(curl_share_errno, arginfo_curl_share_errno)
 	ZEND_FE(curl_share_init, arginfo_curl_share_init)
 	ZEND_FE(curl_share_setopt, arginfo_curl_share_setopt)
@@ -834,7 +834,7 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLOPT_DISALLOW_USERNAME_IN_URL", CURLOPT_DISALLOW_USERNAME_IN_URL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_PROXY_TLS13_CIPHERS", CURLOPT_PROXY_TLS13_CIPHERS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_TLS13_CIPHERS", CURLOPT_TLS13_CIPHERS, CONST_PERSISTENT);
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 	REGISTER_LONG_CONSTANT("CURLOPT_DOH_URL", CURLOPT_DOH_URL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_UPKEEP_INTERVAL_MS", CURLOPT_UPKEEP_INTERVAL_MS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_UPLOAD_BUFFERSIZE", CURLOPT_UPLOAD_BUFFERSIZE, CONST_PERSISTENT);
@@ -891,6 +891,11 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLE_PROXY", CURLE_PROXY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLINFO_PROXY_ERROR", CURLINFO_PROXY_ERROR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_SSL_EC_CURVES", CURLOPT_SSL_EC_CURVES, CONST_PERSISTENT);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */ && LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+	REGISTER_LONG_CONSTANT("CURLOPT_SSL_SIGNATURE_ALGORITHMS", CURLOPT_SSL_SIGNATURE_ALGORITHMS, CONST_PERSISTENT);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
 	REGISTER_LONG_CONSTANT("CURLPX_BAD_ADDRESS_TYPE", CURLPX_BAD_ADDRESS_TYPE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLPX_BAD_VERSION", CURLPX_BAD_VERSION, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLPX_CLOSED", CURLPX_CLOSED, CONST_PERSISTENT);
@@ -981,13 +986,24 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
 
 
+	zend_attribute *attribute_Deprecated_func_curl_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "curl_close", sizeof("curl_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_curl_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_curl_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_curl_close_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_curl_close_0->args[1].value, attribute_Deprecated_func_curl_close_0_arg1_str);
+	attribute_Deprecated_func_curl_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_curl_share_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "curl_share_close", sizeof("curl_share_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_curl_share_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_curl_share_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_curl_share_close_0->args[1].value, attribute_Deprecated_func_curl_close_0_arg1_str);
+	attribute_Deprecated_func_curl_share_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_attribute *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0 = zend_add_global_constant_attribute(const_CURLOPT_BINARYTRANSFER, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1;
 	zend_string *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str = zend_string_init("as it had no effect since 5.1.2", strlen("as it had no effect since 5.1.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1, attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].value, &attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].value, attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str);
 	attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
@@ -1030,9 +1046,9 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 
 	zval property_options_default_value;
 	ZVAL_UNDEF(&property_options_default_value);
-	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, 1);
+	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, true);
 	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_options_name);
+	zend_string_release_ex(property_options_name, true);
 
 	return class_entry;
 }

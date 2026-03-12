@@ -41,17 +41,17 @@ typedef struct {
 
 typedef struct {
 	zend_long key;
-	zend_long length;
-	zend_long next;
+	size_t length;
+	size_t next;
 	char mem;
 } sysvshm_chunk;
 
 typedef struct {
 	char magic[8];
-	zend_long start;
-	zend_long end;
-	zend_long free;
-	zend_long total;
+	size_t start;
+	size_t end;
+	size_t free;
+	size_t total;
 } sysvshm_chunk_head;
 
 typedef struct {

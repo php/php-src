@@ -9,7 +9,7 @@ soap.wsdl_cache_enabled=0
 
 #[AllowDynamicProperties]
 class MySoapClient extends SoapClient {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0): string {
+    public function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
         echo $request, "\n";
         return '';
     }

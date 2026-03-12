@@ -102,7 +102,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #include "zend_globals.h"
-#include "php_globals.h"
 #include "SAPI.h"
 #include "php_ticks.h"
 
@@ -141,6 +140,8 @@ static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("random")
+	ZEND_MOD_REQUIRED("uri")
 	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
 };
@@ -303,6 +304,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
+	BASIC_MINIT_SUBMODULE(image)
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
@@ -376,6 +378,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
+	BASIC_MSHUTDOWN_SUBMODULE(image)
 
 	return SUCCESS;
 }
@@ -558,7 +561,7 @@ PHP_FUNCTION(inet_pton)
 	char buffer[17];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(address, address_len)
+		Z_PARAM_PATH(address, address_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(buffer, 0, sizeof(buffer));
@@ -590,7 +593,7 @@ PHP_FUNCTION(ip2long)
 	struct in_addr ip;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_PATH(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
@@ -1327,42 +1330,36 @@ error options:
 /* {{{ Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
-	char *message, *opt = NULL, *headers = NULL;
-	size_t message_len, opt_len = 0, headers_len = 0;
+	zend_string *message, *opt = NULL, *headers = NULL;
 	zend_long erropt = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_STR(message)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(erropt)
-		Z_PARAM_PATH_OR_NULL(opt, opt_len)
-		Z_PARAM_STRING_OR_NULL(headers, headers_len)
+		Z_PARAM_PATH_STR_OR_NULL(opt)
+		Z_PARAM_STR_OR_NULL(headers)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (_php_error_log_ex((int) erropt, message, message_len, opt, headers) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(_php_error_log((int) erropt, message, opt, headers) == SUCCESS);
 }
 /* }}} */
 
-/* For BC (not binary-safe!) */
-PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers) /* {{{ */
-{
-	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers);
-}
-/* }}} */
-
-PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers) /* {{{ */
+PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const zend_string *opt, const zend_string *headers) /* {{{ */
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
+	const char *hdrs = NULL;
 
 	switch (opt_err)
 	{
 		case 1:		/*send an email */
-			if (!php_mail(opt, "PHP error_log message", message, headers, NULL)) {
+			if (!opt) {
+				return FAILURE;
+			}
+
+			hdrs = headers ? ZSTR_VAL(headers) : NULL;
+			if (!php_mail(ZSTR_VAL(opt), "PHP error_log message", ZSTR_VAL(message), hdrs, NULL)) {
 				return FAILURE;
 			}
 			break;
@@ -1372,27 +1369,27 @@ PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_le
 			return FAILURE;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(opt, "a", REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(opt ? ZSTR_VAL(opt) : NULL, "a", REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
-			nbytes = php_stream_write(stream, message, message_len);
+			nbytes = php_stream_write(stream, ZSTR_VAL(message), ZSTR_LEN(message));
 			php_stream_close(stream);
-			if (nbytes != message_len) {
+			if (nbytes != ZSTR_LEN(message)) {
 				return FAILURE;
 			}
 			break;
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message(message, -1);
+				sapi_module.log_message(ZSTR_VAL(message), -1);
 			} else {
 				return FAILURE;
 			}
 			break;
 
 		default:
-			php_log_err_with_severity(message, LOG_NOTICE);
+			php_log_err_with_severity(ZSTR_VAL(message), LOG_NOTICE);
 			break;
 	}
 	return SUCCESS;
@@ -1748,7 +1745,10 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		php_output_start_default();
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+			zend_throw_error(NULL, "Unable to start output handler");
+			RETURN_THROWS();
+		}
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
@@ -1783,7 +1783,10 @@ PHP_FUNCTION(php_strip_whitespace)
 		Z_PARAM_PATH_STR(filename)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_output_start_default();
+	if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+		zend_throw_error(NULL, "Unable to start output handler");
+		RETURN_THROWS();
+	}
 
 	zend_stream_init_filename_ex(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
@@ -1820,7 +1823,10 @@ PHP_FUNCTION(highlight_string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (i) {
-		php_output_start_default();
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+			zend_throw_error(NULL, "Unable to start output handler");
+			RETURN_THROWS();
+		}
 	}
 
 	EG(error_reporting) = E_ERROR;
@@ -1985,10 +1991,8 @@ PHP_FUNCTION(ini_set)
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (
-			zend_string_equals_literal(varname, "error_log")
-			|| zend_string_equals_literal(varname, "java.class.path")
+			zend_string_equals_literal(varname, "java.class.path")
 			|| zend_string_equals_literal(varname, "java.home")
-			|| zend_string_equals_literal(varname, "mail.log")
 			|| zend_string_equals_literal(varname, "java.library.path")
 			|| zend_string_equals_literal(varname, "vpopmail.directory")
 		) {
@@ -2138,8 +2142,8 @@ PHP_FUNCTION(getservbyname)
 	struct servent *serv;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(name)
-		Z_PARAM_STRING(proto, proto_len)
+		Z_PARAM_PATH_STR(name)
+		Z_PARAM_PATH(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 
@@ -2182,7 +2186,7 @@ PHP_FUNCTION(getservbyport)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(port)
-		Z_PARAM_STRING(proto, proto_len)
+		Z_PARAM_PATH(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	serv = getservbyport(htons((unsigned short) port), proto);
@@ -2209,7 +2213,7 @@ PHP_FUNCTION(getprotobyname)
 	struct protoent *ent;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_PATH(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ent = getprotobyname(name);
@@ -2321,11 +2325,7 @@ PHP_FUNCTION(is_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_exists(SG(rfc1867_uploaded_files), path)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_hash_exists(SG(rfc1867_uploaded_files), path));
 }
 /* }}} */
 

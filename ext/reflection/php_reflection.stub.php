@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 class ReflectionException extends Exception
 {
@@ -226,6 +229,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function hasPrototype(): bool {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.1")]
     public function setAccessible(bool $accessible): void {}
 }
 
@@ -482,6 +486,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getName(): string {}
 
+    public function getMangledName(): string {}
+
     /** @tentative-return-type */
     public function getValue(?object $object = null): mixed {}
 
@@ -540,6 +546,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment(): string|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.1")]
     public function setAccessible(bool $accessible): void {}
 
     /** @tentative-return-type */
@@ -567,6 +574,10 @@ class ReflectionProperty implements Reflector
     public function getHook(PropertyHookType $type): ?ReflectionMethod {}
 
     public function isFinal(): bool {}
+
+    public function isReadable(?string $scope, ?object $object = null): bool {}
+
+    public function isWritable(?string $scope, ?object $object = null): bool {}
 }
 
 /** @not-serializable */
@@ -900,13 +911,15 @@ final class ReflectionFiber
  * @strict-properties
  * @not-serializable
  */
-final class ReflectionConstant implements Reflector
+class ReflectionConstant implements Reflector
 {
     public string $name;
 
     public function __construct(string $name) {}
 
     public function getName(): string {}
+
+    public function inNamespace(): bool {}
 
     public function getNamespaceName(): string {}
 

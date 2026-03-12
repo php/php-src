@@ -16,11 +16,11 @@ MySQLPDOTest::skip();
 
     try {
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         MySQLPDOTest::createTestTable($table, $db);
 
         $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id > ? ORDER BY id ASC LIMIT 2");

@@ -46,12 +46,12 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(@$unset_var => "hello", STDERR => 'resource'),
+       array(STDERR => 'resource'),
 
        // array with mixed values
 /*11*/ array('hello' => 1, "fruit" => 2.2,
               STDERR => 'resource', 133 => "int",
-              @$unset_var => "unset", $heredoc => "heredoc")
+              $heredoc => "heredoc")
 );
 
 // loop through the various elements of $arrays to test array_map()
@@ -125,14 +125,12 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 8 --
-array(2) {
-  [""]=>
-  string(5) "hello"
+array(1) {
   [3]=>
   string(8) "resource"
 }
 -- Iteration 9 --
-array(6) {
+array(5) {
   ["hello"]=>
   int(1)
   ["fruit"]=>
@@ -141,8 +139,6 @@ array(6) {
   string(8) "resource"
   [133]=>
   string(3) "int"
-  [""]=>
-  string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }

@@ -26,7 +26,7 @@ EOT;
 
 // heredoc with different whitespaces
 $diff_whitespaces = <<<EOT
-hello\r world\t
+hello\n world\t
 1111\t\t != 2222\v\v
 heredoc\ndouble quoted string. with\vdifferent\fwhite\vspaces
 EOT;
@@ -46,8 +46,8 @@ $inputs = array (
        array(false, true, false), // with default keys and boolean values
        array(), // empty array
 /*5*/  array(NULL, null), // with NULL
-       array("a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
+       array("a\v\f", "aaaa\n", "b", "aaaa\n", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
+       array('a\v\f', 'aaaa\n', 'b', 'aaaa\n', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
        array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $blank_line),  // with heredocs
 
        // associative arrays
@@ -58,11 +58,11 @@ $inputs = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*14*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-/*18*/ array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+/*18*/ array('' => 1, "" => 2, false => 5, true => 6),
 );
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
@@ -111,7 +111,8 @@ array(4) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa"
+  string(5) "aaaa
+"
   [2]=>
   string(1) "b"
   [4]=>
@@ -122,7 +123,7 @@ array(4) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
-  string(6) "aaaa\r"
+  string(6) "aaaa\n"
   [2]=>
   string(1) "b"
   [4]=>
@@ -139,7 +140,8 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
+  string(88) "hello
+ world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -184,13 +186,6 @@ array(3) {
   string(4) "four"
 }
 -- Iteration 14 --
-array(2) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-}
--- Iteration 15 --
 array(4) {
   [1]=>
   string(4) "true"
@@ -201,24 +196,24 @@ array(4) {
   ["true"]=>
   bool(true)
 }
--- Iteration 16 --
+-- Iteration 15 --
 array(2) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
   string(0) ""
 }
--- Iteration 17 --
+-- Iteration 16 --
 array(2) {
   [1]=>
   string(0) ""
   [6]=>
   bool(true)
 }
--- Iteration 18 --
+-- Iteration 17 --
 array(3) {
   [""]=>
-  int(4)
+  int(2)
   [0]=>
   int(5)
   [1]=>

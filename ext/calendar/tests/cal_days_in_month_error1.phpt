@@ -12,7 +12,7 @@ try {
     echo "{$ex->getMessage()}\n";
 }
 try{
-    cal_days_in_month(CAL_GREGORIAN,0, 2009);
+    cal_days_in_month(CAL_GREGORIAN,20, 2009);
 } catch (ValueError $ex) {
     echo "{$ex->getMessage()}\n";
 }

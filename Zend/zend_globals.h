@@ -88,7 +88,7 @@ struct _zend_compiler_globals {
 
 	zend_string *compiled_filename;
 
-	int zend_lineno;
+	uint32_t zend_lineno;
 
 	zend_op_array *active_op_array;
 
@@ -204,7 +204,7 @@ struct _zend_executor_globals {
 
 	zend_execute_data *current_observed_frame;
 
-	int ticks_count;
+	uint32_t ticks_count;
 
 	zend_long precision;
 
@@ -220,7 +220,7 @@ struct _zend_executor_globals {
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
 
-	HashTable *in_autoload;
+	HashTable autoload_current_classnames;
 
 	zend_long hard_timeout;
 	void *stack_base;
@@ -255,7 +255,7 @@ struct _zend_executor_globals {
 
 	zend_objects_store objects_store;
 	zend_lazy_objects_store lazy_objects_store;
-	zend_object *exception, *prev_exception;
+	zend_object *exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
 
@@ -295,7 +295,8 @@ struct _zend_executor_globals {
 	size_t fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
-	 * in addition to being processed as usual. */
+	 * and their processing is delayed until zend_emit_recorded_errors()
+	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
 	uint32_t num_errors;
 	zend_error_info **errors;
@@ -317,6 +318,8 @@ struct _zend_executor_globals {
 #endif
 
 	zend_strtod_state strtod_state;
+
+	HashTable callable_convert_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -340,7 +343,7 @@ struct _zend_ini_scanner_globals {
 	zend_stack state_stack;
 
 	zend_string *filename;
-	int lineno;
+	uint32_t lineno;
 
 	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
 	int scanner_mode;

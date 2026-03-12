@@ -47,7 +47,6 @@ try {
 } catch (ReflectionException $e) {
     echo $e->getMessage(), "\n";
 }
-$s->setAccessible(true);
 $s->invoke($test, 42);
 var_dump($test->prop2);
 dumpFlags($rp2);

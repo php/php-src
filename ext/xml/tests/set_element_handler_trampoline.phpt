@@ -42,21 +42,18 @@ echo "Both handlers are trampolines:\n";
 $parser = xml_parser_create();
 xml_set_element_handler($parser, $startCallback, $endCallback);
 xml_parse($parser, $xml, true);
-xml_parser_free($parser);
 
 echo "\nStart handler is trampoline, end handler method string:\n";
 $parser = xml_parser_create();
 xml_set_object($parser, $customParser);
 xml_set_element_handler($parser, $startCallback, 'endHandler');
 xml_parse($parser, $xml, true);
-xml_parser_free($parser);
 
 echo "\nEnd handler is trampoline, start handler method string:\n";
 $parser = xml_parser_create();
 xml_set_object($parser, $customParser);
 xml_set_element_handler($parser, 'startHandler', $endCallback);
 xml_parse($parser, $xml, true);
-xml_parser_free($parser);
 
 ?>
 --EXPECTF--

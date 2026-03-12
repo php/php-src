@@ -19,7 +19,7 @@ var_dump(Closure);
 --EXPECTF--
 object(Closure)#%d (2) {
   ["function"]=>
-  string(8) "myMethod"
+  string(13) "Foo::myMethod"
   ["parameter"]=>
   array(1) {
     ["$foo"]=>

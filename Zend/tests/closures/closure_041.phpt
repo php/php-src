@@ -80,16 +80,16 @@ bound: no
 scoped to A: bool(true)
 bound: no
 
-Warning: Cannot unbind $this of closure using $this in %s on line %d
+Warning: Cannot unbind $this of closure using $this, this will be an error in PHP 9 in %s on line %d
 NULL
 
 After binding, with same-class instance for the bound ones
 
-Warning: Cannot bind an instance to a static closure in %s on line %d
+Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 scoped to A: bool(false)
 bound: A (should be scoped to dummy class)
 
-Warning: Cannot bind an instance to a static closure in %s on line %d
+Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 scoped to A: bool(true)
 bound: A
 After binding, with different instance for the bound ones

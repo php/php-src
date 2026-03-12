@@ -8,6 +8,7 @@ xml
 memory_limit=-1
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 require __DIR__ . '/libxml_expat_skipif.inc';
 skipif(want_expat: false);
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

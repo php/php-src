@@ -22,7 +22,8 @@ if ($p1 && $p2 && $p3) {
     echo "TC/TC: ok\n";
 }
 
-imagedestroy($src_tc); imagedestroy($dst_tc);
+$src_tc = null;
+$dst_tc = null;
 
 
 $src_tc = imagecreatetruecolor(5,5);
@@ -46,7 +47,8 @@ $p3 = $c3['red'] == 0x00 && $c3['blue']==0x00 && $c3['green']==0xff;
 if ($p1 && $p2 && $p3) {
     echo "TC/P: ok\n";
 }
-imagedestroy($src_tc); imagedestroy($dst_tc);
+$src_tc = null;
+$dst_tc = null;
 
 
 

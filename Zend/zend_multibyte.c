@@ -35,7 +35,7 @@ static const char *dummy_encoding_name_getter(const zend_encoding *encoding)
 
 static bool dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
 {
-	return 0;
+	return false;
 }
 
 static const zend_encoding *dummy_encoding_detector(const unsigned char *string, size_t length, const zend_encoding **list, size_t list_size)
@@ -195,7 +195,7 @@ ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *ne
 		return SUCCESS;
 	}
 
-	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
+	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, true)) {
 		return FAILURE;
 	}
 

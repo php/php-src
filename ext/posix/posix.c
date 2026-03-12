@@ -45,6 +45,14 @@
 # include <sys/sysmacros.h>
 #endif
 
+#if (defined(__sun) && !defined(_LP64)) || defined(_AIX)
+#define POSIX_PID_MIN LONG_MIN
+#define POSIX_PID_MAX LONG_MAX
+#else
+#define POSIX_PID_MIN INT_MIN
+#define POSIX_PID_MAX INT_MAX
+#endif
+
 #include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
@@ -118,6 +126,12 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
+#define PHP_POSIX_CHECK_PID(pid, arg, lower, upper)										\
+	if (pid < lower || pid > upper) {										\
+		zend_argument_value_error(arg, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
+		RETURN_THROWS();											\
+	}
+
 /* {{{ Send a signal to a process (POSIX.1, 3.3.2) */
 
 PHP_FUNCTION(posix_kill)
@@ -128,6 +142,8 @@ PHP_FUNCTION(posix_kill)
 		Z_PARAM_LONG(pid)
 		Z_PARAM_LONG(sig)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(pid, 1, POSIX_PID_MIN, POSIX_PID_MAX)
 
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
@@ -291,6 +307,9 @@ PHP_FUNCTION(posix_setpgid)
 		Z_PARAM_LONG(pgid)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_POSIX_CHECK_PID(pid, 1, 0, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pgid, 2, 0, POSIX_PID_MAX)
+
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
@@ -328,6 +347,8 @@ PHP_FUNCTION(posix_getsid)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(val, 1, 0, POSIX_PID_MAX)
 
 	if ((val = getsid(val)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -678,7 +699,8 @@ static void php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ 
 	for (count = 0;; count++) {
 		/* gr_mem entries may be misaligned on macos. */
 		char *gr_mem;
-		memcpy(&gr_mem, &g->gr_mem[count], sizeof(char *));
+		char *entry = (char *)g->gr_mem + (count * sizeof (char *));
+		memcpy(&gr_mem, entry, sizeof(char *));
 		if (!gr_mem) {
 			break;
 		}
@@ -720,6 +742,15 @@ PHP_FUNCTION(posix_access)
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;
+	}
+
+	if (mode < 0 || (mode & ~(F_OK | R_OK | W_OK | X_OK))) {
+		zend_argument_value_error(
+			2,
+			"must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK"
+		);
+		efree(path);
+		RETURN_THROWS();
 	}
 
 	ret = access(path, mode);
@@ -1182,6 +1213,21 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(cur)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (cur < -1) {
+		zend_argument_value_error(2, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max < -1) {
+		zend_argument_value_error(3, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max > -1 && cur > max) {
+		zend_argument_value_error(2, "must be lower or equal to " ZEND_LONG_FMT, max);
+		RETURN_THROWS();
+	}
 
 	rl.rlim_cur = cur;
 	rl.rlim_max = max;

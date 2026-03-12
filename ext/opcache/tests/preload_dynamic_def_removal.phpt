@@ -15,7 +15,9 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 <?php
 dynamic();
 dynamic2();
+dynamic_in_hook();
 ?>
 --EXPECT--
 dynamic
 dynamic2
+dynamic in hook

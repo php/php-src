@@ -219,7 +219,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 		PQclear(S->result);
 
 		/* the cursor was declared correctly */
-		S->is_prepared = 1;
+		S->is_prepared = true;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
@@ -240,7 +240,7 @@ stmt_retry:
 				case PGRES_COMMAND_OK:
 				case PGRES_TUPLES_OK:
 					/* it worked */
-					S->is_prepared = 1;
+					S->is_prepared = true;
 					PQclear(S->result);
 					S->result = NULL;
 					break;
@@ -526,10 +526,10 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		ExecStatusType status;
 
 		switch (ori) {
-			case PDO_FETCH_ORI_NEXT: 	spprintf(&ori_str, 0, "NEXT"); break;
-			case PDO_FETCH_ORI_PRIOR:	spprintf(&ori_str, 0, "BACKWARD"); break;
-			case PDO_FETCH_ORI_FIRST:	spprintf(&ori_str, 0, "FIRST"); break;
-			case PDO_FETCH_ORI_LAST:	spprintf(&ori_str, 0, "LAST"); break;
+			case PDO_FETCH_ORI_NEXT: 	ori_str = "NEXT"; break;
+			case PDO_FETCH_ORI_PRIOR:	ori_str = "BACKWARD"; break;
+			case PDO_FETCH_ORI_FIRST:	ori_str = "FIRST"; break;
+			case PDO_FETCH_ORI_LAST:	ori_str = "LAST"; break;
 			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE " ZEND_LONG_FMT, offset); break;
 			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE " ZEND_LONG_FMT, offset); break;
 			default:
@@ -542,7 +542,9 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		}
 
 		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
-		efree(ori_str);
+		if (ori == PDO_FETCH_ORI_ABS || ori == PDO_FETCH_ORI_REL) {
+			efree(ori_str);
+		}
 		S->result = PQexec(S->H->server, q);
 		efree(q);
 		status = PQresultStatus(S->result);

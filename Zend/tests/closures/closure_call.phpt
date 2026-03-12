@@ -61,7 +61,7 @@ int(0)
 int(0)
 int(3)
 
-Warning: Cannot bind closure to scope of internal class stdClass in %s line %d
+Warning: Cannot bind closure to scope of internal class stdClass, this will be an error in PHP 9 in %s line %d
 NULL
 int(21)
 int(3)

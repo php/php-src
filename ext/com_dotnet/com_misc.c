@@ -73,7 +73,7 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 
 	VariantInit(&obj->v);
 	VariantCopyInd(&obj->v, v);
-	obj->modified = 0;
+	obj->modified = false;
 
 	if ((V_VT(&obj->v) == VT_DISPATCH) && (V_DISPATCH(&obj->v) != NULL)) {
 		IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);

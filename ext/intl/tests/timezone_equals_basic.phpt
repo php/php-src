@@ -4,7 +4,6 @@ IntlTimeZone equals handler: basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $tz1 = intltz_create_time_zone('Europe/Lisbon');
 $tz2 = intltz_create_time_zone('Europe/Lisbon');
@@ -26,4 +25,4 @@ bool(true)
 Comparison to equivalent instance:
 bool(false)
 Comparison to GMT:
-bool(false)
+bool(false)

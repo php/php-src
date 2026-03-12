@@ -120,12 +120,10 @@ PHP_METHOD(mysqli_warning, next)
 	MYSQLI_WARNING 	*w;
 	mysqli_object *obj = Z_MYSQLI_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (obj->ptr) {
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;

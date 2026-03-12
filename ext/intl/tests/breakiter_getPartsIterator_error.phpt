@@ -4,7 +4,6 @@ IntlBreakIterator::getPartsIterator(): bad args
 intl
 --FILE--
 <?php
-ini_set("intl.default_locale", "pt_PT");
 
 $it = IntlBreakIterator::createWordInstance(NULL);
 

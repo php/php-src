@@ -17,6 +17,8 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
+#include "pcntl_decl.h"
+
 #if defined(HAVE_DECL_WCONTINUED) && HAVE_DECL_WCONTINUED == 1 && defined(HAVE_WIFCONTINUED) && HAVE_WIFCONTINUED == 1
 #define HAVE_WCONTINUED 1
 #endif
@@ -46,7 +48,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	bool processing_signal_queue;
 	volatile bool pending_signals;
 	bool async_signals;
-	uint8_t num_signals;
+	/* some OSes define NSIG to be > UINT8_MAX */
+	uint16_t num_signals;
 	int last_error;
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 ZEND_END_MODULE_GLOBALS(pcntl)

@@ -15,7 +15,7 @@ var_dump($reflection->getAttributes())
 
 ?>
 --EXPECTF--
-Warning: Constant MY_CONST already defined in %s on line %d
+Warning: Constant MY_CONST already defined, this will be an error in PHP 9 in %s on line %d
 Has attributes
 array(1) {
   [0]=>

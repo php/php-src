@@ -135,17 +135,13 @@ static int zend_file_cache_flock(int fd, int type)
 			(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
 		} \
 	} while (0)
+
 #define SERIALIZE_STR(ptr) do { \
 		if (ptr) { \
 			if (IS_ACCEL_INTERNED(ptr)) { \
 				(ptr) = zend_file_cache_serialize_interned((zend_string*)(ptr), info); \
 			} else { \
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
-				/* script->corrupted shows if the script in SHM or not */ \
-				if (EXPECTED(script->corrupted)) { \
-					GC_ADD_FLAGS(ptr, IS_STR_INTERNED); \
-					GC_DEL_FLAGS(ptr, IS_STR_PERMANENT); \
-				} \
 				(ptr) = (void*)((char*)(ptr) - (char*)script->mem); \
 			} \
 		} \
@@ -164,6 +160,7 @@ static int zend_file_cache_flock(int fd, int type)
 					GC_ADD_FLAGS(ptr, IS_STR_INTERNED); \
 					GC_DEL_FLAGS(ptr, IS_STR_PERMANENT); \
 				} \
+				GC_DEL_FLAGS(ptr, IS_STR_CLASS_NAME_MAP_PTR); \
 			} \
 		} \
 	} while (0)
@@ -387,6 +384,12 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
+		if (!IS_SERIALIZED(fcc->args)) {
+			SERIALIZE_PTR(fcc->args);
+			tmp = fcc->args;
+			UNSERIALIZE_PTR(tmp);
+			zend_file_cache_serialize_ast(tmp, script, info, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -461,6 +464,7 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 
 	SERIALIZE_STR(attr->name);
 	SERIALIZE_STR(attr->lcname);
+	SERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		SERIALIZE_STR(attr->args[i].name);
@@ -572,13 +576,32 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
+
+				/* See GH-17733. Reset Z_EXTRA_P(op2) of ZEND_INIT_FCALL, which
+				 * is an offset into the global function table, to avoid calling
+				 * incorrect functions when environment changes. This, and the
+				 * equivalent code below, can be removed once proper system ID
+				 * validation is implemented. */
+				if (opline->opcode == ZEND_INIT_FCALL) {
+					zval *op2 = opline->op2.zv;
+					UNSERIALIZE_PTR(op2);
+					Z_EXTRA_P(op2) = 0;
+					ZEND_VM_SET_OPCODE_HANDLER(opline);
+				}
 			}
 #else
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.constant = RT_CONSTANT(opline, opline->op1) - literals;
 			}
 			if (opline->op2_type == IS_CONST) {
-				opline->op2.constant = RT_CONSTANT(opline, opline->op2) - literals;
+				zval *op2 = RT_CONSTANT(opline, opline->op2);
+				opline->op2.constant = op2 - literals;
+
+				/* See GH-17733 and comment above. */
+				if (opline->opcode == ZEND_INIT_FCALL) {
+					Z_EXTRA_P(op2) = 0;
+					ZEND_VM_SET_OPCODE_HANDLER(opline);
+				}
 			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR
@@ -1287,6 +1310,10 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_NEW(fcc->fptr);
+		if (!IS_UNSERIALIZED(fcc->args)) {
+			UNSERIALIZE_PTR(fcc->args);
+			zend_file_cache_unserialize_ast(fcc->args, script, buf);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -1352,6 +1379,7 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 
 	UNSERIALIZE_STR(attr->name);
 	UNSERIALIZE_STR(attr->lcname);
+	UNSERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		UNSERIALIZE_STR(attr->args[i].name);
@@ -2091,7 +2119,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return;
 	}
-	
+
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);

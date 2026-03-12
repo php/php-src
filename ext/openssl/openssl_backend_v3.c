@@ -24,6 +24,18 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(openssl)
 
+void php_openssl_backend_init(void)
+{
+#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
+	OSSL_PROVIDER_load(NULL, "legacy");
+	OSSL_PROVIDER_load(NULL, "default");
+#endif
+
+	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
+
+	php_openssl_backend_init_common();
+}
+
 void php_openssl_backend_shutdown(void)
 {
 	(void) 0;
@@ -713,6 +725,12 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 
 const EVP_MD *php_openssl_get_evp_md_by_name(const char *name)
 {
+	const EVP_MD *dp = (const EVP_MD *) OBJ_NAME_get(name, OBJ_NAME_TYPE_MD_METH);
+
+	if (dp != NULL) {
+		return dp;
+	}
+
 	return EVP_MD_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
 }
 
@@ -769,6 +787,12 @@ static const char *php_openssl_cipher_names[] = {
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *name)
 {
+	const EVP_CIPHER *cp = (const EVP_CIPHER *) OBJ_NAME_get(name, OBJ_NAME_TYPE_CIPHER_METH);
+
+	if (cp != NULL) {
+		return cp;
+	}
+
 	return EVP_CIPHER_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
 }
 
@@ -829,6 +853,133 @@ void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 CONF *php_openssl_nconf_new(void)
 {
 	return NCONF_new_ex(PHP_OPENSSL_LIBCTX, NULL);
+}
+
+X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in)
+{
+	X509 *x = X509_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (x == NULL) {
+		return NULL;
+	}
+
+	if (PEM_ASN1_read_bio((d2i_of_void *)d2i_X509, PEM_STRING_X509, in, (void **) &x, NULL, NULL) == NULL) {
+		X509_free(x);
+		return NULL;
+	}
+
+	return x;
+}
+
+X509 *php_openssl_pem_read_bio_x509(BIO *in)
+{
+	X509 *x = X509_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (x == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_X509(in, &x, NULL, NULL) == NULL) {
+		X509_free(x);
+		return NULL;
+	}
+
+	return x;
+}
+
+X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in)
+{
+	X509_REQ *xr = X509_REQ_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (xr == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_X509_REQ(in, &xr, NULL, NULL) == NULL) {
+		X509_REQ_free(xr);
+		return NULL;
+	}
+
+	return xr;
+}
+
+STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in)
+{
+	return PEM_X509_INFO_read_bio_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)
+{
+	return PEM_read_bio_PUBKEY_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u)
+{
+	return PEM_read_bio_PrivateKey_ex(in, NULL, cb, u, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
+PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in)
+{
+	PKCS7 *p = PKCS7_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (p == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_PKCS7(in, &p, NULL, NULL) == NULL) {
+		PKCS7_free(p);
+		return NULL;
+	}
+
+	return p;
+}
+
+CMS_ContentInfo *php_openssl_pem_read_bio_cms(BIO *in)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_CMS(in, &ci, NULL, NULL) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
+}
+
+CMS_ContentInfo *php_openssl_d2i_bio_cms(BIO *in)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (d2i_CMS_bio(in, &ci) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
+}
+
+CMS_ContentInfo *php_openssl_smime_read_cms(BIO *bio, BIO **bcont)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (SMIME_read_CMS_ex(bio, 0, bcont, &ci) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
 }
 
 #endif

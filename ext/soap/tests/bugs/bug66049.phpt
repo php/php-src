@@ -15,7 +15,7 @@ function soap_string_from_xml($str)
     }
 
 class TestSoapClient extends SoapClient {
-    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    function __doRequest($request, $location, $action, $version, $one_way = 0, ?string $uriParserClass = null): ?string {
         $res='<?xml version="1.0" encoding="UTF-8"?>
             <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
             <SOAP-ENV:Body>

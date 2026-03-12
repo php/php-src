@@ -79,10 +79,6 @@ typedef enum {
 #define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 #define PHP_JSON_THROW_ON_ERROR             (1<<22)
 
-/* Internal flags */
-#define PHP_JSON_OUTPUT_ARRAY	0
-#define PHP_JSON_OUTPUT_OBJECT	1
-
 /* default depth */
 #define PHP_JSON_PARSER_DEFAULT_DEPTH 512
 
@@ -90,6 +86,8 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int encode_max_depth;
 	php_json_error_code error_code;
+	size_t error_line;
+	size_t error_column;
 ZEND_END_MODULE_GLOBALS(json)
 
 PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)

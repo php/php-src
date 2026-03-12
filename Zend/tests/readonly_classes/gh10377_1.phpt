@@ -12,4 +12,4 @@ $readonly_anon = new #[AllowDynamicProperties] readonly class {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[AllowDynamicProperties] to readonly class class@anonymous in %s on line %d
+Fatal error: Cannot apply #[\AllowDynamicProperties] to readonly class class@anonymous in %s on line %d

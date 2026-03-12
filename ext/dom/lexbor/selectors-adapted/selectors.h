@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2024 Alexander Borisov
+ * Copyright (C) 2021-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  * Adapted for PHP libxml2 by: Niels Dossche <nielsdos@php.net>
@@ -77,7 +77,6 @@ typedef lxb_selectors_entry_t *
 
 typedef struct {
 	const xmlChar *name;
-	bool interned;
 	bool attr_case_insensitive;
 } lxb_selectors_adapted_id;
 
@@ -100,11 +99,13 @@ struct lxb_selectors_nested {
 	void                     *ctx;
 
 	const xmlNode            *root;
-	lxb_selectors_entry_t    *last;
 	lxb_selectors_nested_t   *parent;
+	lxb_selectors_entry_t    *first;
+	lxb_selectors_entry_t    *top;
 
 	size_t                   index;
-	bool                     found;
+
+	bool                     forward;
 };
 
 struct lxb_selectors {
@@ -113,7 +114,6 @@ struct lxb_selectors {
 	lexbor_dobject_t         *nested;
 
 	lxb_selectors_nested_t   *current;
-	lxb_selectors_entry_t    *first;
 
 	lxb_selectors_opt_t      options;
 	lxb_status_t             status;

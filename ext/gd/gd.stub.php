@@ -449,17 +449,11 @@ const GD_EXTRA_VERSION = UNKNOWN;
  * /usr/include/pngconf.h:310:2: error: #error png.h already includes setjmp.h with some additional fixup.
  * as error, use the values for now...
  */
-/** @var int */
 const PNG_NO_FILTER = 0x00;
-/** @var int */
 const PNG_FILTER_NONE = 0x08;
-/** @var int */
 const PNG_FILTER_SUB = 0x10;
-/** @var int */
 const PNG_FILTER_UP = 0x20;
-/** @var int */
 const PNG_FILTER_AVG = 0x40;
-/** @var int */
 const PNG_FILTER_PAETH = 0x80;
 /** @var int */
 const PNG_ALL_FILTERS = 0x08 | 0x10 | 0x20 | 0x40 | 0x80;
@@ -629,6 +623,7 @@ function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = 128, i
 /** @param resource|string|null $file */
 function imagebmp(GdImage $image, $file = null, bool $compressed = true): bool {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function imagedestroy(GdImage $image): true {}
 
 function imagecolorallocate(GdImage $image, int $red, int $green, int $blue): int|false {}

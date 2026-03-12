@@ -26,10 +26,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-string(67) "locale_add_likely_subtags: invalid locale: U_ILLEGAL_ARGUMENT_ERROR"
+string(68) "Locale::addLikelySubtags(): invalid locale: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(65) "locale_minimize_subtags: invalid locale: U_ILLEGAL_ARGUMENT_ERROR"
+string(67) "Locale::minimizeSubtags(): invalid locale: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(%d) "locale_add_likely_subtags: invalid locale: %s"
+string(68) "Locale::addLikelySubtags(): invalid locale: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(%d) "locale_minimize_subtags: invalid locale: %s"
+string(%d) "Locale::minimizeSubtags(): invalid locale: %s"

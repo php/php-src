@@ -1,13 +1,9 @@
 --TEST--
 IntlCalendar::getTime() basic test
---INI--
-date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->clear();
@@ -22,4 +18,4 @@ var_dump((float)$time*1000, $intlcal->getTime());
 ?>
 --EXPECT--
 float(1330473600000)
-float(1330473600000)
+float(1330473600000)

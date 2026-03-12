@@ -62,19 +62,8 @@ typedef enum {
 
 typedef ZEND_RESULT_CODE zend_result;
 
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-# ifdef ZEND_WIN32
-#  define ZEND_SIZE_MAX  _UI64_MAX
-# else
-#  define ZEND_SIZE_MAX  SIZE_MAX
-# endif
-#else
-# if defined(ZEND_WIN32)
-#  define ZEND_SIZE_MAX  _UI32_MAX
-# else
-#  define ZEND_SIZE_MAX SIZE_MAX
-# endif
-#endif
+/* This constant is deprecated, use SIZE_MAX instead */
+#define ZEND_SIZE_MAX SIZE_MAX
 
 #ifdef ZTS
 #define ZEND_TLS static TSRM_TLS
@@ -649,6 +638,9 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
+/* used for PFAs/FCCs */
+#define _IS_PLACEHOLDER             20
+
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
 #define ZEND_GUARD_PROPERTY_SET		(1<<1)
@@ -750,6 +742,18 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 			rc_dtor_func((zend_refcounted *)_p); \
 		} else { \
 			gc_check_possible_root_no_ref((zend_refcounted *)_p); \
+		} \
+	} while (0)
+
+#define GC_TRY_DTOR_NO_REF(p) \
+	do { \
+		zend_refcounted_h *_p = &(p)->gc; \
+		if (!(_p->u.type_info & GC_IMMUTABLE)) { \
+			if (zend_gc_delref(_p) == 0) { \
+				rc_dtor_func((zend_refcounted *)_p); \
+			} else { \
+				gc_check_possible_root_no_ref((zend_refcounted *)_p); \
+			} \
 		} \
 	} while (0)
 

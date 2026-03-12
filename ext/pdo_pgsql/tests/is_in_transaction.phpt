@@ -19,7 +19,7 @@ $db->exec('CREATE TABLE test_is_in_transaction (a integer not null primary key, 
 
 $db->beginTransaction();
 try {
-echo "Test PDO::PGSQL_TRANSACTION_INTRANS\n";
+echo "Test Pdo\Pgsql::TRANSACTION_INTRANS\n";
 var_dump($db->inTransaction());
 
 $stmt = $db->prepare("INSERT INTO test_is_in_transaction (a, b) values (?, ?)");
@@ -29,7 +29,7 @@ $stmt->execute();
 
 $db->commit();
 
-echo "Test PDO::PGSQL_TRANSACTION_IDLE\n";
+echo "Test Pdo\Pgsql::TRANSACTION_IDLE\n";
 var_dump($db->inTransaction());
 
 $db->beginTransaction();
@@ -40,13 +40,13 @@ $stmt->bindValue(1, "error");
 $stmt->bindValue(2, "test insert");
 $stmt->execute();
 } catch (Exception $e) {
-    /* We catch the exception because the execute will give error and we must test the PDO::PGSQL_TRANSACTION_ERROR */
-    echo "Test PDO::PGSQL_TRANSACTION_INERROR\n";
+    /* We catch the exception because the execute will give error and we must test the Pdo\Pgsql::TRANSACTION_ERROR */
+    echo "Test Pdo\Pgsql::TRANSACTION_INERROR\n";
     var_dump($db->inTransaction());
     $db->rollBack();
 }
 
-echo "Test PDO::PGSQL_TRANSACTION_IDLE\n";
+echo "Test Pdo\Pgsql::TRANSACTION_IDLE\n";
 var_dump($db->inTransaction());
 
 } catch (Exception $e) {
@@ -62,11 +62,11 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->exec('DROP TABLE test_is_in_transaction');
 ?>
 --EXPECT--
-Test PDO::PGSQL_TRANSACTION_INTRANS
+Test Pdo\Pgsql::TRANSACTION_INTRANS
 bool(true)
-Test PDO::PGSQL_TRANSACTION_IDLE
+Test Pdo\Pgsql::TRANSACTION_IDLE
 bool(false)
-Test PDO::PGSQL_TRANSACTION_INERROR
+Test Pdo\Pgsql::TRANSACTION_INERROR
 bool(true)
-Test PDO::PGSQL_TRANSACTION_IDLE
+Test Pdo\Pgsql::TRANSACTION_IDLE
 bool(false)

@@ -1,4 +1,4 @@
-/* e8e2c75d033ddfe256fe87c3fd5a330a6f2c9cbb376ebd83a1b3263e804c766a (0.9.8+)
+/* 5abed1007be99942f49ffe603a894d277066b79b9cb824547af0f3b9481cb9ca (1.0.0+)
  *
  * uriparser - RFC 3986 URI parsing library
  *
@@ -45,47 +45,41 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE)) \
-	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+    || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE)) \
+    || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
-#include "UriDefsConfig.h"
-#if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+#  include "UriDefsConfig.h"
+#  if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
-# ifdef URI_ENABLE_ANSI
-#  define URI_PASS_ANSI 1
-#  include "Uri.h"
-#  undef URI_PASS_ANSI
-# endif
-# ifdef URI_ENABLE_UNICODE
-#  define URI_PASS_UNICODE 1
-#  include "Uri.h"
-#  undef URI_PASS_UNICODE
-# endif
+#    ifdef URI_ENABLE_ANSI
+#      define URI_PASS_ANSI 1
+#      include "Uri.h"
+#      undef URI_PASS_ANSI
+#    endif
+#    ifdef URI_ENABLE_UNICODE
+#      define URI_PASS_UNICODE 1
+#      include "Uri.h"
+#      undef URI_PASS_UNICODE
+#    endif
 /* Only one pass for each encoding */
-#elif (defined(URI_PASS_ANSI) && !defined(URI_H_ANSI) \
-	&& defined(URI_ENABLE_ANSI)) || (defined(URI_PASS_UNICODE) \
-	&& !defined(URI_H_UNICODE) && defined(URI_ENABLE_UNICODE))
-# ifdef URI_PASS_ANSI
-#  define URI_H_ANSI 1
-#  include "UriDefsAnsi.h"
-# else
-#  define URI_H_UNICODE 1
-#  include "UriDefsUnicode.h"
-# endif
+#  elif (defined(URI_PASS_ANSI) && !defined(URI_H_ANSI) && defined(URI_ENABLE_ANSI)) \
+      || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE) \
+          && defined(URI_ENABLE_UNICODE))
+#    ifdef URI_PASS_ANSI
+#      define URI_H_ANSI 1
+#      include "UriDefsAnsi.h"
+#    else
+#      define URI_H_UNICODE 1
+#      include "UriDefsUnicode.h"
+#    endif
 
-
-
-#ifdef __cplusplus
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 
-
-
-#ifndef URI_DOXYGEN
-# include "UriBase.h"
-#endif
-
-
+#    ifndef URI_DOXYGEN
+#      include "UriBase.h"
+#    endif
 
 /**
  * Specifies a range of characters within a string.
@@ -99,11 +93,9 @@ extern "C" {
  * @since 0.3.0
  */
 typedef struct URI_TYPE(TextRangeStruct) {
-	const URI_CHAR * first; /**< Pointer to first character */
-	const URI_CHAR * afterLast; /**< Pointer to character after the last one still in */
+    const URI_CHAR * first; /**< Pointer to first character */
+    const URI_CHAR * afterLast; /**< Pointer to character after the last one still in */
 } URI_TYPE(TextRange); /**< @copydoc UriTextRangeStructA */
-
-
 
 /**
  * Represents a path segment within a %URI path.
@@ -114,13 +106,12 @@ typedef struct URI_TYPE(TextRangeStruct) {
  * @since 0.3.0
  */
 typedef struct URI_TYPE(PathSegmentStruct) {
-	URI_TYPE(TextRange) text; /**< Path segment name */
-	struct URI_TYPE(PathSegmentStruct) * next; /**< Pointer to the next path segment in the list, can be NULL if last already */
+    URI_TYPE(TextRange) text; /**< Path segment name */
+    struct URI_TYPE(PathSegmentStruct) * next; /**< Pointer to the next path segment in
+                                                  the list, can be NULL if last already */
 
-	void * reserved; /**< Reserved to the parser */
+    void * reserved; /**< Reserved to the parser */
 } URI_TYPE(PathSegment); /**< @copydoc UriPathSegmentStructA */
-
-
 
 /**
  * Holds structured host information.
@@ -132,12 +123,15 @@ typedef struct URI_TYPE(PathSegmentStruct) {
  * @since 0.3.0
  */
 typedef struct URI_TYPE(HostDataStruct) {
-	UriIp4 * ip4; /**< IPv4 address */
-	UriIp6 * ip6; /**< IPv6 address */
-	URI_TYPE(TextRange) ipFuture; /**< IPvFuture address */
+    UriIp4 * ip4; /**< IPv4 address */
+    UriIp6 * ip6; /**< IPv6 address */
+    URI_TYPE(TextRange)
+    ipFuture; /**< IPvFuture address
+@note
+With non-<c>NULL</c> members in UriUriStructA.hostData context,
+this text range's pointers must be <em>identical</em> to those
+of UriUriStructA.hostText at all times. */
 } URI_TYPE(HostData); /**< @copydoc UriHostDataStructA */
-
-
 
 /**
  * Represents an RFC 3986 %URI.
@@ -149,23 +143,22 @@ typedef struct URI_TYPE(HostDataStruct) {
  * @since 0.3.0
  */
 typedef struct URI_TYPE(UriStruct) {
-	URI_TYPE(TextRange) scheme; /**< Scheme (e.g. "http") */
-	URI_TYPE(TextRange) userInfo; /**< User info (e.g. "user:pass") */
-	URI_TYPE(TextRange) hostText; /**< Host text (set for all hosts, excluding square brackets) */
-	URI_TYPE(HostData) hostData; /**< Structured host type specific data */
-	URI_TYPE(TextRange) portText; /**< Port (e.g. "80") */
-	URI_TYPE(PathSegment) * pathHead; /**< Head of a linked list of path segments */
-	URI_TYPE(PathSegment) * pathTail; /**< Tail of the list behind pathHead */
-	URI_TYPE(TextRange) query; /**< Query without leading "?" */
-	URI_TYPE(TextRange) fragment; /**< Query without leading "#" */
-	UriBool absolutePath; /**< Absolute path flag, distincting "a" and "/a";
-								always <c>URI_FALSE</c> for URIs with host */
-	UriBool owner; /**< Memory owner flag */
+    URI_TYPE(TextRange) scheme; /**< Scheme (e.g. "http") */
+    URI_TYPE(TextRange) userInfo; /**< User info (e.g. "user:pass") */
+    URI_TYPE(TextRange)
+    hostText; /**< Host text (set for all hosts, excluding square brackets) */
+    URI_TYPE(HostData) hostData; /**< Structured host type specific data */
+    URI_TYPE(TextRange) portText; /**< Port (e.g. "80") */
+    URI_TYPE(PathSegment) * pathHead; /**< Head of a linked list of path segments */
+    URI_TYPE(PathSegment) * pathTail; /**< Tail of the list behind pathHead */
+    URI_TYPE(TextRange) query; /**< Query without leading "?" */
+    URI_TYPE(TextRange) fragment; /**< Query without leading "#" */
+    UriBool absolutePath; /**< Absolute path flag, distincting "a" and "/a"; always
+                             <c>URI_FALSE</c> for URIs with host */
+    UriBool owner; /**< Memory owner flag */
 
-	void * reserved; /**< Reserved to the parser */
+    void * reserved; /**< Reserved to the parser */
 } URI_TYPE(Uri); /**< @copydoc UriUriStructA */
-
-
 
 /**
  * Represents a state of the %URI parser.
@@ -177,14 +170,13 @@ typedef struct URI_TYPE(UriStruct) {
  * @since 0.3.0
  */
 typedef struct URI_TYPE(ParserStateStruct) {
-	URI_TYPE(Uri) * uri; /**< Plug in the %URI structure to be filled while parsing here */
-	int errorCode; /**< Code identifying the error which occurred */
-	const URI_CHAR * errorPos; /**< Pointer to position in case of a syntax error */
+    URI_TYPE(Uri)
+    *uri; /**< Plug in the %URI structure to be filled while parsing here */
+    int errorCode; /**< Code identifying the error which occurred */
+    const URI_CHAR * errorPos; /**< Pointer to position in case of a syntax error */
 
-	void * reserved; /**< Reserved to the parser */
+    void * reserved; /**< Reserved to the parser */
 } URI_TYPE(ParserState); /**< @copydoc UriParserStateStructA */
-
-
 
 /**
  * Represents a query element.
@@ -194,12 +186,12 @@ typedef struct URI_TYPE(ParserStateStruct) {
  * @since 0.7.0
  */
 typedef struct URI_TYPE(QueryListStruct) {
-	const URI_CHAR * key; /**< Key of the query element */
-	const URI_CHAR * value; /**< Value of the query element, can be NULL */
+    const URI_CHAR * key; /**< Key of the query element */
+    const URI_CHAR * value; /**< Value of the query element, can be NULL */
 
-	struct URI_TYPE(QueryListStruct) * next; /**< Pointer to the next key/value pair in the list, can be NULL if last already */
+    struct URI_TYPE(QueryListStruct) * next; /**< Pointer to the next key/value pair in
+                                                the list, can be NULL if last already */
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
-
 
 /**
  * Checks if a URI has the host component set.
@@ -211,7 +203,41 @@ typedef struct URI_TYPE(QueryListStruct) {
  */
 URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
 
+/**
+ * Converts an IPv6 text representation into 16 bytes.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param output       <b>OUT</b>: Output destination, can be <c>NULL</c>
+ * @param first        <b>IN</b>: First character of IPv6 text to parse
+ * @param afterLast    <b>IN</b>: Position to stop parsing at
+ * @return Error code or <c>URI_SUCCESS</c> on success
+ *
+ * @see uriParseIpFourAddressA
+ * @see uriParseIpSixAddressMmA
+ * @see uriIsWellFormedHostIp6A
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(ParseIpSixAddress)(UriIp6 * output, const URI_CHAR * first,
+                                           const URI_CHAR * afterLast);
 
+/**
+ * Converts an IPv6 text representation into 16 bytes.
+ *
+ * @param output       <b>OUT</b>: Output destination, can be <c>NULL</c>
+ * @param first        <b>IN</b>: First character of IPv6 text to parse
+ * @param afterLast    <b>IN</b>: Position to stop parsing at
+ * @param memory       <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return Error code or <c>URI_SUCCESS</c> on success
+ *
+ * @see uriParseIpFourAddressA
+ * @see uriParseIpSixAddressA
+ * @see uriIsWellFormedHostIp6MmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output, const URI_CHAR * first,
+                                             const URI_CHAR * afterLast,
+                                             UriMemoryManager * memory);
 
 /**
  * Parses a RFC 3986 %URI.
@@ -219,7 +245,8 @@ URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
  *
  * @param state       <b>INOUT</b>: Parser state with set output %URI, must not be NULL
  * @param first       <b>IN</b>: Pointer to the first character to parse, must not be NULL
- * @param afterLast   <b>IN</b>: Pointer to the character after the last to parse, must not be NULL
+ * @param afterLast   <b>IN</b>: Pointer to the character after the last to parse, must
+ * not be NULL
  * @return            0 on success, error code otherwise
  *
  * @see uriParseUriA
@@ -227,12 +254,11 @@ URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
  * @see uriParseSingleUriExA
  * @see uriToStringA
  * @since 0.3.0
- * @deprecated Deprecated since 0.9.0, please migrate to uriParseSingleUriExA (with "Single").
+ * @deprecated Deprecated since 0.9.0, please migrate to uriParseSingleUriExA (with
+ * "Single").
  */
-URI_PUBLIC int URI_FUNC(ParseUriEx)(URI_TYPE(ParserState) * state,
-		const URI_CHAR * first, const URI_CHAR * afterLast);
-
-
+URI_PUBLIC int URI_FUNC(ParseUriEx)(URI_TYPE(ParserState) * state, const URI_CHAR * first,
+                                    const URI_CHAR * afterLast);
 
 /**
  * Parses a RFC 3986 %URI.
@@ -247,12 +273,10 @@ URI_PUBLIC int URI_FUNC(ParseUriEx)(URI_TYPE(ParserState) * state,
  * @see uriParseSingleUriExA
  * @see uriToStringA
  * @since 0.3.0
- * @deprecated Deprecated since 0.9.0, please migrate to uriParseSingleUriA (with "Single").
+ * @deprecated Deprecated since 0.9.0, please migrate to uriParseSingleUriA (with
+ * "Single").
  */
-URI_PUBLIC int URI_FUNC(ParseUri)(URI_TYPE(ParserState) * state,
-		const URI_CHAR * text);
-
-
+URI_PUBLIC int URI_FUNC(ParseUri)(URI_TYPE(ParserState) * state, const URI_CHAR * text);
 
 /**
  * Parses a single RFC 3986 %URI.
@@ -271,10 +295,8 @@ URI_PUBLIC int URI_FUNC(ParseUri)(URI_TYPE(ParserState) * state,
  * @see uriToStringA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(ParseSingleUri)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * text, const URI_CHAR ** errorPos);
-
-
+URI_PUBLIC int URI_FUNC(ParseSingleUri)(URI_TYPE(Uri) * uri, const URI_CHAR * text,
+                                        const URI_CHAR ** errorPos);
 
 /**
  * Parses a single RFC 3986 %URI.
@@ -296,11 +318,9 @@ URI_PUBLIC int URI_FUNC(ParseSingleUri)(URI_TYPE(Uri) * uri,
  * @see uriToStringA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(ParseSingleUriEx)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first, const URI_CHAR * afterLast,
-		const URI_CHAR ** errorPos);
-
-
+URI_PUBLIC int URI_FUNC(ParseSingleUriEx)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                          const URI_CHAR * afterLast,
+                                          const URI_CHAR ** errorPos);
 
 /**
  * Parses a single RFC 3986 %URI.
@@ -322,11 +342,10 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriEx)(URI_TYPE(Uri) * uri,
  * @see uriToStringA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri,
-		const URI_CHAR * first, const URI_CHAR * afterLast,
-		const URI_CHAR ** errorPos, UriMemoryManager * memory);
-
-
+URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                            const URI_CHAR * afterLast,
+                                            const URI_CHAR ** errorPos,
+                                            UriMemoryManager * memory);
 
 /**
  * Frees all memory associated with the members
@@ -335,8 +354,8 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri,
  * Uses default libc-based memory manager.
  *
  * @remarks
- * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
- * Calling on an uninitialized structure is <em>not</em> safe.
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is
+ * safe.<br/> Calling on an uninitialized structure is <em>not</em> safe.
  *
  * @param uri   <b>INOUT</b>: %URI structure whose members should be freed
  *
@@ -345,16 +364,14 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri,
  */
 URI_PUBLIC void URI_FUNC(FreeUriMembers)(URI_TYPE(Uri) * uri);
 
-
-
 /**
  * Frees all memory associated with the members
  * of the %URI structure. Note that the structure
  * itself is not freed, only its members.
  *
  * @remarks
- * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
- * Calling on an uninitialized structure is <em>not</em> safe.
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is
+ * safe.<br/> Calling on an uninitialized structure is <em>not</em> safe.
  *
  * @param uri     <b>INOUT</b>: %URI structure whose members should be freed
  * @param memory  <b>IN</b>: Memory manager to use, NULL for default libc
@@ -363,10 +380,7 @@ URI_PUBLIC void URI_FUNC(FreeUriMembers)(URI_TYPE(Uri) * uri);
  * @see uriFreeUriMembersA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri,
-		UriMemoryManager * memory);
-
-
+URI_PUBLIC int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 
 /**
  * Percent-encodes all but unreserved characters from the input string and
@@ -397,10 +411,8 @@ URI_PUBLIC int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri,
  * @since 0.5.2
  */
 URI_PUBLIC URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
-		const URI_CHAR * inAfterLast, URI_CHAR * out,
-		UriBool spaceToPlus, UriBool normalizeBreaks);
-
-
+                                         const URI_CHAR * inAfterLast, URI_CHAR * out,
+                                         UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
  * Percent-encodes all but unreserved characters from the input string and
@@ -430,9 +442,7 @@ URI_PUBLIC URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
  * @since 0.5.0
  */
 URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
-		UriBool spaceToPlus, UriBool normalizeBreaks);
-
-
+                                       UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
  * Unescapes percent-encoded groups in a given string.
@@ -451,10 +461,9 @@ URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
  * @see uriEscapeExA
  * @since 0.5.0
  */
-URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout,
-		UriBool plusToSpace, UriBreakConversion breakConversion);
-
-
+URI_PUBLIC const URI_CHAR *
+    URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout, UriBool plusToSpace,
+                                UriBreakConversion breakConversion);
 
 /**
  * Unescapes percent-encoded groups in a given string.
@@ -476,13 +485,11 @@ URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout,
  */
 URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout);
 
-
-
 /**
  * Performs reference resolution as described in
- * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
- * Uses default libc-based memory manager.
- * NOTE: On success you have to call uriFreeUriMembersA on \p absoluteDest manually later.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of
+ * RFC 3986</a>. Uses default libc-based memory manager. NOTE: On success you have to call
+ * uriFreeUriMembersA on \p absoluteDest manually later.
  *
  * @param absoluteDest     <b>OUT</b>: Result %URI
  * @param relativeSource   <b>IN</b>: Reference to resolve
@@ -496,16 +503,14 @@ URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout);
  * @since 0.4.0
  */
 URI_PUBLIC int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absoluteDest,
-		const URI_TYPE(Uri) * relativeSource,
-		const URI_TYPE(Uri) * absoluteBase);
-
-
+                                    const URI_TYPE(Uri) * relativeSource,
+                                    const URI_TYPE(Uri) * absoluteBase);
 
 /**
  * Performs reference resolution as described in
- * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
- * Uses default libc-based memory manager.
- * NOTE: On success you have to call uriFreeUriMembersA on \p absoluteDest manually later.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of
+ * RFC 3986</a>. Uses default libc-based memory manager. NOTE: On success you have to call
+ * uriFreeUriMembersA on \p absoluteDest manually later.
  *
  * @param absoluteDest     <b>OUT</b>: Result %URI
  * @param relativeSource   <b>IN</b>: Reference to resolve
@@ -519,16 +524,15 @@ URI_PUBLIC int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.8.1
  */
 URI_PUBLIC int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absoluteDest,
-		const URI_TYPE(Uri) * relativeSource,
-		const URI_TYPE(Uri) * absoluteBase,
-		UriResolutionOptions options);
-
-
+                                      const URI_TYPE(Uri) * relativeSource,
+                                      const URI_TYPE(Uri) * absoluteBase,
+                                      UriResolutionOptions options);
 
 /**
  * Performs reference resolution as described in
- * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
- * NOTE: On success you have to call uriFreeUriMembersMmA on \p absoluteDest manually later.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of
+ * RFC 3986</a>. NOTE: On success you have to call uriFreeUriMembersMmA on \p absoluteDest
+ * manually later.
  *
  * @param absoluteDest     <b>OUT</b>: Result %URI
  * @param relativeSource   <b>IN</b>: Reference to resolve
@@ -544,11 +548,10 @@ URI_PUBLIC int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(AddBaseUriExMm)(URI_TYPE(Uri) * absoluteDest,
-		const URI_TYPE(Uri) * relativeSource,
-		const URI_TYPE(Uri) * absoluteBase,
-		UriResolutionOptions options, UriMemoryManager * memory);
-
-
+                                        const URI_TYPE(Uri) * relativeSource,
+                                        const URI_TYPE(Uri) * absoluteBase,
+                                        UriResolutionOptions options,
+                                        UriMemoryManager * memory);
 
 /**
  * Tries to make a relative %URI (a reference) from an
@@ -573,11 +576,9 @@ URI_PUBLIC int URI_FUNC(AddBaseUriExMm)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(RemoveBaseUri)(URI_TYPE(Uri) * dest,
-		const URI_TYPE(Uri) * absoluteSource,
-		const URI_TYPE(Uri) * absoluteBase,
-		UriBool domainRootMode);
-
-
+                                       const URI_TYPE(Uri) * absoluteSource,
+                                       const URI_TYPE(Uri) * absoluteBase,
+                                       UriBool domainRootMode);
 
 /**
  * Tries to make a relative %URI (a reference) from an
@@ -602,11 +603,10 @@ URI_PUBLIC int URI_FUNC(RemoveBaseUri)(URI_TYPE(Uri) * dest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(RemoveBaseUriMm)(URI_TYPE(Uri) * dest,
-		const URI_TYPE(Uri) * absoluteSource,
-		const URI_TYPE(Uri) * absoluteBase,
-		UriBool domainRootMode, UriMemoryManager * memory);
-
-
+                                         const URI_TYPE(Uri) * absoluteSource,
+                                         const URI_TYPE(Uri) * absoluteBase,
+                                         UriBool domainRootMode,
+                                         UriMemoryManager * memory);
 
 /**
  * Checks two URIs for equivalence. Comparison is done
@@ -619,10 +619,7 @@ URI_PUBLIC int URI_FUNC(RemoveBaseUriMm)(URI_TYPE(Uri) * dest,
  *
  * @since 0.4.0
  */
-URI_PUBLIC UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a,
-		const URI_TYPE(Uri) * b);
-
-
+URI_PUBLIC UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b);
 
 /**
  * Calculates the number of characters needed to store the
@@ -630,38 +627,39 @@ URI_PUBLIC UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a,
  * terminator.
  *
  * @param uri             <b>IN</b>: %URI to measure
- * @param charsRequired   <b>OUT</b>: Length of the string representation in characters <b>excluding</b> terminator
+ * @param charsRequired   <b>OUT</b>: Length of the string representation in characters
+ * <b>excluding</b> terminator
  * @return                Error code or 0 on success
  *
  * @see uriToStringA
  * @since 0.5.0
  */
 URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
-		int * charsRequired);
-
-
+                                               int * charsRequired);
 
 /**
  * Converts a %URI structure back to text as described in
- * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.3">section 5.3 of RFC 3986</a>.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.3">section 5.3 of RFC
+ * 3986</a>.
  *
  * NOTE: Scheme-based normalization
- * (<a href="https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.3">section 6.2.3 of RFC 3986</a>)
- * is not applied and is considered a responsibility of the application using uriparser.
+ * (<a href="https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.3">section 6.2.3 of
+ * RFC 3986</a>) is not applied and is considered a responsibility of the application
+ * using uriparser.
  *
  * @param dest           <b>OUT</b>: Output destination
  * @param uri            <b>IN</b>: %URI to convert
- * @param maxChars       <b>IN</b>: Maximum number of characters to copy <b>including</b> terminator
- * @param charsWritten   <b>OUT</b>: Number of characters written, can be lower than maxChars even if the %URI is too long!
+ * @param maxChars       <b>IN</b>: Maximum number of characters to copy <b>including</b>
+ * terminator
+ * @param charsWritten   <b>OUT</b>: Number of characters written, can be lower than
+ * maxChars even if the %URI is too long!
  * @return               Error code or 0 on success
  *
  * @see uriToStringCharsRequiredA
  * @since 0.4.0
  */
 URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
-		int maxChars, int * charsWritten);
-
-
+                                  int maxChars, int * charsWritten);
 
 /**
  * Copies a %URI structure.
@@ -675,9 +673,8 @@ URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
-		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
-
-
+                                   const URI_TYPE(Uri) * sourceUri,
+                                   UriMemoryManager * memory);
 
 /**
  * Copies a %URI structure.
@@ -689,9 +686,8 @@ URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
  * @see uriCopyUriMmA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
-
-
+URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri,
+                                 const URI_TYPE(Uri) * sourceUri);
 
 /**
  * Determines the components of a %URI that are not normalized.
@@ -704,12 +700,10 @@ URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * 
  * @see uriNormalizeSyntaxExMmA
  * @see uriNormalizeSyntaxMaskRequiredExA
  * @since 0.5.0
- * @deprecated Deprecated since 0.9.0, please migrate to uriNormalizeSyntaxMaskRequiredExA (with "Ex").
+ * @deprecated Deprecated since 0.9.0, please migrate to uriNormalizeSyntaxMaskRequiredExA
+ * (with "Ex").
  */
-URI_PUBLIC unsigned int URI_FUNC(NormalizeSyntaxMaskRequired)(
-		const URI_TYPE(Uri) * uri);
-
-
+URI_PUBLIC unsigned int URI_FUNC(NormalizeSyntaxMaskRequired)(const URI_TYPE(Uri) * uri);
 
 /**
  * Determines the components of a %URI that are not normalized.
@@ -724,10 +718,8 @@ URI_PUBLIC unsigned int URI_FUNC(NormalizeSyntaxMaskRequired)(
  * @see uriNormalizeSyntaxMaskRequiredA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(NormalizeSyntaxMaskRequiredEx)(
-		const URI_TYPE(Uri) * uri, unsigned int * outMask);
-
-
+URI_PUBLIC int URI_FUNC(NormalizeSyntaxMaskRequiredEx)(const URI_TYPE(Uri) * uri,
+                                                       unsigned int * outMask);
 
 /**
  * Normalizes a %URI using a normalization mask.
@@ -746,10 +738,7 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntaxMaskRequiredEx)(
  * @see uriNormalizeSyntaxMaskRequiredA
  * @since 0.5.0
  */
-URI_PUBLIC int URI_FUNC(NormalizeSyntaxEx)(URI_TYPE(Uri) * uri,
-		unsigned int mask);
-
-
+URI_PUBLIC int URI_FUNC(NormalizeSyntaxEx)(URI_TYPE(Uri) * uri, unsigned int mask);
 
 /**
  * Normalizes a %URI using a normalization mask.
@@ -768,10 +757,8 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntaxEx)(URI_TYPE(Uri) * uri,
  * @see uriNormalizeSyntaxMaskRequiredA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(NormalizeSyntaxExMm)(URI_TYPE(Uri) * uri,
-		unsigned int mask, UriMemoryManager * memory);
-
-
+URI_PUBLIC int URI_FUNC(NormalizeSyntaxExMm)(URI_TYPE(Uri) * uri, unsigned int mask,
+                                             UriMemoryManager * memory);
 
 /**
  * Normalizes all components of a %URI.
@@ -789,8 +776,6 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntaxExMm)(URI_TYPE(Uri) * uri,
  * @since 0.5.0
  */
 URI_PUBLIC int URI_FUNC(NormalizeSyntax)(URI_TYPE(Uri) * uri);
-
-
 
 /**
  * Converts a Unix filename to a %URI string.
@@ -811,9 +796,7 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntax)(URI_TYPE(Uri) * uri);
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(UnixFilenameToUriString)(const URI_CHAR * filename,
-		URI_CHAR * uriString);
-
-
+                                                 URI_CHAR * uriString);
 
 /**
  * Converts a Windows filename to a %URI string.
@@ -834,9 +817,7 @@ URI_PUBLIC int URI_FUNC(UnixFilenameToUriString)(const URI_CHAR * filename,
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(WindowsFilenameToUriString)(const URI_CHAR * filename,
-		URI_CHAR * uriString);
-
-
+                                                    URI_CHAR * uriString);
 
 /**
  * Extracts a Unix filename from a %URI string.
@@ -853,9 +834,7 @@ URI_PUBLIC int URI_FUNC(WindowsFilenameToUriString)(const URI_CHAR * filename,
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(UriStringToUnixFilename)(const URI_CHAR * uriString,
-		URI_CHAR * filename);
-
-
+                                                 URI_CHAR * filename);
 
 /**
  * Extracts a Windows filename from a %URI string.
@@ -872,9 +851,7 @@ URI_PUBLIC int URI_FUNC(UriStringToUnixFilename)(const URI_CHAR * uriString,
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(UriStringToWindowsFilename)(const URI_CHAR * uriString,
-		URI_CHAR * filename);
-
-
+                                                    URI_CHAR * filename);
 
 /**
  * Calculates the number of characters needed to store the
@@ -883,17 +860,16 @@ URI_PUBLIC int URI_FUNC(UriStringToWindowsFilename)(const URI_CHAR * uriString,
  * normalized to "%0D%0A".
  *
  * @param queryList         <b>IN</b>: Query list to measure
- * @param charsRequired     <b>OUT</b>: Length of the string representation in characters <b>excluding</b> terminator
+ * @param charsRequired     <b>OUT</b>: Length of the string representation in characters
+ * <b>excluding</b> terminator
  * @return                  Error code or 0 on success
  *
  * @see uriComposeQueryCharsRequiredExA
  * @see uriComposeQueryA
  * @since 0.7.0
  */
-URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(
-		const URI_TYPE(QueryList) * queryList, int * charsRequired);
-
-
+URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(const URI_TYPE(QueryList) * queryList,
+                                                   int * charsRequired);
 
 /**
  * Calculates the number of characters needed to store the
@@ -901,7 +877,8 @@ URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(
  * terminator.
  *
  * @param queryList         <b>IN</b>: Query list to measure
- * @param charsRequired     <b>OUT</b>: Length of the string representation in characters <b>excluding</b> terminator
+ * @param charsRequired     <b>OUT</b>: Length of the string representation in characters
+ * <b>excluding</b> terminator
  * @param spaceToPlus       <b>IN</b>: Whether to convert ' ' to '+' or not
  * @param normalizeBreaks   <b>IN</b>: Whether to convert CR and LF to CR-LF or not.
  * @return                  Error code or 0 on success
@@ -910,11 +887,10 @@ URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(
  * @see uriComposeQueryExA
  * @since 0.7.0
  */
-URI_PUBLIC  int URI_FUNC(ComposeQueryCharsRequiredEx)(
-		const URI_TYPE(QueryList) * queryList,
-		int * charsRequired, UriBool spaceToPlus, UriBool normalizeBreaks);
-
-
+URI_PUBLIC int
+    URI_FUNC(ComposeQueryCharsRequiredEx)(const URI_TYPE(QueryList) * queryList,
+                                          int * charsRequired, UriBool spaceToPlus,
+                                          UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -924,8 +900,10 @@ URI_PUBLIC  int URI_FUNC(ComposeQueryCharsRequiredEx)(
  *
  * @param dest              <b>OUT</b>: Output destination
  * @param queryList         <b>IN</b>: Query list to convert
- * @param maxChars          <b>IN</b>: Maximum number of characters to copy <b>including</b> terminator
- * @param charsWritten      <b>OUT</b>: Number of characters written, can be lower than maxChars even if the query list is too long!
+ * @param maxChars          <b>IN</b>: Maximum number of characters to copy
+ * <b>including</b> terminator
+ * @param charsWritten      <b>OUT</b>: Number of characters written, can be lower than
+ * maxChars even if the query list is too long!
  * @return                  Error code or 0 on success
  *
  * @see uriComposeQueryExA
@@ -939,9 +917,8 @@ URI_PUBLIC  int URI_FUNC(ComposeQueryCharsRequiredEx)(
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQuery)(URI_CHAR * dest,
-		const URI_TYPE(QueryList) * queryList, int maxChars, int * charsWritten);
-
-
+                                      const URI_TYPE(QueryList) * queryList, int maxChars,
+                                      int * charsWritten);
 
 /**
  * Converts a query list structure back to a query string.
@@ -949,8 +926,10 @@ URI_PUBLIC int URI_FUNC(ComposeQuery)(URI_CHAR * dest,
  *
  * @param dest              <b>OUT</b>: Output destination
  * @param queryList         <b>IN</b>: Query list to convert
- * @param maxChars          <b>IN</b>: Maximum number of characters to copy <b>including</b> terminator
- * @param charsWritten      <b>OUT</b>: Number of characters written, can be lower than maxChars even if the query list is too long!
+ * @param maxChars          <b>IN</b>: Maximum number of characters to copy
+ * <b>including</b> terminator
+ * @param charsWritten      <b>OUT</b>: Number of characters written, can be lower than
+ * maxChars even if the query list is too long!
  * @param spaceToPlus       <b>IN</b>: Whether to convert ' ' to '+' or not
  * @param normalizeBreaks   <b>IN</b>: Whether to convert CR and LF to CR-LF or not.
  * @return                  Error code or 0 on success
@@ -966,10 +945,9 @@ URI_PUBLIC int URI_FUNC(ComposeQuery)(URI_CHAR * dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryEx)(URI_CHAR * dest,
-		const URI_TYPE(QueryList) * queryList, int maxChars, int * charsWritten,
-		UriBool spaceToPlus, UriBool normalizeBreaks);
-
-
+                                        const URI_TYPE(QueryList) * queryList,
+                                        int maxChars, int * charsWritten,
+                                        UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -992,9 +970,7 @@ URI_PUBLIC int URI_FUNC(ComposeQueryEx)(URI_CHAR * dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryMalloc)(URI_CHAR ** dest,
-		const URI_TYPE(QueryList) * queryList);
-
-
+                                            const URI_TYPE(QueryList) * queryList);
 
 /**
  * Converts a query list structure back to a query string.
@@ -1017,10 +993,9 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMalloc)(URI_CHAR ** dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryMallocEx)(URI_CHAR ** dest,
-		const URI_TYPE(QueryList) * queryList,
-		UriBool spaceToPlus, UriBool normalizeBreaks);
-
-
+                                              const URI_TYPE(QueryList) * queryList,
+                                              UriBool spaceToPlus,
+                                              UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -1043,11 +1018,10 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMallocEx)(URI_CHAR ** dest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryMallocExMm)(URI_CHAR ** dest,
-		const URI_TYPE(QueryList) * queryList,
-		UriBool spaceToPlus, UriBool normalizeBreaks,
-		UriMemoryManager * memory);
-
-
+                                                const URI_TYPE(QueryList) * queryList,
+                                                UriBool spaceToPlus,
+                                                UriBool normalizeBreaks,
+                                                UriMemoryManager * memory);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1067,10 +1041,9 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMallocExMm)(URI_CHAR ** dest,
  * @see uriFreeQueryListMmA
  * @since 0.7.0
  */
-URI_PUBLIC int URI_FUNC(DissectQueryMalloc)(URI_TYPE(QueryList) ** dest,
-		int * itemCount, const URI_CHAR * first, const URI_CHAR * afterLast);
-
-
+URI_PUBLIC int URI_FUNC(DissectQueryMalloc)(URI_TYPE(QueryList) * *dest, int * itemCount,
+                                            const URI_CHAR * first,
+                                            const URI_CHAR * afterLast);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1090,11 +1063,11 @@ URI_PUBLIC int URI_FUNC(DissectQueryMalloc)(URI_TYPE(QueryList) ** dest,
  * @see uriFreeQueryListA
  * @since 0.7.0
  */
-URI_PUBLIC int URI_FUNC(DissectQueryMallocEx)(URI_TYPE(QueryList) ** dest,
-		int * itemCount, const URI_CHAR * first, const URI_CHAR * afterLast,
-		UriBool plusToSpace, UriBreakConversion breakConversion);
-
-
+URI_PUBLIC int URI_FUNC(DissectQueryMallocEx)(URI_TYPE(QueryList) * *dest,
+                                              int * itemCount, const URI_CHAR * first,
+                                              const URI_CHAR * afterLast,
+                                              UriBool plusToSpace,
+                                              UriBreakConversion breakConversion);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1115,12 +1088,12 @@ URI_PUBLIC int URI_FUNC(DissectQueryMallocEx)(URI_TYPE(QueryList) ** dest,
  * @see uriFreeQueryListMmA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(DissectQueryMallocExMm)(URI_TYPE(QueryList) ** dest,
-		int * itemCount, const URI_CHAR * first, const URI_CHAR * afterLast,
-		UriBool plusToSpace, UriBreakConversion breakConversion,
-		UriMemoryManager * memory);
-
-
+URI_PUBLIC int URI_FUNC(DissectQueryMallocExMm)(URI_TYPE(QueryList) * *dest,
+                                                int * itemCount, const URI_CHAR * first,
+                                                const URI_CHAR * afterLast,
+                                                UriBool plusToSpace,
+                                                UriBreakConversion breakConversion,
+                                                UriMemoryManager * memory);
 
 /**
  * Frees all memory associated with the given query list.
@@ -1132,8 +1105,6 @@ URI_PUBLIC int URI_FUNC(DissectQueryMallocExMm)(URI_TYPE(QueryList) ** dest,
  * @since 0.7.0
  */
 URI_PUBLIC void URI_FUNC(FreeQueryList)(URI_TYPE(QueryList) * queryList);
-
-
 
 /**
  * Frees all memory associated with the given query list.
@@ -1147,9 +1118,7 @@ URI_PUBLIC void URI_FUNC(FreeQueryList)(URI_TYPE(QueryList) * queryList);
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(FreeQueryListMm)(URI_TYPE(QueryList) * queryList,
-		UriMemoryManager * memory);
-
-
+                                         UriMemoryManager * memory);
 
 /**
  * Makes the %URI hold copies of strings so that it no longer depends
@@ -1166,8 +1135,6 @@ URI_PUBLIC int URI_FUNC(FreeQueryListMm)(URI_TYPE(QueryList) * queryList,
  */
 URI_PUBLIC int URI_FUNC(MakeOwner)(URI_TYPE(Uri) * uri);
 
-
-
 /**
  * Makes the %URI hold copies of strings so that it no longer depends
  * on the original %URI string.  If the %URI is already owner of copies,
@@ -1180,16 +1147,1163 @@ URI_PUBLIC int URI_FUNC(MakeOwner)(URI_TYPE(Uri) * uri);
  * @see uriMakeOwnerA
  * @since 0.9.4
  */
-URI_PUBLIC int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri,
+URI_PUBLIC int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
+
+/**
+ * Determines if the given text range contains a well-formed fragment
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentA
+ * @see uriSetFragmentMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first,
+                                                  const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed IPv4 address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp4MmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first,
+                                                 const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed IPv6 address
+ * according to RFC 3986 or not.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error
+ * code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6MmA
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriParseIpSixAddressA
+ * @see uriParseIpSixAddressMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIp6)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed IPv6 address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error
+ * code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * afterLast,
+                                    UriMemoryManager * memory);
+
+/**
+ * Determines if the given text range contains a well-formed IPvFuture address
+ * according to RFC 3986 or not.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error
+ * code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostIpFutureMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIpFuture)(const URI_CHAR * first,
+                                       const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed IPvFuture address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error
+ * code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostIpFutureMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
+                                         const URI_CHAR * afterLast,
+                                         UriMemoryManager * memory);
+
+/**
+ * Determines if the given text range contains a well-formed registered host name
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostRegNameA
+ * @see uriSetHostRegNameMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first,
+                                                     const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed path
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param hasHost    <b>IN</b>: Whether the target %URI has a non-<c>NULL</c> host set or
+ * not
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetPathA
+ * @see uriSetPathMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first,
+                                              const URI_CHAR * afterLast,
+                                              UriBool hasHost);
+
+/**
+ * Determines if the given text range contains a well-formed port text
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetPortTextA
+ * @see uriSetPortTextMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first,
+                                              const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed query
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetQueryA
+ * @see uriSetQueryMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedQuery)(const URI_CHAR * first,
+                                               const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed scheme
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetSchemeA
+ * @see uriSetSchemeMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedScheme)(const URI_CHAR * first,
+                                                const URI_CHAR * afterLast);
+
+/**
+ * Determines if the given text range contains a well-formed user info
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else
+ * <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetUserInfoA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first,
+                                                  const URI_CHAR * afterLast);
+
+/**
+ * Sets the fragment of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetFragment)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                     const URI_CHAR * afterLast);
+
+/**
+ * Sets the fragment of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                       const URI_CHAR * afterLast,
+                                       UriMemoryManager * memory);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIp6MmA
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                     const URI_CHAR * afterLast);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIp6MmA
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                       const URI_CHAR * afterLast,
+                                       UriMemoryManager * memory);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostRegName)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                        const URI_CHAR * afterLast);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostRegNameMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                          const URI_CHAR * afterLast,
+                                          UriMemoryManager * memory);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                    const URI_CHAR * afterLast);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                      const URI_CHAR * afterLast,
+                                      UriMemoryManager * memory);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp6A
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                    const URI_CHAR * afterLast);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp6A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                      const URI_CHAR * afterLast,
+                                      UriMemoryManager * memory);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIpFuture)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                         const URI_CHAR * afterLast);
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIpFutureMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                           const URI_CHAR * afterLast,
+                                           UriMemoryManager * memory);
+
+/**
+ * Sets the path of the given %URI to the given value.
+ *
+ * Non-<c>NULL</c> values must start with a leading slash for %URIs that have a host.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPathA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPathMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPath)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                 const URI_CHAR * afterLast);
+
+/**
+ * Sets the path of the given %URI to the given value.
+ *
+ * Non-<c>NULL</c> values must start with a leading slash for %URIs that have a host.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPathA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPathA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                   const URI_CHAR * afterLast, UriMemoryManager * memory);
+
+/**
+ * Sets the port text of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPortA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPortText)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                     const URI_CHAR * afterLast);
+
+/**
+ * Sets the port text of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPortA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                       const URI_CHAR * afterLast,
+                                       UriMemoryManager * memory);
+
+/**
+ * Sets the query of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedQueryA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetQuery)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                  const URI_CHAR * afterLast);
+
+/**
+ * Sets the query of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedQueryA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                    const URI_CHAR * afterLast,
+                                    UriMemoryManager * memory);
+
+/**
+ * Sets the scheme of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetScheme)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                   const URI_CHAR * afterLast);
+
+/**
+ * Sets the scheme of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                     const URI_CHAR * afterLast,
                                      UriMemoryManager * memory);
 
+/**
+ * Sets the user info of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentA
+ * @see uriSetHostAutoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetUserInfo)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                     const URI_CHAR * afterLast);
 
+/**
+ * Sets the user info of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * For all return values but <c>URI_ERROR_MALLOC</c>, all-or-nothing behavior
+ * can be expected, e.g. trying to apply a malformed value will leave the
+ * %URI unchanged.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be
+ * <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostAutoMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
+                                       const URI_CHAR * afterLast,
+                                       UriMemoryManager * memory);
 
-#ifdef __cplusplus
+/**
+ * Obtain the base runtime version of uriparser.
+ *
+ * The string returned is based on the compile time version
+ * of uriparser.
+ *
+ * @note Distributors may have applied backports of security
+ *       fixes (potentially with adjusting packaging version but often
+ *       <em>without</em> adjusting runtime version)
+ *       or even fully custom patches. As a result, the version string
+ *       returned serves as nothing more than "based on that version",
+ *       it does not guarantee equivalence to vanilla upstream releases
+ *       or absence of additional downstream patches.
+ *       It is nothing more than "a hint" and MUST NEVER be used to
+ *       make decisions on in application code at runtime.
+ *
+ * @return Pointer to a read-only zero terminated version string
+ *
+ * @since 0.9.9
+ */
+URI_PUBLIC const URI_CHAR * URI_FUNC(BaseRuntimeVersion)(void);
+
+#    ifdef __cplusplus
 }
-#endif
+#    endif
 
-
-
-#endif
+#  endif
 #endif

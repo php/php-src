@@ -288,9 +288,7 @@ PHP_FUNCTION(phpdbg_break_next)
 {
 	zend_execute_data *ex;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ex = EG(current_execute_data);
 	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
@@ -347,9 +345,7 @@ PHP_FUNCTION(phpdbg_break_function)
 /* {{{ instructs phpdbg to clear breakpoints */
 PHP_FUNCTION(phpdbg_clear)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
@@ -404,9 +400,7 @@ PHP_FUNCTION(phpdbg_start_oplog)
 {
 	phpdbg_oplog_list *prev;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prev = PHPDBG_G(oplog_list);
 
@@ -493,7 +487,7 @@ PHP_FUNCTION(phpdbg_get_executable)
 	HashTable *files = &PHPDBG_G(file_sources);
 	HashTable files_tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|h", &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -587,7 +581,7 @@ PHP_FUNCTION(phpdbg_end_oplog)
 	bool by_function = false;
 	bool by_opcode = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|h", &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -982,7 +976,6 @@ static const opt_struct OPTIONS[] = { /* {{{ */
 
 const char phpdbg_ini_hardcoded[] =
 "html_errors=Off\n"
-"register_argc_argv=On\n"
 "implicit_flush=On\n"
 "display_errors=Off\n"
 "log_errors=On\n"

@@ -65,6 +65,18 @@ string(9) "file3.tmp"
 
 -- Call readdir() without $path argument --
 resource(%d) of type (stream)
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 string(1) "."
 string(2) ".."
 string(9) "file1.tmp"

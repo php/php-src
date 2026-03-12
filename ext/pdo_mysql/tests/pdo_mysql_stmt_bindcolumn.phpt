@@ -16,8 +16,8 @@ MySQLPDOTest::skip();
     MySQLPDOTest::createTestTable($table, $db);
 
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         $stmt = $db->prepare("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 2");
@@ -56,8 +56,8 @@ MySQLPDOTest::skip();
             $index++;
         }
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[007] Unable to turn off emulated prepared statements\n");
 
         $stmt = $db->prepare("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 2, 2");

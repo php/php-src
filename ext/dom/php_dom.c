@@ -488,6 +488,7 @@ static void dom_unset_property(zend_object *object, zend_string *member, void **
 	zend_std_unset_property(object, member, cache_slot);
 }
 
+/* This custom handler is necessary to avoid a recursive construction of the entire subtree. */
 static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
 {
 	dom_object			*obj = php_dom_obj_from_obj(object);
@@ -497,6 +498,11 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	zend_string			*string_key;
 	dom_prop_handler	*entry;
 	zend_string         *object_str;
+
+	/* As we have a custom implementation, we must manually check for overrides. */
+	if (object->ce->__debugInfo) {
+		return zend_std_get_debug_info(object, is_temp);
+	}
 
 	*is_temp = 1;
 
@@ -708,15 +714,17 @@ static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 	zend_object *clone = dom_objects_namespace_node_new(intern->dom.std.ce);
 	dom_object_namespace_node *clone_intern = php_dom_namespace_node_obj_from_obj(clone);
 
-	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
-	ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
-	xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
-
 	if (intern->parent_intern) {
 		clone_intern->parent_intern = intern->parent_intern;
 		GC_ADDREF(&clone_intern->parent_intern->std);
 	}
-	dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
+
+	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
+	if (original_node != NULL) {
+		ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
+		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
+		dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
+	}
 
 	zend_objects_clone_members(clone, &intern->dom.std);
 	return clone;
@@ -891,12 +899,12 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_modern_node_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeType", dom_node_node_type_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "nodeName", dom_node_node_name_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_node_base_uri_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "baseURI", dom_modern_node_base_uri_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "isConnected", dom_node_is_connected_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "ownerDocument", dom_node_owner_document_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentNode", dom_node_parent_node_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "parentElement", dom_node_parent_element_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_node_child_nodes_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "childNodes", dom_modern_node_child_nodes_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "firstChild", dom_node_first_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "lastChild", dom_node_last_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_node_prop_handlers, "previousSibling", dom_node_previous_sibling_read, NULL);
@@ -1297,7 +1305,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "firstChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "lastChild", dom_entity_reference_child_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "textContent", dom_entity_reference_text_content_read, NULL);
-	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_entity_reference_child_nodes_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_modern_entity_reference_child_nodes_read, NULL);
 	zend_hash_add_new_ptr(&classes, dom_modern_entityreference_class_entry->name, &dom_modern_entity_reference_prop_handlers);
 
 	dom_processinginstruction_class_entry = register_class_DOMProcessingInstruction(dom_node_class_entry);
@@ -1369,9 +1377,7 @@ PHP_MINFO_FUNCTION(dom)
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOM_API_VERSION);
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
-#ifdef LIBXML_HTML_ENABLED
 	php_info_print_table_row(2, "HTML Support", "enabled");
-#endif
 #ifdef LIBXML_XPATH_ENABLED
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
@@ -2333,10 +2339,10 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 		}
 
 		case XML_ATTRIBUTE_NODE: {
-			bool free;
-			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &free);
+			bool should_free;
+			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &should_free);
 			RETVAL_STRING_FAST((const char *) value);
-			if (free) {
+			if (should_free) {
 				xmlFree(value);
 			}
 			return;
@@ -2709,20 +2715,10 @@ xmlChar *php_dom_libxml_fix_file_path(xmlChar *path)
 
 xmlDocPtr php_dom_create_html_doc(void)
 {
-#ifdef LIBXML_HTML_ENABLED
 	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
 	if (EXPECTED(lxml_doc)) {
 		lxml_doc->dict = xmlDictCreate();
 	}
-#else
-	/* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
-	 * This code mimics the behaviour. */
-	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-	if (EXPECTED(lxml_doc)) {
-		lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-		lxml_doc->dict = xmlDictCreate();
-	}
-#endif
 	return lxml_doc;
 }
 

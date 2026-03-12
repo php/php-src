@@ -30,8 +30,11 @@ foreach ($obj as $k => &$v) {
 
 var_dump($obj);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 Cannot assign array to reference held by property A::$foo of type string
+
+Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 Cannot assign array to reference held by property A::$foo of type string
 object(A)#1 (1) {
   ["foo"]=>

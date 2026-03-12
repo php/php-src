@@ -44,7 +44,6 @@
 #include <pwd.h>
 #endif
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -73,7 +72,7 @@ Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 {
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
@@ -506,7 +505,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	php_stream_wrapper *wrapper;
 	zend_string *exec_filename;
 
-	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
+	if (!filename || zend_char_has_nul_byte(filename, filename_length)) {
 		return NULL;
 	}
 

@@ -13,5 +13,6 @@ $s++;
 var_dump(Foo::tryFrom($s));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 enum(Foo::Bar)

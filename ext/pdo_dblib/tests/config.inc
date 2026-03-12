@@ -5,7 +5,7 @@
 // assume this bug isn't present if not using FreeTDS
 // otherwise require FreeTDS>=1.1
 function driver_supports_batch_statements_without_select($db) {
-    $version = $db->getAttribute(PDO::DBLIB_ATTR_VERSION);
+    $version = $db->getAttribute(Pdo\Dblib::ATTR_VERSION);
     return !strstartswith($version, 'freetds ') || !strstartswith($version, 'freetds v1.0');
 }
 

@@ -48,7 +48,7 @@ Test::staticMethod();
 --EXPECTF--
 instance scoped, non-static, $this used
 
-Warning: Cannot unbind $this of closure using $this in %s on line %d
+Warning: Cannot unbind $this of closure using $this, this will be an error in PHP 9 in %s on line %d
 instance scoped, static, $this used
 instance scoped, non-static, $this not used
 static scoped, non-static, $this used

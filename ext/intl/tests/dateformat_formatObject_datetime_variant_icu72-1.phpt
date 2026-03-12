@@ -2,13 +2,13 @@
 IntlDateFormatter::formatObject(): DateTime tests
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=pt_PT
+date.timezone=Europe/Lisbon
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", "Europe/Lisbon");
 
 $dt = new DateTime('2012-01-01 00:00:00'); //Europe/Lisbon
 echo IntlDateFormatter::formatObject($dt), "\n";

@@ -104,32 +104,6 @@
 #define MAX_VARLOOKBEHIND 255
 #endif
 
-/* The value of NEWLINE_DEFAULT determines the default newline character
-   sequence. PCRE2 client programs can override this by selecting other values
-   at run time. The valid values are 1 (CR), 2 (LF), 3 (CRLF), 4 (ANY), 5
-   (ANYCRLF), and 6 (NUL). */
-#ifndef NEWLINE_DEFAULT
-#define NEWLINE_DEFAULT 2
-#endif
-
-/* The value of PCRE2GREP_BUFSIZE is the starting size of the buffer used by
-   pcre2grep to hold parts of the file it is searching. The buffer will be
-   expanded up to PCRE2GREP_MAX_BUFSIZE if necessary, for files containing
-   very long lines. The actual amount of memory used by pcre2grep is three
-   times this number, because it allows for the buffering of "before" and
-   "after" lines. */
-#ifndef PCRE2GREP_BUFSIZE
-#define PCRE2GREP_BUFSIZE 20480
-#endif
-
-/* The value of PCRE2GREP_MAX_BUFSIZE specifies the maximum size of the buffer
-   used by pcre2grep to hold parts of the file it is searching. The actual
-   amount of memory used by pcre2grep is three times this number, because it
-   allows for the buffering of "before" and "after" lines. */
-#ifndef PCRE2GREP_MAX_BUFSIZE
-#define PCRE2GREP_MAX_BUFSIZE 1048576
-#endif
-
 /* to make a symbol visible */
 #ifndef PCRE2_EXPORT
 #define PCRE2_EXPORT

@@ -31,9 +31,9 @@
 	} while (0)
 #endif
 #define PHP_RETURN_HRTIME(t) do { \
-	char _a[ZEND_LTOA_BUF_LEN]; \
+	char _a[65]; \
 	double _d; \
-	HRTIME_U64A(t, _a, ZEND_LTOA_BUF_LEN); \
+	HRTIME_U64A(t, _a, sizeof(_a)); \
 	_d = zend_strtod(_a, NULL); \
 	RETURN_DOUBLE(_d); \
 	} while (0)
@@ -46,7 +46,6 @@
 	delivered timestamp is monotonic and cannot be adjusted. */
 PHP_FUNCTION(hrtime)
 {
-#if ZEND_HRTIME_AVAILABLE
 	bool get_as_num = 0;
 	zend_hrtime_t t = zend_hrtime();
 
@@ -55,6 +54,7 @@ PHP_FUNCTION(hrtime)
 		Z_PARAM_BOOL(get_as_num)
 	ZEND_PARSE_PARAMETERS_END();
 
+#if ZEND_HRTIME_AVAILABLE
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
 	} else {

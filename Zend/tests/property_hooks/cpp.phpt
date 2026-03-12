@@ -24,11 +24,13 @@ var_dump($r->hasDefaultValue());
 var_dump($r->getDefaultValue());
 
 ?>
---EXPECT--
+--EXPECTF--
 Pre-test
 Setting
 Constructor
 Getting
 Setting
 bool(false)
+
+Deprecated: ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, use ReflectionProperty::hasDefaultValue() to check if the default value exists in %s on line %d
 NULL

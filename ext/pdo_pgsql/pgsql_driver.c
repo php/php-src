@@ -39,8 +39,14 @@ static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	size_t i = strlen(message)-1;
+	size_t i = strlen(message);
 	char *tmp;
+	if (UNEXPECTED(i == 0)) {
+		tmp = pemalloc(1, persistent);
+		tmp[0] = '\0';
+		return tmp;
+	}
+	--i;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;
@@ -499,22 +505,18 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 				case CONNECTION_AUTH_OK:
 					ZVAL_STRINGL(return_value, "Received authentication; waiting for backend start-up to finish.", strlen("Received authentication; waiting for backend start-up to finish."));
 					break;
-#ifdef CONNECTION_SSL_STARTUP
 				case CONNECTION_SSL_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating SSL encryption.", strlen("Negotiating SSL encryption."));
 					break;
-#endif
 				case CONNECTION_SETENV:
 					ZVAL_STRINGL(return_value, "Negotiating environment-driven parameter settings.", strlen("Negotiating environment-driven parameter settings."));
 					break;
 
-#ifdef CONNECTION_CONSUME
 				case CONNECTION_CONSUME:
 					ZVAL_STRINGL(return_value, "Flushing send queue/consuming extra data.", strlen("Flushing send queue/consuming extra data."));
 					break;
-#endif
 #ifdef CONNECTION_GSS_STARTUP
-				case CONNECTION_SSL_STARTUP:
+				case CONNECTION_GSS_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));
 					break;
 #endif
@@ -1334,6 +1336,20 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
+static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
+{
+	PGresult *res;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	if(H->server) {
+		res = PQexec(H->server, "DISCARD ALL");
+
+		if(res) {
+			PQclear(res);
+		}
+	}
+}
+
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	bool bval;
@@ -1377,7 +1393,7 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
-	NULL,
+	pdo_pgsql_request_shutdown,
 	pgsql_handle_in_transaction,
 	NULL, /* get_gc */
 	pdo_pgsql_scanner

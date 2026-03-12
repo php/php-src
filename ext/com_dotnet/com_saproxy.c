@@ -402,6 +402,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_free_storage,
 	zend_objects_destroy_object,
 	saproxy_clone,
+	NULL, /* clone_with */
 	saproxy_property_read,
 	saproxy_property_write,
 	saproxy_read_dimension,

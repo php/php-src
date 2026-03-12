@@ -347,6 +347,11 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 	}
 
 	if (!strncmp(data_source, "uri:", sizeof("uri:")-1)) {
+		zend_error(E_DEPRECATED, "Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs");
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+
 		/* the specified URI holds connection details */
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
@@ -800,7 +805,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 			*bval = false;
 			return true;
 		case IS_LONG:
-			*bval = zval_is_true(value);
+			*bval = zend_is_true(value);
 			return true;
 		case IS_STRING: /* TODO Should string be allowed? */
 		default:
@@ -1185,7 +1190,7 @@ PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	zend_string *statement;
 	zend_long fetch_mode;
-	bool fetch_mode_is_null = 1;
+	bool fetch_mode_is_null = true;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
@@ -1313,6 +1318,10 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
 		efree(ZEND_MAP_PTR(func->common.run_time_cache));
 	}
+	if (func->common.attributes) {
+		zend_hash_release(func->common.attributes);
+	}
+	zend_free_internal_arg_info(&func->internal_function, false);
 	efree(func);
 }
 /* }}} */
@@ -1325,9 +1334,39 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
 		pefree(ZEND_MAP_PTR(func->common.run_time_cache), 1);
 	}
+	if (func->common.attributes) {
+		zend_hash_release(func->common.attributes);
+	}
+	zend_free_internal_arg_info(&func->internal_function, true);
 	pefree(func, 1);
 }
 /* }}} */
+
+/* We cannot add #[Deprecated] attributes in @generate-function-entries stubs,
+ * and PDO drivers have no way to add them either, so we hard-code deprecation
+ * info here and add the attribute manually in pdo_hash_methods() */
+struct driver_specific_method_deprecation {
+	const char *old_name;
+	const char *new_name;
+};
+
+/* Methods deprecated in https://wiki.php.net/rfc/deprecations_php_8_5
+ * "Deprecate driver specific PDO constants and methods" */
+static const struct driver_specific_method_deprecation driver_specific_method_deprecations[] = {
+	{"pgsqlCopyFromArray",      "Pdo\\Pgsql::copyFromArray"},
+	{"pgsqlCopyFromFile",       "Pdo\\Pgsql::copyFromFile"},
+	{"pgsqlCopyToArray",        "Pdo\\Pgsql::copyToArray"},
+	{"pgsqlCopyToFile",         "Pdo\\Pgsql::copyToFile"},
+	{"pgsqlGetNotify",          "Pdo\\Pgsql::getNotify"},
+	{"pgsqlGetPid",             "Pdo\\Pgsql::getPid"},
+	{"pgsqlLOBCreate",          "Pdo\\Pgsql::lobCreate"},
+	{"pgsqlLOBOpen",            "Pdo\\Pgsql::lobOpen"},
+	{"pgsqlLOBUnlink",          "Pdo\\Pgsql::lobUnlink"},
+	{"sqliteCreateAggregate",   "Pdo\\Sqlite::createAggregate"},
+	{"sqliteCreateCollation",   "Pdo\\Sqlite::createCollation"},
+	{"sqliteCreateFunction",    "Pdo\\Sqlite::createFunction"},
+	{NULL,                      NULL},
+};
 
 /* {{{ overloaded object handlers for PDO class */
 bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
@@ -1357,7 +1396,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		func.type = ZEND_INTERNAL_FUNCTION;
 		func.handler = funcs->handler;
 		func.function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
-		func.scope = dbh_obj->std.ce;
+		func.scope = pdo_dbh_ce;
 		func.prototype = NULL;
 		ZEND_MAP_PTR(func.run_time_cache) = rt_cache_size ? pecalloc(rt_cache_size, 1, dbh->is_persistent) : NULL;
 		func.T = ZEND_OBSERVER_ENABLED;
@@ -1366,11 +1405,24 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		} else {
 			func.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
 		}
+		func.fn_flags |= ZEND_ACC_DEPRECATED;
 		func.doc_comment = NULL;
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
+			uint32_t num_arg_info = 1 + funcs->num_args;
+			if (func.fn_flags & ZEND_ACC_VARIADIC) {
+				num_arg_info++;
+			}
+
+			zend_arg_info *arg_info = safe_pemalloc(num_arg_info,
+					sizeof(zend_arg_info), 0, dbh->is_persistent);
+			for (uint32_t i = 0; i < num_arg_info; i++) {
+				zend_convert_internal_arg_info(&arg_info[i],
+						&funcs->arg_info[i], i == 0, dbh->is_persistent);
+			}
+
+			func.arg_info = arg_info + 1;
 			func.num_args = funcs->num_args;
 			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;
@@ -1394,8 +1446,36 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);
 		zend_str_tolower_copy(lc_name, funcs->fname, namelen);
-		zend_hash_str_add_mem(dbh->cls_methods[kind], lc_name, namelen, &func, sizeof(func));
+		zend_function *func_p = zend_hash_str_add_mem(dbh->cls_methods[kind], lc_name, namelen, &func, sizeof(func));
 		efree(lc_name);
+
+		const char *new_name = NULL;
+		for (const struct driver_specific_method_deprecation *d = driver_specific_method_deprecations;
+				d->old_name; d++) {
+			if (strcmp(d->old_name, funcs->fname) == 0) {
+				new_name = d->new_name;
+				break;
+			}
+		}
+		if (new_name) {
+			uint32_t flags = dbh->is_persistent ? ZEND_ATTRIBUTE_PERSISTENT : 0;
+			zend_attribute *attr = zend_add_attribute(
+					&func_p->common.attributes,
+					ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED),
+					2, flags, 0, 0);
+
+			attr->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+			ZVAL_STR(&attr->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+
+			char *message;
+			size_t len = zend_spprintf(&message, 0, "use %s() instead", new_name);
+			zend_string *message_str = zend_string_init(message, len, dbh->is_persistent);
+			efree(message);
+
+			attr->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+			ZVAL_STR(&attr->args[1].value, message_str);
+		}
+
 		funcs++;
 	}
 
@@ -1528,7 +1608,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);
-	dbh_free(dbh, 0);
+	dbh_free(dbh, false);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce)
@@ -1552,7 +1632,7 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 {
 	if (res->ptr) {
 		pdo_dbh_t *dbh = (pdo_dbh_t*)res->ptr;
-		dbh_free(dbh, 1);
+		dbh_free(dbh, true);
 		res->ptr = NULL;
 	}
 }

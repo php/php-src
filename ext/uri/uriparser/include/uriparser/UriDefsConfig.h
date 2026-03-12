@@ -43,59 +43,51 @@
  */
 
 #ifndef URI_DEFS_CONFIG_H
-#define URI_DEFS_CONFIG_H 1
-
-
+#  define URI_DEFS_CONFIG_H 1
 
 /* Deny external overriding */
-#undef URI_ENABLE_ANSI      /* Internal for !URI_NO_ANSI */
-#undef URI_ENABLE_UNICODE   /* Internal for !URI_NO_UNICODE */
-
-
+#  undef URI_ENABLE_ANSI /* Internal for !URI_NO_ANSI */
+#  undef URI_ENABLE_UNICODE /* Internal for !URI_NO_UNICODE */
 
 /* Encoding */
-#ifdef URI_NO_ANSI
-# ifdef URI_NO_UNICODE
+#  ifdef URI_NO_ANSI
+#    ifdef URI_NO_UNICODE
 /* No encoding at all */
-#  error URI_NO_ANSI and URI_NO_UNICODE cannot go together.
-# else
+#      error URI_NO_ANSI and URI_NO_UNICODE cannot go together.
+#    else
 /* Wide strings only */
-#  define URI_ENABLE_UNICODE  1
-# endif
-#else
-# ifdef URI_NO_UNICODE
+#      define URI_ENABLE_UNICODE 1
+#    endif
+#  else
+#    ifdef URI_NO_UNICODE
 /* Narrow strings only */
-#  define URI_ENABLE_ANSI     1
-# else
+#      define URI_ENABLE_ANSI 1
+#    else
 /* Both narrow and wide strings */
-#  define URI_ENABLE_ANSI     1
-#  define URI_ENABLE_UNICODE  1
-# endif
-#endif
-
-
+#      define URI_ENABLE_ANSI 1
+#      define URI_ENABLE_UNICODE 1
+#    endif
+#  endif
 
 /* Function inlining, not ANSI/ISO C! */
-#if defined(URI_DOXYGEN)
-# define URI_INLINE
-#elif defined(__INTEL_COMPILER)
+#  if defined(URI_DOXYGEN)
+#    define URI_INLINE
+#  elif defined(__INTEL_COMPILER)
 /* Intel C/C++ */
 /* http://predef.sourceforge.net/precomp.html#sec20 */
 /* http://www.intel.com/support/performancetools/c/windows/sb/CS-007751.htm#2 */
-# define URI_INLINE __forceinline
-#elif defined(_MSC_VER)
+#    define URI_INLINE __forceinline
+#  elif defined(_MSC_VER)
 /* Microsoft Visual C++ */
 /* http://predef.sourceforge.net/precomp.html#sec32 */
 /* http://msdn2.microsoft.com/en-us/library/ms882281.aspx */
-# define URI_INLINE __forceinline
-#elif (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L))
+#    define URI_INLINE __forceinline
+#  elif (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L))
 /* C99, "inline" is a keyword */
-# define URI_INLINE inline
-#else
+#    define URI_INLINE inline
+#  else
 /* No inlining */
-# define URI_INLINE
-#endif
-
-
+#    define URI_INLINE
+#  endif
 
 #endif /* URI_DEFS_CONFIG_H */

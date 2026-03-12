@@ -84,32 +84,32 @@ MySQLPDOTest::skip();
 
     try {
         printf("Emulated PS...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         printf("Buffered...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         pdo_mysql_stmt_bindparam($db, 3);
 
         printf("Unbuffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_bindparam($db, 4);
 
         printf("Native PS...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         pdo_mysql_stmt_bindparam($db, 5);
 
         printf("Unbuffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_bindparam($db, 6);
 
     } catch (PDOException $e) {

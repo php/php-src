@@ -2,11 +2,10 @@
 IntlGregorianCalendar::__construct(): argument variants
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = intlgregcal_create_instance(2012, 1, 29, 16, 0, 0);
 var_dump($intlcal->getTimeZone()->getId());

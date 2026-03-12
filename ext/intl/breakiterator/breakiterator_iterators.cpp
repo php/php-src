@@ -43,7 +43,7 @@ inline BreakIterator *_breakiter_prolog(zend_object_iterator *iter)
 	if (bio->biter == NULL) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), U_INVALID_STATE_ERROR,
 			"The BreakIterator object backing the PHP iterator is not "
-			"properly constructed", 0);
+			"properly constructed");
 	}
 	return bio->biter;
 }

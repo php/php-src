@@ -2,11 +2,8 @@
 
 /** @generate-class-entries */
 
-/** @var int */
 const XSL_CLONE_AUTO = 0;
-/** @var int */
 const XSL_CLONE_NEVER = -1;
-/** @var int */
 const XSL_CLONE_ALWAYS = 1;
 
 /**

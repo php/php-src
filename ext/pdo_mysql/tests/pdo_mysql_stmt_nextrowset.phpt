@@ -63,14 +63,14 @@ MySQLPDOTest::skipNotMySQLnd();
         printf("Emulated PS...\n");
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
 
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
         test_proc1($db);
         test_proc2($db);
 
         $db = MySQLPDOTest::factory();
         $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 0);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 0);
         test_proc1($db);
         test_proc2($db);
 
@@ -78,14 +78,14 @@ MySQLPDOTest::skipNotMySQLnd();
         printf("Native PS...\n");
         $db = MySQLPDOTest::factory();
         $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
         test_proc1($db);
         test_proc2($db);
 
         $db = MySQLPDOTest::factory();
         $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 0);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 0);
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 
         test_proc1($db);

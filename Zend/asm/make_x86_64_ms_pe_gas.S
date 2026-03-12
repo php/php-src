@@ -89,6 +89,7 @@
 .file	"make_x86_64_ms_pe_gas.asm"
 .text
 .p2align 4,,15
+.globl	make_fcontext
 .def	make_fcontext;	.scl	2;	.type	32;	.endef
 .seh_proc	make_fcontext
 make_fcontext:
@@ -168,3 +169,6 @@ finish:
 .seh_endproc
 
 .def	_exit;	.scl	2;	.type	32;	.endef  /* standard C library function */
+
+.section .drectve
+.ascii " -export:\"make_fcontext\""

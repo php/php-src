@@ -38,8 +38,6 @@
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
-#undef HAVE_ADABAS
-#undef HAVE_SOLID
 #undef HAVE_SYMLINK
 
 /* its in win32/time.c */

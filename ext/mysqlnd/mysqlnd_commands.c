@@ -623,8 +623,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 
 	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
 												   greet_packet.authentication_plugin_data, greet_packet.auth_protocol,
-												   greet_packet.charset_no, greet_packet.server_capabilities,
-												   conn->options, mysql_flags))
+												   greet_packet.charset_no, greet_packet.server_capabilities, mysql_flags))
 	{
 		goto err;
 	}

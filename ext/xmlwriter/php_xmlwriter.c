@@ -765,7 +765,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	int retval;
 	/* Optional parameters */
 	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
-	bool pe = 0;
+	bool pe = false;
 	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self;
 
@@ -907,9 +907,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 	zval *self = getThis();
 	ze_xmlwriter_object *ze_obj = NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (self) {
 		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */
@@ -1006,7 +1004,7 @@ PHP_METHOD(XMLWriter, toStream)
 /* {{{ php_xmlwriter_flush */
 static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) {
 	xmlTextWriterPtr ptr;
-	bool empty = 1;
+	bool empty = true;
 	int output_bytes;
 	zval *self;
 

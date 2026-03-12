@@ -18,7 +18,6 @@ $green = imagecolorallocate($im, 0,255,0);
 print_r(imagecolorat($im, 0,0));
 imagefill($im, 0,0,$white + 3);
 print_r(imagecolorat($im, 0,0));
-imagedestroy($im);
 ?>
 --EXPECT--
 00

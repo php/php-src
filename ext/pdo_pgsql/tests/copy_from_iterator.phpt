@@ -61,8 +61,11 @@ require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->query('DROP TABLE IF EXISTS test_copy_from_traversable CASCADE');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 PDO::pgsqlCopyFromArray(): Argument #2 ($rows) must be of type Traversable|array, stdClass given
+
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 array (
   0 => 1,
   1 => 1,

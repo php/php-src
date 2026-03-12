@@ -13,7 +13,12 @@ for ($i = 0; $i < 3; $i++) {
     else { echo "nan is false\n"; }
 }	
 ?>
---EXPECT--
+--EXPECTF--
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
+
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
+
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true

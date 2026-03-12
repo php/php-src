@@ -172,7 +172,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666;
-	bool auto_release = 1;
+	bool auto_release = true;
 	int semid;
 	struct sembuf sop[3];
 	int count;
@@ -266,10 +266,10 @@ PHP_FUNCTION(sem_get)
 /* }}} */
 
 /* {{{ php_sysvsem_semop */
-static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
+static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, bool acquire)
 {
 	zval *arg_id;
-	bool nowait = 0;
+	bool nowait = false;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
@@ -311,14 +311,14 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 /* {{{ Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 

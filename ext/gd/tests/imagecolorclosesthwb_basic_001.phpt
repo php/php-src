@@ -21,8 +21,6 @@ gd
     var_dump(imagecolorclosesthwb($image, 0, 24, 200)); // 0
     var_dump(imagecolorclosesthwb($image, 116, 120, 115)); // 1
     var_dump(imagecolorclosesthwb($image, 50, 0, 90)); // 0
-
-    imagedestroy($image);
 ?>
 --EXPECT--
 int(0)

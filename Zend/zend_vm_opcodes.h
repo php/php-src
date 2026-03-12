@@ -29,9 +29,21 @@
 #define ZEND_VM_KIND_SWITCH	2
 #define ZEND_VM_KIND_GOTO	3
 #define ZEND_VM_KIND_HYBRID	4
+#define ZEND_VM_KIND_TAILCALL	5
+static const char *const zend_vm_kind_name[] = {
+    NULL,
+    "ZEND_VM_KIND_CALL",
+    "ZEND_VM_KIND_SWITCH",
+    "ZEND_VM_KIND_GOTO",
+    "ZEND_VM_KIND_HYBRID",
+    "ZEND_VM_KIND_TAILCALL",
+};
+#if 0
 /* HYBRID requires support for computed GOTO and global register variables*/
-#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
+#elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
 # define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
+#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))
+# define ZEND_VM_KIND		ZEND_VM_KIND_TAILCALL
 #else
 # define ZEND_VM_KIND		ZEND_VM_KIND_CALL
 #endif
@@ -42,6 +54,30 @@
 # endif
 #endif
 
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#endif
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
+
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
+typedef const void* zend_vm_opcode_handler_t;
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_FUNC_CCONV *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+#elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
+typedef int zend_vm_opcode_handler_t;
+#elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO
+typedef const void* zend_vm_opcode_handler_t;
+#else
+# error
+#endif
+
 #define ZEND_VM_OP_SPEC          0x00000001
 #define ZEND_VM_OP_CONST         0x00000002
 #define ZEND_VM_OP_TMPVAR        0x00000004
@@ -50,6 +86,7 @@
 #define ZEND_VM_OP_NUM           0x00000010
 #define ZEND_VM_OP_JMP_ADDR      0x00000020
 #define ZEND_VM_OP_TRY_CATCH     0x00000030
+#define ZEND_VM_OP_LOOP_END      0x00000040
 #define ZEND_VM_OP_THIS          0x00000050
 #define ZEND_VM_OP_NEXT          0x00000060
 #define ZEND_VM_OP_CLASS_FETCH   0x00000070
@@ -294,7 +331,8 @@ END_EXTERN_C()
 #define ZEND_JMP_FRAMELESS                  208
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
 #define ZEND_DECLARE_ATTRIBUTED_CONST       210
+#define ZEND_TYPE_ASSERT                    211
 
-#define ZEND_VM_LAST_OPCODE                 210
+#define ZEND_VM_LAST_OPCODE                 211
 
 #endif

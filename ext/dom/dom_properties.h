@@ -104,6 +104,7 @@ zend_result dom_entity_version_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_text_content_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
+zend_result dom_modern_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
 
 /* namednodemap properties */
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
@@ -122,6 +123,7 @@ zend_result dom_node_node_type_read(dom_object *obj, zval *retval);
 zend_result dom_node_parent_node_read(dom_object *obj, zval *retval);
 zend_result dom_node_parent_element_read(dom_object *obj, zval *retval);
 zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_child_nodes_read(dom_object *obj, zval *retval);
 zend_result dom_node_first_child_read(dom_object *obj, zval *retval);
 zend_result dom_node_last_child_read(dom_object *obj, zval *retval);
 zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval);
@@ -137,6 +139,7 @@ zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval);
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval);
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_write(dom_object *obj, zval *newval);
 

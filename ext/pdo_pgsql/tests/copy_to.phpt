@@ -87,6 +87,8 @@ $db->exec('DROP TABLE test_copy_to');
 --EXPECTF--
 Preparing test table for CopyTo tests
 Testing pgsqlCopyToArray() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(19) "0	test insert 0	\N
@@ -99,6 +101,8 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(21) "0;test insert 0;NULL
@@ -111,6 +115,8 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 array(3) {
   [0]=>
   string(7) "0;NULL
@@ -123,23 +129,35 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with error
+
+Deprecated: Method PDO::pgsqlCopyToArray() is deprecated since 8.5, use Pdo\Pgsql::copyToArray() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0	test insert 0	\N
 1	test insert 1	\N
 2	test insert 2	\N
 Testing pgsqlCopyToFile() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0;test insert 0;NULL
 1;test insert 1;NULL
 2;test insert 2;NULL
 Testing pgsqlCopyToFile() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 bool(true)
 0;NULL
 1;NULL
 2;NULL
 Testing pgsqlCopyToFile() with error
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() to unwritable file
+
+Deprecated: Method PDO::pgsqlCopyToFile() is deprecated since 8.5, use Pdo\Pgsql::copyToFile() instead in %s on line %d
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file for writing

@@ -9,10 +9,6 @@ Test array_unique() function : usage variations - associative array with differe
 
 echo "*** Testing array_unique() : assoc. array with diff. keys passed to \$input argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -38,7 +34,7 @@ $inputs = array (
        array("hello", $heredoc => "string", "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(@$unset_var => "hello", STDERR => 'resource', 11, "hello"),
+/*8*/ array(STDERR => 'resource', 11, "hello"),
 );
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
@@ -96,11 +92,11 @@ array(2) {
 }
 -- Iteration 6 --
 array(3) {
-  [""]=>
-  string(5) "hello"
   [3]=>
   string(8) "resource"
   [4]=>
   int(11)
+  [5]=>
+  string(5) "hello"
 }
 Done

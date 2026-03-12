@@ -4,8 +4,6 @@ IntlCalendar::getTimeZone() basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('GMT+00:01');
 print_r($intlcal->getTimeZone());

@@ -663,11 +663,10 @@ parse_eol:
 			p = e;
 			goto parse_eol;
 		}
+
+		zend_string_efree(target_buf);
 	}
 
-	if (target_buf) {
-		zend_string_free(target_buf);
-	}
 	php_stream_close(stream);
 }
 /* }}} */
@@ -961,7 +960,8 @@ PHP_FUNCTION(fscanf)
 	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1016,10 +1016,8 @@ PHPAPI PHP_FUNCTION(fflush)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ret = php_stream_flush(stream);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+
+	RETURN_BOOL(!ret);
 }
 /* }}} */
 
@@ -1032,10 +1030,7 @@ PHPAPI PHP_FUNCTION(rewind)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (-1 == php_stream_rewind(stream)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(-1 != php_stream_rewind(stream));
 }
 /* }}} */
 
@@ -1554,7 +1549,6 @@ PHPAPI PHP_FUNCTION(fread)
 
 	str = php_stream_read_to_str(stream, len);
 	if (!str) {
-		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
 

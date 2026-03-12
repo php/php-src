@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 namespace
 {
@@ -1013,7 +1016,6 @@ namespace
         /** @tentative-return-type */
         public function save(string $filename, int $options = 0): int|false {}
 
-#ifdef LIBXML_HTML_ENABLED
         /** @tentative-return-type */
         public function loadHTML(string $source, int $options = 0): bool {}
 
@@ -1025,7 +1027,6 @@ namespace
 
         /** @tentative-return-type */
         public function saveHTMLFile(string $filename): int|false {}
-#endif
 
         /** @tentative-return-type */
         public function saveXML(?DOMNode $node = null, int $options = 0): string|false {}

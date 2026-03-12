@@ -25,6 +25,8 @@
 #include "ZendAccelerator.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_extensions.h"
+#include "zend_modules.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "zend_file_cache.h"
@@ -32,7 +34,6 @@
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_filestat.h"
 #include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
@@ -60,7 +61,7 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-static int validate_api_restriction(void)
+static bool validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
 		size_t len = strlen(ZCG(accel_directives).restrict_api);
@@ -69,15 +70,24 @@ static int validate_api_restriction(void)
 		    strlen(SG(request_info).path_translated) < len ||
 		    memcmp(SG(request_info).path_translated, ZCG(accel_directives).restrict_api, len) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " API is restricted by \"restrict_api\" configuration directive");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	if (accel_startup_ok) {
+		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.memory_consumption] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption cannot be changed when OPcache is already set up.\n");
+		}
+		return FAILURE;
+	}
+
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -94,7 +104,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (size < 0) {
@@ -113,7 +123,7 @@ static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 	if (size < MIN_ACCEL_FILES) {
@@ -130,7 +140,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
-	double *p = (double *) ZEND_INI_GET_ADDR();
+	double *p = ZEND_INI_GET_ADDR();
 	zend_long percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
@@ -148,14 +158,27 @@ static ZEND_INI_MH(OnEnable)
 	    stage == ZEND_INI_STAGE_DEACTIVATE) {
 		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
-		/* It may be only temporary disabled */
-		bool *p = (bool *) ZEND_INI_GET_ADDR();
+		/* It may be only temporarily disabled */
+		bool *p = ZEND_INI_GET_ADDR();
 		if (zend_ini_parse_bool(new_value)) {
-			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
+			if (*p) {
+				/* Do not warn if OPcache is enabled, as the update would be a noop anyways. */
+				return SUCCESS;
+			}
+
+			if (stage == ZEND_INI_STAGE_ACTIVATE) {
+				if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled. Are you using php_admin_value[opcache.enable]=1 in an individual pool's configuration?");
+				} else {
+					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
+				}
+			} else {
+				zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
+			}
 			return FAILURE;
 		} else {
-			*p = 0;
-			ZCG(accelerator_enabled) = 0;
+			*p = false;
+			ZCG(accelerator_enabled) = false;
 			return SUCCESS;
 		}
 	}
@@ -183,7 +206,7 @@ static ZEND_INI_MH(OnUpdateJit)
 
 static ZEND_INI_MH(OnUpdateJitDebug)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
@@ -197,7 +220,7 @@ static ZEND_INI_MH(OnUpdateCounter)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < 256) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -209,7 +232,7 @@ static ZEND_INI_MH(OnUpdateUnrollC)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -222,7 +245,7 @@ static ZEND_INI_MH(OnUpdateUnrollR)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -235,7 +258,7 @@ static ZEND_INI_MH(OnUpdateUnrollL)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_LOOPS_UNROLL) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -248,7 +271,7 @@ static ZEND_INI_MH(OnUpdateMaxTraceLength)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 3 && val <= ZEND_JIT_TRACE_MAX_LENGTH) {
-		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
@@ -339,7 +362,7 @@ ZEND_INI_BEGIN()
 #endif
 ZEND_INI_END()
 
-static int filename_is_in_cache(zend_string *filename)
+static bool filename_is_in_cache(zend_string *filename)
 {
 	zend_string *key;
 
@@ -349,27 +372,26 @@ static int filename_is_in_cache(zend_string *filename)
 		if (persistent_script && !persistent_script->corrupted) {
 			if (ZCG(accel_directives).validate_timestamps) {
 				zend_file_handle handle;
-				int ret;
+				bool ret;
 
 				zend_stream_init_filename_ex(&handle, filename);
-				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS
-					? 1 : 0;
+				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
 				zend_destroy_file_handle(&handle);
 				return ret;
 			}
 
-			return 1;
+			return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 
-static int filename_is_in_file_cache(zend_string *filename)
+static bool filename_is_in_file_cache(zend_string *filename)
 {
 	zend_string *realpath = zend_resolve_path(filename);
 	if (!realpath) {
-		return 0;
+		return false;
 	}
 
 	zend_file_handle handle;
@@ -382,7 +404,7 @@ static int filename_is_in_file_cache(zend_string *filename)
 	return result != NULL;
 }
 
-static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
+static bool accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (ZEND_NUM_ARGS() == 1) {
 		zval *zv = ZEND_CALL_ARG(execute_data , 1);
@@ -391,7 +413,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 			return filename_is_in_cache(Z_STR_P(zv));
 		}
 	}
-	return 0;
+	return false;
 }
 
 static ZEND_NAMED_FUNCTION(accel_file_exists)
@@ -423,11 +445,17 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
-	(void)type; /* keep the compiler happy */
-
-	REGISTER_INI_ENTRIES();
+	start_accel_extension();
 
 	return SUCCESS;
+}
+
+void zend_accel_register_ini_entries(void)
+{
+	zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry,
+			ACCELERATOR_PRODUCT_NAME, strlen(ACCELERATOR_PRODUCT_NAME));
+
+	zend_register_ini_entries_ex(ini_entries, module->module_number, module->type);
 }
 
 void zend_accel_override_file_functions(void)
@@ -460,6 +488,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 
 	UNREGISTER_INI_ENTRIES();
 	accel_shutdown();
+
 	return SUCCESS;
 }
 
@@ -572,7 +601,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	DISPLAY_INI_ENTRIES();
 }
 
-static zend_module_entry accel_module_entry = {
+zend_module_entry opcache_module_entry = {
 	STANDARD_MODULE_HEADER,
 	ACCELERATOR_PRODUCT_NAME,
 	ext_functions,
@@ -587,11 +616,6 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-int start_accel_module(void)
-{
-	return zend_startup_module(&accel_module_entry);
-}
-
 /* {{{ Get the scripts which are accelerated by ZendAccelerator */
 static int accelerator_get_scripts(zval *return_value)
 {
@@ -599,8 +623,6 @@ static int accelerator_get_scripts(zval *return_value)
 	zval persistent_script_report;
 	zend_accel_hash_entry *cache_entry;
 	struct tm *ta;
-	struct timeval exec_time;
-	struct timeval fetch_time;
 
 	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return 0;
@@ -630,8 +652,6 @@ static int accelerator_get_scripts(zval *return_value)
 			if (ZCG(accel_directives).validate_timestamps) {
 				add_assoc_long(&persistent_script_report, "timestamp", (zend_long)script->timestamp);
 			}
-			timerclear(&exec_time);
-			timerclear(&fetch_time);
 
 			add_assoc_long(&persistent_script_report, "revalidate", (zend_long)script->dynamic_members.revalidate);
 
@@ -648,7 +668,7 @@ ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
-	bool fetch_scripts = 1;
+	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
@@ -781,9 +801,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval directives, version, blacklist;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
@@ -888,9 +906,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 /* {{{ Request that the contents of the opcode cache to be reset */
 ZEND_FUNCTION(opcache_reset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
@@ -915,7 +931,7 @@ ZEND_FUNCTION(opcache_reset)
 ZEND_FUNCTION(opcache_invalidate)
 {
 	zend_string *script_name;
-	bool force = 0;
+	bool force = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &script_name, &force) == FAILURE) {
 		RETURN_THROWS();
@@ -925,11 +941,7 @@ ZEND_FUNCTION(opcache_invalidate)
 		RETURN_FALSE;
 	}
 
-	if (zend_accel_invalidate(script_name, force) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_accel_invalidate(script_name, force) == SUCCESS);
 }
 
 /* {{{ Prevents JIT on function. Call it before the first invocation of the given function. */

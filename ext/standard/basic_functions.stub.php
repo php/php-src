@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* array.c */
 
@@ -109,6 +112,11 @@ const COUNT_NORMAL = UNKNOWN;
  */
 const COUNT_RECURSIVE = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
 /**
  * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
@@ -260,87 +268,70 @@ const PHP_QUERY_RFC1738 = UNKNOWN;
 const PHP_QUERY_RFC3986 = UNKNOWN;
 
 /**
- * @var float
  * @cvalue M_E
  */
 const M_E = 2.718281828459045;
 /**
- * @var float
  * @cvalue M_LOG2E
  */
 const M_LOG2E = 1.4426950408889634074;
 /**
- * @var float
  * @cvalue M_LOG10E
  */
 const M_LOG10E = 0.43429448190325182765;
 /**
- * @var float
  * @cvalue M_LN2
  */
 const M_LN2 = 0.69314718055994530942;
 /**
- * @var float
  * @cvalue M_LN10
  */
 const M_LN10 = 2.30258509299404568402;
 /**
- * @var float
  * @cvalue M_PI
  */
 const M_PI = 3.14159265358979323846;
 /**
- * @var float
  * @cvalue M_PI_2
  */
 const M_PI_2 = 1.57079632679489661923;
 /**
- * @var float
  * @cvalue M_PI_4
  */
 const M_PI_4 = 0.78539816339744830962;
 /**
- * @var float
  * @cvalue M_1_PI
  */
 const M_1_PI = 0.31830988618379067154;
 /**
- * @var float
  * @cvalue M_2_PI
  */
 const M_2_PI = 0.63661977236758134308;
 /**
- * @var float
  * @cvalue M_SQRTPI
  */
 const M_SQRTPI = 1.77245385090551602729;
 /**
- * @var float
  * @cvalue M_2_SQRTPI
  */
 const M_2_SQRTPI = 1.12837916709551257390;
 /**
- * @var float
  * @cvalue M_LNPI
  */
 const M_LNPI = 1.14472988584940017414;
 /**
- * @var float
  * @cvalue M_EULER
  */
 const M_EULER = 0.57721566490153286061;
 /**
- * @var float
  * @cvalue M_SQRT2
  */
 const M_SQRT2 = 1.41421356237309504880;
 /**
- * @var float
  * @cvalue M_SQRT1_2
  */
 const M_SQRT1_2 = 0.70710678118654752440;
 /**
- * @var float
  * @cvalue M_SQRT3
  */
 const M_SQRT3 = 1.73205080756887729352;
@@ -383,17 +374,11 @@ const PHP_ROUND_HALF_ODD = UNKNOWN;
  * @cvalue PHP_MAX_SALT_LEN
  */
 const CRYPT_SALT_LENGTH = UNKNOWN;
-/** @var int */
 const CRYPT_STD_DES = 1;
-/** @var int */
 const CRYPT_EXT_DES = 1;
-/** @var int */
 const CRYPT_MD5 = 1;
-/** @var int */
 const CRYPT_BLOWFISH = 1;
-/** @var int */
 const CRYPT_SHA256 = 1;
-/** @var int */
 const CRYPT_SHA512 = 1;
 
 /* dns.c */
@@ -648,12 +633,17 @@ const IMAGETYPE_WEBP = UNKNOWN;
 const IMAGETYPE_AVIF = UNKNOWN;
 /**
  * @var int
+ * @cvalue IMAGE_FILETYPE_HEIF
+ */
+const IMAGETYPE_HEIF = UNKNOWN;
+/**
+ * @var int
  * @cvalue IMAGE_FILETYPE_UNKNOWN
  */
 const IMAGETYPE_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cvalue IMAGE_FILETYPE_COUNT
+ * @cvalue IMAGE_FILETYPE_FIXED_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
 
@@ -1624,6 +1614,12 @@ function min(mixed $value, mixed ...$values): mixed {}
  */
 function max(mixed $value, mixed ...$values): mixed {}
 
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 3}
+ */
+function clamp(mixed $value, mixed $min, mixed $max): mixed {}
+
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
@@ -1878,7 +1874,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_KEY): array {}
 
 function array_find(array $array, callable $callback): mixed {}
 
@@ -2322,16 +2318,16 @@ function strcoll(string $string1, string $string2): int {}
  * @frameless-function {"arity": 1}
  * @frameless-function {"arity": 2}
  */
-function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function rtrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
-function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
+function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
  * @compile-time-eval
@@ -2692,7 +2688,6 @@ function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING,
 
 /**
  * @return array<int, string>|false
- * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
 
@@ -3582,6 +3577,7 @@ function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
  * @param resource $stream
  * @alias stream_set_timeout
  */
+#[\Deprecated(since: '8.5', message: "use stream_set_timeout() instead")]
 function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 #endif
 

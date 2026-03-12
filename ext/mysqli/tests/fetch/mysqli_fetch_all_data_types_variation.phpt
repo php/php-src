@@ -4,6 +4,9 @@ mysqli_fetch_all() data types variation
 mysqli
 --SKIPIF--
 <?php
+if (getenv('GITHUB_ACTIONS') && str_starts_with(php_uname('m'), 'ppc')) {
+    die('skip Flaky on GitHub Actions PPC runner');
+}
 require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 mysqli_check_skip_test();
 ?>

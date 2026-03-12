@@ -39,5 +39,5 @@ Test::getInt2:
      ; (lines=2, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s
-0000 V0 = QM_ASSIGN int(42)
-0001 RETURN V0
+0000 T0 = VERIFY_RETURN_TYPE int(42)
+0001 RETURN T0

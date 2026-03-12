@@ -9,8 +9,6 @@ intl
 --FILE--
 <?php
 
-ini_set("intl.error_level", E_WARNING);
-
 /*
  * Test for the datefmt_set_timezone_id  function
  */
@@ -22,7 +20,6 @@ function ut_main()
         'America/New_York' => true,
         'America/Los_Angeles' => true,
         'America/Chicago' => true,
-        'CN' => false
     );
     $timestamp_entry = 0;
 
@@ -61,10 +58,7 @@ include_once( 'ut_common.inc' );
 // Run the test
 ut_run();
 ?>
---EXPECTF--
-datefmt_set_timezone: No such time zone: 'CN'
-datefmt_set_timezone: No such time zone: 'CN'
-
+--EXPECT--
 After creation of the dateformatter :  timezone_id= US/Pacific
 -----------
 Trying to set timezone_id= America/New_York
@@ -78,11 +72,6 @@ Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 4:00:00 PM P
 Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 5:00:00 PM Pacific Standard Time
 -----------
 Trying to set timezone_id= America/Chicago
-After call to set_timezone_id :  timezone_id= America/Chicago
-Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 6:00:00 PM Central Standard Time
-Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 7:00:00 PM Central Standard Time
------------
-Trying to set timezone_id= CN
 After call to set_timezone_id :  timezone_id= America/Chicago
 Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 6:00:00 PM Central Standard Time
 Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 7:00:00 PM Central Standard Time

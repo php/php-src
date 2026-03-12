@@ -1,5 +1,5 @@
 --TEST--
-FCC in initializer errors for static reference to instance method.
+FCC in initializer warns for static reference to trait method.
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ var_dump(Closure);
 Deprecated: Calling static trait method Foo::myMethod is deprecated, it should only be called on a class using the trait in %s on line %d
 object(Closure)#%d (2) {
   ["function"]=>
-  string(8) "myMethod"
+  string(13) "Foo::myMethod"
   ["parameter"]=>
   array(1) {
     ["$foo"]=>

@@ -68,7 +68,6 @@ else
     pcre2lib/pcre2_chartables.c
     pcre2lib/pcre2_chkdint.c
     pcre2lib/pcre2_compile.c
-    pcre2lib/pcre2_compile_class.c
     pcre2lib/pcre2_config.c
     pcre2lib/pcre2_context.c
     pcre2lib/pcre2_convert.c
@@ -96,8 +95,7 @@ else
   "])
 
   AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
-    [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"],,
-    [-Werror])
+    [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"])
 
   PHP_PCRE_CFLAGS=m4_normalize(["
     $PHP_PCRE_CFLAGS

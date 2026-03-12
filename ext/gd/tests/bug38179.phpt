@@ -18,8 +18,6 @@ imagecopy($dst_tc, $src, 0,0, 0,0, imagesx($src), imagesy($src));
 
 $p1 = imagecolorat($dst_tc, 3,3);
 printf("%X\n", $p1);
-
-imagedestroy($src); imagedestroy($dst_tc);
 ?>
 --EXPECT--
 46FF0000

@@ -2,6 +2,8 @@
 Test mb_strripos() function : usage variations - Pass different integers as $offset argument
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 /*
@@ -9,8 +11,6 @@ mbstring
  * The character length of $string_ascii and $string_mb is the same,
  * and the needle appears at the same positions in both strings
  */
-
-mb_internal_encoding('UTF-8');
 
 echo "*** Testing mb_strripos() : usage variations ***\n";
 

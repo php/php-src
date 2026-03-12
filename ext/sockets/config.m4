@@ -4,7 +4,7 @@ PHP_ARG_ENABLE([sockets],
     [Enable sockets support])])
 
 if test "$PHP_SOCKETS" != "no"; then
-  AC_CHECK_FUNCS([hstrerror if_nametoindex if_indextoname sockatmark])
+  AC_CHECK_FUNCS([hstrerror if_nametoindex if_indextoname sockatmark accept4])
   AC_CHECK_HEADERS([sys/sockio.h linux/filter.h linux/if_packet.h linux/if_ether.h linux/udp.h])
   AC_DEFINE([HAVE_SOCKETS], [1],
     [Define to 1 if the PHP extension 'sockets' is available.])

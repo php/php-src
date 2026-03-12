@@ -17,7 +17,6 @@ curl_exec($ch);
 var_dump(CURLPROTO_HTTP === curl_getinfo($ch, CURLINFO_PROTOCOL));
 var_dump(0 === curl_getinfo($ch, CURLINFO_PROXY_SSL_VERIFYRESULT));
 var_dump(curl_getinfo($ch, CURLINFO_SCHEME));
-curl_close($ch);
 ?>
 --EXPECTF--
 bool(true)

@@ -277,7 +277,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	zval tmp;
 	HashTable *ht = zend_new_array(2 + (entry->parent ? 1 : 0) + (entry->kv_end - entry->kv_start));
 
-	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
+	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, false));
 	zend_string *key = ZSTR_INIT_LITERAL("browser_name_regex", 0);
 	ZSTR_H(key) = zend_inline_hash_func("browser_name_regex", sizeof("browser_name_regex")-1);
 	zend_hash_add_new(ht, key, &tmp);
@@ -485,7 +485,7 @@ PHP_INI_MH(OnChangeBrowscap)
 	} else if (stage == PHP_INI_STAGE_ACTIVATE) {
 		browser_data *bdata = &BROWSCAP_G(activation_bdata);
 		if (bdata->filename[0] != '\0') {
-			browscap_bdata_dtor(bdata, 0);
+			browscap_bdata_dtor(bdata, false);
 		}
 		if (VCWD_REALPATH(ZSTR_VAL(new_value), bdata->filename) == NULL) {
 			return FAILURE;
@@ -520,7 +520,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
 	browser_data *bdata = &BROWSCAP_G(activation_bdata);
 	if (bdata->filename[0] != '\0') {
-		browscap_bdata_dtor(bdata, 0);
+		browscap_bdata_dtor(bdata, false);
 	}
 
 	return SUCCESS;
@@ -529,7 +529,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 
 PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
-	browscap_bdata_dtor(&global_bdata, 1);
+	browscap_bdata_dtor(&global_bdata, true);
 
 	return SUCCESS;
 }

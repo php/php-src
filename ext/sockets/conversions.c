@@ -571,7 +571,6 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
@@ -581,7 +580,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -611,7 +610,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	} else {
 		/* error already emitted, but let's emit another more relevant */
 		do_from_zval_err(ctx, "could not resolve address '%s' to get an AF_INET6 "
-				"address", Z_STRVAL_P(zaddr_str));
+				"address", ZSTR_VAL(addr_str));
 	}
 
 	zend_tmp_string_release(tmp_addr_str);
@@ -622,8 +621,6 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 	socklen_t size = INET6_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
 
-	memset(ZSTR_VAL(str), '\0', size);
-
 	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
@@ -632,7 +629,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -930,7 +927,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 	char				*bufp = buf;
 	zval				*elem;
 	uint32_t			i = 0;
-	int					num_elems;
+	uint32_t			num_elems;
 	void				*control_buf;
 	zend_llist_element	*alloc;
 	size_t				control_len,
@@ -1102,7 +1099,7 @@ static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, s
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {
-	int				num_elem;
+	uint32_t	num_elem;
 	struct msghdr	*msg = (struct msghdr*)msghdr_c;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -1361,7 +1358,7 @@ void to_zval_read_ucred(const char *data, zval *zv, res_context *ctx)
 #ifdef SCM_RIGHTS
 size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 {
-	int num_elems;
+	uint32_t num_elems;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
@@ -1374,7 +1371,7 @@ size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 		return (size_t)-1;
 	}
 
-	return zend_hash_num_elements(Z_ARRVAL_P(arr)) * sizeof(int);
+	return num_elems * sizeof(int);
 }
 static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
@@ -1420,7 +1417,7 @@ void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
 void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 {
 	size_t			*cmsg_len;
-	int				num_elems,
+	uint32_t				num_elems,
 					i;
 	struct cmsghdr	*dummy_cmsg = 0;
 	size_t			data_offset;

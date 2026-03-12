@@ -54,7 +54,11 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     changequote({,})
     ep_dir=$(echo $1|$SED 's%/*[^/][^/]*/*$%%')
     changequote([,])
-    ep_realdir=$(cd "$ep_dir" && pwd)
+    if test -z $ep_dir ; then
+      ep_realdir=$(pwd)
+    else
+      ep_realdir=$(cd "$ep_dir" && pwd)
+    fi
     $2="$ep_realdir"/$(basename "$1")
   fi
 ])
@@ -122,6 +126,13 @@ AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 
 dnl Required programs.
 PHP_PROG_AWK
+
+dnl Check for obsolete configure options. The --with-pic configure option is
+dnl obsolete as of Libtool 2.5.3 in favor of the --enable-pic.
+AS_VAR_IF([with_pic], [], [], [AC_MSG_ERROR(m4_text_wrap([
+  The Libtool --with-pic/--without-pic configure option is obsolete. Use
+  --enable-pic/--disable-pic instead.
+]))])
 
 abs_srcdir=$(cd $srcdir && pwd)
 abs_builddir=$(pwd)
@@ -790,7 +801,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   php_cxx_post=
   php_lo=lo
 
-  case $with_pic in
+  case $enable_pic in
     yes) pic_setting='-prefer-pic';;
     no)  pic_setting='-prefer-non-pic';;
   esac
@@ -1796,7 +1807,17 @@ AC_DEFUN([PHP_SETUP_ICONV], [
 
   dnl Check external libs for iconv funcs.
   AS_VAR_IF([found_iconv], [no], [
-    for i in $PHP_ICONV /usr/local /usr; do
+
+  dnl Find /opt/homebrew/opt/libiconv on macOS
+  dnl See: https://github.com/php/php-src/pull/19475
+    php_brew_prefix=no
+    AC_CHECK_PROG([BREW], [brew], [brew])
+    if test -n "$BREW"; then
+      AC_MSG_CHECKING([for homebrew prefix])
+      php_brew_prefix=$($BREW --prefix 2> /dev/null)
+    fi
+
+    for i in $PHP_ICONV $php_brew_prefix/opt/libiconv /usr/local /usr; do
       if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
         ICONV_INCLUDE_DIR=$i/include/gnu-libiconv
@@ -2487,4 +2508,44 @@ AC_DEFUN([PHP_REMOVE_OPTIMIZATION_FLAGS], [
   sed_script='s/\([[\t ]]\|^\)-O\([[0-9gsz]]\|fast\|\)\([[\t ]]\|$\)/\1/g'
   CFLAGS=$(echo "$CFLAGS" | $SED -e "$sed_script")
   CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e "$sed_script")
+])
+
+dnl
+dnl PHP_C_STANDARD_LIBRARY
+dnl
+dnl Determine the C standard library used for the build. The uclibc is checked
+dnl first because it also defines the __GLIBC__ and could otherwise be detected
+dnl as glibc. Musl C library is determined heuristically.
+dnl
+AC_DEFUN([PHP_C_STANDARD_LIBRARY],
+[AC_CACHE_CHECK([C standard library implementation],
+[php_cv_c_standard_library],
+[php_cv_c_standard_library=unknown
+dnl Check if C standard library is uclibc.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <features.h>],
+[#ifndef __UCLIBC__
+  (void) __UCLIBC__;
+#endif])],
+[php_cv_c_standard_library=uclibc],
+[php_cv_c_standard_library=unknown])])
+dnl Check if C standard library is GNU C.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <features.h>],
+[#ifndef __GLIBC__
+  (void) __GLIBC__;
+#endif])],
+[php_cv_c_standard_library=glibc],
+[php_cv_c_standard_library=unknown])])
+dnl Check if C standard library is musl libc.
+AS_VAR_IF([php_cv_c_standard_library], [unknown],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdarg.h>],
+[#ifndef __DEFINED_va_list
+  (void) __DEFINED_va_list;
+#endif])],
+[php_cv_c_standard_library=musl],
+[AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1],
+[php_cv_c_standard_library=musl],
+[php_cv_c_standard_library=unknown])])])
+])
 ])

@@ -248,11 +248,6 @@ lxb_dom_node_t *
 lxb_dom_node_destroy(lxb_dom_node_t *node)
 {
     lxb_dom_node_remove(node);
-
-    if (node->owner_document->node_cb->destroy != NULL) {
-        node->owner_document->node_cb->destroy(node);
-    }
-
     return lxb_dom_document_destroy_interface(node);
 }
 

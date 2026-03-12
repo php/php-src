@@ -34,7 +34,6 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
-#include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
 
 #ifdef HAVE_SNMP
@@ -1006,7 +1005,7 @@ static bool snmp_session_set_sec_level(struct snmp_session *s, zend_string *leve
 /* }}} */
 
 /* {{{ Set the authentication protocol in the snmpv3 session */
-static bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
 {
 #ifndef DISABLE_MD5
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
@@ -1038,27 +1037,24 @@ static bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *
 	}
 #endif
 
-	smart_string err = {0};
-
-	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+	zend_value_error(
+		"Authentication protocol must be \"SHA\""
 #ifdef HAVE_SNMP_SHA256
-	smart_string_appends(&err, " or \"SHA256\"");
+		" or \"SHA256\""
 #endif
 #ifdef HAVE_SNMP_SHA512
-	smart_string_appends(&err, " or \"SHA512\"");
+		" or \"SHA512\""
 #endif
 #ifndef DISABLE_MD5
-	smart_string_appends(&err, " or \"MD5\"");
+		" or \"MD5\""
 #endif
-	smart_string_0(&err);
-	zend_value_error("%s", err.c);
-	smart_string_free(&err);
+	);
 	return false;
 }
 /* }}} */
 
 /* {{{ Set the security protocol in the snmpv3 session */
-static bool snmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
 #ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
@@ -1095,9 +1091,10 @@ static bool snmp_session_set_sec_protocol(struct snmp_session *s, zend_string *p
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static bool snmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
+
 	s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
 			(uint8_t *) ZSTR_VAL(pass), ZSTR_LEN(pass),
@@ -1110,7 +1107,7 @@ static bool snmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static bool snmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
 
@@ -1149,9 +1146,10 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 /* }}} */
 
 /* {{{ Set all snmpv3-related security options */
-static bool snmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
+static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
-	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID)
+	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID,
+	uint32_t auth_protocol_argnum)
 {
 
 	/* Setting the security level. */
@@ -1162,9 +1160,19 @@ static bool snmp_session_set_security(struct snmp_session *session, zend_string 
 
 	if (session->securityLevel == SNMP_SEC_LEVEL_AUTHNOPRIV || session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
+		if (!auth_protocol) {
+			zend_argument_value_error(auth_protocol_argnum, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
+			return false;
+		}
+
 		/* Setting the authentication protocol. */
 		if (!snmp_session_set_auth_protocol(session, auth_protocol)) {
 			/* ValueError already generated, just bail out */
+			return false;
+		}
+
+		if (!auth_passphrase) {
+			zend_argument_value_error(auth_protocol_argnum + 1, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
@@ -1175,9 +1183,20 @@ static bool snmp_session_set_security(struct snmp_session *session, zend_string 
 		}
 
 		if (session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+
+			if (!priv_protocol) {
+				zend_argument_value_error(auth_protocol_argnum + 2, "cannot be null when security level is \"authPriv\"");
+				return false;
+			}
+
 			/* Setting the security protocol. */
 			if (!snmp_session_set_sec_protocol(session, priv_protocol)) {
 				/* ValueError already generated, just bail out */
+				return false;
+			}
+
+			if (!priv_passphrase) {
+				zend_argument_value_error(auth_protocol_argnum + 3, "cannot be null when security level is \"authPriv\"");
 				return false;
 			}
 
@@ -1350,7 +1369,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			snmp_session_free(&session);
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL)) {
+		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
 			/* Warning message sent already, just bail out */
@@ -1725,7 +1744,7 @@ PHP_METHOD(SNMP, setSecurity)
 		RETURN_THROWS();
 	}
 
-	if (!snmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7)) {
+	if (!snmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2)) {
 		/* Warning message sent already, just bail out */
 		RETURN_FALSE;
 	}

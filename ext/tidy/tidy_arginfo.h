@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit tidy.stub.php instead.
  * Stub hash: 0e6561410a63658f76011c1ddcecdd1e68757f0a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
@@ -476,9 +476,9 @@ static zend_class_entry *register_class_tidy(void)
 
 	zval property_errorBuffer_default_value;
 	ZVAL_NULL(&property_errorBuffer_default_value);
-	zend_string *property_errorBuffer_name = zend_string_init("errorBuffer", sizeof("errorBuffer") - 1, 1);
+	zend_string *property_errorBuffer_name = zend_string_init("errorBuffer", sizeof("errorBuffer") - 1, true);
 	zend_declare_typed_property(class_entry, property_errorBuffer_name, &property_errorBuffer_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_errorBuffer_name);
+	zend_string_release_ex(property_errorBuffer_name, true);
 
 	zval property_value_default_value;
 	ZVAL_NULL(&property_value_default_value);
@@ -512,33 +512,33 @@ static zend_class_entry *register_class_tidyNode(void)
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
-	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, true);
 	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_column_name);
+	zend_string_release_ex(property_column_name, true);
 
 	zval property_proprietary_default_value;
 	ZVAL_UNDEF(&property_proprietary_default_value);
-	zend_string *property_proprietary_name = zend_string_init("proprietary", sizeof("proprietary") - 1, 1);
+	zend_string *property_proprietary_name = zend_string_init("proprietary", sizeof("proprietary") - 1, true);
 	zend_declare_typed_property(class_entry, property_proprietary_name, &property_proprietary_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_proprietary_name);
+	zend_string_release_ex(property_proprietary_name, true);
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
-	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
-	zend_string_release(property_id_name);
+	zend_string_release_ex(property_id_name, true);
 
 	zval property_attribute_default_value;
 	ZVAL_UNDEF(&property_attribute_default_value);
-	zend_string *property_attribute_name = zend_string_init("attribute", sizeof("attribute") - 1, 1);
+	zend_string *property_attribute_name = zend_string_init("attribute", sizeof("attribute") - 1, true);
 	zend_declare_typed_property(class_entry, property_attribute_name, &property_attribute_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_attribute_name);
+	zend_string_release_ex(property_attribute_name, true);
 
 	zval property_child_default_value;
 	ZVAL_UNDEF(&property_child_default_value);
-	zend_string *property_child_name = zend_string_init("child", sizeof("child") - 1, 1);
+	zend_string *property_child_name = zend_string_init("child", sizeof("child") - 1, true);
 	zend_declare_typed_property(class_entry, property_child_name, &property_child_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_child_name);
+	zend_string_release_ex(property_child_name, true);
 
 	return class_entry;
 }

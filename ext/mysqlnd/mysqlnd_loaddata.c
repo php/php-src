@@ -167,7 +167,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 		SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE,
 						"LOAD DATA LOCAL INFILE is forbidden, check related settings like "
 						"mysqli.allow_local_infile|mysqli.local_infile_directory or "
-						"PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY");
+						"Pdo\\Mysql::ATTR_LOCAL_INFILE|Pdo\\Mysql::ATTR_LOCAL_INFILE_DIRECTORY");
 		prerequisities_ok = FALSE;
 	}
 

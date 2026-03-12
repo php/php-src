@@ -27,10 +27,6 @@ require_once 'skipifconnectfailure.inc';
 
     $tmp = $res->fetch_field();
     var_dump($tmp);
-    if ($tmp->charsetnr != $charsetInfo->number) {
-        printf("[005] Expecting charset %s/%d got %d\n",
-            $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-    }
     if ($tmp->db != $db) {
         printf("[007] Expecting database '%s' got '%s'\n",
           $db, $tmp->db);

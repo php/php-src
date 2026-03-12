@@ -1,5 +1,5 @@
 --TEST--
-Relaxed type compatibility for read-only and write-only properties
+Relaxed type compatibility for get-only and set-only properties
 --FILE--
 <?php
 

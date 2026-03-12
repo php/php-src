@@ -30,7 +30,7 @@ ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, bool persistent)
 
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
 {
-	zend_ptr_stack_init_ex(stack, 0);
+	zend_ptr_stack_init_ex(stack, false);
 }
 
 

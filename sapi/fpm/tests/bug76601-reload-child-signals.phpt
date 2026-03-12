@@ -4,6 +4,7 @@ FPM: bug76601 children should not ignore signals during concurrent reloads
 <?php
 include "skipif.inc";
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") die("skip Potential cause for GitHub Actions crash");
 ?>
 --FILE--
 <?php

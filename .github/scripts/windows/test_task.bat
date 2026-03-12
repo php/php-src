@@ -36,8 +36,7 @@ if %errorlevel% neq 0 exit /b 3
 rem setup PostgreSQL related exts
 set PGUSER=postgres
 set PGPASSWORD=Password12!
-rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
-echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
+set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
 set TMP_POSTGRESQL_BIN=%PGBIN%
 "%TMP_POSTGRESQL_BIN%\createdb.exe" test
@@ -128,7 +127,7 @@ mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
-if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
+echo opcache.record_warnings=1 >> %PHP_BUILD_DIR%\php.ini
 rem work-around for some spawned PHP processes requiring OpenSSL and sockets
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 echo extension=php_sockets.dll >> %PHP_BUILD_DIR%\php.ini

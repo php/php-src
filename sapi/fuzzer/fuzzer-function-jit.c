@@ -50,18 +50,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
-	char *opcache_path = get_opcache_path();
-	assert(opcache_path && "Failed to determine opcache path");
-
 	char ini_buf[512];
 	snprintf(ini_buf, sizeof(ini_buf),
-		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
 		"opcache.jit_buffer_size=128M\n"
-		"opcache.protect_memory=1\n",
-		opcache_path);
-	free(opcache_path);
+		"opcache.protect_memory=1\n");
 
 	create_file();
 	fuzzer_init_php_for_execute(ini_buf);

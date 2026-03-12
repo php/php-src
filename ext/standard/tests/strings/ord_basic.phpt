@@ -15,7 +15,6 @@ var_dump(ord("@"));
 var_dump(ord("\n"));
 var_dump(ord("\x0A"));
 var_dump(ord("\xFF"));
-var_dump(ord("Hello"));
 
 // Make sure all valid ascii chars round trip
 for ($i = 0; $i < 255; $i++) {
@@ -37,4 +36,3 @@ int(64)
 int(10)
 int(10)
 int(255)
-int(72)

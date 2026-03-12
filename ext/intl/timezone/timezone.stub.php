@@ -45,11 +45,10 @@ class IntlTimeZone
     public static function createDefault(): IntlTimeZone {}
 
     /**
-     * @param IntlTimeZone|string|int|float|null $countryOrRawOffset
      * @tentative-return-type
      * @alias intltz_create_enumeration
      */
-    public static function createEnumeration($countryOrRawOffset = null): IntlIterator|false {}
+    public static function createEnumeration(string|int|null $countryOrRawOffset = null): IntlIterator|false {}
 
     /**
      * @tentative-return-type

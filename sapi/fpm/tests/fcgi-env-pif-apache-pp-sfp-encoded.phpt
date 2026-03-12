@@ -1,5 +1,5 @@
 --TEST--
-FPM: FastCGI change for Apache ProxyPass SCRIPT_FILENAME decoding - fallback (GH-17645)
+FPM: FastCGI change for Apache ProxyPass SCRIPT_FILENAME decoding - default (GH-17645)
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -18,7 +18,6 @@ pm.start_servers = 1
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 php_admin_value[cgi.fix_pathinfo] = yes
-php_admin_value[fastcgi.script_path_encoded] = yes
 EOT;
 
 $code = <<<EOT

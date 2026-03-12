@@ -7,4 +7,4 @@ $x = (new ReflectionFunction("substr"))->getClosure();
 $x->call(new a);
 ?>
 --EXPECTF--
-Warning: Cannot rebind scope of closure created from function in %s on line %d
+Warning: Cannot rebind scope of closure created from function, this will be an error in PHP 9 in %s on line %d

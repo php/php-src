@@ -324,7 +324,7 @@ PHP_FUNCTION(mysqli_data_seek)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
 		if (hasThis()) {
@@ -670,7 +670,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (!(field = mysql_fetch_field(result))) {
 		RETURN_FALSE;
@@ -694,7 +694,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	array_init(return_value);
 	num_fields = mysql_num_fields(result);
@@ -727,7 +727,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (offset >= (zend_long) mysql_num_fields(result)) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
@@ -755,7 +755,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	// TODO Warning?
 	if (!(ret = mysql_fetch_lengths(result))) {
@@ -809,7 +809,7 @@ PHP_FUNCTION(mysqli_field_seek)
 		RETURN_THROWS();
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if ((uint32_t)fieldnr >= mysql_num_fields(result)) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
@@ -830,7 +830,7 @@ PHP_FUNCTION(mysqli_field_tell)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	RETURN_LONG(mysql_field_tell(result));
 }
@@ -845,7 +845,7 @@ PHP_FUNCTION(mysqli_free_result)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	mysqli_free_result(result, false);
 	MYSQLI_CLEAR_RESOURCE(mysql_result);
@@ -856,9 +856,7 @@ PHP_FUNCTION(mysqli_free_result)
 PHP_FUNCTION(mysqli_get_client_info)
 {
 	if (hasThis()) {
-		if (zend_parse_parameters_none() == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_NONE();
 	} else {
 		zval *mysql_link;
 
@@ -878,9 +876,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 /* {{{ Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG((zend_long)mysql_get_client_version());
 }
@@ -1123,7 +1119,7 @@ PHP_FUNCTION(mysqli_num_fields)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	RETURN_LONG(mysql_num_fields(result));
 }
@@ -1138,7 +1134,7 @@ PHP_FUNCTION(mysqli_num_rows)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered_and_not_everything_is_fetched(result)) {
 		zend_throw_error(NULL, "mysqli_num_rows() cannot be used in MYSQLI_USE_RESULT mode");
@@ -1198,6 +1194,11 @@ PHP_FUNCTION(mysqli_options)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
+	if (expected_type == IS_NULL) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants");
+		RETURN_THROWS();
+	}
+	
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
@@ -1343,9 +1344,6 @@ PHP_FUNCTION(mysqli_real_query)
 }
 /* }}} */
 
-# define mysql_real_escape_string_quote(mysql, to, from, length, quote) \
-	mysql_real_escape_string(mysql, to, from, length)
-
 PHP_FUNCTION(mysqli_real_escape_string) {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
@@ -1359,7 +1357,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	newstr = zend_string_safe_alloc(2, escapestr_len, 0, 0);
-	ZSTR_LEN(newstr) = mysql_real_escape_string_quote(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len, '\'');
+	ZSTR_LEN(newstr) = mysql_real_escape_string(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len);
 	newstr = zend_string_truncate(newstr, ZSTR_LEN(newstr), 0);
 
 	RETURN_NEW_STR(newstr);
@@ -1408,10 +1406,7 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 		RETURN_THROWS();
 	}
 
-	if (mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len));
 }
 /* }}} */
 
@@ -1550,10 +1545,7 @@ PHP_FUNCTION(mysqli_stmt_reset)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (mysql_stmt_reset(stmt->stmt)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(!mysql_stmt_reset(stmt->stmt));
 }
 /* }}} */
 
@@ -1950,9 +1942,7 @@ PHP_FUNCTION(mysqli_thread_id)
 /* {{{ Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(mysql_thread_safe());
 }

@@ -13,5 +13,5 @@ if (defined('a')) {
 
 ?>
 --EXPECTF--
-Warning: Constant a already defined in %s on line %d
+Warning: Constant a already defined, this will be an error in PHP 9 in %s on line %d
 2

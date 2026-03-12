@@ -30,9 +30,9 @@ using icu::Locale;
 using icu::Calendar;
 using icu::DateFormat;
 
-int datefmt_process_calendar_arg(
+zend_result datefmt_process_calendar_arg(
 	zend_object *calendar_obj, zend_long calendar_long, bool calendar_is_null, Locale const& locale,
-	const char *func_name, intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
+	intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
 );
 
 #endif	/* DATEFORMAT_HELPERS_H */

@@ -75,8 +75,8 @@ for ($i = -1; ++$i < 5;) {
 	while (($re = $stmt->fetch())) {
 		$res[] = $re;
 		// Memory introspection relies on an optionally-compiled constant.
-		if (defined('PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE')) {
-			$mem = $stmt->getAttribute(PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE);
+		if (defined('Pdo\Pgsql::ATTR_RESULT_MEMORY_SIZE')) {
+			$mem = $stmt->getAttribute(Pdo\Pgsql::ATTR_RESULT_MEMORY_SIZE);
 		} else {
 			// If not there emulate a return value which validates our test.
 			$mem = $lazy ? 0 : 1;

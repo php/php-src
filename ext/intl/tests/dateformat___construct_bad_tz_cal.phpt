@@ -4,34 +4,25 @@ IntlDateFormatter::__construct(): bad timezone or calendar
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", 'Atlantic/Azores');
-
-function print_exception($e) {
-    echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
-}
 
 try {
     var_dump(new IntlDateFormatter(NULL, 0, 0, 'bad timezone'));
-} catch (IntlException $e) {
-    print_exception($e);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, 3));
-} catch (IntlException $e) {
-    print_exception($e);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdclass));
-} catch (TypeError $e) {
-    print_exception($e);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
+IntlException: IntlDateFormatter::__construct(): No such time zone: "bad timezone"
+IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object
+TypeError: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given
 
-Exception: datefmt_create: No such time zone: 'bad timezone' in %s on line %d
-
-Exception: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s on line %d
-
-Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given in %s on line %d

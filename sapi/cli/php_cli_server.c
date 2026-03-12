@@ -44,7 +44,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #ifdef HAVE_DLFCN_H
@@ -304,7 +303,7 @@ static int status_comp(const void *a, const void *b) /* {{{ */
 
 static const char *get_status_string(int code) /* {{{ */
 {
-	http_response_status_code_pair needle = {code, NULL},
+	const http_response_status_code_pair needle = {code, NULL},
 		*result = NULL;
 
 	result = bsearch(&needle, http_status_map, http_status_map_len, sizeof(needle), status_comp);
@@ -395,22 +394,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	char *ret;
-	ALLOCA_FLAG(use_heap)
-	char *ext_lower = do_alloca(ext_len + 1, use_heap);
-	zend_str_tolower_copy(ext_lower, ext, ext_len);
-	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
-	free_alloca(ext_lower, use_heap);
-	return (const char*)ret;
+	return zend_hash_str_find_ptr_lc(&server->extension_mime_types, ext, ext_len);
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	client = SG(server_context);
 
@@ -449,9 +440,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -2530,6 +2519,7 @@ static void php_cli_server_startup_workers(void) {
 #if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 				php_cli_server_worker_install_pdeathsig();
 #endif
+				php_child_init();
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
@@ -2562,7 +2552,11 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
 	if (server_sock == SOCK_ERR) {
-		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		if (strchr(host, ':')) {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on [%s]:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		} else {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		}
 		if (errstr) {
 			zend_string_release_ex(errstr, 0);
 		}
@@ -2707,14 +2701,16 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
-			int err = php_socket_errno();
-			if (err != SOCK_EAGAIN && php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
+			pefree(sa, 1);
+			if (php_socket_errno() == SOCK_EAGAIN) {
+				return SUCCESS;
+			}
+			if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 				char *errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR,
 					"Failed to accept a client (reason: %s)", errstr);
 				efree(errstr);
 			}
-			pefree(sa, 1);
 			return FAILURE;
 		}
 		if (SUCCESS != php_set_sock_blocking(client_sock, 0)) {

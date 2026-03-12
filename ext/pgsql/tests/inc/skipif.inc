@@ -1,4 +1,3 @@
-
 <?php
 // This script prints "skip" unless:
 // * the pgsql extension is built-in or loadable, AND
@@ -47,5 +46,3 @@ function skip_bytea_not_escape()
         die("skip libpq or backend >= 9.0\n");
     }
 }
-
-?>

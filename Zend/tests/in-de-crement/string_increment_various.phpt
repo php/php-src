@@ -53,55 +53,72 @@ var_dump(++$s); // string(3) "5e0"
 var_dump(++$s); // float(6)
 ?>
 --EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "Ba"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "bA"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "B0"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "b0"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "AAa"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "aaA"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "10a"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "10A"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(1) "1"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "-cd"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "Z "
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) " A"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "é"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(15) "あいうえお"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "α"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "ω"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "Α"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(2) "Ω"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(8) "foo1.txu"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(4) "1f.6"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(9) "foo.1.txu"
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(5) "1.f.6"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "5e0"
 float(6)

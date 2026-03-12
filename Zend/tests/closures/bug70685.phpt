@@ -15,8 +15,8 @@ var_dump($c);
 
 ?>
 --EXPECTF--
-Warning: Cannot bind method SplDoublyLinkedList::count() to object of class cls in %s on line %d
+Warning: Cannot bind method SplDoublyLinkedList::count() to object of class cls, this will be an error in PHP 9 in %s on line %d
 NULL
 
-Warning: Cannot rebind scope of closure created from method in %s on line %d
+Warning: Cannot rebind scope of closure created from method, this will be an error in PHP 9 in %s on line %d
 NULL

@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
+#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H
@@ -119,7 +120,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string(zend_string *Data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn);
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num);
 static int _php_image_type(zend_string *data);
@@ -817,6 +818,11 @@ PHP_FUNCTION(imagefilledellipse)
 		Z_PARAM_LONG(h)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
+
+    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
+        zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+        RETURN_THROWS();
+    }
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
@@ -1573,7 +1579,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		pefree(pstr, 1);
 		zend_string_release_ex(buff, 0);
 	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
+	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO) == SUCCESS) {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
 			goto out_err;
@@ -1723,7 +1729,7 @@ PHP_FUNCTION(imagecreatefromtga)
 /* }}} */
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -2096,14 +2102,14 @@ PHP_FUNCTION(imagewbmp)
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD);
 }
 /* }}} */
 
 /* {{{ Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2);
 }
 /* }}} */
 
@@ -2447,8 +2453,18 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_THROWS();
 	}
 
+	if (!zend_finite(input)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	if (output <= 0.0) {
 		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(output)) {
+		zend_argument_value_error(3, "must be finite");
 		RETURN_THROWS();
 	}
 
@@ -2960,7 +2976,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i;
+	int ch = 0, col, i;
+	unsigned int x, y;
 	size_t l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
@@ -2993,21 +3010,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, ch, col);
+			gdImageChar(im, font, (int)x, (int)y, ch, col);
 			break;
 		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
 		case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				gdImageChar(im, font, (int)x, (int)y, (int) ((unsigned char) str[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				gdImageCharUp(im, font, (int)x, (int)y, (int) str[i], col);
 				y -= font->w;
 			}
 			break;
@@ -3599,7 +3616,7 @@ PHP_FUNCTION(imagefilter)
 	zval *tmp;
 
 	typedef void (*image_filter)(INTERNAL_FUNCTION_PARAMETERS);
-	zend_long filtertype;
+	zend_long filtertype = 0;
 	image_filter filters[] =
 	{
 		php_image_filter_negate ,
@@ -3617,15 +3634,17 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_scatter
 	};
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {
-		WRONG_PARAM_COUNT;
-	} else if (zend_parse_parameters(2, "Ol", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+	/* We need to do some initial ZPP parsing to be able to extract the filter value */
+	if (zend_parse_parameters(MIN(2, ZEND_NUM_ARGS()), "Ol*", &tmp, gd_image_ce, &filtertype) == FAILURE) {
+
 		RETURN_THROWS();
 	}
 
-	if (filtertype >= 0 && filtertype <= IMAGE_FILTER_MAX) {
-		filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (UNEXPECTED(filtertype < 0 || filtertype > IMAGE_FILTER_MAX)) {
+		zend_argument_value_error(2, "must be one of the IMG_FILTER_* filter constants");
+		RETURN_THROWS();
 	}
+	filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -3913,9 +3932,17 @@ PHP_FUNCTION(imagescale)
 		src_y = gdImageSY(im);
 
 		if (src_x && tmp_h < 0) {
+			if (tmp_w > (ZEND_LONG_MAX / src_y)) {
+				zend_argument_value_error(2, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_y));
+				RETURN_THROWS();
+			}
 			tmp_h = tmp_w * src_y / src_x;
 		}
 		if (src_y && tmp_w < 0) {
+			if (tmp_h > (ZEND_LONG_MAX / src_x)) {
+				zend_argument_value_error(3, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_x));
+				RETURN_THROWS();
+			}
 			tmp_w = tmp_h * src_x / src_y;
 		}
 	}
@@ -4282,7 +4309,7 @@ PHP_FUNCTION(imageresolution)
  *
  * Stream Handling
  * Formerly contained within ext/gd/gd_ctx.c and included
- * at the the top of this file
+ * at the top of this file
  *
  ********************************************************/
 
@@ -4370,7 +4397,7 @@ static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num) {
 			}
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
-			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
+			if (zend_str_has_nul_byte(Z_STR_P(to_zval))) {
 				zend_argument_type_error(arg_num, "must not contain null bytes");
 				return NULL;
 			}

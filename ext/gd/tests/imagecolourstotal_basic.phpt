@@ -22,15 +22,13 @@ var_dump( imagecolorstotal( $img ));
 $bg = imagecolorallocate( $img, 255, 0, 0 );
 $bg = imagecolorallocate( $img, 0, 0, 255 );
 var_dump( imagecolorstotal( $img ));
-imagedestroy( $img );
+$img = null;
 
 // Truecolor image
 $img = imagecreatetruecolor( 50, 50 );
 var_dump( imagecolorstotal( $img ) );
 $bg = imagecolorallocate( $img, 255, 255, 255 );
 var_dump( imagecolorstotal( $img ) );
-imagedestroy( $img );
-
 ?>
 --EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***

@@ -43,7 +43,6 @@ try {
 }
 
 curl_exec($ch);
-curl_close($ch);
 is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>

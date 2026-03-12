@@ -38,16 +38,10 @@
  */
 
 #ifndef URI_NORMALIZE_BASE_H
-#define URI_NORMALIZE_BASE_H 1
+#  define URI_NORMALIZE_BASE_H 1
 
-
-
-#include <uriparser/UriBase.h>
-
-
+#  include <uriparser/UriBase.h>
 
 UriBool uriIsUnreserved(int code);
-
-
 
 #endif /* URI_NORMALIZE_BASE_H */

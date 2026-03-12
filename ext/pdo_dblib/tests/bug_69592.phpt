@@ -1,5 +1,5 @@
 --TEST--
-PDO_DBLIB: PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS for skip junk resultsets on SET NOCOUNT expression
+PDO_DBLIB: Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS for skip junk resultsets on SET NOCOUNT expression
 --EXTENSIONS--
 pdo_dblib
 --SKIPIF--
@@ -18,7 +18,7 @@ $sql = '
     SELECT 0 AS [result]
 ';
 
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+var_dump($db->getAttribute(Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS));
 
 $stmt = $db->query($sql);
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -27,15 +27,15 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
 
-$db->setAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS, true);
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+$db->setAttribute(Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS, true);
+var_dump($db->getAttribute(Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS));
 
 $stmt = $db->query($sql);
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 var_dump($stmt->nextRowset());
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+var_dump($db->getAttribute(Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS));
 
 ?>
 --EXPECT--

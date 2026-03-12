@@ -180,6 +180,7 @@ typedef void (*zend_object_free_obj_t)(zend_object *object);
 typedef void (*zend_object_dtor_obj_t)(zend_object *object);
 
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
+typedef zend_object* (*zend_object_clone_obj_with_t)(zend_object *object, const zend_class_entry *scope, const HashTable *properties);
 
 /* Get class name for display in var_dump and other debugging functions.
  * Must be defined and must return a non-NULL value. */
@@ -209,6 +210,7 @@ struct _zend_object_handlers {
 	zend_object_free_obj_t					free_obj;             /* required */
 	zend_object_dtor_obj_t					dtor_obj;             /* required */
 	zend_object_clone_obj_t					clone_obj;            /* optional */
+	zend_object_clone_obj_with_t			clone_obj_with;       /* optional */
 	zend_object_read_property_t				read_property;        /* required */
 	zend_object_write_property_t			write_property;       /* required */
 	zend_object_read_dimension_t			read_dimension;       /* required */
@@ -246,7 +248,7 @@ extern const ZEND_API zend_object_handlers std_object_handlers;
 #define ZEND_PROPERTY_EXISTS    0x2          /* Property exists */
 
 ZEND_API void zend_class_init_statics(zend_class_entry *ce);
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
+ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
 ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
@@ -310,9 +312,7 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 
 ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
-ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static);
-
-ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(const zend_function *fbc, zend_string *method_name);
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
@@ -333,6 +333,8 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	zend_property_hook_kind kind, zend_string *prop_name);
 
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
+
+void zend_object_handlers_startup(void);
 
 #define zend_release_properties(ht) do { \
 	if (ht) { \

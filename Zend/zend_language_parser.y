@@ -212,7 +212,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(double)'"
+%token T_DOUBLE_CAST "'(float)'"
 %token T_STRING_CAST "'(string)'"
 %token T_ARRAY_CAST  "'(array)'"
 %token T_OBJECT_CAST "'(object)'"
@@ -379,7 +379,7 @@ attribute_group:
 ;
 
 attribute:
-		T_ATTRIBUTE attribute_group possible_comma ']'	{ $$ = $2; }
+		T_ATTRIBUTE backup_doc_comment attribute_group possible_comma ']'	{ $$ = $3; CG(doc_comment) = $2; }
 ;
 
 attributes:
@@ -713,15 +713,14 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE expr ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
-	|	case_list T_DEFAULT case_separator inner_statement_list
+	|	case_list T_CASE expr ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, $3, $5)); }
+	|	case_list T_DEFAULT ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
-;
-
-case_separator:
-		':'
-	|	';'
+	|	case_list T_DEFAULT ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, NULL, $4)); }
 ;
 
 
@@ -902,16 +901,15 @@ return_type:
 ;
 
 argument_list:
-		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+		'(' ')'	{ $$ = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
-	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
 ;
 
 non_empty_argument_list:
 		argument
-			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
+			{ $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $1); }
 	|	non_empty_argument_list ',' argument
-			{ $$ = zend_ast_list_add($1, $3); }
+			{ $$ = zend_ast_arg_list_add($1, $3); }
 ;
 
 /* `clone_argument_list` is necessary to resolve a parser ambiguity (shift-reduce conflict)
@@ -924,25 +922,31 @@ non_empty_argument_list:
  * syntax.
  */
 clone_argument_list:
-		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+		'(' ')'	{ $$ = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_clone_argument_list possible_comma ')' { $$ = $2; }
-	|	'(' expr ',' ')' { $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $2); }
-	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
+	|	'(' expr ',' ')' { $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $2); }
 ;
 
 non_empty_clone_argument_list:
 		expr ',' argument
-			{ $$ = zend_ast_create_list(2, ZEND_AST_ARG_LIST, $1, $3); }
+			{ $$ = zend_ast_create_arg_list(2, ZEND_AST_ARG_LIST, $1, $3); }
 	|	argument_no_expr
-			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
+			{ $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $1); }
 	|	non_empty_clone_argument_list ',' argument
-			{ $$ = zend_ast_list_add($1, $3); }
+			{ $$ = zend_ast_arg_list_add($1, $3); }
 ;
 
 argument_no_expr:
 		identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
-	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+	|	T_ELLIPSIS
+			{ $$ = zend_ast_create_ex(ZEND_AST_PLACEHOLDER_ARG, ZEND_PLACEHOLDER_VARIADIC); }
+	|	'?'
+			{ $$ = zend_ast_create(ZEND_AST_PLACEHOLDER_ARG); }
+	|	identifier ':' '?'
+			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, zend_ast_create(ZEND_AST_PLACEHOLDER_ARG)); }
+	|	T_ELLIPSIS expr
+			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
 argument:
@@ -1349,6 +1353,7 @@ expr:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
+			if ($$->kind == ZEND_AST_ARROW_FUNC) $$->attr = ZEND_PARENTHESIZED_ARROW_FUNC;
 		}
 	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }

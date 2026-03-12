@@ -9,7 +9,7 @@ $a = array( "1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "f
 var_dump ( extract($a, EXTR_PREFIX_ALL, "same"));
 
 $b = array( "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
-             "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 );
+             "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL);
 var_dump ( extract($b, EXTR_PREFIX_ALL, "same"));
 var_dump ( extract($b, EXTR_PREFIX_ALL, "diff"));
 

@@ -17,9 +17,15 @@
 
 #include <php.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
+#ifdef __cplusplus
+}
+#endif
 
 #include <unicode/uspoof.h>
 
@@ -47,10 +53,16 @@ static inline Spoofchecker_object *php_intl_spoofchecker_fetch_object(zend_objec
 #define SPOOFCHECKER_ERROR_CODE(co)   INTL_ERROR_CODE(SPOOFCHECKER_ERROR(co))
 #define SPOOFCHECKER_ERROR_CODE_P(co) &(INTL_ERROR_CODE(SPOOFCHECKER_ERROR(co)))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void spoofchecker_register_Spoofchecker_class(void);
 
 void spoofchecker_object_init(Spoofchecker_object* co);
 void spoofchecker_object_destroy(Spoofchecker_object* co);
+#ifdef __cplusplus
+}
+#endif
 
 extern zend_class_entry *Spoofchecker_ce_ptr;
 
@@ -73,7 +85,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 #define SPOOFCHECKER_CHECK_STATUS(co, msg)                                        \
     intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));           \
     if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {                                  \
-        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg, 0); \
+        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg); \
         RETURN_FALSE;                                                           \
     }                                                                           \
 

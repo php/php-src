@@ -2433,7 +2433,6 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, tmp) {
 		pheader = malloc(sizeof(sdlSoapBindingFunctionHeader));
-		memset(pheader, 0, sizeof(sdlSoapBindingFunctionHeader));
 		*pheader = *tmp;
 
 		if (pheader->name) {
@@ -2497,7 +2496,6 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(params, key, tmp) {
 		pparam = malloc(sizeof(sdlParam));
-		memset(pparam, 0, sizeof(sdlParam));
 		*pparam = *tmp;
 
 		if (pparam->paramName) {
@@ -2539,7 +2537,6 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(faults, key, tmp) {
 		pfault = malloc(sizeof(sdlFault));
-		memset(pfault, 0, sizeof(sdlFault));
 		*pfault = *tmp;
 
 		if (pfault->name) {
@@ -3157,8 +3154,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
-	bool has_proxy_authorization = 0;
-	bool has_authorization = 0;
+	bool has_proxy_authorization = false;
+	bool has_authorization = false;
 
 	ZVAL_UNDEF(&orig_context);
 	ZVAL_UNDEF(&new_context);
@@ -3312,7 +3309,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 	sdl = load_wsdl(this_ptr, uri);
 	if (sdl) {
-		sdl->is_persistent = 0;
+		sdl->is_persistent = false;
 	}
 
 	SOAP_GLOBAL(error_code) = old_error_code;
@@ -3359,7 +3356,7 @@ cache_in_memory:
 			}
 
 			psdl = make_persistent_sdl(sdl);
-			psdl->is_persistent = 1;
+			psdl->is_persistent = true;
 			p.time = t;
 			p.sdl = psdl;
 

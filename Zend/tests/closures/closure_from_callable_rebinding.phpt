@@ -17,4 +17,4 @@ $fn->call(new B);
 
 ?>
 --EXPECTF--
-Warning: Cannot bind method A::method() to object of class B in %s on line %d
+Warning: Cannot bind method A::method() to object of class B, this will be an error in PHP 9 in %s on line %d

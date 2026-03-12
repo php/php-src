@@ -59,7 +59,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"
@@ -1688,9 +1687,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -2040,6 +2037,8 @@ consult the installation file that came with this distribution, or visit \n\
 						 * fork loop any more
 						 */
 						parent = 0;
+
+						php_child_init();
 
 						/* don't catch our signals */
 						sigaction(SIGTERM, &old_term, 0);

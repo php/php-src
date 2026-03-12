@@ -4,6 +4,7 @@ Test SoapClient with excessively large QName prefix in SoapVar
 soap
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE != 8) die("skip: 64-bit only");
 ?>
 --INI--
@@ -18,6 +19,7 @@ class TestSoapClient extends SoapClient {
         $action,
         $version,
         $one_way = false,
+        ?string $uriParserClass = null,
     ): ?string {
         die($request);
     }

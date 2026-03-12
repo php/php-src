@@ -641,7 +641,7 @@ static int is_port_number(const char *bindpath)
 
 int fcgi_listen(const char *path, int backlog)
 {
-	char     *s;
+	const char *s;
 	int       tcp = 0;
 	char      host[MAXPATHLEN];
 	short     port = 0;
@@ -944,7 +944,7 @@ static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t coun
 	return n;
 }
 
-static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count)
+static inline ssize_t safe_read(fcgi_request *req, void *buf, size_t count)
 {
 	int    ret;
 	size_t n = 0;

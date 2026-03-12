@@ -2,6 +2,8 @@
 Test mb_ereg_replace() function : basic
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --SKIPIF--
 <?php
 function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
@@ -14,7 +16,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 
 echo "*** Testing mb_ereg_replace() : basic functionality ***\n";
 
-mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
 $string_ascii = 'abc def';

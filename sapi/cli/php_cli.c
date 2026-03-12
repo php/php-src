@@ -31,7 +31,6 @@
 #include "SAPI.h"
 
 #include <stdio.h>
-#include "php.h"
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
@@ -51,7 +50,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
@@ -115,7 +113,6 @@ PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 
 static const char HARDCODED_INI[] =
 	"html_errors=0\n"
-	"register_argc_argv=1\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"max_execution_time=0\n"

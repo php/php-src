@@ -71,7 +71,7 @@ U_CFUNC void calendar_object_construct(zval *object,
 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
 	assert(co->ucal == NULL);
-	co->ucal = (Calendar*)calendar;
+	co->ucal = calendar;
 }
 
 /* {{{ clone handler for Calendar */

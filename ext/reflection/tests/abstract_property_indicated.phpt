@@ -31,12 +31,12 @@ Class [ <user> <iterateable> abstract class Demo ] {
   }
 
   - Properties [2] {
-    Property [ abstract public $a ]
+    Property [ abstract public virtual $a { get; } ]
     Property [ public $b = NULL ]
   }
 
   - Methods [0] {
   }
 }
-Property [ abstract public $a ]
+Property [ abstract public virtual $a { get; } ]
 Property [ public $b = NULL ]

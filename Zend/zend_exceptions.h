@@ -41,14 +41,12 @@ extern ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
 extern ZEND_API zend_class_entry *zend_ce_request_parse_body_exception;
 
 ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *add_previous);
-ZEND_API void zend_exception_save(void);
-ZEND_API void zend_exception_restore(void);
 
 ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception);
 
 void zend_register_default_exception(void);
 
-ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object);
+ZEND_API zend_class_entry *zend_get_exception_base(const zend_object *object);
 
 ZEND_API void zend_register_default_classes(void);
 

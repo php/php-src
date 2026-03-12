@@ -21,32 +21,46 @@ $dom = new DOMDocument();
 $dom->loadXML($xml);
 $doc = $dom->documentElement->firstChild;
 
+$newDom = Dom\XMLDocument::createFromString($xml);
+$newDoc = $newDom->documentElement->firstChild;
+$counter = 0;
+
+function check($doc, $newDoc, ...$args) {
+  global $counter;
+  $counter++;
+  echo $doc->C14N(...$args)."\n\n";
+  if ($doc->C14N(...$args) !== $newDoc->C14N(...$args)) {
+    var_dump($doc->C14N(...$args), $newDoc->C14N(...$args));
+    throw new Error("mismatch: $counter");
+  }
+}
+
 /* inclusive/without comments first child element of doc element is context. */
-echo $doc->C14N()."\n\n";
+check($doc, $newDoc);
 
 /* exclusive/without comments first child element of doc element is context. */
-echo $doc->c14N(TRUE)."\n\n";
+check($doc, $newDoc, TRUE);
 
 /* inclusive/with comments first child element of doc element is context. */
-echo $doc->C14N(FALSE, TRUE)."\n\n";
+check($doc, $newDoc, FALSE, TRUE);
 
 /* exclusive/with comments first child element of doc element is context. */
-echo $doc->C14N(TRUE, TRUE)."\n\n";
+check($doc, $newDoc, TRUE, TRUE);
 
 /* exclusive/without comments using xpath query. */
-echo $doc->c14N(TRUE, FALSE, array('query'=>'(//. | //@* | //namespace::*)'))."\n\n";
+check($doc, $newDoc, TRUE, FALSE, array('query'=>'(//. | //@* | //namespace::*)'))."\n\n";
 
 /* exclusive/without comments first child element of doc element is context.
    using xpath query with registered namespace.
    test namespace prefix is also included. */
-echo $doc->c14N(TRUE, FALSE,
+check($doc, $newDoc, TRUE, FALSE,
                 array('query'=>'(//a:contain | //a:bar | .//namespace::*)',
                       'namespaces'=>array('a'=>'http://www.example.com/ns/foo')),
-                array('test'))."\n\n";
+                array('test'));
 
 /* exclusive/without comments first child element of doc element is context.
    test namespace prefix is also included */
-echo $doc->C14N(TRUE, FALSE, NULL, array('test'));
+check($doc, $newDoc, TRUE, FALSE, NULL, array('test'));
 ?>
 --EXPECT--
 <contain xmlns="http://www.example.com/ns/foo" xmlns:fubar="http://www.example.com/ns/fubar" xmlns:test="urn::test">

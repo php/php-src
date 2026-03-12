@@ -84,29 +84,50 @@ var_dump($diff < 1 || abs(1 - abs($diff)) < .05);
 var_dump(count($notify));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::pgsqlGetPid() is deprecated since 8.5, use Pdo\Pgsql::getPid() instead in %s on line %d
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(2)
 string(17) "channel_getnotify"
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(2)
 string(17) "channel_getnotify"
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(2)
 string(17) "channel_getnotify"
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(2)
 string(17) "channel_getnotify"
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(4)
 string(17) "channel_getnotify"
 bool(true)
 string(17) "channel_getnotify"
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(true)
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(true)
 int(2)

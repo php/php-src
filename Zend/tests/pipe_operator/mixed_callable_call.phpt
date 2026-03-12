@@ -71,7 +71,7 @@ $res1 = 1
     |> [StaticTest::class, 'times17']
     |> new Times23()
     |> $times29
-    |> fn($x) => times2($x)
+    |> (fn($x) => times2($x))
 ;
 
 var_dump($res1);

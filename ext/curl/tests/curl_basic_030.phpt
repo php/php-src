@@ -22,7 +22,6 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 var_dump(curl_setopt($ch, CURLOPT_CA_CACHE_TIMEOUT, 1));
 var_dump(curl_setopt($ch, CURLOPT_QUICK_EXIT, 1000));
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECT--
 bool(true)

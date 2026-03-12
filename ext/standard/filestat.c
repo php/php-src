@@ -749,7 +749,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	php_stream_wrapper *wrapper = NULL;
 
 	if (IS_ACCESS_CHECK(type)) {
-		if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+		if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
 			if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
 				php_error_docref(NULL, E_WARNING, "Filename contains null byte");
 			}
@@ -821,7 +821,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if (!wrapper) {
-			if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+			if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
 				if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
 					php_error_docref(NULL, E_WARNING, "Filename contains null byte");
 				}

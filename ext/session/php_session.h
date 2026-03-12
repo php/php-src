@@ -26,7 +26,7 @@
 #define PHP_SESSION_VERSION PHP_VERSION
 
 /* save handler macros */
-#define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
+#define PS_OPEN_ARGS     void **mod_data, zend_string *save_path, zend_string *session_name
 #define PS_CLOSE_ARGS    void **mod_data
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
 #define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
@@ -62,7 +62,7 @@ typedef struct ps_module_struct {
 #define PS_VALIDATE_SID_FUNC(x)	zend_result ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
 #define PS_UPDATE_TIMESTAMP_FUNC(x) 	zend_result ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
-/* Legacy save handler module definitions */
+/* Save handler module definitions without timestamp enabled */
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -70,32 +70,15 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x);	\
-	PS_CREATE_SID_FUNC(x)
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x);
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, php_session_create_id, \
-	 php_session_validate_sid, php_session_update_timestamp
-
-/* Legacy SID creation enabled save handler module definitions */
-#define PS_FUNCS_SID(x) \
-	PS_OPEN_FUNC(x); \
-	PS_CLOSE_FUNC(x); \
-	PS_READ_FUNC(x); \
-	PS_WRITE_FUNC(x); \
-	PS_DESTROY_FUNC(x); \
-	PS_GC_FUNC(x); \
-	PS_CREATE_SID_FUNC(x); \
-	PS_VALIDATE_SID_FUNC(x); \
-	PS_UPDATE_TIMESTAMP_FUNC(x);
-
-#define PS_MOD_SID(x) \
-	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
-	 php_session_validate_sid, php_session_update_timestamp
+	 ps_validate_sid_##x, NULL
 
-/* Update timestamp enabled save handler module definitions
-   New save handlers should use this API */
+/* Save handlers with timestamp enabled, it is recommended to use this API */
 #define PS_FUNCS_UPDATE_TIMESTAMP(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -149,10 +132,20 @@ typedef struct _php_ps_globals {
 	zend_string *cookie_samesite;
 	bool  cookie_secure;
 	bool  cookie_httponly;
+	bool  cookie_partitioned;
+	bool  use_cookies;
+	bool  use_only_cookies;
+	bool  send_cookie;
+	bool  auto_start;
+	bool  define_sid;
 	const ps_module *mod;
 	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
+	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	bool lazy_write; /* omit session write when it is possible */
+	bool in_save_handler; /* state if session is in save handler or not */
+	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_started_filename;
 	uint32_t session_started_lineno;
 	int module_number;
@@ -173,16 +166,8 @@ typedef struct _php_ps_globals {
 		zval ps_validate_sid;
 		zval ps_update_timestamp;
 	} mod_user_names;
-	zend_string *mod_user_class_name;
-	bool mod_user_implemented;
-	bool mod_user_is_open;
-	bool auto_start;
-	bool use_cookies;
-	bool use_only_cookies;
-	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
-	bool send_cookie;
-	bool define_sid;
 
+	zend_string *session_vars; /* serialized original session data */
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
 
@@ -197,11 +182,10 @@ typedef struct _php_ps_globals {
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
 	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
-	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	bool lazy_write; /* omit session write when it is possible */
-	bool in_save_handler; /* state if session is in save handler or not */
-	bool set_handler;     /* state if session module i setting handler or not */
-	zend_string *session_vars; /* serialized original session data */
+	bool mod_user_implemented;
+	bool mod_user_is_open;
+	bool mod_user_uses_object_methods_as_handlers;
+	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -248,8 +232,6 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
 PHPAPI zend_result php_session_validate_sid(PS_VALIDATE_SID_ARGS);
 PHPAPI zend_result php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
-PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len);
-
 PHPAPI zend_result php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
@@ -263,7 +245,7 @@ PHPAPI zend_result php_session_register_serializer(const char *name,
 	        zend_result (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
 PHPAPI zend_result php_session_start(void);
-PHPAPI zend_result php_session_flush(int write);
+PHPAPI bool php_session_flush(bool write);
 PHPAPI php_session_status php_get_session_status(void);
 
 PHPAPI const ps_module *_php_find_ps_module(const char *name);
@@ -272,38 +254,20 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 PHPAPI zend_result php_session_valid_key(const char *key);
 PHPAPI zend_result php_session_reset_id(void);
 
-#define PS_ADD_VARL(name) do {										\
-	php_add_session_var(name);							\
-} while (0)
-
-#define PS_ADD_VAR(name) PS_ADD_VARL(name)
-
-#define PS_DEL_VARL(name) do {										\
-	if (!Z_ISNULL(PS(http_session_vars))) {							\
-		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), name);		\
-	}																\
-} while (0)
-
-
-#define PS_ENCODE_VARS 												\
-	zend_string *key;												\
-	zend_ulong num_key;													\
-	zval *struc;
-
 /* Do not use a return statement in `code` because that may leak memory.
  * Break out of the loop instead. */
 #define PS_ENCODE_LOOP(code) do {									\
 	zval _zv;														\
 	/* protect against user interference */							\
 	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars)));				\
-	HashTable *_ht = Z_ARRVAL(_zv);									\
-	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
+	ZEND_HASH_FOREACH_KEY(Z_ARRVAL(_zv), zend_ulong num_key, zend_string * key) { \
 		if (key == NULL) {											\
 			php_error_docref(NULL, E_WARNING,						\
 					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
 			continue;												\
 		}															\
-		if ((struc = php_get_session_var(key))) {					\
+		zval *struc = php_get_session_var(key);						\
+		if (struc) {												\
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\

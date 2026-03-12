@@ -2,11 +2,11 @@
 IntlTimeZone::fromDateTimeZone(): basic test
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Lisbon
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Lisbon');
 
 $tz = IntlTimeZone::fromDateTimeZone(new DateTimeZone('Europe/Amsterdam'));
 var_dump($tz->getID(), $tz->getRawOffset());

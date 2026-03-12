@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit dir.stub.php instead.
  * Stub hash: e21d382cd4001001874c49d8c5244efb57613910 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
@@ -66,9 +66,9 @@ static zend_class_entry *register_class_Directory(void)
 
 	zval property_handle_default_value;
 	ZVAL_UNDEF(&property_handle_default_value);
-	zend_string *property_handle_name = zend_string_init("handle", sizeof("handle") - 1, 1);
+	zend_string *property_handle_name = zend_string_init("handle", sizeof("handle") - 1, true);
 	zend_declare_typed_property(class_entry, property_handle_name, &property_handle_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
-	zend_string_release(property_handle_name);
+	zend_string_release_ex(property_handle_name, true);
 
 	return class_entry;
 }

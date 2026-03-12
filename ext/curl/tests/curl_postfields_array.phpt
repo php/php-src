@@ -38,7 +38,6 @@ $ch = curl_init();
 curl_setopt_array($ch, $options);
 
 $curl_content = curl_exec($ch);
-curl_close($ch);
 	
 $conn = stream_socket_accept($socket);
 echo stream_get_contents($conn);

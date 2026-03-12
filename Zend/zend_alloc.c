@@ -317,7 +317,9 @@ struct _zend_mm_heap {
 		} debug;
 	};
 #endif
+#if ZEND_DEBUG
 	pid_t pid;
+#endif
 	zend_random_bytes_insecure_state rand_state;
 };
 
@@ -376,24 +378,6 @@ static const uint32_t bin_elements[] = {
 static const uint32_t bin_pages[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES, x, y)
 };
-
-#if ZEND_DEBUG
-ZEND_COLD void zend_debug_alloc_output(char *format, ...)
-{
-	char output_buf[256];
-	va_list args;
-
-	va_start(args, format);
-	vsprintf(output_buf, format, args);
-	va_end(args);
-
-#ifdef ZEND_WIN32
-	OutputDebugString(output_buf);
-#else
-	fprintf(stderr, "%s", output_buf);
-#endif
-}
-#endif
 
 static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 {
@@ -1310,13 +1294,18 @@ static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(const zend
 #endif
 }
 
-static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
+static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot_key(uintptr_t shadow_key, zend_mm_free_slot *slot)
 {
 #ifdef WORDS_BIGENDIAN
-	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->shadow_key);
+	return (zend_mm_free_slot*)((uintptr_t)slot ^ shadow_key);
 #else
-	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ heap->shadow_key));
+	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ shadow_key));
 #endif
+}
+
+static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
+{
+	return zend_mm_decode_free_slot_key(heap->shadow_key, slot);
 }
 
 static zend_always_inline void zend_mm_set_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot *slot, zend_mm_free_slot *next)
@@ -1491,7 +1480,6 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
 	if (UNEXPECTED(size < real_size)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
-		return NULL;
 	}
 #endif
 	if (EXPECTED(size <= ZEND_MM_MAX_SMALL_SIZE)) {
@@ -2027,6 +2015,34 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 	zend_mm_refresh_key(heap);
 }
 
+ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
+{
+	uintptr_t old_key = heap->shadow_key;
+
+	zend_mm_init_key(heap);
+
+	/* Update shadow pointers with new key */
+	for (int i = 0; i < ZEND_MM_BINS; i++) {
+		zend_mm_free_slot *slot = heap->free_slot[i];
+		if (!slot) {
+			continue;
+		}
+		zend_mm_free_slot *next;
+		while ((next = slot->next_free_slot)) {
+			zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, i);
+			if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow))) {
+				zend_mm_panic("zend_mm_heap corrupted");
+			}
+			zend_mm_set_next_free_slot(heap, i, slot, next);
+			slot = next;
+		}
+	}
+
+#if ZEND_DEBUG
+	heap->pid = getpid();
+#endif
+}
+
 static zend_mm_heap *zend_mm_init(void)
 {
 	zend_mm_chunk *chunk = (zend_mm_chunk*)zend_mm_chunk_alloc_int(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
@@ -2075,7 +2091,9 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->storage = NULL;
 #endif
 	heap->huge_list = NULL;
+#if ZEND_DEBUG
 	heap->pid = getpid();
+#endif
 	return heap;
 }
 
@@ -2535,13 +2553,12 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		p->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 		p->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 
-		pid_t pid = getpid();
-		if (heap->pid != pid) {
-			zend_mm_init_key(heap);
-			heap->pid = pid;
-		} else {
-			zend_mm_refresh_key(heap);
-		}
+#if ZEND_DEBUG
+		ZEND_ASSERT(getpid() == heap->pid
+				&& "heap was re-used without calling zend_mm_refresh_key_child() after a fork");
+#endif
+
+		zend_mm_refresh_key(heap);
 	}
 }
 
@@ -2609,7 +2626,7 @@ ZEND_API bool is_zend_mm(void)
 #if ZEND_MM_CUSTOM
 	return !AG(mm_heap)->use_custom_heap;
 #else
-	return 1;
+	return true;
 #endif
 }
 
@@ -2947,6 +2964,11 @@ ZEND_API void zend_memory_reset_peak_usage(void)
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
+}
+
+ZEND_API void refresh_memory_manager(void)
+{
+	zend_mm_refresh_key_child(AG(mm_heap));
 }
 
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
@@ -3443,12 +3465,14 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size)
 {
 #if ZEND_MM_STORAGE
-	zend_mm_storage tmp_storage, *storage;
+	zend_mm_storage *storage;
+	zend_mm_storage tmp_storage = {
+		.handlers = *handlers,
+		.data = data,
+	};
 	zend_mm_chunk *chunk;
 	zend_mm_heap *heap;
 
-	memcpy((zend_mm_handlers*)&tmp_storage.handlers, handlers, sizeof(zend_mm_handlers));
-	tmp_storage.data = data;
 	chunk = (zend_mm_chunk*)handlers->chunk_alloc(&tmp_storage, ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(chunk == NULL)) {
 #if ZEND_MM_ERROR
@@ -3506,7 +3530,9 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 		memcpy(storage->data, data, data_size);
 	}
 	heap->storage = storage;
+#if ZEND_DEBUG
 	heap->pid = getpid();
+#endif
 	return heap;
 #else
 	return NULL;

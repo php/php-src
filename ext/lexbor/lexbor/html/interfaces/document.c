@@ -33,12 +33,19 @@ static lexbor_action_t
 lxb_html_document_title_walker(lxb_dom_node_t *node, void *ctx);
 
 
+lxb_inline lxb_dom_interface_t *
+lxb_html_document_interface_create_wrapper(lxb_dom_document_t *document,
+                                           lxb_tag_id_t tag_id, lxb_ns_id_t ns)
+{
+    return lxb_html_interface_create(lxb_html_interface_document(document),
+                                     tag_id, ns);
+}
+
 lxb_html_document_t *
 lxb_html_document_interface_create(lxb_html_document_t *document)
 {
     lxb_status_t status;
     lxb_dom_document_t *doc;
-    lxb_dom_interface_create_f icreator;
 
     if (document != NULL) {
         doc = lexbor_mraw_calloc(lxb_html_document_mraw(document),
@@ -52,10 +59,9 @@ lxb_html_document_interface_create(lxb_html_document_t *document)
         return NULL;
     }
 
-    icreator = (lxb_dom_interface_create_f) lxb_html_interface_create;
-
     status = lxb_dom_document_init(doc, lxb_dom_interface_document(document),
-                                   icreator, lxb_html_interface_clone,
+                                   lxb_html_document_interface_create_wrapper,
+                                   lxb_html_interface_clone,
                                    lxb_html_interface_destroy,
                                    LXB_DOM_DOCUMENT_DTYPE_HTML, LXB_NS_HTML);
     if (status != LXB_STATUS_OK) {

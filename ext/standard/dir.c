@@ -160,6 +160,8 @@ PHP_FUNCTION(dir)
 static php_stream* php_dir_get_directory_stream_from_user_arg(php_stream *dir_stream)
 {
 	if (dir_stream == NULL) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Passing null is deprecated, instead the last opened directory stream should be provided");
 		if (UNEXPECTED(DIRG(default_dir) == NULL)) {
 			zend_type_error("No resource supplied");
 			return NULL;
@@ -398,13 +400,34 @@ PHP_FUNCTION(getcwd)
 /* }}} */
 
 /* {{{ Find pathnames matching a pattern */
+#if defined(ZTS) && defined(PHP_GLOB_ALTDIRFUNC)
+static void *php_glob_opendir_wrapper(const char *path)
+{
+	return VCWD_OPENDIR(path);
+}
+
+static void php_glob_closedir_wrapper(void *dir)
+{
+	(void) closedir(dir);
+}
+
+static int php_glob_lstat_wrapper(const char *buf, zend_stat_t *sb)
+{
+	return VCWD_LSTAT(buf, sb);
+}
+
+static int php_glob_stat_wrapper(const char *buf, zend_stat_t *sb)
+{
+	return VCWD_STAT(buf, sb);
+}
+#endif
+
 PHP_FUNCTION(glob)
 {
 	size_t cwd_skip = 0;
-#ifdef ZTS
+#if defined(ZTS) && !defined(PHP_GLOB_ALTDIRFUNC)
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
-	char *result;
 #endif
 	char *pattern = NULL;
 	size_t pattern_len;
@@ -431,28 +454,45 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
+	memset(&globbuf, 0, sizeof(globbuf));
+
+	int passed_glob_flags = flags & PHP_GLOB_FLAGMASK;
+
 #ifdef ZTS
 	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
-		result = VCWD_GETCWD(cwd, MAXPATHLEN);
+		/* System glob uses the current work directory which is not thread safe.
+		 * The first fix is to override the functions used to open/read/... paths
+		 * with the VCWD ones used in PHP.
+		 * If that functionality is unavailable for whatever reason, fall back
+		 * to prepending the current working directory to the passed path.
+		 * However, that comes with limitations regarding meta characters
+		 * that is not solvable in general (GH-13204). */
+# ifdef PHP_GLOB_ALTDIRFUNC
+		globbuf.gl_opendir = php_glob_opendir_wrapper;
+		globbuf.gl_readdir = (struct dirent *(*)(void *)) readdir;
+		globbuf.gl_closedir = php_glob_closedir_wrapper;
+		globbuf.gl_lstat = php_glob_lstat_wrapper;
+		globbuf.gl_stat = php_glob_stat_wrapper;
+		passed_glob_flags |= PHP_GLOB_ALTDIRFUNC;
+# else
+		char *result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';
 		}
-#ifdef PHP_WIN32
+#  ifdef PHP_WIN32
 		if (IS_SLASH(*pattern)) {
 			cwd[2] = '\0';
 		}
-#endif
+#  endif
 		cwd_skip = strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
+# endif
 	}
 #endif
 
-
-	memset(&globbuf, 0, sizeof(globbuf));
-	globbuf.gl_offs = 0;
-	if (0 != (ret = php_glob(pattern, flags & PHP_GLOB_FLAGMASK, NULL, &globbuf))) {
+	if (0 != (ret = php_glob(pattern, passed_glob_flags, NULL, &globbuf))) {
 #ifdef PHP_GLOB_NOMATCH
 		if (PHP_GLOB_NOMATCH == ret) {
 			/* Some glob implementation simply return no data if no matches
@@ -474,8 +514,7 @@ PHP_FUNCTION(glob)
 #ifdef PHP_GLOB_NOMATCH
 no_results:
 #endif
-		array_init(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	array_init(return_value);
@@ -557,11 +596,15 @@ PHP_FUNCTION(scandir)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, n);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	for (i = 0; i < n; i++) {
-		add_next_index_str(return_value, namelist[i]);
-	}
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		for (i = 0; i < n; i++) {
+			ZEND_HASH_FILL_SET_STR(namelist[i]);
+			ZEND_HASH_FILL_NEXT();
+		}
+	} ZEND_HASH_FILL_END();
 
 	if (n) {
 		efree(namelist);

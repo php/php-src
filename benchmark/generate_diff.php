@@ -62,7 +62,7 @@ function formatDiff(?int $baseInstructions, int $headInstructions): string {
 }
 
 function find_benchmarked_commit_hash(string $repo, string $commitHash): ?string {
-    $repeat = 10;
+    $repeat = 100;
 
     while (true) {
         if ($repeat-- <= 0) {

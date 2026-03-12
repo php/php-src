@@ -36,7 +36,6 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-xml_parser_free($parser);
 
 ?>
 --EXPECT--

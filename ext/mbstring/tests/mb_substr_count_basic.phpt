@@ -4,9 +4,6 @@ Test mb_substr_count() function : basic functionality
 mbstring
 --FILE--
 <?php
-/*
- * Test Basic functionality of mb_substr_count
- */
 
 echo "*** Testing mb_substr_count() : basic functionality ***\n";
 

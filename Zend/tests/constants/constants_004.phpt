@@ -10,4 +10,4 @@ const foo = 2;
 
 ?>
 --EXPECTF--
-Warning: Constant foo\foo already defined in %s on line %d
+Warning: Constant foo\foo already defined, this will be an error in PHP 9 in %s on line %d

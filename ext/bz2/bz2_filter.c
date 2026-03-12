@@ -337,12 +337,14 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			zval *tmpzval = NULL;
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated")-1))) {
+				HashTable *ht = HASH_OF(filterparams);
+
+				if ((tmpzval = zend_hash_str_find_ind(ht, "concatenated", sizeof("concatenated")-1))) {
 					data->expect_concatenated = zend_is_true(tmpzval);
 					tmpzval = NULL;
 				}
 
-				tmpzval = zend_hash_str_find(HASH_OF(filterparams), "small", sizeof("small")-1);
+				tmpzval = zend_hash_str_find_ind(ht, "small", sizeof("small")-1);
 			} else {
 				tmpzval = filterparams;
 			}
@@ -362,7 +364,9 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			zval *tmpzval;
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "blocks", sizeof("blocks")-1))) {
+				HashTable *ht = HASH_OF(filterparams);
+
+				if ((tmpzval = zend_hash_str_find_ind(ht, "blocks", sizeof("blocks")-1))) {
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zend_long blocks = zval_get_long(tmpzval);
 					if (blocks < 1 || blocks > 9) {
@@ -372,7 +376,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					}
 				}
 
-				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "work", sizeof("work")-1))) {
+				if ((tmpzval = zend_hash_str_find_ind(ht, "work", sizeof("work")-1))) {
 					/* Work Factor (0 - 250) */
 					zend_long work = zval_get_long(tmpzval);
 					if (work < 0 || work > 250) {

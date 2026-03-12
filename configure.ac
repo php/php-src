@@ -6,7 +6,13 @@ dnl ----------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
+
 m4_include([build/libtool.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
+m4_include([build/lt~obsolete.m4])
+
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
@@ -17,8 +23,9 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.5.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.6.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
+AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
@@ -128,6 +135,17 @@ AS_VAR_IF([cross_compiling], [yes],
     AC_MSG_RESULT([$BUILD_CC])],
   [BUILD_CC=$CC])
 
+dnl The macro AC_PROG_CC_C99 sets the shell variable ac_cv_prog_cc_c99 to 'no'
+dnl if the compiler does not support C99.i.e. does not support any of _Bool,
+dnl flexible arrays, inline, long long int, mixed code and declarations,
+dnl named initialization of structs, restrict, varargs macros, variable
+dnl declarations in for loops and variable length arrays.
+dnl
+dnl https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/C-Compiler.html
+if test "$ac_cv_prog_cc_c99" = no; then
+  AC_MSG_ERROR([C compiler would not accept C99 code])
+fi
+
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
@@ -148,9 +166,9 @@ PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs.
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3], [--no-generation-date])
-dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 7.4.
-PHP_PROG_PHP([7.4])
+PHP_PROG_RE2C([1.0.3], [--no-generation-date -W])
+dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 8.1.
+PHP_PROG_PHP([8.1])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto extension with re2c],
@@ -206,7 +224,12 @@ dnl supports it. This can help reduce the binary size and startup time.
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
                        [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
+dnl to disable executable stack on haiku due
+dnl to missing elf .note.GNU-stack part
 case $host_alias in
+  *haiku*)
+    LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+    ;;
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
@@ -222,8 +245,8 @@ dnl the performance hit from the lost register.
 AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
 case $host_alias in
   i?86-*-linux*|i?86-*-freebsd*)
-    if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
-      with_pic=no
+    if test "${enable_pic+set}" != "set" || test "$enable_pic" = "no"; then
+      enable_pic=no
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])
@@ -234,15 +257,10 @@ case $host_alias in
     ;;
 esac
 
-dnl Detect musl libc
-AC_MSG_CHECKING([whether we are using musl libc])
-if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1
-then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])
-else
-  AC_MSG_RESULT([no])
-fi
+dnl Detect C library.
+PHP_C_STANDARD_LIBRARY
+AS_VAR_IF([php_cv_c_standard_library], [musl],
+  [AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])])
 
 dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
 dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
@@ -493,11 +511,11 @@ AS_VAR_IF([php_cv_have_alignof], [yes],
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
-if test "$(uname -s 2>/dev/null)" != "QNX"; then
-  AC_STRUCT_ST_BLOCKS
-fi
+AC_CHECK_MEMBERS(m4_normalize([
+  struct stat.st_blksize,
+  struct stat.st_blocks,
+  struct stat.st_rdev
+]))
 
 dnl Checks for types.
 AC_TYPE_UID_T
@@ -1110,7 +1128,7 @@ case $php_sapi_module in
     if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
       enable_static=no
     fi
-    case $with_pic in
+    case $enable_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
         ;;
@@ -1575,20 +1593,7 @@ dnl
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART([Configuring libtool])
 
-dnl Silence warning: "ar: 'u' modifier ignored since 'D' is the default".
-dnl See https://github.com/php/php-src/pull/3017
-AC_SUBST([AR_FLAGS], [cr])
-
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
-dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
-dnl compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
-AC_PROG_LIBTOOL
+LT_INIT
 
 PHP_SET_LIBTOOL_VARIABLE([--silent])
 
@@ -1727,6 +1732,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_ast.c
     zend_atomic.c
     zend_attributes.c
+    zend_autoload.c
     zend_builtin_functions.c
     zend_call_stack.c
     zend_closures.c

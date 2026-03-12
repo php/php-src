@@ -324,17 +324,16 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 	array_init(return_value);
 
 	/* members */
-	ZVAL_ARR(&t, zend_std_get_properties(&engine->std));
-	Z_TRY_ADDREF(t);
+	ZVAL_EMPTY_ARRAY(&t);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 
 	/* state */
 	array_init(&t);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 	if (!engine->engine.algo->serialize(engine->engine.state, Z_ARRVAL(t))) {
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 }
 /* }}} */
 

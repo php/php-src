@@ -30,6 +30,11 @@ echo 'Done' . PHP_EOL;
   <!-- init PDO::__construct() -->
   <PDO::__construct>
   </PDO::__construct>
+  <!-- init Deprecated::__construct() -->
+  <Deprecated::__construct>
+  </Deprecated::__construct>
+
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
   <!-- init PDO::sqliteCreateFunction() -->
   <PDO::sqliteCreateFunction>
   </PDO::sqliteCreateFunction>

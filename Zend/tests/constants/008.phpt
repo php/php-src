@@ -27,13 +27,13 @@ echo "Done\n";
 --EXPECTF--
 TypeError: define(): Argument #1 ($constant_name) must be of type string, array given
 
-Warning: Constant TRUE already defined in %s on line %d
+Warning: Constant TRUE already defined, this will be an error in PHP 9 in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
-Warning: Constant test const already defined in %s on line %d
+Warning: Constant test const already defined, this will be an error in PHP 9 in %s on line %d
 bool(false)
 bool(true)
 bool(true)

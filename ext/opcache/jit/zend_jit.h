@@ -64,15 +64,16 @@
 #define ZEND_JIT_DEBUG_SIZE      (1<<9)
 #define ZEND_JIT_DEBUG_ASM_ADDR  (1<<10)
 
-#define ZEND_JIT_DEBUG_TRACE_START     (1<<12)
-#define ZEND_JIT_DEBUG_TRACE_STOP      (1<<13)
-#define ZEND_JIT_DEBUG_TRACE_COMPILED  (1<<14)
-#define ZEND_JIT_DEBUG_TRACE_EXIT      (1<<15)
-#define ZEND_JIT_DEBUG_TRACE_ABORT     (1<<16)
-#define ZEND_JIT_DEBUG_TRACE_BLACKLIST (1<<17)
-#define ZEND_JIT_DEBUG_TRACE_BYTECODE  (1<<18)
-#define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
-#define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
+#define ZEND_JIT_DEBUG_TRACE_START          (1<<12)
+#define ZEND_JIT_DEBUG_TRACE_STOP           (1<<13)
+#define ZEND_JIT_DEBUG_TRACE_COMPILED       (1<<14)
+#define ZEND_JIT_DEBUG_TRACE_EXIT           (1<<15)
+#define ZEND_JIT_DEBUG_TRACE_ABORT          (1<<16)
+#define ZEND_JIT_DEBUG_TRACE_BLACKLIST      (1<<17)
+#define ZEND_JIT_DEBUG_TRACE_BYTECODE       (1<<18)
+#define ZEND_JIT_DEBUG_TRACE_TSSA           (1<<19)
+#define ZEND_JIT_DEBUG_TRACE_EXIT_INFO      (1<<20)
+#define ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC  (1<<21)
 
 #define ZEND_JIT_DEBUG_IR_SRC            (1<<24)
 #define ZEND_JIT_DEBUG_IR_FINAL          (1<<25)
@@ -145,8 +146,9 @@ typedef struct _zend_jit_globals {
 } zend_jit_globals;
 
 #ifdef ZTS
-# define JIT_G(v) ZEND_TSRMG(jit_globals_id, zend_jit_globals *, v)
+# define JIT_G(v) ZEND_TSRMG_FAST(jit_globals_offset, zend_jit_globals *, v)
 extern int jit_globals_id;
+extern size_t jit_globals_offset;
 #else
 # define JIT_G(v) (jit_globals.v)
 extern zend_jit_globals jit_globals;

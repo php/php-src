@@ -2,12 +2,11 @@
 IntlCalendar::add() basic test
 --INI--
 date.timezone=Atlantic/Azores
+intl.default_locale=nl
 --EXTENSIONS--
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $time = strtotime('2012-02-29 00:00:00 +0000');
 $time2 = strtotime('2012-03-01 05:06:07 +0000');
@@ -26,4 +25,4 @@ var_dump(
 ?>
 --EXPECT--
 float(1330578367000)
-float(1330578367000)
+float(1330578367000)

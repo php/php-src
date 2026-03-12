@@ -49,12 +49,12 @@
 .type	make_fcontext, @function
 
 #define ARG_OFFSET         0
-#define GR_OFFSET	   16
-#define R14_OFFSET	   88
-#define FP_OFFSET	   96
-#define FPC_OFFSET	   160
-#define PC_OFFSET	   168
-#define CONTEXT_SIZE	   176
+#define GR_OFFSET          16
+#define R14_OFFSET         88
+#define FP_OFFSET          96
+#define FPC_OFFSET         160
+#define PC_OFFSET          168
+#define CONTEXT_SIZE       176
 
 /*
 
@@ -72,7 +72,7 @@ r4 - The address of the context function
 make_fcontext:
 	.machine "z10"
 	/* Align the stack to an 8 byte boundary.  */
-	nill    %r2,0xfff0
+	nill    %r2,0xfff8
 
 	/* Allocate stack space for the context.  */
 	aghi	%r2,-CONTEXT_SIZE
