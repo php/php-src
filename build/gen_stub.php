@@ -78,7 +78,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $stubHash = computeStubHash($stubCode);
             $oldStubHash = extractStubHash($arginfoFile);
             if ($stubHash === $oldStubHash && !$context->forceParse) {
-                /* Stub file did not change, do not regenerate. */
+                /* Stub file did not change, do not regenerate, but update the timestamp */
+                touch($arginfoFile);
                 return null;
             }
         }
