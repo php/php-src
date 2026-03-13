@@ -3179,9 +3179,9 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out != NULL) {
 		if (!notext && !X509_REQ_print(bio_out, csr)) {
+			/* TODO: warn? */
 			php_openssl_store_errors();
-		}
-		if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
+		} else if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
 			php_error_docref(NULL, E_WARNING, "Error writing PEM to file %s", file_path);
 			php_openssl_store_errors();
 		} else {
@@ -3230,9 +3230,7 @@ PHP_FUNCTION(openssl_csr_export)
 	bio_out = BIO_new(BIO_s_mem());
 	if (!notext && !X509_REQ_print(bio_out, csr)) {
 		php_openssl_store_errors();
-	}
-
-	if (PEM_write_bio_X509_REQ(bio_out, csr)) {
+	} else if (PEM_write_bio_X509_REQ(bio_out, csr)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
