@@ -2855,7 +2855,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_X509(bio_out, cert)) {
+			if (bio_out && PEM_write_bio_X509(bio_out, cert)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
@@ -2868,7 +2868,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (pkey) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
+			if (bio_out && PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zpkey, bio_buf->data, bio_buf->length);
@@ -2889,7 +2889,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				if (!aCA) break;
 
 				bio_out = BIO_new(BIO_s_mem());
-				if (PEM_write_bio_X509(bio_out, aCA)) {
+				if (bio_out && PEM_write_bio_X509(bio_out, aCA)) {
 					BUF_MEM *bio_buf;
 					BIO_get_mem_ptr(bio_out, &bio_buf);
 					ZVAL_STRINGL(&zextracert, bio_buf->data, bio_buf->length);
