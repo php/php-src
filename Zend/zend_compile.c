@@ -8917,6 +8917,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 		if ((op_array->fn_flags & ZEND_ACC_STATIC)
 		 && !op_array->static_variables
+		 /* Don't cache closures in main, as those would leak without a proper
+		  * cleanup mechanism. */
+		 && declaring_op_array->function_name
 		 && declaring_op_array->last) {
 			zend_op *declare_lambda_op = &declaring_op_array->opcodes[declaring_op_array->last - 1];
 			if (declare_lambda_op->opcode == ZEND_DECLARE_LAMBDA_FUNCTION) {
