@@ -8,7 +8,7 @@ class Foo {
     public $x;
 
     public function __construct() {
-        $this->x = function () { $this; };
+        $this->x = function () { return $this; };
     }
 }
 
@@ -17,7 +17,7 @@ class Bar {
 
     public function __construct() {
         $self = $this;
-        $this->x = function() use ($self) { $this; };
+        $this->x = function() use ($self) { return $this; };
     }
 }
 
