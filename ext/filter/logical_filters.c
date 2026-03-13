@@ -1143,7 +1143,7 @@ static size_t php_utf8_strlen(const unsigned char *str, size_t str_len)
 }
 
 
-zend_result php_filter_validate_str(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_strlen(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
     int min_len_set, max_len_set;
     zval *option_val;

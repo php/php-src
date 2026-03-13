@@ -27,8 +27,8 @@ FILTER_VALIDATE_STR: Unicode maximal subpart validation (Table 3-11 reference)
 $options1 = ['options' => ['min_range' => 2, 'max_range' => 2]];
 $options2 = ['options' => ['max_range' => 5]];
 
-echo bin2hex(filter_var("a\x80", FILTER_VALIDATE_STR, $options1)), "\n";
-echo bin2hex(filter_var("\xE1\x80\xE2\xF0\x91\x92\xF1\xBF\x41", FILTER_VALIDATE_STR, $options2)), "\n";
+echo bin2hex(filter_var("a\x80", FILTER_VALIDATE_STRLEN, $options1)), "\n";
+echo bin2hex(filter_var("\xE1\x80\xE2\xF0\x91\x92\xF1\xBF\x41", FILTER_VALIDATE_STRLEN, $options2)), "\n";
 ?>
 --EXPECT--
 6180

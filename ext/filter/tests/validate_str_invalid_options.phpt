@@ -4,17 +4,17 @@ FILTER_VALIDATE_STR: invalid min_len/max_len options
 <?php
 
 echo "--- min_len negative ---\n";
-var_dump(filter_var("abc", FILTER_VALIDATE_STR, [
+var_dump(filter_var("abc", FILTER_VALIDATE_STRLEN, [
     "options" => ["min_len" => -1]
 ]));
 
 echo "--- max_len negative ---\n";
-var_dump(filter_var("abc", FILTER_VALIDATE_STR, [
+var_dump(filter_var("abc", FILTER_VALIDATE_STRLEN, [
     "options" => ["max_len" => -1]
 ]));
 
 echo "--- min_len greater than max_len ---\n";
-var_dump(filter_var("abc", FILTER_VALIDATE_STR, [
+var_dump(filter_var("abc", FILTER_VALIDATE_STRLEN, [
     "options" => [
         "min_len" => 10,
         "max_len" => 5

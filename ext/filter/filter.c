@@ -50,7 +50,7 @@ static const filter_list_entry filter_list[] = {
 	{ "validate_email",  FILTER_VALIDATE_EMAIL,         php_filter_validate_email  },
 	{ "validate_ip",     FILTER_VALIDATE_IP,            php_filter_validate_ip     },
 	{ "validate_mac",    FILTER_VALIDATE_MAC,           php_filter_validate_mac    },
-	{ "validate_str",    FILTER_VALIDATE_STR,           php_filter_validate_str    },
+	{ "validate_strlen", FILTER_VALIDATE_STRLEN,        php_filter_validate_strlen },
 
 	{ "string",          FILTER_SANITIZE_STRING,        php_filter_string          },
 	{ "stripped",        FILTER_SANITIZE_STRING,        php_filter_string          },
