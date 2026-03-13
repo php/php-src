@@ -1535,7 +1535,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 				add_index_bool(return_value, i, 0);
 			}
 		}
-		if (onig_number_of_names(MBREX(search_re)) > 0) {
+		if (MBREX(search_re) != NULL && onig_number_of_names(MBREX(search_re)) > 0) {
 			mb_regex_groups_iter_args args = {
 				return_value,
 				Z_STRVAL(MBREX(search_str)),
