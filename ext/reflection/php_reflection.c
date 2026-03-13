@@ -875,7 +875,7 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
-	smart_str_appendl(str, indent, strlen(indent));
+	smart_str_appends(str, indent);
 	smart_str_appends(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
 	smart_str_appends(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
