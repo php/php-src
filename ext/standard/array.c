@@ -1170,7 +1170,15 @@ PHP_FUNCTION(key)
 
 static int php_data_compare(const void *f, const void *s) /* {{{ */
 {
-	return zend_compare((zval*)f, (zval*)s);
+	zval *zf = (zval*)f;
+	zval *zs = (zval*)s;
+
+	int result = zend_compare(zf, zs);
+	if (UNEXPECTED(result == 0 && Z_TYPE_P(zf) == IS_DOUBLE && Z_TYPE_P(zs) == IS_DOUBLE)) {
+		return signbit(Z_DVAL_P(zs)) - signbit(Z_DVAL_P(zf));
+	}
+
+	return result;
 }
 /* }}} */
 
@@ -1235,7 +1243,7 @@ PHP_FUNCTION(min)
 			for (i = 1; i < argc; i++) {
 				if (EXPECTED(Z_TYPE(args[i]) == IS_DOUBLE)) {
 					double_compare:
-					if (min_dval > Z_DVAL(args[i])) {
+					if (min_dval > Z_DVAL(args[i]) || UNEXPECTED(signbit(Z_DVAL(args[i])) > signbit(min_dval))) {
 						min_dval = Z_DVAL(args[i]);
 						min = &args[i];
 					}
@@ -1270,7 +1278,7 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 	Z_FLF_PARAM_ZVAL(1, lhs);
 	Z_FLF_PARAM_ZVAL(2, rhs);
 
-	double lhs_dval;
+	double lhs_dval, rhs_dval;
 
 	if (Z_TYPE_P(lhs) == IS_LONG) {
 		zend_long lhs_lval = Z_LVAL_P(lhs);
@@ -1289,10 +1297,13 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
-			RETURN_COPY_VALUE(lhs_dval < Z_DVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = Z_DVAL_P(rhs);
+double_compare2:
+			RETURN_COPY_VALUE(lhs_dval < rhs_dval || UNEXPECTED(signbit(lhs_dval) > signbit(rhs_dval)) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
-			RETURN_COPY_VALUE(lhs_dval < (double)Z_LVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = (double)Z_LVAL_P(rhs);
+			goto double_compare2;
 		} else {
 			goto generic_compare;
 		}
@@ -1363,7 +1374,7 @@ PHP_FUNCTION(max)
 			for (i = 1; i < argc; i++) {
 				if (EXPECTED(Z_TYPE(args[i]) == IS_DOUBLE)) {
 					double_compare:
-					if (max_dval < Z_DVAL(args[i])) {
+					if (max_dval < Z_DVAL(args[i]) || UNEXPECTED(signbit(Z_DVAL(args[i])) < signbit(max_dval))) {
 						max_dval = Z_DVAL(args[i]);
 						max = &args[i];
 					}
@@ -1398,7 +1409,7 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 	Z_FLF_PARAM_ZVAL(1, lhs);
 	Z_FLF_PARAM_ZVAL(2, rhs);
 
-	double lhs_dval;
+	double lhs_dval, rhs_dval;
 
 	if (Z_TYPE_P(lhs) == IS_LONG) {
 		zend_long lhs_lval = Z_LVAL_P(lhs);
@@ -1417,10 +1428,13 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
-			RETURN_COPY_VALUE(lhs_dval >= Z_DVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = Z_DVAL_P(rhs);
+double_compare2:
+			RETURN_COPY_VALUE(lhs_dval > rhs_dval || UNEXPECTED(signbit(lhs_dval) < signbit(rhs_dval)) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
-			RETURN_COPY_VALUE(lhs_dval >= (double)Z_LVAL_P(rhs) ? lhs : rhs);
+			rhs_dval = (double)Z_LVAL_P(rhs);
+			goto double_compare2;
 		} else {
 			goto generic_compare;
 		}
