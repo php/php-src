@@ -1872,8 +1872,7 @@ PHP_FUNCTION(openssl_x509_export)
 	}
 	if (!notext && !X509_print(bio_out, cert)) {
 		php_openssl_store_errors();
-	}
-	if (PEM_write_bio_X509(bio_out, cert)) {
+	} else if (PEM_write_bio_X509(bio_out, cert)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
