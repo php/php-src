@@ -3381,7 +3381,10 @@ PHP_FUNCTION(openssl_csr_sign)
 		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
 	}
 
-	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
+	if (!X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr))) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 
 	if (cert == NULL) {
 		cert = new_cert;
