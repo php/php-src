@@ -904,6 +904,9 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
 		smart_str_appends(str, ", ctor");
 	}
+	if ((fptr->common.fn_flags & ZEND_ACC_STATIC) && (fptr->common.fn_flags2 & ZEND_ACC2_INFERRED_STATIC)) {
+		smart_str_appends(str, ", inferred static");
+	}
 	smart_str_appends(str, "> ");
 
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
@@ -912,7 +915,9 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->common.fn_flags & ZEND_ACC_FINAL) {
 		smart_str_appends(str, "final ");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_STATIC) {
+	if ((fptr->common.fn_flags & ZEND_ACC_STATIC)
+	 /* Don't show static twice for static-inferred functions. */
+	 && !(fptr->common.fn_flags2 & ZEND_ACC2_INFERRED_STATIC)) {
 		smart_str_appends(str, "static ");
 	}
 
