@@ -887,10 +887,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(ZSTR_VAL(str_key), ZSTR_VAL(resource_from->path)+1, from_len) == 0 &&
 				IS_SLASH(ZSTR_VAL(str_key)[from_len])) {
 
-				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
-				memcpy(ZSTR_VAL(new_str_key), ZSTR_VAL(resource_to->path) + 1, to_len);
-				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
-				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
+				new_str_key = zend_string_concat2(
+					ZSTR_VAL(resource_to->path) + 1, to_len,
+					ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len
+				);
 
 				is_modified = true;
 				entry->is_modified = true;
@@ -909,10 +909,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			if (zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource_from->path)+1, from_len) &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
-				memcpy(ZSTR_VAL(new_str_key), ZSTR_VAL(resource_to->path) + 1, to_len);
-				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
-				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
+				new_str_key = zend_string_concat2(
+					ZSTR_VAL(resource_to->path) + 1, to_len,
+					ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len
+				);
 
 				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
@@ -926,10 +926,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			if (zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource_from->path)+1, from_len) &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
-				memcpy(ZSTR_VAL(new_str_key), ZSTR_VAL(resource_to->path) + 1, to_len);
-				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
-				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
+				new_str_key = zend_string_concat2(
+					ZSTR_VAL(resource_to->path) + 1, to_len,
+					ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len
+				);
 
 				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
