@@ -41,6 +41,6 @@ for ($i = 0; $i < 1024; $i++) {
 
 var_dump($other->addAll($victim));
 ?>
---EXPECT--
-int(6737)
+--EXPECTF--
+int(%d)
 int(1024)

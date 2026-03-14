@@ -243,9 +243,8 @@ static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_
 /* TODO: make this an official Zend API? */
 #define SPL_SAFE_HASH_FOREACH_PTR(_ht, _ptr) do { \
 		const HashTable *__ht = (_ht); \
-		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
 		zval *_z = __ht->arPacked; \
-		for (uint32_t _idx = 0; _idx < __ht->nNumUsed; _idx++, _z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size)) { \
+		for (uint32_t _idx = 0; _idx < __ht->nNumUsed; _idx++, _z = ZEND_HASH_ELEMENT(__ht, _idx)) { \
 			if (UNEXPECTED(Z_ISUNDEF_P(_z))) continue; \
 			_ptr = Z_PTR_P(_z);
 
@@ -642,12 +641,12 @@ PHP_METHOD(SplObjectStorage, removeAllExcept)
 	other = Z_SPLOBJSTORAGE_P(obj);
 
 	SPL_SAFE_HASH_FOREACH_PTR(&intern->storage, element) {
-		zend_object *obj = element->obj;
-		GC_ADDREF(obj);
-		if (!spl_object_storage_contains(other, obj)) {
-			spl_object_storage_detach(intern, obj);
+		zend_object *elem_obj = element->obj;
+		GC_ADDREF(elem_obj);
+		if (!spl_object_storage_contains(other, elem_obj)) {
+			spl_object_storage_detach(intern, elem_obj);
 		}
-		OBJ_RELEASE(obj);
+		OBJ_RELEASE(elem_obj);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
