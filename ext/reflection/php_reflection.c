@@ -7890,7 +7890,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
-		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated");
 		RETURN_THROWS();
 	}
 
