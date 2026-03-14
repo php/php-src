@@ -101,6 +101,13 @@ lxb_html_tree_insertion_mode_in_head_noscript_closed(lxb_html_tree_t *tree,
                                                                             token);
     }
 
+    if (token->tag_id == LXB_TAG_NOSCRIPT) {
+        lxb_html_tree_open_elements_pop(tree);
+        tree->mode = lxb_html_tree_insertion_mode_in_head;
+
+        return true;
+    }
+
     lxb_html_tree_parse_error(tree, token, LXB_HTML_RULES_ERROR_UNTO);
 
     return true;

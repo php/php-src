@@ -68,7 +68,6 @@ lxb_html_tree_insertion_mode_before_head_open(lxb_html_tree_t *tree,
             }
 
             tree->has_explicit_head_tag = true;
-
             tree->mode = lxb_html_tree_insertion_mode_in_head;
 
             break;

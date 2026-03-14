@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Alexander Borisov
+ * Copyright (C) 2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -21,9 +21,10 @@
 enum {
     LXB_CSS_AT_RULE__UNDEF      = 0x0000,
     LXB_CSS_AT_RULE__CUSTOM     = 0x0001,
-    LXB_CSS_AT_RULE_MEDIA       = 0x0002,
-    LXB_CSS_AT_RULE_NAMESPACE   = 0x0003,
-    LXB_CSS_AT_RULE__LAST_ENTRY = 0x0004
+    LXB_CSS_AT_RULE_FONT_FACE   = 0x0002,
+    LXB_CSS_AT_RULE_MEDIA       = 0x0003,
+    LXB_CSS_AT_RULE_NAMESPACE   = 0x0004,
+    LXB_CSS_AT_RULE__LAST_ENTRY = 0x0005
 };
 typedef uintptr_t lxb_css_at_rule_type_t;
 

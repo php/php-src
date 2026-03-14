@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -7,10 +7,10 @@
 #include "lexbor/core/shs.h"
 #include "lexbor/core/str.h"
 
-#define LEXBOR_STR_RES_MAP_LOWERCASE
-#define LEXBOR_STR_RES_MAP_UPPERCASE
-#include "lexbor/core/str_res.h"
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_lowercase[256];
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_uppercase[256];
+#endif
 
 #define lexbor_shs_make_id_m(key, size, table_size)                            \
     (((((key[0] * key[size - 1]) * key[0]) + size) % table_size) + 0x01)

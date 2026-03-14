@@ -152,7 +152,7 @@ lxb_css_log_format(lxb_css_log_t *log, lxb_css_log_type_t type,
         return NULL;
     }
 
-    msg = lxb_css_log_push(log, LXB_CSS_LOG_SYNTAX_ERROR, psize);
+    msg = lxb_css_log_push(log, type, psize);
     if (msg == NULL) {
         return NULL;
     }

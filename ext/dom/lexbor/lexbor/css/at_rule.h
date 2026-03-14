@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Alexander Borisov
+ * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -19,19 +19,19 @@ extern "C" {
 typedef struct {
     lxb_css_at_rule_type_t type;
     lexbor_str_t           prelude;
-    lexbor_str_t           block;
+    lxb_css_rule_list_t    *block;
 }
 lxb_css_at_rule__undef_t;
 
 typedef struct {
-    lexbor_str_t name;
-    lexbor_str_t prelude;
-    lexbor_str_t block;
+    lexbor_str_t        name;
+    lexbor_str_t        prelude;
+    lxb_css_rule_list_t *block;
 }
 lxb_css_at_rule__custom_t;
 
 typedef struct {
-    uintptr_t reserved;
+    lxb_css_rule_list_t *block;
 }
 lxb_css_at_rule_media_t;
 
@@ -40,16 +40,30 @@ typedef struct {
 }
 lxb_css_at_rule_namespace_t;
 
+typedef struct {
+    lxb_css_rule_list_t *block;
+}
+lxb_css_at_rule_font_face_t;
 
-LXB_API const lxb_css_entry_data_t *
+
+LXB_API const lxb_css_entry_at_rule_data_t *
 lxb_css_at_rule_by_name(const lxb_char_t *name, size_t length);
 
-LXB_API const lxb_css_entry_data_t *
+LXB_API const lxb_css_entry_at_rule_data_t *
 lxb_css_at_rule_by_id(uintptr_t id);
+
+LXB_API lxb_css_rule_at_t *
+lxb_css_at_rule_create(lxb_css_parser_t *parser,
+                       const lxb_char_t *name, size_t length,
+                       const lxb_css_entry_at_rule_data_t **out_entry);
 
 LXB_API void *
 lxb_css_at_rule_destroy(lxb_css_memory_t *memory, void *value,
                         lxb_css_at_rule_type_t type, bool self_destroy);
+
+LXB_API lxb_status_t
+lxb_css_at_rule_convert_to_undef(lxb_css_parser_t *parser,
+                                 lxb_css_rule_at_t *at);
 
 LXB_API lxb_status_t
 lxb_css_at_rule_serialize(const void *style, lxb_css_at_rule_type_t type,
@@ -73,10 +87,6 @@ LXB_API void *
 lxb_css_at_rule__undef_destroy(lxb_css_memory_t *memory,
                                void *style, bool self_destroy);
 LXB_API lxb_status_t
-lxb_css_at_rule__undef_make(lxb_css_parser_t *parser,
-                            lxb_css_at_rule__undef_t *undef,
-                            const lxb_css_syntax_at_rule_offset_t *at_rule);
-LXB_API lxb_status_t
 lxb_css_at_rule__undef_serialize(const void *style, lexbor_serialize_cb_f cb,
                                  void *ctx);
 LXB_API lxb_status_t
@@ -91,10 +101,6 @@ lxb_css_at_rule__custom_create(lxb_css_memory_t *memory);
 LXB_API void *
 lxb_css_at_rule__custom_destroy(lxb_css_memory_t *memory,
                                 void *style, bool self_destroy);
-LXB_API lxb_status_t
-lxb_css_at_rule__custom_make(lxb_css_parser_t *parser,
-                             lxb_css_at_rule__custom_t *custom,
-                             const lxb_css_syntax_at_rule_offset_t *at_rule);
 LXB_API lxb_status_t
 lxb_css_at_rule__custom_serialize(const void *style, lexbor_serialize_cb_f cb,
                                   void *ctx);
@@ -126,6 +132,18 @@ LXB_API lxb_status_t
 lxb_css_at_rule_namespace_serialize(const void *style, lexbor_serialize_cb_f cb,
                                     void *ctx);
 
+/* Font-face. */
+
+LXB_API void *
+lxb_css_at_rule_font_face_create(lxb_css_memory_t *memory);
+
+LXB_API void *
+lxb_css_at_rule_font_face_destroy(lxb_css_memory_t *memory,
+                                  void *style, bool self_destroy);
+
+LXB_API lxb_status_t
+lxb_css_at_rule_font_face_serialize(const void *style, lexbor_serialize_cb_f cb,
+                                    void *ctx);
 
 #ifdef __cplusplus
 } /* extern "C" */

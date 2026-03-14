@@ -1,32 +1,16 @@
 /*
- * Copyright (C) 2018 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
 
-#ifndef LEXBOR_STR_RES_H
-#define LEXBOR_STR_RES_H
 
-#define LEXBOR_STR_RES_MAP_CHAR_OTHER      '\00'
-#define LEXBOR_STR_RES_MAP_CHAR_A_Z_a_z    '\01'
-#define LEXBOR_STR_RES_MAP_CHAR_WHITESPACE '\02'
+LXB_API const lxb_char_t
+lexbor_str_res_ansi_replacement_character[4] = "\xEF\xBF\xBD";
 
-#define LEXBOR_STR_RES_SLIP 0xFF
-
-#endif /* LEXBOR_STR_RES_H */
-
-#ifdef LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER
-#ifndef LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER_ENABLED
-#define LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER_ENABLED
-static const lxb_char_t
-lexbor_str_res_ansi_replacement_character[] = "\xEF\xBF\xBD";
-#endif /* LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER_ENABLED */
-#endif /* LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER */
-
-#ifdef LEXBOR_STR_RES_MAP_NUM
-#ifndef LEXBOR_STR_RES_MAP_NUM_ENABLED
-#define LEXBOR_STR_RES_MAP_NUM_ENABLED
-static const lxb_char_t lexbor_str_res_map_num[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_num[256] =
+{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -57,14 +41,10 @@ static const lxb_char_t lexbor_str_res_map_num[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff
 };
-#endif /* LEXBOR_STR_RES_MAP_NUM_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_NUM */
 
-
-#ifdef LEXBOR_STR_RES_MAP_HEX
-#ifndef LEXBOR_STR_RES_MAP_HEX_ENABLED
-#define LEXBOR_STR_RES_MAP_HEX_ENABLED
-static const lxb_char_t lexbor_str_res_map_hex[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_hex[256] =
+{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -95,14 +75,10 @@ static const lxb_char_t lexbor_str_res_map_hex[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff
 };
-#endif /* LEXBOR_STR_RES_MAP_HEX_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_HEX */
 
-
-#ifdef LEXBOR_STR_RES_MAP_LOWERCASE
-#ifndef LEXBOR_STR_RES_MAP_LOWERCASE_ENABLED
-#define LEXBOR_STR_RES_MAP_LOWERCASE_ENABLED
-static const lxb_char_t lexbor_str_res_map_lowercase[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_lowercase[256] =
+{
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
     0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11,
     0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a,
@@ -133,14 +109,10 @@ static const lxb_char_t lexbor_str_res_map_lowercase[] = {
     0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb,
     0xfc, 0xfd, 0xfe, 0xff
 };
-#endif /* LEXBOR_STR_RES_MAP_LOWERCASE_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_LOWERCASE */
 
-
-#ifdef LEXBOR_STR_RES_MAP_UPPERCASE
-#ifndef LEXBOR_STR_RES_MAP_UPPERCASE_ENABLED
-#define LEXBOR_STR_RES_MAP_UPPERCASE_ENABLED
-static const lxb_char_t lexbor_str_res_map_uppercase[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_uppercase[256] =
+{
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
     0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11,
     0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a,
@@ -171,14 +143,10 @@ static const lxb_char_t lexbor_str_res_map_uppercase[] = {
     0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb,
     0xfc, 0xfd, 0xfe, 0xff
 };
-#endif /* LEXBOR_STR_RES_MAP_UPPERCASE_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_UPPERCASE */
 
-
-#ifdef LEXBOR_STR_RES_REPLACEMENT_CHARACTER
-#ifndef LEXBOR_STR_RES_REPLACEMENT_CHARACTER_ENABLED
-#define LEXBOR_STR_RES_REPLACEMENT_CHARACTER_ENABLED
-static const size_t lexbor_str_res_replacement_character[] = {
+LXB_API const size_t
+lexbor_str_res_replacement_character[160] =
+{
     65533, 1, 2, 3, 4, 5, 6, 7, 8,
     9, 10, 11, 12, 13, 14, 15, 16, 17,
     18, 19, 20, 21, 22, 23, 24, 25, 26,
@@ -198,14 +166,10 @@ static const size_t lexbor_str_res_replacement_character[] = {
     144, 8216, 8217, 8220, 8221, 8226, 8211, 8212, 732,
     8482, 353, 8250, 339, 157, 382, 376
 };
-#endif /* LEXBOR_STR_RES_REPLACEMENT_CHARACTER_ENABLED */
-#endif /* LEXBOR_STR_RES_REPLACEMENT_CHARACTER */
 
-
-#ifdef LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER
-#ifndef LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER_ENABLED
-#define LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER_ENABLED
-static const size_t lexbor_str_res_alphanumeric_character[] = {
+LXB_API const size_t
+lexbor_str_res_alphanumeric_character[256] =
+{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -236,14 +200,10 @@ static const size_t lexbor_str_res_alphanumeric_character[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff
 };
-#endif /* LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER_ENABLED */
-#endif /* LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER */
 
-
-#ifdef LEXBOR_STR_RES_ALPHA_CHARACTER
-#ifndef LEXBOR_STR_RES_ALPHA_CHARACTER_ENABLED
-#define LEXBOR_STR_RES_ALPHA_CHARACTER_ENABLED
-static const size_t lexbor_str_res_alpha_character[] = {
+LXB_API const size_t
+lexbor_str_res_alpha_character[256] =
+{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -274,14 +234,10 @@ static const size_t lexbor_str_res_alpha_character[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff
 };
-#endif /* LEXBOR_STR_RES_ALPHA_CHARACTER_ENABLED */
-#endif /* LEXBOR_STR_RES_ALPHA_CHARACTER */
 
-
-#ifdef LEXBOR_TOKENIZER_CHARS_MAP
-#ifndef LEXBOR_TOKENIZER_CHARS_MAP_ENABLED
-#define LEXBOR_TOKENIZER_CHARS_MAP_ENABLED
-static const unsigned char lexbor_tokenizer_chars_map[] = {
+LXB_API const unsigned char
+lexbor_tokenizer_chars_map[256] =
+{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0x02, 0x02, 0xff, 0x02, 0x02, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -312,35 +268,24 @@ static const unsigned char lexbor_tokenizer_chars_map[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff
 };
-#endif /* LEXBOR_TOKENIZER_CHARS_MAP_ENABLED */
-#endif /* LEXBOR_TOKENIZER_CHARS_MAP */
 
-
-#ifdef LEXBOR_STR_RES_MAP_HEX_TO_CHAR
-#ifndef LEXBOR_STR_RES_MAP_HEX_TO_CHAR_ENABLED
-#define LEXBOR_STR_RES_MAP_HEX_TO_CHAR_ENABLED
-static const lxb_char_t lexbor_str_res_map_hex_to_char[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_hex_to_char[17] =
+{
     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
     0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x00
 };
-#endif /* LEXBOR_STR_RES_MAP_HEX_TO_CHAR_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_HEX_TO_CHAR */
 
-#ifdef LEXBOR_STR_RES_MAP_HEX_TO_CHAR_LOWERCASE
-#ifndef LEXBOR_STR_RES_MAP_HEX_TO_CHAR_LOWERCASE_ENABLED
-#define LEXBOR_STR_RES_MAP_HEX_TO_CHAR_LOWERCASE_ENABLED
-static const lxb_char_t lexbor_str_res_map_hex_to_char_lowercase[] = {
+LXB_API const lxb_char_t
+lexbor_str_res_map_hex_to_char_lowercase[17] =
+{
     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
     0x39, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x00
 };
-#endif /* LEXBOR_STR_RES_MAP_HEX_TO_CHAR_LOWERCASE_ENABLED */
-#endif /* LEXBOR_STR_RES_MAP_HEX_TO_CHAR_LOWERCASE */
 
-
-#ifdef LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE
-#ifndef LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_ENABLED
-#define LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_ENABLED
-static const char * lexbor_str_res_char_to_two_hex_value[257] = {
+LXB_API const char *
+lexbor_str_res_char_to_two_hex_value[257] =
+{
     "00", "01", "02", "03", "04", "05", "06", "07",
     "08", "09", "0A", "0B", "0C", "0D", "0E", "0F",
     "10", "11", "12", "13", "14", "15", "16", "17",
@@ -375,13 +320,10 @@ static const char * lexbor_str_res_char_to_two_hex_value[257] = {
     "F8", "F9", "FA", "FB", "FC", "FD", "FE", "FF",
     NULL
 };
-#endif /* LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_ENABLED */
-#endif /* LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE */
 
-#ifdef LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_LOWERCASE
-#ifndef LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_LOWERCASE_ENABLED
-#define LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_LOWERCASE_ENABLED
-static const char * lexbor_str_res_char_to_two_hex_value_lowercase[257] = {
+LXB_API const char *
+lexbor_str_res_char_to_two_hex_value_lowercase[257] =
+{
     "00", "01", "02", "03", "04", "05", "06", "07",
     "08", "09", "0a", "0b", "0c", "0d", "0e", "0f",
     "10", "11", "12", "13", "14", "15", "16", "17",
@@ -416,5 +358,3 @@ static const char * lexbor_str_res_char_to_two_hex_value_lowercase[257] = {
     "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff",
     NULL
 };
-#endif /* LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_LOWERCASE_ENABLED */
-#endif /* LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE_LOWERCASE */

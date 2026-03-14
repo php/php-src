@@ -110,6 +110,10 @@ extern "C" {
 
 #define lxb_html_tokenizer_state_token_attr_add_m(tkz, attr, v_return)         \
     do {                                                                       \
+        if (!(tkz->opt & LXB_HTML_TOKENIZER_OPT_ATTR_KEEP_DUPLICATE)) {        \
+            lxb_html_tokenizer_attr_last_duplicate(tkz);                       \
+        }                                                                      \
+                                                                               \
         attr = lxb_html_token_attr_append(tkz->token, tkz->dobj_token_attr);   \
         if (attr == NULL) {                                                    \
             tkz->status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;                  \
@@ -145,6 +149,14 @@ extern "C" {
     (tkz->token->attr_last->value_end = tkz->last)
 
 #define _lxb_html_tokenizer_state_token_done_m(tkz, v_end)                     \
+    if (!(tkz->opt & LXB_HTML_TOKENIZER_OPT_ATTR_KEEP_DUPLICATE)) {            \
+        lxb_html_tokenizer_attr_last_duplicate(tkz);                           \
+    }                                                                          \
+                                                                               \
+    if (tkz->token->type & LXB_HTML_TOKEN_TYPE_CLOSE) {                        \
+        lxb_html_tokenizer_validate_close_tag(tkz);                            \
+    }                                                                          \
+                                                                               \
     tkz->token = tkz->callback_token_done(tkz, tkz->token,                     \
                                           tkz->callback_token_ctx);            \
     if (tkz->token == NULL) {                                                  \
@@ -154,22 +166,31 @@ extern "C" {
         return v_end;                                                          \
     }
 
-#define lxb_html_tokenizer_state_token_done_m(tkz, v_end)                      \
+#define lxb_html_tokenizer_state_token_text_done_m(tkz, v_end)                 \
     do {                                                                       \
-        if (tkz->token->begin != tkz->token->end) {                            \
-            _lxb_html_tokenizer_state_token_done_m(tkz, v_end)                 \
+        if (tkz->token->text_start != tkz->token->text_end) {                  \
+            _lxb_html_tokenizer_state_token_done_m(tkz, v_end);                \
         }                                                                      \
         lxb_html_token_clean(tkz->token);                                      \
         tkz->pos = tkz->start;                                                 \
     }                                                                          \
     while (0)
 
-#define lxb_html_tokenizer_state_token_done_wo_check_m(tkz, v_end)             \
+#define lxb_html_tokenizer_state_token_done_m(tkz, v_end)                      \
     do {                                                                       \
         _lxb_html_tokenizer_state_token_done_m(tkz, v_end)                     \
         lxb_html_token_clean(tkz->token);                                      \
+        tkz->pos = tkz->start;                                                 \
     }                                                                          \
     while (0)
+
+/*
+ * This macro is alias; it serves to ensure that when reading the code,
+ * we clearly understand where checks are not necessary, i.e., we are 100% sure
+ * that the token has been collected and is ready to be sent.
+ */
+#define lxb_html_tokenizer_state_token_done_wo_check_m(tkz, v_end)             \
+    lxb_html_tokenizer_state_token_done_m(tkz, v_end)
 
 #define lxb_html_tokenizer_state_set_text(tkz)                                 \
     do {                                                                       \
@@ -180,7 +201,7 @@ extern "C" {
 
 #define lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, v_end)       \
     do {                                                                       \
-        if (tkz->token->begin != tkz->token->end) {                            \
+        if (tkz->start != tkz->pos) {                                          \
             tkz->token->tag_id = LXB_TAG__TEXT;                                \
                                                                                \
             lxb_html_tokenizer_state_set_text(tkz);                            \
@@ -210,6 +231,11 @@ LXB_API const lxb_char_t *
 lxb_html_tokenizer_state_self_closing_start_tag(lxb_html_tokenizer_t *tkz,
                                                 const lxb_char_t *data,
                                                 const lxb_char_t *end);
+
+LXB_API const lxb_char_t *
+lxb_html_tokenizer_state_cdata_section_before(lxb_html_tokenizer_t *tkz,
+                                              const lxb_char_t *data,
+                                              const lxb_char_t *end);
 
 LXB_API const lxb_char_t *
 lxb_html_tokenizer_state_cr(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
