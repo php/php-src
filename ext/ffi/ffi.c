@@ -1257,10 +1257,8 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return &EG(uninitialized_zval);
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return &EG(uninitialized_zval);
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
@@ -1334,10 +1332,8 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return value;
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return value;
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
