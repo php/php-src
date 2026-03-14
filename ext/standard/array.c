@@ -5846,7 +5846,7 @@ PHP_FUNCTION(array_diff)
 {
 	zval *args;
 	uint32_t argc, i;
-	uint32_t num;
+	uint64_t num;
 	HashTable exclude;
 	zval *value;
 	zend_string *str, *tmp_str, *key;
@@ -5934,6 +5934,11 @@ PHP_FUNCTION(array_diff)
 	if (num == 0) {
 		ZVAL_COPY(return_value, &args[0]);
 		return;
+	}
+
+	if (UNEXPECTED(num >= HT_MAX_SIZE)) {
+		zend_throw_error(NULL, "The total number of elements must be lower than %u", HT_MAX_SIZE);
+		RETURN_THROWS();
 	}
 
 	ZVAL_NULL(&dummy);
