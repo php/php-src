@@ -21,8 +21,17 @@
 #include "filter_private.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/uri/php_uri.h"
+#include "ext/standard/html.h"
 
 #include "zend_multiply.h"
+
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
+
+#ifndef INADDR_NONE
+# define INADDR_NONE ((unsigned long int) -1)
+#endif
 
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
@@ -1112,6 +1121,66 @@ zend_result php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			RETURN_VALIDATION_FAILED
 		}
 	}
+	return SUCCESS;
+}
+/* }}} */
+
+/**
+ * Returns the number of Unicode code points in a UTF-8 encoded string.
+ * Invalid UTF-8 byte sequences (U+FFFD) are counted as one replacement character.
+ */
+static size_t php_utf8_strlen(const unsigned char *str, size_t str_len)
+{
+    size_t len = 0, cursor = 0;
+    zend_result status;
+
+    while (cursor < str_len) {
+        php_next_utf8_char(str, str_len, &cursor, &status);
+        len++;
+    }
+
+    return len;
+}
+
+
+zend_result php_filter_validate_strlen(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+{
+    int min_len_set, max_len_set;
+    zval *option_val;
+    zend_long min_len, max_len;
+    size_t len;
+    const char *str = Z_STRVAL_P(value);
+    size_t str_size = Z_STRLEN_P(value);
+
+    FETCH_LONG_OPTION(min_len, "min_len");
+    FETCH_LONG_OPTION(max_len, "max_len");
+
+    if (min_len_set && min_len < 0) {
+        php_error_docref(NULL, E_WARNING,
+            "min_len must be greater than or equal to 0");
+        RETURN_VALIDATION_FAILED;
+    }
+
+    if (max_len_set && max_len < 0) {
+        php_error_docref(NULL, E_WARNING,
+            "max_len must be greater than or equal to 0");
+        RETURN_VALIDATION_FAILED;
+    }
+
+    if (min_len_set && max_len_set && min_len > max_len) {
+        php_error_docref(NULL, E_WARNING,
+            "min_len must be less than or equal to max_len");
+        RETURN_VALIDATION_FAILED;
+    }
+
+    len = php_utf8_strlen((const unsigned char *)str, str_size);
+
+    if (min_len_set && len < min_len) {
+        RETURN_VALIDATION_FAILED;
+    }
+    if (max_len_set && max_len < len) {
+        RETURN_VALIDATION_FAILED;
+    }
 	return SUCCESS;
 }
 /* }}} */

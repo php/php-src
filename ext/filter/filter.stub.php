@@ -112,6 +112,11 @@ const FILTER_VALIDATE_IP = UNKNOWN;
  * @cvalue FILTER_VALIDATE_MAC
  */
 const FILTER_VALIDATE_MAC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FILTER_VALIDATE_STRLEN
+ */
+const FILTER_VALIDATE_STRLEN = UNKNOWN;
 
 /**
  * @var int

@@ -67,7 +67,8 @@
 #define FILTER_VALIDATE_IP            0x0113
 #define FILTER_VALIDATE_MAC           0x0114
 #define FILTER_VALIDATE_DOMAIN        0x0115
-#define FILTER_VALIDATE_LAST          0x0115
+#define FILTER_VALIDATE_STRLEN        0x0116
+#define FILTER_VALIDATE_LAST          0x0116
 
 #define FILTER_VALIDATE_ALL           0x0100
 
