@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2021 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -37,6 +37,34 @@ lxb_dom_document_type_interface_clone(lxb_dom_document_t *document,
 LXB_API lxb_dom_document_type_t *
 lxb_dom_document_type_interface_destroy(lxb_dom_document_type_t *document_type);
 
+/*
+ * Create DocumentType by specification.
+ *
+ * https://dom.spec.whatwg.org/#dom-domimplementation-createdocumenttype
+ *
+ * @param[in] lxb_dom_document_t *. Not NULL.
+ * @param[in] const lxb_char_t *. Name. May be NULL, but then the return value
+ *            will be NULL and an exception code will be recorded.
+ * @param[in] size_t. Length of name. May be 0, but then the return value
+ *            will be NULL and an exception code will be recorded.
+ * @param[in] const lxb_char_t *. PublicID. Can be NULL.
+ * @param[in] size_t. Length of PublicID. Can be 0.
+ * @param[in] const lxb_char_t *. SystemID. Can be NULL.
+ * @param[in] size_t. Length of SystemID. Can be 0.
+ * @param[out] lxb_dom_exception_code_t. Can be NULL. If the variable is passed,
+ *             the code will definitely be assigned. LXB_DOM_EXCEPTION_OK
+ *             if successful.
+ *
+ * @return lxb_dom_document_type_t * if successful, otherwise NULL.
+ */
+LXB_API lxb_dom_document_type_t *
+lxb_dom_document_type_create(lxb_dom_document_t *document,
+                             const lxb_char_t *name, size_t name_len,
+                             const lxb_char_t *pub, size_t pub_len,
+                             const lxb_char_t *sys, size_t sys_len,
+                             lxb_dom_exception_code_t *code);
+LXB_API bool
+lxb_dom_document_type_valid_name(const lxb_char_t *ame, size_t name_len);
 
 /*
  * Inline functions

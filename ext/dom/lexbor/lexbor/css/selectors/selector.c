@@ -639,10 +639,44 @@ lxb_css_selector_serialize_class(lxb_css_selector_t *selector,
 }
 
 static lxb_status_t
+lxb_css_selector_serialize_escape_write(lxb_char_t *p, lxb_char_t *end,
+                                        lexbor_serialize_cb_f cb, void *ctx)
+{
+    lxb_char_t *begin;
+    lxb_status_t status;
+
+    begin = p;
+
+    lxb_css_selector_serialize_write("\"", 1);
+
+    while (p < end) {
+        if (*p == '"') {
+            if (begin < p) {
+                lxb_css_selector_serialize_write(begin, p - begin);
+            }
+
+            lxb_css_selector_serialize_write("\\000022", 7);
+
+            begin = p + 1;
+        }
+
+        p++;
+    }
+
+    if (begin < p) {
+        lxb_css_selector_serialize_write(begin, p - begin);
+    }
+
+    lxb_css_selector_serialize_write("\"", 1);
+
+    return LXB_STATUS_OK;
+}
+
+static lxb_status_t
 lxb_css_selector_serialize_attribute(lxb_css_selector_t *selector,
                                      lexbor_serialize_cb_f cb, void *ctx)
 {
-    lxb_char_t *p, *begin, *end;
+    lxb_char_t *p, *end;
     lxb_status_t status;
     lxb_css_selector_attribute_t *attr;
 
@@ -686,29 +720,10 @@ lxb_css_selector_serialize_attribute(lxb_css_selector_t *selector,
     p = attr->value.data;
     end = attr->value.data + attr->value.length;
 
-    begin = p;
-
-    lxb_css_selector_serialize_write("\"", 1);
-
-    while (p < end) {
-        if (*p == '"') {
-            if (begin < p) {
-                lxb_css_selector_serialize_write(begin, p - begin);
-            }
-
-            lxb_css_selector_serialize_write("\\000022", 7);
-
-            begin = p + 1;
-        }
-
-        p++;
+    status = lxb_css_selector_serialize_escape_write(p, end, cb, ctx);
+    if (status != LXB_STATUS_OK) {
+        return status;
     }
-
-    if (begin < p) {
-        lxb_css_selector_serialize_write(begin, p - begin);
-    }
-
-    lxb_css_selector_serialize_write("\"", 1);
 
     if (attr->modifier != LXB_CSS_SELECTOR_MODIFIER_UNSET) {
         switch (attr->modifier) {
@@ -740,7 +755,9 @@ lxb_css_selector_serialize_pseudo_class_function(lxb_css_selector_t *selector,
                                                  lexbor_serialize_cb_f cb, void *ctx)
 {
     lxb_status_t status;
+    lxb_char_t *p, *end;
     lxb_css_selector_pseudo_t *pseudo;
+    lxb_css_selector_contains_t *contains;
     const lxb_css_selectors_pseudo_data_func_t *pfunc;
 
     pseudo = &selector->u.pseudo;
@@ -787,6 +804,22 @@ lxb_css_selector_serialize_pseudo_class_function(lxb_css_selector_t *selector,
         case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_WHERE:
             status = lxb_css_selector_serialize_list_chain(pseudo->data,
                                                            cb, ctx);
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_LEXBOR_CONTAINS:
+            contains = pseudo->data;
+            p = contains->str.data;
+            end = p + contains->str.length;
+
+            status = lxb_css_selector_serialize_escape_write(p, end, cb, ctx);
+            if (status != LXB_STATUS_OK) {
+                return status;
+            }
+
+            if (contains->insensitive) {
+                lxb_css_selector_serialize_write(" i", 2);
+            }
+
             break;
 
         default:

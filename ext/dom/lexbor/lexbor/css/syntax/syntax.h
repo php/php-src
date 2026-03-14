@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Alexander Borisov
+ * Copyright (C) 2022-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #include "lexbor/css/syntax/tokenizer.h"
+#include "lexbor/css/syntax/tokenizer.h"
 
 
 typedef struct lxb_css_syntax_rule lxb_css_syntax_rule_t;
@@ -21,124 +22,211 @@ typedef const lxb_css_syntax_token_t *
                           const lxb_css_syntax_token_t *token,
                           lxb_css_syntax_rule_t *rule);
 
-typedef lxb_status_t
-(*lxb_css_syntax_declaration_end_f)(lxb_css_parser_t *parser, void *ctx,
-                                    bool important, bool failed);
+
+typedef struct lxb_css_syntax_cb_base lxb_css_syntax_cb_base_t;
+typedef struct lxb_css_syntax_cb_list_rules lxb_css_syntax_cb_list_rules_t;
+typedef struct lxb_css_syntax_cb_at_rule lxb_css_syntax_cb_at_rule_t;
+typedef struct lxb_css_syntax_cb_qualified_rule lxb_css_syntax_cb_qualified_rule_t;
+typedef struct lxb_css_syntax_cb_block lxb_css_syntax_cb_block_t;
+typedef struct lxb_css_syntax_cb_declarations lxb_css_syntax_cb_declarations_t;
+typedef struct lxb_css_syntax_cb_function lxb_css_syntax_cb_function_t;
+typedef struct lxb_css_syntax_cb_components lxb_css_syntax_cb_components_t;
+typedef struct lxb_css_syntax_cb_pipe lxb_css_syntax_cb_pipe_t;
+
+typedef struct lxb_css_syntax_declaration_offset lxb_css_syntax_declaration_offset_t;
 
 typedef lxb_status_t
 (*lxb_css_syntax_cb_done_f)(lxb_css_parser_t *parser,
                             const lxb_css_syntax_token_t *token,
                             void *ctx, bool failed);
 
-typedef struct {
-    uintptr_t begin;
-    uintptr_t end;
-}
-lxb_css_syntax_list_rules_offset_t;
+typedef const lxb_css_syntax_cb_at_rule_t *
+(*lxb_css_syntax_begin_at_rule_f)(lxb_css_parser_t *parser,
+                                  const lxb_css_syntax_token_t *token,
+                                  void *ctx, void **out_rule);
 
-typedef struct {
-    uintptr_t name;
-    uintptr_t prelude;
-    uintptr_t prelude_end;
-    uintptr_t block;
-    uintptr_t block_end;
-}
-lxb_css_syntax_at_rule_offset_t;
+typedef const lxb_css_syntax_cb_qualified_rule_t *
+(*lxb_css_syntax_begin_qualified_rule_f)(lxb_css_parser_t *parser,
+                                         const lxb_css_syntax_token_t *token,
+                                         void *ctx, void **out_rule);
 
-typedef struct {
-    uintptr_t prelude;
-    uintptr_t prelude_end;
-    uintptr_t block;
-    uintptr_t block_end;
-}
-lxb_css_syntax_qualified_offset_t;
+typedef const lxb_css_syntax_cb_block_t *
+(*lxb_css_syntax_begin_block_f)(lxb_css_parser_t *parser,
+                                const lxb_css_syntax_token_t *token,
+                                void *ctx, void **out_rule);
 
-typedef struct {
-    uintptr_t begin;
-    uintptr_t end;
-    uintptr_t name_begin;
-    uintptr_t name_end;
-    uintptr_t value_begin;
-    uintptr_t before_important;
-    uintptr_t value_end;
-}
-lxb_css_syntax_declarations_offset_t;
+typedef const lxb_css_syntax_cb_declarations_t *
+(*lxb_css_syntax_begin_declarations_f)(lxb_css_parser_t *parser,
+                                       const lxb_css_syntax_token_t *token,
+                                       void *ctx, void **out_rule);
+typedef lxb_css_parser_state_f
+(*lxb_css_syntax_declaration_name_f)(lxb_css_parser_t *parser,
+                                     const lxb_css_syntax_token_t *token,
+                                     void *ctx, void **out_rule);
+typedef lxb_status_t
+(*lxb_css_syntax_declaration_end_f)(lxb_css_parser_t *parser,
+                                    void *declaration, void *ctx,
+                                    const lxb_css_syntax_token_t *token,
+                                    lxb_css_syntax_declaration_offset_t *offset,
+                                    bool important, bool failed);
 
-typedef struct {
-    lxb_css_parser_state_f   state;
-    lxb_css_parser_state_f   block;
+struct lxb_css_syntax_cb_base {
     lxb_css_parser_state_f   failed;
     lxb_css_syntax_cb_done_f end;
-}
-lxb_css_syntax_cb_base_t;
+};
 
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_pipe_t;
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_block_t;
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_function_t;
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_components_t;
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_at_rule_t;
-typedef lxb_css_syntax_cb_base_t lxb_css_syntax_cb_qualified_rule_t;
+struct lxb_css_syntax_cb_list_rules {
+    lxb_css_syntax_cb_base_t              cb;
+    lxb_css_parser_state_f                next;
+    lxb_css_syntax_begin_at_rule_f        at_rule;
+    lxb_css_syntax_begin_qualified_rule_f qualified_rule;
+};
 
-typedef struct {
+struct lxb_css_syntax_cb_at_rule {
+    lxb_css_syntax_cb_base_t     cb;
+    lxb_css_parser_state_f       prelude;
+    lxb_css_syntax_cb_done_f     prelude_end;
+    lxb_css_syntax_begin_block_f block;
+};
+
+struct lxb_css_syntax_cb_qualified_rule {
+    lxb_css_syntax_cb_base_t     cb;
+    lxb_css_parser_state_f       prelude;
+    lxb_css_syntax_cb_done_f     prelude_end;
+    lxb_css_syntax_begin_block_f block;
+};
+
+struct lxb_css_syntax_cb_block {
+    lxb_css_syntax_cb_base_t              cb;
+    lxb_css_parser_state_f                next;
+    lxb_css_syntax_begin_at_rule_f        at_rule;
+    lxb_css_syntax_begin_declarations_f   declarations;
+    lxb_css_syntax_begin_qualified_rule_f qualified_rule;
+};
+
+struct lxb_css_syntax_cb_declarations {
     lxb_css_syntax_cb_base_t          cb;
-    lxb_css_syntax_declaration_end_f  declaration_end;
-    const lxb_css_syntax_cb_at_rule_t *at_rule;
-}
-lxb_css_syntax_cb_declarations_t;
+    lxb_css_syntax_declaration_name_f name;
+    lxb_css_syntax_declaration_end_f  end;
+};
 
-typedef struct {
-    lxb_css_syntax_cb_base_t                 cb;
-    lxb_css_parser_state_f                   next;
-    const lxb_css_syntax_cb_at_rule_t        *at_rule;
-    const lxb_css_syntax_cb_qualified_rule_t *qualified_rule;
-}
-lxb_css_syntax_cb_list_rules_t;
+struct lxb_css_syntax_cb_function {
+    lxb_css_syntax_cb_base_t cb;
+    lxb_css_parser_state_f   value;
+};
+
+struct lxb_css_syntax_cb_components {
+    lxb_css_syntax_cb_base_t cb;
+    lxb_css_parser_state_f   prelude;
+};
+
+struct lxb_css_syntax_cb_pipe {
+    lxb_css_syntax_cb_base_t cb;
+    lxb_css_parser_state_f   prelude;
+};
+
+struct lxb_css_syntax_declaration_offset {
+    size_t value_begin;
+    size_t value_end;
+    size_t important_begin;
+    size_t important_end;
+    size_t end;
+};
 
 struct lxb_css_syntax_rule {
     lxb_css_syntax_state_f       phase;
     lxb_css_parser_state_f       state;
-    lxb_css_parser_state_f       state_back;
+
+    /*
+     * This callback will be called before rule->state is called.
+     * Exclusively from the lxb_css_parser_run(...).
+     */
     lxb_css_syntax_state_f       back;
+    lxb_css_parser_state_f       back_state;
+    void                         *context;
+    void                         *context_old;
+    void                         *returned;
 
     union {
         const lxb_css_syntax_cb_base_t           *cb;
         const lxb_css_syntax_cb_list_rules_t     *list_rules;
         const lxb_css_syntax_cb_at_rule_t        *at_rule;
         const lxb_css_syntax_cb_qualified_rule_t *qualified_rule;
-        const lxb_css_syntax_cb_declarations_t   *declarations;
         const lxb_css_syntax_cb_components_t     *components;
+        const lxb_css_syntax_cb_declarations_t   *declarations;
         const lxb_css_syntax_cb_function_t       *func;
         const lxb_css_syntax_cb_block_t          *block;
         const lxb_css_syntax_cb_pipe_t           *pipe;
         void                                     *user;
     } cbx;
 
-    void                        *context;
-
-    uintptr_t                   offset;
-    size_t                      deep;
-    lxb_css_syntax_token_type_t block_end;
-    bool                        skip_ending;
-    bool                        skip_consume;
-    bool                        important;
-    bool                        failed;
-    bool                        top_level;
-
-    union {
-        lxb_css_syntax_list_rules_offset_t   list_rules;
-        lxb_css_syntax_at_rule_offset_t      at_rule;
-        lxb_css_syntax_qualified_offset_t    qualified;
-        lxb_css_syntax_declarations_offset_t declarations;
-        void                                 *user;
-    } u;
+    size_t                       offset;
+    size_t                       deep;
+    size_t                       begin;
+    lxb_css_syntax_token_type_t  block_end;
+    bool                         nested;
+    bool                         skip_consume;
+    bool                         important;
+    bool                         failed;
 };
 
 
-LXB_API lxb_status_t
+LXB_API lxb_css_rule_list_t *
 lxb_css_syntax_parse_list_rules(lxb_css_parser_t *parser,
                                 const lxb_css_syntax_cb_list_rules_t *cb,
-                                const lxb_char_t *data, size_t length,
-                                void *ctx, bool top_level);
+                                const lxb_char_t *data, size_t length);
+
+LXB_API lxb_css_rule_declaration_list_t *
+lxb_css_syntax_parse_declarations(lxb_css_parser_t *parser,
+                                  const lxb_css_syntax_cb_declarations_t *cb,
+                                  const lxb_char_t *data, size_t length);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_list_rules(lxb_css_parser_t *parser,
+                                  const lxb_css_syntax_cb_list_rules_t *list_rules,
+                                  lxb_css_parser_state_f back,
+                                  void *ctx, lxb_css_syntax_token_type_t stop);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_at_rule(lxb_css_parser_t *parser,
+                               const lxb_css_syntax_token_t *token,
+                               const lxb_css_syntax_cb_at_rule_t *at_rule,
+                               lxb_css_parser_state_f back,
+                               void *ctx, lxb_css_syntax_token_type_t stop);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_qualified_rule(lxb_css_parser_t *parser,
+                                      const lxb_css_syntax_token_t *token,
+                                      const lxb_css_syntax_cb_qualified_rule_t *qualified,
+                                      lxb_css_parser_state_f back,
+                                      void *ctx, lxb_css_syntax_token_type_t stop);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_block(lxb_css_parser_t *parser,
+                             const lxb_css_syntax_token_t *token,
+                             const lxb_css_syntax_cb_block_t *block,
+                             lxb_css_parser_state_f back, void *ctx);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_declarations(lxb_css_parser_t *parser,
+                                    const lxb_css_syntax_token_t *token,
+                                    const lxb_css_syntax_cb_declarations_t *declr,
+                                    lxb_css_parser_state_f back, void *ctx,
+                                    lxb_css_syntax_token_type_t stop);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_components(lxb_css_parser_t *parser,
+                                  const lxb_css_syntax_token_t *token,
+                                  const lxb_css_syntax_cb_components_t *comp,
+                                  lxb_css_parser_state_f back,
+                                  void *ctx, lxb_css_syntax_token_type_t stop);
+
+LXB_API lxb_css_syntax_rule_t *
+lxb_css_syntax_consume_function(lxb_css_parser_t *parser,
+                                const lxb_css_syntax_token_t *token,
+                                const lxb_css_syntax_cb_function_t *func,
+                                lxb_css_parser_state_f back, void *ctx);
+
 
 LXB_API lxb_status_t
 lxb_css_syntax_stack_expand(lxb_css_parser_t *parser, size_t count);
@@ -158,6 +246,7 @@ lxb_css_syntax_string_serialize(const lxb_char_t *data, size_t length,
 LXB_API lxb_status_t
 lxb_css_syntax_ident_or_string_serialize(const lxb_char_t *data, size_t length,
                                          lexbor_serialize_cb_f cb, void *ctx);
+
 
 #ifdef __cplusplus
 } /* extern "C" */

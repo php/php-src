@@ -26,30 +26,33 @@ lxb_html_interface_create(lxb_html_document_t *document, lxb_tag_id_t tag_id,
                           lxb_ns_id_t ns)
 {
     lxb_dom_node_t *node;
+    lxb_dom_element_t *domel;
+    lxb_html_unknown_element_t *unel;
 
     if (tag_id >= LXB_TAG__LAST_ENTRY) {
         if (ns == LXB_NS_HTML) {
-            lxb_html_unknown_element_t *unel;
-
             unel = lxb_html_unknown_element_interface_create(document);
             node = lxb_dom_interface_node(unel);
         }
         else if (ns == LXB_NS_SVG) {
             /* TODO: For this need implement SVGElement */
-            lxb_dom_element_t *domel;
 
             domel = lxb_dom_element_interface_create(&document->dom_document);
             node = lxb_dom_interface_node(domel);
         }
         else {
-            lxb_dom_element_t *domel;
-
             domel = lxb_dom_element_interface_create(&document->dom_document);
             node = lxb_dom_interface_node(domel);
         }
     }
     else {
-        node = lxb_html_interface_res_constructors[tag_id][ns](document);
+        if (ns < LXB_NS__LAST_ENTRY) {
+            node = lxb_html_interface_res_constructors[tag_id][ns](document);
+        }
+        else {
+            domel = lxb_dom_element_interface_create(&document->dom_document);
+            node = lxb_dom_interface_node(domel);
+        }
     }
 
     if (node == NULL) {
