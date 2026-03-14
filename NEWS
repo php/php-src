@@ -72,6 +72,10 @@ PHP                                                                        NEWS
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
+    if the server supports it. (KentarouTakeda)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
