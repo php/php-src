@@ -144,9 +144,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             return $fileInfo;
         }
 
-        [$arginfoCode, $declCode] = generateArgInfoCode(
+        [$arginfoCode, $declCode] = $fileInfo->generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
-            $fileInfo,
             $context->allConstInfos,
             $stubHash
         );
@@ -162,9 +161,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
             $legacyFileInfo = $fileInfo->getLegacyVersion();
 
-            [$arginfoCode] = generateArgInfoCode(
+            [$arginfoCode] = $legacyFileInfo->generateArgInfoCode(
                 basename($stubFilenameWithoutExtension),
-                $legacyFileInfo,
                 $context->allConstInfos,
                 $stubHash
             );
@@ -4270,13 +4268,13 @@ class FileInfo {
     /** @var ConstInfo[] */
     public array $constInfos = [];
     /** @var FuncInfo[] */
-    public array $funcInfos = [];
+    private array $funcInfos = [];
     /** @var ClassInfo[] */
     public array $classInfos = [];
-    public bool $generateFunctionEntries = false;
-    public string $declarationPrefix = "";
-    public bool $generateClassEntries = false;
-    public bool $generateCEnums = false;
+    private bool $generateFunctionEntries = false;
+    private string $declarationPrefix = "";
+    private bool $generateClassEntries = false;
+    private bool $generateCEnums = false;
     private bool $isUndocumentable = false;
     private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
@@ -4355,7 +4353,7 @@ class FileInfo {
         }
     }
 
-    public function getMinimumPhpVersionIdCompatibility(): ?int {
+    private function getMinimumPhpVersionIdCompatibility(): ?int {
         // Non-legacy arginfo files are always PHP 8.0+ compatible
         if (!$this->legacyArginfoGeneration &&
             $this->minimumPhpVersionIdCompatibility !== null &&
@@ -4618,6 +4616,130 @@ class FileInfo {
         }
 
         return $code;
+    }
+
+    
+    /**
+     * @param array<string, ConstInfo> $allConstInfos
+     * @return array{string, string}
+     */
+    public function generateArgInfoCode(
+        string $stubFilenameWithoutExtension,
+        array $allConstInfos,
+        string $stubHash
+    ): array {
+        $code = "";
+
+        $generatedFuncInfos = [];
+
+        $argInfoCode = generateCodeWithConditions(
+            $this->getAllFuncInfos(), "\n",
+            function (FuncInfo $funcInfo) use (&$generatedFuncInfos) {
+                /* If there already is an equivalent arginfo structure, only emit a #define */
+                if ($generatedFuncInfo = $funcInfo->findEquivalent($generatedFuncInfos)) {
+                    $code = sprintf(
+                        "#define %s %s\n",
+                        $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
+                    );
+                } else {
+                    $code = $funcInfo->toArgInfoCode($this->getMinimumPhpVersionIdCompatibility());
+                }
+
+                $generatedFuncInfos[] = $funcInfo;
+                return $code;
+            }
+        );
+
+        if ($argInfoCode !== "") {
+            $code .= "$argInfoCode\n";
+        }
+
+        if ($this->generateFunctionEntries) {
+            $framelessFunctionCode = generateCodeWithConditions(
+                $this->getAllFuncInfos(), "\n",
+                static function (FuncInfo $funcInfo) {
+                    return $funcInfo->getFramelessDeclaration();
+                }
+            );
+
+            if ($framelessFunctionCode !== "") {
+                $code .= "$framelessFunctionCode\n";
+            }
+
+            $generatedFunctionDeclarations = [];
+            $code .= generateCodeWithConditions(
+                $this->getAllFuncInfos(), "",
+                function (FuncInfo $funcInfo) use (&$generatedFunctionDeclarations) {
+                    $key = $funcInfo->getDeclarationKey();
+                    if (isset($generatedFunctionDeclarations[$key])) {
+                        return null;
+                    }
+
+                    $generatedFunctionDeclarations[$key] = true;
+                    return $this->declarationPrefix . $funcInfo->getDeclaration();
+                }
+            );
+
+            $code .= generateFunctionEntries(null, $this->funcInfos);
+
+            foreach ($this->classInfos as $classInfo) {
+                $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
+            }
+        }
+
+        $php80MinimumCompatibility = $this->getMinimumPhpVersionIdCompatibility() === null || $this->getMinimumPhpVersionIdCompatibility() >= PHP_80_VERSION_ID;
+
+        if ($this->generateClassEntries) {
+            $declaredStrings = [];
+            $attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+            $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+            if ($attributeInitializationCode) {
+                if (!$php80MinimumCompatibility) {
+                    $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
+                }
+            }
+
+            if ($attributeInitializationCode !== "" || !empty($this->constInfos)) {
+                $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
+                $code .= "{\n";
+
+                $code .= generateCodeWithConditions(
+                    $this->constInfos,
+                    '',
+                    static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
+                );
+
+                if ($attributeInitializationCode !== "" && $this->constInfos) {
+                    $code .= "\n";
+                }
+
+                $code .= $attributeInitializationCode;
+                $code .= "}\n";
+            }
+
+            $code .= $this->generateClassEntryCode($allConstInfos);
+        }
+
+        $hasDeclFile = false;
+        $declCode = $this->generateCDeclarations();
+        if ($declCode !== '') {
+            $hasDeclFile = true;
+            $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
+            $declCode = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+                . " * Stub hash: $stubHash */\n"
+                . "\n"
+                . "#ifndef {$headerName}\n"
+                . "#define {$headerName}\n"
+                . $declCode . "\n"
+                . "#endif /* {$headerName} */\n";
+        }
+
+        $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
+            . " * Stub hash: $stubHash"
+            . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+            . $code;
+
+        return [$code, $declCode];
     }
 }
 
@@ -5246,130 +5368,6 @@ function generateCodeWithConditions(
     }
 
     return $code;
-}
-
-/**
- * @param array<string, ConstInfo> $allConstInfos
- * @return array{string, string}
- */
-function generateArgInfoCode(
-    string $stubFilenameWithoutExtension,
-    FileInfo $fileInfo,
-    array $allConstInfos,
-    string $stubHash
-): array {
-    $code = "";
-
-    $generatedFuncInfos = [];
-
-    $argInfoCode = generateCodeWithConditions(
-        $fileInfo->getAllFuncInfos(), "\n",
-        static function (FuncInfo $funcInfo) use (&$generatedFuncInfos, $fileInfo) {
-            /* If there already is an equivalent arginfo structure, only emit a #define */
-            if ($generatedFuncInfo = $funcInfo->findEquivalent($generatedFuncInfos)) {
-                $code = sprintf(
-                    "#define %s %s\n",
-                    $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
-                );
-            } else {
-                $code = $funcInfo->toArgInfoCode($fileInfo->getMinimumPhpVersionIdCompatibility());
-            }
-
-            $generatedFuncInfos[] = $funcInfo;
-            return $code;
-        }
-    );
-
-    if ($argInfoCode !== "") {
-        $code .= "$argInfoCode\n";
-    }
-
-    if ($fileInfo->generateFunctionEntries) {
-        $framelessFunctionCode = generateCodeWithConditions(
-            $fileInfo->getAllFuncInfos(), "\n",
-            static function (FuncInfo $funcInfo) {
-                return $funcInfo->getFramelessDeclaration();
-            }
-        );
-
-        if ($framelessFunctionCode !== "") {
-            $code .= "$framelessFunctionCode\n";
-        }
-
-        $generatedFunctionDeclarations = [];
-        $code .= generateCodeWithConditions(
-            $fileInfo->getAllFuncInfos(), "",
-            static function (FuncInfo $funcInfo) use ($fileInfo, &$generatedFunctionDeclarations) {
-                $key = $funcInfo->getDeclarationKey();
-                if (isset($generatedFunctionDeclarations[$key])) {
-                    return null;
-                }
-
-                $generatedFunctionDeclarations[$key] = true;
-                return $fileInfo->declarationPrefix . $funcInfo->getDeclaration();
-            }
-        );
-
-        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
-
-        foreach ($fileInfo->classInfos as $classInfo) {
-            $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
-        }
-    }
-
-    $php80MinimumCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_80_VERSION_ID;
-
-    if ($fileInfo->generateClassEntries) {
-        $declaredStrings = [];
-        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
-        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
-        if ($attributeInitializationCode) {
-            if (!$php80MinimumCompatibility) {
-                $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
-            }
-        }
-
-        if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
-            $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
-            $code .= "{\n";
-
-            $code .= generateCodeWithConditions(
-                $fileInfo->constInfos,
-                '',
-                static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
-            );
-
-            if ($attributeInitializationCode !== "" && $fileInfo->constInfos) {
-                $code .= "\n";
-            }
-
-            $code .= $attributeInitializationCode;
-            $code .= "}\n";
-        }
-
-        $code .= $fileInfo->generateClassEntryCode($allConstInfos);
-    }
-
-    $hasDeclFile = false;
-    $declCode = $fileInfo->generateCDeclarations();
-    if ($declCode !== '') {
-        $hasDeclFile = true;
-        $headerName = "ZEND_" . strtoupper($stubFilenameWithoutExtension) . "_DECL_{$stubHash}_H";
-        $declCode = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
-            . " * Stub hash: $stubHash */\n"
-            . "\n"
-            . "#ifndef {$headerName}\n"
-            . "#define {$headerName}\n"
-            . $declCode . "\n"
-            . "#endif /* {$headerName} */\n";
-    }
-
-    $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
-          . " * Stub hash: $stubHash"
-          . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
-          . $code;
-
-    return [$code, $declCode];
 }
 
 /** @param FuncInfo[] $funcInfos */
