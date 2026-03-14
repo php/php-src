@@ -2363,6 +2363,10 @@ static zend_class_entry *fixup_trait_scope(const zend_function *fn, zend_class_e
 
 static void zend_resolve_type(zend_type *type, const zend_class_entry *const ce)
 {
+	/* We are adding trait methods to another trait, delay resolution */
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return;
+	}
 	/* Only built-in types + static */
 	if (!ZEND_TYPE_IS_COMPLEX(*type)) {
 		return;
@@ -2415,10 +2419,7 @@ static void zend_resolve_trait_relative_class_types(zend_function *const fn, con
 	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
 		zend_type type = new_arg_infos[i].type;
 		zend_type_copy_ctor(&type, true, ce->type == ZEND_INTERNAL_CLASS);
-		/* New CE is a concrete class, resolve */
-		if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
-			zend_resolve_type(&type, ce);
-		}
+		zend_resolve_type(&type, ce);
 	}
 }
 
@@ -3021,7 +3022,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			zend_string *doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 
 			zend_type type = property_info->type;
-			/* Resolve possible self/parent types, copy otherwise */
+			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
+			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
+			/* Resolve possible self/parent types */
 			zend_resolve_type(&type, ce);
 			zend_property_info *new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);
 
