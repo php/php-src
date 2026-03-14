@@ -65,6 +65,17 @@ static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 			return read;
 		}
 
+		/* Corrupt gzip data: gzread() may return 0 or bytes while gzerror indicates Z_DATA_ERROR (e.g. on Windows) */
+		if (read >= 0) {
+			int zerr;
+			gzerror(self->gz_file, &zerr);
+			if (zerr == Z_DATA_ERROR || zerr == Z_STREAM_ERROR) {
+				stream->eof = 1;
+				php_gziop_report_errors(stream, chunk_size, "Read");
+				return -1;
+			}
+		}
+
 		total_read += read;
 		buf += read;
 	} while (count > 0 && !stream->eof);
