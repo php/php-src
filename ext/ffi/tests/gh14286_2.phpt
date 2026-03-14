@@ -2,10 +2,6 @@
 GH-14286 (ffi enum type (when enum has no name) make memory leak)
 --EXTENSIONS--
 ffi
---SKIPIF--
-<?php
-if (PHP_DEBUG || getenv('SKIP_ASAN')) die("xfail: FFI cleanup after parser error is not implemented");
-?>
 --INI--
 ffi.enable=1
 --FILE--
