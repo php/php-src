@@ -992,6 +992,10 @@ PHP_METHOD(SplHeap, next)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
 	spl_ptr_heap_delete_top(intern->heap, NULL, ZEND_THIS);
 }
 /* }}} */
