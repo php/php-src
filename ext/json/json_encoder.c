@@ -378,7 +378,6 @@ zend_result php_json_escape_string(
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
 	/* pre-allocate for string length plus 2 quotes */
-	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
 	pos = 0;
