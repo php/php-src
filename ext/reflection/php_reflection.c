@@ -7715,7 +7715,7 @@ ZEND_METHOD(ReflectionAttribute, getCurrent)
 				return_value
 			);
 			return;
-		case ZEND_ATTRIBUTE_TARGET_PARAMETER:
+		case ZEND_ATTRIBUTE_TARGET_PARAMETER: {
 			zend_function *target_function = attr->target_data.target_parameter.target_function;
 			reflection_parameter_factory(
 				_copy_function(target_function),
@@ -7726,6 +7726,7 @@ ZEND_METHOD(ReflectionAttribute, getCurrent)
 				return_value
 			);
 			return;
+		}
 		case ZEND_ATTRIBUTE_TARGET_CONST:
 			object_init_ex(return_value, reflection_constant_ptr);
 			reflection_object *intern = Z_REFLECTION_P(return_value);
