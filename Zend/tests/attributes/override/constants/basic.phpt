@@ -32,6 +32,11 @@ class C extends PP implements I {
     public const C = 'C';
 }
 
+enum E implements I {
+    #[\Override]
+    public const I = 'I';
+}
+
 echo "Done";
 
 ?>
